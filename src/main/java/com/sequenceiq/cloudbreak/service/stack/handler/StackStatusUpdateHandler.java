@@ -123,9 +123,10 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                 started = startStopResources(cloudPlatform, stack, true);
             }
             if (started) {
-                waitForAmbariToStart(stack);
-                Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-                boolean hostsJoined = waitForHostsToJoin(stack);
+                final Stack updatedStack = stackRepository.findOneWithLists(stack.getId());
+                waitForAmbariToStart(updatedStack);
+                Cluster cluster = clusterRepository.findOneWithLists(updatedStack.getCluster().getId());
+                boolean hostsJoined = waitForHostsToJoin(updatedStack);
                 if (hostsJoined) {
                     String statusReason = "Cluster infrastructure is available, starting of services has been requested. AMBARI_IP:" + stack.getAmbariIp();
                     LOGGER.info("Update stack state to: {}", Status.AVAILABLE);
@@ -134,7 +135,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                 if (hostsJoined && cluster != null && Status.START_REQUESTED.equals(cluster.getStatus())) {
                     cloudbreakEventService.fireCloudbreakEvent(stackId, Status.START_IN_PROGRESS.name(), "Services are starting.");
                     reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
-                            Event.wrap(new ClusterStatusUpdateRequest(stack.getId(), statusRequest)));
+                            Event.wrap(new ClusterStatusUpdateRequest(updatedStack.getId(), statusRequest)));
                 } else if (!hostsJoined && cluster != null && Status.START_REQUESTED.equals(cluster.getStatus())) {
                     cluster.setStatus(Status.START_FAILED);
                     clusterRepository.save(cluster);

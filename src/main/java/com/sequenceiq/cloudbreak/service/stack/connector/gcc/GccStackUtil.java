@@ -88,11 +88,9 @@ public class GccStackUtil {
 
     public CoreInstanceMetaData getMetadata(Stack stack, Compute compute, Resource resource) {
         MDCBuilder.buildMdcContext(stack);
-        try {
-            GccCredential credential = (GccCredential) stack.getCredential();
-            Compute.Instances.Get instanceGet = compute.instances().get(credential.getProjectId(),
-                    GccZone.valueOf(stack.getRegion()).getValue(), resource.getResourceName());
-            Instance executeInstance = instanceGet.execute();
+        GccCredential credential = (GccCredential) stack.getCredential();
+        Instance executeInstance = getInstance(stack, compute, resource);
+        if (executeInstance != null) {
             CoreInstanceMetaData coreInstanceMetaData = new CoreInstanceMetaData(
                     resource.getResourceName(),
                     executeInstance.getNetworkInterfaces().get(0).getNetworkIP(),
@@ -102,6 +100,17 @@ public class GccStackUtil {
                     stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup())
             );
             return coreInstanceMetaData;
+        } else {
+            return null;
+        }
+    }
+
+    public Instance getInstance(Stack stack, Compute compute, Resource resource) {
+        try {
+            GccCredential credential = (GccCredential) stack.getCredential();
+            Compute.Instances.Get instanceGet = compute.instances().get(credential.getProjectId(),
+                    GccZone.valueOf(stack.getRegion()).getValue(), resource.getResourceName());
+            return instanceGet.execute();
         } catch (IOException e) {
             LOGGER.error(String.format("Instance %s is not reachable: %s", resource, e.getMessage()), e);
         }

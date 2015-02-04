@@ -6,6 +6,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
+import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccStartStopContextObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -22,7 +29,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -38,7 +44,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCreation
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccDiskMode;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccDiskType;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
@@ -51,6 +56,10 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     @Autowired
     private StackRepository stackRepository;
     @Autowired
+    private InstanceMetaDataRepository instanceMetaDataRepository;
+    @Autowired
+    private ClusterRepository clusterRepository;
+    @Autowired
     private GccResourceCheckerStatus gccResourceCheckerStatus;
     @Autowired
     private PollingService<GccResourceReadyPollerObject> gccInstanceReadyPollerObjectPollingService;
@@ -59,7 +68,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     @Autowired
     private PollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
     @Autowired
-    private JsonHelper jsonHelper;
+    private GccStackUtil gccStackUtil;
 
     @Override
     public Boolean create(final CreateResourceRequest createResourceRequest, String region) throws Exception {
@@ -202,6 +211,73 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     @Override
     public ResourceType resourceType() {
         return ResourceType.GCC_INSTANCE;
+    }
+
+    @Override
+    public Boolean stop(GccStartStopContextObject startStopContextObject, Resource resource, String region) {
+        GccCredential credential = (GccCredential) startStopContextObject.getStack().getCredential();
+        try {
+            Compute.Instances.Stop stop = startStopContextObject.getCompute().instances()
+                    .stop(credential.getProjectId(), GccZone.valueOf(region).getValue(), resource.getResourceName());
+            stop.setPrettyPrint(Boolean.TRUE);
+            return setInstanceState(stop.execute(), startStopContextObject, resource, credential, false);
+        } catch (IOException e) {
+            LOGGER.error(String.format("There was an error in the vm stop [%s]: %s", resource.getResourceName(), e.getMessage()));
+            return false;
+        }
+    }
+
+    @Override
+    public Boolean start(GccStartStopContextObject startStopContextObject, Resource resource, String region) {
+        GccCredential credential = (GccCredential) startStopContextObject.getStack().getCredential();
+        try {
+            Compute.Instances.Start start = startStopContextObject.getCompute().instances()
+                    .start(credential.getProjectId(), GccZone.valueOf(region).getValue(), resource.getResourceName());
+            start.setPrettyPrint(Boolean.TRUE);
+            return setInstanceState(start.execute(), startStopContextObject, resource, credential, true);
+        } catch (IOException e) {
+            LOGGER.error(String.format("There was an error in the vm start [%s]: %s", resource.getResourceName(), e.getMessage()));
+            return false;
+        }
+    }
+
+    private Boolean setInstanceState(Operation operation, GccStartStopContextObject startStopContextObject, Resource resource,
+            GccCredential credential, boolean start) throws IOException {
+        if (operation.getHttpErrorStatusCode() == null) {
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(
+                    startStopContextObject.getCompute(),
+                    credential,
+                    operation,
+                    GccZone.valueOf(startStopContextObject.getStack().getRegion()));
+            GccResourceReadyPollerObject instReady = new GccResourceReadyPollerObject(zoneOperations, startStopContextObject.getStack(),
+                    resource.getResourceName(), operation.getName(), ResourceType.GCC_INSTANCE);
+            gccInstanceReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, instReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+            if (start) {
+                updateInstanceMetadata(startStopContextObject, resource);
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void updateInstanceMetadata(GccStartStopContextObject startStopContextObject, Resource resource) {
+        Instance instance = gccStackUtil.getInstance(startStopContextObject.getStack(), startStopContextObject.getCompute(), resource);
+        if (instance != null) {
+            InstanceMetaData metaData = instanceMetaDataRepository.findByInstanceId(resource.getResourceName());
+            Stack stack = startStopContextObject.getStack();
+            String publicDnsName = instance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP();
+            if (metaData.getAmbariServer()) {
+                stack.setAmbariIp(publicDnsName);
+                Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
+                stack.setCluster(cluster);
+                stackRepository.save(stack);
+            }
+            metaData.setPublicIp(publicDnsName);
+            instanceMetaDataRepository.save(metaData);
+        } else {
+            LOGGER.error(String.format("Can't find instance by resource name (instance id) : %s", resource.getResourceName()));
+        }
     }
 
     public class GccInstanceCreateRequest extends CreateResourceRequest {

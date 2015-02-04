@@ -25,7 +25,11 @@ import javax.persistence.NamedQuery;
                 name = "InstanceMetaData.findAllInStack",
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.stack.id= :stackId "
-                        + "AND i.terminated = false ")
+                        + "AND i.terminated = false "),
+        @NamedQuery(
+                name = "InstanceMetaData.findByInstanceId",
+                query = "SELECT i FROM InstanceMetaData i "
+                        + "WHERE i.instanceId= :instanceId")
 })
 public class InstanceMetaData implements ProvisionEntity {
 
