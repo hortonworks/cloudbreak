@@ -25,23 +25,22 @@ public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJ
     @Override
     public CloudbreakUsageJson convert(CloudbreakUsage entity) {
         String day = DATE_FORMAT.format(entity.getDay());
-        String zone = getZoneNameByProvider(entity.getCloud(), entity.getZone());
+        String zone = getZoneNameByProvider(entity.getProvider(), entity.getRegion());
         CbUser cbUser = userDetailsService.getDetails(entity.getOwner(), UserFilterField.USERID);
 
         CloudbreakUsageJson json = new CloudbreakUsageJson();
         json.setOwner(entity.getOwner());
         json.setAccount(entity.getAccount());
-        json.setBlueprintName(entity.getBlueprintName());
-        json.setBlueprintId(entity.getBlueprintId());
-        json.setCloud(entity.getCloud());
-        json.setZone(zone);
+        json.setProvider(entity.getProvider());
+        json.setRegion(zone);
         json.setInstanceHours(entity.getInstanceHours());
-        json.setMachineType(entity.getMachineType());
         json.setDay(day);
         json.setStackId(entity.getStackId());
-        json.setStackStatus(entity.getStackStatus());
         json.setStackName(entity.getStackName());
         json.setUsername(cbUser.getUsername());
+        json.setCosts(entity.getCosts());
+        json.setInstanceType(entity.getInstanceType());
+        json.setHostGroup(entity.getHostGroup());
         return json;
     }
 
@@ -50,20 +49,18 @@ public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJ
         CloudbreakUsage entity = new CloudbreakUsage();
         entity.setOwner(json.getOwner());
         entity.setAccount(json.getAccount());
-        entity.setBlueprintName(json.getBlueprintName());
-        entity.setBlueprintId(json.getBlueprintId());
-        entity.setCloud(json.getCloud());
-        entity.setZone(json.getZone());
+        entity.setProvider(json.getProvider());
+        entity.setRegion(json.getRegion());
         entity.setInstanceHours(json.getInstanceHours());
-        entity.setMachineType(json.getMachineType());
         entity.setStackId(json.getStackId());
-        entity.setStackStatus(json.getStackStatus());
         entity.setStackName(json.getStackName());
+        entity.setInstanceType(json.getInstanceType());
+        entity.setHostGroup(json.getHostGroup());
         return entity;
     }
 
     private String getZoneNameByProvider(String cloud, String zoneFromUsage) {
-        String zone = null;
+        String zone = "";
         if (zoneFromUsage != null && CloudPlatform.AWS.name().equals(cloud)) {
             Regions transformedZone = Regions.valueOf(zoneFromUsage);
             zone = transformedZone.name();

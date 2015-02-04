@@ -6,10 +6,6 @@ public class CbUsageFilterParameters {
     private Long since;
     private String cloud;
     private String region;
-    private String vmType;
-    private Long instanceHours;
-    private Long bpId;
-    private String bpName;
     private Long filterEndDate;
 
     private CbUsageFilterParameters(Builder builder) {
@@ -18,10 +14,6 @@ public class CbUsageFilterParameters {
         this.since = builder.since;
         this.cloud = builder.cloud;
         this.region = builder.region;
-        this.vmType = builder.vmType;
-        this.instanceHours = builder.instanceHours;
-        this.bpId = builder.bpId;
-        this.bpName = builder.bpName;
         this.filterEndDate = builder.filterEndDate;
     }
 
@@ -45,22 +37,6 @@ public class CbUsageFilterParameters {
         return region;
     }
 
-    public String getVmType() {
-        return vmType;
-    }
-
-    public Long getInstanceHours() {
-        return instanceHours;
-    }
-
-    public Long getBpId() {
-        return bpId;
-    }
-
-    public String getBpName() {
-        return bpName;
-    }
-
     public Long getFilterEndDate() {
         return filterEndDate;
     }
@@ -71,10 +47,6 @@ public class CbUsageFilterParameters {
         private Long since;
         private String cloud;
         private String region;
-        private String vmType;
-        private Long instanceHours;
-        private Long bpId;
-        private String bpName;
         private Long filterEndDate;
 
         public Builder setAccount(String account) {
@@ -99,26 +71,6 @@ public class CbUsageFilterParameters {
 
         public Builder setRegion(String region) {
             this.region = region;
-            return this;
-        }
-
-        public Builder setVmType(String vmType) {
-            this.vmType = vmType;
-            return this;
-        }
-
-        public Builder setInstanceHours(Long instanceHours) {
-            this.instanceHours = instanceHours;
-            return this;
-        }
-
-        public Builder setBpId(Long bpId) {
-            this.bpId = bpId;
-            return this;
-        }
-
-        public Builder setBpName(String bpName) {
-            this.bpName = bpName;
             return this;
         }
 

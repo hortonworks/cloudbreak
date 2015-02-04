@@ -13,16 +13,19 @@ import javax.persistence.NamedQuery;
                 name = "InstanceMetaData.findHostInStack",
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.stack.id= :stackId "
-                        + "AND i.longName= :hostName"),
+                        + "AND i.longName= :hostName "
+                        + "AND i.terminated = false "),
         @NamedQuery(
                 name = "InstanceMetaData.findUnregisteredHostsInStack",
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.stack.id= :stackId "
+                        + "AND i.terminated = false "
                         + "AND i.removable= true"),
         @NamedQuery(
                 name = "InstanceMetaData.findAllInStack",
                 query = "SELECT i FROM InstanceMetaData i "
-                        + "WHERE i.instanceGroup.stack.id= :stackId")
+                        + "WHERE i.instanceGroup.stack.id= :stackId "
+                        + "AND i.terminated = false ")
 })
 public class InstanceMetaData implements ProvisionEntity {
 
@@ -40,9 +43,12 @@ public class InstanceMetaData implements ProvisionEntity {
     private Integer containerCount = 0;
     @ManyToOne
     private InstanceGroup instanceGroup;
+    private Long startDate;
+    private Long terminationDate;
+    private Boolean terminated;
 
     public InstanceMetaData() {
-
+        terminated = false;
     }
 
     public InstanceGroup getInstanceGroup() {
@@ -135,5 +141,29 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setContainerCount(Integer containerCount) {
         this.containerCount = containerCount;
+    }
+
+    public Long getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Long startDate) {
+        this.startDate = startDate;
+    }
+
+    public Long getTerminationDate() {
+        return terminationDate;
+    }
+
+    public void setTerminationDate(Long terminationDate) {
+        this.terminationDate = terminationDate;
+    }
+
+    public Boolean isTerminated() {
+        return terminated;
+    }
+
+    public void setTerminated(Boolean terminated) {
+        this.terminated = terminated;
     }
 }

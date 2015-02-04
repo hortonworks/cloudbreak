@@ -214,7 +214,7 @@ public class DefaultStackService implements StackService {
                         -1 * hostGroupAdjustmentJson.getScalingAdjustment()));
             }
             int removeableHosts = 0;
-            for (InstanceMetaData metadataEntry : stack.getAllInstanceMetaData()) {
+            for (InstanceMetaData metadataEntry : stack.getRunningInstanceMetaData()) {
                 if (metadataEntry.isRemovable() && metadataEntry.getInstanceGroup().getGroupName().equals(hostGroupAdjustmentJson.getHostGroup())) {
                     removeableHosts++;
                 }

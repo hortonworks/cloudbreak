@@ -218,6 +218,22 @@ public class RetryingStackUpdater {
         }
     }
 
+    public Stack updateStack(Stack stack) {
+        MDCBuilder.buildMdcContext(stack);
+        int attempt = 1;
+        try {
+            return stackRepository.save(stack);
+        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
+            if (attempt <= MAX_RETRIES) {
+                LOGGER.info("Failed to update stack. [attempt: '{}', Cause: {}]. Trying to save it again.",
+                        attempt++, e.getClass().getSimpleName());
+                return stackRepository.save(stack);
+            } else {
+                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts.", stack.getId()), e);
+            }
+        }
+    }
+
     private Stack doUpdateStackStatus(Long stackId, Status status, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
         MDCBuilder.buildMdcContext(stack);

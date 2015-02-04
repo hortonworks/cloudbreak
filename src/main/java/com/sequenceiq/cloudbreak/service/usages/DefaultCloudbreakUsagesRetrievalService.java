@@ -24,12 +24,8 @@ public class DefaultCloudbreakUsagesRetrievalService implements CloudbreakUsages
                 .and(CloudbreakUsageSpecifications.usagesWithStringFields("owner", params.getOwner()))
                 .and(CloudbreakUsageSpecifications.usagesSince(params.getSince()))
                 .and(CloudbreakUsageSpecifications.usagesBefore(params.getFilterEndDate()))
-                .and(CloudbreakUsageSpecifications.usagesWithStringFields("cloud", params.getCloud()))
-                .and(CloudbreakUsageSpecifications.usagesWithStringFields("zone", params.getRegion()))
-                .and(CloudbreakUsageSpecifications.usagesWithStringFields("machineType", params.getVmType()))
-                .and(CloudbreakUsageSpecifications.usagesWithStringFields("blueprintName", params.getBpName()))
-                .and(CloudbreakUsageSpecifications.usagesWithLongField("instanceHours", params.getInstanceHours()))
-                .and(CloudbreakUsageSpecifications.usagesWithLongField("blueprintId", params.getBpId())));
+                .and(CloudbreakUsageSpecifications.usagesWithStringFields("provider", params.getCloud()))
+                .and(CloudbreakUsageSpecifications.usagesWithStringFields("region", params.getRegion())));
         return usages;
     }
 }

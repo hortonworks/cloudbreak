@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.getServic
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +78,7 @@ public class AmbariRoleAllocator {
                     stackUpdater.updateStackMetaData(stackId, instancesMetaData, instanceGroup.getGroupName());
                 }
                 stack = stackUpdater.updateMetadataReady(stackId, true);
-                Set<InstanceMetaData> allInstanceMetaData = stack.getAllInstanceMetaData();
+                Set<InstanceMetaData> allInstanceMetaData = stack.getRunningInstanceMetaData();
                 String publicAmbariAddress = updateAmbariInstanceMetadata(stack, allInstanceMetaData);
                 waitForConsulAgents(stack, allInstanceMetaData);
                 updateToConsulHostNames(allInstanceMetaData);
@@ -175,6 +176,7 @@ public class AmbariRoleAllocator {
         Set<InstanceMetaData> instanceMetaData = new HashSet<>();
         for (CoreInstanceMetaData coreInstanceMetaDataEntry : coreInstanceMetaData) {
             if (coreInstanceMetaDataEntry.getInstanceGroup().getGroupName().equals(instanceGroup.getGroupName())) {
+                long timeInMillis = Calendar.getInstance().getTimeInMillis();
                 InstanceMetaData instanceMetaDataEntry = new InstanceMetaData();
                 instanceMetaDataEntry.setPrivateIp(coreInstanceMetaDataEntry.getPrivateIp());
                 instanceMetaDataEntry.setInstanceGroup(coreInstanceMetaDataEntry.getInstanceGroup());
@@ -186,6 +188,7 @@ public class AmbariRoleAllocator {
                 instanceMetaDataEntry.setContainerCount(coreInstanceMetaDataEntry.getContainerCount());
                 instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
                 instanceMetaDataEntry.setRemovable(true);
+                instanceMetaDataEntry.setStartDate(timeInMillis);
                 instanceMetaData.add(instanceMetaDataEntry);
             }
         }

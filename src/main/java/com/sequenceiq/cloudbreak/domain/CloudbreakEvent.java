@@ -37,7 +37,6 @@ public class CloudbreakEvent implements ProvisionEntity {
     private String account;
     private String cloud;
     private String region;
-    private String vmType;
     private String blueprintName;
     private long blueprintId;
     private Long stackId;
@@ -112,14 +111,6 @@ public class CloudbreakEvent implements ProvisionEntity {
         this.region = region;
     }
 
-    public String getVmType() {
-        return vmType;
-    }
-
-    public void setVmType(String vmType) {
-        this.vmType = vmType;
-    }
-
     public String getBlueprintName() {
         return blueprintName;
     }
@@ -187,7 +178,6 @@ public class CloudbreakEvent implements ProvisionEntity {
         sb.append(", account='").append(account).append('\'');
         sb.append(", cloud='").append(cloud).append('\'');
         sb.append(", region='").append(region).append('\'');
-        sb.append(", vmType='").append(vmType).append('\'');
         sb.append(", blueprintName='").append(blueprintName).append('\'');
         sb.append(", instanceGroup='").append(instanceGroup).append('\'');
         sb.append(", blueprintId=").append(blueprintId);

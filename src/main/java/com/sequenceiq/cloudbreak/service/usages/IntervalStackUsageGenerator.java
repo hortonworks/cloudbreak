@@ -1,133 +1,151 @@
 package com.sequenceiq.cloudbreak.service.usages;
 
-import static java.util.Calendar.DATE;
-import static java.util.Calendar.HOUR_OF_DAY;
-import static java.util.Calendar.MILLISECOND;
-import static java.util.Calendar.MINUTE;
-import static java.util.Calendar.MONTH;
-import static java.util.Calendar.SECOND;
-import static java.util.Calendar.YEAR;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.domain.AwsTemplate;
+import com.sequenceiq.cloudbreak.domain.AzureTemplate;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
+import com.sequenceiq.cloudbreak.domain.GccTemplate;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.price.PriceGenerator;
 
 @Component
 public class IntervalStackUsageGenerator {
     private static final Logger LOGGER = LoggerFactory.getLogger(IntervalStackUsageGenerator.class);
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-    private static final int HOURS_PER_DAY = 24;
-    private static final double HOUR_IN_MS = 3600000.0;
 
-    public Map<String, CloudbreakUsage> getUsages(Date startTime, Date stopTime, CloudbreakEvent startEvent) throws ParseException {
-        Map<String, CloudbreakUsage> dailyStackUsageMap = new HashMap<>();
-        Calendar start = Calendar.getInstance();
-        start.setTime(startTime);
-        Calendar stop = Calendar.getInstance();
-        stop.setTime(stopTime);
-        //subtract minutes that are overflowed from the start
-        stop.add(MINUTE, -start.get(MINUTE));
-        LOGGER.debug("Generate daily usage for startTime: {}, stopTime: {}", startTime, stopTime);
+    @Autowired
+    private StackRepository stackRepository;
 
-        long runningHours = 0;
+    @Autowired
+    private IntervalInstanceUsageGenerator instanceUsageGenerator;
 
-        if (isCalendarsOnTheSameDay(start, stop)) {
-            runningHours = millisToCeiledHours(stopTime.getTime() - startTime.getTime());
-            CloudbreakUsage usage = getCloudbreakUsage(startEvent, runningHours, startTime);
-            LOGGER.debug("Stack ran less than a day, usage: {}", usage);
-            dailyStackUsageMap.put(DATE_FORMAT.format(startTime), usage);
-        } else {
-            // get start day running hours
-            runningHours = runningHoursForDay(startTime, true);
-            CloudbreakUsage startDayUsage = getCloudbreakUsage(startEvent, runningHours, startTime);
-            dailyStackUsageMap.put(DATE_FORMAT.format(startTime), startDayUsage);
-            LOGGER.debug("Generated start day usage: {}", startDayUsage);
-            // get stop day running hours
-            stopTime = stop.getTime();
-            runningHours = runningHoursForDay(stopTime, false);
-            if (runningHours > 0) {
-                Date startOfStopTimeDay = DATE_FORMAT.parse(DATE_FORMAT.format(stopTime));
-                CloudbreakUsage stopDayUsage = getCloudbreakUsage(startEvent, runningHours, startOfStopTimeDay);
-                dailyStackUsageMap.put(DATE_FORMAT.format(stopTime), stopDayUsage);
-                LOGGER.debug("Generated stop day usage: {}", stopDayUsage);
+    @Autowired
+    private List<PriceGenerator> priceGenerators;
+
+    public List<CloudbreakUsage> generateUsages(Date startTime, Date stopTime, CloudbreakEvent startEvent) throws ParseException {
+        List<CloudbreakUsage> dailyUsagesByHostGroup = new ArrayList<>();
+        Stack stack = stackRepository.findById(startEvent.getStackId());
+
+        if (stack != null) {
+            PriceGenerator priceGenerator = selectPriceGeneratorByPlatform(stack);
+
+            for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+                Map<String, CloudbreakUsage> instanceGroupDailyUsages = new HashMap<>();
+                Template template = instanceGroup.getTemplate();
+                String instanceType = getInstanceType(template);
+                String groupName = instanceGroup.getGroupName();
+
+                for (InstanceMetaData metaData : instanceGroup.getAllInstanceMetaData()) {
+                    Map<String, Long> instanceHours = instanceUsageGenerator.getInstanceHours(metaData, startTime, stopTime);
+                    addInstanceHoursToStackUsages(instanceGroupDailyUsages, instanceHours, startEvent, instanceType, groupName);
+                }
+
+                addCalculatedPrice(instanceGroupDailyUsages, priceGenerator, template);
+                dailyUsagesByHostGroup.addAll(instanceGroupDailyUsages.values());
             }
-
-            generateAllDayStackUsages(startTime, stopTime, startEvent, dailyStackUsageMap);
         }
-        return dailyStackUsageMap;
+        return dailyUsagesByHostGroup;
     }
 
-    private boolean isCalendarsOnTheSameDay(Calendar start, Calendar stop) {
-        return start.get(YEAR) == stop.get(YEAR)
-                && start.get(MONTH) == start.get(MONTH)
-                && start.get(DATE) == stop.get(DATE);
-    }
+    private String getInstanceType(Template template) {
+        CloudPlatform cloudPlatform = template.cloudPlatform();
+        String instanceType = "";
 
-    private long runningHoursForDay(Date date, boolean startDay) throws ParseException {
-        String dayAsStr = DATE_FORMAT.format(date);
-        long dayStartOrEndInMillis = DATE_FORMAT.parse(dayAsStr).getTime();
-        if (startDay) {
-            dayStartOrEndInMillis += TimeUnit.HOURS.toMillis(HOURS_PER_DAY);
+        if (CloudPlatform.AWS.equals(cloudPlatform)) {
+            AwsTemplate awsTemp = (AwsTemplate) template;
+            instanceType = awsTemp.getInstanceType().name();
+        } else if (CloudPlatform.GCC.equals(cloudPlatform)) {
+            GccTemplate gceTemp = (GccTemplate) template;
+            instanceType = gceTemp.getGccInstanceType().name();
+        } else if (CloudPlatform.AZURE.equals(cloudPlatform)) {
+            AzureTemplate azureTemp = (AzureTemplate) template;
+            instanceType = azureTemp.getVmType().toString();
+        } else if (CloudPlatform.OPENSTACK.equals(cloudPlatform)) {
+            OpenStackTemplate openTemp = (OpenStackTemplate) template;
+            instanceType = openTemp.getInstanceType().toString();
         }
-        long hourInMillis = date.getTime() - dayStartOrEndInMillis;
-        return millisToCeiledHours(hourInMillis);
+        return instanceType;
     }
 
-    private long millisToCeiledHours(long hourInMillis) {
-        long absHourInMillis = Math.abs(hourInMillis);
-        Double ceiledHours = Math.ceil(absHourInMillis / HOUR_IN_MS);
-        return ceiledHours.longValue();
+    private PriceGenerator selectPriceGeneratorByPlatform(Stack stack) {
+        PriceGenerator result = null;
+        CloudPlatform stackCloudPlatform = stack.cloudPlatform();
+        for (PriceGenerator generator : priceGenerators) {
+            CloudPlatform generatorCloudPlatform = generator.getCloudPlatform();
+            if (stackCloudPlatform.equals(generatorCloudPlatform)) {
+                result = generator;
+                break;
+            }
+        }
+        return result;
     }
 
-    private void generateAllDayStackUsages(Date startTime, Date stopTime, CloudbreakEvent prototype, Map<String, CloudbreakUsage> dailyStackUsageMap) {
-        Calendar start = Calendar.getInstance();
-        start.setTime(startTime);
-        start.add(DATE, 1);
-        setDayToBeginning(start);
-        Calendar end = Calendar.getInstance();
-        end.setTime(stopTime);
-        setDayToBeginning(end);
+    private void addInstanceHoursToStackUsages(Map<String, CloudbreakUsage> dailyStackUsages, Map<String, Long> instanceUsages,
+            CloudbreakEvent event, String instanceType, String groupName) throws ParseException {
 
-        for (Date date = start.getTime(); !start.after(end) && !start.equals(end); start.add(DATE, 1), date = start.getTime()) {
-            CloudbreakUsage usage = getCloudbreakUsage(prototype, HOURS_PER_DAY, date);
-            dailyStackUsageMap.put(DATE_FORMAT.format(date), usage);
-            LOGGER.debug("Generated daily usage: {}", usage);
+        for (Map.Entry<String, Long> entry : instanceUsages.entrySet()) {
+            String day = entry.getKey();
+            Long instanceHours = entry.getValue();
+            if (dailyStackUsages.containsKey(day)) {
+                CloudbreakUsage usage = dailyStackUsages.get(day);
+                long numberOfHours = usage.getInstanceHours() + instanceHours;
+                usage.setInstanceHours(numberOfHours);
+            } else {
+                CloudbreakUsage usage = getCloudbreakUsage(event, instanceHours, day, instanceType, groupName);
+                dailyStackUsages.put(day, usage);
+            }
         }
     }
 
-    private CloudbreakUsage getCloudbreakUsage(CloudbreakEvent event, long runningHours, Date day) {
-        long nodesRunningHours = runningHours * event.getNodeCount();
+    private CloudbreakUsage getCloudbreakUsage(CloudbreakEvent event, long instanceHours, String dayString, String instanceType, String groupName)
+            throws ParseException {
+        Date day = DATE_FORMAT.parse(dayString);
         CloudbreakUsage usage = new CloudbreakUsage();
         usage.setOwner(event.getOwner());
         usage.setAccount(event.getAccount());
-        usage.setBlueprintId(event.getBlueprintId());
-        usage.setBlueprintName(event.getBlueprintName());
-        usage.setCloud(event.getCloud());
-        usage.setZone(event.getRegion());
-        usage.setMachineType(event.getVmType());
-        usage.setInstanceHours(nodesRunningHours);
+        usage.setProvider(event.getCloud());
+        usage.setRegion(event.getRegion());
+        usage.setInstanceHours(instanceHours);
         usage.setDay(day);
         usage.setStackId(event.getStackId());
-        usage.setStackStatus(event.getStackStatus());
         usage.setStackName(event.getStackName());
+        usage.setInstanceType(instanceType);
+        usage.setHostGroup(groupName);
         return usage;
     }
 
-    private void setDayToBeginning(Calendar calendar) {
-        calendar.set(HOUR_OF_DAY, 0);
-        calendar.set(MINUTE, 0);
-        calendar.set(SECOND, 0);
-        calendar.set(MILLISECOND, 0);
+    private void addCalculatedPrice(Map<String, CloudbreakUsage> instanceGroupDailyUsages, PriceGenerator priceGenerator, Template template) {
+        for (CloudbreakUsage usage : instanceGroupDailyUsages.values()) {
+            Long instanceHours = usage.getInstanceHours();
+            Double costs = calculateCostOfInstance(priceGenerator, template, instanceHours);
+            usage.setCosts(costs);
+        }
+    }
+
+    private Double calculateCostOfInstance(PriceGenerator priceGenerator, Template template, Long instanceHours) {
+        Double result = 0.0;
+        if (priceGenerator != null) {
+            result = priceGenerator.calculate(template, instanceHours);
+        }
+        return result;
     }
 }

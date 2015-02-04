@@ -14,7 +14,6 @@ public class Notification {
     private String account;
     private String cloud;
     private String region;
-    private String vmType;
     private String blueprintName;
     private long blueprintId;
     private Long stackId;
@@ -34,7 +33,6 @@ public class Notification {
         this.account = event.getAccount();
         this.cloud = event.getCloud();
         this.region = event.getRegion();
-        this.vmType = event.getVmType();
         this.blueprintName = event.getBlueprintName();
         this.blueprintId = event.getBlueprintId();
         this.stackId = event.getStackId();
@@ -98,14 +96,6 @@ public class Notification {
 
     public void setRegion(String region) {
         this.region = region;
-    }
-
-    public String getVmType() {
-        return vmType;
-    }
-
-    public void setVmType(String vmType) {
-        this.vmType = vmType;
     }
 
     public String getBlueprintName() {
