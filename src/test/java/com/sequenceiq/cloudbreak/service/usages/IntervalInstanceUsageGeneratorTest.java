@@ -13,6 +13,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -326,6 +327,7 @@ public class IntervalInstanceUsageGeneratorTest {
     public void testGetInstanceHoursShouldCalcHoursWhenTheInstanceRunsMoreThanTheOverFlowedMinutesExistOnTheNextDay() throws ParseException {
         InstanceMetaData instance = new InstanceMetaData();
         Calendar cal = Calendar.getInstance();
+        cal.set(2015, 1, 26);
         //from 12:50
         setCalendarTo(cal, 12, 50, 0, 0);
         instance.setStartDate(cal.getTimeInMillis());
@@ -339,8 +341,8 @@ public class IntervalInstanceUsageGeneratorTest {
         Map<String, Long> result = underTest.getInstanceHours(instance, intervalStart, intervalEnd);
 
         assertEquals(result.size(), 2);
-        assertEquals(12L, result.values().toArray()[0]);
-        assertEquals(1L, result.values().toArray()[1]);
+        Assert.assertEquals(Long.valueOf(12), result.get("2015-02-27"));
+        assertEquals(Long.valueOf(1), result.get("2015-02-28"));
     }
 
     private void setCalendarTo(Calendar calendar, int hour, int min, int sec, int ms) {
