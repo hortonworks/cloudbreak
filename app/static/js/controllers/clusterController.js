@@ -67,13 +67,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             var blueprint = $filter('filter')($rootScope.blueprints, {id: $scope.cluster.blueprintId}, true)[0];
 
             if (blueprint.hostGroupCount > $scope.cluster.nodeCount) {
-                $scope.modifyStatusMessage($rootScope.error_msg.hostgroup_invalid_node_count);
-                $scope.modifyStatusClass("has-error");
+                $scope.showError($rootScope.error_msg.hostgroup_invalid_node_count);
                 return;
             }
             if (blueprint.hostGroupCount === 1 && $scope.cluster.nodeCount != 1) {
-                $scope.modifyStatusMessage($rootScope.error_msg.hostgroup_single_invalid);
-                $scope.modifyStatusClass("has-error");
+                $scope.showError($rootScope.error_msg.hostgroup_single_invalid);
                 return;
             }
 
@@ -108,8 +106,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             UluwatuCluster.delete(cluster, function (result) {
                 var actCluster = $filter('filter')($rootScope.clusters, { id: cluster.id }, true)[0];
                 actCluster.status = "DELETE_IN_PROGRESS";
-                $scope.modifyStatusMessage($rootScope.error_msg.cluster_delete_success1 + cluster.id + $rootScope.error_msg.cluster_delete_success2);
-                $scope.modifyStatusClass("has-success");
+                $scope.showSuccess($rootScope.error_msg.cluster_delete_success1 + cluster.id + $rootScope.error_msg.cluster_delete_success2);
                 $scope.$broadcast('DELETE_PERISCOPE_CLUSTER', cluster.id);
             }, function (failure){
                 $scope.showError(failure, $rootScope.error_msg.cluster_delete_failed);

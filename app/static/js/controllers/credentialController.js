@@ -55,15 +55,17 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
 
             if ($scope.credentialAws.public){
                 AccountCredential.save($scope.credentialAws, function(result) {
-                    handleAwsCredentialSuccess(result)
+                    handleAwsCredentialSuccess(result);
                 }, function (error) {
-                    $scope.showError(error, $rootScope.error_msg.aws_credential_failed)
+                    $scope.showError(error, $rootScope.error_msg.aws_credential_failed);
+                    $rootScope.credentialInCreation = false;
                 });
             } else {
                 UserCredential.save($scope.credentialAws, function(result) {
-                    handleAwsCredentialSuccess(result)
+                    handleAwsCredentialSuccess(result);
                 }, function (error) {
-                    $scope.showError(error, $rootScope.error_msg.aws_credential_failed)
+                    $scope.showError(error, $rootScope.error_msg.aws_credential_failed);
+                    $rootScope.credentialInCreation = false;
                 });
             }
 
@@ -71,8 +73,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 $scope.credentialAws.id = result.id;
                 $rootScope.credentials.push($scope.credentialAws);
                 $scope.credentialAws = {};
-                $scope.modifyStatusMessage($rootScope.error_msg.aws_credential_success1 + result.id + $rootScope.error_msg.aws_credential_success2);
-                $scope.modifyStatusClass("has-success");
+                $scope.showSuccess($rootScope.error_msg.aws_credential_success1 + result.id + $rootScope.error_msg.aws_credential_success2);
                 $scope.awsCredentialForm.$setPristine();
                 collapseCreateCredentialFormPanel();
                 $rootScope.credentialInCreation = false;
@@ -87,13 +88,15 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             AccountCredential.save($scope.credentialOpenstack, function(result) {
               handleOpenstackCredentialSuccess(result)
             }, function (error) {
-              $scope.showError(error, $rootScope.error_msg.openstack_credential_failed)
+              $scope.showError(error, $rootScope.error_msg.openstack_credential_failed);
+              $rootScope.credentialInCreation = false;
             });
           } else {
             UserCredential.save($scope.credentialOpenstack, function(result) {
               handleOpenstackCredentialSuccess(result)
             }, function (error) {
-              $scope.showError(error, $rootScope.error_msg.openstack_credential_failed)
+              $scope.showError(error, $rootScope.error_msg.openstack_credential_failed);
+              $rootScope.credentialInCreation = false;
             });
           }
 
@@ -101,8 +104,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             $scope.credentialOpenstack.id = result.id;
             $rootScope.credentials.push($scope.credentialOpenstack);
             $scope.credentialOpenstack = {};
-            $scope.modifyStatusMessage($rootScope.error_msg.openstack_credential_success1 + result.id + $rootScope.error_msg.openstack_credential_success2);
-            $scope.modifyStatusClass("has-success");
+            $scope.showSuccess($rootScope.error_msg.openstack_credential_success1 + result.id + $rootScope.error_msg.openstack_credential_success2);
             $scope.credentialOpenstackForm.$setPristine();
             collapseCreateCredentialFormPanel();
             $rootScope.credentialInCreation = false;
@@ -117,14 +119,16 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 AccountCredential.save($scope.credentialAzure, function(result){
                     handleAzureCredentialSuccess(result)
                 }, function (error) {
-                    $scope.showError(error, $rootScope.error_msg.azure_credential_failed)
+                    $scope.showError(error, $rootScope.error_msg.azure_credential_failed);
+                    $rootScope.credentialInCreation = false;
                     $scope.credentialAzure.publicKey = $base64.decode($scope.credentialAzure.publicKey)
                 });
             } else {
                 UserCredential.save($scope.credentialAzure, function(result){
                     handleAzureCredentialSuccess(result)
                 }, function (error) {
-                    $scope.showError(error, $rootScope.error_msg.azure_credential_failed)
+                    $scope.showError(error, $rootScope.error_msg.azure_credential_failed);
+                    $rootScope.credentialInCreation = false;
                     $scope.credentialAzure.publicKey = $base64.decode($scope.credentialAzure.publicKey)
                 });
             }
@@ -133,13 +137,12 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 $scope.credentialAzure.id = result.id;
                 $rootScope.credentials.push($scope.credentialAzure);
                 $scope.credentialAzure = {};
-                $scope.modifyStatusMessage($rootScope.error_msg.azure_credential_success1 + result.id + $rootScope.error_msg.azure_credential_success2);
-                $scope.modifyStatusClass("has-success");
+                $scope.showSuccess($rootScope.error_msg.azure_credential_success1 + result.id + $rootScope.error_msg.azure_credential_success2);
                 window.location.href = "credentials/certificate/" + result.id
                 $scope.azureCredentialForm.$setPristine();
                 collapseCreateCredentialFormPanel();
             }
-            
+
         }
 
         $scope.createGccCredential = function() {
@@ -157,13 +160,15 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                     AccountCredential.save($scope.credentialGcc, function(result){
                       handleGccCredentialSuccess(result)
                     }, function (error) {
-                      $scope.showError(error, $rootScope.error_msg.gcc_credential_failed)
+                      $scope.showError(error, $rootScope.error_msg.gcc_credential_failed);
+                      $rootScope.credentialInCreation = false;
                     });
                   } else {
                     UserCredential.save($scope.credentialGcc, function(result){
                       handleGccCredentialSuccess(result)
                     }, function (error) {
-                      $scope.showError(error, $rootScope.error_msg.gcc_credential_failed)
+                      $scope.showError(error, $rootScope.error_msg.gcc_credential_failed);
+                      $rootScope.credentialInCreation = false;
                     });
                   }
                 }
@@ -173,8 +178,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                  $scope.credentialGcc.id = result.id;
                  $rootScope.credentials.push($scope.credentialGcc);
                  $scope.credentialGcc = {};
-                 $scope.modifyStatusMessage($rootScope.error_msg.gcc_credential_success1 + result.id + $rootScope.error_msg.gcc_credential_success2);
-                 $scope.modifyStatusClass("has-success");
+                 $scope.showSuccess($rootScope.error_msg.gcc_credential_success1 + result.id + $rootScope.error_msg.gcc_credential_success2);
                  $rootScope.credentialInCreation = false;
                  $scope.gccCredentialForm.$setPristine();
                  collapseCreateCredentialFormPanel();
@@ -188,8 +192,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
         $scope.deleteCredential = function(credential) {
             GlobalCredential.delete({ id: credential.id }, function(success){
                 $rootScope.credentials.splice($rootScope.credentials.indexOf(credential), 1 );
-                $scope.modifyStatusMessage($rootScope.error_msg.credential_delete_success1 + credential.id + $rootScope.error_msg.credential_delete_success2);
-                $scope.modifyStatusClass("has-success");
+                $scope.showSuccess($rootScope.error_msg.credential_delete_success1 + credential.id + $rootScope.error_msg.credential_delete_success2);
             }, function(error){
                 $scope.showError(error);
             });
