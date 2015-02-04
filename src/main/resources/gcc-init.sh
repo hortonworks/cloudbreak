@@ -152,11 +152,17 @@ format_disks() {
   /usr/local/disk_mount.sh
 }
 
+remove_run_init_scripts() {
+  # avoid re-run init-script
+  sed -i "/run-scripts/d" /usr/share/google/run-startup-scripts
+}
+
 main() {
   if [[ "$1" == "::" ]]; then
     shift
     eval "$@"
   else
+    remove_run_init_scripts
     format_disks
     fix_hostname
     start_consul

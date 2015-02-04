@@ -79,7 +79,9 @@ public class GccResourceBuilderInit implements
 
     @Override
     public GccStartStopContextObject startStopInit(Stack stack) throws Exception {
-        return new GccStartStopContextObject(stack);
+        GccCredential credential = (GccCredential) stack.getCredential();
+        Compute compute = gccStackUtil.buildCompute(credential, stack);
+        return new GccStartStopContextObject(stack, compute);
     }
 
     private ManagedZone buildManagedZone(Dns dns, Stack stack) throws IOException {
