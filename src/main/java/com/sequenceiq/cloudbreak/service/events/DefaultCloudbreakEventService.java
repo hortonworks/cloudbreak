@@ -111,8 +111,6 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         populateClusterData(stackEvent, stack);
 
         if (instanceGroupName != null) {
-//            String msg = stackEvent.getEventMessage();
-//            stackEvent.setEventMessage(String.format("Interaction on '%s' hostgroup: %s", instanceGroupName, msg));
             stackEvent.setInstanceGroup(instanceGroupName);
         }
 
