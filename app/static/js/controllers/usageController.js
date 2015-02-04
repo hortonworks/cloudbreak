@@ -59,7 +59,6 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
         }
 
         function processUsages(usages, chartsData) {
-          console.log(usages)
           angular.forEach(usages, function(item) {
             item.monthString = new Date(item.day).getFullYear() + "-" +  new Date(item.day).getMonth();
             item.monthDayString = new Date(item.day).toLocaleDateString();
