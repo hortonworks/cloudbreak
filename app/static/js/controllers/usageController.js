@@ -89,7 +89,7 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
           var actDay = new Date(item.day);
           var shortDate = new Date(actDay.getFullYear(), actDay.getMonth(), actDay.getDate(), 0, 0, 0, 0);
           var chartData = $filter('filter')(chartsDataByProvider, { 'date': shortDate.getTime()}, true);
-          if (chartData.length > 0) {
+          if (chartData != undefined && chartData.length > 0) {
             chartData[0].hours += item.instanceHours;
           }
         }
