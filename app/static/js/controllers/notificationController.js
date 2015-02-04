@@ -29,8 +29,10 @@ function ($scope, $rootScope, $filter, Cluster, GlobalStack) {
 
       if (successEvents.indexOf(eventType) > -1) {
         $scope.showSuccessMessage(notification.message, actCluster.name);
+        $scope.handleStatusChange(notification);
       } else if (errorEvents.indexOf(eventType) > -1) {
         $scope.showErrorMessage(notification.message, actCluster.name);
+        $scope.handleStatusChange(notification);
       } else {
         switch(eventType) {
           case "DELETE_COMPLETED":
@@ -49,7 +51,7 @@ function ($scope, $rootScope, $filter, Cluster, GlobalStack) {
       $scope.$apply();
     }
 
-    function handleStatusChange(notification, statusClass){
+    function handleStatusChange(notification){
       var actCluster = $filter('filter')($rootScope.clusters, { id: notification.stackId })[0];
       actCluster.status = notification.eventType;
       addNotificationToGlobalEvents(notification);
