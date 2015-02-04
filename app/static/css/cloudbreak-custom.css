@@ -13,7 +13,7 @@ a:hover {
 
 .legend>span{
   margin: 2px;
-  padding: 4px 40px 4px 10px;
+  padding: 4px 0px 4px 10px;
   line-height: 1.8;
   word-wrap; normal;
   display: table;
@@ -217,4 +217,27 @@ a:hover {
   color: #999999;
   cursor: default;
   background-color: #fff;
+}
+
+.datepickerclass::-webkit-inner-spin-button,
+.datepickerclass::-webkit-calendar-picker-indicator,
+.datepickerclass::-webkit-clear-button {
+    display: none;
+    margin: 0px;
+    -webkit-appearance: none;
+}
+
+input[type="date"]::-webkit-input-placeholder{ 
+    visibility: hidden !important;
+}
+
+@media (min-width: 990px) and (max-width: 1115px) {
+  #startDate,#endDate {
+      width: 97px;
+  }
+}
+
+.usage-inline-table tbody > tr > td {
+  padding-bottom: 0px !important;
+  line-height: 1.10 !important;
 }
