@@ -262,6 +262,7 @@ updateCloudbreakGroups = function (token, userId) {
     updateGroup(token, userId, 'cloudbreak.blueprints')
     updateGroup(token, userId, 'cloudbreak.credentials')
     updateGroup(token, userId, 'cloudbreak.events')
+    updateGroup(token, userId, 'cloudbreak.recipes')
     updateGroup(token, userId, 'cloudbreak.usages.user')
     updateGroup(token, userId, 'periscope.cluster')
 }
