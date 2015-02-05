@@ -8,10 +8,10 @@ var popUpAppender = new log4javascript.PopUpAppender();
 var layout = new log4javascript.PatternLayout("[%-5p] %m");
 popUpAppender.setLayout(layout);
 
-var uluwatuControllers = angular.module('uluwatuControllers', ['ui-notification']);
+var uluwatuControllers = angular.module('uluwatuControllers', ['cgNotify']);
 
-uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '$rootScope', '$filter', 'UserPermission', 'ErrorHandler', 'Notification',
-    function ($scope, $http, User, $rootScope, $filter, UserPermission, ErrorHandler, Notification) {
+uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '$rootScope', '$filter', 'UserPermission', 'ErrorHandler', 'notify',
+    function ($scope, $http, User, $rootScope, $filter, UserPermission, ErrorHandler, notify) {
         var orderBy = $filter('orderBy');
         $scope.user = User.get();
 
@@ -73,34 +73,38 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
         }
 
         $scope.popupInfo = function(message) {
-            Notification.info({
-                message: message,
-                title: 'Primary notification',
-                delay: 5000
+            notify({
+                message: message.toString(),
+                position: 'right',
+                classes: 'alert-info',
+                duration: 4000
             });
         }
 
         $scope.popupWarning = function(message) {
-            Notification.warning({
-                message: message,
-                title: 'Warning',
-                delay: 5000
+            notify({
+                message: message.toString(),
+                position: 'right',
+                classes: 'alert-warning',
+                duration: 4000
             });
         }
 
         $scope.popupError = function(message) {
-            Notification.error({
-                message: message,
-                title: 'Error',
-                delay: 5000
+            notify({
+                message: message.toString(),
+                position: 'right',
+                classes: 'alert-danger',
+                duration: 4000
             });
         }
 
         $scope.popupSuccess = function(message) {
-            Notification.success({
-                message: message,
-                title: 'Success',
-                delay: 5000
+            notify({
+                message: message.toString(),
+                position: 'right',
+                classes: 'alert-success',
+                duration: 4000
             });
         }
 
