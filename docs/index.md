@@ -238,7 +238,7 @@ You can do this on the management console, or - if you have aws-cli configured -
 
     * Custom policy
 
-      Use this policy **[document](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/aws/iam_role.policy)** to configure the permission to start EC2 instances on the end user's behalf, and use SNS to receive notifications.
+      Use this policy **[document](https://s3-eu-west-1.amazonaws.com/sequenceiq/iam_role.policy)** to configure the permission to start EC2 instances on the end user's behalf, and use SNS to receive notifications.
 
 ####Create IAM role with the create script
 
