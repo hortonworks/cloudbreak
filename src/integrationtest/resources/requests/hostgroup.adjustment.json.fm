@@ -1,6 +1,0 @@
-{  
-   "hostGroupAdjustment":{  
-      "hostGroup":"${hostGroup!"slave_1"}",
-      "scalingAdjustment":"${adjustment!1}"
-   }
-}

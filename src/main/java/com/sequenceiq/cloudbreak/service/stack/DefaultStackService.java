@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static com.sequenceiq.cloudbreak.conf.ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -15,20 +17,21 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
-import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.controller.json.InstanceGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
+import com.sequenceiq.cloudbreak.core.flow.FlowManager;
 import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.Subnet;
@@ -49,7 +52,6 @@ import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 
 import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Service
 public class DefaultStackService implements StackService {
@@ -76,6 +78,9 @@ public class DefaultStackService implements StackService {
 
     @Autowired
     private InstanceMetaDataRepository instanceMetaDataRepository;
+
+    @Autowired
+    private FlowManager flowManager;
 
     @Resource
     private Map<CloudPlatform, ProvisionSetup> provisionSetups;
@@ -105,6 +110,15 @@ public class DefaultStackService implements StackService {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
         return stack;
+    }
+
+    @Override
+    public Stack getById(Long id) {
+        Stack retStack = stackRepository.findById(id);
+        if (retStack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", id));
+        }
+        return retStack;
     }
 
     @Override
@@ -150,14 +164,14 @@ public class DefaultStackService implements StackService {
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
         stack.setHash(generateHash(stack));
-        Optional<String> result = provisionSetups.get(stack.cloudPlatform()).preProvisionCheck(stack);
-        if (result.isPresent()) {
-            throw new BadRequestException(result.orNull());
+        String result = provisionSetups.get(stack.cloudPlatform()).preProvisionCheck(stack);
+        if (null != result) {
+            throw new BadRequestException(result);
         } else {
             try {
                 savedStack = stackRepository.save(stack);
                 LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_REQUEST_EVENT, stack.getId());
-                reactor.notify(ReactorConfig.PROVISION_REQUEST_EVENT, Event.wrap(new ProvisionRequest(stack.cloudPlatform(), stack.getId())));
+                flowManager.triggerProvisioning(new ProvisionRequest(savedStack.cloudPlatform(), savedStack.getId()));
             } catch (DataIntegrityViolationException ex) {
                 throw new DuplicateKeyValueException(APIResourceType.STACK, stack.getName(), ex);
             }
@@ -184,9 +198,7 @@ public class DefaultStackService implements StackService {
                 throw new BadRequestException(String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stackId));
             }
             stackUpdater.updateStackStatus(stackId, Status.START_IN_PROGRESS, "Cluster infrastructure is now starting.");
-            LOGGER.info("Publishing {} event", ReactorConfig.STACK_STATUS_UPDATE_EVENT);
-            reactor.notify(ReactorConfig.STACK_STATUS_UPDATE_EVENT,
-                    Event.wrap(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), status)));
+            flowManager.triggerStackStart(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), status));
         } else {
             Status clusterStatus = clusterRepository.findOneWithLists(stack.getCluster().getId()).getStatus();
             if (Status.STOP_IN_PROGRESS.equals(clusterStatus)) {
@@ -200,9 +212,7 @@ public class DefaultStackService implements StackService {
                     throw new BadRequestException(
                             String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.", stackId));
                 }
-                LOGGER.info("Publishing {} event.", ReactorConfig.STACK_STATUS_UPDATE_EVENT);
-                reactor.notify(ReactorConfig.STACK_STATUS_UPDATE_EVENT,
-                        Event.wrap(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), status)));
+                flowManager.triggerStackStop(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), status));
             }
         }
     }
@@ -213,32 +223,21 @@ public class DefaultStackService implements StackService {
         MDCBuilder.buildMdcContext(stack);
         validateStackStatus(stack);
         validateInstanceGroup(stack, instanceGroupAdjustmentJson.getInstanceGroup());
-        if (0 == instanceGroupAdjustmentJson.getScalingAdjustment()) {
-            throw new BadRequestException(String.format("Requested scaling adjustment on stack '%s' is 0. Nothing to do.", stackId));
+        validateScalingAdjustment(instanceGroupAdjustmentJson, stack);
+        LOGGER.info("Publishing {} event [scalingAdjustment: '{}']", UPDATE_INSTANCES_REQUEST_EVENT, instanceGroupAdjustmentJson.getScalingAdjustment());
+        int absScalingAdjustment = Math.abs(instanceGroupAdjustmentJson.getScalingAdjustment());
+        UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(stack.cloudPlatform(), stack.getId(),
+                instanceGroupAdjustmentJson.getScalingAdjustment(), instanceGroupAdjustmentJson.getInstanceGroup());
+
+        if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
+            String statusMessage = "Adding '%s' new instance(s) to the cluster infrastructure.";
+            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, String.format(statusMessage, absScalingAdjustment));
+            flowManager.triggerStackUpscale(updateInstancesRequest);
+        } else {
+            String statusMessage = "Removing '%s' instance(s) from the cluster infrastructure.";
+            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, String.format(statusMessage, absScalingAdjustment));
+            flowManager.triggerStackDownscale(updateInstancesRequest);
         }
-        if (0 > instanceGroupAdjustmentJson.getScalingAdjustment()) {
-            InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupAdjustmentJson.getInstanceGroup());
-            if (-1 * instanceGroupAdjustmentJson.getScalingAdjustment() > instanceGroup.getNodeCount()) {
-                throw new BadRequestException(String.format("There are %s instances in instance group '%s'. Cannot remove %s instances.",
-                        instanceGroup.getNodeCount(), instanceGroup.getGroupName(),
-                        -1 * instanceGroupAdjustmentJson.getScalingAdjustment()));
-            }
-            int removableHosts = instanceMetaDataRepository.findRemovableInstances(stackId, instanceGroupAdjustmentJson.getInstanceGroup()).size();
-            if (removableHosts < -1 * instanceGroupAdjustmentJson.getScalingAdjustment()) {
-                throw new BadRequestException(
-                        String.format("There are %s unregistered instances in instance group '%s' but %s were requested. Decommission nodes from the cluster!",
-                                removableHosts, instanceGroup.getGroupName(), instanceGroupAdjustmentJson.getScalingAdjustment() * -1));
-            }
-        }
-        String statusMessage = instanceGroupAdjustmentJson.getScalingAdjustment() > 0 ? "Adding '%s' new instance(s) to the cluster infrastructure."
-                : "Removing '%s' instance(s) from the cluster infrastructure.";
-        stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, String.format(statusMessage,
-                Math.abs(instanceGroupAdjustmentJson.getScalingAdjustment())));
-        LOGGER.info("Publishing {} event [scalingAdjustment: '{}']", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT,
-                instanceGroupAdjustmentJson.getScalingAdjustment());
-        reactor.notify(ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT,
-                Event.wrap(new UpdateInstancesRequest(stack.cloudPlatform(), stack.getId(),
-                        instanceGroupAdjustmentJson.getScalingAdjustment(), instanceGroupAdjustmentJson.getInstanceGroup())));
     }
 
     @Override
@@ -249,7 +248,7 @@ public class DefaultStackService implements StackService {
             throw new BadRequestException(String.format("Stack is currently in '%s' state. Security constraints cannot be updated.", stack.getStatus()));
         }
         stackUpdater.updateStackStatus(stackId, Status.UPDATE_IN_PROGRESS, "Updating allowed subnets");
-        reactor.notify(ReactorConfig.UPDATE_SUBNET_REQUEST_EVENT, Event.wrap(new UpdateAllowedSubnetsRequest(stack.cloudPlatform(), stackId, subnetList)));
+        flowManager.triggerUpdateAllowedSubnets(new UpdateAllowedSubnetsRequest(stack.cloudPlatform(), stackId, subnetList));
     }
 
     @Override
@@ -273,8 +272,38 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
+    public InstanceMetaData updateMetaDataStatus(Long id, String hostName, InstanceStatus status) {
+        InstanceMetaData metaData = instanceMetaDataRepository.findHostInStack(id, hostName);
+        if (metaData == null) {
+            throw new NotFoundException(String.format("Metadata not found on stack:'%s' with hostname: '%s'.", id, hostName));
+        }
+        metaData.setInstanceStatus(status);
+        return instanceMetaDataRepository.save(metaData);
+    }
+
+    @Override
     public void validateStack(StackValidation stackValidation) {
         blueprintValidator.validateBlueprintForStack(stackValidation.getBlueprint(), stackValidation.getHostGroups(), stackValidation.getInstanceGroups());
+    }
+
+    private void validateScalingAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack) {
+        if (0 == instanceGroupAdjustmentJson.getScalingAdjustment()) {
+            throw new BadRequestException(String.format("Requested scaling adjustment on stack '%s' is 0. Nothing to do.", stack.getId()));
+        }
+        if (0 > instanceGroupAdjustmentJson.getScalingAdjustment()) {
+            InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupAdjustmentJson.getInstanceGroup());
+            if (-1 * instanceGroupAdjustmentJson.getScalingAdjustment() > instanceGroup.getNodeCount()) {
+                throw new BadRequestException(String.format("There are %s instances in instance group '%s'. Cannot remove %s instances.",
+                        instanceGroup.getNodeCount(), instanceGroup.getGroupName(),
+                        -1 * instanceGroupAdjustmentJson.getScalingAdjustment()));
+            }
+            int removableHosts = instanceMetaDataRepository.findRemovableInstances(stack.getId(), instanceGroupAdjustmentJson.getInstanceGroup()).size();
+            if (removableHosts < -1 * instanceGroupAdjustmentJson.getScalingAdjustment()) {
+                throw new BadRequestException(
+                        String.format("There are %s unregistered instances in instance group '%s' but %s were requested. Decommission nodes from the cluster!",
+                                removableHosts, instanceGroup.getGroupName(), instanceGroupAdjustmentJson.getScalingAdjustment() * -1));
+            }
+        }
     }
 
     private void validateStackStatus(Stack stack) {
@@ -296,8 +325,12 @@ public class DefaultStackService implements StackService {
         if (!user.getUserId().equals(stack.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
             throw new BadRequestException("Stacks can be deleted only by account admins or owners.");
         }
-        LOGGER.info("Publishing {} event.", ReactorConfig.DELETE_REQUEST_EVENT);
-        reactor.notify(ReactorConfig.DELETE_REQUEST_EVENT, Event.wrap(new StackDeleteRequest(stack.cloudPlatform(), stack.getId())));
+        if (!Status.DELETE_COMPLETED.equals(stack.getStatus())) {
+            LOGGER.info("Publishing {} event.", ReactorConfig.DELETE_REQUEST_EVENT);
+            flowManager.triggerTermination(new StackDeleteRequest(stack.cloudPlatform(), stack.getId()));
+        } else {
+            LOGGER.info("Stack is already deleted.");
+        }
     }
 
     private String generateHash(Stack stack) {

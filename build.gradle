@@ -33,30 +33,6 @@ jar {
     baseName = 'cloudbreak'
 }
 
-sourceSets {
-    integrationtest {
-        java {
-            srcDir 'src/integrationtest/java'
-        }
-        resources {
-            srcDir 'src/integrationtest/resources'
-        }
-        compileClasspath = sourceSets.test.compileClasspath
-    }
-}
-
-task integrationtestTest(type: Test) {
-    description = "Runs Integration Tests"
-    testClassesDir = sourceSets.integrationtest.output.classesDir
-    classpath += sourceSets.integrationtest.runtimeClasspath
-    testSrcDirs = sourceSets.integrationtest.java.srcDirs.asList()
-}
-
-checkstyleIntegrationtest {
-    ignoreFailures = false
-    configProperties = ['config_loc': "$projectDir/config/checkstyle"]
-}
-
 configurations {
     deployerJars
     all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
@@ -161,7 +137,9 @@ dependencies {
     compile group: 'javax.mail', name: 'mail', version: '1.5.0-b01'
     compile group: 'org.freemarker', name: 'freemarker', version: '2.3.20'
     compile group: 'com.google.http-client', name: 'google-http-client-jackson2', version: '1.17.0-rc'
-    compile group: 'com.google.oauth-client', name: 'google-oauth-client-jetty', version: '1.17.0-rc'
+    compile (group: 'com.google.oauth-client', name: 'google-oauth-client-jetty', version: '1.17.0-rc'){
+        exclude module: 'servlet-api'
+    }
     compile group: 'com.google.apis', name: 'google-api-services-compute', version: 'v1-rev46-1.19.1'
     compile group: 'com.google.apis', name: 'google-api-services-storage', version: 'v1-rev6-1.19.0'
     compile group: 'com.google.apis', name: 'google-api-services-dns', version: 'v1beta1-rev9-1.19.0'

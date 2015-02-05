@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import reactor.core.Reactor;
 import reactor.event.Event;
 
+@Ignore("Rewrite this test!!!")
 public class AmbariRoleAllocatorTest {
     @InjectMocks
     private AmbariRoleAllocator underTest;

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 import java.util.List;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.controller.json.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -19,6 +20,8 @@ public interface StackService {
 
     Stack get(Long id);
 
+    Stack getById(Long id);
+
     Stack get(String ambariAddress);
 
     Stack create(CbUser user, Stack stack);
@@ -26,6 +29,8 @@ public interface StackService {
     void delete(Long id, CbUser cbUser);
 
     Set<InstanceMetaData> getMetaData(String hash);
+
+    InstanceMetaData updateMetaDataStatus(Long id, String hostName, InstanceStatus status);
 
     void updateStatus(Long stackId, StatusRequest status);
 
