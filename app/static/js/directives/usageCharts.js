@@ -28,7 +28,7 @@ cloudbreakApp.directive('usagecharts', function() {
           x_accessor: 'date',
           y_accessor: 'hours',
           interpolate: 'linear',
-          legend: ['GCP','AZURE','AWS'],
+          legend: ['GCP','AZURE','AWS', 'OPENSTACK'],
           legend_target: '.legend',
           missing_is_zero: false,
           linked: true,
@@ -50,9 +50,11 @@ cloudbreakApp.directive('usagecharts', function() {
         var gcpUsage = value.gcp.slice();
         var azureUsage = value.azure.slice();
         var awsUsage = value.aws.slice();
+        var openstackUsage = value.openstack.slice();
         var gcpMaxHour = 0;
         var azureMaxHour = 0;
         var awsMaxHour = 0;
+        var openstackMaxHour = 0;
         gcpUsage.forEach(function(item) {
           item.date = new Date(item.date);
           if (item.hours > gcpMaxHour) {gcpMaxHour = item.hours;}
@@ -64,6 +66,10 @@ cloudbreakApp.directive('usagecharts', function() {
         awsUsage.forEach(function(item) {
           item.date = new Date(item.date);
           if (item.hours > awsMaxHour) {awsMaxHour = item.hours;}
+        });
+        openstackUsage.forEach(function(item) {
+          item.date = new Date(item.date);
+          if (item.hours > openstackMaxHour) {openstackMaxHour = item.hours;}
         });
 
         var unitedChartData = [];
@@ -81,6 +87,11 @@ cloudbreakApp.directive('usagecharts', function() {
           element.append('<div id="awsChart" class="col-xs-12 col-sm-6 col-md-4"/>');
           createChart('AWS running hours', awsUsage, 'awsChart', (awsMaxHour > 0));
           unitedChartData.push(awsUsage);
+        }
+        if (value.cloud == 'all' || value.cloud == 'OPENSTACK') {
+          element.append('<div id="openstackChart" class="col-xs-12 col-sm-6 col-md-4"/>');
+          createChart('OpenStack running hours', openstackUsage, 'openstackChart', (openstackMaxHour > 0));
+          unitedChartData.push(openstackUsage);
         }
         if (value.cloud == 'all') {
           element.append('<div class="col-xs-12 col-sm-12 col-md-12">' 

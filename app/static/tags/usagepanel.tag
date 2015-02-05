@@ -69,6 +69,7 @@
                 <option value="AWS">Amazon EC2</option>
                 <option value="AZURE">Microsoft Azure</option>
                 <option value="GCC">Google Cloud Compute</option>
+                <option value="OPENSTACK">OpenStack</option>
               </select>
             </div>
           </div>
@@ -128,12 +129,12 @@
                       </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="group in usage.instanceGroups">
-                          <td>{{group.name}}</td>
-                          <td><p ng-repeat="item in $root.config.GCC.gccInstanceTypes | filter:{key: group.instanceType}">{{item.value}}</p></td>
-                          <td>{{group.hours}}</td>
-                        </tr>
-                      </tbody>
+                      <tr ng-repeat="group in usage.instanceGroups">
+                        <td>{{group.name}}</td>
+                        <td><p ng-repeat="item in $root.config.GCC.gccInstanceTypes | filter:{key: group.instanceType}">{{item.value}}</p></td>
+                        <td>{{group.hours}}</td>
+                      </tr>
+                    </tbody>
                   </table>
                 </td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
@@ -162,12 +163,12 @@
                       </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="group in usage.instanceGroups">
-                          <td>{{group.name}}</td>
-                          <td><p ng-repeat="item in $root.config.AWS.instanceType | filter:{key: group.instanceType}">{{item.value}}</p></td>
-                          <td>{{group.hours}}</td>
-                        </tr>
-                      </tbody>
+                      <tr ng-repeat="group in usage.instanceGroups">
+                        <td>{{group.name}}</td>
+                        <td><p ng-repeat="item in $root.config.AWS.instanceType | filter:{key: group.instanceType}">{{item.value}}</p></td>
+                        <td>{{group.hours}}</td>
+                      </tr>
+                    </tbody>
                   </table>
                 </td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
@@ -196,12 +197,12 @@
                       </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="group in usage.instanceGroups">
-                          <td>{{group.name}}</td>
-                          <td><p ng-repeat="item in $root.config.AZURE.azureVmTypes | filter:{key: group.instanceType}">{{item.value}}</p></td>
-                          <td>{{group.hours}}</td>
-                        </tr>
-                      </tbody>
+                      <tr ng-repeat="group in usage.instanceGroups">
+                        <td>{{group.name}}</td>
+                        <td><p ng-repeat="item in $root.config.AZURE.azureVmTypes | filter:{key: group.instanceType}">{{item.value}}</p></td>
+                        <td>{{group.hours}}</td>
+                      </tr>
+                    </tbody>
                   </table>
                 </td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
@@ -213,6 +214,40 @@
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td class="text-right">{{azureSum.fullHours}} hrs</td>
+              </tr>
+
+              <tr ng-repeat="usage in openstackSum.items">
+                <td ng-if="$index == 0" rowspan="{{openstackSum.items.length}}">{{usage.provider}}</td>
+                <td>{{usage.stackName}}</td>
+                <td>{{usage.username}}</td>
+                <td></td>
+                <td>
+                  <table class="table usage-inline-table" style="background-color: #FFFFFF; margin-bottom: 0px;">
+                    <thead>
+                      <tr>
+                        <th>host group</th>
+                        <th>instance type</th>
+                        <th>hours</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat="group in usage.instanceGroups">
+                        <td>{{group.name}}</td>
+                        <td>{{group.instanceType}}</td>
+                        <td>{{group.hours}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td class="text-right">{{usage.instanceHours}} hrs</td>
+              </tr>
+              <tr class="row-summa" ng-show="usages && openstackSum.items.length != 0">
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td class="text-right">{{openstackSum.fullHours}} hrs</td>
               </tr>
             </tbody>
           </table>

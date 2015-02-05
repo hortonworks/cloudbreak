@@ -15,7 +15,7 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             var filterStartDate = $scope.usageFilter.startDate;
             var filterEndDate = new Date($scope.usageFilter.endDate.getTime());
             var param = createRequestParams(filterStartDate);
-            var chartsData = { gcp: [], azure: [], aws: [], cloud: $scope.usageFilter.provider};
+            var chartsData = {gcp: [], azure: [], aws: [], openstack: [], cloud: $scope.usageFilter.provider};
 
             populateChartsDataBySelectedPeriod(chartsData, filterStartDate, filterEndDate);
 
@@ -54,6 +54,7 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             chartsData.gcp.push({ 'date': startDay.getTime(), 'hours': parseInt(0)});
             chartsData.azure.push({ 'date': startDay.getTime(), 'hours': parseInt(0)});
             chartsData.aws.push({ 'date': startDay.getTime(), 'hours': parseInt(0)});
+            chartsData.openstack.push({ 'date': startDay.getTime(), 'hours': parseInt(0)});
             startDay.setDate(startDay.getDate()+1);
           }
         }
@@ -66,19 +67,24 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             var calculatedCost;
             var usageByProvider;
             var chartsDataByProvider;
-            if ($scope.gccFilterFunction(item)) {
+            if ($scope.elementProviderEquals(item, 'GCC')) {
               usageByProvider = $scope.gccSum;
               chartsDataByProvider = chartsData.gcp;
-            } else if($scope.azureFilterFunction(item)) {
+            } else if($scope.elementProviderEquals(item, 'AZURE')) {
               usageByProvider = $scope.azureSum;
               chartsDataByProvider = chartsData.azure;
-            } else if($scope.awsFilterFunction(item)) {
+            } else if($scope.elementProviderEquals(item, 'AWS')) {
               usageByProvider = $scope.awsSum;
               chartsDataByProvider = chartsData.aws;
+            } else if($scope.elementProviderEquals(item, 'OPENSTACK')) {
+              usageByProvider = $scope.openstackSum;
+              chartsDataByProvider = chartsData.openstack;
             }
 
-            addUsageToChartsData(item, chartsDataByProvider);
-            addUsageToSum(item, calculatedCost, usageByProvider)
+            if (chartsDataByProvider != undefined && usageByProvider != undefined) {
+              addUsageToChartsData(item, chartsDataByProvider);
+              addUsageToSum(item, calculatedCost, usageByProvider)
+            }
 
           });
           $scope.orderUsagesBy('stackName', false);
@@ -97,7 +103,7 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
         function addUsageToSum(item, calculatedCost, usageByProvider) {
           usageByProvider.fullHours += parseFloat(item.instanceHours);
           var result = $filter('filter')(usageByProvider.items, {stackId: item.stackId}, true);
-          if (result.length > 0) {
+          if (result != undefined && result.length > 0) {
             result[0].instanceHours = result[0].instanceHours + item.instanceHours;
             result[0].instanceGroups.push({instanceType: item.instanceType, hours: item.instanceHours, name: item.hostGroup});
           } else {
@@ -107,25 +113,9 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
           }
         }
 
-        $scope.gccFilterFunction = function(element) {
+        $scope.elementProviderEquals = function(element, provider) {
             try {
-                return element.provider.match('GCC') ? true : false;
-            } catch (err) {
-                return false;
-            }
-        };
-
-        $scope.awsFilterFunction = function(element) {
-            try {
-                return element.provider.match('AWS') ? true : false;
-            }  catch (err) {
-                return false;
-            }
-        };
-
-        $scope.azureFilterFunction = function(element) {
-            try {
-                return element.provider.match('AZURE') ? true : false;
+                return element.provider.match(provider) ? true : false;
             } catch (err) {
                 return false;
             }
@@ -175,18 +165,10 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
         }
 
         function initSums() {
-            $scope.awsSum = {
-                fullHours: 0,
-                items: []
-            };
-            $scope.gccSum = {
-                fullHours: 0,
-                items: []
-            };
-            $scope.azureSum = {
-                fullHours: 0,
-                items: []
-            };
+            $scope.awsSum = {fullHours: 0, items: []};
+            $scope.gccSum = {fullHours: 0,items: []};
+            $scope.azureSum = {fullHours: 0,items: []};
+            $scope.openstackSum = {fullHours: 0,items: []};
         }
 
         function initFilter() {
