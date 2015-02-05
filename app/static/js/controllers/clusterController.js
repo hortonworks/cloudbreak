@@ -54,7 +54,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         $scope.selectedBlueprintChange = function () {
           var tmpCloudPlatform = $rootScope.activeCredential.cloudPlatform;
-          var tmpTemplateId = $filter('filter')($rootScope.templates, {cloudPlatform: tmpCloudPlatform}, true)[0].id;
+          var tmpTemplate = $filter('filter')($rootScope.templates, {cloudPlatform: tmpCloudPlatform}, true)[0];
+          var tmpTemplateId = null;
+          if (tmpTemplate != null) {
+            tmpTemplateId = tmpTemplate.id;
+          }
           var actualBp = $filter('filter')($rootScope.blueprints, { id: $scope.cluster.blueprintId});
           var hostgroups = [];
           actualBp[0].ambariBlueprint.host_groups.forEach(function(k){
