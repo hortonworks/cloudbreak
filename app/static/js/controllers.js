@@ -72,11 +72,11 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
           $scope.popupSuccess($scope.statusMessage);
         }
 
-        $scope.popup = function(message, class) {
+        $scope.popup = function(message, modifyClass) {
             notify({
                 message: message,
                 position: 'right',
-                classes: class,
+                classes: modifyClass,
                 duration: 4000
             });
         }
