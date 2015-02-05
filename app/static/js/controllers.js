@@ -8,10 +8,10 @@ var popUpAppender = new log4javascript.PopUpAppender();
 var layout = new log4javascript.PatternLayout("[%-5p] %m");
 popUpAppender.setLayout(layout);
 
-var uluwatuControllers = angular.module('uluwatuControllers', ['ui-notification']);
+var uluwatuControllers = angular.module('uluwatuControllers', ['cgNotify']);
 
-uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '$rootScope', '$filter', 'UserPermission', 'ErrorHandler', 'Notification',
-    function ($scope, $http, User, $rootScope, $filter, UserPermission, ErrorHandler, Notification) {
+uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '$rootScope', '$filter', 'UserPermission', 'ErrorHandler', 'notify',
+    function ($scope, $http, User, $rootScope, $filter, UserPermission, ErrorHandler, notify) {
         var orderBy = $filter('orderBy');
         $scope.user = User.get();
 
@@ -72,36 +72,29 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
           $scope.popupSuccess($scope.statusMessage);
         }
 
-        $scope.popupInfo = function(message) {
-            Notification.info({
+        $scope.popup = function(message, class) {
+            notify({
                 message: message,
-                title: 'Primary notification',
-                delay: 5000
+                position: 'right',
+                classes: class,
+                duration: 4000
             });
+        }
+
+        $scope.popupInfo = function(message) {
+            $scope.popup(message.toString(), 'alert-info');
         }
 
         $scope.popupWarning = function(message) {
-            Notification.warning({
-                message: message,
-                title: 'Warning',
-                delay: 5000
-            });
+            $scope.popup(message.toString(), 'alert-warning');
         }
 
         $scope.popupError = function(message) {
-            Notification.error({
-                message: message,
-                title: 'Error',
-                delay: 5000
-            });
+            $scope.popup(message.toString(), 'alert-danger');
         }
 
         $scope.popupSuccess = function(message) {
-            Notification.success({
-                message: message,
-                title: 'Success',
-                delay: 5000
-            });
+            $scope.popup(message.toString(), 'alert-success');
         }
 
         $scope.addPanelJQueryEventListeners = function(panel) {
