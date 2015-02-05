@@ -9,12 +9,12 @@ cloudbreakApp.directive('usagecharts', function() {
         MG.data_graphic({
           title: title,
           data: data,
+          full_width: true,
           chart_type: 'line',
           target: '#' + targetDivId,
           x_accessor: "date",
           y_accessor: "hours",
           interpolate: 'linear',
-          width: 380,
           y_axis: y_axis
         });
       }
@@ -28,11 +28,11 @@ cloudbreakApp.directive('usagecharts', function() {
           x_accessor: 'date',
           y_accessor: 'hours',
           interpolate: 'linear',
-          legend: ['GCP','AZURE','AWS'],
+          legend: ['GCP','AZURE','AWS', 'OPENSTACK'],
           legend_target: '.legend',
           missing_is_zero: false,
           linked: true,
-          width: 450,
+          full_width: true,
           y_axis: y_axis
         });
       }
@@ -50,37 +50,37 @@ cloudbreakApp.directive('usagecharts', function() {
         var gcpUsage = value.gcp.slice();
         var azureUsage = value.azure.slice();
         var awsUsage = value.aws.slice();
+        var openstackUsage = value.openstack.slice();
         var gcpMaxHour = 0;
         var azureMaxHour = 0;
         var awsMaxHour = 0;
-        gcpUsage.forEach(function(item) {
-          item.date = new Date(item.date);
-          if (item.hours > gcpMaxHour) {gcpMaxHour = item.hours;}
-        });
-        azureUsage.forEach(function(item) {
-          item.date = new Date(item.date);
-          if (item.hours > azureMaxHour) {azureMaxHour = item.hours;}
-        });
-        awsUsage.forEach(function(item) {
-          item.date = new Date(item.date);
-          if (item.hours > awsMaxHour) {awsMaxHour = item.hours;}
-        });
+        var openstackMaxHour = 0;
+
+        convertDatesAndSelectMax(gcpUsage, gcpMaxHour);
+        convertDatesAndSelectMax(azureUsage, azureMaxHour);
+        convertDatesAndSelectMax(awsUsage, awsMaxHour);
+        convertDatesAndSelectMax(openstackUsage, openstackMaxHour);
 
         var unitedChartData = [];
         if (value.cloud == 'all' || value.cloud == 'GCC') {
-          element.append('<div id="gcpChart" class="col-xs-12 col-sm-6 col-md-4"/>');
+          element.append('<div id="gcpChart" class="col-xs-12 col-sm-6 col-md-6"/>');
           createChart('GCP running hours', gcpUsage, 'gcpChart', (gcpMaxHour > 0));
           unitedChartData.push(gcpUsage);
         }
         if (value.cloud == 'all' || value.cloud == 'AZURE') {
-          element.append('<div id="azureChart" class="col-xs-12 col-sm-6 col-md-4"/>');
+          element.append('<div class="col-xs-12 col-sm-6 col-md-6"><div id="azureChart" /></div>');
           createChart('AZURE running hours', azureUsage, 'azureChart', (azureMaxHour > 0));
           unitedChartData.push(azureUsage);
         }
         if (value.cloud == 'all' || value.cloud == 'AWS') {
-          element.append('<div id="awsChart" class="col-xs-12 col-sm-6 col-md-4"/>');
+          element.append('<div id="awsChart" class="col-xs-12 col-sm-6 col-md-6"/>');
           createChart('AWS running hours', awsUsage, 'awsChart', (awsMaxHour > 0));
           unitedChartData.push(awsUsage);
+        }
+        if (value.cloud == 'all' || value.cloud == 'OPENSTACK') {
+          element.append('<div id="openstackChart" class="col-xs-12 col-sm-6 col-md-6"/>');
+          createChart('OpenStack running hours', openstackUsage, 'openstackChart', (openstackMaxHour > 0));
+          unitedChartData.push(openstackUsage);
         }
         if (value.cloud == 'all') {
           element.append('<div class="col-xs-12 col-sm-12 col-md-12">' 
@@ -90,6 +90,15 @@ cloudbreakApp.directive('usagecharts', function() {
           createUnitedChart(unitedChartData, y_axis);
         }
       }
+
+      function convertDatesAndSelectMax(collection, max) {
+          collection.forEach(function(item) {
+            item.date = new Date(item.date);
+            if (item.hours > max) {
+              max = item.hours;
+            }
+          });
+        }
     }
   };
 });
