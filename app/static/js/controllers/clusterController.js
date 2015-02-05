@@ -152,6 +152,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         function paginateMetadata() {
             if ($scope.pagination != null) {
+                $scope.pagination.totalItems = $rootScope.activeCluster.metadata.length;
                 var begin = (($scope.pagination.currentPage - 1) * $scope.pagination.itemsPerPage),
                 end = begin + $scope.pagination.itemsPerPage;
                 $scope.filteredActiveClusterData = $rootScope.activeCluster.metadata.slice(begin, end);
