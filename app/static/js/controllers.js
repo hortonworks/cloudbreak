@@ -72,40 +72,29 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
           $scope.popupSuccess($scope.statusMessage);
         }
 
-        $scope.popupInfo = function(message) {
+        $scope.popup = function(message, class) {
             notify({
-                message: message.toString(),
+                message: message,
                 position: 'right',
-                classes: 'alert-info',
+                classes: class,
                 duration: 4000
             });
+        }
+
+        $scope.popupInfo = function(message) {
+            $scope.popup(message.toString(), 'alert-info');
         }
 
         $scope.popupWarning = function(message) {
-            notify({
-                message: message.toString(),
-                position: 'right',
-                classes: 'alert-warning',
-                duration: 4000
-            });
+            $scope.popup(message.toString(), 'alert-warning');
         }
 
         $scope.popupError = function(message) {
-            notify({
-                message: message.toString(),
-                position: 'right',
-                classes: 'alert-danger',
-                duration: 4000
-            });
+            $scope.popup(message.toString(), 'alert-danger');
         }
 
         $scope.popupSuccess = function(message) {
-            notify({
-                message: message.toString(),
-                position: 'right',
-                classes: 'alert-success',
-                duration: 4000
-            });
+            $scope.popup(message.toString(), 'alert-success');
         }
 
         $scope.addPanelJQueryEventListeners = function(panel) {
