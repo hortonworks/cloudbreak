@@ -124,7 +124,6 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
 
         $scope.createAzureTemplate = function () {
             $scope.azureTemp.cloudPlatform = "AZURE";
-            $scope.azureTemp.parameters.imageName = "ambari-docker-v1";
             if($scope.azureTemp.public) {
                 AccountTemplate.save($scope.azureTemp, function (result) {
                   handleAzureTemplateSuccess(result)
