@@ -2,12 +2,6 @@ package com.sequenceiq.cloudbreak.domain;
 
 public enum AwsInstanceType {
 
-    T1Micro("t1.micro", 0),
-    T2Micro("t2.micro", 0),
-    T2Small("t2.small", 0),
-    T2Medium("t2.medium", 0),
-
-    M1Small("m1.small", 1),
     M1Medium("m1.medium", 1),
     M1Large("m1.large", 2),
     M1Xlarge("m1.xlarge", 4),

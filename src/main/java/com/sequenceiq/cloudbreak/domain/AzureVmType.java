@@ -2,11 +2,6 @@ package com.sequenceiq.cloudbreak.domain;
 
 public enum AzureVmType {
 
-    EXTRA_SMALL("Extra Small", 1),
-    SMALL("Small", 2),
-    MEDIUM("Medium", 4),
-    LARGE("Large", 8),
-    EXTRA_LARGE("Extra Large", 16),
     A5("A5", 4),
     A6("A6", 4),
     A7("A7", 8),

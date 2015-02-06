@@ -14,18 +14,14 @@ import org.junit.Test;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.validation.AzureTemplateParam;
-import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 
 public class AzureTemplateConverterTest {
 
-    private static final String DUMMY_VM_TYPE = "SMALL";
+    private static final String DUMMY_VM_TYPE = "STANDARD_D1";
     private static final String DUMMY_DESCRIPTION = "dummyDescription";
-    private static final String DUMMY_IMAGE_NAME = "dummyImageName";
-    private static final AzureLocation DUMMY_LOCATION = AzureLocation.BRAZIL_SOUTH;
     private static final String DUMMY_NAME = "dummyName";
-    private static final String DUMMY_PASSWORD = "dummyPassword";
     private static final String PORT = "8081";
     private static final String LOCAL_PORT = "8080";
     private static final String DUMMY_PROTOCOL = "dummyProtocol";

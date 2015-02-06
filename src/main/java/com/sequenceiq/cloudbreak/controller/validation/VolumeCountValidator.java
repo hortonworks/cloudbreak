@@ -54,14 +54,13 @@ public class VolumeCountValidator implements ConstraintValidator<ValidVolume, Te
         String instanceType = (String) value.getParameters().get(AwsTemplateParam.INSTANCE_TYPE.getName());
         int maxVolume = AwsInstanceType.valueOf(instanceType).getEphemeralVolumes();
         int desiredVolumeCount = value.getVolumeCount() == null ? 0 : value.getVolumeCount();
-        if (desiredVolumeCount > maxVolume) {
+        if (maxVolume == 0) {
             valid = false;
-            if (maxVolume == 0) {
-                addParameterConstraintViolation(context, "volumeCount",
-                        String.format("'%s' instance type does not support 'Ephemeral' volume type", instanceType));
-            } else {
-                addParameterConstraintViolation(context, "volumeCount", String.format("Max allowed ephemeral volume for '%s': %s", instanceType, maxVolume));
-            }
+            addParameterConstraintViolation(context, "volumeCount", String.format("'%s' instance type does not support 'Ephemeral' volume type", instanceType));
+        }
+        if (valid && desiredVolumeCount > maxVolume) {
+            valid = false;
+            addParameterConstraintViolation(context, "volumeCount", String.format("Max allowed ephemeral volume for '%s': %s", instanceType, maxVolume));
         }
         if (valid && desiredVolumeCount < minCount) {
             valid = false;
