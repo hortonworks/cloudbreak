@@ -254,6 +254,8 @@ Once this is configured, Cloudbreak is ready to launch Hadoop clusters on your b
 
 In order to launch Hadoop clusters on the  Microsoft Azure cloud platform you'll need to link your Azure account with Cloudbreak. This can be achieved by creating a new `Azure Credential` in Cloudbreak.
 
+You have to create network manually first in Azure before you start provisoning with Cloudbreak that is a known issue on Azure side.
+
 You'll need an X509 certificate with a 2048-bit RSA keypair.
 
 Generate these artifacts with `openssl` by running the following command, and answering the questions in the command prompt:
