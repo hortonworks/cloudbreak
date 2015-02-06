@@ -2,16 +2,10 @@ package com.sequenceiq.cloudbreak.domain;
 
 public enum AwsInstanceType {
 
-    M1Medium("m1.medium", 1),
-    M1Large("m1.large", 2),
-    M1Xlarge("m1.xlarge", 4),
     M3Medium("m3.medium", 1),
     M3Large("m3.large", 1),
     M3Xlarge("m3.xlarge", 2),
     M32xlarge("m3.2xlarge", 2),
-    M2Xlarge("m2.xlarge", 1),
-    M22xlarge("m2.2xlarge", 1),
-    M24xlarge("m2.4xlarge", 2),
 
     I2Xlarge("i2.xlarge", 1),
     I22xlarge("i2.2xlarge", 2),
@@ -22,8 +16,6 @@ public enum AwsInstanceType {
     Hs18xlarge("hs1.8xlarge", 24),
 
     Cr18xlarge("cr1.8xlarge", 2),
-    C1Medium("c1.medium", 1),
-    C1Xlarge("c1.xlarge", 4),
     C3Large("c3.large", 2),
     C3Xlarge("c3.xlarge", 2),
     C32xlarge("c3.2xlarge", 2),

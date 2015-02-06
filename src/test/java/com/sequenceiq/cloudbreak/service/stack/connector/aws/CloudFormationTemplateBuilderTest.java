@@ -41,7 +41,7 @@ public class CloudFormationTemplateBuilderTest {
     public void testBuildTemplateShouldCreateTwoDeviceNameEntriesWhenTwoVolumesAreSpecified() {
         InstanceGroup instanceGroup1 = new InstanceGroup();
         AwsTemplate awsTemplate = new AwsTemplate();
-        awsTemplate.setInstanceType(AwsInstanceType.C1Medium);
+        awsTemplate.setInstanceType(AwsInstanceType.C3Large);
         awsTemplate.setSpotPrice(0.2);
         awsTemplate.setSshLocation("0.0.0.0/0");
         awsTemplate.setName("awstemp1");
@@ -63,7 +63,7 @@ public class CloudFormationTemplateBuilderTest {
     public void testBuildTemplateShouldHaveSpotPriceSpecifiedWhenItIsSet() {
         InstanceGroup instanceGroup1 = new InstanceGroup();
         AwsTemplate awsTemplate = new AwsTemplate();
-        awsTemplate.setInstanceType(AwsInstanceType.C1Medium);
+        awsTemplate.setInstanceType(AwsInstanceType.C3Large);
         awsTemplate.setSpotPrice(0.2);
         awsTemplate.setSshLocation("0.0.0.0/0");
         awsTemplate.setName("awstemp1");
@@ -83,7 +83,7 @@ public class CloudFormationTemplateBuilderTest {
     public void testBuildTemplateShouldNotHaveSpotPriceSpecifiedWhenItIsSetToFalse() {
         InstanceGroup instanceGroup1 = new InstanceGroup();
         AwsTemplate awsTemplate = new AwsTemplate();
-        awsTemplate.setInstanceType(AwsInstanceType.C1Medium);
+        awsTemplate.setInstanceType(AwsInstanceType.C3Large);
         awsTemplate.setSshLocation("0.0.0.0/0");
         awsTemplate.setName("awstemp1");
         awsTemplate.setVolumeCount(1);

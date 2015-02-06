@@ -61,7 +61,7 @@ public class AwsTemplateConverterTest {
         templateJson.setDescription(DUMMY_DESCRIPTION);
         templateJson.setName(DUMMY_NAME);
         Map<String, Object> props = new HashMap<>();
-        props.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
+        props.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C3Large.name());
         props.put(AwsTemplateParam.SSH_LOCATION.getName(), DUMMY_SSH_LOCATION);
         templateJson.setVolumeCount(2);
         templateJson.setVolumeSize(60);
@@ -74,7 +74,7 @@ public class AwsTemplateConverterTest {
         AwsTemplate awsTemplate = new AwsTemplate();
         awsTemplate.setId(DUMMY_ID);
         awsTemplate.setDescription(DUMMY_DESCRIPTION);
-        awsTemplate.setInstanceType(AwsInstanceType.C1Medium);
+        awsTemplate.setInstanceType(AwsInstanceType.C3Large);
         awsTemplate.setSshLocation(DUMMY_SSH_LOCATION);
         awsTemplate.setName(DUMMY_NAME);
         awsTemplate.setPublicInAccount(true);

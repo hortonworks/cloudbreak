@@ -220,7 +220,7 @@ public final class ServiceTestUtils {
                 awsTemplate.setId(1L);
                 awsTemplate.setOwner(owner);
                 awsTemplate.setAccount(account);
-                awsTemplate.setInstanceType(AwsInstanceType.C1Medium);
+                awsTemplate.setInstanceType(AwsInstanceType.C3Large);
                 awsTemplate.setVolumeType(AwsVolumeType.Gp2);
                 awsTemplate.setSshLocation("0.0.0.0/0");
                 awsTemplate.setVolumeCount(1);
