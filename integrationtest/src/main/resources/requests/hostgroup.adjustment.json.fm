@@ -1,0 +1,6 @@
+{  
+   "hostGroupAdjustment":{  
+      "hostGroup":"${hostGroup}",
+      "scalingAdjustment":"${scalingAdjustment}"
+   }
+}

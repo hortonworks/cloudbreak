@@ -1,0 +1,5 @@
+{
+"ambariBlueprint": ${blueprintContent},
+"name":"${blueprintName!"it-hdp-multi-blueprint"}",
+"description":"Blueprint for integration testing"
+}
