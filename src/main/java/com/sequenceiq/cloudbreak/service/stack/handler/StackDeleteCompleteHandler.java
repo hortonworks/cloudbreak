@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -53,7 +54,10 @@ public class StackDeleteCompleteHandler implements Consumer<Event<StackDeleteCom
     private void updateStackFields(Stack stack) {
         Date now = new Date();
         String terminatedName = stack.getName() + DELIMITER + now.getTime();
-        stack.getCluster().setName(terminatedName);
+        Cluster cluster = stack.getCluster();
+        if (cluster != null) {
+            cluster.setName(terminatedName);
+        }
         stack.setName(terminatedName);
         stack.setStatus(Status.DELETE_COMPLETED);
         stack.setStatusReason(DELETE_COMPLETED_MSG);
