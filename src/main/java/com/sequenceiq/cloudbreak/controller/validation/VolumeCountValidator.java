@@ -56,7 +56,12 @@ public class VolumeCountValidator implements ConstraintValidator<ValidVolume, Te
         int desiredVolumeCount = value.getVolumeCount() == null ? 0 : value.getVolumeCount();
         if (desiredVolumeCount > maxVolume) {
             valid = false;
-            addParameterConstraintViolation(context, "volumeCount", String.format("Max allowed ephemeral volume for '%s': %s", instanceType, maxVolume));
+            if (maxVolume == 0) {
+                addParameterConstraintViolation(context, "volumeCount",
+                        String.format("'%s' instance type does not support 'Ephemeral' volume type", instanceType));
+            } else {
+                addParameterConstraintViolation(context, "volumeCount", String.format("Max allowed ephemeral volume for '%s': %s", instanceType, maxVolume));
+            }
         }
         if (valid && desiredVolumeCount < minCount) {
             valid = false;
