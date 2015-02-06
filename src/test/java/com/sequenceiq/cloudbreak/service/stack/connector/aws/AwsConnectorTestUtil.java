@@ -47,7 +47,7 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
     public static AwsTemplate createAwsTemplate() {
         AwsTemplate awsTemplate = new AwsTemplate();
         awsTemplate.setId(DEFAULT_ID);
-        awsTemplate.setInstanceType(AwsInstanceType.C1Medium);
+        awsTemplate.setInstanceType(AwsInstanceType.C3Large);
         awsTemplate.setSshLocation(SSH_LOCATION);
         awsTemplate.setVolumeCount(2);
         awsTemplate.setVolumeSize(60);
@@ -59,7 +59,7 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
     public static AwsTemplate createAwsTemplateWithZeroVolumes() {
         AwsTemplate awsTemplate = new AwsTemplate();
         awsTemplate.setId(DEFAULT_ID);
-        awsTemplate.setInstanceType(AwsInstanceType.C1Medium);
+        awsTemplate.setInstanceType(AwsInstanceType.C3Large);
         awsTemplate.setSshLocation(SSH_LOCATION);
         awsTemplate.setVolumeCount(0);
         awsTemplate.setVolumeSize(60);
