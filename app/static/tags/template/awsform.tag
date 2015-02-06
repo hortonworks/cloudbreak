@@ -34,7 +34,6 @@
         <!-- .col-sm-9 -->
 
     </div>
-    
     <div class="form-group">
         <label class="col-sm-3 control-label" for="aws_tvolumetype">Volume type</label>
 
