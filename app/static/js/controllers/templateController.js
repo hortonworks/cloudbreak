@@ -164,6 +164,8 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
 
         function initializeAwsTemp() {
             $scope.awsTemp = {
+                volumeCount: 1,
+                volumeSize: 100,
                 parameters: {
                     sshLocation: "0.0.0.0/0",
                     instanceType: "T2Medium",
@@ -174,14 +176,19 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
 
         function initializeAzureTemp() {
             $scope.azureTemp = {
+                volumeCount: 1,
+                volumeSize: 100,
                 parameters: {
-                    vmType: "MEDIUM"
+                    vmType: "MEDIUM",
+                    volumeSize: 100
                 }
             }
         }
 
         function initializeOpenstackTemp() {
           $scope.openstackTemp = {
+            volumeCount: 1,
+            volumeSize: 100,
             parameters: {
             }
           }
@@ -189,6 +196,8 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
 
         function initializeGccTemp() {
             $scope.gccTemp = {
+                volumeCount: 1,
+                volumeSize: 100,
                 parameters: {
                     gccInstanceType: "N1_STANDARD_2",
                     volumeType: "HDD"
