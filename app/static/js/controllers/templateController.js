@@ -173,7 +173,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 volumeSize: 100,
                 parameters: {
                     sshLocation: "0.0.0.0/0",
-                    instanceType: "T2Medium",
+                    instanceType: "M3Large",
                     volumeType: "Standard"
                 }
             }
@@ -184,7 +184,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 volumeCount: 1,
                 volumeSize: 100,
                 parameters: {
-                    vmType: "MEDIUM",
+                    vmType: "STANDARD_D2",
                     volumeSize: 100
                 }
             }
