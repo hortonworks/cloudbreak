@@ -115,7 +115,6 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                     {key: 'SA_EAST_1', value: 'ami-272c9e3a'}
                 ],
                 instanceType: [
-                    {key: 'C1Medium', value: 'C1Medium', cloud: 'AWS', ephemeralVolumeSize: '350 GB STANDARD', maxEphemeralVolumeCount: 1},
                     {key: 'C3Large', value: 'C3Large', cloud: 'AWS', ephemeralVolumeSize: '16 GB SSD', maxEphemeralVolumeCount: 2},
                     {key: 'C3Xlarge', value: 'C3Xlarge', cloud: 'AWS', ephemeralVolumeSize: '40 GB SSD', maxEphemeralVolumeCount: 2},
                     {key: 'C32xlarge', value: 'C32xlarge', cloud: 'AWS', ephemeralVolumeSize: '80 GB SSD', maxEphemeralVolumeCount: 2},
@@ -131,12 +130,6 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                     {key: 'I22xlarge', value: 'I22xlarge', cloud: 'AWS', ephemeralVolumeSize: '800 GB SSD', maxEphemeralVolumeCount: 2},
                     {key: 'I24xlarge', value: 'I24xlarge', cloud: 'AWS', ephemeralVolumeSize: '800 GB SSD', maxEphemeralVolumeCount: 4},
                     {key: 'I28xlarge', value: 'I28xlarge', cloud: 'AWS', ephemeralVolumeSize: '800 GB SSD', maxEphemeralVolumeCount: 8},
-                    {key: 'M1Medium', value: 'M1Medium', cloud: 'AWS', ephemeralVolumeSize: '410 GB STANDARD', maxEphemeralVolumeCount: 1},
-                    {key: 'M1Large', value: 'M1Large', cloud: 'AWS', ephemeralVolumeSize: '420 GB STANDARD', maxEphemeralVolumeCount: 2},
-                    {key: 'M1Xlarge', value: 'M1Xlarge', cloud: 'AWS', ephemeralVolumeSize: '420 GB STANDARD', maxEphemeralVolumeCount: 4},
-                    {key: 'M2Xlarge', value: 'M2Xlarge', cloud: 'AWS', ephemeralVolumeSize: '420 GB STANDARD', maxEphemeralVolumeCount: 1},
-                    {key: 'M22xlarge', value: 'M22xlarge', cloud: 'AWS', ephemeralVolumeSize: '850 GB STANDARD', maxEphemeralVolumeCount: 1},
-                    {key: 'M24xlarge', value: 'M24xlarge', cloud: 'AWS', ephemeralVolumeSize: '840 GB STANDARD', maxEphemeralVolumeCount: 2},
                     {key: 'M3Medium', value: 'M3Medium', cloud: 'AWS', ephemeralVolumeSize: '4 GB SSD', maxEphemeralVolumeCount: 1},
                     {key: 'M3Large', value: 'M3Large', cloud: 'AWS', ephemeralVolumeSize: '32 GB SSD', maxEphemeralVolumeCount: 1},
                     {key: 'M3Xlarge', value: 'M3Xlarge', cloud: 'AWS', ephemeralVolumeSize: '40 GB SSD', maxEphemeralVolumeCount: 2},
