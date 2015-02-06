@@ -96,9 +96,8 @@
                                     <div class="form-group" >
                                       <label class="col-sm-3 control-label" for="templateName{{$index}}">Template</label>
                                       <div class="col-sm-9">
-                                        <select class="form-control" id="templateName{{$index}}" ng-model="instanceGroup.templateId" required >
-                                          <option ng-repeat="template in $root.templates | orderBy:'name'" data-value="{{template.id}}" value="{{template.id}}" id="{{template.id}}" ng-if="template.cloudPlatform == activeCredential.cloudPlatform">{{template.name}}
-                                          </option>
+                                        <select class="form-control" id="template-name-{{$index}}" name="template-name-{{$index}}" ng-model="instanceGroup.templateId"
+                                          ng-options="template.id as template.name for template in $root.templates | filter: {'cloudPlatform': activeCredential.cloudPlatform} | orderBy:'name'" required>
                                         </select>
                                       </div>
                                     </div>
@@ -109,7 +108,6 @@
                           </div>
                       </div>
                     </div>
-
                     <div class="row btn-row">
                         <div class="col-sm-9 col-sm-offset-3">
                             <a href="" id="createCluster" class="btn btn-success btn-block" ng-disabled="clusterCreationForm.$invalid" role="button" ng-click="createCluster()"><i class="fa fa-plus fa-fw"></i>create and start cluster</a>
