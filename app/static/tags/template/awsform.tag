@@ -28,7 +28,7 @@
         <label class="col-sm-3 control-label" for="aws_tinstanceType">Instance type</label>
 
         <div class="col-sm-9">
-            <select class="form-control" id="aws_tinstanceType" ng-options="instanceType.key as instanceType.value for instanceType in $root.config.AWS.instanceType" ng-model="awsTemp.parameters.instanceType" required>
+            <select class="form-control" id="aws_tinstanceType" name="aws_tinstanceType" ng-options="instanceType.key as instanceType.value for instanceType in $root.config.AWS.instanceType" ng-model="awsTemp.parameters.instanceType" ng-change="changeAwsInstanceType()" required>
             </select>
         </div>
         <!-- .col-sm-9 -->
@@ -60,13 +60,15 @@
       </div>
     </div>
 
-    <div class="form-group" ng-hide="awsTemp.parameters.volumeType == 'Ephemeral'" ng-class="{ 'has-error': awsTemplateForm.aws_tvolumesize.$dirty && awsTemplateForm.aws_tvolumesize.$invalid }">
+    <div class="form-group" ng-class="{ 'has-error': awsTemplateForm.aws_tvolumesize.$dirty && awsTemplateForm.aws_tvolumesize.$invalid }">
         <label class="col-sm-3 control-label" for="aws_tvolumesize">Volume size (GB)</label>
 
         <div class="col-sm-9">
-            <input type="number" name="aws_tvolumesize" class="form-control" ng-model="awsTemp.volumeSize" id="aws_tvolumesize" min="10"
-                   max="1000" placeholder="10 - 1000 GB" ng-required="awsTemp.parameters.volumeType != 'Ephemeral'">
 
+            <input type="number" name="aws_tvolumesize" class="form-control" ng-model="awsTemp.volumeSize" id="aws_tvolumesize" min="10" max="1000" placeholder="10 - 1000 GB"
+                ng-required="awsTemp.parameters.volumeType != 'Ephemeral'" ng-hide="awsTemp.parameters.volumeType == 'Ephemeral'">
+
+            <input type="text" class="form-control" name="aws_ephemeral_volumesize" id="aws_ephemeral_volumesize" ng-disabled="true" ng-hide="awsTemp.parameters.volumeType != 'Ephemeral'" value="{{awsInstanceType.ephemeralVolumeSize}}">
             <div class="help-block"
                  ng-show="awsTemplateForm.aws_tvolumesize.$dirty && awsTemplateForm.aws_tvolumesize.$invalid"><i class="fa fa-warning"></i>
                 {{error_msg.volume_size_invalid}}

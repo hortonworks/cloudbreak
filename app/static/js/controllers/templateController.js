@@ -9,6 +9,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
         $scope.awsTemplateForm = {};
         $scope.gccTemplateForm = {};
         $scope.openstackTemplateForm = {};
+        $scope.awsInstanceType = {};
         initializeAzureTemp();
         initializeAwsTemp();
         initializeGccTemp();
@@ -155,6 +156,11 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             }, function (error) {
                 $scope.showError(error, $rootScope.error_msg.template_delete_failed)
             });
+        }
+
+        $scope.changeAwsInstanceType = function() {
+            var instanceType = $scope.awsTemp.parameters.instanceType;
+            $scope.awsInstanceType = $filter('filter')($rootScope.config.AWS.instanceType, {key: instanceType}, true)[0];
         }
 
         function collapseCreateTemplateFormPanel() {
