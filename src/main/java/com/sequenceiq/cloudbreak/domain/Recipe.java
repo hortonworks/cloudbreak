@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -51,7 +52,8 @@ public class Recipe implements ProvisionEntity {
     private String description;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    private Set<String> plugins;
+    @Enumerated(EnumType.STRING)
+    private Map<String, PluginExecutionType> plugins;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Column(columnDefinition = "TEXT", length = 100000)
@@ -95,11 +97,11 @@ public class Recipe implements ProvisionEntity {
         this.keyValues = keyValues;
     }
 
-    public Set<String> getPlugins() {
+    public Map<String, PluginExecutionType> getPlugins() {
         return plugins;
     }
 
-    public void setPlugins(Set<String> plugins) {
+    public void setPlugins(Map<String, PluginExecutionType> plugins) {
         this.plugins = plugins;
     }
 

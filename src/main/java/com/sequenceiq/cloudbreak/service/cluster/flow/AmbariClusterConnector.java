@@ -140,15 +140,15 @@ public class AmbariClusterConnector {
             Blueprint blueprint = cluster.getBlueprint();
 
             AmbariClient ambariClient = clientService.create(stack);
-            if (cluster.getRecipe() != null) {
-                recipeEngine.setupRecipe(stack);
-                recipeEngine.executePreInstall(stack);
-            }
             addBlueprint(stack, ambariClient, blueprint);
             PollingResult waitForHostsResult = waitForHosts(stack, ambariClient);
             if (isSuccess(waitForHostsResult)) {
                 Map<String, List<String>> hostGroupMappings = recommend(cluster);
                 saveHostMetadata(cluster, hostGroupMappings);
+                if (cluster.getRecipe() != null) {
+                    recipeEngine.setupRecipe(stack);
+                    recipeEngine.executePreInstall(stack);
+                }
                 ambariClient.createCluster(cluster.getName(), blueprint.getBlueprintName(), hostGroupMappings);
                 PollingResult pollingResult = waitForClusterInstall(stack, ambariClient);
                 if (isSuccess(pollingResult)) {

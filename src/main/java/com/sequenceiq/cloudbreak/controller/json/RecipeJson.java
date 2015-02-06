@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
 import java.util.Map;
-import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -11,6 +10,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.sequenceiq.cloudbreak.controller.validation.TrustedPlugin;
+import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
 
 
 public class RecipeJson implements JsonEntity {
@@ -25,7 +25,7 @@ public class RecipeJson implements JsonEntity {
     private String description;
 
     @TrustedPlugin
-    private Set<String> plugins;
+    private Map<String, PluginExecutionType> plugins;
 
     @JsonProperty("properties")
     private Map<String, String> properties;
@@ -64,11 +64,11 @@ public class RecipeJson implements JsonEntity {
         this.properties = properties;
     }
 
-    public Set<String> getPlugins() {
+    public Map<String, PluginExecutionType> getPlugins() {
         return plugins;
     }
 
-    public void setPlugins(Set<String> plugins) {
+    public void setPlugins(Map<String, PluginExecutionType> plugins) {
         this.plugins = plugins;
     }
 }

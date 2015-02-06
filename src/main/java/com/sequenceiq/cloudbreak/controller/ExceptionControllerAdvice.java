@@ -76,8 +76,8 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler({ HttpMediaTypeNotSupportedException.class })
     public ResponseEntity<ExceptionResult> httpMediaTypeNotSupported(Exception e) {
         MDCBuilder.buildMdcContext();
-        LOGGER.info(e.getMessage());
-        return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.BAD_REQUEST);
+        LOGGER.error(e.getMessage());
+        return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.NOT_ACCEPTABLE);
     }
 
     @ExceptionHandler({ SubscriptionAlreadyExistException.class })
