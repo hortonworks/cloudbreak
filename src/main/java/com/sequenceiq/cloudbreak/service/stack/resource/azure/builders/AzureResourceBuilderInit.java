@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack.resource.azure.builders;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,8 @@ import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
@@ -32,11 +35,9 @@ public class AzureResourceBuilderInit implements
     public AzureProvisionContextObject provisionInit(Stack stack, String userData) throws Exception {
         AzureCredential credential = (AzureCredential) stack.getCredential();
         AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
-
-        AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
         AzureProvisionContextObject azureProvisionContextObject =
-                new AzureProvisionContextObject(stack.getId(), credential.getCommonName(azureLocation), azureClient,
-                        getOsImageName(credential, azureLocation, stack.getImage()), userData);
+                new AzureProvisionContextObject(stack.getId(), credential.getCommonName(azureLocation),
+                        getOsImageName(credential, azureLocation, stack.getImage()), userData, getAllocatedAddresses(stack));
         return azureProvisionContextObject;
     }
 
@@ -72,8 +73,7 @@ public class AzureResourceBuilderInit implements
 
     @Override
     public AzureStartStopContextObject startStopInit(Stack stack) throws Exception {
-        AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
-        return new AzureStartStopContextObject(stack, azureClient);
+        return new AzureStartStopContextObject(stack);
     }
 
     @Override
@@ -88,6 +88,17 @@ public class AzureResourceBuilderInit implements
 
     public String getOsImageName(Credential credential, AzureLocation location, String imageUrl) {
         return azureStackUtil.getOsImageName(credential, location, imageUrl);
+    }
+
+    private Set<String> getAllocatedAddresses(Stack stack) {
+        List<InstanceGroup> instanceGroups = stack.getInstanceGroupsAsList();
+        Set<String> allocatedAddresses = new TreeSet<>();
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
+                allocatedAddresses.add(instanceMetaData.getPrivateIp());
+            }
+        }
+        return allocatedAddresses;
     }
 
 }

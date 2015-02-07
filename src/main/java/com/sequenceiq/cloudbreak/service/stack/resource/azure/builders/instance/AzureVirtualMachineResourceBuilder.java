@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 
 import java.io.FileNotFoundException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +32,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
-import com.sequenceiq.cloudbreak.service.stack.connector.azure.X509Certificate;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstances;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
@@ -50,6 +48,9 @@ import groovyx.net.http.HttpResponseException;
 @Component
 @Order(3)
 public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResourceBuilder {
+
+    private static final String START_IP = "172.16.0.4";
+    private static final String END_IP = "172.16.255.254";
 
     @Autowired
     private StackRepository stackRepository;
@@ -87,70 +88,73 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     @Override
     public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
             List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
-        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        String internalIp = "172.16.0." + (index + VALID_IP_RANGE_START);
-        AzureTemplate azureTemplate = (AzureTemplate) instanceGroup.orNull().getTemplate();
-        AzureCredential azureCredential = (AzureCredential) stack.getCredential();
-        byte[] encoded = Base64.encodeBase64(buildResources.get(0).getResourceName().getBytes());
-        String label = new String(encoded);
-        Map<String, Object> props = new HashMap<>();
-        List<Port> ports = new ArrayList<>();
-        ports.add(new Port("Ambari", "8080", "8080", "tcp"));
-        ports.add(new Port("Consul", "8500", "8500", "tcp"));
-        ports.add(new Port("NameNode", "50070", "50070", "tcp"));
-        ports.add(new Port("RM Web", "8088", "8088", "tcp"));
-        ports.add(new Port("RM Scheduler", "8030", "8030", "tcp"));
-        ports.add(new Port("RM IPC", "8050", "8050", "tcp"));
-        ports.add(new Port("Job History Server", "19888", "19888", "tcp"));
-        ports.add(new Port("HBase Master", "60010", "60010", "tcp"));
-        ports.add(new Port("Falcon", "15000", "15000", "tcp"));
-        ports.add(new Port("Storm", "8744", "8744", "tcp"));
-        ports.add(new Port("Oozie", "11000", "11000", "tcp"));
-        ports.add(new Port("HTTP", "80", "80", "tcp"));
-        props.put(NAME, buildResources.get(0).getResourceName());
-        props.put(DEPLOYMENTSLOT, PRODUCTION);
-        props.put(LABEL, label);
-        props.put(IMAGENAME, azureStackUtil.getOsImageName(stack.getCredential(), AzureLocation.valueOf(stack.getRegion()), stack.getImage()));
-        props.put(IMAGESTOREURI, buildimageStoreUri(provisionContextObject.getCommonName(), buildResources.get(0).getResourceName()));
-        props.put(HOSTNAME, buildResources.get(0).getResourceName());
-        props.put(USERNAME, DEFAULT_USER_NAME);
-        X509Certificate sshCert = null;
         try {
-            sshCert = azureStackUtil.createX509Certificate(azureCredential);
-        } catch (FileNotFoundException e) {
-            throw new StackCreationFailureException(e);
-        } catch (CertificateException e) {
-            throw new StackCreationFailureException(e);
-        }
-        try {
-            props.put(SSHPUBLICKEYFINGERPRINT, sshCert.getSha1Fingerprint().toUpperCase());
-        } catch (CertificateEncodingException e) {
-            throw new StackCreationFailureException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new StackCreationFailureException(e);
-        }
-        props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", DEFAULT_USER_NAME));
-        props.put(AFFINITYGROUP, provisionContextObject.getCommonName());
-        if (azureTemplate.getVolumeCount() > 0) {
-            List<Integer> disks = new ArrayList<>();
-            for (int i = 0; i < azureTemplate.getVolumeCount(); i++) {
-                disks.add(azureTemplate.getVolumeSize());
+            Stack stack = stackRepository.findById(provisionContextObject.getStackId());
+            AzureTemplate azureTemplate = (AzureTemplate) instanceGroup.orNull().getTemplate();
+            AzureCredential azureCredential = (AzureCredential) stack.getCredential();
+            byte[] encoded = Base64.encodeBase64(buildResources.get(0).getResourceName().getBytes());
+            String label = new String(encoded);
+            Map<String, Object> props = new HashMap<>();
+            List<Port> ports = new ArrayList<>();
+            ports.add(new Port("SSH", "22", "22", "tcp"));
+            ports.add(new Port("Ambari", "8080", "8080", "tcp"));
+            ports.add(new Port("Consul", "8500", "8500", "tcp"));
+            ports.add(new Port("NameNode", "50070", "50070", "tcp"));
+            ports.add(new Port("RM Web", "8088", "8088", "tcp"));
+            ports.add(new Port("RM Scheduler", "8030", "8030", "tcp"));
+            ports.add(new Port("RM IPC", "8050", "8050", "tcp"));
+            ports.add(new Port("Job History Server", "19888", "19888", "tcp"));
+            ports.add(new Port("HBase Master", "60010", "60010", "tcp"));
+            ports.add(new Port("Falcon", "15000", "15000", "tcp"));
+            ports.add(new Port("Storm", "8744", "8744", "tcp"));
+            ports.add(new Port("Oozie", "11000", "11000", "tcp"));
+            ports.add(new Port("HTTP", "80", "80", "tcp"));
+            props.put(NAME, buildResources.get(0).getResourceName());
+            props.put(DEPLOYMENTSLOT, PRODUCTION);
+            props.put(LABEL, label);
+            props.put(IMAGENAME, azureStackUtil.getOsImageName(stack.getCredential(), AzureLocation.valueOf(stack.getRegion()), stack.getImage()));
+            props.put(IMAGESTOREURI, buildImageStoreUri(provisionContextObject.getCommonName(), buildResources.get(0).getResourceName()));
+            props.put(HOSTNAME, buildResources.get(0).getResourceName());
+            props.put(USERNAME, DEFAULT_USER_NAME);
+            props.put(SSHPUBLICKEYFINGERPRINT, azureStackUtil.createX509Certificate(azureCredential).getSha1Fingerprint().toUpperCase());
+            props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", DEFAULT_USER_NAME));
+            props.put(AFFINITYGROUP, provisionContextObject.getCommonName());
+            if (azureTemplate.getVolumeCount() > 0) {
+                props.put(DISKS, generateDisksProperty(azureTemplate));
             }
-            props.put(DISKS, disks);
+            props.put(SERVICENAME, buildResources.get(0).getResourceName());
+            props.put(SUBNETNAME, provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
+            props.put(VIRTUAL_NETWORK_IP_ADDRESS, findNextValidIp(provisionContextObject));
+            props.put(CUSTOMDATA, new String(Base64.encodeBase64(provisionContextObject.getUserData().getBytes())));
+            props.put(VIRTUALNETWORKNAME, provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
+            props.put(PORTS, ports);
+            props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
+            return new AzureVirtualMachineCreateRequest(props,
+                    azureStackUtil.createAzureClient(azureCredential), resources, buildResources, stack, instanceGroup.orNull());
+        } catch (FileNotFoundException | CertificateException | NoSuchAlgorithmException e) {
+            throw new StackCreationFailureException(e);
         }
-
-        props.put(SERVICENAME, buildResources.get(0).getResourceName());
-        props.put(SUBNETNAME, provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
-        props.put(VIRTUAL_NETWORK_IP_ADDRESS, internalIp);
-        props.put(CUSTOMDATA, new String(Base64.encodeBase64(provisionContextObject.getUserData().getBytes())));
-        props.put(VIRTUALNETWORKNAME, provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
-        props.put(PORTS, ports);
-        props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
-        return new AzureVirtualMachineCreateRequest(props,
-                azureStackUtil.createAzureClient(azureCredential), resources, buildResources, stack, instanceGroup.orNull());
     }
 
-    private String buildimageStoreUri(String commonName, String vmName) {
+    private List<Integer> generateDisksProperty(AzureTemplate azureTemplate) {
+        List<Integer> disks = new ArrayList<>();
+        for (int i = 0; i < azureTemplate.getVolumeCount(); i++) {
+            disks.add(azureTemplate.getVolumeSize());
+        }
+        return disks;
+    }
+
+    private String findNextValidIp(AzureProvisionContextObject provisionContextObject) {
+        String ip = START_IP;
+        boolean found = false;
+        while (!found && !ip.equals(END_IP)) {
+            ip = azureStackUtil.getNextIPAddress(ip);
+            found = provisionContextObject.putIfAbsent(ip);
+        }
+        return ip;
+    }
+
+    private String buildImageStoreUri(String commonName, String vmName) {
         return String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", commonName, vmName);
     }
 
@@ -272,15 +276,18 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         private String name;
         private String port;
         private String protocol;
-
-        public Port() {
-        }
+        private final List<String> aclRules;
 
         public Port(String name, String port, String localPort, String protocol) {
+            this(name, port, localPort, protocol, new ArrayList<String>());
+        }
+
+        public Port(String name, String port, String localPort, String protocol, List<String> aclRules) {
             this.name = name;
             this.localPort = localPort;
             this.port = port;
             this.protocol = protocol;
+            this.aclRules = aclRules;
         }
     }
 

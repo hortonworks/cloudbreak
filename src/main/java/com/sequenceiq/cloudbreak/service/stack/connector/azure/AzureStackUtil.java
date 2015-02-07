@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
+import static java.lang.String.format;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -51,7 +53,7 @@ public class AzureStackUtil {
     public String getOsImageName(Credential credential, AzureLocation location, String image) {
         String[] split = image.split("/");
         AzureCredential azureCredential = (AzureCredential) credential;
-        return String.format("%s-%s-%s", azureCredential.getCommonName(location), IMAGE_NAME,
+        return format("%s-%s-%s", azureCredential.getCommonName(location), IMAGE_NAME,
                 split[split.length - 1].replaceAll(".vhd", ""));
     }
 
@@ -73,22 +75,22 @@ public class AzureStackUtil {
 
     public File buildAzureSshCerFile(AzureCredential azureCredential) throws IOException, GeneralSecurityException {
         String sshCerPath = azureCredential.getId() == null ? "/tmp/" + new Date().getTime() + "ssh.cer" : "/tmp/" + azureCredential.getId() + "ssh.cer";
-        File sshCerfile = new File(sshCerPath);
-        if (!sshCerfile.exists()) {
-            FileOutputStream output = new FileOutputStream(sshCerfile);
+        File sshCerFile = new File(sshCerPath);
+        if (!sshCerFile.exists()) {
+            FileOutputStream output = new FileOutputStream(sshCerFile);
             IOUtils.write(Base64.decodeBase64(azureCredential.getSshCerFile()), output);
         }
-        return sshCerfile;
+        return sshCerFile;
     }
 
     public File buildAzureCerFile(AzureCredential azureCredential) throws IOException, GeneralSecurityException {
         String sshCerPath = azureCredential.getId() == null ? "/tmp/" + new Date().getTime() + ".cer" : "/tmp/" + azureCredential.getId() + ".cer";
-        File sshCerfile = new File(sshCerPath);
-        if (!sshCerfile.exists()) {
-            FileOutputStream output = new FileOutputStream(sshCerfile);
+        File sshCerFile = new File(sshCerPath);
+        if (!sshCerFile.exists()) {
+            FileOutputStream output = new FileOutputStream(sshCerFile);
             IOUtils.write(Base64.decodeBase64(azureCredential.getCerFile()), output);
         }
-        return sshCerfile;
+        return sshCerFile;
     }
 
     public AzureCredential generateAzureServiceFiles(AzureCredential azureCredential) throws IOException, GeneralSecurityException {
@@ -122,16 +124,16 @@ public class AzureStackUtil {
     public AzureCredential generateAzureSshCerFile(AzureCredential azureCredential) throws IOException, GeneralSecurityException {
         String sshPemPathWithoutExtension = azureCredential.getId() == null ? "/tmp/" + new Date().getTime() + "ssh" : "/tmp/" + azureCredential.getId() + "ssh";
         String sshPemPath = sshPemPathWithoutExtension + ".pem";
-        File sshPemfile = new File(sshPemPath);
-        if (!sshPemfile.exists()) {
-            FileOutputStream output = new FileOutputStream(sshPemfile);
+        File sshPemFile = new File(sshPemPath);
+        if (!sshPemFile.exists()) {
+            FileOutputStream output = new FileOutputStream(sshPemFile);
             IOUtils.write(azureCredential.getPublicKey(), output);
         }
         try {
             keyGeneratorService.generateSshKey(sshPemPathWithoutExtension);
             azureCredential.setSshCerFile(FileReaderUtils.readBinaryFileFromPath(sshPemPathWithoutExtension + ".cer"));
         } catch (InterruptedException e) {
-            LOGGER.error("An error occured under the ssh generation for {} template. The error was: {} {}", azureCredential.getId(), e.getMessage(), e);
+            LOGGER.error(format("An error occurred during ssh generation for %s template. The error was: %s", azureCredential.getId(), e.getMessage()), e);
             throw new InternalServerException(e.getMessage());
         }
 
@@ -168,7 +170,34 @@ public class AzureStackUtil {
                 }
             }
         } catch (Exception ex) {
-            LOGGER.error("Credential migration unsuccess.", ex.getMessage());
+            LOGGER.error("Unsuccessful credential migration.", ex);
         }
+    }
+
+    public String getNextIPAddress(String ip) {
+        String[] octets = ip.split("\\.");
+        if (octets.length != 4) {
+            throw new IllegalArgumentException();
+        }
+        int value = (Integer.parseInt(octets[0], 10) << (8 * 3)) & 0xFF000000
+                | (Integer.parseInt(octets[1], 10) << (8 * 2)) & 0x00FF0000
+                | (Integer.parseInt(octets[2], 10) << (8 * 1)) & 0x0000FF00
+                | (Integer.parseInt(octets[3], 10) << (8 * 0)) & 0x000000FF;
+        return ipToString(value + 1);
+    }
+
+    private String ipToString(int value) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 3; i >= 0; --i) {
+            sb.append(getOctet(i, value));
+            if (i != 0) {
+                sb.append(".");
+            }
+        }
+        return sb.toString();
+    }
+
+    private int getOctet(int octet, int value) {
+        return (value >> (octet * 8)) & 0x000000FF;
     }
 }

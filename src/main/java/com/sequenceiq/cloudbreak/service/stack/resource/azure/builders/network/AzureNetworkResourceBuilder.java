@@ -16,10 +16,10 @@ import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
@@ -97,8 +97,8 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
         props.put(NAME, buildResources.get(0).getResourceName());
         props.put(AFFINITYGROUP, filterResourcesByType(resources, ResourceType.AZURE_AFFINITY_GROUP).get(0).getResourceName());
         props.put(SUBNETNAME, buildResources.get(0).getResourceName());
-        props.put(ADDRESSPREFIX, "172.16.0.0/16");
-        props.put(SUBNETADDRESSPREFIX, "172.16.0.0/24");
+        props.put(ADDRESSPREFIX, "172.0.0.0/8");
+        props.put(SUBNETADDRESSPREFIX, "172.16.0.0/16");
         AzureClient azureClient = azureStackUtil.createAzureClient(credential);
         return new AzureNetworkCreateRequest(buildResources.get(0).getResourceName(), provisionContextObject.getStackId(), props, azureClient,
                 resources, buildResources);

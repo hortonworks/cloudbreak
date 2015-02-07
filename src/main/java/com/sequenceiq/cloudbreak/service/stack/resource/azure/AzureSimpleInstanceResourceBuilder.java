@@ -28,7 +28,6 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
     protected static final int MAX_NAME_LENGTH = 50;
     protected static final int MAX_ATTEMPTS_FOR_AMBARI_OPS = -1;
     protected static final int NOT_FOUND = 404;
-    protected static final int VALID_IP_RANGE_START = 4;
     protected static final String DESCRIPTION = "description";
     protected static final String AFFINITYGROUP = "affinityGroup";
     protected static final String DEPLOYMENTSLOT = "deploymentSlot";
