@@ -521,6 +521,23 @@ app.post('/account/register', function(req, res){
     }
 });
 
+app.get('/account/details', function(req, res){
+    getUserName(req, res, function(userName){
+        getToken(req, res, function(token){
+            getUserByName(req, res, token, userName, 'userName,familyName,givenName,groups', function(userData){
+                var companyName = null
+                var groups = userData.groups
+                for (var i = 0; i < groups.length; i++ ){
+                    if (groups[i].display.lastIndexOf('sequenceiq.account', 0) === 0) {
+                        companyName = groups[i].display.split('.')[3]
+                    }
+                }
+                res.json({useName: userData.userName, givenName: userData.givenName, familyName: userData.familyName, company: companyName})
+            });
+        });
+    });
+});
+
 app.post('/activate', function(req, res){
     var activate = req.body.activate;
     var email = req.body.email
