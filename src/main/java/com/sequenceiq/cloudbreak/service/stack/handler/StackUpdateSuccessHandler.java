@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.handler;
 
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -8,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.ecwid.consul.v1.ConsulClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -19,6 +22,7 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
+import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
 
 import reactor.event.Event;
 import reactor.function.Consumer;
@@ -47,7 +51,7 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
         Set<String> instanceIds = updateSuccess.getInstanceIds();
         InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(updateSuccess.getHostGroup());
         if (updateSuccess.isRemoveInstances()) {
-            terminateMetaDataInstances(updateSuccess, stackId, instanceIds, instanceGroup);
+            terminate(stack, updateSuccess, stackId, instanceIds, instanceGroup);
         } else {
             int nodeCount = instanceGroup.getNodeCount() + instanceIds.size();
             stackUpdater.updateNodeCount(stackId, nodeCount, updateSuccess.getHostGroup());
@@ -59,15 +63,20 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
 
     }
 
-    private void terminateMetaDataInstances(StackUpdateSuccess updateSuccess, Long stackId, Set<String> instanceIds, InstanceGroup instanceGroup) {
+    private void terminate(Stack stack, StackUpdateSuccess updateSuccess, long stackId,
+            Set<String> instanceIds, InstanceGroup instanceGroup) {
+        MDCBuilder.buildMdcContext(stack);
         int nodeCount = instanceGroup.getNodeCount() - instanceIds.size();
-        stackUpdater.updateNodeCount(stackId, nodeCount, updateSuccess.getHostGroup());
+        String hostGroup = updateSuccess.getHostGroup();
+        stackUpdater.updateNodeCount(stackId, nodeCount, hostGroup);
 
-        for (InstanceMetaData metadataEntry : instanceGroup.getInstanceMetaData()) {
-            if (instanceIds.contains(metadataEntry.getInstanceId())) {
+        List<ConsulClient> clients = createConsulClients(stack, hostGroup);
+        for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
+            if (instanceIds.contains(instanceMetaData.getInstanceId())) {
                 long timeInMillis = Calendar.getInstance().getTimeInMillis();
-                metadataEntry.setTerminationDate(timeInMillis);
-                metadataEntry.setTerminated(true);
+                instanceMetaData.setTerminationDate(timeInMillis);
+                instanceMetaData.setTerminated(true);
+                removeAgentFromConsul(clients, instanceMetaData);
             }
         }
 
@@ -75,6 +84,23 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
         LOGGER.info("Successfully terminated metadata of instances '{}' in stack.", instanceIds);
         eventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_CHANGED.name(),
                 "Billing changed due to downscaling of cluster infrastructure.");
+    }
+
+    private void removeAgentFromConsul(List<ConsulClient> clients, InstanceMetaData metaData) {
+        String nodeName = metaData.getLongName().replace(ConsulUtils.CONSUL_DOMAIN, "");
+        LOGGER.info("Removing node: {} from consul", nodeName);
+        ConsulUtils.agentForceLeave(clients, nodeName);
+    }
+
+    private List<ConsulClient> createConsulClients(Stack stack, String hostGroup) {
+        List<InstanceGroup> instanceGroups = stack.getInstanceGroupsAsList();
+        List<ConsulClient> clients = Collections.emptyList();
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            if (!instanceGroup.getGroupName().equalsIgnoreCase(hostGroup)) {
+                clients = ConsulUtils.createClients(instanceGroup.getInstanceMetaData());
+            }
+        }
+        return clients;
     }
 
 }
