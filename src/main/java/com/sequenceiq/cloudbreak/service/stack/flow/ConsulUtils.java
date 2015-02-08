@@ -24,9 +24,11 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 
 public final class ConsulUtils {
 
+    public static final String CONSUL_DOMAIN = ".node.consul";
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsulUtils.class);
 
     private static final int CONSUL_CLIENTS = 3;
+    private static final int ALIVE_STATUS = 1;
 
     private ConsulUtils() {
         throw new IllegalStateException();
@@ -50,9 +52,9 @@ public final class ConsulUtils {
         }
     }
 
-    public static Map<String, String> getMembers(List<ConsulClient> clients) {
+    public static Map<String, String> getAliveMembers(List<ConsulClient> clients) {
         for (ConsulClient client : clients) {
-            Map<String, String> members = getMembers(client);
+            Map<String, String> members = getMembers(client, ALIVE_STATUS);
             if (!members.isEmpty()) {
                 return members;
             }
@@ -60,12 +62,14 @@ public final class ConsulUtils {
         return Collections.emptyMap();
     }
 
-    public static Map<String, String> getMembers(ConsulClient client) {
+    public static Map<String, String> getMembers(ConsulClient client, int status) {
         try {
             Map<String, String> result = new HashMap<>();
             List<Member> members = client.getAgentMembers().getValue();
             for (Member member : members) {
-                result.put(member.getAddress(), member.getName());
+                if (member.getStatus() == status) {
+                    result.put(member.getAddress(), member.getName());
+                }
             }
             return result;
         } catch (Exception e) {
@@ -154,6 +158,12 @@ public final class ConsulUtils {
             clients.add(new ConsulClient(metaData.getPublicIp()));
         }
         return clients;
+    }
+
+    public static void agentForceLeave(List<ConsulClient> clients, String nodeName) {
+        for (ConsulClient client : clients) {
+            client.agentForceLeave(nodeName);
+        }
     }
 
 }

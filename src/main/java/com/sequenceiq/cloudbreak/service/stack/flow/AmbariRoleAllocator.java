@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.createClients;
-import static com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.getMembers;
+import static com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.getAliveMembers;
 import static com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.getService;
 
 import java.util.ArrayList;
@@ -41,7 +41,6 @@ public class AmbariRoleAllocator {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariRoleAllocator.class);
     private static final int LAST = 3;
     private static final String AMBARI_SERVICE = "ambari-8080";
-    private static final String CONSUL_DOMAIN = ".node.consul";
     private static final int POLLING_INTERVAL = 5000;
     private static final int MAX_POLLING_ATTEMPTS = 100;
 
@@ -103,14 +102,14 @@ public class AmbariRoleAllocator {
         InstanceGroup instanceGroup = one.getInstanceGroupByInstanceGroupName(hostGroup);
         MDCBuilder.buildMdcContext(one);
         try {
-            Set<InstanceMetaData> originalMetadata = instanceGroup.getInstanceMetaData();
+            Set<InstanceMetaData> originalMetadata = instanceGroup.getAllInstanceMetaData();
             Set<InstanceMetaData> instanceMetaData = prepareInstanceMetaData(coreInstanceMetaData, one.getInstanceGroupByInstanceGroupName(hostGroup));
             originalMetadata.addAll(instanceMetaData);
             Stack modifiedStack = stackUpdater.updateStackMetaData(stackId, originalMetadata, hostGroup);
             stackUpdater.updateMetadataReady(stackId, true);
             waitForConsulAgents(modifiedStack, instanceMetaData);
             updateToConsulHostNames(modifiedStack.getInstanceGroupByInstanceGroupName(hostGroup).getInstanceMetaData());
-            stackUpdater.updateStackMetaData(stackId, modifiedStack.getInstanceGroupByInstanceGroupName(hostGroup).getInstanceMetaData(), hostGroup);
+            stackUpdater.updateStackMetaData(stackId, modifiedStack.getInstanceGroupByInstanceGroupName(hostGroup).getAllInstanceMetaData(), hostGroup);
             Set<String> instanceIds = new HashSet<>();
             for (InstanceMetaData metadataEntry : instanceMetaData) {
                 instanceIds.add(metadataEntry.getInstanceId());
@@ -162,12 +161,12 @@ public class AmbariRoleAllocator {
 
     private void updateToConsulHostNames(Set<InstanceMetaData> instancesMetaData) {
         List<ConsulClient> clients = createClients(instancesMetaData);
-        Map<String, String> members = getMembers(clients);
+        Map<String, String> members = getAliveMembers(clients);
         for (InstanceMetaData instanceMetaData : instancesMetaData) {
             String privateIp = instanceMetaData.getPrivateIp();
             String address = members.get(privateIp);
-            if (!instanceMetaData.getLongName().endsWith(CONSUL_DOMAIN)) {
-                instanceMetaData.setLongName(address + CONSUL_DOMAIN);
+            if (!instanceMetaData.getLongName().endsWith(ConsulUtils.CONSUL_DOMAIN)) {
+                instanceMetaData.setLongName(address + ConsulUtils.CONSUL_DOMAIN);
             }
         }
     }

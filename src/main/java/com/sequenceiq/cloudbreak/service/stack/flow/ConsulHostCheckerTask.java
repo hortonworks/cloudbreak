@@ -21,7 +21,7 @@ public class ConsulHostCheckerTask implements StatusCheckerTask<ConsulContext> {
         List<String> privateIps = consulContext.getTargets();
         List<ConsulClient> clients = consulContext.getConsulClients();
         LOGGER.info("Checking '{}' different hosts for consul agents: '{}'", clients.size(), privateIps);
-        Map<String, String> members = ConsulUtils.getMembers(clients);
+        Map<String, String> members = ConsulUtils.getAliveMembers(clients);
         for (String ip : privateIps) {
             if (members.get(ip) == null) {
                 LOGGER.info("Consul agent didn't join on host: {}", ip);
