@@ -35,16 +35,14 @@
 
     </div>
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="aws_tvolumetype">Volume type</label>
+      <label class="col-sm-3 control-label" for="aws_tvolumetype">Volume type</label>
 
-        <div class="col-sm-9">
-            <select class="form-control" id="aws_tvolumetype" ng-options="volumeType.key as volumeType.value for volumeType in $root.config.AWS.volumeTypes" ng-model="awsTemp.parameters.volumeType" required>
-            </select>
-        </div>
-        <!-- .col-sm-9 -->
+      <div class="col-sm-9">
+        <select class="form-control" id="aws_tvolumetype" name="aws_tvolumetype" ng-options="volumeType.key as volumeType.value for volumeType in $root.config.AWS.volumeTypes" ng-model="awsTemp.parameters.volumeType" ng-change="changeAwsInstanceType()" required>
+        </select>
       </div>
+      <!-- .col-sm-9 -->
     </div>
-
     <div class="form-group" ng-class="{ 'has-error' : awsTemplateForm.aws_tvolumecount.$dirty && awsTemplateForm.aws_tvolumecount.$invalid }">
         <label class="col-sm-3 control-label" for="aws_tvolumecount">Attached volumes per instance</label>
 
