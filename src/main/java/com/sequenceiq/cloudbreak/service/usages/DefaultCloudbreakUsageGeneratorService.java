@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +19,16 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventSpecifications;
 import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 
 @Service
 public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGeneratorService {
@@ -37,6 +44,12 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
     @Autowired
     private StackUsageGenerator stackUsageGenerator;
 
+    @Autowired
+    private StackRepository stackRepository;
+
+    @Autowired
+    private TemplateRepository templateRepository;
+
     @Override
     @Scheduled(cron = "0 01 0 * * *")
     public void generate() {
@@ -44,6 +57,7 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
         Iterable<CloudbreakEvent> cloudbreakEvents = getCloudbreakEvents();
         Map<Long, List<CloudbreakEvent>> stackEvents = groupCloudbreakEventsByStack(cloudbreakEvents);
         generateDailyUsageForStacks(usageList, stackEvents);
+        deleteTerminatedStacks(stackEvents.keySet());
         usageRepository.save(usageList);
     }
 
@@ -93,6 +107,28 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
             LOGGER.debug("Processing stackId {} for userid {}", stackEventEntry.getKey());
             List<CloudbreakUsage> stackDailyUsages = stackUsageGenerator.generate(stackEventEntry.getValue());
             usageList.addAll(stackDailyUsages);
+        }
+    }
+
+    private void deleteTerminatedStacks(Set<Long> stackIds) {
+        for (Long stackId : stackIds) {
+            Stack stack = stackRepository.findById(stackId);
+            if (stack != null && Status.DELETE_COMPLETED.equals(stack.getStatus())) {
+                stackRepository.delete(stack);
+                deleteTemplatesOfStack(stack);
+            }
+        }
+    }
+
+    private void deleteTemplatesOfStack(Stack stack) {
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            Template template = instanceGroup.getTemplate();
+            if (template != null) {
+                List<Stack> allStackForTemplate = stackRepository.findAllStackForTemplate(template.getId());
+                if (template.isDeleted() && allStackForTemplate.size() <= 1) {
+                    templateRepository.delete(template);
+                }
+            }
         }
     }
 }

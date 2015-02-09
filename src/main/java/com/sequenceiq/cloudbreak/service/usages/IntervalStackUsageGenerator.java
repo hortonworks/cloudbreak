@@ -46,13 +46,12 @@ public class IntervalStackUsageGenerator {
         Stack stack = stackRepository.findById(startEvent.getStackId());
 
         if (stack != null) {
-            PriceGenerator priceGenerator = selectPriceGeneratorByPlatform(stack);
-
             for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
                 Map<String, CloudbreakUsage> instanceGroupDailyUsages = new HashMap<>();
                 Template template = instanceGroup.getTemplate();
                 String instanceType = getInstanceType(template);
                 String groupName = instanceGroup.getGroupName();
+                PriceGenerator priceGenerator = selectPriceGeneratorByPlatform(template.cloudPlatform());
 
                 for (InstanceMetaData metaData : instanceGroup.getAllInstanceMetaData()) {
                     Map<String, Long> instanceHours = instanceUsageGenerator.getInstanceHours(metaData, startTime, stopTime);
@@ -86,12 +85,11 @@ public class IntervalStackUsageGenerator {
         return instanceType;
     }
 
-    private PriceGenerator selectPriceGeneratorByPlatform(Stack stack) {
+    private PriceGenerator selectPriceGeneratorByPlatform(CloudPlatform cloudPlatform) {
         PriceGenerator result = null;
-        CloudPlatform stackCloudPlatform = stack.cloudPlatform();
         for (PriceGenerator generator : priceGenerators) {
             CloudPlatform generatorCloudPlatform = generator.getCloudPlatform();
-            if (stackCloudPlatform.equals(generatorCloudPlatform)) {
+            if (cloudPlatform.equals(generatorCloudPlatform)) {
                 result = generator;
                 break;
             }

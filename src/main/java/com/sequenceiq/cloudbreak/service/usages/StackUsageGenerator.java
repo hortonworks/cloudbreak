@@ -19,11 +19,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 @Component
 public class StackUsageGenerator {
@@ -34,9 +31,6 @@ public class StackUsageGenerator {
 
     @Autowired
     private IntervalStackUsageGenerator intervalUsageGenerator;
-
-    @Autowired
-    private StackRepository stackRepository;
 
     public List<CloudbreakUsage> generate(List<CloudbreakEvent> stackEvents) {
         List<CloudbreakUsage> stackUsages = new LinkedList<>();
@@ -55,7 +49,6 @@ public class StackUsageGenerator {
             }
 
             generateRunningStackUsage(stackUsages, start);
-            deleteStackIfTerminated(actEvent);
         } catch (Exception e) {
             LOGGER.error("Usage generation failed for stack(id:{})! Error when processing event(id:{})! Ex: {}", actEvent.getStackId(), actEvent.getId(), e);
             throw new IllegalStateException(e);
@@ -94,15 +87,6 @@ public class StackUsageGenerator {
             CloudbreakEvent newBillingStart = createBillingStarterCloudbreakEvent(startEvent, cal);
             eventRepository.save(newBillingStart);
             LOGGER.debug("BILLING_STARTED is created with date:{} for running stack {}.", cal.getTime(), newBillingStart.getStackId());
-        }
-    }
-
-    private void deleteStackIfTerminated(CloudbreakEvent event) {
-        if (event != null) {
-            Stack stack = stackRepository.findById(event.getStackId());
-            if (stack != null && Status.DELETE_COMPLETED.equals(stack.getStatus())) {
-                stackRepository.delete(stack);
-            }
         }
     }
 

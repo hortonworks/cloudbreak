@@ -4,7 +4,6 @@ import static java.util.Calendar.DATE;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,7 +31,6 @@ import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
 
 public class StackUsageGeneratorTest {
@@ -45,8 +43,6 @@ public class StackUsageGeneratorTest {
     private CloudbreakEventRepository eventRepository;
     @Mock
     private IntervalStackUsageGenerator intervalUsageGenerator;
-    @Mock
-    private StackRepository stackRepository;
     @Mock
     private CloudbreakUsage cloudbreakUsage;
 
@@ -71,7 +67,6 @@ public class StackUsageGeneratorTest {
         List<CloudbreakUsage> usageList = underTest.generate(new ArrayList<CloudbreakEvent>());
 
         assertTrue(usageList.isEmpty());
-        verify(stackRepository, never()).findById(1L);
     }
 
     @Test
@@ -86,39 +81,12 @@ public class StackUsageGeneratorTest {
         when(intervalUsageGenerator.generateUsages(startDate, stopDate, startEvent)).thenReturn(usagesByDay);
         Stack stack = ServiceTestUtils.createStack();
         stack.setStatus(Status.AVAILABLE);
-        when(stackRepository.findById(1L)).thenReturn(stack);
 
         //WHEN
         List<CloudbreakUsage> usageList = underTest.generate(Arrays.asList(startEvent, stopEvent));
 
         //THEN
         verify(intervalUsageGenerator).generateUsages(startDate, stopDate, startEvent);
-        verify(stackRepository).findById(1L);
-        verify(stackRepository, never()).delete(stack);
-        assertFalse(usageList.isEmpty());
-    }
-
-    @Test
-    public void testGenerateShouldDeleteStackWhenTheStackStateIsDeleteCompleted() throws Exception {
-        //GIVEN
-        Date startDate = referenceCalendar.getTime();
-        referenceCalendar.set(DATE, referenceCalendar.get(DATE) + 1);
-        Date stopDate = referenceCalendar.getTime();
-        CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
-        CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STOPPED.name(), stopDate);
-        List<CloudbreakUsage> usagesByDay = Arrays.asList(cloudbreakUsage);
-        when(intervalUsageGenerator.generateUsages(startDate, stopDate, startEvent)).thenReturn(usagesByDay);
-        Stack stack = ServiceTestUtils.createStack();
-        stack.setStatus(Status.DELETE_COMPLETED);
-        when(stackRepository.findById(1L)).thenReturn(stack);
-
-        //WHEN
-        List<CloudbreakUsage> usageList = underTest.generate(Arrays.asList(startEvent, stopEvent));
-
-        //THEN
-        verify(intervalUsageGenerator).generateUsages(startDate, stopDate, startEvent);
-        verify(stackRepository).findById(1L);
-        verify(stackRepository, times(1)).delete(stack);
         assertFalse(usageList.isEmpty());
     }
 
@@ -132,13 +100,11 @@ public class StackUsageGeneratorTest {
         when(intervalUsageGenerator.generateUsages(any(Date.class), any(Date.class), any(CloudbreakEvent.class))).thenReturn(usagesByDay);
         Stack stack = ServiceTestUtils.createStack();
         stack.setStatus(Status.AVAILABLE);
-        when(stackRepository.findById(1L)).thenReturn(stack);
 
         //WHEN
         List<CloudbreakUsage> usageList = underTest.generate(Arrays.asList(startEvent));
 
         //THEN
-        verify(stackRepository, never()).delete(stack);
         assertFalse(usageList.isEmpty());
     }
 
@@ -152,13 +118,11 @@ public class StackUsageGeneratorTest {
         when(intervalUsageGenerator.generateUsages(any(Date.class), any(Date.class), any(CloudbreakEvent.class))).thenReturn(usagesByDay);
         Stack stack = ServiceTestUtils.createStack();
         stack.setStatus(Status.AVAILABLE);
-        when(stackRepository.findById(1L)).thenReturn(stack);
 
         //WHEN
         List<CloudbreakUsage> usageList = underTest.generate(Arrays.asList(startEvent));
 
         //THEN
-        verify(stackRepository, never()).delete(stack);
         verify(eventRepository, times(1)).save(any(CloudbreakEvent.class));
         assertFalse(usageList.isEmpty());
     }
@@ -175,7 +139,6 @@ public class StackUsageGeneratorTest {
         when(intervalUsageGenerator.generateUsages(startDate, stopDate, startEvent)).thenReturn(usagesByDay);
         Stack stack = ServiceTestUtils.createStack();
         stack.setStatus(Status.AVAILABLE);
-        when(stackRepository.findById(1L)).thenReturn(stack);
 
         //WHEN
         List<CloudbreakUsage> usageList = underTest.generate(Arrays.asList(startEvent, stopEvent));
@@ -199,57 +162,12 @@ public class StackUsageGeneratorTest {
         when(intervalUsageGenerator.generateUsages(startDate, stopDate, startEvent)).thenReturn(usagesByDay);
         Stack stack = ServiceTestUtils.createStack();
         stack.setStatus(Status.AVAILABLE);
-        when(stackRepository.findById(1L)).thenReturn(stack);
 
         //WHEN
         List<CloudbreakUsage> usageList = underTest.generate(Arrays.asList(startEvent, secondStartEvent, stopEvent));
 
         //THEN
         verify(intervalUsageGenerator).generateUsages(startDate, stopDate, startEvent);
-        verify(stackRepository).findById(1L);
-        verify(stackRepository, never()).delete(stack);
-        assertFalse(usageList.isEmpty());
-    }
-
-    @Test
-    public void testGenerateShouldNotDeleteStackWhenStackDoesNotExistWithId() throws Exception {
-        //GIVEN
-        Date startDate = referenceCalendar.getTime();
-        referenceCalendar.set(DATE, referenceCalendar.get(DATE) + 1);
-        CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
-        List<CloudbreakUsage> usagesByDay = Arrays.asList(cloudbreakUsage);
-        when(intervalUsageGenerator.generateUsages(any(Date.class), any(Date.class), any(CloudbreakEvent.class))).thenReturn(usagesByDay);
-        when(stackRepository.findById(1L)).thenReturn(null);
-
-        //WHEN
-        List<CloudbreakUsage> usageList = underTest.generate(Arrays.asList(startEvent));
-
-        //THEN
-        verify(intervalUsageGenerator).generateUsages(any(Date.class), any(Date.class), any(CloudbreakEvent.class));
-        verify(stackRepository).findById(1L);
-        verify(stackRepository, never()).delete(any(Stack.class));
-        assertFalse(usageList.isEmpty());
-    }
-
-    @Test
-    public void testGenerateShouldNotDeleteStackWhenStackStatusIsNotDeleteCompleted() throws Exception {
-        //GIVEN
-        Date startDate = referenceCalendar.getTime();
-        referenceCalendar.set(DATE, referenceCalendar.get(DATE) + 1);
-        CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
-        List<CloudbreakUsage> usagesByDay = Arrays.asList(cloudbreakUsage);
-        when(intervalUsageGenerator.generateUsages(any(Date.class), any(Date.class), any(CloudbreakEvent.class))).thenReturn(usagesByDay);
-        Stack stack = ServiceTestUtils.createStack();
-        stack.setStatus(Status.AVAILABLE);
-        when(stackRepository.findById(1L)).thenReturn(stack);
-
-        //WHEN
-        List<CloudbreakUsage> usageList = underTest.generate(Arrays.asList(startEvent));
-
-        //THEN
-        verify(intervalUsageGenerator).generateUsages(any(Date.class), any(Date.class), any(CloudbreakEvent.class));
-        verify(stackRepository).findById(1L);
-        verify(stackRepository, never()).delete(stack);
         assertFalse(usageList.isEmpty());
     }
 }
