@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -57,7 +58,9 @@ public class StackDeleteCompleteHandler implements Consumer<Event<StackDeleteCom
         Cluster cluster = stack.getCluster();
         if (cluster != null) {
             cluster.setName(terminatedName);
+            cluster.setBlueprint(null);
         }
+        stack.setCredential(null);
         stack.setName(terminatedName);
         stack.setStatus(Status.DELETE_COMPLETED);
         stack.setStatusReason(DELETE_COMPLETED_MSG);
@@ -65,10 +68,13 @@ public class StackDeleteCompleteHandler implements Consumer<Event<StackDeleteCom
     }
 
     private void terminateMetaDataInstances(Stack stack) {
-        for (InstanceMetaData metaData : stack.getRunningInstanceMetaData()) {
-            long timeInMillis = Calendar.getInstance().getTimeInMillis();
-            metaData.setTerminationDate(timeInMillis);
-            metaData.setTerminated(true);
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            instanceGroup.setTemplate(null);
+            for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
+                long timeInMillis = Calendar.getInstance().getTimeInMillis();
+                metaData.setTerminationDate(timeInMillis);
+                metaData.setTerminated(true);
+            }
         }
     }
 }
