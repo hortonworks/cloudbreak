@@ -29,6 +29,7 @@
     <suppress checks="IllegalCatch" files="GccStackUtil.java"/>
     <suppress checks="IllegalCatch" files="GccProvisionSetup.java"/>
     <suppress checks="CyclomaticComplexity" files="MDCBuilder.java"/>
+    <suppress checks="MagicNumber" files="AzureStackUtil.java"/>
 
     <!-- -->
 
