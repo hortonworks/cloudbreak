@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.core.flow;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import reactor.core.Reactor;
 import reactor.event.Event;
 import reactor.function.Consumer;
 
@@ -20,6 +22,15 @@ import reactor.function.Consumer;
 public abstract class AbstractFlowHandler<T> implements Consumer<Event<T>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFlowHandler.class);
 
+    @Autowired
+    private FlowManager flowManager;
+
+    @Autowired
+    private FlowEventFactory eventFactory;
+
+    @Autowired
+    private Reactor reactor;
+
     /**
      * Template method for flow reactor event consumer logic.
      *
@@ -27,14 +38,19 @@ public abstract class AbstractFlowHandler<T> implements Consumer<Event<T>> {
      */
     @Override
     public void accept(Event<T> event) {
+        Object result = null;
+        boolean success = false;
         try {
             LOGGER.debug("FlowHandler called with event {}", event);
-            execute(event);
-            triggerNext();
+            result = execute(event);
+            success = true;
         } catch (Throwable t) {
-            LOGGER.debug("Consuming error {}", t);
+            LOGGER.debug("Consuming the error {}", t);
             event.consumeError(t);
+            handleErrorFlow(t, event);
         }
+        Object payload = assemblePayload(result);
+        next(payload, success);
     }
 
     /**
@@ -43,11 +59,36 @@ public abstract class AbstractFlowHandler<T> implements Consumer<Event<T>> {
      * @param event the reactor event received
      * @throws Throwable if an error occurs during the handler logic execution.
      */
-    protected abstract void execute(Event<T> event) throws Exception;
+    protected abstract Object execute(Event<T> event) throws Exception;
 
     /**
      * Send a reactor notification to trigger the next step of the flow if required.
      */
-    protected abstract void triggerNext();
+    protected void next(Object payload, boolean success) {
+        String key = flowManager.transition(this.getClass(), success);
+        if (null != key) {
+            Event event = eventFactory.createEvent(payload, key);
+            reactor.notify(key, event);
+        } else {
+            LOGGER.debug("The handler {} has no transitions.", this.getClass());
+        }
+    }
+
+    /**
+     * Delegates to the error handling callback. Enhances the error with contextual data from the passed in event.
+     *
+     * @param throwable the caught exception
+     * @param data      the received
+     */
+
+    protected abstract void handleErrorFlow(Throwable throwable, Object data);
+
+    /**
+     * Assembles the payload for the next phase based on the results of the execution.
+     *
+     * @param serviceResult the results of the execution
+     * @return the payload for the next phase of the flow
+     */
+    protected abstract Object assemblePayload(Object serviceResult);
 
 }
