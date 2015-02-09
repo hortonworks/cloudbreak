@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.websocket;
 
+import static com.sequenceiq.cloudbreak.domain.Status.DELETE_COMPLETED;
+
 import java.util.Date;
 import java.util.List;
 
@@ -35,7 +37,7 @@ public class UptimeNotifier {
         long now = new Date().getTime();
         for (Cluster cluster : clusters) {
             Stack stack = stackRepository.findStackForCluster(cluster.getId());
-            if (stack != null) {
+            if (stack != null && !DELETE_COMPLETED.equals(stack.getStatus())) {
                 Long uptime = cluster.getUpSince() == null || !Status.AVAILABLE.equals(cluster.getStatus()) ? 0L : now - cluster.getUpSince();
                 Notification notification = createUptimeNotification(stack, uptime);
                 notificationSender.send(notification);
