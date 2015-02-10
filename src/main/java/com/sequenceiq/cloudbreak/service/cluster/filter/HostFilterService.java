@@ -20,13 +20,13 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 
 @Service
-public class AmbariHostFilterService {
+public class HostFilterService {
 
     public static final String RM_WS_PATH = "/ws/v1/cluster";
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterConnector.class);
 
     @Autowired
-    private List<AmbariHostFilter> hostFilters;
+    private List<HostFilter> hostFilters;
 
     @Autowired
     private AmbariConfigurationService configurationService;
@@ -40,9 +40,9 @@ public class AmbariHostFilterService {
         try {
             AmbariClient ambariClient = clientService.create(stack);
             Map<String, String> config = configurationService.getConfiguration(ambariClient, hostGroup);
-            for (AmbariHostFilter hostFilter : hostFilters) {
+            for (HostFilter hostFilter : hostFilters) {
                 try {
-                    filteredList = hostFilter.filter(config, filteredList);
+                    filteredList = hostFilter.filter(stack.getId(), config, filteredList);
                 } catch (HostFilterException e) {
                     LOGGER.warn("Filter didn't succeed, moving to next filter", e);
                 }

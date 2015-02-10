@@ -41,6 +41,7 @@ public class InstanceMetaData implements ProvisionEntity {
     private Integer volumeCount;
     private String instanceId;
     private Boolean ambariServer;
+    private Boolean consulServer;
     private String dockerSubnet;
     private String longName;
     private Boolean removable;
@@ -169,5 +170,13 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setTerminated(Boolean terminated) {
         this.terminated = terminated;
+    }
+
+    public Boolean getConsulServer() {
+        return consulServer;
+    }
+
+    public void setConsulServer(Boolean consulServer) {
+        this.consulServer = consulServer;
     }
 }

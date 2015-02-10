@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.service.cluster.ConfigParam;
 
 @Component
-public class AppMasterFilter implements AmbariHostFilter {
+public class AppMasterFilter implements HostFilter {
 
     private static final String AM_KEY = "amHostHttpAddress";
     private static final String APPS_NODE = "apps";
@@ -31,12 +31,12 @@ public class AppMasterFilter implements AmbariHostFilter {
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<HostMetadata> filter(Map<String, String> config, List<HostMetadata> hosts) throws HostFilterException {
+    public List<HostMetadata> filter(long stackId, Map<String, String> config, List<HostMetadata> hosts) throws HostFilterException {
         List<HostMetadata> result = new ArrayList<>(hosts);
         try {
             String resourceManagerAddress = config.get(ConfigParam.YARN_RM_WEB_ADDRESS.key());
             String appResponse = restTemplate.exchange(
-                    String.format("http://%s", resourceManagerAddress + AmbariHostFilterService.RM_WS_PATH + "/apps?state=RUNNING"),
+                    String.format("http://%s", resourceManagerAddress + HostFilterService.RM_WS_PATH + "/apps?state=RUNNING"),
                     HttpMethod.GET, null, String.class).getBody();
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(appResponse);

@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
-import com.sequenceiq.cloudbreak.service.cluster.filter.AmbariHostFilterService;
+import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
 
 import groovyx.net.http.HttpResponseException;
 import reactor.core.Reactor;
@@ -82,7 +82,7 @@ public class AmbariClusterService implements ClusterService {
     private AmbariConfigurationService configurationService;
 
     @Autowired
-    private AmbariHostFilterService hostFilterService;
+    private HostFilterService hostFilterService;
 
     @Override
     public void create(CbUser user, Long stackId, Cluster cluster) {
@@ -144,7 +144,8 @@ public class AmbariClusterService implements ClusterService {
             String hostGroup = hostGroupAdjustment.getHostGroup();
             Set<HostMetadata> hostsInHostGroup = hostMetadataRepository.findHostsInHostgroup(hostGroup, cluster.getId());
             List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(stack, hostsInHostGroup, hostGroupAdjustment.getHostGroup());
-            verifyNodeCount(cluster, replication, hostGroupAdjustment.getScalingAdjustment(), filteredHostList);
+            int reservedInstances = hostsInHostGroup.size() - filteredHostList.size();
+            verifyNodeCount(cluster, replication, hostGroupAdjustment.getScalingAdjustment(), filteredHostList, reservedInstances);
             if (doesHostGroupContainDataNode(ambariClient, cluster.getBlueprint().getBlueprintName(), hostGroup)) {
                 downScaleCandidates = checkAndSortByAvailableSpace(stack, ambariClient, replication,
                         hostGroupAdjustment.getScalingAdjustment(), filteredHostList);
@@ -302,11 +303,11 @@ public class AmbariClusterService implements ClusterService {
         return false;
     }
 
-    private void verifyNodeCount(Cluster cluster, int replication, int scalingAdjustment, List<HostMetadata> filteredHostList) {
+    private void verifyNodeCount(Cluster cluster, int replication, int scalingAdjustment, List<HostMetadata> filteredHostList, int reservedInstances) {
         MDCBuilder.buildMdcContext(cluster);
         int adjustment = Math.abs(scalingAdjustment);
         int hostSize = filteredHostList.size();
-        if (hostSize - adjustment <= replication || hostSize < adjustment) {
+        if (hostSize + reservedInstances - adjustment <= replication || hostSize < adjustment) {
             LOGGER.info("Cannot downscale: replication: {}, adjustment: {}, filtered host size: {}", replication, scalingAdjustment, hostSize);
             throw new BadRequestException("There is not enough node to downscale. "
                     + "Check the replication factor and the ApplicationMaster occupation.");
@@ -323,7 +324,7 @@ public class AmbariClusterService implements ClusterService {
         int removeCount = Math.abs(adjustment);
         Map<String, Map<Long, Long>> dfsSpace = client.getDFSSpace();
         Map<String, Long> sortedAscending = sortByUsedSpace(dfsSpace, false);
-        Map<String, Long> selectedNodes = selectNodes(stack, sortedAscending, filteredHostList, removeCount);
+        Map<String, Long> selectedNodes = selectNodes(sortedAscending, filteredHostList, removeCount);
         Map<String, Long> remainingNodes = removeSelected(sortedAscending, selectedNodes);
         LOGGER.info("Selected nodes for decommission: {}", selectedNodes);
         LOGGER.info("Remaining nodes after decommission: {}", remainingNodes);
@@ -340,19 +341,15 @@ public class AmbariClusterService implements ClusterService {
         return convert(selectedNodes, filteredHostList);
     }
 
-    private Map<String, Long> selectNodes(Stack stack, Map<String, Long> sortedAscending, List<HostMetadata> filteredHostList, int removeCount) {
+    private Map<String, Long> selectNodes(Map<String, Long> sortedAscending, List<HostMetadata> filteredHostList, int removeCount) {
         Map<String, Long> select = new HashMap<>();
         int i = 0;
-        long stackId = stack.getId();
         for (String host : sortedAscending.keySet()) {
             if (i < removeCount) {
                 for (HostMetadata hostMetadata : filteredHostList) {
                     if (hostMetadata.getHostName().equalsIgnoreCase(host)) {
-                        InstanceMetaData instanceMetaData = instanceMetadataRepository.findHostInStack(stackId, host);
-                        if (!instanceMetaData.getAmbariServer()) {
-                            select.put(host, sortedAscending.get(host));
-                            i++;
-                        }
+                        select.put(host, sortedAscending.get(host));
+                        i++;
                         break;
                     }
                 }
