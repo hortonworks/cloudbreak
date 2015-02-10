@@ -2,11 +2,12 @@
 
 var log = log4javascript.getLogger("accountuserController-logger");
 
-angular.module('uluwatuControllers').controller('accountuserController', ['$scope', '$rootScope', '$filter', 'UserInvite', 'AccountUsers', 'ActivateAccountUsers', 'UserPermission',
-    function ($scope, $rootScope, $filter, UserInvite, AccountUsers, ActivateAccountUsers, UserPermission) {
+angular.module('uluwatuControllers').controller('accountuserController', ['$scope', '$rootScope', '$filter', 'UserInvite', 'AccountUsers', 'ActivateAccountUsers', 'UserPermission', 'AccountDetails',
+    function ($scope, $rootScope, $filter, UserInvite, AccountUsers, ActivateAccountUsers, UserPermission, AccountDetails) {
 
         initInvite();
         $rootScope.accountUsers = [];
+        $scope.userDetails = AccountDetails.get()
         getUsersForAccount();
 
         $scope.inviteUser = function() {
