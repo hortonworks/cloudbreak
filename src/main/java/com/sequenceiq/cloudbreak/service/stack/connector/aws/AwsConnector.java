@@ -130,17 +130,26 @@ public class AwsConnector implements CloudPlatformConnector {
                 }
             }
             for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, instanceGroup.getGroupName());
-                AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(Regions.valueOf(stack.getRegion()), awsCredential);
-                List<AutoScalingGroup> asGroups = amazonASClient.describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest()
-                        .withAutoScalingGroupNames(asGroupName)).getAutoScalingGroups();
-                if (!asGroups.isEmpty()) {
-                    if (!asGroups.get(0).getSuspendedProcesses().isEmpty()) {
-                        amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
-                                .withAutoScalingGroupName(asGroupName)
-                                .withMinSize(0)
-                                .withDesiredCapacity(0));
-                        amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
+                try {
+                    String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, instanceGroup.getGroupName());
+                    AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(Regions.valueOf(stack.getRegion()), awsCredential);
+                    List<AutoScalingGroup> asGroups = amazonASClient.describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest()
+                            .withAutoScalingGroupNames(asGroupName)).getAutoScalingGroups();
+                    if (!asGroups.isEmpty()) {
+                        if (!asGroups.get(0).getSuspendedProcesses().isEmpty()) {
+                            amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
+                                    .withAutoScalingGroupName(asGroupName)
+                                    .withMinSize(0)
+                                    .withDesiredCapacity(0));
+                            amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
+                        }
+                    }
+                } catch (AmazonServiceException e) {
+                    if (e.getErrorMessage().matches("Resource.*does not exist for stack.*")) {
+                        MDCBuilder.buildMdcContext(stack);
+                        LOGGER.info(e.getErrorMessage());
+                    } else {
+                        throw e;
                     }
                 }
             }
