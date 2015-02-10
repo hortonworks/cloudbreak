@@ -536,7 +536,7 @@ app.get('/account/details', function(req, res){
                     }
                 }
                 getUserById(req, res, token, adminUserId, function(adminUserData){
-                    res.json({useName: userData.userName, givenName: userData.givenName, familyName: userData.familyName, company: companyName, companyOwner: adminUserData.userName})
+                    res.json({userName: userData.userName, givenName: userData.givenName, familyName: userData.familyName, company: companyName, companyOwner: adminUserData.userName})
                 });
             });
         });
