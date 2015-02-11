@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.getServic
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +82,7 @@ public class AmbariRoleAllocator {
                 stack = stackUpdater.updateMetadataReady(stackId, true);
                 Set<InstanceMetaData> allInstanceMetaData = stack.getRunningInstanceMetaData();
                 String publicAmbariAddress = updateAmbariInstanceMetadata(stack, allInstanceMetaData);
-                waitForConsulAgents(stack, allInstanceMetaData);
+                waitForConsulAgents(stack, allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
                 updateWithConsulData(allInstanceMetaData);
                 instanceMetaDataRepository.save(allInstanceMetaData);
                 LOGGER.info("Publishing {} event", ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT);
@@ -109,7 +110,7 @@ public class AmbariRoleAllocator {
             originalMetadata.addAll(instanceMetaData);
             Stack modifiedStack = stackUpdater.updateStackMetaData(stackId, originalMetadata, hostGroup);
             stackUpdater.updateMetadataReady(stackId, true);
-            waitForConsulAgents(modifiedStack, instanceMetaData);
+            waitForConsulAgents(modifiedStack, originalMetadata, instanceMetaData);
             updateWithConsulData(modifiedStack.getInstanceGroupByInstanceGroupName(hostGroup).getInstanceMetaData());
             stackUpdater.updateStackMetaData(stackId, modifiedStack.getInstanceGroupByInstanceGroupName(hostGroup).getAllInstanceMetaData(), hostGroup);
             Set<String> instanceIds = new HashSet<>();
@@ -148,8 +149,10 @@ public class AmbariRoleAllocator {
         return getService(clients, AMBARI_SERVICE).get(0).getAddress();
     }
 
-    private void waitForConsulAgents(Stack stack, Set<InstanceMetaData> instancesMetaData) {
-        List<ConsulClient> clients = createClients(instancesMetaData);
+    private void waitForConsulAgents(Stack stack, Set<InstanceMetaData> originalMetaData, Set<InstanceMetaData> instancesMetaData) {
+        Set<InstanceMetaData> copy = new HashSet<>(originalMetaData);
+        copy.removeAll(instancesMetaData);
+        List<ConsulClient> clients = createClients(copy);
         List<String> privateIps = new ArrayList<>(instancesMetaData.size());
         for (InstanceMetaData instance : instancesMetaData) {
             privateIps.add(instance.getPrivateIp());
