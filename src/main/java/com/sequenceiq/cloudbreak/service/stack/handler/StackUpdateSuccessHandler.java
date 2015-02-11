@@ -20,8 +20,11 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
+import com.sequenceiq.cloudbreak.service.stack.flow.ConsulAgentLeaveCheckerTask;
+import com.sequenceiq.cloudbreak.service.stack.flow.ConsulContext;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
 
 import reactor.event.Event;
@@ -32,6 +35,9 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackUpdateSuccessHandler.class);
 
+    private static final int POLLING_INTERVAL = 5000;
+    private static final int MAX_POLLING_ATTEMPTS = 100;
+
     @Autowired
     private StackRepository stackRepository;
 
@@ -40,6 +46,9 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
 
     @Autowired
     private CloudbreakEventService eventService;
+
+    @Autowired
+    private PollingService<ConsulContext> consulPollingService;
 
     @Override
     public void accept(Event<StackUpdateSuccess> t) {
@@ -76,7 +85,7 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
                 long timeInMillis = Calendar.getInstance().getTimeInMillis();
                 instanceMetaData.setTerminationDate(timeInMillis);
                 instanceMetaData.setTerminated(true);
-                removeAgentFromConsul(clients, instanceMetaData);
+                removeAgentFromConsul(stack, clients, instanceMetaData);
             }
         }
 
@@ -86,10 +95,13 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
                 "Billing changed due to downscaling of cluster infrastructure.");
     }
 
-    private void removeAgentFromConsul(List<ConsulClient> clients, InstanceMetaData metaData) {
+    private void removeAgentFromConsul(Stack stack, List<ConsulClient> clients, InstanceMetaData metaData) {
         String nodeName = metaData.getLongName().replace(ConsulUtils.CONSUL_DOMAIN, "");
-        LOGGER.info("Removing node: {} from consul", nodeName);
-        ConsulUtils.agentForceLeave(clients, nodeName);
+        consulPollingService.pollWithTimeout(
+                new ConsulAgentLeaveCheckerTask(),
+                new ConsulContext(stack, clients, Collections.singletonList(nodeName)),
+                POLLING_INTERVAL,
+                MAX_POLLING_ATTEMPTS);
     }
 
     private List<ConsulClient> createConsulClients(Stack stack, String hostGroup) {
