@@ -27,8 +27,10 @@ public final class ConsulUtils {
     public static final String CONSUL_DOMAIN = ".node.consul";
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsulUtils.class);
 
+    private static final int DEFAULT_TIMEOUT_MS = 5000;
     private static final int CONSUL_CLIENTS = 3;
     private static final int ALIVE_STATUS = 1;
+    private static final int LEFT_STATUS = 3;
 
     private ConsulUtils() {
         throw new IllegalStateException();
@@ -53,8 +55,16 @@ public final class ConsulUtils {
     }
 
     public static Map<String, String> getAliveMembers(List<ConsulClient> clients) {
+        return getMembers(clients, ALIVE_STATUS);
+    }
+
+    public static Map<String, String> getLeftMembers(List<ConsulClient> clients) {
+        return getMembers(clients, LEFT_STATUS);
+    }
+
+    public static Map<String, String> getMembers(List<ConsulClient> clients, int status) {
         for (ConsulClient client : clients) {
-            Map<String, String> members = getMembers(client, ALIVE_STATUS);
+            Map<String, String> members = getMembers(client, status);
             if (!members.isEmpty()) {
                 return members;
             }
@@ -146,23 +156,31 @@ public final class ConsulUtils {
     }
 
     public static List<ConsulClient> createClients(Collection<InstanceMetaData> instancesMetaData) {
-        return createClients(instancesMetaData, CONSUL_CLIENTS);
+        return createClients(instancesMetaData, DEFAULT_TIMEOUT_MS);
     }
 
-    public static List<ConsulClient> createClients(Collection<InstanceMetaData> instancesMetaData, int numClients) {
+    public static List<ConsulClient> createClients(Collection<InstanceMetaData> instancesMetaData, int timeout) {
+        return createClients(instancesMetaData, CONSUL_CLIENTS, timeout);
+    }
+
+    public static List<ConsulClient> createClients(Collection<InstanceMetaData> instancesMetaData, int numClients, int timeout) {
         List<ConsulClient> clients = new ArrayList<>();
         List<InstanceMetaData> instanceList = new ArrayList<>(instancesMetaData);
         int size = instancesMetaData.size();
         List<InstanceMetaData> subList = size < numClients ? instanceList : instanceList.subList(0, numClients);
         for (InstanceMetaData metaData : subList) {
-            clients.add(new ConsulClient(metaData.getPublicIp()));
+            clients.add(new ConsulClient(metaData.getPublicIp(), timeout));
         }
         return clients;
     }
 
     public static void agentForceLeave(List<ConsulClient> clients, String nodeName) {
         for (ConsulClient client : clients) {
-            client.agentForceLeave(nodeName);
+            try {
+                client.agentForceLeave(nodeName);
+            } catch (Exception e) {
+                return;
+            }
         }
     }
 
