@@ -47,7 +47,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
-import com.sequenceiq.cloudbreak.service.cluster.filter.AmbariHostFilterService;
+import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
 
 import groovyx.net.http.HttpResponseException;
 import reactor.core.Reactor;
@@ -84,7 +84,7 @@ public class AmbariClusterServiceTest {
     private AmbariClientService clientService;
 
     @Mock
-    private AmbariHostFilterService hostFilterService;
+    private HostFilterService hostFilterService;
 
     @Mock
     private HostMetadataRepository hostMetadataRepository;
@@ -202,7 +202,7 @@ public class AmbariClusterServiceTest {
         when(hostMetadataRepository.findHostsInHostgroup("slave_1", cluster.getId())).thenReturn(hostsMetaData);
         when(clientService.create(stack)).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
-        when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
+        when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "2"));
         when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData, "slave_1")).thenReturn(asList(metadata2, metadata3));
 
         Exception result = null;

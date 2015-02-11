@@ -53,7 +53,7 @@ import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationFailure;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsFailure;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsSuccess;
-import com.sequenceiq.cloudbreak.service.cluster.filter.AmbariHostFilterService;
+import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.status.AmbariClusterStatusUpdater;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 
@@ -102,7 +102,7 @@ public class AmbariClusterConnector {
     private AmbariClientService clientService;
 
     @Autowired
-    private AmbariHostFilterService hostFilterService;
+    private HostFilterService hostFilterService;
 
     @Autowired
     private CloudbreakEventService eventService;
