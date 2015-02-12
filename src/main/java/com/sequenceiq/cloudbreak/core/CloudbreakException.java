@@ -1,9 +1,8 @@
 package com.sequenceiq.cloudbreak.core;
 
-
-public class CloudbreakException extends Exception{
+public class CloudbreakException extends Exception {
     public CloudbreakException() {
-        super();
+
     }
 
     public CloudbreakException(String message) {
