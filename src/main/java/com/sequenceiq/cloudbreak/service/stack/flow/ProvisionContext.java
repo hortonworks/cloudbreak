@@ -117,6 +117,7 @@ public class ProvisionContext {
                                             .withProvisionContextObject(pCO)
                                             .withStack(finalStack)
                                             .withStackUpdater(stackUpdater)
+                                            .withStackRepository(stackRepository)
                                             .build()
                             );
                             futures.add(submit);
@@ -130,8 +131,10 @@ public class ProvisionContext {
                     }
                     resourceRequestResults.addAll(provisionUtil.waitForRequestToFinish(stackId, futures).get(FutureResult.FAILED));
                     stackFailureHandlerService.handleFailure(stack, resourceRequestResults);
-                    LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
-                    reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(cloudPlatform, stack.getId(), resourceSet)));
+                    if (!stackRepository.findById(stackId).isStackInDeletionPhase()) {
+                        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
+                        reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(cloudPlatform, stack.getId(), resourceSet)));
+                    }
                 } else {
                     CloudPlatformConnector cloudPlatformConnector = cloudPlatformConnectors.get(cloudPlatform);
                     cloudPlatformConnector.buildStack(stack, userDataScript, setupProperties);

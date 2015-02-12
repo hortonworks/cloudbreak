@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.handler;
 
+import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -7,15 +10,12 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-import com.sequenceiq.cloudbreak.service.cluster.flow.ConsulPluginEvent;
-import com.sequenceiq.cloudbreak.service.cluster.flow.PluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -28,14 +28,18 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClientPollerObject;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHealthCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHosts;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHostsJoinStatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.cluster.flow.ConsulPluginEvent;
+import com.sequenceiq.cloudbreak.service.cluster.flow.PluginManager;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
@@ -71,7 +75,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
     private PollingService<AmbariHosts> ambariHostJoin;
 
     @Autowired
-    private PollingService<AmbariClient> ambariHealthChecker;
+    private PollingService<AmbariClientPollerObject> ambariHealthChecker;
 
     @javax.annotation.Resource
     private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
@@ -93,6 +97,12 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
 
     @Autowired
     private PluginManager pluginManager;
+
+    @Autowired
+    private AmbariHealthCheckerTask ambariHealthCheckerTask;
+
+    @Autowired
+    private AmbariHostsJoinStatusCheckerTask ambariHostsJoinStatusCheckerTask;
 
     @Override
     public void accept(Event<StackStatusUpdateRequest> event) {
@@ -131,23 +141,27 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
             }
             if (started) {
                 final Stack updatedStack = stackRepository.findOneWithLists(stack.getId());
-                waitForAmbariToStart(updatedStack);
-                Cluster cluster = clusterRepository.findOneWithLists(updatedStack.getCluster().getId());
-                triggerConsulEvent(updatedStack, ConsulPluginEvent.START_AMBARI_EVENT);
-                boolean hostsJoined = restartAmbariAgentsIfNeeded(updatedStack, waitForHostsToJoin(updatedStack));
-                if (hostsJoined) {
-                    String statusReason = "Cluster infrastructure is available, starting of services has been requested. AMBARI_IP:" + stack.getAmbariIp();
-                    LOGGER.info("Update stack state to: {}", Status.AVAILABLE);
-                    stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, statusReason);
-                }
-                if (hostsJoined && cluster != null && Status.START_REQUESTED.equals(cluster.getStatus())) {
-                    cloudbreakEventService.fireCloudbreakEvent(stackId, Status.START_IN_PROGRESS.name(), "Services are starting.");
-                    reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
-                            Event.wrap(new ClusterStatusUpdateRequest(updatedStack.getId(), statusRequest)));
-                } else if (!hostsJoined && cluster != null && Status.START_REQUESTED.equals(cluster.getStatus())) {
-                    cluster.setStatus(Status.START_FAILED);
-                    clusterRepository.save(cluster);
-                    stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Services could not start because host(s) could not join.");
+                PollingResult pollingResult = waitForAmbariToStart(updatedStack);
+                if (isSuccess(pollingResult)) {
+                    Cluster cluster = clusterRepository.findOneWithLists(updatedStack.getCluster().getId());
+                    triggerConsulEvent(updatedStack, ConsulPluginEvent.START_AMBARI_EVENT);
+                    PollingResult hostsJoined = restartAmbariAgentsIfNeeded(updatedStack, waitForHostsToJoin(updatedStack));
+                    if (isSuccess(pollingResult)) {
+                        String statusReason = "Cluster infrastructure is available, starting of services has been requested. AMBARI_IP:" + stack.getAmbariIp();
+                        LOGGER.info("Update stack state to: {}", Status.AVAILABLE);
+                        stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, statusReason);
+                    }
+                    if (isSuccess(pollingResult) && cluster != null && Status.START_REQUESTED.equals(cluster.getStatus())) {
+                        cloudbreakEventService.fireCloudbreakEvent(stackId, Status.START_IN_PROGRESS.name(), "Services are starting.");
+                        reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
+                                Event.wrap(new ClusterStatusUpdateRequest(updatedStack.getId(), statusRequest)));
+                    } else if (!(isSuccess(pollingResult) && !isExited(hostsJoined))
+                            && cluster != null
+                            && Status.START_REQUESTED.equals(cluster.getStatus())) {
+                        cluster.setStatus(Status.START_FAILED);
+                        clusterRepository.save(cluster);
+                        stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Services could not start because host(s) could not join.");
+                    }
                 }
             } else {
                 LOGGER.info("Update stack state to: {}", Status.START_FAILED);
@@ -200,36 +214,35 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
         return finished;
     }
 
-    private void waitForAmbariToStart(Stack stack) {
-        ambariHealthChecker.pollWithTimeout(
-                new AmbariHealthCheckerTask(),
-                clientService.create(stack),
+    private PollingResult waitForAmbariToStart(Stack stack) {
+        return ambariHealthChecker.pollWithTimeout(
+                ambariHealthCheckerTask,
+                new AmbariClientPollerObject(stack, clientService.create(stack)),
                 AmbariClusterConnector.POLLING_INTERVAL,
                 AmbariClusterConnector.MAX_ATTEMPTS_FOR_HOSTS);
     }
 
-    private boolean waitForHostsToJoin(Stack stack) {
-        AmbariHostsJoinStatusCheckerTask ambariHostsJoinStatusCheckerTask = new AmbariHostsJoinStatusCheckerTask();
+    private PollingResult waitForHostsToJoin(Stack stack) {
         AmbariHosts ambariHosts = new AmbariHosts(stack, clientService.create(stack), stack.getFullNodeCount());
         try {
-            ambariHostJoin.pollWithTimeout(
+            return ambariHostJoin.pollWithTimeout(
                     ambariHostsJoinStatusCheckerTask,
                     ambariHosts,
                     AmbariClusterConnector.POLLING_INTERVAL,
                     AmbariClusterConnector.MAX_ATTEMPTS_FOR_HOSTS);
         } catch (AmbariHostsUnavailableException ex) {
             LOGGER.error(ex.getMessage());
+            return PollingResult.EXIT;
         }
-        return ambariHostsJoinStatusCheckerTask.checkStatus(ambariHosts);
     }
 
-    private boolean restartAmbariAgentsIfNeeded(Stack stack, boolean started) {
-        if (!started) {
+    private PollingResult restartAmbariAgentsIfNeeded(Stack stack, PollingResult started) {
+        if (!isSuccess(started)) {
             LOGGER.info("Ambari agents couldn't join. Restart ambari agents...");
             triggerConsulEvent(stack, ConsulPluginEvent.RESTART_AMBARI_EVENT);
             return waitForHostsToJoin(stack);
         }
-        return true;
+        return PollingResult.SUCCESS;
     }
 
     private void triggerConsulEvent(Stack stack, ConsulPluginEvent event) {

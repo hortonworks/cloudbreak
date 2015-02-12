@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
+import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
@@ -99,21 +101,26 @@ public class AzureMetadataSetup implements MetadataSetup {
         props.put(NAME, resource.getResourceName());
         props.put(SERVICENAME, resource.getResourceName());
         AzureMetadataSetupCheckerTaskContext azureMetadataSetupCheckerTaskContext = new AzureMetadataSetupCheckerTaskContext(azureClient, stack, props);
-        azureMetadataSetupCheckerTaskPollingService.pollWithTimeout(azureMetadataSetupCheckerTask, azureMetadataSetupCheckerTaskContext,
-                POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-        Object virtualMachine = azureClient.getVirtualMachine(props);
-        try {
-            CoreInstanceMetaData instanceMetaData = new CoreInstanceMetaData(
-                    resource.getResourceName(),
-                    getPrivateIP((String) virtualMachine),
-                    resource.getResourceName() + ".cloudapp.net",
-                    stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup()).getTemplate().getVolumeCount(),
-                    getLongName((String) virtualMachine),
-                    stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup())
-                    );
-            return instanceMetaData;
-        } catch (IOException e) {
-            LOGGER.error(String.format("Instance %s is not reachable: %s", resource.getResourceName(), e.getMessage()), e);
+        PollingResult pollingResult = azureMetadataSetupCheckerTaskPollingService
+                .pollWithTimeout(azureMetadataSetupCheckerTask,
+                        azureMetadataSetupCheckerTaskContext,
+                        POLLING_INTERVAL,
+                        MAX_POLLING_ATTEMPTS);
+        if (isSuccess(pollingResult)) {
+            Object virtualMachine = azureClient.getVirtualMachine(props);
+            try {
+                CoreInstanceMetaData instanceMetaData = new CoreInstanceMetaData(
+                        resource.getResourceName(),
+                        getPrivateIP((String) virtualMachine),
+                        resource.getResourceName() + ".cloudapp.net",
+                        stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup()).getTemplate().getVolumeCount(),
+                        getLongName((String) virtualMachine),
+                        stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup())
+                );
+                return instanceMetaData;
+            } catch (IOException e) {
+                LOGGER.error(String.format("Instance %s is not reachable: %s", resource.getResourceName(), e.getMessage()), e);
+            }
         }
         return null;
     }

@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
-public class OpenStackHeatStackStatusCheckerTask implements StatusCheckerTask<OpenStackContext> {
+public class OpenStackHeatStackStatusCheckerTask extends StackBasedStatusCheckerTask<OpenStackContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackHeatStackStatusCheckerTask.class);
 
@@ -42,4 +42,5 @@ public class OpenStackHeatStackStatusCheckerTask implements StatusCheckerTask<Op
     public String successMessage(OpenStackContext context) {
         return "Heat stack successfully reached the desired state: " + context.getStatus();
     }
+
 }

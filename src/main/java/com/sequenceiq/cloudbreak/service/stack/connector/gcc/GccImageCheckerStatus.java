@@ -1,21 +1,27 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.gcc;
 
+import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import java.io.IOException;
 
 @Component
-public class GccImageCheckerStatus implements StatusCheckerTask<GccImageReadyPollerObject> {
+public class GccImageCheckerStatus extends StackBasedStatusCheckerTask<GccImageReadyPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GccImageCheckerStatus.class);
     private static final String READY = "READY";
+
+    @Autowired
+    private StackRepository stackRepository;
 
     @Override
     public boolean checkStatus(GccImageReadyPollerObject gccImageReadyPollerObject) {
@@ -46,4 +52,5 @@ public class GccImageCheckerStatus implements StatusCheckerTask<GccImageReadyPol
         return String.format("Gcc image '%s' is ready on '%s' stack",
                 gccImageReadyPollerObject.getName(), gccImageReadyPollerObject.getStack().getId());
     }
+
 }

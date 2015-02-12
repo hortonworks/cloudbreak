@@ -35,8 +35,9 @@ import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstances;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureCreateResourceStatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureDeleteResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourcePollerObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
@@ -62,17 +63,23 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     private AzureStackUtil azureStackUtil;
 
     @Autowired
-    private AzureResourceStatusCheckerTask azureResourceStatusCheckerTask;
+    private AzureCreateResourceStatusCheckerTask azureCreateResourceStatusCheckerTask;
+
+    @Autowired
+    private AzureDeleteResourceStatusCheckerTask azureDeleteResourceStatusCheckerTask;
 
     @Autowired
     private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
+
+    @Autowired
+    private AzureInstanceStatusCheckerTask azureInstanceStatusCheckerTask;
 
     @Override
     public Boolean create(final CreateResourceRequest createResourceRequest, final String region) throws Exception {
         AzureVirtualMachineCreateRequest aCSCR = (AzureVirtualMachineCreateRequest) createResourceRequest;
         HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createVirtualMachine(aCSCR.getProps());
         AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), virtualMachineResponse, aCSCR.getStack());
-        azureResourcePollerObjectPollingService.pollWithTimeout(azureResourceStatusCheckerTask, azureResourcePollerObject,
+        azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                 POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         return true;
     }
@@ -170,7 +177,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             HttpResponseDecorator deleteVirtualMachineResult = (HttpResponseDecorator) azureClient.deleteVirtualMachine(props);
             AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(azureClient, deleteVirtualMachineResult,
                     stack);
-            azureResourcePollerObjectPollingService.pollWithTimeout(azureResourceStatusCheckerTask, azureResourcePollerObject,
+            azureResourcePollerObjectPollingService.pollWithTimeout(azureDeleteResourceStatusCheckerTask, azureResourcePollerObject,
                     POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         } catch (HttpResponseException ex) {
             httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner(), stack);
@@ -187,7 +194,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         boolean started = setStackState(aSSCO.getStack().getId(), resource, azureStackUtil.createAzureClient(credential), false);
         if (started) {
             azurePollingService.pollWithTimeout(
-                    new AzureInstanceStatusCheckerTask(),
+                    azureInstanceStatusCheckerTask,
                     new AzureInstances(aSSCO.getStack(), azureStackUtil.createAzureClient(credential), Arrays.asList(resource.getResourceName()), "Running"),
                     POLLING_INTERVAL,
                     MAX_ATTEMPTS_FOR_AMBARI_OPS);

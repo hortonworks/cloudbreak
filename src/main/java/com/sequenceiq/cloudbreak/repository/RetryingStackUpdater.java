@@ -237,16 +237,18 @@ public class RetryingStackUpdater {
     private Stack doUpdateStackStatus(Long stackId, Status status, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
         MDCBuilder.buildMdcContext(stack);
-        if (status != null) {
-            stack.setStatus(status);
-        }
-        if (statusReason != null) {
-            stack.setStatusReason(statusReason);
-        }
-        stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack: [status: '{}', statusReason: '{}'].", status.name(), statusReason);
+        if (!stack.getStatus().equals(Status.DELETE_COMPLETED)) {
+            if (status != null) {
+                stack.setStatus(status);
+            }
+            if (statusReason != null) {
+                stack.setStatusReason(statusReason);
+            }
+            stack = stackRepository.save(stack);
+            LOGGER.info("Updated stack: [status: '{}', statusReason: '{}'].", status.name(), statusReason);
 
-        cloudbreakEventService.fireCloudbreakEvent(stackId, status.name(), statusReason);
+            cloudbreakEventService.fireCloudbreakEvent(stackId, status.name(), statusReason);
+        }
         return stack;
     }
 

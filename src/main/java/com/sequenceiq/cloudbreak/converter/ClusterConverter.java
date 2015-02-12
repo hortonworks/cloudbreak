@@ -117,7 +117,11 @@ public class ClusterConverter {
             clusterResponse.setMinutesUp(0);
         }
         clusterResponse.setStatusReason(cluster.getStatusReason());
-        clusterResponse.setBlueprintId(cluster.getBlueprint().getId());
+        if (cluster.getBlueprint() == null) {
+            clusterResponse.setBlueprintId(null);
+        } else {
+            clusterResponse.setBlueprintId(cluster.getBlueprint().getId());
+        }
         if (cluster.getRecipe() != null) {
             clusterResponse.setRecipeId(cluster.getRecipe().getId());
         }

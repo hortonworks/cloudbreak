@@ -4,12 +4,14 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
-public class DNDecommissionStatusCheckerTask implements StatusCheckerTask<AmbariOperations> {
+@Component
+public class DNDecommissionStatusCheckerTask extends StackBasedStatusCheckerTask<AmbariOperations> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DNDecommissionStatusCheckerTask.class);
 

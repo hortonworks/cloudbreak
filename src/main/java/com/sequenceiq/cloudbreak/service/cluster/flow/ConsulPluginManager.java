@@ -28,6 +28,9 @@ public class ConsulPluginManager implements PluginManager {
     public static final int MAX_ATTEMPTS = 30;
 
     @Autowired
+    private ConsulKVCheckerTask consulKVCheckerTask;
+
+    @Autowired
     private PollingService<ConsulKVCheckerContext> keyValuePollingService;
 
     @Override
@@ -73,7 +76,7 @@ public class ConsulPluginManager implements PluginManager {
         List<ConsulClient> clients = ConsulUtils.createClients(instanceMetaData);
         List<String> keys = generateKeys(instanceMetaData, eventIds);
         keyValuePollingService.pollWithTimeout(
-                new ConsulKVCheckerTask(),
+                consulKVCheckerTask,
                 new ConsulKVCheckerContext(stack, clients, keys, FINISH_SIGNAL, FAILED_SIGNAL),
                 POLLING_INTERVAL, MAX_ATTEMPTS
         );

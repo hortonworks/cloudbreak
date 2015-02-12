@@ -128,6 +128,7 @@ public class ProvisionContextTest {
         futureResultListHashMap.put(FutureResult.FAILED, new ArrayList<ResourceRequestResult>());
         futureResultListHashMap.put(FutureResult.SUCCESS, new ArrayList<ResourceRequestResult>());
         when(provisionUtil.waitForRequestToFinish(anyLong(), anyList())).thenReturn(futureResultListHashMap);
+        when(stackRepository.findById(anyLong())).thenReturn(stack);
         doNothing().when(provisionUtil).checkErrorOccurred(anyMap());
         // GIVEN
         given(stackRepository.findOneWithLists(1L)).willReturn(stack);

@@ -5,10 +5,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
-public class AzureMetadataSetupCheckerTask implements StatusCheckerTask<AzureMetadataSetupCheckerTaskContext> {
+public class AzureMetadataSetupCheckerTask extends StackBasedStatusCheckerTask<AzureMetadataSetupCheckerTaskContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureMetadataSetupCheckerTask.class);
 
@@ -38,4 +38,5 @@ public class AzureMetadataSetupCheckerTask implements StatusCheckerTask<AzureMet
                 azureMetadataSetupCheckerTaskContext.getProps().get(AzureStackUtil.NAME),
                 azureMetadataSetupCheckerTaskContext.getStack().getId());
     }
+
 }

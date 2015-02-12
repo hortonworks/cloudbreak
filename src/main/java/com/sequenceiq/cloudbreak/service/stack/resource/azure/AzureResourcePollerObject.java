@@ -2,27 +2,23 @@ package com.sequenceiq.cloudbreak.service.stack.resource.azure;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.StackDependentPollerObject;
 
 import groovyx.net.http.HttpResponseDecorator;
 
-public class AzureResourcePollerObject {
+public class AzureResourcePollerObject extends StackDependentPollerObject {
 
     private AzureClient azureClient;
     private HttpResponseDecorator httpResponseDecorator;
-    private Stack stack;
 
     public AzureResourcePollerObject(AzureClient azureClient, HttpResponseDecorator httpResponseDecorator, Stack stack) {
+        super(stack);
         this.azureClient = azureClient;
         this.httpResponseDecorator = httpResponseDecorator;
-        this.stack = stack;
     }
 
     public AzureClient getAzureClient() {
         return azureClient;
-    }
-
-    public Stack getStack() {
-        return stack;
     }
 
     public HttpResponseDecorator getHttpResponseDecorator() {

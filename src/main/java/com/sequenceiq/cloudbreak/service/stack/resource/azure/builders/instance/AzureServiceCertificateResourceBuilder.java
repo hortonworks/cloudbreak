@@ -18,17 +18,17 @@ import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.X509Certificate;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureCreateResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourcePollerObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
@@ -45,7 +45,7 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
     private AzureStackUtil azureStackUtil;
 
     @Autowired
-    private AzureResourceStatusCheckerTask azureResourceStatusCheckerTask;
+    private AzureCreateResourceStatusCheckerTask azureCreateResourceStatusCheckerTask;
 
     @Autowired
     private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
@@ -55,7 +55,7 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
         AzureServiceCertificateCreateRequest aCSCR = (AzureServiceCertificateCreateRequest) createResourceRequest;
         HttpResponseDecorator serviceCertificate = (HttpResponseDecorator) aCSCR.getAzureClient().createServiceCertificate(aCSCR.getProps());
         AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), serviceCertificate, aCSCR.getStack());
-        azureResourcePollerObjectPollingService.pollWithTimeout(azureResourceStatusCheckerTask, azureResourcePollerObject,
+        azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                 POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         return true;
     }

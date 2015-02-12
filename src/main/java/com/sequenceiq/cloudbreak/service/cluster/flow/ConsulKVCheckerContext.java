@@ -4,25 +4,21 @@ import java.util.List;
 
 import com.ecwid.consul.v1.ConsulClient;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.StackDependentPollerObject;
 
-public class ConsulKVCheckerContext {
+public class ConsulKVCheckerContext extends StackDependentPollerObject {
 
-    private final Stack stack;
     private final List<ConsulClient> consulClients;
     private final List<String> keys;
     private final String expectedValue;
     private final String failValue;
 
     public ConsulKVCheckerContext(Stack stack, List<ConsulClient> consulClients, List<String> keys, String expectedValue, String failValue) {
-        this.stack = stack;
+        super(stack);
         this.consulClients = consulClients;
         this.keys = keys;
         this.expectedValue = expectedValue;
         this.failValue = failValue;
-    }
-
-    public Stack getStack() {
-        return stack;
     }
 
     public List<ConsulClient> getConsulClients() {

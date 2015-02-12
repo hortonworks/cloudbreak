@@ -15,7 +15,7 @@ public class Notification {
     private String cloud;
     private String region;
     private String blueprintName;
-    private long blueprintId;
+    private Long blueprintId;
     private Long stackId;
     private String stackName;
     private Status stackStatus;
@@ -106,11 +106,11 @@ public class Notification {
         this.blueprintName = blueprintName;
     }
 
-    public long getBlueprintId() {
+    public Long getBlueprintId() {
         return blueprintId;
     }
 
-    public void setBlueprintId(long blueprintId) {
+    public void setBlueprintId(Long blueprintId) {
         this.blueprintId = blueprintId;
     }
 

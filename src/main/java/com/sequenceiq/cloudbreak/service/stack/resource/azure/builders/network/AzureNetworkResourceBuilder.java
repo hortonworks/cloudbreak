@@ -24,8 +24,8 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureCreateResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourcePollerObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
@@ -42,7 +42,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     @Autowired
     private AzureStackUtil azureStackUtil;
     @Autowired
-    private AzureResourceStatusCheckerTask azureResourceStatusCheckerTask;
+    private AzureCreateResourceStatusCheckerTask azureCreateResourceStatusCheckerTask;
     @Autowired
     private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
 
@@ -54,7 +54,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
         if (!aCSCR.getAzureClient().getVirtualNetworkConfiguration().toString().contains(aCSCR.getName())) {
             HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createVirtualNetwork(aCSCR.getProps());
             AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), virtualNetworkResponse, stack);
-            azureResourcePollerObjectPollingService.pollWithTimeout(azureResourceStatusCheckerTask, azureResourcePollerObject,
+            azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                     POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         }
         return true;

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 import static java.util.Collections.singletonMap;
 
 import java.util.ArrayList;
@@ -42,6 +44,7 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
@@ -113,6 +116,15 @@ public class AmbariClusterConnector {
     @Autowired
     private RecipeEngine recipeEngine;
 
+    @Autowired
+    private AmbariHostsStatusCheckerTask ambariHostsStatusCheckerTask;
+
+    @Autowired
+    private AmbariOperationsStatusCheckerTask ambariOperationsStatusCheckerTask;
+
+    @Autowired
+    private DNDecommissionStatusCheckerTask dnDecommissionStatusCheckerTask;
+
     public void buildAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(cluster);
@@ -132,12 +144,18 @@ public class AmbariClusterConnector {
             Map<String, List<String>> hostGroupMappings = recommend(stack, ambariClient);
             saveHostMetadata(cluster, hostGroupMappings);
             ambariClient.createCluster(cluster.getName(), blueprint.getBlueprintName(), hostGroupMappings);
-            waitForClusterInstall(stack, ambariClient);
-            runSmokeTest(stack, ambariClient);
-            if (cluster.getRecipe() != null) {
-                recipeEngine.executePostInstall(stack);
+            PollingResult pollingResult = waitForClusterInstall(stack, ambariClient);
+            if (isSuccess(pollingResult)) {
+                pollingResult = runSmokeTest(stack, ambariClient);
+                if (!isExited(pollingResult)) {
+                    if (cluster.getRecipe() != null) {
+                        recipeEngine.executePostInstall(stack);
+                    }
+                }
+                if (isSuccess(pollingResult)) {
+                    clusterCreateSuccess(cluster, new Date().getTime(), stack.getAmbariIp());
+                }
             }
-            clusterCreateSuccess(cluster, new Date().getTime(), stack.getAmbariIp());
         } catch (PluginFailureException | AmbariHostsUnavailableException | AmbariOperationFailedException | InvalidHostGroupHostAssociation e) {
             LOGGER.error(e.getMessage(), e);
             clusterCreateFailed(stack, cluster, e.getMessage());
@@ -160,10 +178,16 @@ public class AmbariClusterConnector {
                 recipeEngine.setupRecipe(stack);
             }
             addHostMetadata(cluster, hosts, hostGroupAdjustment);
-            waitForAmbariOperations(stack, ambariClient, installServices(hosts, stack, ambariClient, hostGroupAdjustment));
-            waitForAmbariOperations(stack, ambariClient, singletonMap("START_SERVICES", ambariClient.startAllServices()));
-            restartHadoopServices(stack, ambariClient, false);
-            updateHostSuccessful(cluster, new HashSet<>(hosts), false);
+            PollingResult pollingResult = waitForAmbariOperations(stack, ambariClient, installServices(hosts, stack, ambariClient, hostGroupAdjustment));
+            if (isSuccess(pollingResult)) {
+                pollingResult = waitForAmbariOperations(stack, ambariClient, singletonMap("START_SERVICES", ambariClient.startAllServices()));
+                if (isSuccess(pollingResult)) {
+                    pollingResult = restartHadoopServices(stack, ambariClient, false);
+                    if (isSuccess(pollingResult)) {
+                        updateHostSuccessful(cluster, new HashSet<>(hosts), false);
+                    }
+                }
+            }
         } catch (AmbariHostsUnavailableException | AmbariOperationFailedException e) {
             LOGGER.error(e.getMessage(), e);
             updateHostFailed(cluster, e.getMessage(), true);
@@ -201,15 +225,23 @@ public class AmbariClusterConnector {
             Set<String> components = ambariClient.getComponentsCategory(blueprintName, hostGroup).keySet();
             Map<String, HostMetadata> hostsToRemove = selectHostsToRemove(decommissionCandidates, stack, adjustment);
             List<String> hostList = new ArrayList<>(hostsToRemove.keySet());
-            waitForAmbariOperations(stack, ambariClient, decommissionComponents(ambariClient, hostList, components));
-            waitForDataNodeDecommission(stack, ambariClient);
-            stopHadoopComponents(stack, ambariClient, hostList);
-            deleteHostsFromAmbari(ambariClient, hostList, new ArrayList<>(components));
-            restartHadoopServices(stack, ambariClient, true);
-            cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-            cluster.getHostMetadata().removeAll(hostsToRemove.values());
-            clusterRepository.save(cluster);
-            updateHostSuccessful(cluster, hostsToRemove.keySet(), true);
+            PollingResult pollingResult = waitForAmbariOperations(stack, ambariClient, decommissionComponents(ambariClient, hostList, components));
+            if (isSuccess(pollingResult)) {
+                pollingResult = waitForDataNodeDecommission(stack, ambariClient);
+                if (isSuccess(pollingResult)) {
+                    pollingResult = stopHadoopComponents(stack, ambariClient, hostList);
+                    if (isSuccess(pollingResult)) {
+                        deleteHostsFromAmbari(ambariClient, hostList, new ArrayList<>(components));
+                        pollingResult = restartHadoopServices(stack, ambariClient, true);
+                        if (isSuccess(pollingResult)) {
+                            cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
+                            cluster.getHostMetadata().removeAll(hostsToRemove.values());
+                            clusterRepository.save(cluster);
+                            updateHostSuccessful(cluster, hostsToRemove.keySet(), true);
+                        }
+                    }
+                }
+            }
         } catch (Exception e) {
             LOGGER.error(UNHANDLED_EXCEPTION_MSG, e);
             updateHostFailed(cluster, UNHANDLED_EXCEPTION_MSG, false);
@@ -261,14 +293,14 @@ public class AmbariClusterConnector {
         return decommissionRequests;
     }
 
-    private void runSmokeTest(Stack stack, AmbariClient ambariClient) {
+    private PollingResult runSmokeTest(Stack stack, AmbariClient ambariClient) {
         int id = ambariClient.runMRServiceCheck();
-        waitForAmbariOperations(stack, ambariClient, singletonMap("MR_SMOKE_TEST", id));
+        return waitForAmbariOperations(stack, ambariClient, singletonMap("MR_SMOKE_TEST", id));
     }
 
-    private void stopHadoopComponents(Stack stack, AmbariClient ambariClient, List<String> hosts) throws HttpResponseException {
+    private PollingResult stopHadoopComponents(Stack stack, AmbariClient ambariClient, List<String> hosts) throws HttpResponseException {
         int requestId = ambariClient.stopAllComponentsOnHosts(hosts);
-        waitForAmbariOperations(stack, ambariClient, singletonMap("Stopping components on the decommissioned hosts", requestId));
+        return waitForAmbariOperations(stack, ambariClient, singletonMap("Stopping components on the decommissioned hosts", requestId));
     }
 
     private void deleteHostsFromAmbari(AmbariClient ambariClient, List<String> hosts, List<String> components) {
@@ -279,7 +311,7 @@ public class AmbariClusterConnector {
         }
     }
 
-    private void restartHadoopServices(Stack stack, AmbariClient ambariClient, boolean decommissioned) {
+    private PollingResult restartHadoopServices(Stack stack, AmbariClient ambariClient, boolean decommissioned) {
         Map<String, Integer> restartRequests = new HashMap<>();
         Map<String, Map<String, String>> serviceComponents = ambariClient.getServiceComponentsMap();
         if (decommissioned) {
@@ -292,7 +324,7 @@ public class AmbariClusterConnector {
         if (serviceComponents.containsKey("GANGLIA")) {
             restartRequests.put("GANGLIA", ambariClient.restartServiceComponents("GANGLIA", Arrays.asList("GANGLIA_SERVER")));
         }
-        waitForAmbariOperations(stack, ambariClient, restartRequests);
+        return waitForAmbariOperations(stack, ambariClient, restartRequests);
     }
 
     private boolean setClusterState(Stack stack, boolean stopped) {
@@ -317,11 +349,14 @@ public class AmbariClusterConnector {
         }
         if (requestId != -1) {
             LOGGER.info("Waiting for Hadoop services to {} on stack", action);
-            operationsPollingService.pollWithTimeout(
-                    new AmbariOperationsStatusCheckerTask(),
+            PollingResult pollingResult = operationsPollingService.pollWithTimeout(
+                    ambariOperationsStatusCheckerTask,
                     new AmbariOperations(stack, ambariClient, singletonMap(action + " services", requestId)),
                     AmbariClusterConnector.POLLING_INTERVAL,
                     AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
+            if (!isSuccess(pollingResult)) {
+                result = false;
+            }
         }
         return result;
     }
@@ -370,11 +405,11 @@ public class AmbariClusterConnector {
         }
     }
 
-    private void waitForHosts(Stack stack, AmbariClient ambariClient) {
+    private PollingResult waitForHosts(Stack stack, AmbariClient ambariClient) {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Waiting for hosts to connect.[Ambari server address: {}]", stack.getAmbariIp());
-        hostsPollingService.pollWithTimeout(
-                new AmbariHostsStatusCheckerTask(),
+        return hostsPollingService.pollWithTimeout(
+                ambariHostsStatusCheckerTask,
                 new AmbariHosts(stack, ambariClient, stack.getFullNodeCount()),
                 POLLING_INTERVAL,
                 MAX_ATTEMPTS_FOR_HOSTS);
@@ -382,18 +417,20 @@ public class AmbariClusterConnector {
 
     private Map<String, List<String>> recommend(Stack stack, AmbariClient ambariClient) throws InvalidHostGroupHostAssociation {
         MDCBuilder.buildMdcContext(stack);
-        waitForHosts(stack, ambariClient);
-        LOGGER.info("Asking Ambari client to recommend host-hostGroup mapping [Ambari server address: {}]", stack.getAmbariIp());
         Map<String, List<String>> hostGroupMappings = new HashMap<>();
-        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
-                if (hostGroupMappings.get(instanceGroup.getGroupName()) == null) {
-                    hostGroupMappings.put(instanceGroup.getGroupName(), new ArrayList<String>());
+        PollingResult pollingResult = waitForHosts(stack, ambariClient);
+        if (isSuccess(pollingResult)) {
+            LOGGER.info("Asking Ambari client to recommend host-hostGroup mapping [Ambari server address: {}]", stack.getAmbariIp());
+            for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+                for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
+                    if (hostGroupMappings.get(instanceGroup.getGroupName()) == null) {
+                        hostGroupMappings.put(instanceGroup.getGroupName(), new ArrayList<String>());
+                    }
+                    hostGroupMappings.get(instanceGroup.getGroupName()).add(metaData.getLongName());
                 }
-                hostGroupMappings.get(instanceGroup.getGroupName()).add(metaData.getLongName());
             }
+            LOGGER.info("recommended host-hostGroup mappings for stack: {}", hostGroupMappings);
         }
-        LOGGER.info("recommended host-hostGroup mappings for stack: {}", hostGroupMappings);
         return hostGroupMappings;
     }
 
@@ -411,10 +448,10 @@ public class AmbariClusterConnector {
         clusterRepository.save(cluster);
     }
 
-    private void waitForClusterInstall(Stack stack, AmbariClient ambariClient) {
+    private PollingResult waitForClusterInstall(Stack stack, AmbariClient ambariClient) {
         Map<String, Integer> clusterInstallRequest = new HashMap<>();
         clusterInstallRequest.put("CLUSTER_INSTALL", 1);
-        waitForAmbariOperations(stack, ambariClient, clusterInstallRequest);
+        return waitForAmbariOperations(stack, ambariClient, clusterInstallRequest);
     }
 
     private List<String> findFreeHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
@@ -444,24 +481,24 @@ public class AmbariClusterConnector {
         }
     }
 
-    private void waitForAmbariOperations(Stack stack, AmbariClient ambariClient, Map<String, Integer> operationRequests) {
+    private PollingResult waitForAmbariOperations(Stack stack, AmbariClient ambariClient, Map<String, Integer> operationRequests) {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Waiting for Ambari operations to finish. [Operation requests: {}]", operationRequests);
-        waitForAmbariOperations(stack, ambariClient, new AmbariOperationsStatusCheckerTask(), operationRequests);
+        return waitForAmbariOperations(stack, ambariClient, ambariOperationsStatusCheckerTask, operationRequests);
     }
 
-    private void waitForAmbariOperations(Stack stack, AmbariClient ambariClient, StatusCheckerTask task, Map<String, Integer> operationRequests) {
-        operationsPollingService.pollWithTimeout(
+    private PollingResult waitForAmbariOperations(Stack stack, AmbariClient ambariClient, StatusCheckerTask task, Map<String, Integer> operationRequests) {
+        return operationsPollingService.pollWithTimeout(
                 task,
                 new AmbariOperations(stack, ambariClient, operationRequests),
                 POLLING_INTERVAL,
                 MAX_ATTEMPTS_FOR_AMBARI_OPS);
     }
 
-    private void waitForDataNodeDecommission(Stack stack, AmbariClient ambariClient) {
+    private PollingResult waitForDataNodeDecommission(Stack stack, AmbariClient ambariClient) {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Waiting for DataNodes to move the blocks to other nodes");
-        waitForAmbariOperations(stack, ambariClient, new DNDecommissionStatusCheckerTask(), Collections.<String, Integer>emptyMap());
+        return waitForAmbariOperations(stack, ambariClient, dnDecommissionStatusCheckerTask, Collections.<String, Integer>emptyMap());
     }
 
     private void clusterCreateSuccess(Cluster cluster, long creationFinished, String ambariIp) {

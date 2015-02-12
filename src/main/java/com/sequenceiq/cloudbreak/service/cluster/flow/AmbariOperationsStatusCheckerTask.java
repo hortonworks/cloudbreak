@@ -6,13 +6,15 @@ import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 
-public class AmbariOperationsStatusCheckerTask implements StatusCheckerTask<AmbariOperations> {
+@Component
+public class AmbariOperationsStatusCheckerTask extends StackBasedStatusCheckerTask<AmbariOperations> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariOperationsStatusCheckerTask.class);
 

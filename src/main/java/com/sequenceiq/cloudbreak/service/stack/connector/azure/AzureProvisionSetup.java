@@ -30,8 +30,8 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureCreateResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourcePollerObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourceStatusCheckerTask;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
@@ -71,7 +71,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
     private CredentialRepository credentialRepository;
 
     @Autowired
-    private AzureResourceStatusCheckerTask azureResourceStatusCheckerTask;
+    private AzureCreateResourceStatusCheckerTask azureCreateResourceStatusCheckerTask;
 
     @Autowired
     private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
@@ -194,7 +194,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
                 params.put(AFFINITYGROUP, affinityGroupName);
                 HttpResponseDecorator response = (HttpResponseDecorator) azureClient.createStorageAccount(params);
                 AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(azureClient, response, stack);
-                azureResourcePollerObjectPollingService.pollWithTimeout(azureResourceStatusCheckerTask, azureResourcePollerObject,
+                azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                         POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             } else {
                 LOGGER.error(String.format("Error occurs on %s stack under the storage creation", stack.getId()), ex);

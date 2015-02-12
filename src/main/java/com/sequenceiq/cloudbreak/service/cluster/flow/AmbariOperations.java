@@ -4,21 +4,17 @@ import java.util.Map;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.StackDependentPollerObject;
 
-public class AmbariOperations {
+public class AmbariOperations extends StackDependentPollerObject {
 
-    private Stack stack;
     private AmbariClient ambariClient;
     private Map<String, Integer> requests;
 
     public AmbariOperations(Stack stack, AmbariClient ambariClient, Map<String, Integer> requests) {
-        this.stack = stack;
+        super(stack);
         this.ambariClient = ambariClient;
         this.requests = requests;
-    }
-
-    public Stack getStack() {
-        return stack;
     }
 
     public AmbariClient getAmbariClient() {
