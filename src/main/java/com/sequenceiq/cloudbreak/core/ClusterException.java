@@ -1,8 +1,7 @@
 package com.sequenceiq.cloudbreak.core;
 
-public class ClusterException extends CloudbreakException{
+public class ClusterException extends CloudbreakException {
     public ClusterException() {
-        super();
     }
 
     public ClusterException(String message) {
