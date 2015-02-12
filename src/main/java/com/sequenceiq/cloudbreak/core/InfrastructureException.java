@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core;
 
 public class InfrastructureException extends CloudbreakException {
     public InfrastructureException() {
-        super();
     }
 
     public InfrastructureException(String message) {
