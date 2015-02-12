@@ -15,5 +15,7 @@ public interface ProvisioningFacade {
 
     ProvisioningContext allocateRoles(ProvisioningContext provisioningContext) throws CloudbreakException;
 
+    ProvisioningContext startAmbari(ProvisioningContext provisioningContext) throws CloudbreakException;
+
     ProvisioningContext buildAmbariCluster(ProvisioningContext provisioningContext) throws CloudbreakException;
 }

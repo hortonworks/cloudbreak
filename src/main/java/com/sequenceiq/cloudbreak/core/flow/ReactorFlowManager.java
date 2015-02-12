@@ -13,6 +13,7 @@ import reactor.event.Event;
 
 /**
  * Flow manager implementation backed by Reactor.
+ * This class is the flow state machine and mediates between the states and reactor events
  */
 @Service
 public class ReactorFlowManager implements FlowManager {
@@ -34,7 +35,7 @@ public class ReactorFlowManager implements FlowManager {
             } else {
                 transition = transitionMap.get(handler).getFailure();
             }
-            LOGGER.debug("Transitioning to [ {} ] > from handler [ {} ] ", transition, handler);
+            LOGGER.debug("Transitioning to [ {} ] from handler [ {} ] ", transition, handler);
         } else {
             LOGGER.debug("There is no registered transition from handler {}", handler);
         }

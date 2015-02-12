@@ -34,6 +34,11 @@ public class SimpleProvisioningFacade implements ProvisioningFacade {
         return provisioningContext;
     }
 
+    @Override public ProvisioningContext startAmbari(ProvisioningContext provisioningContext) throws CloudbreakException {
+        LOGGER.debug("Building ambari cluster. Context: {}", provisioningContext);
+        return provisioningContext;
+    }
+
     @Override
     public ProvisioningContext buildAmbariCluster(ProvisioningContext provisioningContext) throws CloudbreakException {
         LOGGER.debug("Building ambari cluster. Context: {}", provisioningContext);
