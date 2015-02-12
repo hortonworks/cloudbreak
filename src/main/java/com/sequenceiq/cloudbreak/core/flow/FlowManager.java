@@ -1,10 +1,14 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
+/**
+ * Contract for flow management operations.
+ * A <b>flow<b/> represents a succession of <b>phases<b/>, each performed on a different thread.
+ */
 public interface FlowManager {
-
-    String transition(Class handlerClass, boolean success);
 
     void registerTransition(Class handlerClass, Transition transition);
 
-    boolean hasTransitions(Class handlerClass);
+    void triggerProvisioning(Object object);
+
+    void triggerNext(Class sourceHandlerClass, Object payload, boolean success);
 }
