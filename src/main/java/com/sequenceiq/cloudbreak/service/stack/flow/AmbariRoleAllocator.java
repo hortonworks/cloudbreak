@@ -153,9 +153,15 @@ public class AmbariRoleAllocator {
         Set<InstanceMetaData> copy = new HashSet<>(originalMetaData);
         copy.removeAll(instancesMetaData);
         List<ConsulClient> clients = createClients(copy);
-        List<String> privateIps = new ArrayList<>(instancesMetaData.size());
-        for (InstanceMetaData instance : instancesMetaData) {
-            privateIps.add(instance.getPrivateIp());
+        List<String> privateIps = new ArrayList<>();
+        if (instancesMetaData.isEmpty()) {
+            for (InstanceMetaData instance : originalMetaData) {
+                privateIps.add(instance.getPrivateIp());
+            }
+        } else {
+            for (InstanceMetaData instance : instancesMetaData) {
+                privateIps.add(instance.getPrivateIp());
+            }
         }
         consulPollingService.pollWithTimeout(
                 new ConsulHostCheckerTask(),
