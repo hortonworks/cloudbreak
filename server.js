@@ -180,11 +180,13 @@ app.get('/', function(req, res) {
 });
 
 app.get('/logout', function(req, res){
+    var sourceUrl = req.protocol + '://' + req.headers.host;
+    var source = new Buffer(sourceUrl).toString('base64')
     req.session.destroy(function() {
         res.clearCookie('connect.sid', { path: '/' });
         res.clearCookie('JSESSIONID', { path: '/' });
         res.clearCookie('uaa_cookie', { path: '/' });
-        res.redirect(sultansAddress + '?logout=true')
+        res.redirect(sultansAddress + '?logout=true&source=' + source)
     })
 })
 
