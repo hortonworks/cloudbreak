@@ -29,7 +29,7 @@
     </test>
     <test name="create master template">
         <parameter name="awsTemplateName" value="it-aws-master-created" />
-        <parameter name="awsInstanceType" value="T2Medium" />
+        <parameter name="awsInstanceType" value="M3Medium" />
         <parameter name="awsVolumeType" value="Standard" />
         <parameter name="awsVolumeCount" value="1" />
         <parameter name="awsVolumeSize" value="10" />
@@ -40,7 +40,7 @@
     </test>
     <test name="create slave template">
         <parameter name="awsTemplateName" value="it-aws-slave-created" />
-        <parameter name="awsInstanceType" value="T2Medium" />
+        <parameter name="awsInstanceType" value="M3Medium" />
         <parameter name="awsVolumeType" value="Standard" />
         <parameter name="awsVolumeCount" value="2" />
         <parameter name="awsVolumeSize" value="20" />

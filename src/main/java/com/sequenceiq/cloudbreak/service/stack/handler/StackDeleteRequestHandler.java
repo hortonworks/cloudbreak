@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.handler;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -23,6 +24,8 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
+import com.sequenceiq.cloudbreak.service.stack.flow.FutureResult;
+import com.sequenceiq.cloudbreak.service.stack.flow.ResourceRequestResult;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisionUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
@@ -75,28 +78,40 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
             if (!data.getCloudPlatform().isWithTemplate()) {
                 ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(data.getCloudPlatform());
                 final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
-
+                List<Future<ResourceRequestResult>> futures = new ArrayList<>();
                 for (int i = instanceResourceBuilders.get(data.getCloudPlatform()).size() - 1; i >= 0; i--) {
-                    List<Future<Boolean>> futures = new ArrayList<>();
                     final int index = i;
                     List<Resource> resourceByType = stack.getResourcesByType(instanceResourceBuilders.get(data.getCloudPlatform()).get(i).resourceType());
                     for (final Resource resource : resourceByType) {
-                        Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
+                        Future<ResourceRequestResult> submit = resourceBuilderExecutor.submit(new Callable<ResourceRequestResult>() {
                             @Override
-                            public Boolean call() throws Exception {
-                                return instanceResourceBuilders.get(data.getCloudPlatform()).get(index).delete(resource, dCO, stack.getRegion());
+                            public ResourceRequestResult call() throws Exception {
+                                try {
+                                    instanceResourceBuilders.get(data.getCloudPlatform()).get(index).delete(resource, dCO, stack.getRegion());
+                                    retryingStackUpdater.removeStackResources(stack.getId(), Arrays.asList(resource));
+                                    return ResourceRequestResult.ResourceRequestResultBuilder.builder()
+                                            .withFutureResult(FutureResult.SUCCESS)
+                                            .withInstanceGroup(stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup()))
+                                            .build();
+                                } catch (Exception ex) {
+                                    return ResourceRequestResult.ResourceRequestResultBuilder.builder()
+                                            .withException(ex)
+                                            .withFutureResult(FutureResult.FAILED)
+                                            .withInstanceGroup(stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup()))
+                                            .build();
+                                }
                             }
                         });
                         futures.add(submit);
                         if (provisionUtil.isRequestFull(stack, futures.size() + 1)) {
-                            provisionUtil.waitForRequestToFinish(stack.getId(), futures);
+                            Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
+                            provisionUtil.checkErrorOccurred(result);
                             futures = new ArrayList<>();
                         }
                     }
-                    for (Future<Boolean> future : futures) {
-                        future.get();
-                    }
                 }
+                Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
+                provisionUtil.checkErrorOccurred(result);
                 for (int i = networkResourceBuilders.get(data.getCloudPlatform()).size() - 1; i >= 0; i--) {
                     for (Resource resource : stack.getResourcesByType(networkResourceBuilders.get(data.getCloudPlatform()).get(i).resourceType())) {
                         networkResourceBuilders.get(data.getCloudPlatform()).get(i).delete(resource, dCO, stack.getRegion());

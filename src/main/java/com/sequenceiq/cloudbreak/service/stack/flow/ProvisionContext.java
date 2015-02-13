@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
+import java.util.TreeSet;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
-import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -27,10 +26,12 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.stack.FailureHandlerService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
+import com.sequenceiq.cloudbreak.service.stack.flow.callable.ProvisionContextCallable.ProvisionContextCallableBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.ProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
@@ -74,6 +75,9 @@ public class ProvisionContext {
     @Autowired
     private ProvisionUtil provisionUtil;
 
+    @Autowired
+    private FailureHandlerService stackFailureHandlerService;
+
     public void buildStack(final CloudPlatform cloudPlatform, Long stackId, Map<String, Object> setupProperties, Map<String, String> userDataParams) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         MDCBuilder.buildMdcContext(stack);
@@ -89,54 +93,42 @@ public class ProvisionContext {
                     final ProvisionContextObject pCO =
                             resourceBuilderInit.provisionInit(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), userDataParams));
                     for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
+                        List<Resource> buildResources = resourceBuilder.buildResources(pCO, 0, Arrays.asList(resourceSet), Optional.<InstanceGroup>absent());
                         CreateResourceRequest createResourceRequest =
-                                resourceBuilder.buildCreateRequest(pCO,
-                                        Lists.newArrayList(resourceSet),
-                                        resourceBuilder.buildResources(pCO, 0, Arrays.asList(resourceSet),
-                                                Optional.<InstanceGroup>absent()),
-                                        0,
-                                        Optional.<InstanceGroup>absent());
+                                resourceBuilder.buildCreateRequest(pCO, Lists.newArrayList(resourceSet), buildResources, 0, Optional.<InstanceGroup>absent());
                         stackUpdater.addStackResources(stack.getId(), createResourceRequest.getBuildableResources());
                         resourceSet.addAll(createResourceRequest.getBuildableResources());
                         pCO.getNetworkResources().addAll(createResourceRequest.getBuildableResources());
                         resourceBuilder.create(createResourceRequest, stack.getRegion());
                     }
-                    List<Future<Boolean>> futures = new ArrayList<>();
+                    List<Future<ResourceRequestResult>> futures = new ArrayList<>();
+                    List<ResourceRequestResult> resourceRequestResults = new ArrayList<>();
                     int fullIndex = 0;
-                    for (final InstanceGroup instanceGroupEntry : stack.getInstanceGroups()) {
+                    for (final InstanceGroup instanceGroupEntry : new TreeSet<>(stack.getInstanceGroups())) {
                         for (int i = 0; i < instanceGroupEntry.getNodeCount(); i++) {
                             final int index = fullIndex;
                             final Stack finalStack = stack;
-                            Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
-                                @Override
-                                public Boolean call() throws Exception {
-                                    LOGGER.info("Node {}. creation starting", index);
-                                    List<Resource> resources = new ArrayList<>();
-                                    for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
-                                        CreateResourceRequest createResourceRequest =
-                                                resourceBuilder.buildCreateRequest(pCO,
-                                                        resources,
-                                                        resourceBuilder.buildResources(pCO, index, resources, Optional.of(instanceGroupEntry)),
-                                                        index,
-                                                        Optional.of(instanceGroupEntry));
-                                        stackUpdater.addStackResources(finalStack.getId(), createResourceRequest.getBuildableResources());
-                                        resourceBuilder.create(createResourceRequest, finalStack.getRegion());
-                                        resources.addAll(createResourceRequest.getBuildableResources());
-                                        LOGGER.info("Node {}. creation in progress resource {} creation finished.", index,
-                                                resourceBuilder.resourceBuilderType());
-                                    }
-                                    return true;
-                                }
-                            });
+                            Future<ResourceRequestResult> submit = resourceBuilderExecutor.submit(
+                                    ProvisionContextCallableBuilder.builder()
+                                            .withIndex(index)
+                                            .withInstanceGroup(instanceGroupEntry)
+                                            .withInstanceResourceBuilders(instanceResourceBuilders)
+                                            .withProvisionContextObject(pCO)
+                                            .withStack(finalStack)
+                                            .withStackUpdater(stackUpdater)
+                                            .build()
+                            );
                             futures.add(submit);
                             fullIndex++;
                             if (provisionUtil.isRequestFullWithCloudPlatform(stack, futures.size() + 1)) {
-                                provisionUtil.waitForRequestToFinish(stackId, futures);
+                                resourceRequestResults.addAll(provisionUtil.waitForRequestToFinish(stackId, futures).get(FutureResult.FAILED));
+                                stackFailureHandlerService.handleFailure(stack, resourceRequestResults);
                                 futures = new ArrayList<>();
                             }
                         }
                     }
-                    provisionUtil.waitForRequestToFinish(stackId, futures);
+                    resourceRequestResults.addAll(provisionUtil.waitForRequestToFinish(stackId, futures).get(FutureResult.FAILED));
+                    stackFailureHandlerService.handleFailure(stack, resourceRequestResults);
                     LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
                     reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(cloudPlatform, stack.getId(), resourceSet)));
                 } else {
@@ -147,17 +139,11 @@ public class ProvisionContext {
                 LOGGER.info("CloudFormation stack creation was requested for a stack, that is not in REQUESTED status anymore. [stackId: '{}', status: '{}']",
                         stack.getId(), stack.getStatus());
             }
-        } catch (BuildStackFailureException e) {
-            LOGGER.error("Unhandled exception occurred while creating stack.", e);
-            LOGGER.info("Publishing {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT);
-            StackOperationFailure stackCreationFailure =
-                    new StackOperationFailure(stackId, "Internal server error occurred while creating stack: " + e.getMessage());
-            reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occurred while creating stack.", e);
             LOGGER.info("Publishing {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT);
-            StackOperationFailure stackCreationFailure =
-                    new StackOperationFailure(stackId, "Internal server error occurred while creating stack: " + e.getMessage());
+            StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, "Internal server error occurred while creating stack: "
+                    + e.getMessage());
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         }
     }

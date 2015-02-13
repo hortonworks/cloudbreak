@@ -4,6 +4,11 @@
     "userName": "${ambariUser}",
     "password": "${ambariPassword}",
     "region" : "${region}",
+    "onFailureAction" : "${onFailureAction}",
+    "failurePolicy": {
+        "threshold" :  ${threshold},
+        "adjustmentType" : "${adjustmentType}"
+    },
     "instanceGroups" : [
     <#list instanceGroups as instanceGroup>
       {

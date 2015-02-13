@@ -6,13 +6,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
-import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccStartStopContextObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -25,16 +18,21 @@ import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.Metadata;
 import com.google.api.services.compute.model.NetworkInterface;
 import com.google.api.services.compute.model.Operation;
+import com.google.api.services.compute.model.Tags;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
@@ -42,12 +40,15 @@ import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPolle
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCreationException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceReadyPollerObject;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccDiskMode;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccDiskType;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccProvisionContextObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccStartStopContextObject;
 
 @Component
 @Order(3)
@@ -171,6 +172,9 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         instance.setCanIpForward(Boolean.TRUE);
         instance.setNetworkInterfaces(getNetworkInterface(provisionContextObject.getProjectId(), stack.getName()));
         instance.setDisks(listOfDisks);
+        Tags tags = new Tags();
+        tags.setItems(Arrays.asList(instanceGroup.orNull().getGroupName().toString().replaceAll("[^A-Za-z0-9 ]", "")));
+        instance.setTags(tags);
         Metadata metadata = new Metadata();
         metadata.setItems(Lists.<Metadata.Items>newArrayList());
 

@@ -13,6 +13,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +37,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
+import com.sequenceiq.cloudbreak.service.stack.FailureHandlerService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyResourceBuilderInit;
@@ -87,6 +89,9 @@ public class ProvisionContextTest {
     @Mock
     private ProvisionUtil provisionUtil;
 
+    @Mock
+    private FailureHandlerService stackFailureHandlerService;
+
     private Map<String, Object> setupProperties = new HashMap<>();
 
     private Map<String, String> userDataParams = new HashMap<>();
@@ -116,12 +121,17 @@ public class ProvisionContextTest {
     }
 
     @Test
-    public void buildStackWhenAllResourceBuilderWorksFine() {
+    public void buildStackWhenAllResourceBuilderWorksFine() throws Exception {
         prepareInstanceResourceBuilders();
         prepareNetWorkResourceBuilders();
-        doNothing().when(provisionUtil).waitForRequestToFinish(anyLong(), anyList());
+        Map<FutureResult, List<ResourceRequestResult>> futureResultListHashMap = new HashMap<>();
+        futureResultListHashMap.put(FutureResult.FAILED, new ArrayList<ResourceRequestResult>());
+        futureResultListHashMap.put(FutureResult.SUCCESS, new ArrayList<ResourceRequestResult>());
+        when(provisionUtil.waitForRequestToFinish(anyLong(), anyList())).thenReturn(futureResultListHashMap);
+        doNothing().when(provisionUtil).checkErrorOccurred(anyMap());
         // GIVEN
         given(stackRepository.findOneWithLists(1L)).willReturn(stack);
+        doNothing().when(stackFailureHandlerService).handleFailure(any(Stack.class), anyList());
 
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class), anyString())).willReturn(stack);
         given(stackUpdater.updateStackStatusReason(anyLong(), anyString())).willReturn(stack);
@@ -137,10 +147,10 @@ public class ProvisionContextTest {
     }
 
     @Test
-    public void buildStackWhenNetworkResourceBuilderDropException() {
+    public void buildStackWhenNetworkResourceBuilderDropException() throws Exception {
         prepareInstanceResourceBuilders();
         prepareExNetWorkResourceBuilders();
-        doThrow(new BuildStackFailureException(new Exception())).when(provisionUtil).waitForRequestToFinish(anyLong(), anyList());
+        doThrow(new InterruptedException()).when(provisionUtil).waitForRequestToFinish(anyLong(), anyList());
         // GIVEN
         given(stackRepository.findOneWithLists(1L)).willReturn(stack);
 
@@ -158,7 +168,7 @@ public class ProvisionContextTest {
     }
 
     @Test
-    public void buildStackWhenInstanceResourceBuilderDropException() {
+    public void buildStackWhenInstanceResourceBuilderDropException() throws Exception {
         prepareExInstanceResourceBuilders();
         prepareNetWorkResourceBuilders();
         doThrow(new BuildStackFailureException(new Exception())).when(provisionUtil).waitForRequestToFinish(anyLong(), anyList());
