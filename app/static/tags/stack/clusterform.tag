@@ -52,6 +52,32 @@
                         </div>
                     </div>
                     <div class="form-group">
+                      <label class="col-sm-3 control-label" for="selectRegion">Failure logic</label>
+                      <div class="col-sm-9">
+                        <select class="form-control" id="selectFailureLogic" ng-model="cluster.onFailureAction" required>
+                          <option value="ROLLBACK">rollback</option>
+                          <option value="DO_NOTHING">do nothing</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="col-sm-3 control-label" for="selectAdjustment">Failure Configuration</label>
+                      <div class="col-sm-offset-2 col-sm-4">
+                        <select class="form-control" id="selectAdjustment" ng-model="cluster.failurePolicy.adjustmentType" ng-disabled="activeCredential.cloudPlatform == 'AWS' || activeCredential.cloudPlatform == 'OPENSTACK'">
+                          <option value="EXACT" selected="selected">exact number of failed nodes</option>
+                          <option value="PERCENTAGE">percentage of failed nodes</option>
+                        </select>
+                      </div>
+                      <div class="col-sm-3">
+                        <div class="input-group">
+                          <span class="input-group-addon" id="basic-addon1">></span>
+                          <input type="number" name="fthreshold" class="form-control" ng-model="cluster.failurePolicy.threshold" id="fthreshold" ng-disabled="activeCredential.cloudPlatform == 'AWS'">
+                          <div class="input-group-addon" ng-show="cluster.failurePolicy.adjustmentType == 'PERCENTAGE'">%</div>
+                          <div class="input-group-addon" ng-show="cluster.failurePolicy.adjustmentType == 'EXACT'">#</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group">
                         <label class="col-sm-3 control-label" for="selectBlueprint">Blueprint</label>
                         <div class="col-sm-9">
                             <select class="form-control" id="selectBlueprint" ng-model="cluster.blueprintId"  required ng-change="selectedBlueprintChange()">
