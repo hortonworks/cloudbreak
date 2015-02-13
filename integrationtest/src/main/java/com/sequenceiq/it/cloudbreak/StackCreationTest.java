@@ -46,7 +46,7 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         templateModel.put("region", region);
         templateModel.put("ambariUser", ambariUser);
         templateModel.put("ambariPassword", ambariPassword);
-        templateModel.put("onFailureAction", onFailure);
+        templateModel.put("onFailureAction", onFailureAction);
         templateModel.put("threshold", threshold);
         templateModel.put("adjustmentType", adjustmentType);
         templateModel.put("instanceGroups", itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class));
