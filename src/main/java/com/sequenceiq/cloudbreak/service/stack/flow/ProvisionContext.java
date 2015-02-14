@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
@@ -17,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
+import com.google.common.primitives.Ints;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -104,7 +105,7 @@ public class ProvisionContext {
                     List<Future<ResourceRequestResult>> futures = new ArrayList<>();
                     List<ResourceRequestResult> resourceRequestResults = new ArrayList<>();
                     int fullIndex = 0;
-                    for (final InstanceGroup instanceGroupEntry : new TreeSet<>(stack.getInstanceGroups())) {
+                    for (final InstanceGroup instanceGroupEntry : getOrderedCopy(stack.getInstanceGroups())) {
                         for (int i = 0; i < instanceGroupEntry.getNodeCount(); i++) {
                             final int index = fullIndex;
                             final Stack finalStack = stack;
@@ -146,6 +147,15 @@ public class ProvisionContext {
                     + e.getMessage());
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         }
+    }
+
+    private List<InstanceGroup> getOrderedCopy(Set<InstanceGroup> instanceGroupSet) {
+        Ordering<InstanceGroup> byLengthOrdering = new Ordering<InstanceGroup>() {
+            public int compare(InstanceGroup left, InstanceGroup right) {
+                return Ints.compare(left.getNodeCount(), right.getNodeCount());
+            }
+        };
+        return byLengthOrdering.sortedCopy(instanceGroupSet);
     }
 
 }
