@@ -64,7 +64,7 @@
                       <label class="col-sm-3 control-label" for="selectAdjustment">Failure Configuration</label>
                       <div class="col-sm-offset-2 col-sm-4">
                         <select class="form-control" id="selectAdjustment" ng-model="cluster.failurePolicy.adjustmentType" ng-disabled="activeCredential.cloudPlatform == 'AWS' || activeCredential.cloudPlatform == 'OPENSTACK'">
-                          <option value="EXACT" selected="selected">exact number of failed nodes</option>
+                          <option value="EXACT" selected="selected">number of failed nodes</option>
                           <option value="PERCENTAGE">percentage of failed nodes</option>
                         </select>
                       </div>
