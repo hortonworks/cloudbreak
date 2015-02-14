@@ -19,32 +19,33 @@ import javax.persistence.UniqueConstraint;
         @NamedQuery(
                 name = "Template.findForUser",
                 query = "SELECT t FROM Template t "
-                        + "WHERE t.owner= :user"),
+                        + "WHERE t.owner= :user AND deleted IS NOT TRUE "),
         @NamedQuery(
                 name = "Template.findPublicInAccountForUser",
                 query = "SELECT t FROM Template t "
-                        + "WHERE (t.account= :account AND t.publicInAccount= true) "
-                        + "OR t.owner= :user"),
+                        + "WHERE ((t.account= :account AND t.publicInAccount= true) "
+                        + "OR t.owner= :user) AND deleted IS NOT TRUE "),
         @NamedQuery(
                 name = "Template.findAllInAccount",
                 query = "SELECT t FROM Template t "
-                        + "WHERE t.account= :account "),
+                        + "WHERE t.account= :account AND deleted IS NOT TRUE "),
         @NamedQuery(
                 name = "Template.findOneByName",
                 query = "SELECT t FROM Template t "
-                        + "WHERE t.name= :name and t.account= :account"),
+                        + "WHERE t.name= :name and t.account= :account AND deleted IS NOT TRUE "),
         @NamedQuery(
                 name = "Template.findByIdInAccount",
                 query = "SELECT t FROM Template t "
-                        + "WHERE t.id= :id and t.account= :account"),
+                        + "WHERE t.id= :id and t.account= :account AND deleted IS NOT TRUE "),
         @NamedQuery(
                 name = "Template.findByNameInAccount",
                 query = "SELECT t FROM Template t "
-                        + "WHERE t.name= :name and ((t.account= :account and t.publicInAccount=true) or t.owner= :owner)"),
+                        + "WHERE t.name= :name and ((t.account= :account and t.publicInAccount=true) or t.owner= :owner) "
+                        + "AND deleted IS NOT TRUE "),
         @NamedQuery(
                 name = "Template.findByNameInUser",
                 query = "SELECT t FROM Template t "
-                        + "WHERE t.owner= :owner and t.name= :name")
+                        + "WHERE t.owner= :owner and t.name= :name AND deleted IS NOT TRUE ")
 })
 public abstract class Template {
 
@@ -66,7 +67,10 @@ public abstract class Template {
     private Integer volumeCount;
     private Integer volumeSize;
 
+    private boolean deleted;
+
     public Template() {
+        deleted = false;
     }
 
     public abstract CloudPlatform cloudPlatform();
@@ -135,4 +139,11 @@ public abstract class Template {
         this.volumeSize = volumeSize;
     }
 
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
 }

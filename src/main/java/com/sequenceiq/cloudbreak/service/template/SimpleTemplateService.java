@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.template;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -15,6 +16,7 @@ import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -25,6 +27,7 @@ import com.sequenceiq.cloudbreak.service.credential.SimpleCredentialService;
 @Service
 public class SimpleTemplateService implements TemplateService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleCredentialService.class);
+    private static final String DELIMITER = "_";
 
     private static final String TEMPLATE_NOT_FOUND_MSG = "Template '%s' not found.";
 
@@ -122,9 +125,28 @@ public class SimpleTemplateService implements TemplateService {
             }
             templateRepository.delete(template);
         } else {
-            throw new BadRequestException(String.format(
-                    "There are stacks associated with template '%s'. Please remove these before deleting the template.", template.getName()));
+            if (isRunningStackReferToTemplate(allStackForTemplate)) {
+                throw new BadRequestException(String.format(
+                        "There are stacks associated with template '%s'. Please remove these before deleting the template.", template.getName()));
+            } else {
+                Date now = new Date();
+                String terminatedName = template.getName() + DELIMITER + now.getTime();
+                template.setName(terminatedName);
+                template.setDeleted(true);
+                templateRepository.save(template);
+            }
         }
+    }
+
+    private boolean isRunningStackReferToTemplate(List<Stack> allStackForTemplate) {
+        boolean result = false;
+        for (Stack stack : allStackForTemplate) {
+            if (!Status.DELETE_COMPLETED.equals(stack.getStatus())) {
+                result = true;
+                break;
+            }
+        }
+        return result;
     }
 
 }

@@ -57,7 +57,10 @@ public class StackDeleteCompleteHandler implements Consumer<Event<StackDeleteCom
         Cluster cluster = stack.getCluster();
         if (cluster != null) {
             cluster.setName(terminatedName);
+            cluster.setBlueprint(null);
+            cluster.setRecipe(null);
         }
+        stack.setCredential(null);
         stack.setName(terminatedName);
         stack.setStatus(Status.DELETE_COMPLETED);
         stack.setStatusReason(DELETE_COMPLETED_MSG);
