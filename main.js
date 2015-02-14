@@ -49,9 +49,11 @@ app.get('/', function(req, res) {
             res.clearCookie('connect.sid', { path: '/' });
             res.clearCookie('JSESSIONID', { path: '/' });
             res.clearCookie('uaa_cookie', { path: '/' });
+            res.cookie('source', req.query.source);
             res.render('login',{ errorMessage: "" });
         })
     } else {
+        res.cookie('source', req.query.source);
         res.render('login',{ errorMessage: "" });
     }
 });
@@ -107,7 +109,13 @@ app.post('/', function(req, res){
             }
             res.cookie('uaa_cookie', sessionId) // TODO check sessionId
             if (req.session.client_id == null) {
-                res.redirect('dashboard')
+                var sourceCookie = getCookie(req, 'source')
+                if (sourceCookie == null || sourceCookie == 'undefined'){
+                    res.redirect('dashboard')
+                } else {
+                    var sourceUrl = new Buffer(sourceCookie, 'base64').toString('utf-8')
+                    res.redirect(sourceUrl)
+                }
             } else {
                 res.redirect('confirm')
             }
