@@ -200,7 +200,16 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     public Boolean stop(AzureStartStopContextObject aSSCO, Resource resource, String region) {
         Stack stack = stackRepository.findById(aSSCO.getStack().getId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
-        return setStackState(aSSCO.getStack().getId(), resource, azureStackUtil.createAzureClient(credential), true);
+        boolean stopped = setStackState(aSSCO.getStack().getId(), resource, azureStackUtil.createAzureClient(credential), true);
+        if (stopped) {
+            azurePollingService.pollWithTimeout(
+                    new AzureInstanceStatusCheckerTask(),
+                    new AzureInstances(aSSCO.getStack(), azureStackUtil.createAzureClient(credential), Arrays.asList(resource.getResourceName()), "Suspended"),
+                    POLLING_INTERVAL,
+                    MAX_ATTEMPTS_FOR_AMBARI_OPS);
+            return true;
+        }
+        return false;
     }
 
     private boolean setStackState(Long stackId, Resource resource, AzureClient azureClient, boolean stopped) {
