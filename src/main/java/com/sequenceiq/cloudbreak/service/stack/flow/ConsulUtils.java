@@ -184,4 +184,42 @@ public final class ConsulUtils {
         }
     }
 
+    public static int getConsulServerCount(int nodeCount) {
+        if (nodeCount < ConsulServers.NODE_COUNT_LOW.getMax()) {
+            return ConsulServers.NODE_COUNT_LOW.getConsulServerCount();
+        } else if (nodeCount < ConsulServers.NODE_COUNT_MEDIUM.getMax()) {
+            return ConsulServers.NODE_COUNT_MEDIUM.getConsulServerCount();
+        } else {
+            return ConsulServers.NODE_COUNT_HIGH.getConsulServerCount();
+        }
+    }
+
+    public enum ConsulServers {
+        NODE_COUNT_LOW(3, 1000, 3),
+        NODE_COUNT_MEDIUM(1001, 5000, 5),
+        NODE_COUNT_HIGH(5001, 100_000, 7);
+
+        private final int min;
+        private final int max;
+        private final int consulServerCount;
+
+        private ConsulServers(int min, int max, int consulServerCount) {
+            this.min = min;
+            this.max = max;
+            this.consulServerCount = consulServerCount;
+        }
+
+        public int getMin() {
+            return min;
+        }
+
+        public int getMax() {
+            return max;
+        }
+
+        public int getConsulServerCount() {
+            return consulServerCount;
+        }
+    }
+
 }

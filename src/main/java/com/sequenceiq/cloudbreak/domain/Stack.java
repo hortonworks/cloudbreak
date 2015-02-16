@@ -175,6 +175,8 @@ public class Stack implements ProvisionEntity {
 
     private String hash;
 
+    private int consulServers;
+
     private boolean metadataReady;
 
     @OneToOne
@@ -364,6 +366,14 @@ public class Stack implements ProvisionEntity {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public int getConsulServers() {
+        return consulServers;
+    }
+
+    public void setConsulServers(int consulServers) {
+        this.consulServers = consulServers;
     }
 
     public OnFailureAction getOnFailureActionAction() {

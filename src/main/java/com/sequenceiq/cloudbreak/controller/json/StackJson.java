@@ -47,6 +47,7 @@ public class StackJson implements JsonEntity {
     private OnFailureAction onFailureAction = OnFailureAction.ROLLBACK;
     private FailurePolicyJson failurePolicy;
     private List<InstanceGroupJson> instanceGroups = new ArrayList<>();
+    private Integer consulServerCount;
 
     public StackJson() {
     }
@@ -221,5 +222,13 @@ public class StackJson implements JsonEntity {
     @JsonIgnore
     public void setPublicInAccount(boolean publicInAccount) {
         this.publicInAccount = publicInAccount;
+    }
+
+    public Integer getConsulServerCount() {
+        return consulServerCount;
+    }
+
+    public void setConsulServerCount(Integer consulServerCount) {
+        this.consulServerCount = consulServerCount;
     }
 }

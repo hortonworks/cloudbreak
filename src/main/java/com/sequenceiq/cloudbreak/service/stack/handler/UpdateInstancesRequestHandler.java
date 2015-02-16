@@ -152,15 +152,12 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
     }
 
     private void upScaleStack(UpdateInstancesRequest request, Stack stack) throws Exception {
+        String userDataScript = userDataBuilder.build(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>());
         if (stack.isCloudPlatformUsedWithTemplate()) {
-            cloudPlatformConnectors.get(stack.cloudPlatform()).addInstances(stack,
-                    userDataBuilder.build(stack.cloudPlatform(), stack.getHash(), new HashMap<String, String>()),
-                    request.getScalingAdjustment(),
-                    request.getHostGroup());
+            cloudPlatformConnectors.get(stack.cloudPlatform()).addInstances(stack, userDataScript, request.getScalingAdjustment(), request.getHostGroup());
         } else {
             ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(stack.cloudPlatform());
-            final ProvisionContextObject provisionContextObject = resourceBuilderInit
-                    .provisionInit(stack, userDataBuilder.build(stack.cloudPlatform(), stack.getHash(), new HashMap<String, String>()));
+            final ProvisionContextObject provisionContextObject = resourceBuilderInit.provisionInit(stack, userDataScript);
             for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(stack.cloudPlatform())) {
                 provisionContextObject.getNetworkResources().addAll(stack.getResourcesByType(resourceBuilder.resourceType()));
             }
@@ -191,11 +188,8 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
             resourceRequestResults.addAll(result.get(FutureResult.SUCCESS));
             LOGGER.info("Publishing {} event.", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT);
             reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
-                    Event.wrap(new AddInstancesComplete(
-                            stack.cloudPlatform(),
-                            stack.getId(),
-                            collectResources(resourceRequestResults),
-                            request.getHostGroup())
+                    Event.wrap(new AddInstancesComplete(stack.cloudPlatform(), stack.getId(),
+                                    collectResources(resourceRequestResults), request.getHostGroup())
                     )
             );
         }
