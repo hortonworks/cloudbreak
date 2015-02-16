@@ -23,6 +23,7 @@ public class AmbariStartHandler extends AbstractFlowHandler<ProvisioningContext>
     protected Object execute(Event<ProvisioningContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
         ProvisioningContext provisioningContext = provisioningFacade.startAmbari(event.getData());
+        LOGGER.info("Ambari started. Context: {}", provisioningContext);
         return provisioningContext;
     }
 
