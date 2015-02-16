@@ -28,7 +28,8 @@ public class SimpleProvisioningFacade implements ProvisioningFacade {
     public ProvisioningContext setup(ProvisioningContext provisioningContext) throws CloudbreakException {
         LOGGER.debug("Set up provisioning. Context: {}", provisioningContext);
         try {
-            provisionSetups.get(provisioningContext.getCloudPlatform()).setupProvisioning(stackService.get(provisioningContext.getStackId()));
+            provisionSetups.get(provisioningContext.getCloudPlatform())
+                    .setupProvisioning(stackService.get(provisioningContext.getStackId()));
             LOGGER.debug("Provisioning setup done.");
         } catch (Exception e) {
             LOGGER.error("Exception during provisioning setup" + e.getMessage());

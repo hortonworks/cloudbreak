@@ -22,10 +22,10 @@ import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
+import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 
 import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Component
 public class OpenStackProvisionSetup implements ProvisionSetup {
@@ -39,14 +39,11 @@ public class OpenStackProvisionSetup implements ProvisionSetup {
     private OpenStackUtil openStackUtil;
 
     @Override
-    public void setupProvisioning(Stack stack) {
+    public ProvisionEvent setupProvisioning(Stack stack) throws Exception {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
-                Event.wrap(new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
-                                .withSetupProperty(CREDENTIAL, stack.getCredential())
-                )
-        );
+        return new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
+                .withSetupProperty(CREDENTIAL, stack.getCredential());
     }
 
     @Override
