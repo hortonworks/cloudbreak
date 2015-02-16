@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
+import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureCreateResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourcePollerObject;
@@ -37,7 +38,6 @@ import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
 import groovyx.net.http.ResponseParseException;
 import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Component
 public class AzureProvisionSetup implements ProvisionSetup {
@@ -77,7 +77,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
     private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
 
     @Override
-    public void setupProvisioning(Stack stack) {
+    public ProvisionEvent setupProvisioning(Stack stack) throws Exception {
         MDCBuilder.buildMdcContext(stack);
         Credential credential = stack.getCredential();
         AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
@@ -108,11 +108,8 @@ public class AzureProvisionSetup implements ProvisionSetup {
             createOsImageLink(credential, azureClient, targetImageUri, azureLocation, stack.getImage());
         }
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
-                Event.wrap(new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
-                                .withSetupProperty(CREDENTIAL, stack.getCredential())
-                )
-        );
+        return new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
+                .withSetupProperty(CREDENTIAL, stack.getCredential());
     }
 
     private void createOsImageLink(Credential credential, AzureClient azureClient, String targetImageUri, AzureLocation location, String imageUrl) {
