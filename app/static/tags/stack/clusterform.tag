@@ -3,6 +3,12 @@
         <div class="panel-heading panel-heading-nav">
             <a href="" id="create-cluster-back-btn" class="btn btn-info btn-fa-2x" role="button"><i class="fa fa-angle-left fa-2x fa-fw-forced"></i></a>
             <h4>Create cluster</h4>
+            <a ng-show="!showAdvancedOptionForm" class="btn btn-success pull-right" role="button" style="right: -1px !important;left: 64%;bottom: -2px;" id="advanced-pick" ng-click="showAdvancedOption()">
+              <i></i>Show Advanced Options
+            </a>
+            <a ng-show="showAdvancedOptionForm" class="btn btn-success pull-right" role="button" style="right: -1px !important;left: 64%;bottom: -2px;" id="advanced-pick" ng-click="showAdvancedOption()">
+              <i></i>Hide Advanced Options
+            </a>
         </div>
         <div id="create-cluster-panel-collapse" class="panel panel-default">
             <div class="panel-body">
@@ -16,7 +22,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="form-group" ng-class="{ 'has-error': clusterCreationForm.cl_clusterUserName.$dirty && clusterCreationForm.cl_clusterUserName.$invalid }">
+                    <div class="form-group" ng-show="showAdvancedOptionForm" ng-class="{ 'has-error': clusterCreationForm.cl_clusterUserName.$dirty && clusterCreationForm.cl_clusterUserName.$invalid }">
                         <label class="col-sm-3 control-label" for="cl_clusterUserName">Ambari username</label>
                         <div class="col-sm-9">
                             <input type="text" name="cl_clusterUserName" class="form-control" id="cl_clusterUserName" name="cl_clusterUserName" placeholder="min. 5 max. 15 char" ng-model="cluster.userName"  ng-pattern="/^[a-z][-a-z0-9]*[a-z0-9]$/" ng-minlength="5" ng-maxlength="15" required>
@@ -25,7 +31,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="form-group" ng-class="{ 'has-error': clusterCreationForm.cl_clusterPass.$dirty && clusterCreationForm.cl_clusterPass.$invalid }">
+                    <div class="form-group" ng-show="showAdvancedOptionForm" ng-class="{ 'has-error': clusterCreationForm.cl_clusterPass.$dirty && clusterCreationForm.cl_clusterPass.$invalid }">
                         <label class="col-sm-3 control-label" for="cl_clusterPass">Ambari password</label>
                         <div class="col-sm-9">
                             <input type="text" name="cl_clusterPass" class="form-control" id="cl_clusterPass" name="cl_clusterPass" placeholder="min. 5 max. 15 char" ng-model="cluster.password"  ng-pattern="/^[a-z][-a-z0-9]*[a-z0-9]$/" ng-minlength="5" ng-maxlength="15" required>
@@ -51,8 +57,8 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-group">
-                      <label class="col-sm-3 control-label" for="selectRegion">Failure logic</label>
+                    <div class="form-group" ng-show="showAdvancedOptionForm">
+                      <label class="col-sm-3 control-label" for="selectRegion">Failure policy</label>
                       <div class="col-sm-9">
                         <select class="form-control" id="selectFailureLogic" ng-model="cluster.onFailureAction" required>
                           <option value="ROLLBACK">rollback</option>
@@ -60,8 +66,8 @@
                         </select>
                       </div>
                     </div>
-                    <div class="form-group">
-                      <label class="col-sm-3 control-label" for="selectAdjustment">Failure Configuration</label>
+                    <div class="form-group" ng-show="showAdvancedOptionForm">
+                      <label class="col-sm-3 control-label" for="selectAdjustment">Failure threshold</label>
                       <div class="col-sm-offset-2 col-sm-4">
                         <select class="form-control" id="selectAdjustment" ng-model="cluster.failurePolicy.adjustmentType" ng-disabled="activeCredential.cloudPlatform == 'AWS' || activeCredential.cloudPlatform == 'OPENSTACK'">
                           <option value="EXACT" selected="selected">number of failed nodes</option>
@@ -92,7 +98,7 @@
                              <input type="checkbox" name="cluster_publicInAccount" id="cluster_publicInAccount" ng-model="cluster.public">
                          </div>
                     </div>
-                    <div class="form-group" >
+                    <div class="form-group" ng-show="showAdvancedOptionForm">
                       <label class="col-sm-3 control-label" for="emailneeded">Email notification when cluster is provisioned</label>
                       <div class="col-sm-9">
                         <input type="checkbox" id="emailneeded" ng-model="cluster.email" name="emailneeded">
@@ -134,6 +140,7 @@
                           </div>
                       </div>
                     </div>
+
                     <div class="row btn-row">
                         <div class="col-sm-9 col-sm-offset-3">
                             <a href="" id="createCluster" class="btn btn-success btn-block" ng-disabled="clusterCreationForm.$invalid" role="button" ng-click="createCluster()"><i class="fa fa-plus fa-fw"></i>create and start cluster</a>

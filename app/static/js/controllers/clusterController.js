@@ -49,8 +49,17 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $scope.detailsShow = true;
         $scope.periscopeShow = false;
         $scope.metricsShow = false;
+        $scope.showAdvancedOptionForm = false;
         getUluwatuClusters();
         initCluster();
+
+        $scope.showAdvancedOption = function() {
+            if ($scope.showAdvancedOptionForm === false) {
+              $scope.showAdvancedOptionForm = true;
+            } else {
+              $scope.showAdvancedOptionForm = false;
+            }
+        }
 
         $scope.selectedBlueprintChange = function () {
           var tmpCloudPlatform = $rootScope.activeCredential.cloudPlatform;
