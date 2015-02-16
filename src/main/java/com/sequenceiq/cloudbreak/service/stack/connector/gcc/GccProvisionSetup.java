@@ -22,7 +22,6 @@ import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.StorageObject;
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -31,10 +30,8 @@ import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
+import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Component
 public class GccProvisionSetup implements ProvisionSetup {
@@ -46,9 +43,6 @@ public class GccProvisionSetup implements ProvisionSetup {
     private static final int POLLING_INTERVAL = 5000;
 
     @Autowired
-    private Reactor reactor;
-
-    @Autowired
     private GccStackUtil gccStackUtil;
 
     @Autowired
@@ -58,9 +52,10 @@ public class GccProvisionSetup implements ProvisionSetup {
     private GccImageCheckerStatus gccImageCheckerStatus;
 
     @Override
-    public void setupProvisioning(Stack stack) {
+    public ProvisionEvent setupProvisioning(Stack stack) throws Exception {
         MDCBuilder.buildMdcContext(stack);
         PollingResult pollingResult = PollingResult.SUCCESS;
+        ProvisionSetupComplete ret = null;
         try {
             Storage storage = gccStackUtil.buildStorage((GccCredential) stack.getCredential(), stack);
             Compute compute = gccStackUtil.buildCompute((GccCredential) stack.getCredential(), stack);
@@ -99,17 +94,15 @@ public class GccProvisionSetup implements ProvisionSetup {
             }
         } catch (IOException e) {
             LOGGER.error(String.format("Error occurs on %s stack under the setup", stack.getId()), e);
-            throw new InternalServerException(e.getMessage());
+            throw e;
         }
+
         if (isSuccess(pollingResult)) {
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
-            reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
-                    Event.wrap(
-                            new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
-                                    .withSetupProperty(CREDENTIAL, stack.getCredential())
-                    )
-            );
+            ret = new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
+                    .withSetupProperty(CREDENTIAL, stack.getCredential());
         }
+        return ret;
     }
 
     @Override
