@@ -236,12 +236,12 @@ uluwatuServices.factory('UluwatuCluster', ['UserStack', 'AccountStack', 'Cluster
         return {
             handleError: function(error) {
                 var failedMsg = ""
-                var errorData = error.data["validationErrors"]
-                if (errorData != null) {
+                if ("validationErrors" in error.data) {
+                    var errorData = error.data["validationErrors"]
                     for (var key in errorData) {
                         failedMsg += errorData[key] + "; "
                     }
-                } else if (error.data != null){
+                } else if (error.data != null) {
                     failedMsg += error.data.message
                 } else if (error.error_description != null) {
                     failedMsg += error.error_description
