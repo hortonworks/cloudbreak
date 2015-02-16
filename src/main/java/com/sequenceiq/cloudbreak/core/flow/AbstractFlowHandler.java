@@ -61,7 +61,7 @@ public abstract class AbstractFlowHandler<T> implements Consumer<Event<T>> {
      * Proceeds to the next phase in the flow.
      */
     protected void next(Object payload, boolean success) {
-        flowManager.triggerNext(this.getClass(), payload, success);
+        flowManager.triggerNext(getClass(), payload, success);
     }
 
     /**

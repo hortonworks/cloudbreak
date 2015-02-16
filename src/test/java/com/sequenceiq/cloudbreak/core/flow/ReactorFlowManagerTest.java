@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.sequenceiq.cloudbreak.conf.TestConfig;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ProvisioningSetupHandler;
 
+@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { TestConfig.class })
 @ComponentScan("com.sequenceiq.cloudbreak.core.flow")
