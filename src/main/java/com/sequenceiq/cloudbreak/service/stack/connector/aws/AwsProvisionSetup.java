@@ -44,12 +44,10 @@ public class AwsProvisionSetup implements ProvisionSetup {
         return Optional.absent();
     }
 
-    @Override
     public Map<String, Object> getSetupProperties(Stack stack) {
         return new HashMap<>();
     }
 
-    @Override
     public Map<String, String> getUserDataProperties(Stack stack) {
         return new HashMap<>();
     }

@@ -2,10 +2,8 @@ package com.sequenceiq.cloudbreak.service.stack.connector.openstack;
 
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.CREDENTIAL;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.openstack4j.api.OSClient;
@@ -57,16 +55,6 @@ public class OpenStackProvisionSetup implements ProvisionSetup {
         OSClient osClient = openStackUtil.createOSClient(stack);
         Optional<String> result = verifyFlavors(osClient, stack.getInstanceGroupsAsList());
         return result.isPresent() ? result : verifyImage(osClient, imageName);
-    }
-
-    @Override
-    public Map<String, String> getUserDataProperties(Stack stack) {
-        return new HashMap<>();
-    }
-
-    @Override
-    public Map<String, Object> getSetupProperties(Stack stack) {
-        return new HashMap<>();
     }
 
     @Override
