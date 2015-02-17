@@ -63,8 +63,8 @@ get_consul_opts() {
       CONSUL_OPTIONS="$CONSUL_OPTIONS -retry-join $(consul_join_ip)"
     fi
 
-    if [ $(my_order) -le 3 ]; then
-      CONSUL_OPTIONS="$CONSUL_OPTIONS -server -bootstrap-expect 3"
+    if [ $(my_order) -le "$CONSUL_SERVER_COUNT" ]; then
+      CONSUL_OPTIONS="$CONSUL_OPTIONS -server -bootstrap-expect $CONSUL_SERVER_COUNT"
     fi
   fi
 }

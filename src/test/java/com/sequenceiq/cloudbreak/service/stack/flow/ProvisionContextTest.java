@@ -139,7 +139,7 @@ public class ProvisionContextTest {
 
         given(reactor.notify(any(), any(Event.class))).willReturn(null);
 
-        given(userDataBuilder.build(any(CloudPlatform.class), anyString(), anyMap())).willReturn("userdata dummy");
+        given(userDataBuilder.build(any(CloudPlatform.class), anyString(), anyInt(), anyMap())).willReturn(DUMMY_NAME);
         // WHEN
         underTest.buildStack(cloudPlatform, 1L, setupProperties, userDataParams);
         // THEN
@@ -160,7 +160,7 @@ public class ProvisionContextTest {
 
         given(reactor.notify(any(), any(Event.class))).willReturn(null);
 
-        given(userDataBuilder.build(any(CloudPlatform.class), anyString(), anyMap())).willReturn("userdata dummy");
+        given(userDataBuilder.build(any(CloudPlatform.class), anyString(), anyInt(), anyMap())).willReturn(DUMMY_NAME);
         // WHEN
         underTest.buildStack(cloudPlatform, 1L, setupProperties, userDataParams);
         // THEN
@@ -183,7 +183,7 @@ public class ProvisionContextTest {
 
         given(reactor.notify(any(), any(Event.class))).willReturn(null);
 
-        given(userDataBuilder.build(any(CloudPlatform.class), anyString(), anyMap())).willReturn("userdata dummy");
+        given(userDataBuilder.build(any(CloudPlatform.class), anyString(), anyInt(), anyMap())).willReturn(DUMMY_NAME);
         // WHEN
         underTest.buildStack(cloudPlatform, 1L, setupProperties, userDataParams);
         // THEN

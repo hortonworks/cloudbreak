@@ -16,19 +16,20 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.regions.Regions;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
-import com.sequenceiq.cloudbreak.controller.json.StackJson;
 import com.sequenceiq.cloudbreak.controller.json.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.controller.json.StackJson;
 import com.sequenceiq.cloudbreak.domain.AdjustmentType;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
+import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
 
 @Component
 public class StackConverter extends AbstractConverter<StackJson, Stack> {
 
-    private static final int MIN_NODE_COUNT = 3;
     private static final double ONE_HUNDRED = 100.0;
 
     @Autowired
@@ -77,6 +78,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stackJson.setUserName(entity.getUserName());
         stackJson.setPassword(entity.getPassword());
         stackJson.setHash(entity.getHash());
+        stackJson.setConsulServerCount(entity.getConsulServers());
         stackJson.setRegion(entity.getRegion());
         stackJson.setOnFailureAction(entity.getOnFailureActionAction());
         List<InstanceGroupJson> templateGroups = new ArrayList<>();
@@ -106,34 +108,47 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         try {
             stack.setCredential(credentialRepository.findOne(json.getCredentialId()));
         } catch (AccessDeniedException e) {
-            throw new AccessDeniedException(String.format("Access to credential '%s' is denied or credential doesn't exist.", json.getCredentialId()), e);
+            throw new AccessDeniedException(String.format("Access to credential '%s' is denied or credential doesn't exist", json.getCredentialId()), e);
         }
         stack.setStatus(Status.REQUESTED);
         stack.setInstanceGroups(instanceGroupConverter.convertAllJsonToEntity(json.getInstanceGroups(), stack));
-        if (stack.getFullNodeCount() < MIN_NODE_COUNT) {
-            throw new BadRequestException("NodeCount of stack has to be at least 3.");
+        int minNodeCount = ConsulUtils.ConsulServers.NODE_COUNT_LOW.getMin();
+        int fullNodeCount = stack.getFullNodeCount();
+        if (fullNodeCount < minNodeCount) {
+            throw new BadRequestException(String.format("At least %s node is required to launch the stack", minNodeCount));
         }
         if (json.getImage() != null) {
             stack.setImage(json.getImage());
         } else {
             stack.setImage(prepareImage(stack));
         }
+        int consulServers = getConsulServerCount(json, fullNodeCount);
+        stack.setConsulServers(consulServers);
         if (json.getFailurePolicy() != null) {
             stack.setFailurePolicy(failurePolicyConverter.convert(json.getFailurePolicy()));
-            if (stack.getFailurePolicy().getThreshold() == 0L) {
-                throw new BadRequestException("The threshold can not be 0.");
+            FailurePolicy failurePolicy = stack.getFailurePolicy();
+            if (failurePolicy.getThreshold() == 0L) {
+                throw new BadRequestException("The threshold can not be 0");
             }
-            if (stack.getFailurePolicy().getAdjustmentType().equals(AdjustmentType.EXACT)) {
-                if (stack.getFullNodeCount() - stack.getFailurePolicy().getThreshold() < MIN_NODE_COUNT) {
-                    throw new BadRequestException("At least 3 live nodes are required after rollback.");
+            String errorMsg = String.format("At least %s live nodes are required after rollback", consulServers);
+            if (failurePolicy.getAdjustmentType().equals(AdjustmentType.EXACT)) {
+                if (fullNodeCount - failurePolicy.getThreshold() < consulServers) {
+                    throw new BadRequestException(errorMsg);
                 }
-            } else if (stack.getFailurePolicy().getAdjustmentType().equals(AdjustmentType.PERCENTAGE)) {
-                if (stack.getFullNodeCount() - calculateMinCount(stack) < MIN_NODE_COUNT) {
-                    throw new BadRequestException("At least 3 live nodes are required after rollback.");
-                }
+            } else if (fullNodeCount - calculateMinCount(stack) < consulServers) {
+                throw new BadRequestException(errorMsg);
             }
         }
         return stack;
+    }
+
+    private int getConsulServerCount(StackJson json, int fullNodeCount) {
+        Integer userDefinedConsulServers = json.getConsulServerCount();
+        int consulServers = userDefinedConsulServers == null ? ConsulUtils.getConsulServerCount(fullNodeCount) : userDefinedConsulServers;
+        if (consulServers > fullNodeCount || consulServers < 1) {
+            throw new BadRequestException("Invalid consul server specification: must be in range 1-" + fullNodeCount);
+        }
+        return consulServers;
     }
 
     private long calculateMinCount(Stack stack) {
@@ -151,7 +166,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
             case OPENSTACK:
                 return openStackImage;
             default:
-                throw new BadRequestException(String.format("Not Supported cloudplatform which is: %s", stack.cloudPlatform()));
+                throw new BadRequestException(String.format("Not supported cloud platform: %s", stack.cloudPlatform()));
         }
     }
 

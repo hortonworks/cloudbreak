@@ -32,9 +32,10 @@ public class UserDataBuilder {
         }
     }
 
-    public String build(CloudPlatform cloudPlatform, String metadataHash, Map<String, String> parameters) {
+    public String build(CloudPlatform cloudPlatform, String metadataHash, int consulServers, Map<String, String> parameters) {
         parameters.put("METADATA_ADDRESS", hostAddress);
         parameters.put("METADATA_HASH", metadataHash);
+        parameters.put("CONSUL_SERVER_COUNT", "" + consulServers);
         String userDataScript = userDataScripts.get(cloudPlatform);
         StringBuilder stringBuilder = new StringBuilder("#!/bin/bash\n");
         for (Entry<String, String> parameter : parameters.entrySet()) {

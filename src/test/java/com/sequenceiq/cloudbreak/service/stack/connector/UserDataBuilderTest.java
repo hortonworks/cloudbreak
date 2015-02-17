@@ -32,7 +32,7 @@ public class UserDataBuilderTest {
         Map<String, String> map = new HashMap<>();
         map.put("NODE_PREFIX", "testamb");
         map.put("MYDOMAIN", "test.kom");
-        Assert.assertEquals(expectedScript, userDataBuilder.build(CloudPlatform.AWS, "hash123", map));
+        Assert.assertEquals(expectedScript, userDataBuilder.build(CloudPlatform.AWS, "hash123", 3, map));
     }
 
     @Test
@@ -41,7 +41,7 @@ public class UserDataBuilderTest {
         Map<String, String> map = new HashMap<>();
         map.put("NODE_PREFIX", "testamb");
         map.put("MYDOMAIN", "test.kom");
-        Assert.assertEquals(expectedScript, userDataBuilder.build(CloudPlatform.AZURE, "hash123", map));
+        Assert.assertEquals(expectedScript, userDataBuilder.build(CloudPlatform.AZURE, "hash123", 3, map));
     }
 
     @Test
@@ -50,7 +50,7 @@ public class UserDataBuilderTest {
         Map<String, String> map = new HashMap<>();
         map.put("NODE_PREFIX", "testamb");
         map.put("MYDOMAIN", "test.kom");
-        Assert.assertEquals(expectedScript, userDataBuilder.build(CloudPlatform.GCC, "hash123", map));
+        Assert.assertEquals(expectedScript, userDataBuilder.build(CloudPlatform.GCC, "hash123", 3, map));
     }
 
 }

@@ -87,12 +87,12 @@ public class ProvisionContext {
                 String statusReason = "Creation of cluster infrastructure has started on the cloud provider.";
                 stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS, statusReason);
                 stackUpdater.updateStackStatusReason(stack.getId(), stack.getStatus().name());
+                String userDataScript = userDataBuilder.build(cloudPlatform, stack.getHash(), stack.getConsulServers(), userDataParams);
                 if (!cloudPlatform.isWithTemplate()) {
                     stackUpdater.updateStackStatus(stack.getId(), Status.REQUESTED, "Creation of cluster infrastructure has been requested.");
                     Set<Resource> resourceSet = new HashSet<>();
                     ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
-                    final ProvisionContextObject pCO =
-                            resourceBuilderInit.provisionInit(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), userDataParams));
+                    final ProvisionContextObject pCO = resourceBuilderInit.provisionInit(stack, userDataScript);
                     for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
                         List<Resource> buildResources = resourceBuilder.buildResources(pCO, 0, Arrays.asList(resourceSet), Optional.<InstanceGroup>absent());
                         CreateResourceRequest createResourceRequest =
@@ -134,7 +134,7 @@ public class ProvisionContext {
                     reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(cloudPlatform, stack.getId(), resourceSet)));
                 } else {
                     CloudPlatformConnector cloudPlatformConnector = cloudPlatformConnectors.get(cloudPlatform);
-                    cloudPlatformConnector.buildStack(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), userDataParams), setupProperties);
+                    cloudPlatformConnector.buildStack(stack, userDataScript, setupProperties);
                 }
             } else {
                 LOGGER.info("CloudFormation stack creation was requested for a stack, that is not in REQUESTED status anymore. [stackId: '{}', status: '{}']",

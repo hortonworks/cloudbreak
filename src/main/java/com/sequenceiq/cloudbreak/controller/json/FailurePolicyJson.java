@@ -5,14 +5,14 @@ import com.sequenceiq.cloudbreak.domain.AdjustmentType;
 public class FailurePolicyJson implements JsonEntity {
 
     private Long id;
-    private Long threshold;
+    private long threshold;
     private AdjustmentType adjustmentType;
 
-    public Long getThreshold() {
+    public long getThreshold() {
         return threshold;
     }
 
-    public void setThreshold(Long threshold) {
+    public void setThreshold(long threshold) {
         this.threshold = threshold;
     }
 
@@ -25,7 +25,6 @@ public class FailurePolicyJson implements JsonEntity {
     }
 
     public Long getId() {
-
         return id;
     }
 
