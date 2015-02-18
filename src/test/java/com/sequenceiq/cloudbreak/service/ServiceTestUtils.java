@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsInstanceType;
@@ -21,11 +20,9 @@ import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.service.stack.connector.ConnectorTestUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccInstanceType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccRawDiskType;
 
@@ -252,15 +249,6 @@ public final class ServiceTestUtils {
         event.setEventTimestamp(eventTimestamp);
         event.setNodeCount(nodeCount);
         return event;
-    }
-
-    public static SnsTopic createSnsTopic(Credential credential) {
-        SnsTopic snsTopic = new SnsTopic();
-        snsTopic.setId(ConnectorTestUtil.DEFAULT_ID);
-        snsTopic.setCredential((AwsCredential) credential);
-        snsTopic.setTopicArn(ConnectorTestUtil.DEFAULT_TOPIC_ARN);
-        snsTopic.setRegion(Regions.DEFAULT_REGION);
-        return snsTopic;
     }
 
     public static DescribeInstancesResult createDescribeInstanceResult() {
