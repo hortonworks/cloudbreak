@@ -1,19 +1,24 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.controller.validation.ValidStackRequest;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.OnFailureAction;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.SubnetJson;
 
+@ValidStackRequest
 public class StackJson implements JsonEntity {
 
     private Long id;
@@ -22,6 +27,7 @@ public class StackJson implements JsonEntity {
             message = "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
     private String name;
+    @NotNull
     private String region;
     private String owner;
     private String account;
@@ -47,9 +53,12 @@ public class StackJson implements JsonEntity {
     private String statusReason;
     private OnFailureAction onFailureAction = OnFailureAction.ROLLBACK;
     private FailurePolicyJson failurePolicy;
+    @Valid
     private List<InstanceGroupJson> instanceGroups = new ArrayList<>();
     private Integer consulServerCount;
     private List<SubnetJson> allowedSubnets = new ArrayList<>();
+
+    private Map<String, String> parameters = new HashMap<>();
 
     public StackJson() {
     }
@@ -240,5 +249,13 @@ public class StackJson implements JsonEntity {
 
     public void setConsulServerCount(Integer consulServerCount) {
         this.consulServerCount = consulServerCount;
+    }
+
+    public Map<String, String> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(Map<String, String> parameters) {
+        this.parameters = parameters;
     }
 }

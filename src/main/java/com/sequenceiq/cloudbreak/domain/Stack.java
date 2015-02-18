@@ -3,16 +3,20 @@ package com.sequenceiq.cloudbreak.domain;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.MapKeyColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -180,6 +184,11 @@ public class Stack implements ProvisionEntity {
     private int consulServers;
 
     private boolean metadataReady;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @MapKeyColumn(name = "key")
+    @Column(name = "value", columnDefinition = "TEXT", length = 100000)
+    private Map<String, String> parameters;
 
     @OneToOne
     private Credential credential;
@@ -481,5 +490,13 @@ public class Stack implements ProvisionEntity {
 
     public void addAllowedSubnet(Subnet subnet) {
         allowedSubnets.add(subnet);
+    }
+
+    public Map<String, String> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(Map<String, String> parameters) {
+        this.parameters = parameters;
     }
 }
