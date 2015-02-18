@@ -3,9 +3,12 @@ package com.sequenceiq.cloudbreak.service.stack.handler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+import com.sequenceiq.cloudbreak.service.cluster.flow.ConsulPluginEvent;
+import com.sequenceiq.cloudbreak.service.cluster.flow.PluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,6 +91,9 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
     @Autowired
     private AmbariClientService clientService;
 
+    @Autowired
+    private PluginManager pluginManager;
+
     @Override
     public void accept(Event<StackStatusUpdateRequest> event) {
         StackStatusUpdateRequest statusUpdateRequest = event.getData();
@@ -99,6 +105,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
         MDCBuilder.buildMdcContext(stack);
         if (StatusRequest.STOPPED.equals(statusRequest)) {
             cloudbreakEventService.fireCloudbreakEvent(stackId, Status.STOP_IN_PROGRESS.name(), "Cluster infrastructure is stopping.");
+            triggerConsulEvent(stack, ConsulPluginEvent.STOP_AMBARI_EVENT);
             boolean stopped;
             if (cloudPlatform.isWithTemplate()) {
                 CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
@@ -126,7 +133,8 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                 final Stack updatedStack = stackRepository.findOneWithLists(stack.getId());
                 waitForAmbariToStart(updatedStack);
                 Cluster cluster = clusterRepository.findOneWithLists(updatedStack.getCluster().getId());
-                boolean hostsJoined = waitForHostsToJoin(updatedStack);
+                triggerConsulEvent(updatedStack, ConsulPluginEvent.START_AMBARI_EVENT);
+                boolean hostsJoined = restartAmbariAgentsIfNeeded(updatedStack, waitForHostsToJoin(updatedStack));
                 if (hostsJoined) {
                     String statusReason = "Cluster infrastructure is available, starting of services has been requested. AMBARI_IP:" + stack.getAmbariIp();
                     LOGGER.info("Update stack state to: {}", Status.AVAILABLE);
@@ -213,5 +221,19 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
             LOGGER.error(ex.getMessage());
         }
         return ambariHostsJoinStatusCheckerTask.checkStatus(ambariHosts);
+    }
+
+    private boolean restartAmbariAgentsIfNeeded(Stack stack, boolean started) {
+        if (!started) {
+            LOGGER.info("Ambari agents couldn't join. Restart ambari agents...");
+            triggerConsulEvent(stack, ConsulPluginEvent.RESTART_AMBARI_EVENT);
+            return waitForHostsToJoin(stack);
+        }
+        return true;
+    }
+
+    private void triggerConsulEvent(Stack stack, ConsulPluginEvent event) {
+        Set<String> eventIds = pluginManager.triggerPlugins(stack.getAllInstanceMetaData(), event);
+        pluginManager.waitForEventFinish(stack, stack.getAllInstanceMetaData(), eventIds);
     }
 }

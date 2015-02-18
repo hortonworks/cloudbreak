@@ -29,14 +29,14 @@ public class RecipeEngine {
     }
 
     public void executePreInstall(Stack stack) {
-        triggerAndWaitForPlugins(stack, RecipeLifecycleEvent.PRE_INSTALL);
+        triggerAndWaitForPlugins(stack, ConsulPluginEvent.PRE_INSTALL);
     }
 
     public void executePostInstall(Stack stack) {
-        triggerAndWaitForPlugins(stack, RecipeLifecycleEvent.POST_INSTALL);
+        triggerAndWaitForPlugins(stack, ConsulPluginEvent.POST_INSTALL);
     }
 
-    private void triggerAndWaitForPlugins(Stack stack, RecipeLifecycleEvent event) {
+    private void triggerAndWaitForPlugins(Stack stack, ConsulPluginEvent event) {
         Set<InstanceMetaData> instances = instanceMetadataRepository.findAllInStack(stack.getId());
         Set<String> triggerEventIds = pluginManager.triggerPlugins(instances, event);
         pluginManager.waitForEventFinish(stack, instances, triggerEventIds);
