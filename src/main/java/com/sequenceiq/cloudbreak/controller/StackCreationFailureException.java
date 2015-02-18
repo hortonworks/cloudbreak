@@ -6,6 +6,10 @@ public class StackCreationFailureException extends RuntimeException {
         super(ex);
     }
 
+    public StackCreationFailureException(String message) {
+        super(message);
+    }
+
     public StackCreationFailureException(String message, Throwable cause) {
         super(message, cause);
     }

@@ -51,6 +51,13 @@
       "MaxLength": "12",
       "AllowedPattern" : "ami-[a-z0-9]{8}",
       "ConstraintDescription" : "must follow pattern: ami-xxxxxxxx"
+    },
+
+    "RootDeviceName" : {
+      "Description" : "Name of the root device that comes with the AMI",
+      "Type" : "String",
+      "MinLength": "8",
+      "MaxLength": "12"
     }
 
   },
@@ -158,7 +165,7 @@
       "Properties" : {
       	"BlockDeviceMappings" : [
       	  {
-            "DeviceName" : "/dev/sda1",
+            "DeviceName" : { "Ref" : "RootDeviceName" },
             "Ebs" : {
               "VolumeSize" : "50",
               "VolumeType" : "gp2"

@@ -134,6 +134,7 @@ start_ambari_agent() {
     --net=host \
     --restart=always \
     -e BRIDGE_IP=$(get_ip) \
+    -v /data/jars:/usr/lib/hadoop/lib \
     $VOLUMES \
     sequenceiq/ambari:$DOCKER_TAG /start-agent
 }

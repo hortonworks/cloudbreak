@@ -28,14 +28,18 @@ import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.DescribeImagesRequest;
+import com.amazonaws.services.ec2.model.DescribeImagesResult;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.Image;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -172,13 +176,15 @@ public class AwsConnector implements CloudPlatformConnector {
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
         AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(Regions.valueOf(stack.getRegion()), awsCredential);
         String stackName = String.format("%s-%s", stack.getName(), stack.getId());
+
         List<Parameter> parameters = new ArrayList<>(Arrays.asList(
                 new Parameter().withParameterKey("SSHLocation").withParameterValue("0.0.0.0/0"),
                 new Parameter().withParameterKey("CBUserData").withParameterValue(userData),
                 new Parameter().withParameterKey("StackName").withParameterValue(stackName),
                 new Parameter().withParameterKey("StackOwner").withParameterValue(awsCredential.getRoleArn()),
                 new Parameter().withParameterKey("KeyName").withParameterValue(awsCredential.getKeyPairName()),
-                new Parameter().withParameterKey("AMI").withParameterValue(stack.getImage())
+                new Parameter().withParameterKey("AMI").withParameterValue(stack.getImage()),
+                new Parameter().withParameterKey("RootDeviceName").withParameterValue(getRootDeviceName(stack, awsCredential))
         ));
         CreateStackRequest createStackRequest = createStackRequest()
                 .withStackName(stackName)
@@ -194,18 +200,6 @@ public class AwsConnector implements CloudPlatformConnector {
         resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, stackName, stack));
         Stack updatedStack = stackUpdater.updateStackResources(stack.getId(), resources);
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", stackName, updatedStack.getId());
-    }
-
-
-    private boolean spotPriceNeeded(Set<InstanceGroup> instanceGroups) {
-        boolean spotPrice = true;
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            AwsTemplate awsTemplate = (AwsTemplate) instanceGroup.getTemplate();
-            if (awsTemplate.getSpotPrice() == null) {
-                spotPrice = false;
-            }
-        }
-        return spotPrice;
     }
 
     @Override
@@ -264,6 +258,28 @@ public class AwsConnector implements CloudPlatformConnector {
     @Override
     public boolean stopAll(Stack stack) {
         return setStackState(stack, true);
+    }
+
+    private String getRootDeviceName(Stack stack, AwsCredential awsCredential) {
+        AmazonEC2Client ec2Client = awsStackUtil.createEC2Client(Regions.valueOf(stack.getRegion()), awsCredential);
+        DescribeImagesResult images = ec2Client.describeImages(new DescribeImagesRequest().withImageIds(stack.getImage()));
+        Image image = images.getImages().get(0);
+        if (image != null) {
+            return image.getRootDeviceName();
+        } else {
+            throw new StackCreationFailureException(String.format("Couldn't describe AMI '%s'.", stack.getImage()));
+        }
+    }
+
+    private boolean spotPriceNeeded(Set<InstanceGroup> instanceGroups) {
+        boolean spotPrice = true;
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            AwsTemplate awsTemplate = (AwsTemplate) instanceGroup.getTemplate();
+            if (awsTemplate.getSpotPrice() == null) {
+                spotPrice = false;
+            }
+        }
+        return spotPrice;
     }
 
     private boolean setStackState(Stack stack, boolean stopped) {

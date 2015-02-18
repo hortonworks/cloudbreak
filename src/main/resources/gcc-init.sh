@@ -50,6 +50,7 @@ start_consul() {
     --name consul \
     --net=host \
     --restart=always \
+    -v /data/jars:/usr/lib/hadoop/lib \
     $CONSUL_IMAGE $CONSUL_OPTIONS
 }
 
