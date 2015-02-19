@@ -1,13 +1,10 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anySetOf;
 import static org.mockito.Mockito.doNothing;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import org.junit.Before;
@@ -17,11 +14,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
-import com.sequenceiq.cloudbreak.controller.json.SnsTopicJson;
 import com.sequenceiq.cloudbreak.controller.validation.AWSCredentialParam;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.TemporaryAwsCredentials;
 import com.sequenceiq.cloudbreak.service.credential.RsaPublicKeyValidator;
 
@@ -32,9 +27,6 @@ public class AwsCredentialConverterTest {
     public static final String DUMMY_NAME = "dummyName";
     @InjectMocks
     private AwsCredentialConverter underTest;
-
-    @Mock
-    private SnsTopicConverter snsTopicConverter;
 
     @Mock
     private RsaPublicKeyValidator rsaPublicKeyValidator;
@@ -54,8 +46,6 @@ public class AwsCredentialConverterTest {
     @Test
     public void testConvertAwsCredentialEntityToJson() {
         // GIVEN
-        given(snsTopicConverter.convertAllEntityToJson(anySetOf(SnsTopic.class)))
-                .willReturn(new HashSet<SnsTopicJson>());
         // WHEN
         CredentialJson result = underTest.convert(awsCredential);
         // THEN
@@ -68,8 +58,6 @@ public class AwsCredentialConverterTest {
     public void testConvertAwsCredentialEntityToJsonWhenDescriptionIsNull() {
         // GIVEN
         awsCredential.setDescription(null);
-        given(snsTopicConverter.convertAllEntityToJson(anySetOf(SnsTopic.class)))
-                .willReturn(new HashSet<SnsTopicJson>());
         // WHEN
         CredentialJson result = underTest.convert(awsCredential);
         // THEN
@@ -93,7 +81,6 @@ public class AwsCredentialConverterTest {
         awsCredential.setId(1L);
         awsCredential.setName(DUMMY_NAME);
         awsCredential.setRoleArn(DUMMY_ROLE_ARN);
-        awsCredential.setSnsTopics(new HashSet<SnsTopic>());
         awsCredential.setDescription(DUMMY_DESCRIPTION);
         awsCredential.setTemporaryAwsCredentials(new TemporaryAwsCredentials());
         awsCredential.setPublicInAccount(true);
@@ -108,7 +95,6 @@ public class AwsCredentialConverterTest {
         credentialJson.setName(DUMMY_NAME);
         Map<String, Object> params = new HashMap<>();
         params.put(AWSCredentialParam.ROLE_ARN.getName(), DUMMY_ROLE_ARN);
-        params.put(AWSCredentialParam.SNS_TOPICS.getName(), new HashSet<SnsTopic>());
         credentialJson.setParameters(params);
         return credentialJson;
     }

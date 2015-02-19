@@ -1,9 +1,16 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
+import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_COMPLETE;
+import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_FAILED;
+import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_COMPLETE;
+import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_FAILED;
+import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_COMPLETE;
+import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_FAILED;
+import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_IN_PROGRESS;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +34,7 @@ import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.Parameter;
+import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
@@ -38,7 +46,9 @@ import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
 import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
@@ -50,6 +60,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -59,6 +70,7 @@ import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
+import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstanceStatusCheckerTask;
@@ -72,7 +84,7 @@ public class AwsConnector implements CloudPlatformConnector {
 
     private static final int MAX_POLLING_ATTEMPTS = 60;
     private static final int POLLING_INTERVAL = 5000;
-
+    private static final int INFINITE_ATTEMPTS = -1;
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsConnector.class);
 
     @Autowired
@@ -103,66 +115,18 @@ public class AwsConnector implements CloudPlatformConnector {
     private PollingService<AutoScalingGroupReady> pollingService;
 
     @Autowired
+    private PollingService<CloudFormationStackPollerContext> stackPollingService;
+
+    @Autowired
     private ClusterRepository clusterRepository;
 
     @Autowired
     private StackRepository stackRepository;
 
-    /**
-     * If the AutoScaling group has some suspended scaling policies it causes that the CloudFormation stack delete won't be able to remove the ASG.
-     * In this case the ASG size is reduced to zero and the processes are resumed first.
-     */
+
     @Override
-    public void deleteStack(Stack stack, Credential credential) {
-        MDCBuilder.buildMdcContext(stack);
-        LOGGER.info("Deleting stack: {}", stack.getId());
-        AwsCredential awsCredential = (AwsCredential) credential;
-        Resource resource = stack.getResourceByType(ResourceType.CLOUDFORMATION_STACK);
-        if (resource != null) {
-            AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(Regions.valueOf(stack.getRegion()), awsCredential);
-            LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", stack.getId(), resource.getResourceName());
-            DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(resource.getResourceName());
-            try {
-                client.describeStacks(describeStacksRequest);
-            } catch (AmazonServiceException e) {
-                if (e.getErrorMessage().equals("Stack:" + resource.getResourceName() + " does not exist")) {
-                    LOGGER.info("AWS CloudFormation stack not found, publishing {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
-                    reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
-                    return;
-                } else {
-                    throw e;
-                }
-            }
-            for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                try {
-                    String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, instanceGroup.getGroupName());
-                    AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(Regions.valueOf(stack.getRegion()), awsCredential);
-                    List<AutoScalingGroup> asGroups = amazonASClient.describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest()
-                            .withAutoScalingGroupNames(asGroupName)).getAutoScalingGroups();
-                    if (!asGroups.isEmpty()) {
-                        if (!asGroups.get(0).getSuspendedProcesses().isEmpty()) {
-                            amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
-                                    .withAutoScalingGroupName(asGroupName)
-                                    .withMinSize(0)
-                                    .withDesiredCapacity(0));
-                            amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
-                        }
-                    }
-                } catch (AmazonServiceException e) {
-                    if (e.getErrorMessage().matches("Resource.*does not exist for stack.*")) {
-                        MDCBuilder.buildMdcContext(stack);
-                        LOGGER.info(e.getErrorMessage());
-                    } else {
-                        throw e;
-                    }
-                }
-            }
-            DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(resource.getResourceName());
-            client.deleteStack(deleteStackRequest);
-        } else {
-            LOGGER.info("No resource saved for stack, publishing {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
-            reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
-        }
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.AWS;
     }
 
     @Override
@@ -175,31 +139,39 @@ public class AwsConnector implements CloudPlatformConnector {
         MDCBuilder.buildMdcContext(stack);
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
         AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(Regions.valueOf(stack.getRegion()), awsCredential);
-        String stackName = String.format("%s-%s", stack.getName(), stack.getId());
-
+        String cFStackName = String.format("%s-%s", stack.getName(), stack.getId());
         List<Parameter> parameters = new ArrayList<>(Arrays.asList(
                 new Parameter().withParameterKey("SSHLocation").withParameterValue("0.0.0.0/0"),
                 new Parameter().withParameterKey("CBUserData").withParameterValue(userData),
-                new Parameter().withParameterKey("StackName").withParameterValue(stackName),
+                new Parameter().withParameterKey("StackName").withParameterValue(cFStackName),
                 new Parameter().withParameterKey("StackOwner").withParameterValue(awsCredential.getRoleArn()),
                 new Parameter().withParameterKey("KeyName").withParameterValue(awsCredential.getKeyPairName()),
                 new Parameter().withParameterKey("AMI").withParameterValue(stack.getImage()),
                 new Parameter().withParameterKey("RootDeviceName").withParameterValue(getRootDeviceName(stack, awsCredential))
         ));
         CreateStackRequest createStackRequest = createStackRequest()
-                .withStackName(stackName)
+                .withStackName(cFStackName)
                 .withOnFailure(com.amazonaws.services.cloudformation.model.OnFailure.valueOf(stack.getOnFailureActionAction().name()))
                 .withTemplateBody(cfTemplateBuilder.build("templates/aws-cf-stack.ftl",
                         spotPriceNeeded(stack.getInstanceGroups()), stack.getInstanceGroupsAsList()))
-                .withNotificationARNs((String) setupProperties.get(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY))
                 .withParameters(parameters);
         client.createStack(createStackRequest);
+        Resource resource = new Resource(ResourceType.CLOUDFORMATION_STACK, cFStackName, stack, null);
+        Set<Resource> resources = Sets.newHashSet(resource);
+        stack = stackUpdater.updateStackResources(stack.getId(), resources);
+        LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, stack.getId());
 
+        List<StackStatus> errorStatuses = Arrays.asList(CREATE_FAILED, ROLLBACK_IN_PROGRESS, ROLLBACK_FAILED, ROLLBACK_COMPLETE);
+        CloudFormationStackPollerContext stackPollerContext = new CloudFormationStackPollerContext(client, CREATE_COMPLETE, errorStatuses, stack);
+        try {
+            stackPollingService.pollWithTimeout(new CloudFormationStackStatusChecker(), stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
+            sendUpdatedStackCreateComplete(stack, cFStackName, resources);
+        } catch (CloudFormationStackException e) {
+            LOGGER.error(String.format("Failed to create CloudFormation stack: %s", stack.getId()), e);
+            stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_FAILED, "Creation of cluster infrastructure failed: " + e.getMessage());
+            throw new BuildStackFailureException(e);
+        }
 
-        Set<Resource> resources = new HashSet<>();
-        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, stackName, stack));
-        Stack updatedStack = stackUpdater.updateStackResources(stack.getId(), resources);
-        LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", stackName, updatedStack.getId());
     }
 
     @Override
@@ -246,9 +218,6 @@ public class AwsConnector implements CloudPlatformConnector {
         return true;
     }
 
-    protected CreateStackRequest createStackRequest() {
-        return new CreateStackRequest();
-    }
 
     @Override
     public boolean startAll(Stack stack) {
@@ -260,14 +229,51 @@ public class AwsConnector implements CloudPlatformConnector {
         return setStackState(stack, true);
     }
 
-    private String getRootDeviceName(Stack stack, AwsCredential awsCredential) {
-        AmazonEC2Client ec2Client = awsStackUtil.createEC2Client(Regions.valueOf(stack.getRegion()), awsCredential);
-        DescribeImagesResult images = ec2Client.describeImages(new DescribeImagesRequest().withImageIds(stack.getImage()));
-        Image image = images.getImages().get(0);
-        if (image != null) {
-            return image.getRootDeviceName();
+    /**
+     * If the AutoScaling group has some suspended scaling policies it causes that the CloudFormation stack delete won't be able to remove the ASG.
+     * In this case the ASG size is reduced to zero and the processes are resumed first.
+     */
+    @Override
+    public void deleteStack(Stack stack, Credential credential) {
+        MDCBuilder.buildMdcContext(stack);
+        LOGGER.info("Deleting stack: {}", stack.getId());
+        AwsCredential awsCredential = (AwsCredential) credential;
+        Resource resource = stack.getResourceByType(ResourceType.CLOUDFORMATION_STACK);
+        if (resource != null) {
+            AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(Regions.valueOf(stack.getRegion()), awsCredential);
+            String cFStackName = resource.getResourceName();
+            LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", stack.getId(), cFStackName);
+            DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
+            try {
+                client.describeStacks(describeStacksRequest);
+            } catch (AmazonServiceException e) {
+                if (e.getErrorMessage().equals("Stack:" + cFStackName + " does not exist")) {
+                    LOGGER.info("AWS CloudFormation stack not found, publishing {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
+                    reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
+                    return;
+                } else {
+                    throw e;
+                }
+            }
+            resumeAutoScalingPolicies(stack, awsCredential);
+            DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(cFStackName);
+            client.deleteStack(deleteStackRequest);
+
+            List<StackStatus> errorStatuses = Arrays.asList(DELETE_FAILED);
+            CloudFormationStackPollerContext stackPollerContext = new CloudFormationStackPollerContext(client, DELETE_COMPLETE, errorStatuses, stack);
+            try {
+                stackPollingService.pollWithTimeout(new CloudFormationStackStatusChecker(), stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
+                LOGGER.info("CloudFormation stack({}) delete completed. Publishing {} event.", cFStackName, ReactorConfig.DELETE_COMPLETE_EVENT);
+                reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
+            } catch (CloudFormationStackException e) {
+                LOGGER.error(String.format("Failed to delete CloudFormation stack: %s, id:%s", cFStackName, stack.getId()), e);
+                stackUpdater.updateStackStatus(stack.getId(), Status.DELETE_FAILED, "Failed to delete stack: " + e.getMessage());
+                throw new BuildStackFailureException(e);
+            }
+
         } else {
-            throw new StackCreationFailureException(String.format("Couldn't describe AMI '%s'.", stack.getImage()));
+            LOGGER.info("No resource saved for stack, publishing {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
+            reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
         }
     }
 
@@ -280,6 +286,24 @@ public class AwsConnector implements CloudPlatformConnector {
             }
         }
         return spotPrice;
+    }
+
+    private void sendUpdatedStackCreateComplete(Stack stack, String cFStackName, Set<Resource> resourceSet) {
+        stack = stackUpdater.updateStackCreateComplete(stack.getId());
+        LOGGER.info("CloudFormation stack({}) creation completed.", cFStackName);
+        LOGGER.info("Publishing {} event.", ReactorConfig.PROVISION_COMPLETE_EVENT);
+        reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AWS, stack.getId(), resourceSet)));
+    }
+
+    private String getRootDeviceName(Stack stack, AwsCredential awsCredential) {
+        AmazonEC2Client ec2Client = awsStackUtil.createEC2Client(Regions.valueOf(stack.getRegion()), awsCredential);
+        DescribeImagesResult images = ec2Client.describeImages(new DescribeImagesRequest().withImageIds(stack.getImage()));
+        Image image = images.getImages().get(0);
+        if (image != null) {
+            return image.getRootDeviceName();
+        } else {
+            throw new StackCreationFailureException(String.format("Couldn't describe AMI '%s'.", stack.getImage()));
+        }
     }
 
     private boolean setStackState(Stack stack, boolean stopped) {
@@ -347,8 +371,34 @@ public class AwsConnector implements CloudPlatformConnector {
         }
     }
 
-    @Override
-    public CloudPlatform getCloudPlatform() {
-        return CloudPlatform.AWS;
+    private void resumeAutoScalingPolicies(Stack stack, AwsCredential awsCredential) {
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            try {
+                String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, instanceGroup.getGroupName());
+                AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(Regions.valueOf(stack.getRegion()), awsCredential);
+                List<AutoScalingGroup> asGroups = amazonASClient.describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest()
+                        .withAutoScalingGroupNames(asGroupName)).getAutoScalingGroups();
+                if (!asGroups.isEmpty()) {
+                    if (!asGroups.get(0).getSuspendedProcesses().isEmpty()) {
+                        amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
+                                .withAutoScalingGroupName(asGroupName)
+                                .withMinSize(0)
+                                .withDesiredCapacity(0));
+                        amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
+                    }
+                }
+            } catch (AmazonServiceException e) {
+                if (e.getErrorMessage().matches("Resource.*does not exist for stack.*")) {
+                    MDCBuilder.buildMdcContext(stack);
+                    LOGGER.info(e.getErrorMessage());
+                } else {
+                    throw e;
+                }
+            }
+        }
+    }
+
+    protected CreateStackRequest createStackRequest() {
+        return new CreateStackRequest();
     }
 }

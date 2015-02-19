@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.converter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
@@ -14,9 +13,6 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 @Component
 public class AwsCredentialConverter extends AbstractConverter<CredentialJson, AwsCredential> {
 
-    @Autowired
-    private SnsTopicConverter snsTopicConverter;
-
     @Override
     public CredentialJson convert(AwsCredential entity) {
         CredentialJson credentialJson = new CredentialJson();
@@ -26,7 +22,6 @@ public class AwsCredentialConverter extends AbstractConverter<CredentialJson, Aw
         credentialJson.setPublicInAccount(entity.isPublicInAccount());
         Map<String, Object> params = new HashMap<>();
         params.put(AWSCredentialParam.ROLE_ARN.getName(), entity.getRoleArn());
-        params.put(AWSCredentialParam.SNS_TOPICS.getName(), snsTopicConverter.convertAllEntityToJson(entity.getSnsTopics()));
         credentialJson.setParameters(params);
         credentialJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         credentialJson.setPublicKey(entity.getPublicKey());
