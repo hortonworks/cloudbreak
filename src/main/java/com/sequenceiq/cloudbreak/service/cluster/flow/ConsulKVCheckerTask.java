@@ -45,7 +45,7 @@ public class ConsulKVCheckerTask implements StatusCheckerTask<ConsulKVCheckerCon
         }
         LOGGER.info(result.toString());
         if (failed) {
-            throw new PluginFailureException(String.format("One or more entries in Consul's key-value store signal failure: ", result.toString()));
+            throw new PluginFailureException(String.format("One or more entries in Consul's key-value store signal failure: %s", result.toString()));
         }
         return keysFound;
     }

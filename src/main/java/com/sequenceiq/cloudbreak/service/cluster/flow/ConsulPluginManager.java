@@ -57,7 +57,7 @@ public class ConsulPluginManager implements PluginManager {
     }
 
     @Override
-    public Set<String> triggerPlugins(Collection<InstanceMetaData> instanceMetaData, RecipeLifecycleEvent event) {
+    public Set<String> triggerPlugins(Collection<InstanceMetaData> instanceMetaData, ConsulPluginEvent event) {
         List<ConsulClient> clients = ConsulUtils.createClients(instanceMetaData);
         String eventId = ConsulUtils.fireEvent(clients, event.getName(), "", null, null);
         if (eventId != null) {

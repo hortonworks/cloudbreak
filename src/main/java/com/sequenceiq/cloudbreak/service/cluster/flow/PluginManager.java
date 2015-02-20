@@ -13,7 +13,7 @@ public interface PluginManager {
 
     Set<String> installPlugins(Collection<InstanceMetaData> instanceMetaData, Collection<String> plugins);
 
-    Set<String> triggerPlugins(Collection<InstanceMetaData> instanceMetaData, RecipeLifecycleEvent event);
+    Set<String> triggerPlugins(Collection<InstanceMetaData> instanceMetaData, ConsulPluginEvent event);
 
     void waitForEventFinish(Stack stack, Collection<InstanceMetaData> instanceMetaData, Set<String> eventIds);
 }
