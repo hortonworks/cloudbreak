@@ -18,6 +18,7 @@ import reactor.event.Event;
 @Service
 public class ReactorFlowManager implements FlowManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReactorFlowManager.class);
+
     private Map<Class, Transition> transitionMap = new HashMap();
 
     @Autowired

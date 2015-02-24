@@ -7,13 +7,14 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
+import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.ProvisioningFacade;
 
 import reactor.event.Event;
 
 @Component
-public class AmbariRoleAllocationHandler extends AbstractFlowHandler<ProvisioningContext> {
+public class AmbariRoleAllocationHandler extends AbstractFlowHandler<ProvisioningContext> implements FlowHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariRoleAllocationHandler.class);
 
     @Autowired
