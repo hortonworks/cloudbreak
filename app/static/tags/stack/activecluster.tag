@@ -150,9 +150,9 @@
                         </div>
                         <div class="panel panel-default" ng-repeat="group in $root.activeCluster.instanceGroups">
                             <div class="panel-heading">
-                                <h5><a href="" data-toggle="collapse" data-target='#panel-collapsetmp{{group.templateId}}'><span class="badge pull-right ng-binding">{{group.group}}: {{group.nodeCount}} node</span><i class="fa fa-file-o fa-fw"></i>Template: {{getSelectedTemplate(group.templateId).name}}</a></h5>
+                                <h5><a href="" data-toggle="collapse" data-target='#panel-collapsetmp-{{$index}}-{{group.templateId}}'><span class="badge pull-right ng-binding">{{group.group}}: {{group.nodeCount}} node</span><i class="fa fa-file-o fa-fw"></i>Template: {{getSelectedTemplate(group.templateId).name}}</a></h5>
                             </div>
-                            <div id="panel-collapsetmp{{group.templateId}}" class="panel-collapse collapse">
+                            <div id="panel-collapsetmp-{{$index}}-{{group.templateId}}" class="panel-collapse collapse">
                                 <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'AWS' ">
                                     <div ng-include="'tags/template/awslist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}"></div>
                                 </div>

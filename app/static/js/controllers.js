@@ -77,7 +77,13 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
                 message: message,
                 position: 'right',
                 classes: modifyClass,
-                duration: 4000
+                duration: 4000,
+                onClose: function() {
+                    var el = angular.element(document.querySelector('[data-closing="true"]'));
+                    if (el != undefined) {
+                        el.remove();
+                    };
+                }
             });
         }
 

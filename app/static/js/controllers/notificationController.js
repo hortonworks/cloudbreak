@@ -53,8 +53,10 @@ function ($scope, $rootScope, $filter, Cluster, GlobalStack) {
 
     function handleStatusChange(notification){
       var actCluster = $filter('filter')($rootScope.clusters, { id: notification.stackId })[0];
-      actCluster.status = notification.eventType;
-      addNotificationToGlobalEvents(notification);
+      if (actCluster != undefined) {
+        actCluster.status = notification.eventType;
+        addNotificationToGlobalEvents(notification);
+      }
     }
 
     function handleAvailableNotification(notification) {

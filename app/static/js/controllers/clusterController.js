@@ -118,7 +118,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             UluwatuCluster.delete(cluster, function (result) {
                 var actCluster = $filter('filter')($rootScope.clusters, { id: cluster.id }, true)[0];
                 actCluster.status = "DELETE_IN_PROGRESS";
-                $scope.showSuccess($rootScope.error_msg.cluster_delete_success1 + cluster.id + $rootScope.error_msg.cluster_delete_success2);
                 $scope.$broadcast('DELETE_PERISCOPE_CLUSTER', cluster.id);
             }, function (failure){
                 $scope.showError(failure, $rootScope.error_msg.cluster_delete_failed);
