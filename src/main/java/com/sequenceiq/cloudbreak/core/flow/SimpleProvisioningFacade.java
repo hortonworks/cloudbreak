@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
+import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 
 @Service
 public class SimpleProvisioningFacade implements ProvisioningFacade {
@@ -28,7 +29,7 @@ public class SimpleProvisioningFacade implements ProvisioningFacade {
     public ProvisioningContext setup(ProvisioningContext provisioningContext) throws CloudbreakException {
         LOGGER.debug("Set up provisioning. Context: {}", provisioningContext);
         try {
-            provisionSetups.get(provisioningContext.getCloudPlatform())
+            ProvisionEvent provisioningSetupResult = provisionSetups.get(provisioningContext.getCloudPlatform())
                     .setupProvisioning(stackService.get(provisioningContext.getStackId()));
             LOGGER.debug("Provisioning setup done.");
         } catch (Exception e) {

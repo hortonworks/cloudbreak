@@ -2,6 +2,10 @@ package com.sequenceiq.cloudbreak.core.flow;
 
 import static reactor.event.selector.Selectors.$;
 
+import java.util.Map;
+
+import javax.annotation.Resource;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,6 +18,8 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.ProvisioningHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ProvisioningSetupHandler;
 
 import reactor.core.Reactor;
+import reactor.event.Event;
+import reactor.function.Consumer;
 
 @Component
 public class FlowInitializer implements InitializingBean {
@@ -33,23 +39,8 @@ public class FlowInitializer implements InitializingBean {
     @Autowired
     private Reactor reactor;
 
-    @Autowired
-    private ProvisioningSetupHandler provisioningSetupHandler;
-
-    @Autowired
-    private ProvisioningHandler provisioningHandler;
-
-    @Autowired
-    private MetadataSetupHandler metadataSetupHandler;
-
-    @Autowired
-    private AmbariRoleAllocationHandler ambariRoleAllocationHandler;
-
-    @Autowired
-    private AmbariStartHandler ambariStartHandler;
-
-    @Autowired
-    private ClusterCreationHandler clusterCreationHandler;
+    @Resource
+    private Map<Class, FlowHandler> flowHandlersMap;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -69,12 +60,22 @@ public class FlowInitializer implements InitializingBean {
                 ReactorFlowManager.TransitionFactory
                         .createTransition(Phases.AMBARI_START.name(), Phases.CLUSTER_CREATION.name(), "AMBARI_START_FAILED"));
 
-        reactor.on($(Phases.PROVISIONING_SETUP.name()), provisioningSetupHandler);
-        reactor.on($(Phases.PROVISIONING.name()), provisioningHandler);
-        reactor.on($(Phases.METADATA_SETUP.name()), metadataSetupHandler);
-        reactor.on($(Phases.AMBARI_ROLE_ALLOCATION.name()), ambariRoleAllocationHandler);
-        reactor.on($(Phases.AMBARI_START.name()), ambariStartHandler);
-        reactor.on($(Phases.CLUSTER_CREATION.name()), clusterCreationHandler);
+        reactor.on($(Phases.PROVISIONING_SETUP.name()), getHandlerForClass(ProvisioningSetupHandler.class));
+        reactor.on($(Phases.PROVISIONING.name()), getHandlerForClass(ProvisioningHandler.class));
+        reactor.on($(Phases.METADATA_SETUP.name()), getHandlerForClass(MetadataSetupHandler.class));
+        reactor.on($(Phases.AMBARI_ROLE_ALLOCATION.name()), getHandlerForClass(AmbariRoleAllocationHandler.class));
+        reactor.on($(Phases.AMBARI_START.name()), getHandlerForClass(AmbariStartHandler.class));
+        reactor.on($(Phases.CLUSTER_CREATION.name()), getHandlerForClass(ClusterCreationHandler.class));
 
+    }
+
+    private Consumer<Event<?>> getHandlerForClass(Class handlerClass) {
+        FlowHandler handler = null;
+        if (flowHandlersMap.containsKey(handlerClass)) {
+            handler = flowHandlersMap.get(handlerClass);
+        } else {
+            throw new IllegalStateException("No flowhandler found for" + handlerClass + " Check your configuration");
+        }
+        return (Consumer<Event<?>>) handler;
     }
 }
