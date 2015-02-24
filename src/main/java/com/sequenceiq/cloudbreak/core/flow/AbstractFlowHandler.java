@@ -21,7 +21,7 @@ import reactor.function.Consumer;
  *
  * @param <T> the type of the event payload
  */
-public abstract class AbstractFlowHandler<T> implements Consumer<Event<T>> {
+public abstract class AbstractFlowHandler<T> implements Consumer<Event<T>>, FlowHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFlowHandler.class);
 
     @Autowired
