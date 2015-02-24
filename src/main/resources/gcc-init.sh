@@ -50,7 +50,6 @@ start_consul() {
     --name consul \
     --net=host \
     --restart=always \
-    -v /data/jars:/usr/lib/hadoop/lib \
     $CONSUL_IMAGE $CONSUL_OPTIONS
 }
 
@@ -135,6 +134,8 @@ start_ambari_agent() {
     --net=host \
     --restart=always \
     -e BRIDGE_IP=$(get_ip) \
+    -e HADOOP_CLASSPATH=/data/jars/*:/usr/lib/hadoop/lib/* \
+    -v /data/jars:/data/jars \
     $VOLUMES \
     sequenceiq/ambari:$DOCKER_TAG /start-agent
 }
