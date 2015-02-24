@@ -19,13 +19,13 @@ import com.sequenceiq.it.util.RestUtil;
 
 @ContextConfiguration(classes = IntegrationTestConfiguration.class)
 public class TestSuiteInitializer extends AbstractTestNGSpringContextTests {
-    @Value("${integrationtest.uaa.server}")
+    @Value("${integrationtest.uaa.server:}")
     private String defaultUaaServer;
 
-    @Value("${integrationtest.uaa.user}")
+    @Value("${integrationtest.uaa.user:}")
     private String defaultUaaUser;
 
-    @Value("${integrationtest.uaa.password}")
+    @Value("${integrationtest.uaa.password:}")
     private String defaultUaaPassword;
 
     @Value("${integrationtest.keystore:}")

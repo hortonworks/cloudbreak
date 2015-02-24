@@ -23,7 +23,7 @@ import com.sequenceiq.it.util.RestUtil;
 
 @ContextConfiguration(classes = IntegrationTestConfiguration.class)
 public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextTests {
-    @Value("${integrationtest.cloudbreak.server}")
+    @Value("${integrationtest.cloudbreak.server:}")
     private String defaultCloudbreakServer;
 
     @Autowired
