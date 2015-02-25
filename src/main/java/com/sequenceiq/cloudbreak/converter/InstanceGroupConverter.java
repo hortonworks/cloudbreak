@@ -7,10 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.InstanceGroupJson;
-import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 
 @Component
@@ -37,9 +36,6 @@ public class InstanceGroupConverter extends AbstractConverter<InstanceGroupJson,
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName(json.getGroup());
         instanceGroup.setNodeCount(json.getNodeCount());
-        if (!json.getGroup().contains("slave") && json.getNodeCount() != 1) {
-            throw new BadRequestException("If you have a master hostgroup than the count of the nodes has to be 1 on master group.");
-        }
         try {
             instanceGroup.setTemplate(templateRepository.findOne(json.getTemplateId()));
         } catch (AccessDeniedException e) {

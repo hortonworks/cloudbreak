@@ -21,10 +21,13 @@ import com.sequenceiq.cloudbreak.controller.json.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
+import com.sequenceiq.cloudbreak.controller.json.StackValidationRequest;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.json.UpdateStackJson;
+import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.converter.MetaDataConverter;
 import com.sequenceiq.cloudbreak.converter.StackConverter;
+import com.sequenceiq.cloudbreak.converter.StackValidationConverter;
 import com.sequenceiq.cloudbreak.converter.SubnetConverter;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -46,6 +49,9 @@ public class StackController {
 
     @Autowired
     private MetaDataConverter metaDataConverter;
+
+    @Autowired
+    private StackValidationConverter stackValidationConverter;
 
     @RequestMapping(value = "user/stacks", method = RequestMethod.POST)
     @ResponseBody
@@ -155,6 +161,14 @@ public class StackController {
     public ResponseEntity<StackJson> getStackForAmbari(@RequestBody AmbariAddressJson json) {
         Stack stack = stackService.get(json.getAmbariAddress());
         return new ResponseEntity<>(stackConverter.convert(stack), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "stacks/validate", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<IdJson> validateStack(@RequestBody @Valid StackValidationRequest stackValidationRequest) {
+        StackValidation stackValidation = stackValidationConverter.convert(stackValidationRequest);
+        stackService.validateStack(stackValidation);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private ResponseEntity<IdJson> createStack(CbUser user, StackJson stackRequest, boolean publicInAccount) {

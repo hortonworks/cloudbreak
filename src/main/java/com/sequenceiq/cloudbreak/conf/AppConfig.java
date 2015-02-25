@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
@@ -23,6 +24,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptorMapFactory;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
@@ -30,6 +34,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.TemplateReader;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Configuration
 public class AppConfig {
@@ -139,5 +144,18 @@ public class AppConfig {
         CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslConnectionSocketFactory).build();
         requestFactory.setHttpClient(httpClient);
         return new RestTemplate(requestFactory);
+    }
+
+    @Bean
+    public StackServiceComponentDescriptorMapFactory stackServiceComponentDescriptorMapFactory() throws IOException {
+        Map<String, Integer> maxCardinalityReps = Maps.newHashMap();
+        maxCardinalityReps.put("1", 1);
+        maxCardinalityReps.put("0-1", 1);
+        maxCardinalityReps.put("1-2", 1);
+        maxCardinalityReps.put("0+", Integer.MAX_VALUE);
+        maxCardinalityReps.put("1+", Integer.MAX_VALUE);
+        maxCardinalityReps.put("ALL", Integer.MAX_VALUE);
+        String stackServiceComponentsJson = FileReaderUtils.readFileFromClasspath("hdp/hdp-services.json");
+        return new StackServiceComponentDescriptorMapFactory(stackServiceComponentsJson, maxCardinalityReps, new ObjectMapper());
     }
 }

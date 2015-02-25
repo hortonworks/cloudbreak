@@ -26,6 +26,22 @@ public class BlueprintConverterTest {
     public static final String DUMMY_DESCRIPTION = "dummyDescription";
 
     public static final String DUMMY_BLUEPRINT_TEXT =
+            "{\"Blueprints\":{\"blueprint_name\":\"asd\"},\"host_groups\":[{\"name\":\"asd\", \"components\":[{\"name\":\"comp\"}]},"
+                    + "{\"name\":\"slave_a\", \"components\":[{\"name\":\"comp\"}]}]}";
+
+    public static final String DUMMY_BLUEPRINT_TEXT_WITH_EMPTY_COMPONENT_ARRAY =
+            "{\"Blueprints\":{\"blueprint_name\":\"asd\"},\"host_groups\":[{\"name\":\"asd\", \"components\":[]},"
+                    + "{\"name\":\"slave_a\", \"components\":[{\"name\":\"comp\"}]}]}";
+
+    public static final String DUMMY_BLUEPRINT_TEXT_WO_COMPONENT_ARRAY =
+            "{\"Blueprints\":{\"blueprint_name\":\"asd\"},\"host_groups\":[{\"name\":\"asd\", \"components\":[{\"name\":\"comp\"}]},"
+                    + "{\"name\":\"slave_a\", \"components\":{\"name\":\"comp\"}}]}";
+
+    public static final String DUMMY_BLUEPRINT_TEXT_WO_COMPONENT_NAME =
+            "{\"Blueprints\":{\"blueprint_name\":\"asd\"},\"host_groups\":[{\"name\":\"asd\", \"components\":[{\"name\":\"comp\"}]},"
+                    + "{\"name\":\"slave_a\", \"components\":[{\"names\":\"comp\"}]}]}";
+
+    public static final String DUMMY_BLUEPRINT_TEXT_WO_COMPONENTS =
             "{\"Blueprints\":{\"blueprint_name\":\"asd\"},\"host_groups\":[{\"name\":\"asd\"},{\"name\":\"slave_a\"}]}";
 
     public static final String DUMMY_BLUEPRINT_TEXT_WO_BLUEPRINTS =
@@ -192,7 +208,7 @@ public class BlueprintConverterTest {
         assertEquals(result.getBlueprintText(), blueprintJson.getAmbariBlueprint());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = BadRequestException.class)
     public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenHostGroupDoNotHaveName() {
         // GIVEN
         given(jsonNode.toString()).willReturn(DUMMY_BLUEPRINT_TEXT_HOSTGROUPS_DONT_HAVE_NAME);
@@ -202,6 +218,50 @@ public class BlueprintConverterTest {
         Blueprint result = underTest.convert(blueprintJson);
         // THEN
         assertEquals(result.getBlueprintText(), blueprintJson.getAmbariBlueprint());
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenHostGroupDoNotHaveComponents() {
+        // GIVEN
+        given(jsonNode.toString()).willReturn(DUMMY_BLUEPRINT_TEXT_WO_COMPONENTS);
+        blueprintJson.setAmbariBlueprint(jsonNode);
+        blueprintJson.setUrl(null);
+        // WHEN
+        Blueprint result = underTest.convert(blueprintJson);
+        // THEN throws Exception
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenHostGroupContainsComponentWithoutName() {
+        // GIVEN
+        given(jsonNode.toString()).willReturn(DUMMY_BLUEPRINT_TEXT_WO_COMPONENT_NAME);
+        blueprintJson.setAmbariBlueprint(jsonNode);
+        blueprintJson.setUrl(null);
+        // WHEN
+        Blueprint result = underTest.convert(blueprintJson);
+        // THEN throws Exception
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenHostGroupHasNoComponentArray() {
+        // GIVEN
+        given(jsonNode.toString()).willReturn(DUMMY_BLUEPRINT_TEXT_WO_COMPONENT_ARRAY);
+        blueprintJson.setAmbariBlueprint(jsonNode);
+        blueprintJson.setUrl(null);
+        // WHEN
+        Blueprint result = underTest.convert(blueprintJson);
+        // THEN throws Exception
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenHostGroupHasEmptyComponentArray() {
+        // GIVEN
+        given(jsonNode.toString()).willReturn(DUMMY_BLUEPRINT_TEXT_WITH_EMPTY_COMPONENT_ARRAY);
+        blueprintJson.setAmbariBlueprint(jsonNode);
+        blueprintJson.setUrl(null);
+        // WHEN
+        Blueprint result = underTest.convert(blueprintJson);
+        // THEN throws Exception
     }
 
     private BlueprintJson createBlueprintJson() {
