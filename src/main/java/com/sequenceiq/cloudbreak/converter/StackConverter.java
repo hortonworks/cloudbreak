@@ -142,20 +142,34 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         if (json.getFailurePolicy() != null) {
             stack.setFailurePolicy(failurePolicyConverter.convert(json.getFailurePolicy()));
             FailurePolicy failurePolicy = stack.getFailurePolicy();
-            if (failurePolicy.getThreshold() == 0L) {
+            if (failurePolicy.getThreshold() == 0L && !AdjustmentType.BEST_EFFORT.equals(failurePolicy.getAdjustmentType())) {
                 throw new BadRequestException("The threshold can not be 0");
             }
             String errorMsg = String.format("At least %s live nodes are required after rollback", consulServers);
-            if (failurePolicy.getAdjustmentType().equals(AdjustmentType.EXACT)) {
-                if (fullNodeCount - failurePolicy.getThreshold() < consulServers) {
-                    throw new BadRequestException(errorMsg);
-                }
-            } else if (fullNodeCount - calculateMinCount(stack) < consulServers) {
-                throw new BadRequestException(errorMsg);
+            if (AdjustmentType.EXACT.equals(failurePolicy.getAdjustmentType())) {
+                validateExactCount(stack, consulServers, failurePolicy, errorMsg);
+            } else if (AdjustmentType.PERCENTAGE.equals(failurePolicy.getAdjustmentType())) {
+                validatePercentageCount(stack, consulServers, failurePolicy, errorMsg);
             }
         }
         stack.setParameters(json.getParameters());
         return stack;
+    }
+
+    private void validatePercentageCount(Stack stack, int consulServers, FailurePolicy failurePolicy, String errorMsg) {
+        if (calculateMinCount(stack) < consulServers) {
+            throw new BadRequestException(errorMsg);
+        } else if (failurePolicy.getThreshold() < 0L || failurePolicy.getThreshold() > ONE_HUNDRED) {
+            throw new BadRequestException("The percentage of the threshold has to be between 0 an 100.");
+        }
+    }
+
+    private void validateExactCount(Stack stack, int consulServers, FailurePolicy failurePolicy, String errorMsg) {
+        if (failurePolicy.getThreshold() < consulServers) {
+            throw new BadRequestException(errorMsg);
+        } else if (failurePolicy.getThreshold() > stack.getFullNodeCount()) {
+            throw new BadRequestException("Threshold can not be higher than the nodecount of the stack.");
+        }
     }
 
     private int getConsulServerCount(StackJson json, int fullNodeCount) {

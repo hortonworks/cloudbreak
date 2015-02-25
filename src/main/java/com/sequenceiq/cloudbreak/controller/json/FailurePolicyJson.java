@@ -5,10 +5,10 @@ import com.sequenceiq.cloudbreak.domain.AdjustmentType;
 public class FailurePolicyJson implements JsonEntity {
 
     private Long id;
-    private long threshold;
+    private Long threshold;
     private AdjustmentType adjustmentType;
 
-    public long getThreshold() {
+    public Long getThreshold() {
         return threshold;
     }
 

@@ -1,5 +1,5 @@
 package com.sequenceiq.cloudbreak.domain;
 
 public enum AdjustmentType {
-    EXACT, PERCENTAGE
+    EXACT, PERCENTAGE, BEST_EFFORT
 }

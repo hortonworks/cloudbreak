@@ -48,45 +48,53 @@ public class StackFailureHandlerService implements FailureHandlerService {
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
 
     @Override
-    public void handleFailure(Stack stack, List<ResourceRequestResult> resourceRequestResults) {
+    public void handleFailure(Stack stack, List<ResourceRequestResult> failedResourceRequestResults) {
         MDCBuilder.buildMdcContext(stack);
-        if (stack.getFailurePolicy() == null) {
-            if (resourceRequestResults.size() > 0) {
+        Stack localStack = stackRepository.findById(stack.getId());
+        if (localStack.getFailurePolicy() == null) {
+            if (failedResourceRequestResults.size() > 0) {
                 LOGGER.info("Failure policy is null so error will throw");
-                throwError(stack, resourceRequestResults);
+                throwError(localStack, failedResourceRequestResults);
             }
         } else {
-            switch (stack.getFailurePolicy().getAdjustmentType()) {
+            switch (localStack.getFailurePolicy().getAdjustmentType()) {
                 case EXACT:
-                    if (stack.getFailurePolicy().getThreshold() < resourceRequestResults.size()) {
+                    if (localStack.getFailurePolicy().getThreshold() > localStack.getFullNodeCount() - failedResourceRequestResults.size()) {
                         LOGGER.info("Number of failures is more than the threshold so error will throw");
-                        throwError(stack, resourceRequestResults);
-                    } else if (resourceRequestResults.size() != 0) {
+                        throwError(localStack, failedResourceRequestResults);
+                    } else if (failedResourceRequestResults.size() != 0) {
                         LOGGER.info("Decrease node counts because threshold was higher");
-                        handleExceptions(stack, resourceRequestResults);
+                        handleExceptions(localStack, failedResourceRequestResults);
                     }
                     break;
                 case PERCENTAGE:
-                    if (Double.valueOf(stack.getFailurePolicy().getThreshold())
-                            < Double.valueOf(resourceRequestResults.size()) / Double.valueOf(stack.getFullNodeCount()) * ONE_HUNDRED) {
+                    if (Double.valueOf(localStack.getFailurePolicy().getThreshold()) > calculatePercentage(failedResourceRequestResults, localStack)) {
                         LOGGER.info("Number of failures is more than the threshold so error will throw");
-                        throwError(stack, resourceRequestResults);
-                    } else if (resourceRequestResults.size() != 0) {
+                        throwError(localStack, failedResourceRequestResults);
+                    } else if (failedResourceRequestResults.size() != 0) {
                         LOGGER.info("Decrease node counts because threshold was higher");
-                        handleExceptions(stack, resourceRequestResults);
+                        handleExceptions(localStack, failedResourceRequestResults);
                     }
+                    break;
+                case BEST_EFFORT:
+                    LOGGER.info("Decrease node counts because threshold was higher");
+                    handleExceptions(localStack, failedResourceRequestResults);
                     break;
                 default:
                     LOGGER.info("Unsupported adjustment type so error will throw");
-                    throwError(stack, resourceRequestResults);
+                    throwError(localStack, failedResourceRequestResults);
                     break;
             }
         }
     }
 
-    private void handleExceptions(Stack stack, List<ResourceRequestResult> resourceRequestResults) {
+    private double calculatePercentage(List<ResourceRequestResult> failedResourceRequestResults, Stack localStack) {
+        return Double.valueOf((localStack.getFullNodeCount() + failedResourceRequestResults.size()) / localStack.getFullNodeCount()) * ONE_HUNDRED;
+    }
+
+    private void handleExceptions(Stack stack, List<ResourceRequestResult> failedResourceRequestResult) {
         MDCBuilder.buildMdcContext(stack);
-        for (ResourceRequestResult exception : resourceRequestResults) {
+        for (ResourceRequestResult exception : failedResourceRequestResult) {
             List<Resource> resourceList = new ArrayList<>();
             LOGGER.error("Error was occurred which is: " + exception.getException().orNull().getMessage());
             for (Resource resource : exception.getResources()) {
@@ -99,7 +107,7 @@ public class StackFailureHandlerService implements FailureHandlerService {
             }
             if (!resourceList.isEmpty()) {
                 LOGGER.info("Resource list not empty so rollback will start.Resource list size is: " + resourceList.size());
-                doRollbackAndDecreaseNodeCount(exception, stack, resourceList, resourceRequestResults);
+                doRollbackAndDecreaseNodeCount(exception, stack, resourceList, failedResourceRequestResult);
             }
         }
     }

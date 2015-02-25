@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UpdateClusterJson implements JsonEntity {
 
     private HostGroupAdjustmentJson hostGroupAdjustment;

@@ -8,6 +8,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.controller.validation.ValidProvisionRequest;
 import com.sequenceiq.cloudbreak.controller.validation.ValidVolume;
@@ -15,6 +16,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 
 @ValidProvisionRequest
 @ValidVolume(minCount = 1, maxCount = 15, minSize = 10, maxSize = 1000)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TemplateJson implements JsonEntity {
 
     private Long id;
