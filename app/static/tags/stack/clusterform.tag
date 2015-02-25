@@ -58,28 +58,27 @@
                         </div>
                     </div>
                     <div class="form-group" ng-show="showAdvancedOptionForm">
-                      <label class="col-sm-3 control-label" for="selectRegion">Failure policy</label>
-                      <div class="col-sm-9">
-                        <select class="form-control" id="selectFailureLogic" ng-model="cluster.onFailureAction" required>
-                          <option value="ROLLBACK">rollback</option>
-                          <option value="DO_NOTHING">do nothing</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div class="form-group" ng-show="showAdvancedOptionForm">
-                      <label class="col-sm-3 control-label" for="selectAdjustment">Failure threshold</label>
-                      <div class="col-sm-offset-2 col-sm-4">
-                        <select class="form-control" id="selectAdjustment" ng-model="cluster.failurePolicy.adjustmentType" ng-disabled="activeCredential.cloudPlatform == 'AWS' || activeCredential.cloudPlatform == 'OPENSTACK'">
-                          <option value="EXACT" selected="selected">number of failed nodes</option>
-                          <option value="PERCENTAGE">percentage of failed nodes</option>
-                        </select>
-                      </div>
+                      <label class="col-sm-3 control-label" for="selectAdjustment">Minimum cluster size</label>
                       <div class="col-sm-3">
-                        <div class="input-group">
-                          <span class="input-group-addon" id="basic-addon1">></span>
-                          <input type="number" name="fthreshold" class="form-control" ng-model="cluster.failurePolicy.threshold" id="fthreshold" ng-disabled="activeCredential.cloudPlatform == 'AWS'">
-                          <div class="input-group-addon" ng-show="cluster.failurePolicy.adjustmentType == 'PERCENTAGE'">%</div>
-                          <div class="input-group-addon" ng-show="cluster.failurePolicy.adjustmentType == 'EXACT'">#</div>
+                        <select class="form-control" id="bestEffort" ng-model="cluster.bestEffort" ng-change="selectedAdjustmentChange()" ng-disabled="activeCredential.cloudPlatform == 'AWS' || activeCredential.cloudPlatform == 'OPENSTACK'">
+                          <option value="EXACT">exact</option>
+                          <option value="BEST_EFFORT">best effort</option>
+                        </select>
+                      </div>
+                      <div class="col-sm-6">
+                        <div class="col-sm-6">
+                          <div class="input-group col-sm-12" ng-show="cluster.bestEffort != 'BEST_EFFORT'">
+                              <select class="form-control" id="selectAdjustment" ng-model="cluster.failurePolicy.adjustmentType" ng-disabled="activeCredential.cloudPlatform == 'AWS' || activeCredential.cloudPlatform == 'OPENSTACK'">
+                                <option value="EXACT"># of nodes</option>
+                                <option value="PERCENTAGE">% of nodes</option>
+                              </select>
+                          </div>
+                        </div>
+                        <div class="col-sm-6">
+                          <div class="input-group" ng-show="cluster.bestEffort != 'BEST_EFFORT'">
+                              <span class="input-group-addon" id="basic-addon1">=</span>
+                              <input type="number" name="fthreshold" class="form-control" ng-model="cluster.failurePolicy.threshold" id="fthreshold" ng-disabled="activeCredential.cloudPlatform == 'AWS'">
+                          </div>
                         </div>
                       </div>
                     </div>
