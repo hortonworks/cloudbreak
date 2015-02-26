@@ -55,7 +55,7 @@ public class AzureAffinityGroupResourceBuilder extends AzureSimpleNetworkResourc
         } catch (Exception ex) {
             if (((HttpResponseException) ex).getStatusCode() == NOT_FOUND) {
                 HttpResponseDecorator affinityResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createAffinityGroup(aCSCR.getProps());
-                AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), affinityResponse, stack);
+                AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), stack, affinityResponse);
                 azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                         POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             } else if (ex instanceof HttpResponseException) {

@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.azure.builders.instance;
 
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
+import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.PORTS;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
+import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.VIRTUAL_NETWORK_IP_ADDRESS;
 
 import java.io.FileNotFoundException;
 import java.security.NoSuchAlgorithmException;
@@ -31,6 +33,8 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.network.NetworkConfig;
+import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstances;
@@ -49,9 +53,6 @@ import groovyx.net.http.HttpResponseException;
 @Component
 @Order(3)
 public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResourceBuilder {
-
-    private static final String START_IP = "172.16.0.4";
-    private static final String END_IP = "172.16.255.254";
 
     @Autowired
     private StackRepository stackRepository;
@@ -78,7 +79,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     public Boolean create(final CreateResourceRequest createResourceRequest, final String region) throws Exception {
         AzureVirtualMachineCreateRequest aCSCR = (AzureVirtualMachineCreateRequest) createResourceRequest;
         HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createVirtualMachine(aCSCR.getProps());
-        AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), virtualMachineResponse, aCSCR.getStack());
+        AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), aCSCR.getStack(), virtualMachineResponse);
         azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                 POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         return true;
@@ -102,20 +103,6 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             byte[] encoded = Base64.encodeBase64(buildResources.get(0).getResourceName().getBytes());
             String label = new String(encoded);
             Map<String, Object> props = new HashMap<>();
-            List<Port> ports = new ArrayList<>();
-            ports.add(new Port("SSH", "22", "22", "tcp"));
-            ports.add(new Port("Ambari", "8080", "8080", "tcp"));
-            ports.add(new Port("Consul", "8500", "8500", "tcp"));
-            ports.add(new Port("NameNode", "50070", "50070", "tcp"));
-            ports.add(new Port("RM Web", "8088", "8088", "tcp"));
-            ports.add(new Port("RM Scheduler", "8030", "8030", "tcp"));
-            ports.add(new Port("RM IPC", "8050", "8050", "tcp"));
-            ports.add(new Port("Job History Server", "19888", "19888", "tcp"));
-            ports.add(new Port("HBase Master", "60010", "60010", "tcp"));
-            ports.add(new Port("Falcon", "15000", "15000", "tcp"));
-            ports.add(new Port("Storm", "8744", "8744", "tcp"));
-            ports.add(new Port("Oozie", "11000", "11000", "tcp"));
-            ports.add(new Port("HTTP", "80", "80", "tcp"));
             props.put(NAME, buildResources.get(0).getResourceName());
             props.put(DEPLOYMENTSLOT, PRODUCTION);
             props.put(LABEL, label);
@@ -134,10 +121,9 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             props.put(VIRTUAL_NETWORK_IP_ADDRESS, findNextValidIp(provisionContextObject));
             props.put(CUSTOMDATA, new String(Base64.encodeBase64(provisionContextObject.getUserData().getBytes())));
             props.put(VIRTUALNETWORKNAME, provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
-            props.put(PORTS, ports);
+            props.put(PORTS, NetworkUtils.getPorts(stack));
             props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
-            return new AzureVirtualMachineCreateRequest(props,
-                    azureStackUtil.createAzureClient(azureCredential), resources, buildResources, stack, instanceGroup.orNull());
+            return new AzureVirtualMachineCreateRequest(props, resources, buildResources, stack, instanceGroup.orNull());
         } catch (FileNotFoundException | CertificateException | NoSuchAlgorithmException e) {
             throw new StackCreationFailureException(e);
         }
@@ -152,9 +138,9 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     }
 
     private String findNextValidIp(AzureProvisionContextObject provisionContextObject) {
-        String ip = START_IP;
+        String ip = NetworkConfig.START_IP;
         boolean found = false;
-        while (!found && !ip.equals(END_IP)) {
+        while (!found && !ip.equals(NetworkConfig.END_IP)) {
             ip = azureStackUtil.getNextIPAddress(ip);
             found = provisionContextObject.putIfAbsent(ip);
         }
@@ -175,8 +161,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             props.put(NAME, resource.getResourceName());
             AzureClient azureClient = azureStackUtil.createAzureClient(credential);
             HttpResponseDecorator deleteVirtualMachineResult = (HttpResponseDecorator) azureClient.deleteVirtualMachine(props);
-            AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(azureClient, deleteVirtualMachineResult,
-                    stack);
+            AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(azureClient, stack, deleteVirtualMachineResult);
             azureResourcePollerObjectPollingService.pollWithTimeout(azureDeleteResourceStatusCheckerTask, azureResourcePollerObject,
                     POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         } catch (HttpResponseException ex) {
@@ -250,17 +235,15 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
 
     public class AzureVirtualMachineCreateRequest extends CreateResourceRequest {
         private Map<String, Object> props = new HashMap<>();
-        private AzureClient azureClient;
         private List<Resource> resources;
         private Stack stack;
         private InstanceGroup instanceGroup;
 
-        public AzureVirtualMachineCreateRequest(Map<String, Object> props, AzureClient azureClient, List<Resource> resources, List<Resource> buildNames,
+        public AzureVirtualMachineCreateRequest(Map<String, Object> props, List<Resource> resources, List<Resource> buildNames,
                 Stack stack, InstanceGroup instanceGroup) {
             super(buildNames);
             this.stack = stack;
             this.props = props;
-            this.azureClient = azureClient;
             this.resources = resources;
             this.instanceGroup = instanceGroup;
         }
@@ -283,27 +266,6 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
 
         public InstanceGroup getInstanceGroup() {
             return instanceGroup;
-        }
-    }
-
-    public class Port {
-
-        private String localPort;
-        private String name;
-        private String port;
-        private String protocol;
-        private final List<String> aclRules;
-
-        public Port(String name, String port, String localPort, String protocol) {
-            this(name, port, localPort, protocol, new ArrayList<String>());
-        }
-
-        public Port(String name, String port, String localPort, String protocol, List<String> aclRules) {
-            this.name = name;
-            this.localPort = localPort;
-            this.port = port;
-            this.protocol = protocol;
-            this.aclRules = aclRules;
         }
     }
 

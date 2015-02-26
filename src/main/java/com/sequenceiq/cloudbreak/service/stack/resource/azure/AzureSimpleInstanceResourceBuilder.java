@@ -12,8 +12,10 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
+import com.sequenceiq.cloudbreak.service.stack.resource.UpdateContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureStartStopContextObject;
@@ -21,7 +23,7 @@ import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureStartSt
 import groovyx.net.http.HttpResponseException;
 
 public abstract class AzureSimpleInstanceResourceBuilder implements
-        ResourceBuilder<AzureProvisionContextObject, AzureDeleteContextObject, AzureStartStopContextObject> {
+        ResourceBuilder<AzureProvisionContextObject, AzureDeleteContextObject, AzureStartStopContextObject, UpdateContextObject> {
     protected static final Logger LOGGER = LoggerFactory.getLogger(AzureSimpleInstanceResourceBuilder.class);
     protected static final int POLLING_INTERVAL = 5000;
     protected static final int MAX_POLLING_ATTEMPTS = 60;
@@ -37,13 +39,11 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
     protected static final String HOSTNAME = "hostname";
     protected static final String USERNAME = "username";
     protected static final String SUBNETNAME = "subnetName";
-    protected static final String VIRTUAL_NETWORK_IP_ADDRESS = "virtualNetworkIPAddress";
     protected static final String CUSTOMDATA = "customData";
     protected static final String VIRTUALNETWORKNAME = "virtualNetworkName";
     protected static final String VMTYPE = "vmType";
     protected static final String SSHPUBLICKEYFINGERPRINT = "sshPublicKeyFingerprint";
     protected static final String SSHPUBLICKEYPATH = "sshPublicKeyPath";
-    protected static final String PORTS = "ports";
     protected static final String DISKS = "disks";
     protected static final String DATA = "data";
     protected static final String DEFAULT_USER_NAME = "ubuntu";
@@ -79,6 +79,10 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
         } else {
             LOGGER.error(String.format("Azure resource not found with %s name for %s user.", resourceName, user));
         }
+    }
+
+    @Override
+    public void update(UpdateContextObject updateContextObject) throws UpdateFailedException {
     }
 
     @Override

@@ -13,9 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
+import com.google.common.primitives.Ints;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.network.NetworkConfig;
+import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -31,11 +36,17 @@ public class HeatTemplateBuilder {
     @Autowired
     private Configuration freemarkerConfiguration;
 
-    public String build(String templatePath, List<InstanceGroup> instanceGroups, String userData) {
+    public String build(Stack stack, String templatePath, List<InstanceGroup> instanceGroups, String userData) {
         try {
             Map<String, Object> model = new HashMap<>();
-            model.put("agents", buildInstances(instanceGroups));
+            model.put("agents", buildInstances(getOrderedCopy(instanceGroups)));
             model.put("userdata", formatUserData(userData));
+            model.put("subnets", stack.getAllowedSubnets());
+            model.put("ports", NetworkUtils.getPorts(stack));
+            model.put("cbSubnet", NetworkConfig.SUBNET_16);
+            model.put("startIP", NetworkConfig.START_IP);
+            model.put("endIP", NetworkConfig.END_IP);
+            model.put("gatewayIP", NetworkConfig.GATEWAY_IP);
             return processTemplateIntoString(freemarkerConfiguration.getTemplate(templatePath, "UTF-8"), model);
         } catch (IOException | TemplateException e) {
             throw new InternalServerException("Failed to process the OpenStack HeatTemplate", e);
@@ -70,6 +81,16 @@ public class HeatTemplateBuilder {
             sb.append("            " + lines[i] + "\n");
         }
         return sb.toString();
+    }
+
+    private List<InstanceGroup> getOrderedCopy(List<InstanceGroup> instanceGroupList) {
+        Ordering<InstanceGroup> byLengthOrdering = new Ordering<InstanceGroup>() {
+            public int compare(InstanceGroup left, InstanceGroup right) {
+                int countCompare = Ints.compare(left.getNodeCount(), right.getNodeCount());
+                return countCompare == 0 ? left.getGroupName().compareTo(right.getGroupName()) : countCompare;
+            }
+        };
+        return byLengthOrdering.sortedCopy(instanceGroupList);
     }
 
 }

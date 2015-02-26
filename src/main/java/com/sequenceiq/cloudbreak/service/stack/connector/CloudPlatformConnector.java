@@ -26,4 +26,6 @@ public interface CloudPlatformConnector {
 
     CloudPlatform getCloudPlatform();
 
+    void updateAllowedSubnets(Stack stack, String userData) throws UpdateFailedException;
+
 }

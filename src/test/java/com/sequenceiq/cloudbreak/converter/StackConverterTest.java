@@ -36,8 +36,10 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.Subnet;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
+import com.sequenceiq.cloudbreak.service.network.SecurityService;
 
 public class StackConverterTest {
 
@@ -72,6 +74,12 @@ public class StackConverterTest {
 
     @Mock
     private MetaDataConverter metaDataConverter;
+
+    @Mock
+    private SubnetConverter subnetConverter;
+
+    @Mock
+    private SecurityService securityService;
 
     private Stack stack;
 
@@ -201,20 +209,19 @@ public class StackConverterTest {
         stack.setStackCompleted(CF_STACK_COMPLETED);
         stack.setCluster(new Cluster());
         stack.setCredential(awsCredential);
-        //stack.setTemplate(awsTemplate);
         stack.setDescription(DESCRIPTION);
         stack.setHash(DUMMY_HASH);
         stack.setId(DUMMY_ID);
         stack.setInstanceGroups(new HashSet<InstanceGroup>());
         stack.setMetadataReady(METADATA_READY);
         stack.setName(DUMMY_NAME);
-        //stack.setNodeCount(NODE_COUNT);
         stack.setStatus(Status.AVAILABLE);
         stack.setStatusReason(DUMMY_STATUS_REASON);
         stack.setVersion(VERSION);
         stack.setPublicInAccount(true);
         stack.setAccount(DUMMY_NAME);
         stack.setOwner(DUMMY_NAME);
+        stack.setAllowedSubnets(new HashSet<Subnet>());
         stack.setInstanceGroups(new HashSet<InstanceGroup>());
         return stack;
     }

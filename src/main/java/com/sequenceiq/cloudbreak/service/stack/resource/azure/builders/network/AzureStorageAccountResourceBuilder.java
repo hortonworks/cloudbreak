@@ -55,7 +55,7 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
         } catch (Exception ex) {
             if (((HttpResponseException) ex).getStatusCode() == NOT_FOUND) {
                 HttpResponseDecorator storageResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createStorageAccount(aCSCR.getProps());
-                AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), storageResponse, stack);
+                AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), stack, storageResponse);
                 azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                         POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             } else if (ex instanceof HttpResponseException) {

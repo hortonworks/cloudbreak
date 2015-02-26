@@ -5,15 +5,6 @@
 
   "Parameters" : {
   
-    "SSHLocation" : {
-      "Description" : "Lockdown SSH access (default can be accessed from anywhere)",
-      "Type" : "String",
-      "MinLength": "9",
-      "MaxLength": "18",
-      "AllowedPattern" : "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
-      "ConstraintDescription" : "must be a valid CIDR range of the form x.x.x.x/x."
-    },
-    
     "StackName" : {
       "Description" : "Name of the CloudFormation stack that is used to tag instances",
       "Type" : "String",
@@ -64,8 +55,8 @@
 
   "Mappings" : {
     "SubnetConfig" : {
-      "VPC"     : { "CIDR" : "10.0.0.0/16" },
-      "Public"  : { "CIDR" : "10.0.0.0/24" }
+      "VPC"     : { "CIDR" : "${cbSubnet}" },
+      "Public"  : { "CIDR" : "${cbSubnet}" }
     }
   },
 
@@ -222,21 +213,15 @@
         "GroupDescription" : "Allow access from web and bastion as well as outbound HTTP and HTTPS traffic",
         "VpcId" : { "Ref" : "VPC" },
         "SecurityGroupIngress" : [
-		  { "IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"} ,
-		  { "IpProtocol" : "tcp", "FromPort" : "8500", "ToPort" : "8500", "CidrIp" : "0.0.0.0/0"} ,
-		  { "IpProtocol" : "tcp", "FromPort" : "8080", "ToPort" : "8080", "CidrIp" : "0.0.0.0/0"} ,
-		  { "IpProtocol" : "tcp", "FromPort" : "8088", "ToPort" : "8088", "CidrIp" : "0.0.0.0/0"} ,
-		  { "IpProtocol" : "tcp", "FromPort" : "8050", "ToPort" : "8050", "CidrIp" : "0.0.0.0/0"} ,
-		  { "IpProtocol" : "tcp", "FromPort" : "8020", "ToPort" : "8020", "CidrIp" : "0.0.0.0/0"} ,
-		  { "IpProtocol" : "tcp", "FromPort" : "10020", "ToPort" : "10020", "CidrIp" : "0.0.0.0/0"} ,
-		  { "IpProtocol" : "tcp", "FromPort" : "19888", "ToPort" : "19888", "CidrIp" : "0.0.0.0/0"} ,
-          { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : "10.0.0.0/24"} ,
-		  { "IpProtocol" : "tcp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "10.0.0.0/24"} ,
-		  { "IpProtocol" : "udp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "10.0.0.0/24"} ,
-		  { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : "172.17.0.0/16"} ,
-		  { "IpProtocol" : "tcp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "172.17.0.0/16"} ,
-		  { "IpProtocol" : "udp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "172.17.0.0/16"} ,
-          { "IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : { "Ref" : "SSHLocation" } } ]
+          <#list subnets as s>
+            <#list ports as p>
+                { "IpProtocol" : "${p.protocol}", "FromPort" : "${p.localPort}", "ToPort" : "${p.port}", "CidrIp" : "${s.cidr}"} ,
+            </#list>
+		  </#list>
+		  { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : "${cbSubnet}"} ,
+          { "IpProtocol" : "tcp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "${cbSubnet}"} ,
+          { "IpProtocol" : "udp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "${cbSubnet}"}
+        ]
       }
     }
     

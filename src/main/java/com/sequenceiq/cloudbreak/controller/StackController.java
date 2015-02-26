@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.json.UpdateStackJson;
 import com.sequenceiq.cloudbreak.converter.MetaDataConverter;
 import com.sequenceiq.cloudbreak.converter.StackConverter;
+import com.sequenceiq.cloudbreak.converter.SubnetConverter;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -38,6 +40,9 @@ public class StackController {
 
     @Autowired
     private StackConverter stackConverter;
+
+    @Autowired
+    private SubnetConverter subnetConverter;
 
     @Autowired
     private MetaDataConverter metaDataConverter;
@@ -125,8 +130,11 @@ public class StackController {
         if (updateRequest.getStatus() != null) {
             stackService.updateStatus(id, updateRequest.getStatus());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
+        } else if (updateRequest.getHostGroupAdjustment() != null) {
             stackService.updateNodeCount(id, updateRequest.getHostGroupAdjustment());
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            stackService.updateAllowedSubnets(id, new ArrayList<>(subnetConverter.convertAllJsonToEntity(updateRequest.getAllowedSubnets())));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }

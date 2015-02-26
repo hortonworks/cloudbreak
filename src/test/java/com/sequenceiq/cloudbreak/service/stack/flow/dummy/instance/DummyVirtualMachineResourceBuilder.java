@@ -6,23 +6,29 @@ import java.util.List;
 
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyStartStopContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
+import com.sequenceiq.cloudbreak.service.stack.resource.UpdateContextObject;
 
 public class DummyVirtualMachineResourceBuilder
-        implements ResourceBuilder<DummyProvisionContextObject, DummyDeleteContextObject, DummyStartStopContextObject> {
+        implements ResourceBuilder<DummyProvisionContextObject, DummyDeleteContextObject, DummyStartStopContextObject, UpdateContextObject> {
 
     @Override
     public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
         return true;
+    }
+
+    @Override
+    public void update(UpdateContextObject updateContextObject) throws UpdateFailedException {
     }
 
     @Override

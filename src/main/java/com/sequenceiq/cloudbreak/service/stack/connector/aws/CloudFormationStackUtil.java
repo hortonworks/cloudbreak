@@ -37,6 +37,10 @@ public class CloudFormationStackUtil {
         return asGroupResource.getStackResourceDetail().getPhysicalResourceId();
     }
 
+    public String getCfStackName(Stack stack) {
+        return String.format("%s-%s", stack.getName(), stack.getId());
+    }
+
     public List<String> getInstanceIds(Stack stack, String hostGroup) {
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(Regions.valueOf(stack.getRegion()), awsCredential);

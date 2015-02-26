@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 public class OpenStackHeatStackStatusCheckerTask extends StackBasedStatusCheckerTask<OpenStackContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackHeatStackStatusCheckerTask.class);
+    private static final String FAILED_STATE = "FAILED";
 
     @Override
     public boolean checkStatus(OpenStackContext context) {
@@ -25,8 +26,7 @@ public class OpenStackHeatStackStatusCheckerTask extends StackBasedStatusChecker
         LOGGER.info("Checking OpenStack Heat stack status of: {} to reach: {}", stackName, desiredState);
         org.openstack4j.model.heat.Stack heatStack = osClient.heat().stacks().getDetails(stackName, heatStackId);
         String status = heatStack.getStatus();
-        if (status.equalsIgnoreCase(HeatStackStatus.DELETE_FAILED.getStatus())
-                || status.equalsIgnoreCase(HeatStackStatus.CREATE_FAILED.getStatus())) {
+        if (status.endsWith(FAILED_STATE)) {
             throw new HeatStackFailedException(heatStack.getStackStatusReason());
         }
         return status.equalsIgnoreCase(desiredState);

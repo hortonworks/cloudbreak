@@ -14,11 +14,18 @@ public class UpdateStackRequestValidator implements ConstraintValidator<ValidUpd
 
     @Override
     public boolean isValid(UpdateStackJson value, ConstraintValidatorContext context) {
-        if (value.getStatus() != null && value.getHostGroupAdjustment() != null) {
-            addConstraintViolation(context, "Invalid PUT request on this resource. NodeCount and status cannot be set in the same request.");
-            return false;
-        } else if (value.getStatus() == null && value.getHostGroupAdjustment() == null) {
-            addConstraintViolation(context, "Invalid PUT request on this resource. It should contain an update on the status or the node count.");
+        int updateResources = 0;
+        if (value.getStatus() != null) {
+            updateResources++;
+        }
+        if (value.getHostGroupAdjustment() != null) {
+            updateResources++;
+        }
+        if (value.getAllowedSubnets() != null) {
+            updateResources++;
+        }
+        if (updateResources != 1) {
+            addConstraintViolation(context, "Invalid PUT request on this resource. 1 update request is allowed at a time.");
             return false;
         }
         return true;

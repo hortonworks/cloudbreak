@@ -89,7 +89,6 @@ public class AwsProvisionerTest {
         given(client.createStack(any(CreateStackRequest.class))).willReturn(createStackResult);
         given(createStackResult.getStackId()).willReturn(STACK_ID);
         given(stackUpdater.updateStackResources(anyLong(), anySet())).willReturn(stack);
-        given(underTest.createStackRequest()).willReturn(createStackRequest);
         //given(cfTemplateBuilder.build(anyString(), anyInt(), anyBoolean())).willReturn("templatebody");
         Map<String, Object> setupProperties = new HashMap<>();
         // WHEN

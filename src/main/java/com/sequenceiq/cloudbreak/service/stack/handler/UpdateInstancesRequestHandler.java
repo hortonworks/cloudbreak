@@ -124,7 +124,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                 List<Future<ResourceRequestResult>> futures = new ArrayList<>();
                 final int index = j;
                 final ResourceBuilder resourceBuilder = instanceResourceBuilders.get(stack.cloudPlatform()).get(index);
-                for (final Resource resource : getResourcesByType(resourceBuilder.resourceType(), deleteContextObject.getDecommisionResources())) {
+                for (final Resource resource : getResourcesByType(resourceBuilder.resourceType(), deleteContextObject.getDecommissionResources())) {
                     Future<ResourceRequestResult> submit = resourceBuilderExecutor.submit(
                             DownScaleCallableBuilder.builder()
                                     .withStack(stack)
@@ -144,7 +144,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                 provisionUtil.checkErrorOccurred(result);
             }
             if (!stackRepository.findById(stack.getId()).isStackInDeletionPhase()) {
-                stackUpdater.removeStackResources(stack.getId(), deleteContextObject.getDecommisionResources());
+                stackUpdater.removeStackResources(stack.getId(), deleteContextObject.getDecommissionResources());
                 LOGGER.info("Terminated instances in stack: '{}'", instanceIds);
                 LOGGER.info("Publishing {} event.", ReactorConfig.REMOVE_INSTANCES_COMPLETE_EVENT);
                 reactor.notify(ReactorConfig.REMOVE_INSTANCES_COMPLETE_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true,

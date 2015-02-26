@@ -12,16 +12,18 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureStartStopContextObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureUpdateContextObject;
 
 import groovyx.net.http.HttpResponseException;
 
 public abstract class AzureSimpleNetworkResourceBuilder implements
-        ResourceBuilder<AzureProvisionContextObject, AzureDeleteContextObject, AzureStartStopContextObject> {
+        ResourceBuilder<AzureProvisionContextObject, AzureDeleteContextObject, AzureStartStopContextObject, AzureUpdateContextObject> {
     protected static final Logger LOGGER = LoggerFactory.getLogger(AzureSimpleInstanceResourceBuilder.class);
     protected static final int POLLING_INTERVAL = 5000;
     protected static final int MAX_POLLING_ATTEMPTS = 60;
@@ -59,6 +61,10 @@ public abstract class AzureSimpleNetworkResourceBuilder implements
             }
         }
         return resourcesTemp;
+    }
+
+    @Override
+    public void update(AzureUpdateContextObject updateContextObject) throws UpdateFailedException {
     }
 
     @Override

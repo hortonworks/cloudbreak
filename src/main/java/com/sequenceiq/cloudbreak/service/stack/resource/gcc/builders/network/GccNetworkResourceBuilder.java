@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.network.NetworkConfig;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
@@ -94,7 +95,7 @@ public class GccNetworkResourceBuilder extends GccSimpleNetworkResourceBuilder {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         Network network = new Network();
         network.setName(stack.getName());
-        network.setIPv4Range("10.0.0.0/24");
+        network.setIPv4Range(NetworkConfig.SUBNET_16);
         return new GccNetworkCreateRequest(provisionContextObject.getStackId(), network, provisionContextObject.getProjectId(),
                 provisionContextObject.getCompute(), buildResources);
     }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
+import com.sequenceiq.cloudbreak.domain.Subnet;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
@@ -39,6 +41,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
+import com.sequenceiq.cloudbreak.service.stack.event.UpdateAllowedSubnetsRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 
@@ -213,16 +216,16 @@ public class DefaultStackService implements StackService {
                         stack.getInstanceGroupByInstanceGroupName(hostGroupAdjustmentJson.getHostGroup()).getNodeCount(), stackId,
                         -1 * hostGroupAdjustmentJson.getScalingAdjustment()));
             }
-            int removeableHosts = 0;
+            int removableHosts = 0;
             for (InstanceMetaData metadataEntry : stack.getRunningInstanceMetaData()) {
                 if (metadataEntry.isRemovable() && metadataEntry.getInstanceGroup().getGroupName().equals(hostGroupAdjustmentJson.getHostGroup())) {
-                    removeableHosts++;
+                    removableHosts++;
                 }
             }
-            if (removeableHosts < -1 * hostGroupAdjustmentJson.getScalingAdjustment()) {
+            if (removableHosts < -1 * hostGroupAdjustmentJson.getScalingAdjustment()) {
                 throw new BadRequestException(
                         String.format("There are %s removable hosts on stack '%s' but %s were requested. Decommission nodes from the cluster first!",
-                                removeableHosts, stackId, hostGroupAdjustmentJson.getScalingAdjustment() * -1));
+                                removableHosts, stackId, hostGroupAdjustmentJson.getScalingAdjustment() * -1));
             }
         }
         String statusMessage = hostGroupAdjustmentJson.getScalingAdjustment() > 0 ? "Adding '%s' new instance(s) to the cluster infrastructure."
@@ -234,6 +237,17 @@ public class DefaultStackService implements StackService {
         reactor.notify(ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT,
                 Event.wrap(new UpdateInstancesRequest(stack.cloudPlatform(), stack.getId(),
                         hostGroupAdjustmentJson.getScalingAdjustment(), hostGroupAdjustmentJson.getHostGroup())));
+    }
+
+    @Override
+    public void updateAllowedSubnets(Long stackId, List<Subnet> subnetList) {
+        Stack stack = stackRepository.findOne(stackId);
+        MDCBuilder.buildMdcContext(stack);
+        if (!Status.AVAILABLE.equals(stack.getStatus())) {
+            throw new BadRequestException(String.format("Stack is currently in '%s' state. Security constraints cannot be updated.", stack.getStatus()));
+        }
+        stackUpdater.updateStackStatus(stackId, Status.UPDATE_IN_PROGRESS, "Updating allowed subnets");
+        reactor.notify(ReactorConfig.UPDATE_SUBNET_REQUEST_EVENT, Event.wrap(new UpdateAllowedSubnetsRequest(stack.cloudPlatform(), stackId, subnetList)));
     }
 
     @Override
