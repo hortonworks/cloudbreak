@@ -10,6 +10,7 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_I
 import static com.amazonaws.services.cloudformation.model.StackStatus.UPDATE_COMPLETE;
 import static com.amazonaws.services.cloudformation.model.StackStatus.UPDATE_ROLLBACK_COMPLETE;
 import static com.amazonaws.services.cloudformation.model.StackStatus.UPDATE_ROLLBACK_FAILED;
+import static com.amazonaws.services.cloudformation.model.StackStatus.UPDATE_ROLLBACK_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
@@ -161,7 +162,8 @@ public class AwsConnector implements CloudPlatformConnector {
         stack = stackUpdater.updateStackResources(stackId, resources);
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, stackId);
         List<StackStatus> errorStatuses = Arrays.asList(CREATE_FAILED, ROLLBACK_IN_PROGRESS, ROLLBACK_FAILED, ROLLBACK_COMPLETE);
-        CloudFormationStackPollerContext stackPollerContext = new CloudFormationStackPollerContext(client, CREATE_COMPLETE, errorStatuses, stack);
+        CloudFormationStackPollerContext stackPollerContext = new CloudFormationStackPollerContext(client, CREATE_COMPLETE, CREATE_FAILED,
+                errorStatuses, stack);
         try {
             PollingResult pollingResult = stackPollingService
                     .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
@@ -236,7 +238,8 @@ public class AwsConnector implements CloudPlatformConnector {
         AmazonCloudFormationClient cloudFormationClient = awsStackUtil.createCloudFormationClient(stack);
         cloudFormationClient.updateStack(updateStackRequest);
         List<StackStatus> errorStatuses = Arrays.asList(UPDATE_ROLLBACK_COMPLETE, UPDATE_ROLLBACK_FAILED);
-        CloudFormationStackPollerContext stackPollerContext = new CloudFormationStackPollerContext(cloudFormationClient, UPDATE_COMPLETE, errorStatuses, stack);
+        CloudFormationStackPollerContext stackPollerContext = new CloudFormationStackPollerContext(cloudFormationClient, UPDATE_COMPLETE,
+                UPDATE_ROLLBACK_IN_PROGRESS, errorStatuses, stack);
         try {
             PollingResult pollingResult =
                     stackPollingService.pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
@@ -287,9 +290,9 @@ public class AwsConnector implements CloudPlatformConnector {
             resumeAutoScalingPolicies(stack, awsCredential);
             DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(cFStackName);
             client.deleteStack(deleteStackRequest);
-
             List<StackStatus> errorStatuses = Arrays.asList(DELETE_FAILED);
-            CloudFormationStackPollerContext stackPollerContext = new CloudFormationStackPollerContext(client, DELETE_COMPLETE, errorStatuses, stack);
+            CloudFormationStackPollerContext stackPollerContext = new CloudFormationStackPollerContext(client, DELETE_COMPLETE,
+                    DELETE_FAILED, errorStatuses, stack);
             try {
                 PollingResult pollingResult = stackPollingService
                         .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);

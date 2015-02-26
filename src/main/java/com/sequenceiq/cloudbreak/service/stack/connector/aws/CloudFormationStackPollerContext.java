@@ -10,14 +10,16 @@ public class CloudFormationStackPollerContext {
 
     private AmazonCloudFormationClient cloudFormationClient;
     private StackStatus successStatus;
-    private List<StackStatus> errorStatuses;
+    private StackStatus errorStatus;
+    private List<StackStatus> stackErrorStatuses;
     private Stack stack;
 
-    public CloudFormationStackPollerContext(AmazonCloudFormationClient cloudFormationClient, StackStatus successStatus, List<StackStatus> errorStatuses,
-            Stack stack) {
+    public CloudFormationStackPollerContext(AmazonCloudFormationClient cloudFormationClient, StackStatus successStatus, StackStatus errorStatus,
+            List<StackStatus> stackErrorStatuses, Stack stack) {
         this.cloudFormationClient = cloudFormationClient;
         this.successStatus = successStatus;
-        this.errorStatuses = errorStatuses;
+        this.errorStatus = errorStatus;
+        this.stackErrorStatuses = stackErrorStatuses;
         this.stack = stack;
     }
 
@@ -29,11 +31,15 @@ public class CloudFormationStackPollerContext {
         return successStatus;
     }
 
-    public List<StackStatus> getErrorStatuses() {
-        return errorStatuses;
+    public StackStatus getErrorStatus() {
+        return errorStatus;
     }
 
     public Stack getStack() {
         return stack;
+    }
+
+    public List<StackStatus> getStackErrorStatuses() {
+        return stackErrorStatuses;
     }
 }
