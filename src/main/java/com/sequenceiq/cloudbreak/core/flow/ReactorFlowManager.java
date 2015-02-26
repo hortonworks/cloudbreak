@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
+
 import reactor.core.Reactor;
 import reactor.event.Event;
 
@@ -50,7 +52,8 @@ public class ReactorFlowManager implements FlowManager {
 
     @Override
     public void triggerProvisioning(Object object) {
-        ProvisioningContext context = (ProvisioningContext) object;
+        ProvisionRequest provisionRequest = (ProvisionRequest) object;
+        ProvisioningContext context = ProvisioningContextFactory.create(provisionRequest.getCloudPlatform(), provisionRequest.getStackId());
         reactor.notify(FlowInitializer.Phases.PROVISIONING_SETUP.name(), eventFactory.createEvent(context, FlowInitializer.Phases.PROVISIONING_SETUP.name()));
     }
 
