@@ -102,6 +102,15 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
+    public Stack getById(Long id) {
+        Stack retStack = stackRepository.findById(id);
+        if (retStack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", id));
+        }
+        return retStack;
+    }
+
+    @Override
     public Stack get(String ambariAddress) {
         Stack stack = stackRepository.findByAmbari(ambariAddress);
         if (stack == null) {
@@ -151,7 +160,7 @@ public class DefaultStackService implements StackService {
             try {
                 savedStack = stackRepository.save(stack);
                 LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_REQUEST_EVENT, stack.getId());
-                flowManager.triggerProvisioning(new ProvisionRequest(stack.cloudPlatform(), stack.getId()));
+                flowManager.triggerProvisioning(new ProvisionRequest(savedStack.cloudPlatform(), savedStack.getId()));
             } catch (DataIntegrityViolationException ex) {
                 throw new DuplicateKeyValueException(APIResourceType.STACK, stack.getName(), ex);
             }

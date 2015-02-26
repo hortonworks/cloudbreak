@@ -18,6 +18,8 @@ public interface StackService {
 
     Stack get(Long id);
 
+    Stack getById(Long id);
+
     Stack get(String ambariAddress);
 
     Stack create(CbUser user, Stack stack);
