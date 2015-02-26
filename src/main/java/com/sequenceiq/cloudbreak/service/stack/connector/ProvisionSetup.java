@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.connector;
 
-import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
@@ -9,7 +8,7 @@ public interface ProvisionSetup {
 
     ProvisionEvent setupProvisioning(Stack stack) throws Exception;
 
-    Optional<String> preProvisionCheck(Stack stack);
+    String preProvisionCheck(Stack stack);
 
     CloudPlatform getCloudPlatform();
 
