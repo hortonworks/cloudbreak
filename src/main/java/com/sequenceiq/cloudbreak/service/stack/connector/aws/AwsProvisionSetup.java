@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -32,8 +31,8 @@ public class AwsProvisionSetup implements ProvisionSetup {
     }
 
     @Override
-    public Optional<String> preProvisionCheck(Stack stack) {
-        return Optional.absent();
+    public String preProvisionCheck(Stack stack) {
+        return null;
     }
 
     public Map<String, Object> getSetupProperties(Stack stack) {
