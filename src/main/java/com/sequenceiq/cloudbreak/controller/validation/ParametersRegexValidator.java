@@ -17,7 +17,7 @@ public class ParametersRegexValidator extends AbstractParameterValidator {
             if (param.getRegex().isPresent()
                     && parameters.containsKey(param.getName())
                     && !String.valueOf(parameters.get(param.getName())).matches(param.getRegex().get())) {
-                addParameterConstraintViolation(context, param.getName(), String.format("%s is not valid for regex: %s.",
+                addParameterConstraintViolation(context, param.getName(), String.format("%s does not match regex: %s.",
                         param.getName(), param.getRegex().get()));
                 valid = false;
             }

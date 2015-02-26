@@ -103,6 +103,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
             stackJson.setFailurePolicy(failurePolicyConverter.convert(entity.getFailurePolicy()));
         }
         stackJson.setImage(entity.getImage());
+        stackJson.setParameters(entity.getParameters());
         return stackJson;
     }
 
@@ -129,7 +130,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         int minNodeCount = ConsulUtils.ConsulServers.NODE_COUNT_LOW.getMin();
         int fullNodeCount = stack.getFullNodeCount();
         if (fullNodeCount < minNodeCount) {
-            throw new BadRequestException(String.format("At least %s node is required to launch the stack", minNodeCount));
+            throw new BadRequestException(String.format("At least %s nodes are required to launch the stack", minNodeCount));
         }
         if (json.getImage() != null) {
             stack.setImage(json.getImage());
@@ -153,6 +154,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
                 throw new BadRequestException(errorMsg);
             }
         }
+        stack.setParameters(json.getParameters());
         return stack;
     }
 

@@ -38,6 +38,7 @@ import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
+import com.amazonaws.services.cloudformation.model.OnFailure;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
@@ -147,11 +148,13 @@ public class AwsConnector implements CloudPlatformConnector {
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
         AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(Regions.valueOf(stack.getRegion()), awsCredential);
         String cFStackName = cfStackUtil.getCfStackName(stack);
+        boolean existingVPC = isExistingVPC(stack);
         CreateStackRequest createStackRequest = new CreateStackRequest()
                 .withStackName(cFStackName)
-                .withOnFailure(com.amazonaws.services.cloudformation.model.OnFailure.valueOf(stack.getOnFailureActionAction().name()))
-                .withTemplateBody(cfTemplateBuilder.build(stack, "templates/aws-cf-stack.ftl"))
-                .withParameters(getStackParameters(stack, userData, awsCredential, cFStackName));
+                .withOnFailure(OnFailure.valueOf(stack.getOnFailureActionAction().name()))
+                .withTemplateBody(cfTemplateBuilder.build(stack, existingVPC, "templates/aws-cf-stack.ftl"))
+                .withParameters(getStackParameters(stack, userData, awsCredential, cFStackName, existingVPC));
+
         client.createStack(createStackRequest);
         Resource resource = new Resource(ResourceType.CLOUDFORMATION_STACK, cFStackName, stack, null);
         Set<Resource> resources = Sets.newHashSet(resource);
@@ -225,10 +228,11 @@ public class AwsConnector implements CloudPlatformConnector {
     @Override
     public void updateAllowedSubnets(Stack stack, String userData) throws UpdateFailedException {
         String cFStackName = cfStackUtil.getCfStackName(stack);
+        boolean existingVPC = isExistingVPC(stack);
         UpdateStackRequest updateStackRequest = new UpdateStackRequest()
                 .withStackName(cFStackName)
-                .withTemplateBody(cfTemplateBuilder.build(stack, "templates/aws-cf-stack.ftl"))
-                .withParameters(getStackParameters(stack, userData, (AwsCredential) stack.getCredential(), stack.getName()));
+                .withTemplateBody(cfTemplateBuilder.build(stack, existingVPC, "templates/aws-cf-stack.ftl"))
+                .withParameters(getStackParameters(stack, userData, (AwsCredential) stack.getCredential(), stack.getName(), existingVPC));
         AmazonCloudFormationClient cloudFormationClient = awsStackUtil.createCloudFormationClient(stack);
         cloudFormationClient.updateStack(updateStackRequest);
         List<StackStatus> errorStatuses = Arrays.asList(UPDATE_ROLLBACK_COMPLETE, UPDATE_ROLLBACK_FAILED);
@@ -304,8 +308,14 @@ public class AwsConnector implements CloudPlatformConnector {
         }
     }
 
-    private List<Parameter> getStackParameters(Stack stack, String userData, AwsCredential awsCredential, String stackName) {
-        return new ArrayList<>(Arrays.asList(
+    private boolean isExistingVPC(Stack stack) {
+        return stack.getParameters().get("vpcId") != null
+                && stack.getParameters().get("subnetCIDR") != null
+                && stack.getParameters().get("internetGatewayId") != null;
+    }
+
+    private List<Parameter> getStackParameters(Stack stack, String userData, AwsCredential awsCredential, String stackName, boolean existingVPC) {
+        List<Parameter> parameters = new ArrayList<>(Arrays.asList(
                 new Parameter().withParameterKey("CBUserData").withParameterValue(userData),
                 new Parameter().withParameterKey("StackName").withParameterValue(stackName),
                 new Parameter().withParameterKey("StackOwner").withParameterValue(awsCredential.getRoleArn()),
@@ -313,6 +323,12 @@ public class AwsConnector implements CloudPlatformConnector {
                 new Parameter().withParameterKey("AMI").withParameterValue(stack.getImage()),
                 new Parameter().withParameterKey("RootDeviceName").withParameterValue(getRootDeviceName(stack, awsCredential))
         ));
+        if (existingVPC) {
+            parameters.add(new Parameter().withParameterKey("VPCId").withParameterValue(stack.getParameters().get("vpcId")));
+            parameters.add(new Parameter().withParameterKey("SubnetCIDR").withParameterValue(stack.getParameters().get("subnetCIDR")));
+            parameters.add(new Parameter().withParameterKey("InternetGatewayId").withParameterValue(stack.getParameters().get("internetGatewayId")));
+        }
+        return parameters;
     }
 
     private void sendUpdatedStackCreateComplete(long stackId, String cFStackName, Set<Resource> resourceSet) {

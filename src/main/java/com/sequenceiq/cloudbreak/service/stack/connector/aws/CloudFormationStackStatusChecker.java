@@ -43,6 +43,7 @@ public class CloudFormationStackStatusChecker implements StatusCheckerTask<Cloud
             MDCBuilder.buildMdcContext(stack);
             LOGGER.info("Checking if AWS CloudFormation stack '{}' reached status '{}'", cloudFormationStackName, successStatus);
             DescribeStacksResult describeStacksResult = client.describeStacks(describeStacksRequest);
+
             List<com.amazonaws.services.cloudformation.model.Stack> stacks = describeStacksResult.getStacks();
             if (stacks.size() > 0) {
                 StackStatus actualStatus = StackStatus.valueOf(stacks.get(0).getStackStatus());

@@ -97,7 +97,7 @@ public class AwsMetadataSetup implements MetadataSetup {
                     coreInstanceMetadata.add(new CoreInstanceMetaData(
                             instance.getInstanceId(),
                             instance.getPrivateIpAddress(),
-                            instance.getPublicDnsName(),
+                            instance.getPublicIpAddress(),
                             instance.getBlockDeviceMappings().size() - 1,
                             instance.getPrivateDnsName(),
                             instanceGroup

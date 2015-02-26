@@ -64,7 +64,7 @@ public class CloudFormationTemplateBuilderTest {
         when(stack.getInstanceGroupsAsList()).thenReturn(instanceGroupsList);
         when(stack.getInstanceGroups()).thenReturn(instanceGroupSet);
         // WHEN
-        String result = underTest.build(stack, "templates/aws-cf-stack.ftl");
+        String result = underTest.build(stack, false, "templates/aws-cf-stack.ftl");
         // THEN
         assertTrue(result.contains("\"DeviceName\" : \"/dev/xvdf\""));
         assertTrue(result.contains("\"DeviceName\" : \"/dev/xvdg\""));
@@ -90,7 +90,7 @@ public class CloudFormationTemplateBuilderTest {
         when(stack.getInstanceGroupsAsList()).thenReturn(instanceGroupsList);
         when(stack.getInstanceGroups()).thenReturn(instanceGroupSet);
         // WHEN
-        String result = underTest.build(stack, "templates/aws-cf-stack.ftl");
+        String result = underTest.build(stack, false, "templates/aws-cf-stack.ftl");
         // THEN
         assertTrue(result.contains("\"SpotPrice\""));
     }
@@ -113,7 +113,7 @@ public class CloudFormationTemplateBuilderTest {
         when(stack.getInstanceGroupsAsList()).thenReturn(instanceGroupsList);
         when(stack.getInstanceGroups()).thenReturn(instanceGroupSet);
         // WHEN
-        String result = underTest.build(stack, "templates/aws-cf-stack.ftl");
+        String result = underTest.build(stack, false, "templates/aws-cf-stack.ftl");
         // THEN
         assertFalse(result.contains("\"SpotPrice\""));
     }
@@ -121,6 +121,6 @@ public class CloudFormationTemplateBuilderTest {
     @Test(expected = InternalServerException.class)
     public void testBuildTemplateShouldThrowInternalServerExceptionWhenTemplateDoesNotExist() {
         // WHEN
-        underTest.build(stack, "templates/non-existent.ftl");
+        underTest.build(stack, false, "templates/non-existent.ftl");
     }
 }

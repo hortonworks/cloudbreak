@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -57,7 +58,7 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler({ MethodArgumentNotValidException.class })
     public ResponseEntity<ValidationResult> validationFailed(MethodArgumentNotValidException e) {
         MDCBuilder.buildMdcContext();
-        LOGGER.error(e.getMessage(), e);
+        LOGGER.error(e.getMessage());
         ValidationResult result = new ValidationResult();
         for (FieldError err : e.getBindingResult().getFieldErrors()) {
             result.addValidationError(err.getField(), err.getDefaultMessage());
@@ -70,6 +71,13 @@ public class ExceptionControllerAdvice {
         MDCBuilder.buildMdcContext();
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult("The requested http method is not supported on the resource."), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({ HttpMediaTypeNotSupportedException.class })
+    public ResponseEntity<ExceptionResult> httpMediaTypeNotSupported(Exception e) {
+        MDCBuilder.buildMdcContext();
+        LOGGER.info(e.getMessage());
+        return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({ SubscriptionAlreadyExistException.class })
