@@ -15,11 +15,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.core.flow.FlowManager;
 import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
@@ -70,6 +70,9 @@ public class DefaultStackService implements StackService {
 
     @Autowired
     private AmbariClusterConnector ambariClusterConnector;
+
+    @Autowired
+    private FlowManager flowManager;
 
     @Resource
     private Map<CloudPlatform, ProvisionSetup> provisionSetups;
@@ -141,14 +144,14 @@ public class DefaultStackService implements StackService {
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
         stack.setHash(generateHash(stack));
-        Optional<String> result = provisionSetups.get(stack.cloudPlatform()).preProvisionCheck(stack);
-        if (result.isPresent()) {
-            throw new BadRequestException(result.orNull());
+        String result = provisionSetups.get(stack.cloudPlatform()).preProvisionCheck(stack);
+        if (null != result) {
+            throw new BadRequestException(result);
         } else {
             try {
                 savedStack = stackRepository.save(stack);
                 LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_REQUEST_EVENT, stack.getId());
-                reactor.notify(ReactorConfig.PROVISION_REQUEST_EVENT, Event.wrap(new ProvisionRequest(stack.cloudPlatform(), stack.getId())));
+                flowManager.triggerProvisioning(new ProvisionRequest(stack.cloudPlatform(), stack.getId()));
             } catch (DataIntegrityViolationException ex) {
                 throw new DuplicateKeyValueException(APIResourceType.STACK, stack.getName(), ex);
             }
