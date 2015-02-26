@@ -24,8 +24,8 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureCreateResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourcePollerObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
@@ -42,7 +42,7 @@ public class AzureAffinityGroupResourceBuilder extends AzureSimpleNetworkResourc
     @Autowired
     private AzureStackUtil azureStackUtil;
     @Autowired
-    private AzureResourceStatusCheckerTask azureResourceStatusCheckerTask;
+    private AzureCreateResourceStatusCheckerTask azureCreateResourceStatusCheckerTask;
     @Autowired
     private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
 
@@ -56,7 +56,7 @@ public class AzureAffinityGroupResourceBuilder extends AzureSimpleNetworkResourc
             if (((HttpResponseException) ex).getStatusCode() == NOT_FOUND) {
                 HttpResponseDecorator affinityResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createAffinityGroup(aCSCR.getProps());
                 AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), affinityResponse, stack);
-                azureResourcePollerObjectPollingService.pollWithTimeout(azureResourceStatusCheckerTask, azureResourcePollerObject,
+                azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                         POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             } else if (ex instanceof HttpResponseException) {
                 LOGGER.error(String.format("Error occurs on %s stack under the affinity group creation", aCSCR.getStackId()), ex);

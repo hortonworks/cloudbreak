@@ -65,13 +65,18 @@ public class ClusterStatusUpdateHandler implements Consumer<Event<ClusterStatusU
         MDCBuilder.buildMdcContext(cluster);
         if (StatusRequest.STOPPED.equals(statusRequest)) {
             cloudbreakEventService.fireCloudbreakEvent(stackId, Status.STOP_IN_PROGRESS.name(), "Services are stopping.");
-            ambariClusterConnector.stopCluster(stack);
-            cluster.setStatus(Status.STOPPED);
-            cloudbreakEventService.fireCloudbreakEvent(stackId, Status.AVAILABLE.name(), "Services have been stopped successfully.");
-            if (Status.STOP_REQUESTED.equals(stackRepository.findOneWithLists(stackId).getStatus())) {
-                LOGGER.info("Hadoop services stopped, stopping.");
-                reactor.notify(ReactorConfig.STACK_STATUS_UPDATE_EVENT,
-                        Event.wrap(new StackStatusUpdateRequest(stack.cloudPlatform(), stackId, statusRequest)));
+            boolean stopped = ambariClusterConnector.stopCluster(stack);
+            if (stopped) {
+                cluster.setStatus(Status.STOPPED);
+                cloudbreakEventService.fireCloudbreakEvent(stackId, Status.AVAILABLE.name(), "Services have been stopped successfully.");
+                if (Status.STOP_REQUESTED.equals(stackRepository.findOneWithLists(stackId).getStatus())) {
+                    LOGGER.info("Hadoop services stopped, stack stop requested.");
+                    reactor.notify(ReactorConfig.STACK_STATUS_UPDATE_EVENT,
+                            Event.wrap(new StackStatusUpdateRequest(stack.cloudPlatform(), stackId, statusRequest)));
+                }
+            } else {
+                LOGGER.info("Failed to stop Hadoop services, setting cluster state to: {}", Status.AVAILABLE);
+                stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Failed to stop cluster, some of the services could not started.");
             }
         } else {
             boolean started = ambariClusterConnector.startCluster(stack);

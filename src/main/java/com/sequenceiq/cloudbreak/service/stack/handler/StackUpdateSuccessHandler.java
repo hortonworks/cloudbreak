@@ -50,6 +50,9 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
     @Autowired
     private PollingService<ConsulContext> consulPollingService;
 
+    @Autowired
+    private ConsulAgentLeaveCheckerTask consulAgentLeaveCheckerTask;
+
     @Override
     public void accept(Event<StackUpdateSuccess> t) {
         StackUpdateSuccess updateSuccess = t.getData();
@@ -98,7 +101,7 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
     private void removeAgentFromConsul(Stack stack, List<ConsulClient> clients, InstanceMetaData metaData) {
         String nodeName = metaData.getLongName().replace(ConsulUtils.CONSUL_DOMAIN, "");
         consulPollingService.pollWithTimeout(
-                new ConsulAgentLeaveCheckerTask(),
+                consulAgentLeaveCheckerTask,
                 new ConsulContext(stack, clients, Collections.singletonList(nodeName)),
                 POLLING_INTERVAL,
                 MAX_POLLING_ATTEMPTS);

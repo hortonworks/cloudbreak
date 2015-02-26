@@ -67,4 +67,9 @@ public class AzureCloudServiceDeleteTask implements StatusCheckerTask<AzureCloud
         return String.format("Azure resource '%s' is removed success on '%s' stack",
                 azureDiskRemoveReadyPollerObject.getName(), azureDiskRemoveReadyPollerObject.getStack().getId());
     }
+
+    @Override
+    public boolean exitPolling(AzureCloudServiceDeleteTaskContext azureCloudServiceDeleteTaskContext) {
+        return false;
+    }
 }

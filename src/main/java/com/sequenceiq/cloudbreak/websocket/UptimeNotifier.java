@@ -52,9 +52,18 @@ public class UptimeNotifier {
         notification.setStackId(stack.getId());
         notification.setEventType(UPTIME_NOTIFICATION);
         notification.setEventMessage(String.valueOf(uptime));
-        notification.setCloud(stack.getCredential().cloudPlatform().toString());
-        notification.setBlueprintId(stack.getCluster().getBlueprint().getId());
-        notification.setBlueprintName(stack.getCluster().getBlueprint().getBlueprintName());
+        if (stack.getCredential() == null) {
+            notification.setCloud("null");
+        } else {
+            notification.setCloud(stack.getCredential().cloudPlatform().toString());
+        }
+        if (stack.getCluster() == null || stack.getCluster().getBlueprint() == null) {
+            notification.setBlueprintId(null);
+            notification.setBlueprintName("null");
+        } else {
+            notification.setBlueprintId(stack.getCluster().getBlueprint().getId());
+            notification.setBlueprintName(stack.getCluster().getBlueprint().getBlueprintName());
+        }
         return notification;
     }
 }

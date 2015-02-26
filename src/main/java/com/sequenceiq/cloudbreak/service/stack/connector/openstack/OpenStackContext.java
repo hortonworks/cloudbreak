@@ -5,16 +5,16 @@ import java.util.List;
 import org.openstack4j.api.OSClient;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.StackDependentPollerObject;
 
-public final class OpenStackContext {
+public final class OpenStackContext extends StackDependentPollerObject {
 
-    private final Stack stack;
     private final List<String> resources;
     private final OSClient osClient;
     private final String status;
 
     public OpenStackContext(Stack stack, List<String> resources, OSClient osClient, String status) {
-        this.stack = stack;
+        super(stack);
         this.resources = resources;
         this.osClient = osClient;
         this.status = status;
@@ -30,10 +30,6 @@ public final class OpenStackContext {
 
     public String getSingleResource() {
         return resources.get(0);
-    }
-
-    public Stack getStack() {
-        return stack;
     }
 
     public String getStatus() {

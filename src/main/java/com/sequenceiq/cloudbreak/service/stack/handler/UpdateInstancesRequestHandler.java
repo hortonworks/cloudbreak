@@ -143,11 +143,13 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                 Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
                 provisionUtil.checkErrorOccurred(result);
             }
-            stackUpdater.removeStackResources(stack.getId(), deleteContextObject.getDecommisionResources());
-            LOGGER.info("Terminated instances in stack: '{}'", instanceIds);
-            LOGGER.info("Publishing {} event.", ReactorConfig.REMOVE_INSTANCES_COMPLETE_EVENT);
-            reactor.notify(ReactorConfig.REMOVE_INSTANCES_COMPLETE_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true,
-                    instanceIds, request.getHostGroup())));
+            if (!stackRepository.findById(stack.getId()).isStackInDeletionPhase()) {
+                stackUpdater.removeStackResources(stack.getId(), deleteContextObject.getDecommisionResources());
+                LOGGER.info("Terminated instances in stack: '{}'", instanceIds);
+                LOGGER.info("Publishing {} event.", ReactorConfig.REMOVE_INSTANCES_COMPLETE_EVENT);
+                reactor.notify(ReactorConfig.REMOVE_INSTANCES_COMPLETE_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true,
+                        instanceIds, request.getHostGroup())));
+            }
         }
     }
 
@@ -186,12 +188,14 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
             Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
             provisionUtil.checkErrorOccurred(result);
             resourceRequestResults.addAll(result.get(FutureResult.SUCCESS));
-            LOGGER.info("Publishing {} event.", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT);
-            reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
-                    Event.wrap(new AddInstancesComplete(stack.cloudPlatform(), stack.getId(),
-                                    collectResources(resourceRequestResults), request.getHostGroup())
-                    )
-            );
+            if (!stackRepository.findById(stack.getId()).isStackInDeletionPhase()) {
+                LOGGER.info("Publishing {} event.", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT);
+                reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
+                        Event.wrap(new AddInstancesComplete(stack.cloudPlatform(), stack.getId(),
+                                        collectResources(resourceRequestResults), request.getHostGroup())
+                        )
+                );
+            }
         }
     }
 

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.createClients;
 import static com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.getAliveMembers;
 import static com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.getService;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.catalog.model.CatalogService;
+import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -28,6 +31,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
@@ -65,6 +69,12 @@ public class AmbariRoleAllocator {
     @Autowired
     private PollingService<ConsulContext> consulPollingService;
 
+    @Autowired
+    private ConsulHostCheckerTask consulHostCheckerTask;
+
+    @Autowired
+    private ConsulServiceCheckerTask consulServiceCheckerTask;
+
     public void allocateRoles(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData) {
         try {
             Stack stack = stackRepository.findById(stackId);
@@ -81,13 +91,17 @@ public class AmbariRoleAllocator {
                 }
                 stack = stackUpdater.updateMetadataReady(stackId, true);
                 Set<InstanceMetaData> allInstanceMetaData = stack.getRunningInstanceMetaData();
-                String publicAmbariAddress = updateAmbariInstanceMetadata(stack, allInstanceMetaData);
-                waitForConsulAgents(stack, allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
-                updateWithConsulData(allInstanceMetaData);
-                instanceMetaDataRepository.save(allInstanceMetaData);
-                LOGGER.info("Publishing {} event", ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT);
-                reactor.notify(ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT, Event.wrap(new AmbariRoleAllocationComplete(stack,
-                        publicAmbariAddress)));
+                Optional<String> publicAmbariAddress = updateAmbariInstanceMetadata(stack, allInstanceMetaData);
+                if (publicAmbariAddress.isPresent()) {
+                    PollingResult pollingResult = waitForConsulAgents(stack, allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
+                    if (isSuccess(pollingResult)) {
+                        updateWithConsulData(allInstanceMetaData);
+                        instanceMetaDataRepository.save(allInstanceMetaData);
+                        LOGGER.info("Publishing {} event", ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT);
+                        reactor.notify(ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT, Event.wrap(new AmbariRoleAllocationComplete(stack,
+                                publicAmbariAddress.orNull())));
+                    }
+                }
             } else {
                 LOGGER.info("Metadata is already created, ignoring '{}' event.", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT);
             }
@@ -110,15 +124,17 @@ public class AmbariRoleAllocator {
             originalMetadata.addAll(instanceMetaData);
             Stack modifiedStack = stackUpdater.updateStackMetaData(stackId, originalMetadata, hostGroup);
             stackUpdater.updateMetadataReady(stackId, true);
-            waitForConsulAgents(modifiedStack, originalMetadata, instanceMetaData);
-            updateWithConsulData(modifiedStack.getInstanceGroupByInstanceGroupName(hostGroup).getInstanceMetaData());
-            stackUpdater.updateStackMetaData(stackId, modifiedStack.getInstanceGroupByInstanceGroupName(hostGroup).getAllInstanceMetaData(), hostGroup);
-            Set<String> instanceIds = new HashSet<>();
-            for (InstanceMetaData metadataEntry : instanceMetaData) {
-                instanceIds.add(metadataEntry.getInstanceId());
+            PollingResult pollingResult = waitForConsulAgents(modifiedStack, originalMetadata, instanceMetaData);
+            if (isSuccess(pollingResult)) {
+                updateWithConsulData(modifiedStack.getInstanceGroupByInstanceGroupName(hostGroup).getInstanceMetaData());
+                stackUpdater.updateStackMetaData(stackId, modifiedStack.getInstanceGroupByInstanceGroupName(hostGroup).getAllInstanceMetaData(), hostGroup);
+                Set<String> instanceIds = new HashSet<>();
+                for (InstanceMetaData metadataEntry : instanceMetaData) {
+                    instanceIds.add(metadataEntry.getInstanceId());
+                }
+                LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
+                reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stackId, false, instanceIds, hostGroup)));
             }
-            LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
-            reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stackId, false, instanceIds, hostGroup)));
         } catch (Exception e) {
             String errMessage = "Unhandled exception occurred while updating stack metadata.";
             LOGGER.error(errMessage, e);
@@ -127,29 +143,41 @@ public class AmbariRoleAllocator {
         }
     }
 
-    private String updateAmbariInstanceMetadata(Stack stack, Set<InstanceMetaData> instancesMetaData) {
-        String ambariAddress = getAmbariAddressFromConsul(stack, instancesMetaData);
-        for (InstanceMetaData instanceMetaData : instancesMetaData) {
-            if (instanceMetaData.getPrivateIp().equalsIgnoreCase(ambariAddress)) {
-                instanceMetaData.setAmbariServer(true);
-                instanceMetaData.setRemovable(false);
-                return instanceMetaData.getPublicIp();
+    private Optional<String> updateAmbariInstanceMetadata(Stack stack, Set<InstanceMetaData> instancesMetaData) {
+        AmbariAddressReturnObject ambariAddress = getAmbariAddressFromConsul(stack, instancesMetaData);
+        if (ambariAddress.getAddress().isPresent() && isSuccess(ambariAddress.getPollingResult().orNull())) {
+            for (InstanceMetaData instanceMetaData : instancesMetaData) {
+                if (instanceMetaData.getPrivateIp().equalsIgnoreCase(ambariAddress.getAddress().orNull())) {
+                    instanceMetaData.setAmbariServer(true);
+                    instanceMetaData.setRemovable(false);
+                    return Optional.fromNullable(instanceMetaData.getPublicIp());
+                }
             }
+        } else if (isExited(ambariAddress.pollingResult.orNull())) {
+            return Optional.absent();
         }
         throw new WrongMetadataException("Public IP of Ambari server cannot be null");
     }
 
-    private String getAmbariAddressFromConsul(Stack stack, Set<InstanceMetaData> instancesMetaData) {
+    private AmbariAddressReturnObject getAmbariAddressFromConsul(Stack stack, Set<InstanceMetaData> instancesMetaData) {
         List<ConsulClient> clients = createClients(instancesMetaData);
-        consulPollingService.pollWithTimeout(
-                new ConsulServiceCheckerTask(),
+        PollingResult pollingResult = consulPollingService.pollWithTimeout(
+                consulServiceCheckerTask,
                 new ConsulContext(stack, clients, Arrays.asList(AMBARI_SERVICE)),
                 POLLING_INTERVAL,
                 MAX_POLLING_ATTEMPTS);
-        return getService(clients, AMBARI_SERVICE).get(0).getAddress();
+        if (isSuccess(pollingResult)) {
+            return successAmbariAddressReturnObject(getService(clients, AMBARI_SERVICE).get(0).getAddress());
+        } else if (isExited(pollingResult)) {
+            return exitedAmbariAddressReturnObject();
+        } else {
+            return failedAmbariAddressReturnObject();
+        }
     }
 
-    private void waitForConsulAgents(Stack stack, Set<InstanceMetaData> originalMetaData, Set<InstanceMetaData> instancesMetaData) {
+
+
+    private PollingResult waitForConsulAgents(Stack stack, Set<InstanceMetaData> originalMetaData, Set<InstanceMetaData> instancesMetaData) {
         Set<InstanceMetaData> copy = new HashSet<>(originalMetaData);
         copy.removeAll(instancesMetaData);
         List<ConsulClient> clients = createClients(copy);
@@ -163,8 +191,8 @@ public class AmbariRoleAllocator {
                 privateIps.add(instance.getPrivateIp());
             }
         }
-        consulPollingService.pollWithTimeout(
-                new ConsulHostCheckerTask(),
+        return consulPollingService.pollWithTimeout(
+                consulHostCheckerTask,
                 new ConsulContext(stack, clients, privateIps),
                 POLLING_INTERVAL,
                 MAX_POLLING_ATTEMPTS);
@@ -225,6 +253,36 @@ public class AmbariRoleAllocator {
         LOGGER.info("Publishing {} event ", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
         StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, cause);
         reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
+    }
+
+    public AmbariAddressReturnObject successAmbariAddressReturnObject(String address) {
+        return new AmbariAddressReturnObject(Optional.fromNullable(address), Optional.fromNullable(PollingResult.SUCCESS));
+    }
+
+    public AmbariAddressReturnObject exitedAmbariAddressReturnObject() {
+        return new AmbariAddressReturnObject(Optional.<String>absent(), Optional.fromNullable(PollingResult.EXIT));
+    }
+
+    public AmbariAddressReturnObject failedAmbariAddressReturnObject() {
+        return new AmbariAddressReturnObject(Optional.<String>absent(), Optional.<PollingResult>absent());
+    }
+
+    public class AmbariAddressReturnObject {
+        private final Optional<String> address;
+        private final Optional<PollingResult> pollingResult;
+
+        private AmbariAddressReturnObject(Optional<String> address, Optional<PollingResult> pollingResult) {
+            this.address = address;
+            this.pollingResult = pollingResult;
+        }
+
+        public Optional<String> getAddress() {
+            return address;
+        }
+
+        public Optional<PollingResult> getPollingResult() {
+            return pollingResult;
+        }
     }
 
 }

@@ -7,6 +7,7 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_FAI
 import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_COMPLETE;
 import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_FAILED;
 import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,6 +67,7 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
@@ -123,16 +125,11 @@ public class AwsConnector implements CloudPlatformConnector {
     @Autowired
     private StackRepository stackRepository;
 
+    @Autowired
+    private AwsInstanceStatusCheckerTask awsInstanceStatusCheckerTask;
 
-    @Override
-    public CloudPlatform getCloudPlatform() {
-        return CloudPlatform.AWS;
-    }
-
-    @Override
-    public void rollback(Stack stack, Set<Resource> resourceSet) {
-        return;
-    }
+    @Autowired
+    private CloudFormationStackStatusChecker cloudFormationStackStatusChecker;
 
     @Override
     public void buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
@@ -164,14 +161,16 @@ public class AwsConnector implements CloudPlatformConnector {
         List<StackStatus> errorStatuses = Arrays.asList(CREATE_FAILED, ROLLBACK_IN_PROGRESS, ROLLBACK_FAILED, ROLLBACK_COMPLETE);
         CloudFormationStackPollerContext stackPollerContext = new CloudFormationStackPollerContext(client, CREATE_COMPLETE, errorStatuses, stack);
         try {
-            stackPollingService.pollWithTimeout(new CloudFormationStackStatusChecker(), stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
-            sendUpdatedStackCreateComplete(stack, cFStackName, resources);
+            PollingResult pollingResult = stackPollingService
+                    .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
+            if (isSuccess(pollingResult)) {
+                sendUpdatedStackCreateComplete(stack, cFStackName, resources);
+            }
         } catch (CloudFormationStackException e) {
             LOGGER.error(String.format("Failed to create CloudFormation stack: %s", stack.getId()), e);
             stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_FAILED, "Creation of cluster infrastructure failed: " + e.getMessage());
             throw new BuildStackFailureException(e);
         }
-
     }
 
     @Override
@@ -193,12 +192,18 @@ public class AwsConnector implements CloudPlatformConnector {
                 instanceGroupByInstanceGroupName.getNodeCount() + instanceCount);
         AutoScalingGroupReady asGroupReady = new AutoScalingGroupReady(stack, amazonEC2Client, amazonASClient, asGroupName, requiredInstances);
         LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
-        pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, Event.wrap(new AddInstancesComplete(CloudPlatform.AWS, stack.getId(), null, hostGroup)));
+        PollingResult pollingResult = pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+        if (isSuccess(pollingResult)) {
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
+            reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, Event.wrap(new AddInstancesComplete(CloudPlatform.AWS, stack.getId(), null, hostGroup)));
+        }
         return true;
     }
 
+    /**
+     * If the AutoScaling group has some suspended scaling policies it causes that the CloudFormation stack delete won't be able to remove the ASG.
+     * In this case the ASG size is reduced to zero and the processes are resumed first.
+     */
     @Override
     public boolean removeInstances(Stack stack, Set<String> instanceIds, String hostGroup) {
         MDCBuilder.buildMdcContext(stack);
@@ -262,15 +267,17 @@ public class AwsConnector implements CloudPlatformConnector {
             List<StackStatus> errorStatuses = Arrays.asList(DELETE_FAILED);
             CloudFormationStackPollerContext stackPollerContext = new CloudFormationStackPollerContext(client, DELETE_COMPLETE, errorStatuses, stack);
             try {
-                stackPollingService.pollWithTimeout(new CloudFormationStackStatusChecker(), stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
-                LOGGER.info("CloudFormation stack({}) delete completed. Publishing {} event.", cFStackName, ReactorConfig.DELETE_COMPLETE_EVENT);
-                reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
+                PollingResult pollingResult = stackPollingService
+                        .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
+                if (isSuccess(pollingResult)) {
+                    LOGGER.info("CloudFormation stack({}) delete completed. Publishing {} event.", cFStackName, ReactorConfig.DELETE_COMPLETE_EVENT);
+                    reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
+                }
             } catch (CloudFormationStackException e) {
                 LOGGER.error(String.format("Failed to delete CloudFormation stack: %s, id:%s", cFStackName, stack.getId()), e);
                 stackUpdater.updateStackStatus(stack.getId(), Status.DELETE_FAILED, "Failed to delete stack: " + e.getMessage());
                 throw new BuildStackFailureException(e);
             }
-
         } else {
             LOGGER.info("No resource saved for stack, publishing {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
             reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
@@ -332,13 +339,15 @@ public class AwsConnector implements CloudPlatformConnector {
                             AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
                 } else {
                     amazonEC2Client.startInstances(new StartInstancesRequest().withInstanceIds(instances));
-                    awsPollingService.pollWithTimeout(
-                            new AwsInstanceStatusCheckerTask(),
+                    PollingResult pollingResult = awsPollingService.pollWithTimeout(
+                            awsInstanceStatusCheckerTask,
                             new AwsInstances(stack, amazonEC2Client, new ArrayList(instances), "Running"),
                             AmbariClusterConnector.POLLING_INTERVAL,
                             AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
-                    amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
-                    updateInstanceMetadata(stack, amazonEC2Client, stack.getRunningInstanceMetaData(), instances);
+                    if (isSuccess(pollingResult)) {
+                        amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
+                        updateInstanceMetadata(stack, amazonEC2Client, stack.getRunningInstanceMetaData(), instances);
+                    }
                 }
             } catch (Exception e) {
                 LOGGER.error(String.format("Failed to %s AWS instances on stack: %s", stopped ? "stop" : "start", stack.getId()), e);
@@ -396,6 +405,16 @@ public class AwsConnector implements CloudPlatformConnector {
                 }
             }
         }
+    }
+
+    @Override
+    public void rollback(Stack stack, Set<Resource> resourceSet) {
+        return;
+    }
+
+    @Override
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.AWS;
     }
 
     protected CreateStackRequest createStackRequest() {

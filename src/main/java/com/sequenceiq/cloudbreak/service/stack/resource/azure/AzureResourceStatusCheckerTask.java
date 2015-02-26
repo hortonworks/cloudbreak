@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.stack.resource.azure;
 
 import org.apache.http.Header;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
@@ -10,8 +9,7 @@ import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 
-@Component
-public class AzureResourceStatusCheckerTask  implements StatusCheckerTask<AzureResourcePollerObject> {
+public abstract class AzureResourceStatusCheckerTask implements StatusCheckerTask<AzureResourcePollerObject> {
     @Autowired
     private JsonHelper jsonHelper;
 

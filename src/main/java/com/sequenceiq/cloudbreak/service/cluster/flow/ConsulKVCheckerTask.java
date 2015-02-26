@@ -4,14 +4,16 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.ecwid.consul.v1.ConsulClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.PluginFailureException;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
 
-public class ConsulKVCheckerTask implements StatusCheckerTask<ConsulKVCheckerContext> {
+@Component
+public class ConsulKVCheckerTask extends StackBasedStatusCheckerTask<ConsulKVCheckerContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsulKVCheckerTask.class);
 

@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
+import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_COMPLETE;
+
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
@@ -13,12 +17,18 @@ import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 
+@Component
 public class CloudFormationStackStatusChecker implements StatusCheckerTask<CloudFormationStackPollerContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudFormationStackStatusChecker.class);
+
+    @Autowired
+    private StackRepository stackRepository;
 
     @Override
     public boolean checkStatus(CloudFormationStackPollerContext context) {
@@ -62,5 +72,22 @@ public class CloudFormationStackStatusChecker implements StatusCheckerTask<Cloud
     public String successMessage(CloudFormationStackPollerContext context) {
         Stack stack = context.getStack();
         return String.format("AWS CloudFormation stack(%s) reached the desired state '%s'", stack.getId(), context.getSuccessStatus());
+    }
+
+    @Override
+    public boolean exitPolling(CloudFormationStackPollerContext cloudFormationStackPollerContext) {
+        if (!cloudFormationStackPollerContext.getSuccessStatus().equals(DELETE_COMPLETE)) {
+            try {
+                Stack byId = stackRepository.findById(cloudFormationStackPollerContext.getStack().getId());
+                if (byId == null || byId.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
+                    return true;
+                }
+                return false;
+            } catch (Exception ex) {
+                return true;
+            }
+        } else {
+            return false;
+        }
     }
 }

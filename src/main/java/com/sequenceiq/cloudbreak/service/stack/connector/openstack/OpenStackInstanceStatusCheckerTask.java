@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
-public class OpenStackInstanceStatusCheckerTask implements StatusCheckerTask<OpenStackContext> {
+public class OpenStackInstanceStatusCheckerTask extends StackBasedStatusCheckerTask<OpenStackContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackInstanceStatusCheckerTask.class);
 
@@ -44,4 +44,5 @@ public class OpenStackInstanceStatusCheckerTask implements StatusCheckerTask<Ope
     public String successMessage(OpenStackContext context) {
         return "OpenStack instances successfully reached the desired state: " + context.getStatus();
     }
+
 }

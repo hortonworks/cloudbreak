@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.openstack;
 
+import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
@@ -86,12 +88,14 @@ public class OpenStackConnector implements CloudPlatformConnector {
         Stack updatedStack = stackUpdater.addStackResources(stack.getId(), resources);
         LOGGER.info("Heat stack creation request sent with stack name: '{}' for stack: '{}'", stackName, updatedStack.getId());
         try {
-            pollingService.pollWithTimeout(openStackHeatStackStatusCheckerTask,
+            PollingResult pollingResult = pollingService.pollWithTimeout(openStackHeatStackStatusCheckerTask,
                     new OpenStackContext(stack, asList(openStackStack.getId()), osClient, HeatStackStatus.CREATED.getStatus()),
                     POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
-            reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(
-                    new ProvisionComplete(CloudPlatform.OPENSTACK, stack.getId(), new HashSet<>(resources))));
+            if (isSuccess(pollingResult)) {
+                LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
+                reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(
+                        new ProvisionComplete(CloudPlatform.OPENSTACK, stack.getId(), new HashSet<>(resources))));
+            }
         } catch (HeatStackFailedException e) {
             LOGGER.error(String.format("Failed to create Heat stack: %s", stack.getId()), e);
             stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_FAILED, "Creation of cluster infrastructure failed: " + e.getMessage());
@@ -117,11 +121,13 @@ public class OpenStackConnector implements CloudPlatformConnector {
             String heatStackId = heatStack.getResourceName();
             osClient.heat().stacks().delete(stack.getName(), heatStackId);
             try {
-                pollingService.pollWithTimeout(openStackHeatStackStatusCheckerTask,
+                PollingResult pollingResult = pollingService.pollWithTimeout(openStackHeatStackStatusCheckerTask,
                         new OpenStackContext(stack, asList(heatStackId), osClient, HeatStackStatus.DELETED.getStatus()),
                         POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-                LOGGER.info("Heat stack deleted, publishing {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
-                reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
+                if (isSuccess(pollingResult)) {
+                    LOGGER.info("Heat stack deleted, publishing {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
+                    reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
+                }
             } catch (HeatStackFailedException e) {
                 LOGGER.error(String.format("Failed to delete Heat stack: %s", stack.getId()), e);
                 stackUpdater.updateStackStatus(stack.getId(), Status.DELETE_FAILED, "Termination of cluster infrastructure failed: " + e.getMessage());
@@ -191,10 +197,15 @@ public class OpenStackConnector implements CloudPlatformConnector {
             return result;
         }
         String desiredState = stopped ? OpenStackInstanceStatus.STOPPED.getStatus() : OpenStackInstanceStatus.STARTED.getStatus();
-        pollingService.pollWithTimeout(openStackInstanceStatusCheckerTask,
+        PollingResult pollingResult = pollingService.pollWithTimeout(openStackInstanceStatusCheckerTask,
                 new OpenStackContext(stack, instances, osClient, desiredState),
                 POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-        return result;
+        if (isSuccess(pollingResult)) {
+            return result;
+        } else {
+            return false;
+        }
+
     }
 
     private boolean executeAction(OSClient osClient, String instanceId, Action action) {

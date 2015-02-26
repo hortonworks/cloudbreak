@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.gcc;
 
+import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.CREDENTIAL;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
@@ -58,6 +60,7 @@ public class GccProvisionSetup implements ProvisionSetup {
     @Override
     public void setupProvisioning(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
+        PollingResult pollingResult = PollingResult.SUCCESS;
         try {
             Storage storage = gccStackUtil.buildStorage((GccCredential) stack.getCredential(), stack);
             Compute compute = gccStackUtil.buildCompute((GccCredential) stack.getCredential(), stack);
@@ -91,20 +94,22 @@ public class GccProvisionSetup implements ProvisionSetup {
                 ins1.execute();
                 GccImageReadyPollerObject gccImageReadyPollerObject = new GccImageReadyPollerObject(compute,
                         stack, image.getName(), GccZone.valueOf(stack.getRegion()));
-                gccImageReadyPollerObjectPollingService
+                pollingResult = gccImageReadyPollerObjectPollingService
                         .pollWithTimeout(gccImageCheckerStatus, gccImageReadyPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             }
         } catch (IOException e) {
             LOGGER.error(String.format("Error occurs on %s stack under the setup", stack.getId()), e);
             throw new InternalServerException(e.getMessage());
         }
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
-                Event.wrap(
-                        new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
-                                .withSetupProperty(CREDENTIAL, stack.getCredential())
-                )
-        );
+        if (isSuccess(pollingResult)) {
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
+            reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
+                    Event.wrap(
+                            new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
+                                    .withSetupProperty(CREDENTIAL, stack.getCredential())
+                    )
+            );
+        }
     }
 
     @Override

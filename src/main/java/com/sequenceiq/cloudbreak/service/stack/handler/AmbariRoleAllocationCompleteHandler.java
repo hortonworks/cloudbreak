@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.handler;
 
+import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
@@ -38,6 +41,8 @@ public class AmbariRoleAllocationCompleteHandler implements Consumer<Event<Ambar
     private StackRepository stackRepository;
     @Autowired
     private PollingService<AmbariStartupPollerObject> ambariStartupPollerObjectPollingService;
+    @Autowired
+    private AmbariStartupListenerTask ambariStartupListenerTask;
 
     @Override
     public void accept(Event<AmbariRoleAllocationComplete> event) {
@@ -49,10 +54,12 @@ public class AmbariRoleAllocationCompleteHandler implements Consumer<Event<Ambar
         Stack stack = stackRepository.findById(stackId);
         AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, ambariIp, clientService.createDefault(ambariIp));
         try {
-            ambariStartupPollerObjectPollingService.pollWithTimeout(new AmbariStartupListenerTask(),
+            PollingResult pollingResult = ambariStartupPollerObjectPollingService.pollWithTimeout(ambariStartupListenerTask,
                     ambariStartupPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-            LOGGER.info("Publishing {} event.", ReactorConfig.STACK_CREATE_SUCCESS_EVENT);
-            reactor.notify(ReactorConfig.STACK_CREATE_SUCCESS_EVENT, Event.wrap(new StackCreationSuccess(stack.getId(), ambariIp)));
+            if (isSuccess(pollingResult)) {
+                LOGGER.info("Publishing {} event.", ReactorConfig.STACK_CREATE_SUCCESS_EVENT);
+                reactor.notify(ReactorConfig.STACK_CREATE_SUCCESS_EVENT, Event.wrap(new StackCreationSuccess(stack.getId(), ambariIp)));
+            }
         } catch (Exception ex) {
             LOGGER.error("Timeout occured while trying to reach initializing Ambari server.");
             LOGGER.info("Publishing {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT);

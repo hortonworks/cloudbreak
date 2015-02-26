@@ -452,6 +452,10 @@ public class Stack implements ProvisionEntity {
         return credential.cloudPlatform();
     }
 
+    public boolean isStackInDeletionPhase() {
+        return status.equals(Status.DELETE_COMPLETED) || status.equals(Status.DELETE_IN_PROGRESS);
+    }
+
     public Boolean isCloudPlatformUsedWithTemplate() {
         return cloudPlatform().isWithTemplate();
     }

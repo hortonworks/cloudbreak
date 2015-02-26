@@ -2,19 +2,20 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
-import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
-public class AmbariHealthCheckerTask implements StatusCheckerTask<AmbariClient> {
+@Component
+public class AmbariHealthCheckerTask extends StackBasedStatusCheckerTask<AmbariClientPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariHealthCheckerTask.class);
 
     @Override
-    public boolean checkStatus(AmbariClient ambariClient) {
+    public boolean checkStatus(AmbariClientPollerObject ambariClientPollerObject) {
         try {
-            String ambariHealth = ambariClient.healthCheck();
+            String ambariHealth = ambariClientPollerObject.getAmbariClient().healthCheck();
             if ("RUNNING".equals(ambariHealth)) {
                 return true;
             }
@@ -26,13 +27,13 @@ public class AmbariHealthCheckerTask implements StatusCheckerTask<AmbariClient> 
     }
 
     @Override
-    public void handleTimeout(AmbariClient t) {
-        throw new InternalServerException(String.format("Operation timed out. Ambari server could not start %s", t.getAmbari().getUri()));
+    public void handleTimeout(AmbariClientPollerObject t) {
+        throw new InternalServerException(String.format("Operation timed out. Ambari server could not start %s", t.getAmbariClient().getAmbari().getUri()));
     }
 
     @Override
-    public String successMessage(AmbariClient t) {
-        return String.format("Ambari server successfully started '%s'", t.getAmbari().getUri());
+    public String successMessage(AmbariClientPollerObject t) {
+        return String.format("Ambari server successfully started '%s'", t.getAmbariClient().getAmbari().getUri());
     }
 
 }

@@ -5,13 +5,15 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.ecwid.consul.v1.ConsulClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
-public class ConsulHostCheckerTask implements StatusCheckerTask<ConsulContext> {
+@Component
+public class ConsulHostCheckerTask extends StackBasedStatusCheckerTask<ConsulContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsulHostCheckerTask.class);
 

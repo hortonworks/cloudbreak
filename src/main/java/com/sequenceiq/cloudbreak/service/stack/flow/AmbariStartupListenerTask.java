@@ -2,12 +2,14 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 
-public class AmbariStartupListenerTask implements StatusCheckerTask<AmbariStartupPollerObject> {
+@Component
+public class AmbariStartupListenerTask extends StackBasedStatusCheckerTask<AmbariStartupPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariStartupListenerTask.class);
 

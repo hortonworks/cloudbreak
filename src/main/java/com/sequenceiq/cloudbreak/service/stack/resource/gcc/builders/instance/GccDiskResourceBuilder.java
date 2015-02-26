@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCreationException;
@@ -45,8 +44,6 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
     private GccResourceCheckerStatus gccResourceCheckerStatus;
     @Autowired
     private PollingService<GccResourceReadyPollerObject> gccDiskReadyPollerObjectPollingService;
-    @Autowired
-    private GccRemoveCheckerStatus gccRemoveCheckerStatus;
     @Autowired
     private PollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
     @Autowired

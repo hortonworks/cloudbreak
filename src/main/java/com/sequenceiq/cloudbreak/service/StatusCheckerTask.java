@@ -7,4 +7,6 @@ public interface StatusCheckerTask<T> {
     void handleTimeout(T t);
 
     String successMessage(T t);
+
+    boolean exitPolling(T t);
 }

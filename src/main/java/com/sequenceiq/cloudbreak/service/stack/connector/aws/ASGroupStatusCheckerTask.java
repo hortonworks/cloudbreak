@@ -12,11 +12,11 @@ import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
 @Component
-public class ASGroupStatusCheckerTask implements StatusCheckerTask<AutoScalingGroupReady> {
+public class ASGroupStatusCheckerTask extends StackBasedStatusCheckerTask<AutoScalingGroupReady> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ASGroupStatusCheckerTask.class);
 
@@ -61,4 +61,5 @@ public class ASGroupStatusCheckerTask implements StatusCheckerTask<AutoScalingGr
         MDCBuilder.buildMdcContext(t.getStack());
         return String.format("AutoScaling group '%s' is ready. All %s instances are running.", t.getAutoScalingGroupName(), t.getRequiredInstances());
     }
+
 }

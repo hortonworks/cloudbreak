@@ -77,6 +77,11 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
                 gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getResourceType(), gccRemoveReadyPollerObject.getStack().getId());
     }
 
+    @Override
+    public boolean exitPolling(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
+        return false;
+    }
+
     private boolean analyzeOperation(Operation operation, GccRemoveReadyPollerObject gccRemoveReadyPollerObject, GoogleJsonResponseException ex) {
         if (ex != null && ex.getDetails().get("code").equals(NOT_FOUND)) {
             return true;
