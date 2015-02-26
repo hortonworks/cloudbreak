@@ -249,10 +249,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }
         }
 
-        $scope.isMaster = function(group) {
-           return group.indexOf("slave") == -1 ? true : false;
-        }
-
         function getUluwatuClusters(){
           UluwatuCluster.query(function (clusters) {
               $rootScope.clusters = clusters;
