@@ -13,7 +13,7 @@ public interface ProvisioningFacade {
 
     ProvisioningContext setupMetadata(ProvisioningContext provisioningContext) throws CloudbreakException;
 
-    ProvisioningContext allocateRoles(ProvisioningContext provisioningContext) throws CloudbreakException;
+    ProvisioningContext allocateAmbariRoles(ProvisioningContext provisioningContext) throws CloudbreakException;
 
     ProvisioningContext startAmbari(ProvisioningContext provisioningContext) throws CloudbreakException;
 
