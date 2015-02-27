@@ -40,4 +40,11 @@ public class ProvisioningContextFactory {
         return provisioningContext;
     }
 
+    public static ProvisioningContext createAmbariStartContext(Long stackId, String ambariIp) {
+        ProvisioningContext provisioningContext = createContext();
+        provisioningContext.setStackId(stackId);
+        provisioningContext.setAmbariIp(ambariIp);
+        return provisioningContext;
+    }
+
 }
