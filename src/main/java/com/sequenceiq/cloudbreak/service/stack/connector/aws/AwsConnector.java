@@ -400,14 +400,14 @@ public class AwsConnector implements CloudPlatformConnector {
             for (Instance instance : reservation.getInstances()) {
                 for (InstanceMetaData metaData : instanceMetaData) {
                     if (metaData.getInstanceId().equals(instance.getInstanceId())) {
-                        String publicDnsName = instance.getPublicDnsName();
+                        String publicIp = instance.getPublicIpAddress();
                         if (metaData.getAmbariServer()) {
-                            stack.setAmbariIp(publicDnsName);
+                            stack.setAmbariIp(publicIp);
                             Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
                             stack.setCluster(cluster);
                             stackRepository.save(stack);
                         }
-                        metaData.setPublicIp(publicDnsName);
+                        metaData.setPublicIp(publicIp);
                         instanceMetaDataRepository.save(metaData);
                         break;
                     }
