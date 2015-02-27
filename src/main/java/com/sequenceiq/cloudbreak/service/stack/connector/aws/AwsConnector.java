@@ -369,7 +369,7 @@ public class AwsConnector implements CloudPlatformConnector {
                     amazonASClient.suspendProcesses(new SuspendProcessesRequest().withAutoScalingGroupName(asGroupName));
                     amazonEC2Client.stopInstances(new StopInstancesRequest().withInstanceIds(instances));
                     awsPollingService.pollWithTimeout(
-                            new AwsInstanceStatusCheckerTask(),
+                            awsInstanceStatusCheckerTask,
                             new AwsInstances(stack, amazonEC2Client, new ArrayList(instances), "Stopped"),
                             AmbariClusterConnector.POLLING_INTERVAL,
                             AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
