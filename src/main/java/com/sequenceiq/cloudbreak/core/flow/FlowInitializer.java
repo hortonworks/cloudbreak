@@ -45,20 +45,20 @@ public class FlowInitializer implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
 
-        flowManager.registerTransition(ProvisioningSetupHandler.class,
-                ReactorFlowManager.TransitionFactory
-                        .createTransition(Phases.PROVISIONING_SETUP.name(), Phases.PROVISIONING.name(), "PROVISIONING_SETUP_FAILED"));
-        flowManager.registerTransition(ProvisioningHandler.class,
-                ReactorFlowManager.TransitionFactory.createTransition(Phases.PROVISIONING.name(), Phases.METADATA_SETUP.name(), "PROVISIONING_FAILED"));
-        flowManager.registerTransition(MetadataSetupHandler.class,
-                ReactorFlowManager.TransitionFactory
-                        .createTransition(Phases.METADATA_SETUP.name(), Phases.AMBARI_ROLE_ALLOCATION.name(), "METADATA_SETUP_FAILED"));
-        flowManager.registerTransition(AmbariRoleAllocationHandler.class,
-                ReactorFlowManager.TransitionFactory
-                        .createTransition(Phases.AMBARI_ROLE_ALLOCATION.name(), Phases.AMBARI_START.name(), "AMBARI_ROLE_ALLOCATION_FAILED"));
-        flowManager.registerTransition(AmbariStartHandler.class,
-                ReactorFlowManager.TransitionFactory
-                        .createTransition(Phases.AMBARI_START.name(), Phases.CLUSTER_CREATION.name(), "AMBARI_START_FAILED"));
+        flowManager.registerTransition(ProvisioningSetupHandler.class, ReactorFlowManager.TransitionFactory
+                .createTransition(Phases.PROVISIONING_SETUP.name(), Phases.PROVISIONING.name(), "PROVISIONING_SETUP_FAILED"));
+
+        flowManager.registerTransition(ProvisioningHandler.class, ReactorFlowManager.TransitionFactory
+                .createTransition(Phases.PROVISIONING.name(), Phases.METADATA_SETUP.name(), "PROVISIONING_FAILED"));
+
+        flowManager.registerTransition(MetadataSetupHandler.class, ReactorFlowManager.TransitionFactory
+                .createTransition(Phases.METADATA_SETUP.name(), Phases.AMBARI_ROLE_ALLOCATION.name(), "METADATA_SETUP_FAILED"));
+
+        flowManager.registerTransition(AmbariRoleAllocationHandler.class, ReactorFlowManager.TransitionFactory
+                .createTransition(Phases.AMBARI_ROLE_ALLOCATION.name(), Phases.AMBARI_START.name(), "AMBARI_ROLE_ALLOCATION_FAILED"));
+
+        flowManager.registerTransition(AmbariStartHandler.class, ReactorFlowManager.TransitionFactory
+                .createTransition(Phases.AMBARI_START.name(), Phases.CLUSTER_CREATION.name(), "AMBARI_START_FAILED"));
 
         reactor.on($(Phases.PROVISIONING_SETUP.name()), getHandlerForClass(ProvisioningSetupHandler.class));
         reactor.on($(Phases.PROVISIONING.name()), getHandlerForClass(ProvisioningHandler.class));

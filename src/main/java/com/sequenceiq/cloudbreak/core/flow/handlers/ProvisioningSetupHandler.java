@@ -24,7 +24,7 @@ public class ProvisioningSetupHandler extends AbstractFlowHandler<ProvisioningCo
     protected Object execute(Event<ProvisioningContext> event) throws CloudbreakException {
         LOGGER.info("Executing provisioning setup logic. Event: {}", event);
         ProvisioningContext provisioningContext = event.getData();
-        provisioningFacade.setup(provisioningContext);
+        provisioningContext = provisioningFacade.setup(provisioningContext);
         return provisioningContext;
     }
 
