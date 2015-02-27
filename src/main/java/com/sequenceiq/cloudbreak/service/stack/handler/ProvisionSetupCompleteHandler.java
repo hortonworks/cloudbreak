@@ -35,6 +35,10 @@ public class ProvisionSetupCompleteHandler implements Consumer<Event<ProvisionSe
         Stack stack = stackRepository.findById(stackId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stackId);
-        provisionContext.buildStack(cloudPlatform, stackId, provisionSetupComplete.getSetupProperties(), provisionSetupComplete.getUserDataParams());
+        try {
+            provisionContext.buildStack(cloudPlatform, stackId, provisionSetupComplete.getSetupProperties(), provisionSetupComplete.getUserDataParams());
+        } catch (Exception e) {
+            throw new IllegalStateException("Invalid / Old flow handler. To be removed!");
+        }
     }
 }
