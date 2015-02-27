@@ -5,12 +5,12 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 public class UpdateInstancesRequest extends ProvisionEvent {
 
     private Integer scalingAdjustment;
-    private String hostGroup;
+    private String instanceGroup;
 
-    public UpdateInstancesRequest(CloudPlatform cloudPlatform, Long stackId, Integer scalingAdjustment, String hostGroup) {
+    public UpdateInstancesRequest(CloudPlatform cloudPlatform, Long stackId, Integer scalingAdjustment, String instanceGroup) {
         super(cloudPlatform, stackId);
         this.scalingAdjustment = scalingAdjustment;
-        this.hostGroup = hostGroup;
+        this.instanceGroup = instanceGroup;
     }
 
     public Integer getScalingAdjustment() {
@@ -21,11 +21,11 @@ public class UpdateInstancesRequest extends ProvisionEvent {
         this.scalingAdjustment = scalingAdjustment;
     }
 
-    public String getHostGroup() {
-        return hostGroup;
+    public String getInstanceGroup() {
+        return instanceGroup;
     }
 
-    public void setHostGroup(String hostGroup) {
-        this.hostGroup = hostGroup;
+    public void setInstanceGroup(String instanceGroup) {
+        this.instanceGroup = instanceGroup;
     }
 }

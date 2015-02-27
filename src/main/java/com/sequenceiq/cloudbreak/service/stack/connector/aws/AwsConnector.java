@@ -178,15 +178,15 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public boolean addInstances(Stack stack, String userData, Integer instanceCount, String hostGroup) {
+    public boolean addInstances(Stack stack, String userData, Integer instanceCount, String instanceGroup) {
         MDCBuilder.buildMdcContext(stack);
-        InstanceGroup instanceGroupByInstanceGroupName = stack.getInstanceGroupByInstanceGroupName(hostGroup);
+        InstanceGroup instanceGroupByInstanceGroupName = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         Integer requiredInstances = instanceGroupByInstanceGroupName.getNodeCount() + instanceCount;
         Regions region = Regions.valueOf(stack.getRegion());
         AwsCredential credential = (AwsCredential) stack.getCredential();
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(region, credential);
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(region, credential);
-        String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, hostGroup);
+        String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, instanceGroup);
         amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
                 .withAutoScalingGroupName(asGroupName)
                 .withMaxSize(requiredInstances)
@@ -199,7 +199,8 @@ public class AwsConnector implements CloudPlatformConnector {
         PollingResult pollingResult = pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         if (isSuccess(pollingResult)) {
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
-            reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, Event.wrap(new AddInstancesComplete(CloudPlatform.AWS, stack.getId(), null, hostGroup)));
+            reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
+                    Event.wrap(new AddInstancesComplete(CloudPlatform.AWS, stack.getId(), null, instanceGroup)));
         }
         return true;
     }
@@ -209,21 +210,21 @@ public class AwsConnector implements CloudPlatformConnector {
      * In this case the ASG size is reduced to zero and the processes are resumed first.
      */
     @Override
-    public boolean removeInstances(Stack stack, Set<String> instanceIds, String hostGroup) {
+    public boolean removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
         MDCBuilder.buildMdcContext(stack);
         Regions region = Regions.valueOf(stack.getRegion());
         AwsCredential credential = (AwsCredential) stack.getCredential();
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(region, credential);
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(region, credential);
 
-        String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, hostGroup);
+        String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, instanceGroup);
         DetachInstancesRequest detachInstancesRequest = new DetachInstancesRequest().withAutoScalingGroupName(asGroupName).withInstanceIds(instanceIds)
                 .withShouldDecrementDesiredCapacity(true);
         amazonASClient.detachInstances(detachInstancesRequest);
         amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(instanceIds));
         LOGGER.info("Terminated instances in stack '{}': '{}'", stack.getId(), instanceIds);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds, hostGroup)));
+        reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds, instanceGroup)));
         return true;
     }
 

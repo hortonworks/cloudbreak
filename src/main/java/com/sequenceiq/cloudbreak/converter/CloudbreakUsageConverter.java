@@ -40,7 +40,7 @@ public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJ
         json.setUsername(cbUser.getUsername());
         json.setCosts(entity.getCosts());
         json.setInstanceType(entity.getInstanceType());
-        json.setHostGroup(entity.getHostGroup());
+        json.setInstanceGroup(entity.getInstanceGroup());
         return json;
     }
 
@@ -55,7 +55,7 @@ public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJ
         entity.setStackId(json.getStackId());
         entity.setStackName(json.getStackName());
         entity.setInstanceType(json.getInstanceType());
-        entity.setHostGroup(json.getHostGroup());
+        entity.setInstanceGroup(json.getInstanceGroup());
         return entity;
     }
 

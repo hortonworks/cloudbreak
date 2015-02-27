@@ -8,12 +8,12 @@ import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
 public class MetadataUpdateComplete extends ProvisionEvent {
     private Set<CoreInstanceMetaData> coreInstanceMetaData = new HashSet<>();
-    private String hostGroup;
+    private String instanceGroup;
 
-    public MetadataUpdateComplete(CloudPlatform cloudPlatform, Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData, String hostGroup) {
+    public MetadataUpdateComplete(CloudPlatform cloudPlatform, Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData, String instanceGroup) {
         super(cloudPlatform, stackId);
         this.coreInstanceMetaData = coreInstanceMetaData;
-        this.hostGroup = hostGroup;
+        this.instanceGroup = instanceGroup;
     }
 
     public Set<CoreInstanceMetaData> getCoreInstanceMetaData() {
@@ -24,11 +24,11 @@ public class MetadataUpdateComplete extends ProvisionEvent {
         this.coreInstanceMetaData = coreInstanceMetaData;
     }
 
-    public String getHostGroup() {
-        return hostGroup;
+    public String getInstanceGroup() {
+        return instanceGroup;
     }
 
-    public void setHostGroup(String hostGroup) {
-        this.hostGroup = hostGroup;
+    public void setInstanceGroup(String instanceGroup) {
+        this.instanceGroup = instanceGroup;
     }
 }

@@ -114,26 +114,27 @@ public class AmbariRoleAllocator {
         }
     }
 
-    public void updateInstanceMetadata(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData, String hostGroup) {
+    public void updateInstanceMetadata(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData, String instanceGroupName) {
         Stack one = stackRepository.findOneWithLists(stackId);
-        InstanceGroup instanceGroup = one.getInstanceGroupByInstanceGroupName(hostGroup);
+        InstanceGroup instanceGroup = one.getInstanceGroupByInstanceGroupName(instanceGroupName);
         MDCBuilder.buildMdcContext(one);
         try {
             Set<InstanceMetaData> originalMetadata = instanceGroup.getAllInstanceMetaData();
-            Set<InstanceMetaData> instanceMetaData = prepareInstanceMetaData(coreInstanceMetaData, one.getInstanceGroupByInstanceGroupName(hostGroup));
+            Set<InstanceMetaData> instanceMetaData = prepareInstanceMetaData(coreInstanceMetaData, one.getInstanceGroupByInstanceGroupName(instanceGroupName));
             originalMetadata.addAll(instanceMetaData);
-            Stack modifiedStack = stackUpdater.updateStackMetaData(stackId, originalMetadata, hostGroup);
+            Stack modifiedStack = stackUpdater.updateStackMetaData(stackId, originalMetadata, instanceGroupName);
             stackUpdater.updateMetadataReady(stackId, true);
             PollingResult pollingResult = waitForConsulAgents(modifiedStack, originalMetadata, instanceMetaData);
             if (isSuccess(pollingResult)) {
-                updateWithConsulData(modifiedStack.getInstanceGroupByInstanceGroupName(hostGroup).getInstanceMetaData());
-                stackUpdater.updateStackMetaData(stackId, modifiedStack.getInstanceGroupByInstanceGroupName(hostGroup).getAllInstanceMetaData(), hostGroup);
+                updateWithConsulData(modifiedStack.getInstanceGroupByInstanceGroupName(instanceGroupName).getInstanceMetaData());
+                stackUpdater.updateStackMetaData(stackId,
+                            modifiedStack.getInstanceGroupByInstanceGroupName(instanceGroupName).getAllInstanceMetaData(), instanceGroupName);
                 Set<String> instanceIds = new HashSet<>();
                 for (InstanceMetaData metadataEntry : instanceMetaData) {
                     instanceIds.add(metadataEntry.getInstanceId());
                 }
                 LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
-                reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stackId, false, instanceIds, hostGroup)));
+                reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stackId, false, instanceIds, instanceGroupName)));
             }
         } catch (Exception e) {
             String errMessage = "Unhandled exception occurred while updating stack metadata.";

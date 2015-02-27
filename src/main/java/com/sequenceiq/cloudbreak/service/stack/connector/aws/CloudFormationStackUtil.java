@@ -24,16 +24,16 @@ public class CloudFormationStackUtil {
     @Autowired
     private AwsStackUtil awsStackUtil;
 
-    public String getAutoscalingGroupName(Stack stack, String hostGroup) {
+    public String getAutoscalingGroupName(Stack stack, String instanceGroup) {
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
         AmazonCloudFormationClient amazonCfClient = awsStackUtil.createCloudFormationClient(Regions.valueOf(stack.getRegion()), awsCredential);
-        return getAutoscalingGroupName(stack, amazonCfClient, hostGroup);
+        return getAutoscalingGroupName(stack, amazonCfClient, instanceGroup);
     }
 
-    public String getAutoscalingGroupName(Stack stack, AmazonCloudFormationClient amazonCFClient, String hostGroup) {
+    public String getAutoscalingGroupName(Stack stack, AmazonCloudFormationClient amazonCFClient, String instanceGroup) {
         DescribeStackResourceResult asGroupResource = amazonCFClient.describeStackResource(new DescribeStackResourceRequest()
                 .withStackName(stack.getResourcesByType(ResourceType.CLOUDFORMATION_STACK).get(0).getResourceName())
-                .withLogicalResourceId(String.format("AmbariNodes%s", hostGroup.replaceAll("_", ""))));
+                .withLogicalResourceId(String.format("AmbariNodes%s", instanceGroup.replaceAll("_", ""))));
         return asGroupResource.getStackResourceDetail().getPhysicalResourceId();
     }
 
@@ -41,17 +41,17 @@ public class CloudFormationStackUtil {
         return String.format("%s-%s", stack.getName(), stack.getId());
     }
 
-    public List<String> getInstanceIds(Stack stack, String hostGroup) {
+    public List<String> getInstanceIds(Stack stack, String instanceGroup) {
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(Regions.valueOf(stack.getRegion()), awsCredential);
         AmazonCloudFormationClient amazonCFClient = awsStackUtil.createCloudFormationClient(Regions.valueOf(stack.getRegion()), awsCredential);
-        return getInstanceIds(stack, amazonASClient, amazonCFClient, hostGroup);
+        return getInstanceIds(stack, amazonASClient, amazonCFClient, instanceGroup);
     }
 
-    public List<String> getInstanceIds(Stack stack, AmazonAutoScalingClient amazonASClient, AmazonCloudFormationClient amazonCFClient, String hostGroup) {
+    public List<String> getInstanceIds(Stack stack, AmazonAutoScalingClient amazonASClient, AmazonCloudFormationClient amazonCFClient, String instanceGroup) {
         DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = amazonASClient
                 .describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest()
-                        .withAutoScalingGroupNames(getAutoscalingGroupName(stack, amazonCFClient, hostGroup)));
+                        .withAutoScalingGroupNames(getAutoscalingGroupName(stack, amazonCFClient, instanceGroup)));
         List<String> instanceIds = new ArrayList<>();
         if (describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances() != null) {
             for (Instance instance : describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances()) {

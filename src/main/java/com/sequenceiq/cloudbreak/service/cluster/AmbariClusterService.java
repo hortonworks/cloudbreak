@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -36,7 +37,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
+import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -70,7 +71,7 @@ public class AmbariClusterService implements ClusterService {
     private InstanceMetaDataRepository instanceMetadataRepository;
 
     @Autowired
-    private HostMetadataRepository hostMetadataRepository;
+    private HostGroupRepository hostGroupRepository;
 
     @Autowired
     private Reactor reactor;
@@ -141,12 +142,12 @@ public class AmbariClusterService implements ClusterService {
         if (decommissionRequest) {
             AmbariClient ambariClient = clientService.create(stack);
             int replication = getReplicationFactor(ambariClient, hostGroupAdjustment.getHostGroup());
-            String hostGroup = hostGroupAdjustment.getHostGroup();
-            Set<HostMetadata> hostsInHostGroup = hostMetadataRepository.findHostsInHostgroup(hostGroup, cluster.getId());
+            HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
+            Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();
             List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(stack, hostsInHostGroup, hostGroupAdjustment.getHostGroup());
             int reservedInstances = hostsInHostGroup.size() - filteredHostList.size();
             verifyNodeCount(cluster, replication, hostGroupAdjustment.getScalingAdjustment(), filteredHostList, reservedInstances);
-            if (doesHostGroupContainDataNode(ambariClient, cluster.getBlueprint().getBlueprintName(), hostGroup)) {
+            if (doesHostGroupContainDataNode(ambariClient, cluster.getBlueprint().getBlueprintName(), hostGroup.getName())) {
                 downScaleCandidates = checkAndSortByAvailableSpace(stack, ambariClient, replication,
                         hostGroupAdjustment.getScalingAdjustment(), filteredHostList);
             } else {
@@ -216,18 +217,18 @@ public class AmbariClusterService implements ClusterService {
 
     private boolean validateRequest(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
         MDCBuilder.buildMdcContext(stack.getCluster());
+        HostGroup hostGroup = getHostGroup(stack, hostGroupAdjustment);
         int scalingAdjustment = hostGroupAdjustment.getScalingAdjustment();
         boolean downScale = scalingAdjustment < 0;
         if (scalingAdjustment == 0) {
             throw new BadRequestException("No scaling adjustments specified. Nothing to do.");
         }
         if (!downScale) {
-            validateUnregisteredHosts(stack, scalingAdjustment);
+            validateUnregisteredHosts(hostGroup, scalingAdjustment);
         } else {
             validateRegisteredHosts(stack, hostGroupAdjustment);
             validateComponentsCategory(stack, hostGroupAdjustment);
         }
-        validateHostGroup(stack, hostGroupAdjustment);
         return downScale;
     }
 
@@ -253,21 +254,18 @@ public class AmbariClusterService implements ClusterService {
         }
     }
 
-    private void validateUnregisteredHosts(Stack stack, int sumScalingAdjustments) {
-        Set<InstanceMetaData> unregisteredHosts = instanceMetadataRepository.findUnregisteredHostsInStack(stack.getId());
-        if (unregisteredHosts.size() == 0) {
+    private void validateUnregisteredHosts(HostGroup hostGroup, int scalingAdjustment) {
+        Set<InstanceMetaData> unregisteredHosts = instanceMetadataRepository.findUnregisteredHostsInInstanceGroup(hostGroup.getInstanceGroup().getId());
+        if (unregisteredHosts.size() < scalingAdjustment) {
             throw new BadRequestException(String.format(
-                    "There are no unregistered hosts in stack '%s'. Add some additional nodes to the stack before adding new hosts to the cluster.",
-                    stack.getId()));
-        }
-        if (unregisteredHosts.size() < sumScalingAdjustments) {
-            throw new BadRequestException(String.format("Number of unregistered hosts in the stack is %s, but %s would be needed to complete the request.",
-                    unregisteredHosts.size(), sumScalingAdjustments));
+                    "There are %s unregistered instances in instance group '%s'. %s more instances needed to complete this request.",
+                    unregisteredHosts.size(), hostGroup.getInstanceGroup().getGroupName(), scalingAdjustment - unregisteredHosts.size()));
         }
     }
 
     private void validateRegisteredHosts(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
-        Set<HostMetadata> hostMetadata = hostMetadataRepository.findHostsInHostgroup(hostGroupAdjustment.getHostGroup(), stack.getCluster().getId());
+        Set<HostMetadata> hostMetadata = hostGroupRepository.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroupAdjustment.getHostGroup())
+                .getHostMetadata();
         if (hostMetadata.size() <= -1 * hostGroupAdjustment.getScalingAdjustment()) {
             String errorMessage = String.format("[hostGroup: '%s', current hosts: %s, decommissions requested: %s]",
                     hostGroupAdjustment.getHostGroup(), hostMetadata.size(), -1 * hostGroupAdjustment.getScalingAdjustment());
@@ -277,30 +275,14 @@ public class AmbariClusterService implements ClusterService {
         }
     }
 
-    private void validateHostGroup(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
-        if (!assignableHostGroup(stack.getCluster(), hostGroupAdjustment.getHostGroup())) {
+    private HostGroup getHostGroup(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
+        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroupAdjustment.getHostGroup());
+        if (hostGroup == null) {
             throw new BadRequestException(String.format(
-                    "Invalid host group: blueprint '%s' that was used to create the cluster does not contain a host group with this name.",
-                    stack.getCluster().getBlueprint().getId(), hostGroupAdjustment.getHostGroup()));
+                    "Invalid host group: cluster '%s' does not contain a host group named '%s'.",
+                    stack.getCluster().getName(), hostGroupAdjustment.getHostGroup()));
         }
-    }
-
-    private Boolean assignableHostGroup(Cluster cluster, String hostGroup) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root;
-            root = mapper.readTree(cluster.getBlueprint().getBlueprintText());
-            Iterator<JsonNode> hostGroupsIterator = root.path("host_groups").elements();
-            while (hostGroupsIterator.hasNext()) {
-                JsonNode hostGroupNode = hostGroupsIterator.next();
-                if (hostGroupNode.path("name").asText().equals(hostGroup)) {
-                    return true;
-                }
-            }
-        } catch (IOException e) {
-            throw new InternalServerException("Unhandled exception occurred while reading blueprint: " + e.getMessage(), e);
-        }
-        return false;
+        return hostGroup;
     }
 
     private void verifyNodeCount(Cluster cluster, int replication, int scalingAdjustment, List<HostMetadata> filteredHostList, int reservedInstances) {

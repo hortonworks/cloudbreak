@@ -246,7 +246,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
     }
 
     private void triggerConsulEvent(Stack stack, ConsulPluginEvent event) {
-        Set<String> eventIds = pluginManager.triggerPlugins(stack.getAllInstanceMetaData(), event);
-        pluginManager.waitForEventFinish(stack, stack.getAllInstanceMetaData(), eventIds);
+        Set<String> eventIds = pluginManager.triggerPlugins(stack.getRunningInstanceMetaData(), event);
+        pluginManager.waitForEventFinish(stack, stack.getRunningInstanceMetaData(), eventIds);
     }
 }

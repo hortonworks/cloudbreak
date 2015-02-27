@@ -9,6 +9,6 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 
 public interface HostMetadataRepository extends CrudRepository<HostMetadata, Long> {
 
-    Set<HostMetadata> findHostsInHostgroup(@Param("hostGroup") String hostGroup, @Param("clusterId") Long clusterId);
+    Set<HostMetadata> findHostsInHostgroup(@Param("hostGroupId") Long hostGroupId);
 
 }

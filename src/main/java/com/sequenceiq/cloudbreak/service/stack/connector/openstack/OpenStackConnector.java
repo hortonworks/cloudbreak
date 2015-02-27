@@ -123,18 +123,18 @@ public class OpenStackConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public boolean addInstances(Stack stack, String userData, Integer adjustment, String hostGroup) {
+    public boolean addInstances(Stack stack, String userData, Integer adjustment, String instanceGroup) {
         MDCBuilder.buildMdcContext(stack);
-        InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(hostGroup);
+        InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         group.setNodeCount(group.getNodeCount() + adjustment);
         try {
             String heatTemplate = heatTemplateBuilder.add(stack, TEMPLATE_PATH, userData,
-                    instanceMetaDataRepository.findAllInStack(stack.getId()), hostGroup, adjustment);
+                    instanceMetaDataRepository.findAllInStack(stack.getId()), instanceGroup, adjustment);
             PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
             if (isSuccess(pollingResult)) {
                 LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
                 reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
-                        Event.wrap(new AddInstancesComplete(CloudPlatform.OPENSTACK, stack.getId(), null, hostGroup)));
+                        Event.wrap(new AddInstancesComplete(CloudPlatform.OPENSTACK, stack.getId(), null, instanceGroup)));
             }
         } catch (UpdateFailedException e) {
             LOGGER.error("Failed to update the Heat stack", e);
@@ -144,14 +144,14 @@ public class OpenStackConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public boolean removeInstances(Stack stack, Set<String> instanceIds, String hostGroup) {
+    public boolean removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
         try {
             String userDataScript = userDataBuilder.build(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>());
             String heatTemplate = heatTemplateBuilder.remove(stack, TEMPLATE_PATH, userDataScript,
-                    instanceMetaDataRepository.findAllInStack(stack.getId()), instanceIds, hostGroup);
+                    instanceMetaDataRepository.findAllInStack(stack.getId()), instanceIds, instanceGroup);
             PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
             if (isSuccess(pollingResult)) {
-                reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds, hostGroup)));
+                reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds, instanceGroup)));
             }
         } catch (UpdateFailedException e) {
             LOGGER.error("Failed to update the Heat stack", e);

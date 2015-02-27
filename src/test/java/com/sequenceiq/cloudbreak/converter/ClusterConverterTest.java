@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.converter;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anySet;
 
 import java.io.IOException;
 
@@ -19,6 +21,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
+import com.sequenceiq.cloudbreak.controller.json.HostGroupJson;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -27,6 +30,8 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
+import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -47,6 +52,12 @@ public class ClusterConverterTest {
 
     @Mock
     private StackRepository stackRepository;
+
+    @Mock
+    private HostGroupRepository hostGroupRepository;
+
+    @Mock
+    private InstanceGroupRepository instanceGroupRepository;
 
     @Mock
     private JsonHelper jsonHelper;
@@ -79,27 +90,44 @@ public class ClusterConverterTest {
     @Test(expected = BadRequestException.class)
     public void testConvertClusterEntityToJsonShouldThrowBadRequestExceptionWhenBlueprintValidatorThrowsIt() {
         // GIVEN
+        HostGroupJson masterHostGroup = new HostGroupJson();
+        masterHostGroup.setName("master");
+        masterHostGroup.setInstanceGroupName("group1");
+        HostGroupJson slaveHostGroup = new HostGroupJson();
+        slaveHostGroup.setName("slave_1");
+        slaveHostGroup.setInstanceGroupName("slavegroup");
+        clusterRequest.setHostGroups(Sets.newHashSet(masterHostGroup, slaveHostGroup));
         Stack stack = new Stack();
         stack.setInstanceGroups(Sets.<InstanceGroup>newHashSet());
         given(blueprintRepository.findOne(anyLong())).willReturn(blueprint);
         given(stackRepository.findOne(anyLong())).willReturn(stack);
-        willThrow(BadRequestException.class).given(blueprintValidator).validateBlueprintForStack(blueprint, stack.getInstanceGroups());
+        willThrow(BadRequestException.class).given(blueprintValidator).validateBlueprintForStack(any(Blueprint.class), anySet(), anySet());
         // WHEN
         underTest.convert(clusterRequest, 1L);
     }
 
     @Test
-    public void testConvertClusterEntityToJsonWhenStackInstanceGroupsWasDefinedCorrect() {
+    public void testConvertClusterEntityToJsonWhenHostGroupsWereDefinedCorrectly() {
         // GIVEN
         Stack stack = new Stack();
+        stack.setId(1L);
         InstanceGroup instanceGroup1 = new InstanceGroup();
-        instanceGroup1.setGroupName("master");
+        instanceGroup1.setGroupName("group1");
         InstanceGroup instanceGroup2 = new InstanceGroup();
-        instanceGroup2.setGroupName("slave_1");
+        instanceGroup2.setGroupName("slavegroup");
         stack.getInstanceGroups().add(instanceGroup1);
         stack.getInstanceGroups().add(instanceGroup2);
+        HostGroupJson masterHostGroup = new HostGroupJson();
+        masterHostGroup.setName("master");
+        masterHostGroup.setInstanceGroupName("group1");
+        HostGroupJson slaveHostGroup = new HostGroupJson();
+        slaveHostGroup.setName("slave_1");
+        slaveHostGroup.setInstanceGroupName("slavegroup");
+        clusterRequest.setHostGroups(Sets.newHashSet(masterHostGroup, slaveHostGroup));
         given(blueprintRepository.findOne(anyLong())).willReturn(blueprint);
         given(stackRepository.findOne(anyLong())).willReturn(stack);
+        given(instanceGroupRepository.findOneByGroupNameInStack(1L, "group1")).willReturn(instanceGroup1);
+        given(instanceGroupRepository.findOneByGroupNameInStack(1L, "slavegroup")).willReturn(instanceGroup2);
         // WHEN
         Cluster result = underTest.convert(clusterRequest, 1L);
         // THEN

@@ -38,11 +38,12 @@ import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.converter.ClusterConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
+import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -87,7 +88,7 @@ public class AmbariClusterServiceTest {
     private HostFilterService hostFilterService;
 
     @Mock
-    private HostMetadataRepository hostMetadataRepository;
+    private HostGroupRepository hostGroupRepository;
 
     @Mock
     private AmbariConfigurationService configurationService;
@@ -171,7 +172,10 @@ public class AmbariClusterServiceTest {
         HostMetadata metadata3 = mock(HostMetadata.class);
         Set<HostMetadata> hostsMetaData = new HashSet<>();
         hostsMetaData.addAll(asList(metadata1, metadata2, metadata3));
-        when(hostMetadataRepository.findHostsInHostgroup("slave_1", cluster.getId())).thenReturn(hostsMetaData);
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setHostMetadata(hostsMetaData);
+        hostGroup.setName("slave_1");
+        when(hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), "slave_1")).thenReturn(hostGroup);
         when(clientService.create(stack)).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "2"));
@@ -199,7 +203,10 @@ public class AmbariClusterServiceTest {
         Set<HostMetadata> hostsMetaData = new HashSet<>();
         List<HostMetadata> hostsMetadataList = asList(metadata1, metadata2, metadata3);
         hostsMetaData.addAll(hostsMetadataList);
-        when(hostMetadataRepository.findHostsInHostgroup("slave_1", cluster.getId())).thenReturn(hostsMetaData);
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setHostMetadata(hostsMetaData);
+        hostGroup.setName("slave_1");
+        when(hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), "slave_1")).thenReturn(hostGroup);
         when(clientService.create(stack)).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "2"));
@@ -231,6 +238,9 @@ public class AmbariClusterServiceTest {
         InstanceMetaData instanceMetaData4 = mock(InstanceMetaData.class);
         Set<HostMetadata> hostsMetaData = new HashSet<>(asList(metadata1, metadata2, metadata3, metadata4));
         List<HostMetadata> hostsMetadataList = asList(metadata2, metadata3, metadata4);
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setHostMetadata(hostsMetaData);
+        hostGroup.setName("slave_1");
         Map<String, Map<Long, Long>> dfsSpace = new HashMap<>();
         dfsSpace.put("node2", singletonMap(85_000L, 15_000L));
         dfsSpace.put("node1", singletonMap(90_000L, 10_000L));
@@ -244,7 +254,7 @@ public class AmbariClusterServiceTest {
         when(instanceMetaData2.getAmbariServer()).thenReturn(false);
         when(instanceMetaData3.getAmbariServer()).thenReturn(false);
         when(instanceMetaData4.getAmbariServer()).thenReturn(false);
-        when(hostMetadataRepository.findHostsInHostgroup("slave_1", cluster.getId())).thenReturn(hostsMetaData);
+        when(hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), "slave_1")).thenReturn(hostGroup);
         when(clientService.create(stack)).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
@@ -279,6 +289,9 @@ public class AmbariClusterServiceTest {
         Set<HostMetadata> hostsMetaData = new HashSet<>();
         List<HostMetadata> hostsMetadataList = asList(metadata1, metadata2, metadata3);
         hostsMetaData.addAll(hostsMetadataList);
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setHostMetadata(hostsMetaData);
+        hostGroup.setName("slave_1");
         Map<String, Map<Long, Long>> dfsSpace = new HashMap<>();
         dfsSpace.put("node2", singletonMap(85_000L, 15_000L));
         dfsSpace.put("node1", singletonMap(90_000L, 10_000L));
@@ -289,7 +302,7 @@ public class AmbariClusterServiceTest {
         when(instanceMetaData1.getAmbariServer()).thenReturn(false);
         when(instanceMetaData2.getAmbariServer()).thenReturn(false);
         when(instanceMetaData3.getAmbariServer()).thenReturn(false);
-        when(hostMetadataRepository.findHostsInHostgroup("slave_1", cluster.getId())).thenReturn(hostsMetaData);
+        when(hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), "slave_1")).thenReturn(hostGroup);
         when(clientService.create(stack)).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
@@ -325,6 +338,9 @@ public class AmbariClusterServiceTest {
         Set<HostMetadata> hostsMetaData = new HashSet<>();
         List<HostMetadata> hostsMetadataList = asList(metadata1, metadata2, metadata3, metadata4);
         hostsMetaData.addAll(hostsMetadataList);
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setHostMetadata(hostsMetaData);
+        hostGroup.setName("slave_1");
         Map<String, Map<Long, Long>> dfsSpace = new HashMap<>();
         dfsSpace.put("node2", singletonMap(85_000L, 15_000L));
         dfsSpace.put("node1", singletonMap(90_000L, 10_000L));
@@ -338,7 +354,7 @@ public class AmbariClusterServiceTest {
         when(instanceMetaData2.getAmbariServer()).thenReturn(false);
         when(instanceMetaData3.getAmbariServer()).thenReturn(false);
         when(instanceMetaData4.getAmbariServer()).thenReturn(false);
-        when(hostMetadataRepository.findHostsInHostgroup("slave_1", cluster.getId())).thenReturn(hostsMetaData);
+        when(hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), "slave_1")).thenReturn(hostGroup);
         when(clientService.create(stack)).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
@@ -374,6 +390,9 @@ public class AmbariClusterServiceTest {
         Set<HostMetadata> hostsMetaData = new HashSet<>();
         List<HostMetadata> hostsMetadataList = asList(metadata1, metadata2, metadata3);
         hostsMetaData.addAll(hostsMetadataList);
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setHostMetadata(hostsMetaData);
+        hostGroup.setName("slave_1");
         Map<String, Map<Long, Long>> dfsSpace = new HashMap<>();
         dfsSpace.put("node2", singletonMap(5_000L, 15_000L));
         dfsSpace.put("node1", singletonMap(10_000L, 10_000L));
@@ -384,7 +403,7 @@ public class AmbariClusterServiceTest {
         when(instanceMetaData1.getAmbariServer()).thenReturn(false);
         when(instanceMetaData2.getAmbariServer()).thenReturn(false);
         when(instanceMetaData3.getAmbariServer()).thenReturn(false);
-        when(hostMetadataRepository.findHostsInHostgroup("slave_1", cluster.getId())).thenReturn(hostsMetaData);
+        when(hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), "slave_1")).thenReturn(hostGroup);
         when(clientService.create(stack)).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));

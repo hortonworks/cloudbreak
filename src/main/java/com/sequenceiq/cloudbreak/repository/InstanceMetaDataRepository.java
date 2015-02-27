@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.data.repository.CrudRepository;
@@ -15,6 +16,10 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
 
     InstanceMetaData findHostInStack(@Param("stackId") Long stackId, @Param("hostName") String hostName);
 
-    Set<InstanceMetaData> findUnregisteredHostsInStack(@Param("stackId") Long stackId);
+//    Set<InstanceMetaData> findUnregisteredHostsInStack(@Param("stackId") Long stackId);
+
+    Set<InstanceMetaData> findUnregisteredHostsInInstanceGroup(@Param("instanceGroupId") Long instanceGroupId);
+
+    List<String> findHostNamesInInstanceGroup(@Param("instanceGroupId") Long instanceGroupId);
 
 }

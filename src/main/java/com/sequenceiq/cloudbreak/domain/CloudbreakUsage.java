@@ -32,7 +32,7 @@ public class CloudbreakUsage implements ProvisionEntity {
 
     private String instanceType;
 
-    private String hostGroup;
+    private String instanceGroup;
 
     public Long getId() {
         return id;
@@ -114,12 +114,12 @@ public class CloudbreakUsage implements ProvisionEntity {
         this.instanceType = instanceType;
     }
 
-    public String getHostGroup() {
-        return hostGroup;
+    public String getInstanceGroup() {
+        return instanceGroup;
     }
 
-    public void setHostGroup(String hostGroup) {
-        this.hostGroup = hostGroup;
+    public void setInstanceGroup(String instanceGroup) {
+        this.instanceGroup = instanceGroup;
     }
 
     @Override
@@ -135,7 +135,7 @@ public class CloudbreakUsage implements ProvisionEntity {
         sb.append(", stackId='").append(stackId).append('\'');
         sb.append(", stackName='").append(stackName).append('\'');
         sb.append(", instanceType='").append(instanceType).append('\'');
-        sb.append(", hostGroup='").append(hostGroup).append('\'');
+        sb.append(", instanceGroup='").append(instanceGroup).append('\'');
         sb.append(", costs='").append(costs).append('\'');
         sb.append('}');
         return sb.toString();

@@ -61,12 +61,12 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
         Set<String> instanceIds = updateSuccess.getInstanceIds();
-        InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(updateSuccess.getHostGroup());
+        InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(updateSuccess.getInstanceGroup());
         if (updateSuccess.isRemoveInstances()) {
-            terminate(stack, updateSuccess, stackId, instanceIds, instanceGroup);
+            terminate(stack, stackId, instanceIds, instanceGroup);
         } else {
             int nodeCount = instanceGroup.getNodeCount() + instanceIds.size();
-            stackUpdater.updateNodeCount(stackId, nodeCount, updateSuccess.getHostGroup());
+            stackUpdater.updateNodeCount(stackId, nodeCount, updateSuccess.getInstanceGroup());
             eventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_CHANGED.name(), "Billing changed due to upscaling of cluster infrastructure.");
         }
         stackUpdater.updateMetadataReady(stackId, true);
@@ -75,14 +75,13 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
 
     }
 
-    private void terminate(Stack stack, StackUpdateSuccess updateSuccess, long stackId,
+    private void terminate(Stack stack, long stackId,
             Set<String> instanceIds, InstanceGroup instanceGroup) {
         MDCBuilder.buildMdcContext(stack);
         int nodeCount = instanceGroup.getNodeCount() - instanceIds.size();
-        String hostGroup = updateSuccess.getHostGroup();
-        stackUpdater.updateNodeCount(stackId, nodeCount, hostGroup);
+        stackUpdater.updateNodeCount(stackId, nodeCount, instanceGroup.getGroupName());
 
-        List<ConsulClient> clients = createConsulClients(stack, hostGroup);
+        List<ConsulClient> clients = createConsulClients(stack, instanceGroup.getGroupName());
         for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
             if (instanceIds.contains(instanceMetaData.getInstanceId())) {
                 long timeInMillis = Calendar.getInstance().getTimeInMillis();
@@ -107,11 +106,11 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
                 MAX_POLLING_ATTEMPTS);
     }
 
-    private List<ConsulClient> createConsulClients(Stack stack, String hostGroup) {
+    private List<ConsulClient> createConsulClients(Stack stack, String instanceGroupName) {
         List<InstanceGroup> instanceGroups = stack.getInstanceGroupsAsList();
         List<ConsulClient> clients = Collections.emptyList();
         for (InstanceGroup instanceGroup : instanceGroups) {
-            if (!instanceGroup.getGroupName().equalsIgnoreCase(hostGroup)) {
+            if (!instanceGroup.getGroupName().equalsIgnoreCase(instanceGroupName)) {
                 clients = ConsulUtils.createClients(instanceGroup.getInstanceMetaData());
             }
         }

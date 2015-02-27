@@ -33,7 +33,7 @@ import javax.persistence.UniqueConstraint;
         @NamedQuery(
                 name = "Cluster.findOneWithLists",
                 query = "SELECT c FROM Cluster c "
-                        + "LEFT JOIN FETCH c.hostMetadata "
+                        + "LEFT JOIN FETCH c.hostGroups "
                         + "WHERE c.id= :id")
 })
 public class Cluster implements ProvisionEntity {
@@ -71,7 +71,7 @@ public class Cluster implements ProvisionEntity {
     private Boolean emailNeeded;
 
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<HostMetadata> hostMetadata = new HashSet<>();
+    private Set<HostGroup> hostGroups = new HashSet<>();
 
     public String getDescription() {
         return description;
@@ -177,11 +177,11 @@ public class Cluster implements ProvisionEntity {
         this.emailNeeded = emailNeeded;
     }
 
-    public Set<HostMetadata> getHostMetadata() {
-        return hostMetadata;
+    public Set<HostGroup> getHostGroups() {
+        return hostGroups;
     }
 
-    public void setHostMetadata(Set<HostMetadata> hostMetadata) {
-        this.hostMetadata = hostMetadata;
+    public void setHostGroups(Set<HostGroup> hostGroups) {
+        this.hostGroups = hostGroups;
     }
 }

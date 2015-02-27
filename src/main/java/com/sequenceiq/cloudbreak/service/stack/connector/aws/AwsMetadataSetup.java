@@ -112,7 +112,7 @@ public class AwsMetadataSetup implements MetadataSetup {
     }
 
     @Override
-    public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String hostGroup) {
+    public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String instanceGroupName) {
         MDCBuilder.buildMdcContext(stack);
         Set<CoreInstanceMetaData> coreInstanceMetadata = new HashSet<>();
         LOGGER.info("Adding new instances to metadata: [stack: '{}']", stack.getId());
@@ -136,7 +136,7 @@ public class AwsMetadataSetup implements MetadataSetup {
                         coreInstanceMetadata.add(new CoreInstanceMetaData(
                                 instance.getInstanceId(),
                                 instance.getPrivateIpAddress(),
-                                instance.getPublicDnsName(),
+                                instance.getPublicIpAddress(),
                                 instance.getBlockDeviceMappings().size() - 1,
                                 instance.getPrivateDnsName(),
                                 instanceGroup
@@ -148,7 +148,7 @@ public class AwsMetadataSetup implements MetadataSetup {
         }
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT,
-                Event.wrap(new MetadataUpdateComplete(CloudPlatform.AWS, stack.getId(), coreInstanceMetadata, hostGroup)));
+                Event.wrap(new MetadataUpdateComplete(CloudPlatform.AWS, stack.getId(), coreInstanceMetadata, instanceGroupName)));
     }
 
     @Override

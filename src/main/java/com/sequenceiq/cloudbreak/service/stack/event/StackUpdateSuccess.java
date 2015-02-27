@@ -7,13 +7,13 @@ public class StackUpdateSuccess {
     private Long stackId;
     private boolean removeInstances;
     private Set<String> instanceIds;
-    private String hostGroup;
+    private String instanceGroup;
 
-    public StackUpdateSuccess(Long stackId, boolean removeInstances, Set<String> instanceIds, String hostGroup) {
+    public StackUpdateSuccess(Long stackId, boolean removeInstances, Set<String> instanceIds, String instanceGroup) {
         this.stackId = stackId;
         this.removeInstances = removeInstances;
         this.instanceIds = instanceIds;
-        this.hostGroup = hostGroup;
+        this.instanceGroup = instanceGroup;
     }
 
     public Long getStackId() {
@@ -28,7 +28,7 @@ public class StackUpdateSuccess {
         return instanceIds;
     }
 
-    public String getHostGroup() {
-        return hostGroup;
+    public String getInstanceGroup() {
+        return instanceGroup;
     }
 }

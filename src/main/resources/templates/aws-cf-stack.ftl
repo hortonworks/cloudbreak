@@ -192,7 +192,7 @@
         "DesiredCapacity" : ${tgroup.nodeCount},
         "Tags" : [ { "Key" : "Name", "Value" : { "Ref" : "StackName" }, "PropagateAtLaunch" : "true" },
         		   { "Key" : "owner", "Value" : { "Ref" : "StackOwner" }, "PropagateAtLaunch" : "true" },
-        		   { "Key" : "hostGroup", "Value" : "${tgroup.groupName}", "PropagateAtLaunch" : "true" }]
+        		   { "Key" : "instanceGroup", "Value" : "${tgroup.groupName}", "PropagateAtLaunch" : "true" }]
       }
     },
 

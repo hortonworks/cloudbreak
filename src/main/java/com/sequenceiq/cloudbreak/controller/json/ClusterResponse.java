@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -14,6 +16,7 @@ public class ClusterResponse {
     private Long recipeId;
     private String description;
     private String statusReason;
+    private Set<HostGroupJson> hostGroups;
 
     public String getDescription() {
         return description;
@@ -86,5 +89,13 @@ public class ClusterResponse {
 
     public void setRecipeId(Long recipeId) {
         this.recipeId = recipeId;
+    }
+
+    public Set<HostGroupJson> getHostGroups() {
+        return hostGroups;
+    }
+
+    public void setHostGroups(Set<HostGroupJson> hostGroups) {
+        this.hostGroups = hostGroups;
     }
 }

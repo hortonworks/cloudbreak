@@ -9,6 +9,6 @@ public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, L
 
     InstanceGroup findOne(@Param("id") Long id);
 
-    InstanceGroup findOneByGroupName(@Param("groupName") String groupName);
+    InstanceGroup findOneByGroupNameInStack(@Param("stackId") Long stackId, @Param("groupName") String groupName);
 
 }

@@ -5,11 +5,15 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.DiskAttachUtils.
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 
 @Service
 public class HadoopConfigurationService {
@@ -20,15 +24,22 @@ public class HadoopConfigurationService {
     public static final String YARN_NODEMANAGER_LOG_DIRS = "yarn.nodemanager.log-dirs";
     public static final String HDFS_DATANODE_DATA_DIRS = "dfs.datanode.data.dir";
 
+    @Autowired
+    private HostGroupRepository hostGroupRepository;
+
+    @Autowired
+    private InstanceGroupRepository instanceGroupRepository;
+
     public Map<String, Map<String, Map<String, String>>> getConfiguration(Stack stack) {
+        Set<HostGroup> hostGroups = hostGroupRepository.findHostGroupsInCluster(stack.getCluster().getId());
         Map<String, Map<String, Map<String, String>>> hadoopConfig = new HashMap<>();
-        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+        for (HostGroup hostGroup : hostGroups) {
             Map<String, Map<String, String>> tmpConfig = new HashMap<>();
-            int volumeCount = instanceGroup.getTemplate().getVolumeCount();
+            int volumeCount = hostGroup.getInstanceGroup().getTemplate().getVolumeCount();
             if (volumeCount > 0) {
                 tmpConfig.put(YARN_SITE, getYarnSiteConfigs(buildDiskPathString(volumeCount, "nodemanager")));
                 tmpConfig.put(HDFS_SITE, getHDFSSiteConfigs(buildDiskPathString(volumeCount, "datanode")));
-                hadoopConfig.put(instanceGroup.getGroupName(), tmpConfig);
+                hadoopConfig.put(hostGroup.getName(), tmpConfig);
             }
         }
         return hadoopConfig;

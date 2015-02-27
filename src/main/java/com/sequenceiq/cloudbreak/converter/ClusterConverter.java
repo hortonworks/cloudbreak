@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -9,13 +11,18 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
+import com.sequenceiq.cloudbreak.controller.json.HostGroupJson;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
+import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
@@ -35,6 +42,12 @@ public class ClusterConverter {
     private RecipeRepository recipeRepository;
 
     @Autowired
+    private InstanceGroupRepository instanceGroupRepository;
+
+    @Autowired
+    private HostGroupRepository hostGroupRepository;
+
+    @Autowired
     private JsonHelper jsonHelper;
 
     @Autowired
@@ -52,7 +65,8 @@ public class ClusterConverter {
         try {
             Blueprint blueprint = blueprintRepository.findOne(clusterRequest.getBlueprintId());
             cluster.setBlueprint(blueprint);
-            blueprintValidator.validateBlueprintForStack(blueprint, stackRepository.findOne(stackId).getInstanceGroups());
+            cluster.setHostGroups(convertHostGroupsFromJson(stackId, cluster, clusterRequest.getHostGroups()));
+            blueprintValidator.validateBlueprintForStack(blueprint, cluster.getHostGroups(), stackRepository.findOne(stackId).getInstanceGroups());
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(
                     String.format("Access to blueprint '%s' is denied or blueprint doesn't exist.", clusterRequest.getBlueprintId()), e);
@@ -98,7 +112,35 @@ public class ClusterConverter {
             clusterResponse.setRecipeId(cluster.getRecipe().getId());
         }
         clusterResponse.setDescription(cluster.getDescription() == null ? "" : cluster.getDescription());
+        clusterResponse.setHostGroups(convertHostGroupsToJson(hostGroupRepository.findHostGroupsInCluster(cluster.getId())));
         return clusterResponse;
+    }
+
+    private Set<HostGroup> convertHostGroupsFromJson(Long stackId, Cluster cluster, Set<HostGroupJson> hostGroupsJsons) {
+        Set<HostGroup> hostGroups = new HashSet<>();
+        for (HostGroupJson json : hostGroupsJsons) {
+            HostGroup hostGroup = new HostGroup();
+            hostGroup.setName(json.getName());
+            InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stackId, json.getInstanceGroupName());
+            if (instanceGroup == null) {
+                throw new BadRequestException(String.format("Cannot find instance group named '%s' in stack '%s'", json.getInstanceGroupName(), stackId));
+            }
+            hostGroup.setInstanceGroup(instanceGroup);
+            hostGroup.setCluster(cluster);
+            hostGroups.add(hostGroup);
+        }
+        return hostGroups;
+    }
+
+    private Set<HostGroupJson> convertHostGroupsToJson(Set<HostGroup> hostGroups) {
+        Set<HostGroupJson> hostGroupJsons = new HashSet<>();
+        for (HostGroup hostGroup : hostGroups) {
+            HostGroupJson hostGroupJson = new HostGroupJson();
+            hostGroupJson.setName(hostGroup.getName());
+            hostGroupJson.setInstanceGroupName(hostGroup.getInstanceGroup().getGroupName());
+            hostGroupJsons.add(hostGroupJson);
+        }
+        return hostGroupJsons;
     }
 
 }

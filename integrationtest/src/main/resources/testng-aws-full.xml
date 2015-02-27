@@ -71,14 +71,14 @@
         </classes>
     </test>
     <test name="upscale">
-        <parameter name="hostGroup" value="slave_1" />
+        <parameter name="instanceGroup" value="slave_1" />
         <parameter name="scalingAdjustment" value="3" />
         <classes>
             <class name="com.sequenceiq.it.cloudbreak.ScalingTest" />
         </classes>
     </test>
     <test name="downscale">
-        <parameter name="hostGroup" value="slave_1" />
+        <parameter name="instanceGroup" value="slave_1" />
         <parameter name="scalingAdjustment" value="-2" />
         <classes>
             <class name="com.sequenceiq.it.cloudbreak.ScalingTest" />
