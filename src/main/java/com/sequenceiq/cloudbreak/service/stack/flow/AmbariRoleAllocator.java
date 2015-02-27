@@ -34,13 +34,8 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Service
 public class AmbariRoleAllocator {
@@ -62,12 +57,6 @@ public class AmbariRoleAllocator {
     private RetryingStackUpdater stackUpdater;
 
     @Autowired
-    private Reactor reactor;
-
-    @Autowired
-    private GccStackUtil gccStackUtil;
-
-    @Autowired
     private PollingService<ConsulContext> consulPollingService;
 
     @Autowired
@@ -76,76 +65,66 @@ public class AmbariRoleAllocator {
     @Autowired
     private ConsulServiceCheckerTask consulServiceCheckerTask;
 
-    public void allocateRoles(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData) {
-        try {
-            Stack stack = stackRepository.findById(stackId);
-            MDCBuilder.buildMdcContext(stack);
-            if (!stack.isMetadataReady()) {
-                if (coreInstanceMetaData.size() != stack.getFullNodeCount()) {
-                    throw new WrongMetadataException(String.format(
-                            "Size of the collected metadata set does not equal the node count of the stack. [metadata size=%s] [nodecount=%s]",
-                            coreInstanceMetaData.size(), stack.getFullNodeCount()));
-                }
-                for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                    Set<InstanceMetaData> instancesMetaData = prepareInstanceMetaData(coreInstanceMetaData, instanceGroup, InstanceStatus.REGISTERED);
-                    stackUpdater.updateStackMetaData(stackId, instancesMetaData, instanceGroup.getGroupName());
-                }
-                stack = stackUpdater.updateMetadataReady(stackId, true);
-                Set<InstanceMetaData> allInstanceMetaData = stack.getRunningInstanceMetaData();
-                Optional<String> publicAmbariAddress = updateAmbariInstanceMetadata(stack, allInstanceMetaData);
-                if (publicAmbariAddress.isPresent()) {
-                    PollingResult pollingResult = waitForConsulAgents(stack, allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
-                    if (isSuccess(pollingResult)) {
-                        updateWithConsulData(allInstanceMetaData);
-                        instanceMetaDataRepository.save(allInstanceMetaData);
-                        LOGGER.info("Publishing {} event", ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT);
-                        reactor.notify(ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT, Event.wrap(new AmbariRoleAllocationComplete(stack,
-                                publicAmbariAddress.orNull())));
-                    }
-                }
-            } else {
-                LOGGER.info("Metadata is already created, ignoring '{}' event.", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT);
+    public AmbariRoleAllocationComplete allocateRoles(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData) {
+        AmbariRoleAllocationComplete allocationComplete = null;
+
+        Stack stack = stackRepository.findById(stackId);
+        MDCBuilder.buildMdcContext(stack);
+        if (!stack.isMetadataReady()) {
+            if (coreInstanceMetaData.size() != stack.getFullNodeCount()) {
+                throw new WrongMetadataException(String.format(
+                        "Size of the collected metadata set does not equal the node count of the stack. [metadata size=%s] [nodecount=%s]",
+                        coreInstanceMetaData.size(), stack.getFullNodeCount()));
             }
-        } catch (WrongMetadataException e) {
-            LOGGER.error(e.getMessage(), e);
-            notifyStackCreateFailed(stackId, e.getMessage());
-        } catch (Exception e) {
-            LOGGER.error("Unhandled exception occured while creating stack.", e);
-            notifyStackCreateFailed(stackId, "Unhandled exception occured while creating stack.");
+            for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+                Set<InstanceMetaData> instancesMetaData = prepareInstanceMetaData(coreInstanceMetaData, instanceGroup, InstanceStatus.REGISTERED);
+                stackUpdater.updateStackMetaData(stackId, instancesMetaData, instanceGroup.getGroupName());
+            }
+            stack = stackUpdater.updateMetadataReady(stackId, true);
+            Set<InstanceMetaData> allInstanceMetaData = stack.getRunningInstanceMetaData();
+            Optional<String> publicAmbariAddress = updateAmbariInstanceMetadata(stack, allInstanceMetaData);
+            if (publicAmbariAddress.isPresent()) {
+                PollingResult pollingResult = waitForConsulAgents(stack, allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
+                if (isSuccess(pollingResult)) {
+                    updateWithConsulData(allInstanceMetaData);
+                    instanceMetaDataRepository.save(allInstanceMetaData);
+                    LOGGER.info("Publishing {} event", ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT);
+                    allocationComplete = new AmbariRoleAllocationComplete(stack, publicAmbariAddress.orNull());
+                }
+            }
+        } else {
+            LOGGER.info("Metadata is already created, ignoring '{}' event.", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT);
         }
+        return allocationComplete;
     }
 
-    public void updateInstanceMetadata(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData, String instanceGroupName) {
+    public StackUpdateSuccess updateInstanceMetadata(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData, String instanceGroupName) {
+        StackUpdateSuccess stackUpdateSuccess = null;
+
         Stack one = stackRepository.findOneWithLists(stackId);
         InstanceGroup instanceGroup = one.getInstanceGroupByInstanceGroupName(instanceGroupName);
         MDCBuilder.buildMdcContext(one);
-        try {
-            Set<InstanceMetaData> originalMetadata = instanceGroup.getAllInstanceMetaData();
-            Set<InstanceMetaData> instanceMetaData = prepareInstanceMetaData(
-                    coreInstanceMetaData,
-                    one.getInstanceGroupByInstanceGroupName(instanceGroupName),
-                    InstanceStatus.UNREGISTERED);
-            originalMetadata.addAll(instanceMetaData);
-            Stack modifiedStack = stackUpdater.updateStackMetaData(stackId, originalMetadata, instanceGroupName);
-            stackUpdater.updateMetadataReady(stackId, true);
-            PollingResult pollingResult = waitForConsulAgents(modifiedStack, originalMetadata, instanceMetaData);
-            if (isSuccess(pollingResult)) {
-                updateWithConsulData(modifiedStack.getInstanceGroupByInstanceGroupName(instanceGroupName).getInstanceMetaData());
-                stackUpdater.updateStackMetaData(stackId,
-                            modifiedStack.getInstanceGroupByInstanceGroupName(instanceGroupName).getAllInstanceMetaData(), instanceGroupName);
-                Set<String> instanceIds = new HashSet<>();
-                for (InstanceMetaData metadataEntry : instanceMetaData) {
-                    instanceIds.add(metadataEntry.getInstanceId());
-                }
-                LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
-                reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stackId, false, instanceIds, instanceGroupName)));
+        Set<InstanceMetaData> originalMetadata = instanceGroup.getAllInstanceMetaData();
+        Set<InstanceMetaData> instanceMetaData = prepareInstanceMetaData(
+                coreInstanceMetaData,
+                one.getInstanceGroupByInstanceGroupName(instanceGroupName),
+                InstanceStatus.UNREGISTERED);
+        originalMetadata.addAll(instanceMetaData);
+        Stack modifiedStack = stackUpdater.updateStackMetaData(stackId, originalMetadata, instanceGroupName);
+        stackUpdater.updateMetadataReady(stackId, true);
+        PollingResult pollingResult = waitForConsulAgents(modifiedStack, originalMetadata, instanceMetaData);
+        if (isSuccess(pollingResult)) {
+            updateWithConsulData(modifiedStack.getInstanceGroupByInstanceGroupName(instanceGroupName).getInstanceMetaData());
+            stackUpdater.updateStackMetaData(stackId,
+                    modifiedStack.getInstanceGroupByInstanceGroupName(instanceGroupName).getAllInstanceMetaData(), instanceGroupName);
+            Set<String> instanceIds = new HashSet<>();
+            for (InstanceMetaData metadataEntry : instanceMetaData) {
+                instanceIds.add(metadataEntry.getInstanceId());
             }
-        } catch (Exception e) {
-            String errMessage = "Unhandled exception occurred while updating stack metadata.";
-            LOGGER.error(errMessage, e);
-            LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_FAILED_EVENT);
-            reactor.notify(ReactorConfig.STACK_UPDATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stackId, errMessage)));
+            LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
+            stackUpdateSuccess = new StackUpdateSuccess(stackId, false, instanceIds, instanceGroupName);
         }
+        return stackUpdateSuccess;
     }
 
     private Optional<String> updateAmbariInstanceMetadata(Stack stack, Set<InstanceMetaData> instancesMetaData) {
@@ -179,8 +158,6 @@ public class AmbariRoleAllocator {
             return failedAmbariAddressReturnObject();
         }
     }
-
-
 
     private PollingResult waitForConsulAgents(Stack stack, Set<InstanceMetaData> originalMetaData, Set<InstanceMetaData> instancesMetaData) {
         Set<InstanceMetaData> copy = new HashSet<>(originalMetaData);
@@ -230,7 +207,8 @@ public class AmbariRoleAllocator {
         return privateIps;
     }
 
-    private Set<InstanceMetaData> prepareInstanceMetaData(Set<CoreInstanceMetaData> coreInstanceMetaData, InstanceGroup instanceGroup, InstanceStatus status) {
+    private Set<InstanceMetaData> prepareInstanceMetaData(Set<CoreInstanceMetaData> coreInstanceMetaData, InstanceGroup instanceGroup, InstanceStatus
+            status) {
         Set<InstanceMetaData> instanceMetaData = new HashSet<>();
         for (CoreInstanceMetaData coreInstanceMetaDataEntry : coreInstanceMetaData) {
             if (coreInstanceMetaDataEntry.getInstanceGroup().getGroupName().equals(instanceGroup.getGroupName())) {
@@ -251,13 +229,6 @@ public class AmbariRoleAllocator {
             }
         }
         return instanceMetaData;
-    }
-
-    private void notifyStackCreateFailed(Long stackId, String cause) {
-        MDCBuilder.buildMdcContext();
-        LOGGER.info("Publishing {} event ", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
-        StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, cause);
-        reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
     }
 
     public AmbariAddressReturnObject successAmbariAddressReturnObject(String address) {

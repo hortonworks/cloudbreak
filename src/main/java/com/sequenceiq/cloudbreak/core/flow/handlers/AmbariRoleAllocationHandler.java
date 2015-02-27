@@ -23,7 +23,7 @@ public class AmbariRoleAllocationHandler extends AbstractFlowHandler<Provisionin
     @Override
     protected Object execute(Event<ProvisioningContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
-        ProvisioningContext provisioningContext = provisioningFacade.allocateRoles(event.getData());
+        ProvisioningContext provisioningContext = provisioningFacade.allocateAmbariRoles(event.getData());
         LOGGER.info("Role allocated. Context: {}", provisioningContext);
         return provisioningContext;
     }
