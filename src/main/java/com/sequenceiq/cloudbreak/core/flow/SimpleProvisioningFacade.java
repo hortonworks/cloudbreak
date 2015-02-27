@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
+import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisionContext;
@@ -23,6 +25,9 @@ public class SimpleProvisioningFacade implements ProvisioningFacade {
 
     @Resource
     private Map<CloudPlatform, ProvisionSetup> provisioningSetupServices;
+
+    @Resource
+    private Map<CloudPlatform, MetadataSetup> metadataSetups;
 
     @Autowired
     private ProvisionContext provisioningService;
@@ -42,7 +47,7 @@ public class SimpleProvisioningFacade implements ProvisioningFacade {
             LOGGER.error("Exception during provisioning setup: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
-        return ProvisioningContextFactory.create(provisioningSetupResult.getCloudPlatform(), provisioningSetupResult.getStackId(),
+        return ProvisioningContextFactory.createProvisioningContext(provisioningSetupResult.getCloudPlatform(), provisioningSetupResult.getStackId(),
                 provisioningSetupResult.getSetupProperties(), provisioningSetupResult.getUserDataParams());
     }
 
@@ -63,8 +68,17 @@ public class SimpleProvisioningFacade implements ProvisioningFacade {
 
     @Override
     public ProvisioningContext setupMetadata(ProvisioningContext provisioningContext) throws CloudbreakException {
-        LOGGER.debug("Set up metadata. Context: {}", provisioningContext);
-        return provisioningContext;
+        LOGGER.debug("Metadata setup. Context: {}", provisioningContext);
+        MetadataSetupComplete metadataSetupComplete = null;
+        try {
+            metadataSetupComplete = (MetadataSetupComplete) metadataSetups.get(provisioningContext.getCloudPlatform())
+                    .setupMetadata(stackService.getById(provisioningContext.getStackId()));
+            LOGGER.debug("Metadata setup DONE.");
+        } catch (Exception e) {
+            LOGGER.error("Exception during metadata setup: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+        return ProvisioningContextFactory.createProvisioningSetupContext(metadataSetupComplete.getCloudPlatform(), metadataSetupComplete.getStackId());
     }
 
     @Override
