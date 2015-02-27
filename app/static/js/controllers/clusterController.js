@@ -61,6 +61,15 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }
         }
 
+        $scope.selectedAdjustmentChange = function() {
+            if ($scope.cluster.bestEffort === "BEST_EFFORT") {
+                $scope.cluster.failurePolicy.adjustmentType = "BEST_EFFORT";
+            } else {
+                $scope.cluster.failurePolicy.adjustmentType = "EXACT";
+                $scope.cluster.failurePolicy.threshold = 3;
+            }
+        }
+
         $scope.selectedBlueprintChange = function () {
           var tmpCloudPlatform = $rootScope.activeCredential.cloudPlatform;
           var tmpTemplate = $filter('filter')($rootScope.templates, {cloudPlatform: tmpCloudPlatform}, true)[0];
@@ -145,11 +154,19 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 }
             );
         }
-         $scope.$watch('pagination.currentPage + pagination.itemsPerPage', function(){
+        $scope.$watch('pagination.currentPage + pagination.itemsPerPage', function(){
             if ($rootScope.activeCluster.metadata != null) {
                 paginateMetadata();
             }
-         });
+        });
+
+        $rootScope.$watch('activeCredential', function() {
+            if ($rootScope.activeCredential != null) {
+                $scope.cluster.bestEffort = "BEST_EFFORT";
+                $scope.cluster.failurePolicy.adjustmentType = "BEST_EFFORT";
+                $scope.cluster.failurePolicy.threshold = null;
+            }
+        });
 
         $rootScope.$watch('activeCluster.metadata', function() {
             if ($rootScope.activeCluster.metadata != null) {
@@ -245,9 +262,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 password: "admin",
                 userName: "admin",
                 onFailureAction: "ROLLBACK",
+                bestEffort: "BEST_EFFORT",
                 failurePolicy: {
-                  adjustmentType: "EXACT",
-                  threshold: 1
+                  adjustmentType: "BEST_EFFORT",
                 }
             };
         }
