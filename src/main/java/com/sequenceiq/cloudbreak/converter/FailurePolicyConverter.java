@@ -12,7 +12,7 @@ public class FailurePolicyConverter extends AbstractConverter<FailurePolicyJson,
         FailurePolicyJson json = new FailurePolicyJson();
         json.setAdjustmentType(entity.getAdjustmentType());
         json.setId(entity.getId());
-        json.setThreshold(entity.getThreshold());
+        json.setThreshold(entity.getThreshold() == null ? 0 : entity.getThreshold());
         return json;
     }
 
@@ -21,7 +21,7 @@ public class FailurePolicyConverter extends AbstractConverter<FailurePolicyJson,
         FailurePolicy stackFailurePolicy = new FailurePolicy();
         stackFailurePolicy.setAdjustmentType(json.getAdjustmentType());
         stackFailurePolicy.setId(json.getId());
-        stackFailurePolicy.setThreshold(json.getThreshold());
+        stackFailurePolicy.setThreshold(json.getThreshold() == null ? 0 : json.getThreshold());
         return stackFailurePolicy;
     }
 }

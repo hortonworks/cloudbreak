@@ -11,6 +11,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.controller.validation.ValidStackRequest;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -19,6 +20,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.SubnetJson;
 
 @ValidStackRequest
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class StackJson implements JsonEntity {
 
     private Long id;

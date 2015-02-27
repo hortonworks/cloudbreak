@@ -2,11 +2,13 @@ package com.sequenceiq.cloudbreak.controller.json;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.controller.validation.ValidUpdateStackRequest;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.SubnetJson;
 
 @ValidUpdateStackRequest
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UpdateStackJson implements JsonEntity {
 
     private StatusRequest status;
