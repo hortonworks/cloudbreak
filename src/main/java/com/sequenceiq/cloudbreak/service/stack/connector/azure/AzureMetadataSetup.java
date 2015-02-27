@@ -33,10 +33,8 @@ import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
+import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Component
 public class AzureMetadataSetup implements MetadataSetup {
@@ -51,23 +49,20 @@ public class AzureMetadataSetup implements MetadataSetup {
     @Autowired
     private PollingService<AzureMetadataSetupCheckerTaskContext> azureMetadataSetupCheckerTaskPollingService;
     @Autowired
-    private Reactor reactor;
-    @Autowired
     private AzureStackUtil azureStackUtil;
 
     @Override
-    public void setupMetadata(Stack stack) {
+    public ProvisionEvent setupMetadata(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential);
         Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT,
-                Event.wrap(new MetadataSetupComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas)));
+        return new MetadataSetupComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas);
     }
 
     @Override
-    public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String hostGroup) {
+    public ProvisionEvent addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String hostGroup) {
         MDCBuilder.buildMdcContext(stack);
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential);
@@ -79,8 +74,7 @@ public class AzureMetadataSetup implements MetadataSetup {
         }
         Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient, resources);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT,
-                Event.wrap(new MetadataUpdateComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas, hostGroup)));
+        return new MetadataUpdateComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas, hostGroup);
     }
 
     private Set<CoreInstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient, List<Resource> resources) {

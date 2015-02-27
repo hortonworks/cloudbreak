@@ -20,10 +20,8 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
+import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Component
 public class OpenStackMetadataSetup implements MetadataSetup {
@@ -31,13 +29,10 @@ public class OpenStackMetadataSetup implements MetadataSetup {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackMetadataSetup.class);
 
     @Autowired
-    private Reactor reactor;
-
-    @Autowired
     private OpenStackUtil openStackUtil;
 
     @Override
-    public void setupMetadata(Stack stack) {
+    public ProvisionEvent setupMetadata(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         OSClient osClient = openStackUtil.createOSClient(stack);
         Resource heatResource = stack.getResourceByType(ResourceType.HEAT_STACK);
@@ -58,12 +53,12 @@ public class OpenStackMetadataSetup implements MetadataSetup {
             ));
         }
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT,
-                Event.wrap(new MetadataSetupComplete(CloudPlatform.OPENSTACK, stack.getId(), instancesCoreMetadata)));
+        return new MetadataSetupComplete(CloudPlatform.OPENSTACK, stack.getId(), instancesCoreMetadata);
     }
 
     @Override
-    public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String hostGroup) {
+    public ProvisionEvent addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String hostGroup) {
+        return null;
     }
 
     @Override

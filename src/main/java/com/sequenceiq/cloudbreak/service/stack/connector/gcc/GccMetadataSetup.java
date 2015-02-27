@@ -21,10 +21,8 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
+import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Component
 public class GccMetadataSetup implements MetadataSetup {
@@ -32,18 +30,14 @@ public class GccMetadataSetup implements MetadataSetup {
     private static final Logger LOGGER = LoggerFactory.getLogger(GccMetadataSetup.class);
 
     @Autowired
-    private Reactor reactor;
-
-    @Autowired
     private GccStackUtil gccStackUtil;
 
     @Override
-    public void setupMetadata(Stack stack) {
+    public ProvisionEvent setupMetadata(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         List<Resource> resourcesByType = stack.getResourcesByType(ResourceType.GCC_INSTANCE);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT,
-                Event.wrap(new MetadataSetupComplete(CloudPlatform.GCC, stack.getId(), collectMetaData(stack, resourcesByType))));
+        return new MetadataSetupComplete(CloudPlatform.GCC, stack.getId(), collectMetaData(stack, resourcesByType));
     }
 
     private Set<CoreInstanceMetaData> collectMetaData(Stack stack, List<Resource> resources) {
@@ -56,7 +50,7 @@ public class GccMetadataSetup implements MetadataSetup {
     }
 
     @Override
-    public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String hostGroup) {
+    public ProvisionEvent addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String hostGroup) {
         MDCBuilder.buildMdcContext(stack);
         List<Resource> resources = new ArrayList<>();
         for (Resource resource : resourceList) {
@@ -66,8 +60,7 @@ public class GccMetadataSetup implements MetadataSetup {
         }
         Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, resources);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT,
-                Event.wrap(new MetadataUpdateComplete(CloudPlatform.GCC, stack.getId(), instanceMetaDatas, hostGroup)));
+        return new MetadataUpdateComplete(CloudPlatform.GCC, stack.getId(), instanceMetaDatas, hostGroup);
     }
 
     private CoreInstanceMetaData getMetadata(Stack stack, Compute compute, Resource resource) {

@@ -13,18 +13,31 @@ public class ProvisioningContextFactory {
     private ProvisioningContextFactory() {
     }
 
-    public static ProvisioningContext create(CloudPlatform cloudPlatform, Long stackId) {
-        ProvisioningContext provisioningContext = new ProvisioningContext();
+    public static final ProvisioningContext createContext() {
+        return new ProvisioningContext();
+    }
+
+    public static ProvisioningContext createProvisioningSetupContext(CloudPlatform cloudPlatform, Long stackId) {
+        ProvisioningContext provisioningContext = createContext();
         provisioningContext.setCloudPlatform(cloudPlatform);
         provisioningContext.setStackId(stackId);
         return provisioningContext;
     }
 
-    public static ProvisioningContext create(CloudPlatform cloudPlatform, Long stackId, Map<String, Object> setupProperties,
+    public static ProvisioningContext createProvisioningContext(CloudPlatform cloudPlatform, Long stackId, Map<String, Object> setupProperties,
             Map<String, String> userDataParams) {
-        ProvisioningContext provisioningContext = create(cloudPlatform, stackId);
+        ProvisioningContext provisioningContext = createProvisioningSetupContext(cloudPlatform, stackId);
         provisioningContext.getSetupProperties().putAll(setupProperties);
         provisioningContext.getUserDataParams().putAll(userDataParams);
         return provisioningContext;
     }
+
+    public static ProvisioningContext createMetadataSetupContext(CloudPlatform cloudPlatform, Long stackId, Map<String, Object> setupProperties,
+            Map<String, String> userDataParams) {
+        ProvisioningContext provisioningContext = createProvisioningSetupContext(cloudPlatform, stackId);
+        provisioningContext.getSetupProperties().putAll(setupProperties);
+        provisioningContext.getUserDataParams().putAll(userDataParams);
+        return provisioningContext;
+    }
+
 }
