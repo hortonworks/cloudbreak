@@ -1,20 +1,23 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
 @Entity
 public class AzureTemplate extends Template implements ProvisionEntity {
 
-    private String vmType;
+    @Enumerated(EnumType.STRING)
+    private AzureVmType vmType;
 
     public AzureTemplate() {
     }
 
-    public String getVmType() {
+    public AzureVmType getVmType() {
         return vmType;
     }
 
-    public void setVmType(String vmType) {
+    public void setVmType(AzureVmType vmType) {
         this.vmType = vmType;
     }
 

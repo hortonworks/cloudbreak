@@ -14,7 +14,7 @@ public class AzurePriceGenerator implements PriceGenerator {
     public Double calculate(Template template, Long hours) {
         Double result = 0.0;
         AzureTemplate temp = (AzureTemplate) template;
-        AzureVmType vmType = AzureVmType.valueOf(temp.getVmType());
+        AzureVmType vmType = temp.getVmType();
         return result;
     }
 
