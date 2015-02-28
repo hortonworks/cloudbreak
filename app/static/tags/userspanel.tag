@@ -1,4 +1,4 @@
-<div id="panel-users" class="col-md-12 col-lg-12" ng-controller="accountuserController" ng-show="user.admin">
+<div id="panel-users" class="col-md-12 col-lg-11" ng-controller="accountuserController" ng-show="user.admin">
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
             <a id="users-btn" data-target="#panel-users-collapse" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>

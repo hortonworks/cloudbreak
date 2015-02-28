@@ -1,4 +1,4 @@
-<div id="panel-events" class="col-md-12" ng-controller="eventController">
+<div id="panel-events" class="col-md-12 col-lg-11" ng-controller="eventController">
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
             <a href="" id="events-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"
