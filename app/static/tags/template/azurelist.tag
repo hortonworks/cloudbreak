@@ -43,15 +43,6 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
-    <!-- .form-group -->
-    <div class="form-group">
-        <label class="col-sm-3 control-label" for="imageName">Image name</label>
-
-        <div class="col-sm-9">
-            <p id="imageName" class="form-control-static">{{template.parameters.imageName}}</p>
-        </div>
-        <!-- .col-sm-9 -->
-    </div>
     <div class="form-group">
         <label class="col-sm-3 control-label" for="location">Attached volumes per instance</label>
 

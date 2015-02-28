@@ -1,6 +1,6 @@
 <!-- .... BLUEPRINTS PANEL ................................................. -->
 
-<div id="panel-blueprints" ng-controller="blueprintController" class="col-md-12 col-lg-9">
+<div id="panel-blueprints" ng-controller="blueprintController" class="col-md-12 col-lg-11">
 
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
