@@ -1,0 +1,8 @@
+docs/*
+.git/*
+.idea/*
+README.md
+start.sh
+mkdocs.yml
+.DS_Store
+node_modules/*
