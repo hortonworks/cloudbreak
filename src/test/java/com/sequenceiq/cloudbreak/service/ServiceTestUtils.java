@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AwsVolumeType;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
+import com.sequenceiq.cloudbreak.domain.AzureVmType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
@@ -206,7 +207,7 @@ public final class ServiceTestUtils {
                 azureTemplate.setId(1L);
                 azureTemplate.setOwner(owner);
                 azureTemplate.setAccount(account);
-                azureTemplate.setVmType("test-vm-type");
+                azureTemplate.setVmType(AzureVmType.STANDARD_D1);
                 azureTemplate.setVolumeCount(1);
                 azureTemplate.setVolumeSize(100);
                 azureTemplate.setDescription("azure test template");

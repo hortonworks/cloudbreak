@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.domain.AzureVmType;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -122,7 +121,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             props.put(CUSTOMDATA, new String(Base64.encodeBase64(provisionContextObject.getUserData().getBytes())));
             props.put(VIRTUALNETWORKNAME, provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
             props.put(PORTS, NetworkUtils.getPorts(stack));
-            props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
+            props.put(VMTYPE, azureTemplate.getVmType().vmType().replaceAll(" ", ""));
             return new AzureVirtualMachineCreateRequest(props, resources, buildResources, stack, instanceGroup.orNull());
         } catch (FileNotFoundException | CertificateException | NoSuchAlgorithmException e) {
             throw new StackCreationFailureException(e);

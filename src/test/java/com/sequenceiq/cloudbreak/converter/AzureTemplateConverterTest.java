@@ -15,11 +15,12 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.validation.AzureTemplateParam;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
+import com.sequenceiq.cloudbreak.domain.AzureVmType;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 
 public class AzureTemplateConverterTest {
 
-    private static final String DUMMY_VM_TYPE = "STANDARD_D1";
+    private static final AzureVmType DUMMY_VM_TYPE = AzureVmType.STANDARD_D1;
     private static final String DUMMY_DESCRIPTION = "dummyDescription";
     private static final String DUMMY_NAME = "dummyName";
     private static final String PORT = "8081";
