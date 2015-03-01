@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.service.stack.connector.openstack;
 
 import static org.apache.commons.lang3.StringUtils.deleteWhitespace;
 
+import java.util.Map;
+
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.openstack.OSFactory;
@@ -32,6 +34,15 @@ public class OpenStackUtil {
 
     public String getKeyPairName(OpenStackCredential credential) {
         return CB_KEYPAIR_NAME + deleteWhitespace(credential.getName().toLowerCase());
+    }
+
+    public String getInstanceId(String uuid, Map<String, String> metadata) {
+        return uuid + "_" + getNormalizedGroupName(metadata.get(HeatTemplateBuilder.CB_INSTANCE_GROUP_NAME)) + "_"
+                + metadata.get(HeatTemplateBuilder.CB_INSTANCE_PRIVATE_ID);
+    }
+
+    public String getNormalizedGroupName(String groupName) {
+        return groupName.replaceAll("_", "");
     }
 
 }
