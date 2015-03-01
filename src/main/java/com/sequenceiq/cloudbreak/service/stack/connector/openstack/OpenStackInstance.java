@@ -26,6 +26,10 @@ public final class OpenStackInstance {
         return volumes;
     }
 
+    public Map<String, String> getMetadataAsMap() {
+        return metadata;
+    }
+
     public String getMetadata() {
         try {
             return new ObjectMapper().writeValueAsString(metadata);

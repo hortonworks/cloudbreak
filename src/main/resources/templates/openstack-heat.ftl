@@ -35,7 +35,6 @@ parameters:
     type: string
     description: The ID of the public network. You will need to replace it with your DevStack public network ID
 
-
 resources:
 
   app_network:
@@ -72,8 +71,10 @@ resources:
         subnet_id: { get_resource: app_subnet }
         
   <#list agents as agent>
-        
-  ambari_instance_${agent_index}:
+  <#assign metadata = agent.metadata?eval>
+  <#assign instance_id = metadata.cb_instance_group_name?replace('_', '') + "_" + metadata.cb_instance_private_id>
+
+  ambari_${instance_id}:
     type: OS::Nova::Server
     properties:
       image: { get_param: image_id }
@@ -81,7 +82,7 @@ resources:
       key_name: { get_param: key_name }
       metadata: ${agent.metadata}
       networks:
-        - port: { get_resource: ambari_app_port_${agent_index} }
+        - port: { get_resource: ambari_app_port_${instance_id} }
       user_data_format: RAW
       user_data:
         str_replace:
@@ -89,41 +90,40 @@ resources:
 ${userdata}
           params:
             public_net_id: { get_param: public_net_id }
-   
 
-  ambari_app_port_${agent_index}:
+  ambari_app_port_${instance_id}:
       type: OS::Neutron::Port
       properties:
         network_id: { get_resource: app_network }
+        replacement_policy: AUTO
         fixed_ips:
           - subnet_id: { get_resource: app_subnet }
         security_groups: [ { get_resource: server_security_group } ]
         
   <#list agent.volumes as volume>
   
-  ambari_volume_${agent_index}_${volume_index}:
+  ambari_volume_${instance_id}_${volume_index}:
     type: OS::Cinder::Volume
     properties:
       name: hdfs-volume
       size: ${volume.size}
       volume_type: lvmdriver-1    
   
-  ambari_volume_attach_${agent_index}_${volume_index}:
+  ambari_volume_attach_${instance_id}_${volume_index}:
     type: OS::Cinder::VolumeAttachment
     properties:
-      instance_uuid: { get_resource: ambari_instance_${agent_index} }
+      instance_uuid: { get_resource: ambari_${instance_id} }
       mountpoint: ${volume.device}
-      volume_id: { get_resource: ambari_volume_${agent_index}_${volume_index} }
+      volume_id: { get_resource: ambari_volume_${instance_id}_${volume_index} }
   </#list>
 
-  ambari_server_floatingip_${agent_index}:
+  ambari_server_floatingip_${instance_id}:
     type: OS::Neutron::FloatingIP
     properties:
       floating_network_id: { get_param: public_net_id }
-      port_id: { get_resource: ambari_app_port_${agent_index} }
+      port_id: { get_resource: ambari_app_port_${instance_id} }
   
   </#list>     
-        
 
   server_security_group:
     type: OS::Neutron::SecurityGroup
@@ -152,6 +152,8 @@ ${userdata}
         
 outputs:
   <#list agents as agent>
-  instance_uuid_${agent_index}:
-    value: { get_attr: [ambari_instance_${agent_index}, show, id] }
+  <#assign m = agent.metadata?eval>
+  <#assign instance_id = m.cb_instance_group_name?replace('_', '') + "_" + m.cb_instance_private_id>
+  instance_uuid_${instance_id}:
+    value: { get_attr: [ambari_${instance_id}, show, id] }
   </#list>
