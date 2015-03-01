@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
+import com.amazonaws.services.cloudformation.model.DescribeStackEventsRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
+import com.amazonaws.services.cloudformation.model.StackEvent;
 import com.amazonaws.services.cloudformation.model.StackStatus;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 
 @Component
 public class CloudFormationStackStatusChecker implements StatusCheckerTask<CloudFormationStackPollerContext> {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudFormationStackStatusChecker.class);
 
     @Autowired
@@ -35,25 +34,26 @@ public class CloudFormationStackStatusChecker implements StatusCheckerTask<Cloud
         boolean result = false;
         Stack stack = context.getStack();
         StackStatus successStatus = context.getSuccessStatus();
+        StackStatus errorStatus = context.getErrorStatus();
         AmazonCloudFormationClient client = context.getCloudFormationClient();
-        Resource resource = stack.getResourceByType(ResourceType.CLOUDFORMATION_STACK);
-        String cloudFormationStackName = resource.getResourceName();
+        String cloudFormationStackName = stack.getResourceByType(ResourceType.CLOUDFORMATION_STACK).getResourceName();
         DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cloudFormationStackName);
-        try {
-            MDCBuilder.buildMdcContext(stack);
-            LOGGER.info("Checking if AWS CloudFormation stack '{}' reached status '{}'", cloudFormationStackName, successStatus);
-            DescribeStacksResult describeStacksResult = client.describeStacks(describeStacksRequest);
+        DescribeStackEventsRequest stackEventsRequest = new DescribeStackEventsRequest().withStackName(cloudFormationStackName);
+        MDCBuilder.buildMdcContext(stack);
+        LOGGER.info("Checking if AWS CloudFormation stack '{}' reached status '{}'", cloudFormationStackName, successStatus);
 
-            List<com.amazonaws.services.cloudformation.model.Stack> stacks = describeStacksResult.getStacks();
-            if (stacks.size() > 0) {
-                StackStatus actualStatus = StackStatus.valueOf(stacks.get(0).getStackStatus());
-                if (context.getErrorStatuses().contains(actualStatus)) {
-                    throw new CloudFormationStackException("AWS CloudFormation stack reached an error state: " + actualStatus.toString());
-                } else if (actualStatus.equals(successStatus)) {
+        try {
+            com.amazonaws.services.cloudformation.model.Stack cfStack = client.describeStacks(describeStacksRequest).getStacks().get(0);
+            List<StackEvent> stackEvents = client.describeStackEvents(stackEventsRequest).getStackEvents();
+            if (!stackEvents.isEmpty() && cfStack != null) {
+                StackStatus cfStackStatus = StackStatus.valueOf(cfStack.getStackStatus());
+                if (context.getStackErrorStatuses().contains(cfStackStatus)) {
+                    String errorStatusReason = getErrorCauseStatusReason(stackEvents, errorStatus);
+                    throw new CloudFormationStackException(String.format("AWS CloudFormation stack reached an error state: %s reason: %s"
+                            , errorStatus.toString(), errorStatusReason));
+                } else if (cfStackStatus.equals(successStatus)) {
                     result = true;
                 }
-            } else {
-                throw new CloudFormationStackException("AWS CloudFormation stack could not be found for stack: " + stack.getId());
             }
         } catch (AmazonServiceException e) {
             LOGGER.info("Could not get the description of CloudFormation stack (CB stackId:{}) {}.", stack.getId(), e.getErrorMessage());
@@ -90,5 +90,19 @@ public class CloudFormationStackStatusChecker implements StatusCheckerTask<Cloud
         } else {
             return false;
         }
+    }
+
+    private String getErrorCauseStatusReason(List<StackEvent> stackEvents, StackStatus errorStatus) {
+        StackEvent cause = null;
+        for (StackEvent event : stackEvents) {
+            if (event.getResourceStatus().equals(errorStatus.toString())) {
+                if (cause == null) {
+                    cause = event;
+                } else if (cause.getTimestamp().getTime() > event.getTimestamp().getTime()) {
+                    cause = event;
+                }
+            }
+        }
+        return cause.getResourceStatusReason();
     }
 }
