@@ -137,7 +137,7 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
             JsonNode root = mapper.readTree(blueprintText);
             hasBlueprintInBlueprint(root);
             hasBlueprintNameInBlueprint(root);
-            hasHostGroupInBlueprint(root);
+            validateHostGroups(root);
             new AmbariClient().validateBlueprint(blueprintText);
         } catch (InvalidBlueprintException e) {
             throw new BadRequestException("Invalid Blueprint: " + e.getMessage(), e);
@@ -146,9 +146,31 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
         }
     }
 
-    private void hasHostGroupInBlueprint(JsonNode root) {
-        if (root.path("host_groups").isMissingNode() || !root.path("host_groups").isArray()) {
-            throw new BadRequestException("Invalid blueprint: 'host_groups' node is missing from JSON or is not an array.");
+    private void validateHostGroups(JsonNode root) {
+        JsonNode hostGroups = root.path("host_groups");
+        if (hostGroups.isMissingNode() || !hostGroups.isArray() || hostGroups.size() == 0) {
+            throw new BadRequestException("Invalid blueprint: 'host_groups' node is missing from JSON or is not an array or empty.");
+        }
+        for (JsonNode hostGroup : hostGroups) {
+            JsonNode hostGroupName = hostGroup.path("name");
+            if (hostGroupName.isMissingNode() || !hostGroupName.isTextual() || hostGroupName.asText().isEmpty()) {
+                throw new BadRequestException("Invalid blueprint: one of the 'host_groups' has no name.");
+            }
+            validateComponentsInHostgroup(hostGroup, hostGroupName.asText());
+        }
+    }
+
+    private void validateComponentsInHostgroup(JsonNode hostGroup, String hostGroupName) {
+        JsonNode components = hostGroup.path("components");
+        if (components.isMissingNode() || !components.isArray() || components.size() == 0) {
+            throw new BadRequestException(
+                    String.format("Invalid blueprint: '%s' hostgroup's 'components' node is missing from JSON or is not an array or empty.", hostGroupName));
+        }
+        for (JsonNode component : components) {
+            JsonNode componentName = component.path("name");
+            if (componentName.isMissingNode() || !componentName.isTextual() || componentName.asText().isEmpty()) {
+                throw new BadRequestException(String.format("Invalid blueprint: one fo the 'components' has no name in '%s' hostgroup.", hostGroupName));
+            }
         }
     }
 

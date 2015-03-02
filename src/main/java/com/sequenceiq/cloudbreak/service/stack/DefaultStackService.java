@@ -20,6 +20,8 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
+import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
@@ -73,6 +75,9 @@ public class DefaultStackService implements StackService {
 
     @Resource
     private Map<CloudPlatform, ProvisionSetup> provisionSetups;
+
+    @Autowired
+    private BlueprintValidator blueprintValidator;
 
     @Override
     public Set<Stack> retrievePrivateStacks(CbUser user) {
@@ -268,6 +273,11 @@ public class DefaultStackService implements StackService {
             }
         }
         throw new NotFoundException("Metadata not found on stack.");
+    }
+
+    @Override
+    public void validateStack(StackValidation stackValidation) {
+        blueprintValidator.validateBlueprintForStack(stackValidation.getBlueprint(), stackValidation.getInstanceGroups());
     }
 
     private void delete(Stack stack, CbUser user) {

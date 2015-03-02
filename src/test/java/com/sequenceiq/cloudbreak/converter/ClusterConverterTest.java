@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Matchers.anyLong;
 
 import java.io.IOException;
@@ -14,10 +15,12 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
+import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -51,6 +54,9 @@ public class ClusterConverterTest {
     @Mock
     private JsonNode jsonNode;
 
+    @Mock
+    private BlueprintValidator blueprintValidator;
+
     private Cluster cluster;
 
     private ClusterRequest clusterRequest;
@@ -71,25 +77,15 @@ public class ClusterConverterTest {
     }
 
     @Test(expected = BadRequestException.class)
-    public void testConvertClusterEntityToJsonWhenStackHasNoInstanceGroup() {
-        // GIVEN
-        given(blueprintRepository.findOne(anyLong())).willReturn(blueprint);
-        given(stackRepository.findOne(anyLong())).willReturn(new Stack());
-        // WHEN
-        Cluster result = underTest.convert(clusterRequest, 1L);
-    }
-
-    @Test(expected = BadRequestException.class)
-    public void testConvertClusterEntityToJsonWhenStackHasOnlyOneInstanceGroup() {
+    public void testConvertClusterEntityToJsonShouldThrowBadRequestExceptionWhenBlueprintValidatorThrowsIt() {
         // GIVEN
         Stack stack = new Stack();
-        InstanceGroup instanceGroup1 = new InstanceGroup();
-        instanceGroup1.setGroupName("master");
-        stack.getInstanceGroups().add(instanceGroup1);
+        stack.setInstanceGroups(Sets.<InstanceGroup>newHashSet());
         given(blueprintRepository.findOne(anyLong())).willReturn(blueprint);
         given(stackRepository.findOne(anyLong())).willReturn(stack);
+        willThrow(BadRequestException.class).given(blueprintValidator).validateBlueprintForStack(blueprint, stack.getInstanceGroups());
         // WHEN
-        Cluster result = underTest.convert(clusterRequest, 1L);
+        underTest.convert(clusterRequest, 1L);
     }
 
     @Test

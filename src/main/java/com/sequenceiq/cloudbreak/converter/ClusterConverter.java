@@ -1,28 +1,23 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.io.IOException;
 import java.util.Date;
-import java.util.Iterator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
+import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 @Component
 public class ClusterConverter {
@@ -42,6 +37,9 @@ public class ClusterConverter {
     @Autowired
     private JsonHelper jsonHelper;
 
+    @Autowired
+    private BlueprintValidator blueprintValidator;
+
     public Cluster convert(ClusterRequest clusterRequest) {
         return convert(clusterRequest, null);
     }
@@ -54,14 +52,10 @@ public class ClusterConverter {
         try {
             Blueprint blueprint = blueprintRepository.findOne(clusterRequest.getBlueprintId());
             cluster.setBlueprint(blueprint);
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(blueprint.getBlueprintText());
-            validateBlueprintRequest(root, stackRepository.findOne(stackId));
+            blueprintValidator.validateBlueprintForStack(blueprint, stackRepository.findOne(stackId).getInstanceGroups());
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(
                     String.format("Access to blueprint '%s' is denied or blueprint doesn't exist.", clusterRequest.getBlueprintId()), e);
-        } catch (IOException e) {
-            throw new BadRequestException(String.format("Blueprint [%s] can not convert to json node.", clusterRequest.getBlueprintId()));
         }
         if (clusterRequest.getRecipeId() != null) {
             try {
@@ -76,28 +70,6 @@ public class ClusterConverter {
         cluster.setDescription(clusterRequest.getDescription());
         cluster.setEmailNeeded(clusterRequest.getEmailNeeded());
         return cluster;
-    }
-
-    private void validateBlueprintRequest(JsonNode root, Stack stack) {
-        Iterator<JsonNode> hostGroups = root.get("host_groups").elements();
-        int hostGroupCount = 0;
-        while (hostGroups.hasNext()) {
-            JsonNode next = hostGroups.next();
-            String name = next.get("name").asText();
-            boolean find = false;
-            for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                if (instanceGroup.getGroupName().equals(name)) {
-                    find = true;
-                }
-            }
-            hostGroupCount++;
-            if (!find) {
-                throw new BadRequestException(String.format("The name of host group '%s' doesn't match any of the defined instance groups.", name));
-            }
-        }
-        if (stack.getInstanceGroups().size() != hostGroupCount) {
-            throw new BadRequestException(String.format("Request not defined all instance group on '%s' stack.", stack.getId()));
-        }
     }
 
     public ClusterResponse convert(Cluster cluster, String clusterJson) {

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -37,4 +38,6 @@ public interface StackService {
     void updateNodeCount(Long stackId, HostGroupAdjustmentJson hostGroupAdjustmentJson);
 
     void updateAllowedSubnets(Long stackId, List<Subnet> subnetList);
+
+    void validateStack(StackValidation stackValidation);
 }
