@@ -155,6 +155,7 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
             this.save = function (cluster, successHandler, failureHandler) {
                 var stackValidation = {
                   instanceGroups: cluster.instanceGroups,
+                  hostGroups: cluster.hostGroups,
                   blueprintId: cluster.blueprintId
                 }
                 StackValidation.save(stackValidation, function (result) {
@@ -195,7 +196,8 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                     var cbCluster = {
                         name: cluster.name,
                         blueprintId: cluster.blueprintId,
-                        emailNeeded: cluster.email
+                        emailNeeded: cluster.email,
+                        hostGroups: cluster.hostGroups
                     }
                     Cluster.save({ id: result.id }, cbCluster, function (result) {
                         cluster.hoursUp = 0;
