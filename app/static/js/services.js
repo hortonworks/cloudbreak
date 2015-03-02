@@ -172,8 +172,8 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         region: cluster.region,
                         failurePolicy: cluster.failurePolicy,
                         onFailure: cluster.onFailure,
-                        instanceGroups: cluster.instanceGroups
-                        parameters: cluster.parameters,
+                        instanceGroups: cluster.instanceGroups,
+                        parameters: cluster.parameters
                     }
                     if (cluster.public) {
                         AccountStack.save(stack, function (result) {
