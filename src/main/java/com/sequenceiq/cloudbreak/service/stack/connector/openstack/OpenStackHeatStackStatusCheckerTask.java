@@ -12,8 +12,8 @@ import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 @Component
 public class OpenStackHeatStackStatusCheckerTask extends StackBasedStatusCheckerTask<OpenStackContext> {
 
+    protected static final String FAILED_STATE = "FAILED";
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackHeatStackStatusCheckerTask.class);
-    private static final String FAILED_STATE = "FAILED";
 
     @Override
     public boolean checkStatus(OpenStackContext context) {
