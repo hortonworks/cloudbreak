@@ -105,7 +105,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             $rootScope.credentials.push($scope.credentialOpenstack);
             $scope.credentialOpenstack = {};
             $scope.showSuccess($rootScope.error_msg.openstack_credential_success1 + result.id + $rootScope.error_msg.openstack_credential_success2);
-            $scope.credentialOpenstackForm.$setPristine();
+            $scope.openstackCredentialForm.$setPristine();
             collapseCreateCredentialFormPanel();
             $scope.credentialInCreation = false;
           }
