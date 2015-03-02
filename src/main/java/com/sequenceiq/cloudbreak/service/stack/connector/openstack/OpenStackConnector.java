@@ -84,6 +84,9 @@ public class OpenStackConnector implements CloudPlatformConnector {
     private OpenStackHeatStackStatusCheckerTask openStackHeatStackStatusCheckerTask;
 
     @Autowired
+    private OpenStackHeatStackDeleteStatusCheckerTask openStackHeatStackDeleteStatusCheckerTask;
+
+    @Autowired
     private OpenStackInstanceStatusCheckerTask openStackInstanceStatusCheckerTask;
 
     @Override
@@ -165,7 +168,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
             String heatStackId = heatStack.getResourceName();
             osClient.heat().stacks().delete(stack.getName(), heatStackId);
             try {
-                PollingResult pollingResult = pollingService.pollWithTimeout(openStackHeatStackStatusCheckerTask,
+                PollingResult pollingResult = pollingService.pollWithTimeout(openStackHeatStackDeleteStatusCheckerTask,
                         new OpenStackContext(stack, asList(heatStackId), osClient, HeatStackStatus.DELETED.getStatus()),
                         POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
                 if (isSuccess(pollingResult)) {
