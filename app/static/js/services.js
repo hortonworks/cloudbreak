@@ -80,6 +80,11 @@ uluwatuServices.factory('AccountStack', ['$resource',
         return $resource('account/stacks');
     }]);
 
+uluwatuServices.factory('StackValidation', ['$resource',
+    function ($resource) {
+      return $resource('stacks/validate');
+    }]);
+
 uluwatuServices.factory('UserUsages', ['$resource',
     function ($resource) {
         return $resource('user/usages?:param');
@@ -130,8 +135,8 @@ uluwatuServices.factory('GlobalStack', ['$resource',
         return $resource('stacks/:id', null, { 'update': { method:'PUT' } });
     }]);
 
-uluwatuServices.factory('UluwatuCluster', ['UserStack', 'AccountStack', 'Cluster', 'GlobalStack',
-    function (UserStack, AccountStack, Cluster, GlobalStack) {
+uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'AccountStack', 'Cluster', 'GlobalStack',
+    function (StackValidation, UserStack, AccountStack, Cluster, GlobalStack) {
         function AggregateCluster(UserStack, AccountStack, Cluster) {
 
             this.query = function (successHandler) {
@@ -148,29 +153,41 @@ uluwatuServices.factory('UluwatuCluster', ['UserStack', 'AccountStack', 'Cluster
             }
 
             this.save = function (cluster, successHandler, failureHandler) {
-                var stack = {
-                    name: cluster.name,
-                    credentialId: cluster.credentialId,
-                    password: cluster.password,
-                    userName: cluster.userName,
-                    region: cluster.region,
-                    failurePolicy: cluster.failurePolicy,
-                    onFailure: cluster.onFailure,
-                    instanceGroups: cluster.instanceGroups,
-                    parameters: cluster.parameters,
+                var stackValidation = {
+                  instanceGroups: cluster.instanceGroups,
+                  blueprintId: cluster.blueprintId
                 }
-                if (cluster.public) {
-                    AccountStack.save(stack, function (result) {
-                        stackSuccessHandler(result)
-                    }, function (failure) {
-                        failureHandler(failure);
-                    });
-                } else {
-                    UserStack.save(stack, function (result) {
-                        stackSuccessHandler(result)
-                    }, function (failure) {
-                        failureHandler(failure);
-                    });
+                StackValidation.save(stackValidation, function (result) {
+                  stackValidationSuccessHandler(result)
+                }, function (failure) {
+                  failureHandler(failure);
+                });
+
+                function stackValidationSuccessHandler(result) {
+                    var stack = {
+                        name: cluster.name,
+                        credentialId: cluster.credentialId,
+                        password: cluster.password,
+                        userName: cluster.userName,
+                        region: cluster.region,
+                        failurePolicy: cluster.failurePolicy,
+                        onFailure: cluster.onFailure,
+                        instanceGroups: cluster.instanceGroups
+                        parameters: cluster.parameters,
+                    }
+                    if (cluster.public) {
+                        AccountStack.save(stack, function (result) {
+                            stackSuccessHandler(result)
+                        }, function (failure) {
+                            failureHandler(failure);
+                        });
+                    } else {
+                        UserStack.save(stack, function (result) {
+                            stackSuccessHandler(result)
+                        }, function (failure) {
+                            failureHandler(failure);
+                        });
+                    }
                 }
 
                 function stackSuccessHandler(result) {
