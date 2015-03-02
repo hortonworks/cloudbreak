@@ -41,6 +41,22 @@ public class StackJsonValidator implements ConstraintValidator<ValidStackRequest
                 return false;
             }
         }
+        for (StackParam param : StackParam.values()) {
+            if (json.getParameters().keySet().contains(param.getName())) {
+                List<StackParam> paramByGroup = StackParam.getParamsByGroup(param.getGroup());
+                for (StackParam stackParam : paramByGroup) {
+                    if (json.getParameters().get(stackParam.getName()) == null) {
+                        context.buildConstraintViolationWithTemplate(
+                                String.format("The %s dependency is the %s field which is not represented in the json",
+                                        param.getName(), stackParam.getName()))
+                                .addPropertyNode("parameters")
+                                .addBeanNode().inIterable().atKey(param.getName())
+                                .addConstraintViolation();
+                        return false;
+                    }
+                }
+            }
+        }
         Map<String, Object> params = new HashMap<>();
         params.putAll(json.getParameters());
         if (!regexValidator.validate(params, context, stackParams)) {
