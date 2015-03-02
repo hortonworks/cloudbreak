@@ -154,7 +154,7 @@ public class Stack implements ProvisionEntity {
     @SequenceGenerator(name = "stack_generator", sequenceName = "stack_table")
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String name;
 
     private String owner;
