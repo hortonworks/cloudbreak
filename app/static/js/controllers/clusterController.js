@@ -97,6 +97,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 return;
             }
             $scope.cluster.credentialId = $rootScope.activeCredential.id;
+            $scope.prepareParameters($scope.cluster);
             UluwatuCluster.save($scope.cluster, function (result) {
                 var nodeCount = 0;
                 angular.forEach(result.instanceGroups, function(group) {
@@ -123,6 +124,14 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             });
         }
 
+        $scope.prepareParameters = function (cluster) {
+            for (var item in cluster.parameters) {
+                if (cluster.parameters[item] === "" || cluster.parameters[item] === undefined) {
+                  delete cluster.parameters[item];
+                }
+            }
+        }
+
         $scope.deleteCluster = function (cluster) {
             UluwatuCluster.delete(cluster, function (result) {
                 var actCluster = $filter('filter')($rootScope.clusters, { id: cluster.id }, true)[0];
@@ -132,6 +141,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.showError(failure, $rootScope.error_msg.cluster_delete_failed);
             });
         }
+
         $scope.changeActiveCluster = function (clusterId) {
             $rootScope.activeCluster = $filter('filter')($rootScope.clusters, { id: clusterId })[0];
             $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, { id: $rootScope.activeCluster.blueprintId})[0];
@@ -263,6 +273,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 userName: "admin",
                 onFailureAction: "ROLLBACK",
                 bestEffort: "BEST_EFFORT",
+                parameters: {},
                 failurePolicy: {
                   adjustmentType: "BEST_EFFORT",
                 }
