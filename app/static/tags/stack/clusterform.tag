@@ -153,7 +153,7 @@
                                   <div class="form-group">
                                       <label class="col-sm-3 control-label" for="vpcId">Vpc Id</label>
                                       <div class="col-sm-9">
-                                        <input type="text" name="vpcId" class="form-control" id="vpcId" ng-model="cluster.parameters.vpcId" placeholder="vpc-abcd1234" ng-pattern="vpc-[a-z0-9]{8}" ng-minlength="12" ng-maxlength="12">
+                                        <input type="text" name="vpcId" class="form-control" id="vpcId" ng-model="cluster.parameters.vpcId" placeholder="vpc-abcd1234" ng-pattern="/vpc-[a-z0-9]{8}/" ng-minlength="12" ng-maxlength="12">
                                         <div class="help-block" ng-show="clusterCreationForm.vpcId.$dirty && clusterCreationForm.vpcId.$invalid">
                                           <i class="fa fa-warning"></i>Invalid Vpc id (It has to match for this pattern vpc-abcd1234)
                                         </div>
@@ -162,7 +162,7 @@
                                   <div class="form-group">
                                       <label class="col-sm-3 control-label" for="internetGatewayId">Internet Gateway Id</label>
                                       <div class="col-sm-9">
-                                        <input type="text" name="internetGatewayId" class="form-control" id="internetGatewayId" ng-model="cluster.parameters.internetGatewayId" placeholder="igw-abcd1234" ng-pattern="igw-[a-z0-9]{8}" ng-minlength="12" ng-maxlength="12">
+                                        <input type="text" name="internetGatewayId" class="form-control" id="internetGatewayId" ng-model="cluster.parameters.internetGatewayId" placeholder="igw-abcd1234" ng-pattern="/igw-[a-z0-9]{8}/" ng-minlength="12" ng-maxlength="12">
                                         <div class="help-block" ng-show="clusterCreationForm.internetGatewayId.$dirty && clusterCreationForm.internetGatewayId.$invalid">
                                           <i class="fa fa-warning"></i>Invalid Internet grateway id (It has to match for this pattern igw-abcd1234)
                                         </div>

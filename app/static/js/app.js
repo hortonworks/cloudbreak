@@ -80,13 +80,10 @@ cloudbreakApp.config([ '$routeProvider', '$locationProvider', function($routePro
           blockUIConfig.requestFilter = function(config) {
             var block = false
             if (config.url.match(/^(.*)templates($|\/).*/) || config.url.match(/^(.*)blueprints($|\/).*/)
-            || config.url.match(/^(.*)credentials($|\/).*/) || config.url.match(/^periscope\/clusters($|\/).*/)
-            || (config.url.match(/^stacks\/(\d+)\/cluster($|\/).*/) && config.method == 'POST')){
+            || config.url.match(/^(.*)credentials($|\/).*/) || config.url.match(/^(.*)users($|\?).*/)
+            || config.url.match(/^(.*)permission($|\?).*/) || config.url.match(/^stacks\/(\d+)\/cluster($|\/).*/)
+            || config.url.match(/^periscope\/clusters($|\/).*/) || config.url.match(/^(.*)usages($|\?).*/)){
                 block = true
-            } else if (config.url.match(/^(.*)usages($|\?).*/) && config.method == 'GET') {
-                block = true;
-            } else if (config.url.match(/^(.*)users($|\?).*/) || config.url.match(/^(.*)permission($|\?).*/)){
-                block = true;
             }
             if (!block) {
                 return block

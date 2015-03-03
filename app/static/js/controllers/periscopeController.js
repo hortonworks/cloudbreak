@@ -121,7 +121,6 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
         }
 
         function createAlarmSuccessHandler(success) {
-          console.log(success)
           $scope.alarms.push(success);
           $scope.metricBasedAlarmForm.$setPristine();
           $scope.timeBasedAlarmForm.$setPristine();
