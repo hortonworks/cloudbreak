@@ -164,6 +164,9 @@ public class AmbariClusterService implements ClusterService {
     public void updateStatus(Long stackId, StatusRequest statusRequest) {
         Stack stack = stackRepository.findOne(stackId);
         Cluster cluster = stack.getCluster();
+        if (cluster == null) {
+            throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stackId));
+        }
         MDCBuilder.buildMdcContext(stack.getCluster());
         long clusterId = cluster.getId();
         Status clusterStatus = cluster.getStatus();

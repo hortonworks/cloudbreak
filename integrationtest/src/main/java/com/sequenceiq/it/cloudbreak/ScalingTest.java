@@ -30,6 +30,9 @@ public class ScalingTest extends AbstractCloudbreakIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScalingTest.class);
 
     @Autowired
+    private Template instancegroupAdjustmentTemplate;
+
+    @Autowired
     private Template hostgroupAdjustmentTemplate;
 
     @BeforeMethod
@@ -38,30 +41,33 @@ public class ScalingTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    @Parameters({ "hostGroup", "scalingAdjustment" })
-    public void testScaling(@Optional("slave_1") String hostGroup, @Optional("1") int scalingAdjustment) {
+    @Parameters({ "instanceGroup", "scalingAdjustment" })
+    public void testScaling(@Optional("slave_1") String instanceGroup, @Optional("1") int scalingAdjustment) {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
-        Map<String, Object> templateModel = new HashMap<>();
-        templateModel.put("hostGroup", hostGroup);
-        templateModel.put("scalingAdjustment", String.valueOf(scalingAdjustment));
+        Map<String, Object> stackTemplateModel = new HashMap<>();
+        stackTemplateModel.put("instanceGroup", instanceGroup);
+        stackTemplateModel.put("scalingAdjustment", String.valueOf(scalingAdjustment));
+        Map<String, Object> clusterTemplateModel = new HashMap<>();
+        clusterTemplateModel.put("hostGroup", instanceGroup);
+        clusterTemplateModel.put("scalingAdjustment", String.valueOf(scalingAdjustment));
         RequestSpecification stackRequest = RestUtil.entityPathRequest(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER),
                 itContext.getContextParam(IntegrationTestContext.AUTH_TOKEN), "stackId", itContext.getContextParam(CloudbreakITContextConstants.STACK_ID)).
-                body(FreeMarkerUtil.renderTemplate(hostgroupAdjustmentTemplate, templateModel)).basePath("/stacks/{stackId}").log().all();
-        RequestSpecification hostGroupRequest = RestUtil.entityPathRequest(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER),
+                body(FreeMarkerUtil.renderTemplate(instancegroupAdjustmentTemplate, stackTemplateModel)).basePath("/stacks/{stackId}").log().all();
+        RequestSpecification clusterRequest = RestUtil.entityPathRequest(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER),
                 itContext.getContextParam(IntegrationTestContext.AUTH_TOKEN), "stackId", itContext.getContextParam(CloudbreakITContextConstants.STACK_ID)).
-                body(FreeMarkerUtil.renderTemplate(hostgroupAdjustmentTemplate, templateModel)).basePath("/stacks/{stackId}/cluster").log().all();
+                body(FreeMarkerUtil.renderTemplate(hostgroupAdjustmentTemplate, clusterTemplateModel)).basePath("/stacks/{stackId}/cluster").log().all();
         // WHEN
         if (scalingAdjustment < 0) {
-            putRequest(hostGroupRequest, stackId, itContext);
+            putRequest(clusterRequest, stackId, itContext);
             putRequest(stackRequest, stackId, itContext);
         } else {
             putRequest(stackRequest, stackId, itContext);
-            putRequest(hostGroupRequest, stackId, itContext);
+            putRequest(clusterRequest, stackId, itContext);
         }
         // THEN
-        checkCluster(stackId, hostGroup, itContext);
+        checkCluster(stackId, itContext);
     }
 
     private void putRequest(RequestSpecification request, String stackId, IntegrationTestContext itContext) {
@@ -70,7 +76,7 @@ public class ScalingTest extends AbstractCloudbreakIntegrationTest {
         CloudbreakUtil.waitForStackStatus(itContext, stackId, "AVAILABLE");
     }
 
-    protected void checkCluster(String stackId, String hostGroup, IntegrationTestContext itContext) {
+    protected void checkCluster(String stackId, IntegrationTestContext itContext) {
         Response stackResponse = RestUtil.getRequest(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER),
                 itContext.getContextParam(IntegrationTestContext.AUTH_TOKEN)).pathParam("stackId", stackId)
                 .get("/stacks/{stackId}");

@@ -42,17 +42,21 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     }
 
     @BeforeSuite(dependsOnMethods = "initContext")
-    @Parameters({ "cloudbreakServer", "credentialName", "instanceGroups", "blueprintName", "stackName" })
+    @Parameters({ "cloudbreakServer", "credentialName", "instanceGroups", "hostGroups", "blueprintName", "stackName" })
     public void initCloudbreakSuite(@Optional("") String cloudbreakServer, @Optional("") String credentialName,
-            @Optional("") String instanceGroups, @Optional("") String blueprintName, @Optional("") String stackName) {
+            @Optional("") String instanceGroups, @Optional("") String hostGroups, @Optional("") String blueprintName, @Optional("") String stackName) {
         cloudbreakServer = StringUtils.hasLength(cloudbreakServer) ? cloudbreakServer : defaultCloudbreakServer;
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER, cloudbreakServer);
         putResourceToContextIfExist(CloudbreakITContextConstants.BLUEPRINT_ID, "/account/blueprints/{name}", blueprintName);
         putResourceToContextIfExist(CloudbreakITContextConstants.CREDENTIAL_ID, "/account/credentials/{name}", credentialName);
         putResourceToContextIfExist(CloudbreakITContextConstants.STACK_ID, "/account/stacks/{name}", stackName);
         if (StringUtils.hasLength(instanceGroups)) {
-            List<String[]> instanceGroupStrings = templateAdditionParser.parseInstanceGroups(instanceGroups);
+            List<String[]> instanceGroupStrings = templateAdditionParser.parseCommaSeparatedRows(instanceGroups);
             itContext.putContextParam(CloudbreakITContextConstants.TEMPLATE_ID, createInstanceGroups(instanceGroupStrings));
+        }
+        if (StringUtils.hasLength(hostGroups)) {
+            List<String[]> hostGroupStrings = templateAdditionParser.parseCommaSeparatedRows(hostGroups);
+            itContext.putContextParam(CloudbreakITContextConstants.HOSTGROUP_ID, createHostGroups(hostGroupStrings));
         }
     }
 
@@ -63,6 +67,14 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
                     Integer.parseInt(instanceGroupStr[2])));
         }
         return instanceGroups;
+    }
+
+    private List<HostGroup> createHostGroups(List<String[]> hostGroupStrings) {
+        List<HostGroup> hostGroups = new ArrayList<>();
+        for (String[] hostGroupStr : hostGroupStrings) {
+            hostGroups.add(new HostGroup(hostGroupStr[0], hostGroupStr[1]));
+        }
+        return hostGroups;
     }
 
     private void putResourceToContextIfExist(String contextId, String resourcePath, String resourceName) {

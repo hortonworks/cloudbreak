@@ -1,0 +1,6 @@
+{
+   "instanceGroupAdjustment":{
+      "instanceGroup":"${instanceGroup}",
+      "scalingAdjustment":"${scalingAdjustment}"
+   }
+}

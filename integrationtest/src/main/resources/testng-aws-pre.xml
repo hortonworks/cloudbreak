@@ -13,6 +13,7 @@
     <!-- with existing cloud provider templates
     <parameter name="instanceGroups" value="it-aws-master,master,1;it-aws-slave,slave_1,3" />
     -->
+    <parameter name="hostGroups" value="master,master;slave_1,slave_1" />
     <test name="init">
         <classes>
             <class name="com.sequenceiq.it.TestSuiteInitializer" />

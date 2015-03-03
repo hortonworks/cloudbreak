@@ -61,6 +61,11 @@ public class FreeMarkerConfig {
     }
 
     @Bean
+    public Template instancegroupAdjustmentTemplate() throws IOException {
+        return freeConfig.getTemplate("requests/instancegroup.adjustment.json.fm", "UTF-8");
+    }
+
+    @Bean
     public Template statusUpdateTemplate() throws IOException {
         return freeConfig.getTemplate("requests/status.update.json.fm", "UTF-8");
     }

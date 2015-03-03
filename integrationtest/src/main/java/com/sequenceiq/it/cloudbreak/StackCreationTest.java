@@ -37,7 +37,7 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
     @Test
     @Parameters({ "stackName", "region", "ambariUser", "ambariPassword", "onFailureAction", "threshold", "adjustmentType" })
     public void testStackCreation(@Optional("testing1") String stackName, @Optional("EUROPE_WEST1_B") String region, @Optional("admin") String ambariUser,
-            @Optional("admin") String ambariPassword, @Optional("DO_NOTHING") String onFailureAction, @Optional("1") Long threshold,
+            @Optional("admin") String ambariPassword, @Optional("DO_NOTHING") String onFailureAction, @Optional("4") Long threshold,
             @Optional("EXACT") String adjustmentType) {
         // GIVEN
         IntegrationTestContext itContext = getItContext();

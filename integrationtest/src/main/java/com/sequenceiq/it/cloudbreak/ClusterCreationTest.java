@@ -48,6 +48,7 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         templateModel.put("clusterName", clusterName);
         templateModel.put("emailNeeded", String.valueOf(emailNeeded));
         templateModel.put("blueprintId", itContext.getContextParam(CloudbreakITContextConstants.BLUEPRINT_ID));
+        templateModel.put("hostGroups", itContext.getContextParam(CloudbreakITContextConstants.HOSTGROUP_ID, List.class));
         // WHEN
         Response resourceCreationResponse = RestUtil.entityPathRequest(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER),
                 itContext.getContextParam(IntegrationTestContext.AUTH_TOKEN), "stackId", itContext.getContextParam(CloudbreakITContextConstants.STACK_ID))
