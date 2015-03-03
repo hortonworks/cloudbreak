@@ -1,22 +1,22 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
+import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 
 /**
  * Contract for stack provisioning on supported cloud providers.
  */
 public interface FlowFacade {
 
-    ProvisioningContext setup(ProvisioningContext provisioningContext) throws CloudbreakException;
+    FlowContext setup(FlowContext flowContext) throws CloudbreakException;
 
-    ProvisioningContext provision(ProvisioningContext provisioningContext) throws CloudbreakException;
+    FlowContext provision(FlowContext flowContext) throws CloudbreakException;
 
-    ProvisioningContext setupMetadata(ProvisioningContext provisioningContext) throws CloudbreakException;
+    FlowContext setupMetadata(FlowContext flowContext) throws CloudbreakException;
 
-    ProvisioningContext allocateAmbariRoles(ProvisioningContext provisioningContext) throws CloudbreakException;
+    FlowContext allocateAmbariRoles(FlowContext flowContext) throws CloudbreakException;
 
-    ProvisioningContext startAmbari(ProvisioningContext provisioningContext) throws CloudbreakException;
+    FlowContext startAmbari(FlowContext flowContext) throws CloudbreakException;
 
-    ProvisioningContext buildAmbariCluster(ProvisioningContext provisioningContext) throws CloudbreakException;
+    FlowContext buildAmbariCluster(FlowContext flowContext) throws CloudbreakException;
 }
