@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.flow.ProvisioningContextFactory;
+import com.sequenceiq.cloudbreak.core.flow.FlowContextFactory;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -44,36 +44,36 @@ public class SimpleFlowFacade implements FlowFacade {
     @Override
     public FlowContext setup(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Provisioning setup. Context: {}", context);
-        ProvisionSetupComplete flowContext = (ProvisionSetupComplete) context;
+        ProvisioningContext provisioningContext = (ProvisioningContext) context;
+        ProvisionSetupComplete setupComplete = null;
         try {
-            flowContext = (ProvisionSetupComplete) provisionSetups.get(flowContext.getCloudPlatform())
-                    .setupProvisioning(stackService.getById(flowContext.getStackId()));
+            setupComplete = (ProvisionSetupComplete) provisionSetups.get(provisioningContext.getCloudPlatform())
+                    .setupProvisioning(stackService.getById(provisioningContext.getStackId()));
             LOGGER.debug("Provisioning setup DONE.");
         } catch (Exception e) {
             LOGGER.error("Exception during provisioning setup: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
-        return ProvisioningContextFactory.createProvisioningContext(flowContext.getCloudPlatform(), flowContext.getStackId(),
-                flowContext.getSetupProperties(), flowContext.getUserDataParams());
+        return FlowContextFactory.createProvisioningContext(setupComplete.getCloudPlatform(), setupComplete.getStackId(),
+                setupComplete.getSetupProperties(), setupComplete.getUserDataParams());
     }
 
     @Override
     public FlowContext provision(FlowContext provisioningContext) throws CloudbreakException {
         LOGGER.debug("Provisioning. Context: {}", provisioningContext);
-        ProvisionComplete provisionResult = null;
+
         ProvisioningContext context = null;
 
         try {
             context = (ProvisioningContext) provisioningContext;
-            provisionResult = provisioningService.buildStack(context.getCloudPlatform(), context.getStackId(),
+            ProvisionComplete provisionResult = provisionResult = provisioningService.buildStack(context.getCloudPlatform(), context.getStackId(),
                     context.getSetupProperties(), context.getUserDataParams());
+            return context;
         } catch (Exception e) {
             //LOGGER.info("Publishing {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT);
             LOGGER.error("Exception during provisioning setup: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
-        //todo change the return value!
-        return context;
     }
 
     @Override
@@ -89,7 +89,7 @@ public class SimpleFlowFacade implements FlowFacade {
             LOGGER.error("Exception during metadata setup: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
-        return ProvisioningContextFactory.createProvisioningSetupContext(metadataSetupComplete.getCloudPlatform(), metadataSetupComplete.getStackId());
+        return FlowContextFactory.createProvisioningSetupContext(metadataSetupComplete.getCloudPlatform(), metadataSetupComplete.getStackId());
     }
 
     @Override

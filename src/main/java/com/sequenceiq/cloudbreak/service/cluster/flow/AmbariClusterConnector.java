@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.core.flow.ProvisioningContextFactory;
+import com.sequenceiq.cloudbreak.core.flow.FlowContextFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
@@ -142,7 +142,7 @@ public class AmbariClusterConnector {
                 }
             }
             if (isSuccess(pollingResult)) {
-                retVal = ProvisioningContextFactory.createClusterCreateSuccessContext(cluster.getId(), new Date().getTime(), stack.getAmbariIp());
+                retVal = FlowContextFactory.createClusterCreateSuccessContext(cluster.getId(), new Date().getTime(), stack.getAmbariIp());
             }
         }
         return retVal;
@@ -481,14 +481,14 @@ public class AmbariClusterConnector {
         MDCBuilder.buildMdcContext(cluster);
         LOGGER.info("Publishing {} event", ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT);
         //reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT, Event.wrap(new UpdateAmbariHostsSuccess(cluster.getId(), hostNames, decommission)));
-        return ProvisioningContextFactory.createAmbariHostsUpdatedsSuccessContext(cluster.getId(), hostNames, decommission);
+        return FlowContextFactory.createAmbariHostsUpdatedsSuccessContext(cluster.getId(), hostNames, decommission);
     }
 
     private Object updateHostFailed(Cluster cluster, String message, boolean addingNodes) {
         MDCBuilder.buildMdcContext(cluster);
         LOGGER.info("Publishing {} event", ReactorConfig.UPDATE_AMBARI_HOSTS_FAILED_EVENT);
         //reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_FAILED_EVENT, Event.wrap(new UpdateAmbariHostsFailure(cluster.getId(), message, addingNodes)));
-        return ProvisioningContextFactory.createAmbariHostsUpdatedsFailureContext(cluster.getId(), message, addingNodes);
+        return FlowContextFactory.createAmbariHostsUpdatedsFailureContext(cluster.getId(), message, addingNodes);
     }
 
 }

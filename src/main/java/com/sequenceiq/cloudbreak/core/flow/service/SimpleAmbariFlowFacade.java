@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.flow.ProvisioningContextFactory;
+import com.sequenceiq.cloudbreak.core.flow.FlowContextFactory;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -62,7 +62,7 @@ public class SimpleAmbariFlowFacade implements AmbariFlowFacade {
         ProvisioningContext provisioningContext = (ProvisioningContext) context;
         AmbariRoleAllocationComplete ambariRoleAllocationComplete = ambariRoleAllocator
                 .allocateRoles(provisioningContext.getStackId(), provisioningContext.getCoreInstanceMetaData());
-        return ProvisioningContextFactory.createAmbariStartContext(ambariRoleAllocationComplete.getStack().getId(), ambariRoleAllocationComplete.getAmbariIp());
+        return FlowContextFactory.createAmbariStartContext(ambariRoleAllocationComplete.getStack().getId(), ambariRoleAllocationComplete.getAmbariIp());
     }
 
     @Override
