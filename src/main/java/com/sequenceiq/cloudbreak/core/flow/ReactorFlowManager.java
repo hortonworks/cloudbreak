@@ -54,7 +54,7 @@ public class ReactorFlowManager implements FlowManager {
     @Override
     public void triggerProvisioning(Object object) {
         ProvisionRequest provisionRequest = (ProvisionRequest) object;
-        ProvisioningContext context = ProvisioningContextFactory.createProvisioningSetupContext(provisionRequest.getCloudPlatform(),
+        ProvisioningContext context = FlowContextFactory.createProvisioningSetupContext(provisionRequest.getCloudPlatform(),
                 provisionRequest.getStackId());
         reactor.notify(FlowInitializer.Phases.PROVISIONING_SETUP.name(), eventFactory.createEvent(context, FlowInitializer.Phases.PROVISIONING_SETUP.name()));
     }

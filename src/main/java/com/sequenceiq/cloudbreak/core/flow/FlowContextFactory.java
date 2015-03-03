@@ -10,10 +10,10 @@ import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 
 // todo make this class a builder
-public class ProvisioningContextFactory {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProvisioningContextFactory.class);
+public class FlowContextFactory {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowContextFactory.class);
 
-    private ProvisioningContextFactory() {
+    private FlowContextFactory() {
     }
 
     public static final ProvisioningContext createContext() {
