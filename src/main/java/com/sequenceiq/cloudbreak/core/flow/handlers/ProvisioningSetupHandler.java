@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
-import com.sequenceiq.cloudbreak.core.flow.ProvisioningFacade;
+import com.sequenceiq.cloudbreak.core.flow.service.FlowFacade;
 
 import reactor.event.Event;
 
@@ -18,13 +18,13 @@ public class ProvisioningSetupHandler extends AbstractFlowHandler<ProvisioningCo
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisioningSetupHandler.class);
 
     @Autowired
-    private ProvisioningFacade provisioningFacade;
+    private FlowFacade flowFacade;
 
     @Override
     protected Object execute(Event<ProvisioningContext> event) throws CloudbreakException {
         LOGGER.info("Executing provisioning setup logic. Event: {}", event);
         ProvisioningContext provisioningContext = event.getData();
-        provisioningContext = provisioningFacade.setup(provisioningContext);
+        provisioningContext = flowFacade.setup(provisioningContext);
         return provisioningContext;
     }
 

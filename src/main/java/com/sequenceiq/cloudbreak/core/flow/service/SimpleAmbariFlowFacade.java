@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow;
+package com.sequenceiq.cloudbreak.core.flow.service;
 
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.flow.ProvisioningContextFactory;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;

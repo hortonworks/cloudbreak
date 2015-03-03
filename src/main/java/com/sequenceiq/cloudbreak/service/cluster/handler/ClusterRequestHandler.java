@@ -28,18 +28,22 @@ public class ClusterRequestHandler implements Consumer<Event<Stack>> {
         Stack stack = event.getData();
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", eventKey);
-        if (ReactorConfig.AMBARI_STARTED_EVENT.equals(eventKey)) {
-            if (stack.getCluster() != null && stack.getCluster().getStatus().equals(Status.REQUESTED)) {
-                ambariClusterConnector.buildAmbariCluster(stack);
-            } else {
-                LOGGER.info("Ambari has started but there were no cluster request to this stack yet. Won't install cluster now.");
+        try {
+            if (ReactorConfig.AMBARI_STARTED_EVENT.equals(eventKey)) {
+                if (stack.getCluster() != null && stack.getCluster().getStatus().equals(Status.REQUESTED)) {
+                    ambariClusterConnector.buildAmbariCluster(stack);
+                } else {
+                    LOGGER.info("Ambari has started but there were no cluster request to this stack yet. Won't install cluster now.");
+                }
+            } else if (ReactorConfig.CLUSTER_REQUESTED_EVENT.equals(eventKey)) {
+                if (stack.getStatus().equals(Status.AVAILABLE)) {
+                    ambariClusterConnector.buildAmbariCluster(stack);
+                } else {
+                    LOGGER.info("Cluster install requested but the stack is not completed yet. Installation will start after the stack is ready.");
+                }
             }
-        } else if (ReactorConfig.CLUSTER_REQUESTED_EVENT.equals(eventKey)) {
-            if (stack.getStatus().equals(Status.AVAILABLE)) {
-                ambariClusterConnector.buildAmbariCluster(stack);
-            } else {
-                LOGGER.info("Cluster install requested but the stack is not completed yet. Installation will start after the stack is ready.");
-            }
+        } catch (Exception e) {
+            throw new IllegalStateException("Cluster creation failed!");
         }
     }
 }

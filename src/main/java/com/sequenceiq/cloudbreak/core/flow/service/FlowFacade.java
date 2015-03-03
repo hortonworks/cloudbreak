@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow;
+package com.sequenceiq.cloudbreak.core.flow.service;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
@@ -6,7 +6,7 @@ import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 /**
  * Contract for stack provisioning on supported cloud providers.
  */
-public interface ProvisioningFacade {
+public interface FlowFacade {
 
     ProvisioningContext setup(ProvisioningContext provisioningContext) throws CloudbreakException;
 

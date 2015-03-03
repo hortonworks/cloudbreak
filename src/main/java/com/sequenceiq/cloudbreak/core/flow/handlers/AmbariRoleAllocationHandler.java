@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
-import com.sequenceiq.cloudbreak.core.flow.ProvisioningFacade;
+import com.sequenceiq.cloudbreak.core.flow.service.FlowFacade;
 
 import reactor.event.Event;
 
@@ -18,12 +18,12 @@ public class AmbariRoleAllocationHandler extends AbstractFlowHandler<Provisionin
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariRoleAllocationHandler.class);
 
     @Autowired
-    private ProvisioningFacade provisioningFacade;
+    private FlowFacade flowFacade;
 
     @Override
     protected Object execute(Event<ProvisioningContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
-        ProvisioningContext provisioningContext = provisioningFacade.allocateAmbariRoles(event.getData());
+        ProvisioningContext provisioningContext = flowFacade.allocateAmbariRoles(event.getData());
         LOGGER.info("Role allocated. Context: {}", provisioningContext);
         return provisioningContext;
     }

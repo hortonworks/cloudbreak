@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow;
+package com.sequenceiq.cloudbreak.core.flow.service;
 
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 

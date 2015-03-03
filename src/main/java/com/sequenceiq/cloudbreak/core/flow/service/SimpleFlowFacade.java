@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow;
+package com.sequenceiq.cloudbreak.core.flow.service;
 
 import java.util.Map;
 
@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.flow.ProvisioningContextFactory;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -21,8 +22,8 @@ import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisionContext;
 
 @Service
-public class SimpleProvisioningFacade implements ProvisioningFacade {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleProvisioningFacade.class);
+public class SimpleFlowFacade implements FlowFacade {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleFlowFacade.class);
 
     @Resource
     private Map<CloudPlatform, ProvisionSetup> provisioningSetupServices;
