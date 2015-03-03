@@ -4,14 +4,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.annotation.Resource;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.sequenceiq.cloudbreak.core.flow.service.AmbariFlowFacade;
+import com.sequenceiq.cloudbreak.core.flow.service.SimpleAmbariFlowFacade;
 
 @Configuration
 public class FlowConfig {
 
-    @Autowired
+    @Resource
     private List<FlowHandler> flowHandlers;
 
     @Bean
@@ -21,5 +25,10 @@ public class FlowConfig {
             transitions.put(handler.getClass(), handler);
         }
         return transitions;
+    }
+
+    @Bean
+    public AmbariFlowFacade ambariFlowFacade() {
+        return new SimpleAmbariFlowFacade();
     }
 }
