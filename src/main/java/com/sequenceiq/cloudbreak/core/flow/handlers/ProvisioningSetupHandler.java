@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
+import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.service.FlowFacade;
 
@@ -23,7 +24,7 @@ public class ProvisioningSetupHandler extends AbstractFlowHandler<ProvisioningCo
     @Override
     protected Object execute(Event<ProvisioningContext> event) throws CloudbreakException {
         LOGGER.info("Executing provisioning setup logic. Event: {}", event);
-        ProvisioningContext provisioningContext = event.getData();
+        FlowContext provisioningContext = event.getData();
         provisioningContext = flowFacade.setup(provisioningContext);
         return provisioningContext;
     }

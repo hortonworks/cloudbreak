@@ -23,7 +23,7 @@ public class MetadataSetupHandler extends AbstractFlowHandler<ProvisioningContex
     @Override
     protected Object execute(Event<ProvisioningContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
-        ProvisioningContext provisioningContext = flowFacade.setupMetadata(event.getData());
+        ProvisioningContext provisioningContext = (ProvisioningContext) flowFacade.setupMetadata(event.getData());
         LOGGER.info("Metadata set up. Context: {}", provisioningContext);
         return provisioningContext;
     }

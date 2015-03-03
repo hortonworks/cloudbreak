@@ -23,7 +23,7 @@ public class ClusterCreationHandler extends AbstractFlowHandler<ProvisioningCont
     @Override
     protected Object execute(Event<ProvisioningContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
-        ProvisioningContext provisioningContext = flowFacade.buildAmbariCluster(event.getData());
+        ProvisioningContext provisioningContext = (ProvisioningContext) flowFacade.buildAmbariCluster(event.getData());
         LOGGER.info("Cluster created. Context: {}", provisioningContext);
         return provisioningContext;
     }

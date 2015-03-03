@@ -32,12 +32,16 @@ public class UpdateAmbariHostsRequestHandler implements Consumer<Event<UpdateAmb
         UpdateAmbariHostsRequest request = event.getData();
         Stack stack = stackRepository.findById(request.getStackId());
         MDCBuilder.buildMdcContext(stack);
-        LOGGER.info("Accepted {} event.", ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT);
-        HostGroupAdjustmentJson adjustment = request.getHostGroupAdjustment();
-        if (request.isDecommission()) {
-            ambariClusterConnector.decommissionAmbariNodes(request.getStackId(), adjustment, request.getDecommissionCandidates());
-        } else {
-            ambariClusterConnector.installAmbariNode(request.getStackId(), adjustment);
+        try {
+            LOGGER.info("Accepted {} event.", ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT);
+            HostGroupAdjustmentJson adjustment = request.getHostGroupAdjustment();
+            if (request.isDecommission()) {
+                ambariClusterConnector.decommissionAmbariNodes(request.getStackId(), adjustment, request.getDecommissionCandidates());
+            } else {
+                ambariClusterConnector.installAmbariNode(request.getStackId(), adjustment);
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException("Update ambari hosts failed!");
         }
     }
 }
