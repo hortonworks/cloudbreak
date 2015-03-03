@@ -140,7 +140,8 @@ public class StackController {
             stackService.updateNodeCount(id, updateRequest.getInstanceGroupAdjustment());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            stackService.updateAllowedSubnets(id, new ArrayList<>(subnetConverter.convertAllJsonToEntity(updateRequest.getAllowedSubnets())));
+            stackService.updateAllowedSubnets(id,
+                    new ArrayList<>(subnetConverter.convertAllJsonToEntity(updateRequest.getAllowedSubnets(), stackService.get(id))));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
