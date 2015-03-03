@@ -200,12 +200,12 @@ public class RetryingStackUpdater {
         }
     }
 
-    public Stack updateNodeCount(Long stackId, Integer nodeCount, String hostGroup) {
+    public Stack updateNodeCount(Long stackId, Integer nodeCount, String instanceGroup) {
         Stack stack = stackRepository.findById(stackId);
         MDCBuilder.buildMdcContext(stack);
         int attempt = 1;
         try {
-            return doUpdateNodeCount(stackId, nodeCount, hostGroup);
+            return doUpdateNodeCount(stackId, nodeCount, instanceGroup);
         } catch (OptimisticLockException | OptimisticLockingFailureException e) {
             if (attempt <= MAX_RETRIES) {
                 LOGGER.info("Failed to update stack while trying to set 'nodecount'. [attempt: '{}', Cause: {}]. Trying to save it again.",
@@ -281,10 +281,10 @@ public class RetryingStackUpdater {
         return stack;
     }
 
-    private Stack doUpdateNodeCount(Long stackId, Integer nodeCount, String hostGroup) {
+    private Stack doUpdateNodeCount(Long stackId, Integer nodeCount, String instanceGroup) {
         Stack stack = stackRepository.findById(stackId);
         MDCBuilder.buildMdcContext(stack);
-        stack.getInstanceGroupByInstanceGroupName(hostGroup).setNodeCount(nodeCount);
+        stack.getInstanceGroupByInstanceGroupName(instanceGroup).setNodeCount(nodeCount);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack: [nodeCount: '{}'].", nodeCount);
         return stack;

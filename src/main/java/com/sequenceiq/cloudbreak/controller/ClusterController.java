@@ -83,13 +83,15 @@ public class ClusterController {
         if (updateJson.getStatus() != null) {
             clusterService.updateStatus(stackId, updateJson.getStatus());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else if (updateJson.getHostGroupAdjustment() != null) {
+            if (!stackStatus.equals(Status.AVAILABLE)) {
+                throw new BadRequestException(String.format(
+                        "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
+                        stackStatus));
+            }
+            clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        if (!stackStatus.equals(Status.AVAILABLE)) {
-            throw new BadRequestException(String.format(
-                    "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
-                    stackStatus));
-        }
-        clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

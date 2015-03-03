@@ -116,7 +116,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
             }
         }
         if (stack.isCloudPlatformUsedWithTemplate()) {
-            cloudPlatformConnectors.get(stack.cloudPlatform()).removeInstances(stack, instanceIds, request.getHostGroup());
+            cloudPlatformConnectors.get(stack.cloudPlatform()).removeInstances(stack, instanceIds, request.getInstanceGroup());
         } else {
             ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(stack.cloudPlatform());
             final DeleteContextObject deleteContextObject = resourceBuilderInit.decommissionInit(stack, instanceIds);
@@ -148,7 +148,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                 LOGGER.info("Terminated instances in stack: '{}'", instanceIds);
                 LOGGER.info("Publishing {} event.", ReactorConfig.REMOVE_INSTANCES_COMPLETE_EVENT);
                 reactor.notify(ReactorConfig.REMOVE_INSTANCES_COMPLETE_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true,
-                        instanceIds, request.getHostGroup())));
+                        instanceIds, request.getInstanceGroup())));
             }
         }
     }
@@ -156,7 +156,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
     private void upScaleStack(UpdateInstancesRequest request, Stack stack) throws Exception {
         String userDataScript = userDataBuilder.build(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>());
         if (stack.isCloudPlatformUsedWithTemplate()) {
-            cloudPlatformConnectors.get(stack.cloudPlatform()).addInstances(stack, userDataScript, request.getScalingAdjustment(), request.getHostGroup());
+            cloudPlatformConnectors.get(stack.cloudPlatform()).addInstances(stack, userDataScript, request.getScalingAdjustment(), request.getInstanceGroup());
         } else {
             ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(stack.cloudPlatform());
             final ProvisionContextObject provisionContextObject = resourceBuilderInit.provisionInit(stack, userDataScript);
@@ -174,7 +174,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                                 .withIndex(index)
                                 .withProvisionContextObject(provisionContextObject)
                                 .withInstanceResourceBuilders(instanceResourceBuilders)
-                                .withHostGroup(request.getHostGroup())
+                                .withInstanceGroup(request.getInstanceGroup())
                                 .build()
                 );
                 futures.add(submit);
@@ -192,7 +192,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                 LOGGER.info("Publishing {} event.", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT);
                 reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
                         Event.wrap(new AddInstancesComplete(stack.cloudPlatform(), stack.getId(),
-                                        collectResources(resourceRequestResults), request.getHostGroup())
+                                        collectResources(resourceRequestResults), request.getInstanceGroup())
                         )
                 );
             }

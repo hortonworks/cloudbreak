@@ -14,12 +14,12 @@ public class TemplateAdditionParser {
         return additions;
     }
 
-    public List<String[]> parseInstanceGroups(String instanceGroupsString) {
-        List<String[]> instanceGroups = new ArrayList<>();
-        String[] instanceGroupStrings = instanceGroupsString.split(";");
-        for (String instanceGroupString : instanceGroupStrings) {
-            instanceGroups.add(instanceGroupString.split(","));
+    public List<String[]> parseCommaSeparatedRows(String source) {
+        List<String[]> result = new ArrayList<>();
+        String[] rows = source.split(";");
+        for (String row : rows) {
+            result.add(row.split(","));
         }
-        return instanceGroups;
+        return result;
     }
 }

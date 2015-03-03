@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.validation.blueprint;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Set;
 
 import org.junit.Before;
@@ -19,6 +20,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -27,6 +29,7 @@ public class BlueprintValidatorTest {
     private static final String GROUP1 = "group1";
     private static final String GROUP2 = "group2";
     private static final String GROUP3 = "group3";
+    private static final String GROUP4 = "group4";
     private static final String COMPONENT1 = "comp1";
     private static final String COMPONENT2 = "comp2";
     private static final String COMPONENT3 = "comp3";
@@ -50,9 +53,10 @@ public class BlueprintValidatorTest {
         // GIVEN
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
+        Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
         BDDMockito.given(objectMapper.readTree(BDDMockito.anyString())).willThrow(new IOException());
         // WHEN
-        underTest.validateBlueprintForStack(blueprint, instanceGroups);
+        underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN throw exception
     }
 
@@ -61,10 +65,11 @@ public class BlueprintValidatorTest {
         // GIVEN
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
+        Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
         JsonNode blueprintJsonTree = createJsonTreeWithUnknownHostGroup();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         // WHEN
-        underTest.validateBlueprintForStack(blueprint, instanceGroups);
+        underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN throw exception
     }
 
@@ -73,10 +78,11 @@ public class BlueprintValidatorTest {
         // GIVEN
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
+        Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
         JsonNode blueprintJsonTree = createJsonTreeWithIllegalGroup();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         // WHEN
-        underTest.validateBlueprintForStack(blueprint, instanceGroups);
+        underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN throw exception
     }
 
@@ -85,10 +91,11 @@ public class BlueprintValidatorTest {
         // GIVEN
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
+        Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
         JsonNode blueprintJsonTree = createJsonTreeWithTooMuchGroup();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         // WHEN
-        underTest.validateBlueprintForStack(blueprint, instanceGroups);
+        underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN throw exception
     }
 
@@ -97,10 +104,11 @@ public class BlueprintValidatorTest {
         // GIVEN
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
+        Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
         JsonNode blueprintJsonTree = createJsonTreeWithNotEnoughGroup();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         // WHEN
-        underTest.validateBlueprintForStack(blueprint, instanceGroups);
+        underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN throw exception
     }
 
@@ -109,10 +117,11 @@ public class BlueprintValidatorTest {
         // GIVEN
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
+        Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
         JsonNode blueprintJsonTree = createJsonTreeWithComponentInMoreGroups();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         // WHEN
-        underTest.validateBlueprintForStack(blueprint, instanceGroups);
+        underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN throw exception
     }
 
@@ -121,10 +130,11 @@ public class BlueprintValidatorTest {
         // GIVEN
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
+        Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
         JsonNode blueprintJsonTree = createJsonTree();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         // WHEN
-        underTest.validateBlueprintForStack(blueprint, instanceGroups);
+        underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN doesn't throw exception
     }
 
@@ -133,10 +143,11 @@ public class BlueprintValidatorTest {
         // GIVEN
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
+        Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
         JsonNode blueprintJsonTree = createJsonTreeWithUnknownComponent();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         // WHEN
-        underTest.validateBlueprintForStack(blueprint, instanceGroups);
+        underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN doesn't throw exception
     }
 
@@ -168,6 +179,21 @@ public class BlueprintValidatorTest {
         return group;
     }
 
+    private Set<HostGroup> createHostGroups(Set<InstanceGroup> instanceGroups) {
+        Set<HostGroup> groups = Sets.newHashSet();
+        for (InstanceGroup instanceGroup : new ArrayList<InstanceGroup>(instanceGroups)) {
+            groups.add(createHostGroup(instanceGroup.getGroupName(), instanceGroup));
+        }
+        return groups;
+    }
+
+    private HostGroup createHostGroup(String groupName, InstanceGroup instanceGroup) {
+        HostGroup group = new HostGroup();
+        group.setName(groupName);
+        group.setInstanceGroup(instanceGroup);
+        return group;
+    }
+
     private JsonNode createJsonTreeWithUnknownHostGroup() {
         JsonNodeFactory jsonNodeFactory = JsonNodeFactory.instance;
         ObjectNode rootNode = jsonNodeFactory.objectNode();
@@ -194,7 +220,7 @@ public class BlueprintValidatorTest {
         addHostGroup(hostGroupsNode, GROUP1, COMPONENT2);
         addHostGroup(hostGroupsNode, GROUP2, COMPONENT1);
         addHostGroup(hostGroupsNode, GROUP3, COMPONENT3);
-        addHostGroup(hostGroupsNode, GROUP3, SLAVE_COMPONENT);
+        addHostGroup(hostGroupsNode, GROUP4, SLAVE_COMPONENT);
         return rootNode;
     }
 

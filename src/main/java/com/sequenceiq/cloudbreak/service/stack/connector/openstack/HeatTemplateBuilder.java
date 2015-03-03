@@ -49,17 +49,17 @@ public class HeatTemplateBuilder {
     }
 
     public String remove(Stack stack, String templatePath, String userData, Set<InstanceMetaData> instanceMetadata,
-            Set<String> removeInstances, String hostGroup) {
+            Set<String> removeInstances, String instanceGroup) {
         Set<Integer> privateIds = new HashSet<>();
         for (String instanceId : removeInstances) {
             privateIds.add(getPrivateId(instanceId));
         }
-        List<OpenStackInstance> agents = generateAgentsWithFilter(instanceMetadata, privateIds, hostGroup);
+        List<OpenStackInstance> agents = generateAgentsWithFilter(instanceMetadata, privateIds, instanceGroup);
         return build(stack, templatePath, agents, userData);
     }
 
-    public String add(Stack stack, String templatePath, String userData, Set<InstanceMetaData> instanceMetadata, String hostGroup, int adjustment) {
-        List<OpenStackInstance> agents = generateNewAgents(instanceMetadata, hostGroup, adjustment);
+    public String add(Stack stack, String templatePath, String userData, Set<InstanceMetaData> instanceMetadata, String instanceGroup, int adjustment) {
+        List<OpenStackInstance> agents = generateNewAgents(instanceMetadata, instanceGroup, adjustment);
         return build(stack, templatePath, agents, userData);
     }
 
@@ -119,23 +119,23 @@ public class HeatTemplateBuilder {
         return agents;
     }
 
-    private List<OpenStackInstance> generateNewAgents(Set<InstanceMetaData> instanceMetadata, String hostGroup, int adjustment) {
+    private List<OpenStackInstance> generateNewAgents(Set<InstanceMetaData> instanceMetadata, String instanceGroup, int adjustment) {
         List<OpenStackInstance> agents = regenerateAgents(instanceMetadata);
         Set<Integer> existingIds = new HashSet<>();
         for (OpenStackInstance agent : agents) {
             Map<String, String> metadata = agent.getMetadataAsMap();
-            if (hostGroup.equals(metadata.get(CB_INSTANCE_GROUP_NAME))) {
+            if (instanceGroup.equals(metadata.get(CB_INSTANCE_GROUP_NAME))) {
                 existingIds.add(Integer.valueOf(metadata.get(CB_INSTANCE_PRIVATE_ID)));
             }
         }
-        OpenStackTemplate template = getTemplate(instanceMetadata, hostGroup);
+        OpenStackTemplate template = getTemplate(instanceMetadata, instanceGroup);
         while (adjustment > 0) {
             int privateId = 0;
             while (existingIds.contains(privateId)) {
                 privateId++;
             }
             List<OpenStackVolume> volumes = buildVolumes(template.getVolumeCount(), template.getVolumeSize());
-            Map<String, String> metadata = generateMetadata(hostGroup, privateId);
+            Map<String, String> metadata = generateMetadata(instanceGroup, privateId);
             OpenStackInstance instance = new OpenStackInstance(template.getInstanceType(), volumes, metadata);
             agents.add(instance);
             adjustment--;
@@ -154,9 +154,9 @@ public class HeatTemplateBuilder {
         return Integer.valueOf(instanceId.split("_")[PRIVATE_ID_PART]);
     }
 
-    private OpenStackTemplate getTemplate(Set<InstanceMetaData> instanceMetaData, String hostGroup) {
+    private OpenStackTemplate getTemplate(Set<InstanceMetaData> instanceMetaData, String instanceGroup) {
         for (InstanceMetaData metaData : instanceMetaData) {
-            if (metaData.getInstanceGroup().getGroupName().equals(hostGroup)) {
+            if (metaData.getInstanceGroup().getGroupName().equals(instanceGroup)) {
                 return (OpenStackTemplate) metaData.getInstanceGroup().getTemplate();
             }
         }

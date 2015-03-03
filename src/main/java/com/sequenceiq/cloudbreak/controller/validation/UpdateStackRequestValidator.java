@@ -18,7 +18,7 @@ public class UpdateStackRequestValidator implements ConstraintValidator<ValidUpd
         if (value.getStatus() != null) {
             updateResources++;
         }
-        if (value.getHostGroupAdjustment() != null) {
+        if (value.getInstanceGroupAdjustment() != null) {
             updateResources++;
         }
         if (value.getAllowedSubnets() != null) {

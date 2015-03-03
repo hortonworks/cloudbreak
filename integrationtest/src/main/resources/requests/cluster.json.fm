@@ -1,5 +1,13 @@
 {
    "name":"${clusterName}",
    "blueprintId":"${blueprintId}",
-   "emailNeeded":${emailNeeded}
+   "emailNeeded":${emailNeeded},
+   "hostGroups" : [
+   <#list hostGroups as hostGroup>
+        {
+             "name":"${hostGroup.name}",
+             "instanceGroupName":"${hostGroup.instanceGroupName}"
+        }<#if hostGroup_has_next>,</#if>
+   </#list>
+   ]
 }

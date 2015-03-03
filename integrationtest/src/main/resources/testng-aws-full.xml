@@ -7,6 +7,7 @@
     <parameter name="uaaPassword" value="COULD BE SPECIFIED" />
     <parameter name="cloudbreakServer" value="COULD BE SPECIFIED" />
     -->
+    <parameter name="hostGroups" value="master,master;slave_1,slave_1" />
     <test name="init">
         <classes>
             <class name="com.sequenceiq.it.TestSuiteInitializer" />
@@ -71,14 +72,14 @@
         </classes>
     </test>
     <test name="upscale">
-        <parameter name="hostGroup" value="slave_1" />
+        <parameter name="instanceGroup" value="slave_1" />
         <parameter name="scalingAdjustment" value="3" />
         <classes>
             <class name="com.sequenceiq.it.cloudbreak.ScalingTest" />
         </classes>
     </test>
     <test name="downscale">
-        <parameter name="hostGroup" value="slave_1" />
+        <parameter name="instanceGroup" value="slave_1" />
         <parameter name="scalingAdjustment" value="-2" />
         <classes>
             <class name="com.sequenceiq.it.cloudbreak.ScalingTest" />

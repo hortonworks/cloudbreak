@@ -13,8 +13,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 @NamedQuery(
         name = "HostMetadata.findHostsInHostgroup",
         query = "SELECT h FROM HostMetadata h "
-                + "WHERE h.hostGroup= :hostGroup "
-                + "AND h.cluster.id= :clusterId")
+                + "WHERE h.hostGroup.id= :hostGroupId ")
 public class HostMetadata {
 
     @Id
@@ -23,10 +22,8 @@ public class HostMetadata {
 
     private String hostName;
 
-    private String hostGroup;
-
     @ManyToOne
-    private Cluster cluster;
+    private HostGroup hostGroup;
 
     public HostMetadata() {
 
@@ -40,30 +37,22 @@ public class HostMetadata {
         this.hostName = hostName;
     }
 
-    public String getHostGroup() {
+    public HostGroup getHostGroup() {
         return hostGroup;
     }
 
-    public void setHostGroup(String hostGroup) {
+    public void setHostGroup(HostGroup hostGroup) {
         this.hostGroup = hostGroup;
-    }
-
-    public Cluster getCluster() {
-        return cluster;
-    }
-
-    public void setCluster(Cluster cluster) {
-        this.cluster = cluster;
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this, "cluster");
+        return HashCodeBuilder.reflectionHashCode(this, "hostGroup");
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj, "cluster");
+        return EqualsBuilder.reflectionEquals(this, obj, "hostGroup");
     }
 
 }

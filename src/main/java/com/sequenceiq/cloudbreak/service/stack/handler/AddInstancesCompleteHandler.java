@@ -24,6 +24,6 @@ public class AddInstancesCompleteHandler implements Consumer<Event<AddInstancesC
     public void accept(Event<AddInstancesComplete> event) {
         AddInstancesComplete data = event.getData();
         LOGGER.info("Accepted {} event.", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT);
-        metadataSetupContext.updateMetadata(data.getCloudPlatform(), data.getStackId(), event.getData().getResources(), data.getHostGroup());
+        metadataSetupContext.updateMetadata(data.getCloudPlatform(), data.getStackId(), event.getData().getResources(), data.getInstanceGroup());
     }
 }

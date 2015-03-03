@@ -136,8 +136,8 @@ public class StackController {
         if (updateRequest.getStatus() != null) {
             stackService.updateStatus(id, updateRequest.getStatus());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else if (updateRequest.getHostGroupAdjustment() != null) {
-            stackService.updateNodeCount(id, updateRequest.getHostGroupAdjustment());
+        } else if (updateRequest.getInstanceGroupAdjustment() != null) {
+            stackService.updateNodeCount(id, updateRequest.getInstanceGroupAdjustment());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             stackService.updateAllowedSubnets(id, new ArrayList<>(subnetConverter.convertAllJsonToEntity(updateRequest.getAllowedSubnets())));

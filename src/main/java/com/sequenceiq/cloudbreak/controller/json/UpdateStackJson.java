@@ -13,7 +13,7 @@ public class UpdateStackJson implements JsonEntity {
 
     private StatusRequest status;
 
-    private HostGroupAdjustmentJson hostGroupAdjustment;
+    private InstanceGroupAdjustmentJson instanceGroupAdjustment;
 
     private List<SubnetJson> allowedSubnets;
 
@@ -29,12 +29,12 @@ public class UpdateStackJson implements JsonEntity {
         this.status = status;
     }
 
-    public HostGroupAdjustmentJson getHostGroupAdjustment() {
-        return hostGroupAdjustment;
+    public InstanceGroupAdjustmentJson getInstanceGroupAdjustment() {
+        return instanceGroupAdjustment;
     }
 
-    public void setHostGroupAdjustment(HostGroupAdjustmentJson hostGroupAdjustment) {
-        this.hostGroupAdjustment = hostGroupAdjustment;
+    public void setInstanceGroupAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustment) {
+        this.instanceGroupAdjustment = instanceGroupAdjustment;
     }
 
     public List<SubnetJson> getAllowedSubnets() {

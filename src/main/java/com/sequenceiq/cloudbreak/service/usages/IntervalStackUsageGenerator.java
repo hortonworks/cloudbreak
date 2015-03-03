@@ -42,7 +42,7 @@ public class IntervalStackUsageGenerator {
     private List<PriceGenerator> priceGenerators;
 
     public List<CloudbreakUsage> generateUsages(Date startTime, Date stopTime, CloudbreakEvent startEvent) throws ParseException {
-        List<CloudbreakUsage> dailyUsagesByHostGroup = new ArrayList<>();
+        List<CloudbreakUsage> dailyUsagesByInstanceGroup = new ArrayList<>();
         Stack stack = stackRepository.findById(startEvent.getStackId());
 
         if (stack != null) {
@@ -59,10 +59,10 @@ public class IntervalStackUsageGenerator {
                 }
 
                 addCalculatedPrice(instanceGroupDailyUsages, priceGenerator, template);
-                dailyUsagesByHostGroup.addAll(instanceGroupDailyUsages.values());
+                dailyUsagesByInstanceGroup.addAll(instanceGroupDailyUsages.values());
             }
         }
-        return dailyUsagesByHostGroup;
+        return dailyUsagesByInstanceGroup;
     }
 
     private String getInstanceType(Template template) {
@@ -127,7 +127,7 @@ public class IntervalStackUsageGenerator {
         usage.setStackId(event.getStackId());
         usage.setStackName(event.getStackName());
         usage.setInstanceType(instanceType);
-        usage.setHostGroup(groupName);
+        usage.setInstanceGroup(groupName);
         return usage;
     }
 

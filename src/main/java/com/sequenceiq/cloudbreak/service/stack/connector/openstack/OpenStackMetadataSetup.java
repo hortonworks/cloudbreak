@@ -63,7 +63,7 @@ public class OpenStackMetadataSetup implements MetadataSetup {
     }
 
     @Override
-    public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, final String hostGroup) {
+    public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, final String instanceGroupName) {
         MDCBuilder.buildMdcContext(stack);
         OSClient osClient = openStackUtil.createOSClient(stack);
         Resource heatResource = stack.getResourceByType(ResourceType.HEAT_STACK);
@@ -72,12 +72,12 @@ public class OpenStackMetadataSetup implements MetadataSetup {
         List<Map<String, Object>> outputs = heatStack.getOutputs();
         Set<CoreInstanceMetaData> instancesCoreMetadata = new HashSet<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            if (instanceGroup.getGroupName().equals(hostGroup)) {
+            if (instanceGroup.getGroupName().equals(instanceGroupName)) {
                 for (Map<String, Object> map : outputs) {
                     String instanceUUID = (String) map.get("output_value");
                     Server server = osClient.compute().servers().get(instanceUUID);
                     Map<String, String> metadata = server.getMetadata();
-                    String instanceGroupName = metadata.get(HeatTemplateBuilder.CB_INSTANCE_GROUP_NAME);
+                    String groupName = metadata.get(HeatTemplateBuilder.CB_INSTANCE_GROUP_NAME);
                     final String instanceId = openStackUtil.getInstanceId(instanceUUID, metadata);
                     boolean metadataExists = FluentIterable.from(instanceGroup.getInstanceMetaData()).anyMatch(new Predicate<InstanceMetaData>() {
                         @Override
@@ -85,16 +85,16 @@ public class OpenStackMetadataSetup implements MetadataSetup {
                             return input.getInstanceId().equals(instanceId);
                         }
                     });
-                    if (!metadataExists && instanceGroupName.equals(hostGroup)) {
+                    if (!metadataExists && groupName.equals(instanceGroupName)) {
                         LOGGER.info("New instance added to metadata: [stack: '{}', instanceId: '{}']", stack.getId(), instanceId);
-                        instancesCoreMetadata.add(createCoreMetaData(stack, server, instanceGroupName, instanceId));
+                        instancesCoreMetadata.add(createCoreMetaData(stack, server, groupName, instanceId));
                     }
                 }
             }
         }
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT,
-                Event.wrap(new MetadataUpdateComplete(CloudPlatform.OPENSTACK, stack.getId(), instancesCoreMetadata, hostGroup)));
+                Event.wrap(new MetadataUpdateComplete(CloudPlatform.OPENSTACK, stack.getId(), instancesCoreMetadata, instanceGroupName)));
     }
 
     @Override

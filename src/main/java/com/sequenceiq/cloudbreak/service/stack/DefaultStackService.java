@@ -19,9 +19,9 @@ import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
+import com.sequenceiq.cloudbreak.controller.json.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
@@ -204,44 +204,42 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
-    public void updateNodeCount(Long stackId, HostGroupAdjustmentJson hostGroupAdjustmentJson) {
+    public void updateNodeCount(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustmentJson) {
         Stack stack = stackRepository.findOne(stackId);
         MDCBuilder.buildMdcContext(stack);
-        if (!Status.AVAILABLE.equals(stack.getStatus())) {
-            throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. Node count can only be updated if it's running.", stackId,
-                    stack.getStatus()));
-        }
-        if (0 == hostGroupAdjustmentJson.getScalingAdjustment()) {
+        validateStackStatus(stack);
+        validateInstanceGroup(stack, instanceGroupAdjustmentJson.getInstanceGroup());
+        if (0 == instanceGroupAdjustmentJson.getScalingAdjustment()) {
             throw new BadRequestException(String.format("Requested scaling adjustment on stack '%s' is 0. Nothing to do.", stackId));
         }
-        if (0 > hostGroupAdjustmentJson.getScalingAdjustment()) {
-            if (-1 * hostGroupAdjustmentJson.getScalingAdjustment()
-                    > stack.getInstanceGroupByInstanceGroupName(hostGroupAdjustmentJson.getHostGroup()).getNodeCount()) {
-                throw new BadRequestException(String.format("There are %s instances in stack '%s'. Cannot remove %s instances.",
-                        stack.getInstanceGroupByInstanceGroupName(hostGroupAdjustmentJson.getHostGroup()).getNodeCount(), stackId,
-                        -1 * hostGroupAdjustmentJson.getScalingAdjustment()));
+        if (0 > instanceGroupAdjustmentJson.getScalingAdjustment()) {
+            InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupAdjustmentJson.getInstanceGroup());
+            if (-1 * instanceGroupAdjustmentJson.getScalingAdjustment() > instanceGroup.getNodeCount()) {
+                throw new BadRequestException(String.format("There are %s instances in instance group '%s'. Cannot remove %s instances.",
+                        instanceGroup.getNodeCount(), instanceGroup.getGroupName(),
+                        -1 * instanceGroupAdjustmentJson.getScalingAdjustment()));
             }
             int removableHosts = 0;
             for (InstanceMetaData metadataEntry : stack.getRunningInstanceMetaData()) {
-                if (metadataEntry.isRemovable() && metadataEntry.getInstanceGroup().getGroupName().equals(hostGroupAdjustmentJson.getHostGroup())) {
+                if (metadataEntry.isRemovable() && metadataEntry.getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup())) {
                     removableHosts++;
                 }
             }
-            if (removableHosts < -1 * hostGroupAdjustmentJson.getScalingAdjustment()) {
+            if (removableHosts < -1 * instanceGroupAdjustmentJson.getScalingAdjustment()) {
                 throw new BadRequestException(
-                        String.format("There are %s removable hosts on stack '%s' but %s were requested. Decommission nodes from the cluster first!",
-                                removableHosts, stackId, hostGroupAdjustmentJson.getScalingAdjustment() * -1));
+                        String.format("There are %s unregistered instances in instance group '%s' but %s were requested. Decommission nodes from the cluster!",
+                                removableHosts, instanceGroup.getGroupName(), instanceGroupAdjustmentJson.getScalingAdjustment() * -1));
             }
         }
-        String statusMessage = hostGroupAdjustmentJson.getScalingAdjustment() > 0 ? "Adding '%s' new instance(s) to the cluster infrastructure."
+        String statusMessage = instanceGroupAdjustmentJson.getScalingAdjustment() > 0 ? "Adding '%s' new instance(s) to the cluster infrastructure."
                 : "Removing '%s' instance(s) from the cluster infrastructure.";
         stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, String.format(statusMessage,
-                Math.abs(hostGroupAdjustmentJson.getScalingAdjustment())));
+                Math.abs(instanceGroupAdjustmentJson.getScalingAdjustment())));
         LOGGER.info("Publishing {} event [scalingAdjustment: '{}']", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT,
-                hostGroupAdjustmentJson.getScalingAdjustment());
+                instanceGroupAdjustmentJson.getScalingAdjustment());
         reactor.notify(ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT,
                 Event.wrap(new UpdateInstancesRequest(stack.cloudPlatform(), stack.getId(),
-                        hostGroupAdjustmentJson.getScalingAdjustment(), hostGroupAdjustmentJson.getHostGroup())));
+                        instanceGroupAdjustmentJson.getScalingAdjustment(), instanceGroupAdjustmentJson.getInstanceGroup())));
     }
 
     @Override
@@ -277,7 +275,20 @@ public class DefaultStackService implements StackService {
 
     @Override
     public void validateStack(StackValidation stackValidation) {
-        blueprintValidator.validateBlueprintForStack(stackValidation.getBlueprint(), stackValidation.getInstanceGroups());
+        blueprintValidator.validateBlueprintForStack(stackValidation.getBlueprint(), stackValidation.getHostGroups(), stackValidation.getInstanceGroups());
+    }
+
+    private void validateStackStatus(Stack stack) {
+        if (!Status.AVAILABLE.equals(stack.getStatus())) {
+            throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. Node count can only be updated if it's running.", stack.getId(),
+                    stack.getStatus()));
+        }
+    }
+
+    private void validateInstanceGroup(Stack stack, String instanceGroup) {
+        if (stack.getInstanceGroupByInstanceGroupName(instanceGroup) == null) {
+            throw new BadRequestException(String.format("Stack '%s' does not have an instanceGroup named '%s'.", stack.getId(), instanceGroup));
+        }
     }
 
     private void delete(Stack stack, CbUser user) {

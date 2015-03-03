@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.controller.validation.blueprint;
 import java.util.List;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.HostGroup;
 
 class BlueprintServiceComponent {
     private String name;
@@ -16,9 +16,9 @@ class BlueprintServiceComponent {
         this.hostgroups = Lists.newArrayList(hostgroup);
     }
 
-    public void update(InstanceGroup instanceGroup) {
-        nodeCount += instanceGroup.getNodeCount();
-        hostgroups.add(instanceGroup.getGroupName());
+    public void update(HostGroup hostGroup) {
+        nodeCount += hostGroup.getInstanceGroup().getNodeCount();
+        hostgroups.add(hostGroup.getName());
     }
 
     public String getName() {

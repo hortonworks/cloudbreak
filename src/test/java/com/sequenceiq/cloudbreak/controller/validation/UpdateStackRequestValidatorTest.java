@@ -23,7 +23,7 @@ import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.controller.json.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.controller.json.UpdateStackJson;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 
@@ -46,7 +46,7 @@ public class UpdateStackRequestValidatorTest {
     @Test
     public void testIsValidShouldReturnTrueWhenStatusIsUpdated() {
         UpdateStackJson updateStackJson = new UpdateStackJson();
-        updateStackJson.setHostGroupAdjustment(null);
+        updateStackJson.setInstanceGroupAdjustment(null);
         updateStackJson.setStatus(StatusRequest.STARTED);
         boolean valid = underTest.isValid(updateStackJson, constraintValidatorContext);
         assertTrue(valid);
@@ -55,10 +55,10 @@ public class UpdateStackRequestValidatorTest {
     @Test
     public void testIsValidShouldReturnTrueWhenNodeCountIsUpdated() {
         UpdateStackJson updateStackJson = new UpdateStackJson();
-        HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
-        hostGroupAdjustmentJson.setScalingAdjustment(12);
-        hostGroupAdjustmentJson.setHostGroup("slave_1");
-        updateStackJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
+        InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
+        instanceGroupAdjustmentJson.setScalingAdjustment(12);
+        instanceGroupAdjustmentJson.setInstanceGroup("slave_1");
+        updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
         updateStackJson.setStatus(null);
         boolean valid = underTest.isValid(updateStackJson, constraintValidatorContext);
         assertTrue(valid);
@@ -67,19 +67,20 @@ public class UpdateStackRequestValidatorTest {
     @Test
     public void testIsValidShouldReturnFalseWhenRequestContainsNodeCountAndStatus() {
         UpdateStackJson updateStackJson = new UpdateStackJson();
-        HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
-        hostGroupAdjustmentJson.setScalingAdjustment(4);
-        hostGroupAdjustmentJson.setHostGroup("slave_1");
+        InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
+        instanceGroupAdjustmentJson.setScalingAdjustment(4);
+        instanceGroupAdjustmentJson.setInstanceGroup("slave_1");
         updateStackJson.setStatus(StatusRequest.STARTED);
+        updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
         boolean valid = underTest.isValid(updateStackJson, constraintValidatorContext);
-        assertTrue(valid);
+        assertFalse(valid);
     }
 
     @Test
     public void testIsValidShouldReturnFalseWhenRequestContainsOnlyNulls() {
 
         UpdateStackJson updateStackJson = new UpdateStackJson();
-        updateStackJson.setHostGroupAdjustment(null);
+        updateStackJson.setInstanceGroupAdjustment(null);
         updateStackJson.setStatus(null);
         updateStackJson.setAllowedSubnets(null);
         boolean valid = underTest.isValid(updateStackJson, constraintValidatorContext);

@@ -8,10 +8,18 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 @Entity
+@NamedQueries({
+        @NamedQuery(name = "InstanceGroup.findOneByGroupNameInStack",
+                query = "SELECT i from InstanceGroup i "
+                        + "WHERE i.stack.id = :stackId "
+                        + "AND i.groupName = :groupName")
+})
 public class InstanceGroup implements ProvisionEntity, Comparable {
     @Id
     @GeneratedValue
