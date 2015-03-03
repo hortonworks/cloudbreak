@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow;
+package com.sequenceiq.cloudbreak.core.flow.service;
 
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.flow.ProvisioningContextFactory;
+import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
+import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -54,38 +57,61 @@ public class SimpleAmbariFlowFacade implements AmbariFlowFacade {
     private PollingService<AmbariStartupPollerObject> ambariStartupPollerObjectPollingService;
 
     @Override
-    public ProvisioningContext allocateAmbariRoles(ProvisioningContext context) throws Exception {
+    public FlowContext allocateAmbariRoles(FlowContext context) throws Exception {
         LOGGER.debug("Allocating Ambari roles. Context: {}", context);
-        AmbariRoleAllocationComplete ambariRoleAllocationComplete = ambariRoleAllocator.allocateRoles(context.getStackId(), context.getCoreInstanceMetaData());
+        ProvisioningContext provisioningContext = (ProvisioningContext) context;
+        AmbariRoleAllocationComplete ambariRoleAllocationComplete = ambariRoleAllocator
+                .allocateRoles(provisioningContext.getStackId(), provisioningContext.getCoreInstanceMetaData());
         return ProvisioningContextFactory.createAmbariStartContext(ambariRoleAllocationComplete.getStack().getId(), ambariRoleAllocationComplete.getAmbariIp());
     }
 
     @Override
-    public ProvisioningContext startAmbari(ProvisioningContext context) throws Exception {
-        ProvisioningContext retContext = null;
-        Stack stack = stackService.getById(context.getStackId());
+    public FlowContext startAmbari(FlowContext context) throws Exception {
+        ProvisioningContext provisioningContext = (ProvisioningContext) context;
+        Stack stack = stackService.getById(provisioningContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
 
-        AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, context.getAmbariIp(),
-                clientService.createDefault(context.getAmbariIp()));
+        AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, provisioningContext.getAmbariIp(),
+                clientService.createDefault(provisioningContext.getAmbariIp()));
 
         PollingResult pollingResult = ambariStartupPollerObjectPollingService.pollWithTimeout(ambariStartupListenerTask, ambariStartupPollerObject,
                 POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
 
         if (isSuccess(pollingResult)) {
             LOGGER.info("Stack has been successfully created!");
-            assert context.getAmbariIp() != null;
-            retContext = context;
+            assert provisioningContext.getAmbariIp() != null;
+
         } else {
             throw new CloudbreakException("Stack creation failed. Context:" + context);
         }
-        stack = stackUpdater.updateAmbariIp(stack.getId(), context.getAmbariIp());
+        stack = stackUpdater.updateAmbariIp(stack.getId(), provisioningContext.getAmbariIp());
         String statusReason = "Cluster infrastructure and ambari are available on the cloud. AMBARI_IP:" + stack.getAmbariIp();
         stack = stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, statusReason);
         stackUpdater.updateStackStatusReason(stack.getId(), "");
-        changeAmbariCredentials(context.getAmbariIp(), stack);
+        changeAmbariCredentials(provisioningContext.getAmbariIp(), stack);
 
-        return retContext;
+        return provisioningContext;
+    }
+
+    @Override
+    public FlowContext buildAmbariCluster(FlowContext context) throws Exception {
+        ProvisioningContext provisioningContext = (ProvisioningContext) context;
+        Stack stack = stackService.getById(provisioningContext.getStackId());
+        MDCBuilder.buildMdcContext(stack);
+
+        if (stack.getCluster() != null && stack.getCluster().getStatus().equals(Status.REQUESTED)) {
+            ambariClusterConnector.buildAmbariCluster(stack);
+        } else {
+            LOGGER.info("Ambari has started but there were no cluster request to this stack yet. Won't install cluster now.");
+        }
+
+        if (stack.getStatus().equals(Status.AVAILABLE)) {
+            //todo use the retvalue!
+            Object clusterInfo = ambariClusterConnector.buildAmbariCluster(stack);
+        } else {
+            LOGGER.info("Cluster install requested but the stack is not completed yet. Installation will start after the stack is ready.");
+        }
+        return provisioningContext;
     }
 
     private void changeAmbariCredentials(String ambariIp, Stack stack) {
