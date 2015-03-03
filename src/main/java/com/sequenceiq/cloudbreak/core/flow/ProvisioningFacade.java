@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 
 /**
  * Contract for stack provisioning on supported cloud providers.

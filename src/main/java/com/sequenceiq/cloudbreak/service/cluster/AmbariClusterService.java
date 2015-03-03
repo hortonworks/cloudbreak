@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -46,8 +47,6 @@ import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
 
 import groovyx.net.http.HttpResponseException;
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Service
 public class AmbariClusterService implements ClusterService {
@@ -73,9 +72,6 @@ public class AmbariClusterService implements ClusterService {
     private HostMetadataRepository hostMetadataRepository;
 
     @Autowired
-    private Reactor reactor;
-
-    @Autowired
     private AmbariClientService clientService;
 
     @Autowired
@@ -85,7 +81,7 @@ public class AmbariClusterService implements ClusterService {
     private HostFilterService hostFilterService;
 
     @Override
-    public void create(CbUser user, Long stackId, Cluster cluster) {
+    public Cluster create(CbUser user, Long stackId, Cluster cluster) {
         Stack stack = stackRepository.findOne(stackId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
@@ -101,8 +97,7 @@ public class AmbariClusterService implements ClusterService {
             throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName(), ex);
         }
         stack = stackUpdater.updateStackCluster(stack.getId(), cluster);
-        LOGGER.info("Publishing {} event", ReactorConfig.CLUSTER_REQUESTED_EVENT);
-        reactor.notify(ReactorConfig.CLUSTER_REQUESTED_EVENT, Event.wrap(stack));
+        return cluster;
     }
 
     @Override
@@ -132,7 +127,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public void updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
+    public UpdateAmbariHostsRequest updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(cluster);
@@ -155,12 +150,13 @@ public class AmbariClusterService implements ClusterService {
         }
         LOGGER.info("Cluster update requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         LOGGER.info("Publishing {} event", ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT);
-        reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT, Event.wrap(
-                new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, downScaleCandidates, decommissionRequest)));
+        return new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, downScaleCandidates, decommissionRequest);
     }
 
     @Override
-    public void updateStatus(Long stackId, StatusRequest statusRequest) {
+    public ClusterStatusUpdateRequest updateStatus(Long stackId, StatusRequest statusRequest) {
+        ClusterStatusUpdateRequest retVal = null;
+
         Stack stack = stackRepository.findOne(stackId);
         Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(stack.getCluster());
@@ -184,8 +180,7 @@ public class AmbariClusterService implements ClusterService {
                 cluster.setStatus(Status.START_IN_PROGRESS);
                 clusterRepository.save(cluster);
                 LOGGER.info("Publishing {} event", ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT);
-                reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
-                        Event.wrap(new ClusterStatusUpdateRequest(stack.getId(), statusRequest)));
+                retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest);
             }
         } else {
             if (!Status.AVAILABLE.equals(clusterStatus)) {
@@ -199,9 +194,34 @@ public class AmbariClusterService implements ClusterService {
             cluster.setStatus(Status.STOP_IN_PROGRESS);
             clusterRepository.save(cluster);
             LOGGER.info("Publishing {} event", ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT);
-            reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
-                    Event.wrap(new ClusterStatusUpdateRequest(stack.getId(), statusRequest)));
+            retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest);
         }
+
+        return retVal;
+    }
+
+    @Override
+    public Cluster clusterCreationSuccess(Long clusterId, long creationFinished, String ambariIp) {
+        Cluster cluster = clusterRepository.findById(clusterId);
+        MDCBuilder.buildMdcContext(cluster);
+        LOGGER.info("Accepted {} event.", ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT, clusterId);
+        cluster.setStatus(Status.AVAILABLE);
+        cluster.setStatusReason("");
+        cluster.setCreationFinished(creationFinished);
+        cluster.setUpSince(creationFinished);
+        cluster = clusterRepository.save(cluster);
+        Stack stack = stackRepository.findStackWithListsForCluster(clusterId);
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            Set<InstanceMetaData> instances = instanceGroup.getInstanceMetaData();
+            for (InstanceMetaData instanceMetaData : instances) {
+                instanceMetaData.setRemovable(false);
+            }
+            stackUpdater.updateStackMetaData(stack.getId(), instances, instanceGroup.getGroupName());
+        }
+        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "Cluster installation successfully finished. AMBARI_IP:" + stack.getAmbariIp());
+
+        // send email;
+        return cluster;
     }
 
     private int getReplicationFactor(AmbariClient ambariClient, String hostGroup) {
@@ -403,5 +423,4 @@ public class AmbariClusterService implements ClusterService {
         }
         return result;
     }
-
 }

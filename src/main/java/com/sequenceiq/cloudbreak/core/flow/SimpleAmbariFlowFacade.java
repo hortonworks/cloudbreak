@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -86,6 +87,25 @@ public class SimpleAmbariFlowFacade implements AmbariFlowFacade {
         changeAmbariCredentials(context.getAmbariIp(), stack);
 
         return retContext;
+    }
+
+    @Override
+    public ProvisioningContext buildAmbariCluster(ProvisioningContext context) throws Exception {
+        Stack stack = stackService.getById(context.getStackId());
+        MDCBuilder.buildMdcContext(stack);
+
+        if (stack.getCluster() != null && stack.getCluster().getStatus().equals(Status.REQUESTED)) {
+            ambariClusterConnector.buildAmbariCluster(stack);
+        } else {
+            LOGGER.info("Ambari has started but there were no cluster request to this stack yet. Won't install cluster now.");
+        }
+
+        if (stack.getStatus().equals(Status.AVAILABLE)) {
+            ambariClusterConnector.buildAmbariCluster(stack);
+        } else {
+            LOGGER.info("Cluster install requested but the stack is not completed yet. Installation will start after the stack is ready.");
+        }
+        return context;
     }
 
     private void changeAmbariCredentials(String ambariIp, Stack stack) {

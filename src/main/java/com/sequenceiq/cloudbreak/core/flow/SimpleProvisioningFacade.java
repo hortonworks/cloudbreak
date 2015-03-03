@@ -10,15 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.service.AmbariFlowFacade;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
-import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListenerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisionContext;
 
 @Service
@@ -39,9 +38,6 @@ public class SimpleProvisioningFacade implements ProvisioningFacade {
 
     @Autowired
     private StackService stackService;
-
-    @Autowired
-    private AmbariStartupListenerTask ambariStartupListenerTask;
 
     @Override
     public ProvisioningContext setup(ProvisioningContext provisioningContext) throws CloudbreakException {
@@ -106,20 +102,26 @@ public class SimpleProvisioningFacade implements ProvisioningFacade {
     @Override
     public ProvisioningContext startAmbari(ProvisioningContext provisioningContext) throws CloudbreakException {
         LOGGER.debug("Starting Ambari. Context: {}", provisioningContext);
-        ProvisioningContext ambariRoleAllocationContext = null;
+        ProvisioningContext ambariStartContext = null;
         try {
-            ambariRoleAllocationContext = ambariFlowFacade.startAmbari(provisioningContext);
+            ambariStartContext = ambariFlowFacade.startAmbari(provisioningContext);
             LOGGER.debug("Ambari start DONE.");
         } catch (Exception e) {
             LOGGER.error("Exception during metadata setup: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
-        return ambariRoleAllocationContext;
+        return ambariStartContext;
     }
 
     @Override
-    public ProvisioningContext buildAmbariCluster(ProvisioningContext provisioningContext) throws CloudbreakException {
-        LOGGER.debug("Building ambari cluster. Context: {}", provisioningContext);
-        return provisioningContext;
+    public ProvisioningContext buildAmbariCluster(ProvisioningContext context) throws CloudbreakException {
+        LOGGER.debug("Building ambari cluster. Context: {}", context);
+        try {
+            context = ambariFlowFacade.buildAmbariCluster(context);
+        } catch (Exception e) {
+            LOGGER.error("Exception during the cluster build process: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+        return context;
     }
 }

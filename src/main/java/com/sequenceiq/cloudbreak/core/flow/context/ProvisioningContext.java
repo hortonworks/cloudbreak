@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow;
+package com.sequenceiq.cloudbreak.core.flow.context;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,6 +17,11 @@ public class ProvisioningContext implements FlowContext {
     private Set<Resource> resources = new HashSet<>();
     private Set<CoreInstanceMetaData> coreInstanceMetaData = new HashSet<>();
     private String ambariIp;
+    private long clusterId;
+    private long clusterCreationTime;
+    private String message;
+    private Set<String> hostNames;
+    private boolean decommision;
 
     public CloudPlatform getCloudPlatform() {
         return cloudPlatform;
@@ -58,6 +63,42 @@ public class ProvisioningContext implements FlowContext {
         this.ambariIp = ambariIp;
     }
 
+    public long getClusterId() {
+        return clusterId;
+    }
+
+    public void setClusterId(long clusterId) {
+        this.clusterId = clusterId;
+    }
+
+    public long getClusterCreationTime() {
+        return clusterCreationTime;
+    }
+
+    public void setClusterCreationTime(long clusterCreationTime) {
+        this.clusterCreationTime = clusterCreationTime;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public Set<String> getHostNames() {
+        return hostNames;
+    }
+
+    public boolean isDecommision() {
+        return decommision;
+    }
+
+    public void setDecommision(boolean decommision) {
+        this.decommision = decommision;
+    }
+
     @Override public String toString() {
         final StringBuilder sb = new StringBuilder("ProvisioningContext{");
         sb.append("cloudPlatform=").append(cloudPlatform);
@@ -67,6 +108,9 @@ public class ProvisioningContext implements FlowContext {
         sb.append(", resources=").append(resources);
         sb.append(", coreInstanceMetaData=").append(coreInstanceMetaData);
         sb.append(", ambariIp='").append(ambariIp).append('\'');
+        sb.append(", clusterId=").append(clusterId);
+        sb.append(", clusterCreationTime=").append(clusterCreationTime);
+        sb.append(", message='").append(message).append('\'');
         sb.append('}');
         return sb.toString();
     }
