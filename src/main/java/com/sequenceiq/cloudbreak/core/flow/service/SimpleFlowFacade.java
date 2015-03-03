@@ -27,7 +27,7 @@ public class SimpleFlowFacade implements FlowFacade {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleFlowFacade.class);
 
     @Resource
-    private Map<CloudPlatform, ProvisionSetup> provisioningSetupServices;
+    private Map<CloudPlatform, ProvisionSetup> provisionSetups;
 
     @Resource
     private Map<CloudPlatform, MetadataSetup> metadataSetups;
@@ -46,7 +46,7 @@ public class SimpleFlowFacade implements FlowFacade {
         LOGGER.debug("Provisioning setup. Context: {}", context);
         ProvisionSetupComplete flowContext = (ProvisionSetupComplete) context;
         try {
-            flowContext = (ProvisionSetupComplete) provisioningSetupServices.get(flowContext.getCloudPlatform())
+            flowContext = (ProvisionSetupComplete) provisionSetups.get(flowContext.getCloudPlatform())
                     .setupProvisioning(stackService.getById(flowContext.getStackId()));
             LOGGER.debug("Provisioning setup DONE.");
         } catch (Exception e) {
