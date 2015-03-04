@@ -6,8 +6,10 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Resource;
 
 // todo make this class a builder
 public class FlowContextFactory {
@@ -82,4 +84,11 @@ public class FlowContextFactory {
         return context;
     }
 
+    public static FlowContext createProvisionCompleteContext(CloudPlatform cloudPlatform, Long stackId, Set<Resource> resources) {
+        ProvisioningContext context = createContext();
+        context.setCloudPlatform(cloudPlatform);
+        context.setStackId(stackId);
+        context.getResources().addAll(resources);
+        return context;
+    }
 }
