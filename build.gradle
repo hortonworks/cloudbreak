@@ -362,6 +362,11 @@ test {
     onOutput { descriptor, event ->
         logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message)
     }
+    jacoco {
+        append = false
+        destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
+        classDumpFile = file("$buildDir/jacoco/classpathdumps")
+    }
 }
 
 jacoco {
@@ -378,13 +383,7 @@ jacocoTestReport {
     }
 }
 
-
 sonarRunner {
-    jacoco {
-        append = false
-        destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
-        classDumpFile = file("$buildDir/jacoco/classpathdumps")
-    }
     sonarProperties {
         property "sonar.host.url", "$config.sonar_host_url"
         property "sonar.jdbc.url", "$config.sonar_jdbc_url"
@@ -398,10 +397,9 @@ sonarRunner {
 }
 
 
-task wrapper(type: Wrapper) { gradleVersion = "1.12" }
+task wrapper(type: Wrapper) { gradleVersion = "2.3" }
 
 task buildInfo(type: BuildInfoTask) {
-    systemProperties = System.properties
     destination = file("$buildDir")
     applicationPropertiesPath = "$buildDir"
     basename = jar.baseName
