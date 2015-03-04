@@ -113,15 +113,21 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                   item.templateId = parseFloat(item.templateId);
                 });
                 result.blueprintId = parseFloat(result.blueprintId);
-                $rootScope.clusters.push(result);
-                initCluster();
-                $jq('.carousel').carousel(0);
-                // enable toolbar buttons
-                $jq('#toggle-cluster-block-btn').removeClass('disabled');
-                $jq('#sort-clusters-btn').removeClass('disabled');
-                $jq('#create-cluster-btn').removeClass('disabled');
-                $jq("#notification-n-filtering").prop("disabled", false);
-                $scope.clusterCreationForm.$setPristine();
+
+                var existingCluster = $filter('filter')($rootScope.clusters, {id: result.id}, true)[0];
+                if (existingCluster != undefined) {
+                    existingCluster = result;
+                } else {
+                    $rootScope.clusters.push(result);
+                    $jq('.carousel').carousel(0);
+                    // enable toolbar buttons
+                    $jq('#toggle-cluster-block-btn').removeClass('disabled');
+                    $jq('#sort-clusters-btn').removeClass('disabled');
+                    $jq('#create-cluster-btn').removeClass('disabled');
+                    $jq("#notification-n-filtering").prop("disabled", false);
+                    $scope.clusterCreationForm.$setPristine();
+                    initCluster();
+                }
             }, function(failure) {
                 $scope.showError(failure, $rootScope.error_msg.cluster_failed);
             });
