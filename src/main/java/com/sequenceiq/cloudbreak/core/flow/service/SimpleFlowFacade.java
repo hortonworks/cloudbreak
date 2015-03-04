@@ -44,33 +44,30 @@ public class SimpleFlowFacade implements FlowFacade {
     @Override
     public FlowContext setup(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Provisioning setup. Context: {}", context);
-        ProvisioningContext provisioningContext = (ProvisioningContext) context;
-        ProvisionSetupComplete setupComplete = null;
         try {
-            setupComplete = (ProvisionSetupComplete) provisionSetups.get(provisioningContext.getCloudPlatform())
+            ProvisioningContext provisioningContext = (ProvisioningContext) context;
+            ProvisionSetupComplete setupComplete = (ProvisionSetupComplete) provisionSetups.get(provisioningContext.getCloudPlatform())
                     .setupProvisioning(stackService.getById(provisioningContext.getStackId()));
             LOGGER.debug("Provisioning setup DONE.");
+            return FlowContextFactory.createProvisioningContext(setupComplete.getCloudPlatform(), setupComplete.getStackId(),
+                    setupComplete.getSetupProperties(), setupComplete.getUserDataParams());
         } catch (Exception e) {
             LOGGER.error("Exception during provisioning setup: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
-        return FlowContextFactory.createProvisioningContext(setupComplete.getCloudPlatform(), setupComplete.getStackId(),
-                setupComplete.getSetupProperties(), setupComplete.getUserDataParams());
     }
 
     @Override
-    public FlowContext provision(FlowContext provisioningContext) throws CloudbreakException {
-        LOGGER.debug("Provisioning. Context: {}", provisioningContext);
-
-        ProvisioningContext context = null;
-
+    public FlowContext provision(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Provisioning. Context: {}", context);
         try {
-            context = (ProvisioningContext) provisioningContext;
-            ProvisionComplete provisionResult = provisionResult = provisioningService.buildStack(context.getCloudPlatform(), context.getStackId(),
-                    context.getSetupProperties(), context.getUserDataParams());
-            return context;
+            ProvisioningContext provisioningContext = (ProvisioningContext) context;
+            ProvisionComplete provisionResult = provisioningService.buildStack(provisioningContext.getCloudPlatform(), provisioningContext.getStackId(),
+                    provisioningContext.getSetupProperties(), provisioningContext.getUserDataParams());
+            LOGGER.debug("Provisioning DONE.");
+            return FlowContextFactory
+                    .createProvisionCompleteContext(provisionResult.getCloudPlatform(), provisionResult.getStackId(), provisionResult.getResources());
         } catch (Exception e) {
-            //LOGGER.info("Publishing {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT);
             LOGGER.error("Exception during provisioning setup: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
@@ -79,46 +76,43 @@ public class SimpleFlowFacade implements FlowFacade {
     @Override
     public FlowContext setupMetadata(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Metadata setup. Context: {}", context);
-        MetadataSetupComplete metadataSetupComplete = null;
-        ProvisioningContext provisioningContext = (ProvisioningContext) context;
         try {
-            metadataSetupComplete = (MetadataSetupComplete) metadataSetups.get(provisioningContext.getCloudPlatform())
+            ProvisioningContext provisioningContext = (ProvisioningContext) context;
+            MetadataSetupComplete metadataSetupComplete = (MetadataSetupComplete) metadataSetups.get(provisioningContext.getCloudPlatform())
                     .setupMetadata(stackService.getById(provisioningContext.getStackId()));
             LOGGER.debug("Metadata setup DONE.");
+            return FlowContextFactory.createProvisioningSetupContext(metadataSetupComplete.getCloudPlatform(), metadataSetupComplete.getStackId());
         } catch (Exception e) {
             LOGGER.error("Exception during metadata setup: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
-        return FlowContextFactory.createProvisioningSetupContext(metadataSetupComplete.getCloudPlatform(), metadataSetupComplete.getStackId());
     }
 
     @Override
-    public ProvisioningContext allocateAmbariRoles(FlowContext context) throws CloudbreakException {
+    public FlowContext allocateAmbariRoles(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Allocating Ambari roles. Context: {}", context);
-
-        ProvisioningContext ambariRoleAllocationContext = null;
         try {
-            ambariRoleAllocationContext = (ProvisioningContext) ambariFlowFacade.allocateAmbariRoles(context);
-            LOGGER.debug("Metadata setup DONE.");
+            ProvisioningContext ambariRoleAllocationContext = (ProvisioningContext) ambariFlowFacade.allocateAmbariRoles(context);
+            LOGGER.debug("Allocating Ambari roles DONE.");
+            return ambariRoleAllocationContext;
         } catch (Exception e) {
             LOGGER.error("Exception during metadata setup: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
-        return ambariRoleAllocationContext;
     }
 
     @Override
     public FlowContext startAmbari(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Starting Ambari. Context: {}", context);
-        FlowContext ambariStartContext = null;
+
         try {
-            ambariStartContext = ambariFlowFacade.startAmbari(context);
+            FlowContext ambariStartContext = ambariFlowFacade.startAmbari(context);
             LOGGER.debug("Ambari start DONE.");
+            return ambariStartContext;
         } catch (Exception e) {
             LOGGER.error("Exception during metadata setup: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
-        return ambariStartContext;
     }
 
     @Override
@@ -126,10 +120,11 @@ public class SimpleFlowFacade implements FlowFacade {
         LOGGER.debug("Building ambari cluster. Context: {}", context);
         try {
             context = ambariFlowFacade.buildAmbariCluster(context);
+            LOGGER.debug("Building ambari cluster DONE");
+            return context;
         } catch (Exception e) {
             LOGGER.error("Exception during the cluster build process: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
-        return context;
     }
 }
