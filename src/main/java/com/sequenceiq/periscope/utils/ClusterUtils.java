@@ -25,14 +25,6 @@ public final class ClusterUtils {
         return (double) metrics.getAvailableMB() / (double) metrics.getTotalMB();
     }
 
-    public static float computeMaxQueueResourceCapacity(Cluster cluster, CapacitySchedulerQueueInfo queue) {
-        return cluster.getTotalMB() * (queue.getAbsoluteMaxCapacity() / MAX_CAPACITY);
-    }
-
-    public static float computeFreeQueueResourceCapacity(Cluster cluster, CapacitySchedulerQueueInfo queue) {
-        return computeMaxQueueResourceCapacity(cluster, queue) - queue.getResourcesUsed().getMemory();
-    }
-
     public static List<CapacitySchedulerQueueInfo> getAllQueueInfo(SchedulerInfo schedulerInfo) {
         List<CapacitySchedulerQueueInfo> queueInfoList = new ArrayList<>();
         if (schedulerInfo instanceof CapacitySchedulerInfo) {

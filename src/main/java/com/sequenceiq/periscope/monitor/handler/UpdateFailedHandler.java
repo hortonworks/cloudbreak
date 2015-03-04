@@ -1,4 +1,4 @@
-package com.sequenceiq.periscope.monitor.event.handler;
+package com.sequenceiq.periscope.monitor.handler;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

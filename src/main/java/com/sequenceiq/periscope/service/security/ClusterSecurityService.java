@@ -11,8 +11,6 @@ import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.service.CloudbreakService;
 
-import groovyx.net.http.HttpResponseException;
-
 @Service
 public class ClusterSecurityService {
 
@@ -23,7 +21,7 @@ public class ClusterSecurityService {
         CloudbreakClient client = cloudbreakService.getClient();
         try {
             return client.hasAccess(user.getId(), user.getAccount(), ambari.getHost());
-        } catch (HttpResponseException e) {
+        } catch (Exception e) {
             // if the cluster is unknown for cloudbreak
             // it should allow it to monitor
             return true;

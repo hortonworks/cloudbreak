@@ -1,6 +1,8 @@
 package com.sequenceiq.periscope.domain;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -18,6 +20,7 @@ public class ScalingPolicy {
     @SequenceGenerator(name = "template_generator", sequenceName = "sequence_table")
     private long id;
     private String name;
+    @Enumerated(EnumType.STRING)
     private AdjustmentType adjustmentType;
     private int scalingAdjustment;
     @OneToOne(mappedBy = "scalingPolicy")

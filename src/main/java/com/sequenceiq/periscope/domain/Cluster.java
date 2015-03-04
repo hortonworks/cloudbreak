@@ -1,6 +1,8 @@
 package com.sequenceiq.periscope.domain;
 
+import java.net.ConnectException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -24,7 +28,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.client.api.YarnClient;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.periscope.log.Logger;
@@ -54,12 +57,12 @@ public class Cluster {
     private Ambari ambari;
     @ManyToOne
     private PeriscopeUser user;
-    private boolean appMovementAllowed;
+    @Enumerated(EnumType.STRING)
     private ClusterState state = ClusterState.RUNNING;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(nullable = true)
+    @JoinColumn(nullable = true, name = "cluster_id")
     private List<MetricAlarm> metricAlarms = new ArrayList<>();
-    @JoinColumn(nullable = true)
+    @JoinColumn(nullable = true, name = "cluster_id")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<TimeAlarm> timeAlarms = new ArrayList<>();
     private int minSize = DEFAULT_MIN_SIZE;
@@ -68,15 +71,13 @@ public class Cluster {
     private Long stackId;
 
     @Transient
+    private Map<String, String> configCache = new HashMap<>();
+    @Transient
     private Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
     @Transient
-    private long lastScalingActivity;
-    @Transient
-    private Configuration configuration;
+    private volatile long lastScalingActivity;
     @Transient
     private YarnClient yarnClient;
-    @Transient
-    private ClusterMetricsInfo metrics;
     @Transient
     private HostResolution resolution;
 
@@ -94,16 +95,20 @@ public class Cluster {
 
     public void start() throws ConnectionException {
         try {
-            configuration = AmbariConfigurationService.getConfiguration(id, newAmbariClient(), resolution);
             if (yarnClient != null) {
                 yarnClient.stop();
             }
             yarnClient = YarnClient.createYarnClient();
-            yarnClient.init(configuration);
+            yarnClient.init(getConfiguration());
             yarnClient.start();
+            configCache = new HashMap<>();
         } catch (Exception e) {
             throw new ConnectionException(getHost());
         }
+    }
+
+    public Configuration getConfiguration() throws ConnectException {
+        return AmbariConfigurationService.getConfiguration(id, newAmbariClient(), resolution);
     }
 
     public void stop() {
@@ -123,10 +128,6 @@ public class Cluster {
 
     public void setResolution(HostResolution resolution) {
         this.resolution = resolution;
-    }
-
-    public boolean isAppMovementAllowed() {
-        return appMovementAllowed;
     }
 
     public ClusterState getState() {
@@ -247,23 +248,25 @@ public class Cluster {
     }
 
     public String getConfigValue(ConfigParam param, String defaultValue) {
-        return configuration.get(param.key(), defaultValue);
+        String key = param.key();
+        String value = configCache.get(key);
+        if (value == null) {
+            try {
+                value = getConfiguration().get(key, defaultValue);
+                configCache.put(key, value);
+            } catch (ConnectException e) {
+                value = defaultValue;
+            }
+        }
+        return value;
     }
 
-    public long getTotalMB() {
-        return metrics == null ? 0 : metrics.getTotalMB();
-    }
-
-    public long getLastScalingActivity() {
+    public synchronized long getLastScalingActivity() {
         return lastScalingActivity;
     }
 
-    public void setLastScalingActivityCurrent() {
+    public synchronized void setLastScalingActivityCurrent() {
         this.lastScalingActivity = System.currentTimeMillis();
-    }
-
-    public void updateMetrics(ClusterMetricsInfo metrics) {
-        this.metrics = metrics == null ? this.metrics : metrics;
     }
 
     public void refreshConfiguration() throws ConnectionException {

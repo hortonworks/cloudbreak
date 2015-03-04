@@ -9,6 +9,7 @@ import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.quartz.simpl.SimpleJobFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +18,7 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
+import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
@@ -44,6 +46,15 @@ public class AppConfig implements AsyncConfigurer {
         executorFactoryBean.setMaxPoolSize(maxPoolSize);
         executorFactoryBean.setQueueCapacity(queueCapacity);
         return executorFactoryBean;
+    }
+
+    @Bean
+    public SchedulerFactoryBean schedulerFactoryBean() {
+        SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
+        scheduler.setTaskExecutor(getAsyncExecutor());
+        scheduler.setAutoStartup(true);
+        scheduler.setJobFactory(new SimpleJobFactory());
+        return scheduler;
     }
 
     @Bean

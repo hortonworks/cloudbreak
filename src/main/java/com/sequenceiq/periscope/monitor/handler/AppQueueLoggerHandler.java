@@ -1,6 +1,5 @@
-package com.sequenceiq.periscope.monitor.event.handler;
+package com.sequenceiq.periscope.monitor.handler;
 
-import static com.sequenceiq.periscope.utils.ClusterUtils.computeMaxQueueResourceCapacity;
 import static com.sequenceiq.periscope.utils.ClusterUtils.getAllQueueInfo;
 
 import java.util.Date;
@@ -47,7 +46,6 @@ public class AppQueueLoggerHandler implements ApplicationListener<ApplicationUpd
             sb.append("\nmax capacity: ").append(queue.getMaxCapacity());
             sb.append("\nabsolute capacity: ").append(queue.getAbsoluteCapacity());
             sb.append("\nabsolute max capacity: ").append(queue.getAbsoluteMaxCapacity());
-            sb.append("\nabsolute max resource capacity (MB): ").append(computeMaxQueueResourceCapacity(cluster, queue));
             sb.append("\nused capacity: ").append(queue.getUsedCapacity());
             sb.append("\nabsolute used capacity: ").append(queue.getAbsoluteUsedCapacity());
             sb.append("\nnumber of apps: ").append(queue.getNumApplications());

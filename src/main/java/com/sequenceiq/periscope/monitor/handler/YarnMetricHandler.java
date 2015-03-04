@@ -1,85 +1,67 @@
-package com.sequenceiq.periscope.monitor.event.handler;
+package com.sequenceiq.periscope.monitor.handler;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.periscope.domain.BaseAlarm;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ComparisonOperator;
 import com.sequenceiq.periscope.domain.MetricAlarm;
-import com.sequenceiq.periscope.domain.Notification;
-import com.sequenceiq.periscope.domain.ScalingPolicy;
-import com.sequenceiq.periscope.domain.TimeAlarm;
 import com.sequenceiq.periscope.log.Logger;
 import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
-import com.sequenceiq.periscope.monitor.MonitorUpdateRate;
-import com.sequenceiq.periscope.monitor.event.ClusterMetricsUpdateEvent;
+import com.sequenceiq.periscope.monitor.event.EventType;
+import com.sequenceiq.periscope.monitor.event.YarnMetricUpdateEvent;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.service.ClusterService;
-import com.sequenceiq.periscope.service.NotificationService;
-import com.sequenceiq.periscope.service.ScalingService;
 import com.sequenceiq.periscope.utils.ClusterUtils;
-import com.sequenceiq.periscope.utils.DateUtils;
 
 @Component
-public class ClusterWatcher implements ApplicationListener<ClusterMetricsUpdateEvent> {
+public class YarnMetricHandler implements MetricHandler {
 
-    private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(ClusterWatcher.class);
+    private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(YarnMetricHandler.class);
     private static final DecimalFormat TIME_FORMAT = new DecimalFormat("##.##");
 
     @Autowired
     private ClusterService clusterService;
-    @Autowired
-    private ScalingService scalingService;
-    @Autowired
-    private NotificationService notificationService;
 
     @Override
-    public void onApplicationEvent(ClusterMetricsUpdateEvent event) {
-        long clusterId = event.getClusterId();
+    public List<MetricResult> isAlarmHit(ApplicationEvent event) {
+        YarnMetricUpdateEvent source = (YarnMetricUpdateEvent) event;
+        long clusterId = source.getClusterId();
         try {
             Cluster cluster = clusterService.get(clusterId);
-            ClusterMetricsInfo metrics = event.getClusterMetricsInfo();
-            cluster.updateMetrics(metrics);
-            checkTimeAlarms(cluster);
-            checkMetricAlarms(cluster, metrics);
+            ClusterMetricsInfo metrics = source.getClusterMetricsInfo();
+            return checkMetricAlarms(cluster, metrics);
         } catch (ClusterNotFoundException e) {
-            LOGGER.error(clusterId, "Cluster not found", e);
+            LOGGER.error(clusterId, "Cluster not found, ignoring event", e);
         }
+        return Collections.emptyList();
     }
 
-    private void checkTimeAlarms(Cluster cluster) {
-        for (TimeAlarm alarm : cluster.getTimeAlarms()) {
-            long clusterId = cluster.getId();
-            String alarmName = alarm.getName();
-            LOGGER.info(clusterId, "Checking time based alarm: '{}'", alarmName);
-            if (isTrigger(alarm, clusterId)) {
-                LOGGER.info(clusterId, "Alarm: '{}' triggers", alarmName);
-                handleNotifications(cluster, alarm);
-                handleScaling(cluster, alarm);
-                break;
-            }
-        }
+    @Override
+    public EventType getEventType() {
+        return EventType.YARN_METRIC;
     }
 
-    private boolean isTrigger(TimeAlarm alarm, long clusterId) {
-        return DateUtils.isTrigger(clusterId, alarm.getCron(), alarm.getTimeZone(), MonitorUpdateRate.CLUSTER_UPDATE_RATE);
-    }
-
-    private void checkMetricAlarms(Cluster cluster, ClusterMetricsInfo metrics) {
+    private List<MetricResult> checkMetricAlarms(Cluster cluster, ClusterMetricsInfo metrics) {
+        List<MetricResult> result = new ArrayList<>();
         for (MetricAlarm metricAlarm : cluster.getMetricAlarms()) {
             long clusterId = cluster.getId();
             LOGGER.info(clusterId, "Checking metric based alarm: '{}'", metricAlarm.getName());
             double value = getMetricValue(metrics, metricAlarm);
             if (alarmHit(value, metricAlarm, clusterId)) {
-                handleNotifications(cluster, metricAlarm);
-                handleScaling(cluster, metricAlarm);
+                result.add(new MetricResult(true, metricAlarm, cluster));
+            } else {
+                result.add(new MetricResult(false, metricAlarm, cluster));
             }
         }
+        return result;
     }
 
     private double getMetricValue(ClusterMetricsInfo metrics, MetricAlarm metricAlarm) {
@@ -175,21 +157,4 @@ public class ClusterWatcher implements ApplicationListener<ClusterMetricsUpdateE
     private void setCurrentTime(MetricAlarm metricAlarm) {
         metricAlarm.setAlarmHitsSince(System.currentTimeMillis());
     }
-
-    private void handleScaling(Cluster cluster, BaseAlarm alarm) {
-        ScalingPolicy scalingPolicy = alarm.getScalingPolicy();
-        if (scalingPolicy != null) {
-            scalingService.scale(cluster, scalingPolicy);
-        }
-    }
-
-    private void handleNotifications(Cluster cluster, BaseAlarm alarm) {
-        if (!alarm.isNotificationSent()) {
-            for (Notification notification : alarm.getNotifications()) {
-                notificationService.sendNotification(cluster, alarm, notification);
-            }
-            alarm.setNotificationSent(true);
-        }
-    }
-
 }

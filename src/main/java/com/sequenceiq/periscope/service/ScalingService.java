@@ -65,8 +65,7 @@ public class ScalingService {
         }
     }
 
-    public ScalingPolicy setScalingPolicy(PeriscopeUser user, long clusterId, long policyId, ScalingPolicy scalingPolicy)
-            throws ClusterNotFoundException {
+    public ScalingPolicy setScalingPolicy(PeriscopeUser user, long clusterId, long policyId, ScalingPolicy scalingPolicy) throws ClusterNotFoundException {
         Cluster cluster = clusterService.get(user, clusterId);
         ScalingPolicy result = null;
         List<BaseAlarm> alarms = cluster.getAlarms();
@@ -91,13 +90,18 @@ public class ScalingService {
         Cluster cluster = clusterService.get(user, clusterId);
         long alarmId = policy.getAlarm().getId();
         List<BaseAlarm> alarms = cluster.getAlarms();
+        boolean added = false;
         for (BaseAlarm baseAlarm : alarms) {
             if (baseAlarm.getId() == alarmId) {
                 baseAlarm.setScalingPolicy(policy);
                 policyRepository.save(policy);
                 saveAlarm(baseAlarm);
+                added = true;
                 break;
             }
+        }
+        if (!added) {
+            throw new AlarmNotFoundException(alarmId);
         }
         return policy;
     }
@@ -105,13 +109,18 @@ public class ScalingService {
     public void deletePolicy(PeriscopeUser user, long clusterId, long policyId) throws ClusterNotFoundException {
         Cluster cluster = clusterService.get(user, clusterId);
         List<BaseAlarm> alarms = cluster.getAlarms();
+        boolean removed = false;
         for (BaseAlarm alarm : alarms) {
             ScalingPolicy scalingPolicy = alarm.getScalingPolicy();
             if (scalingPolicy != null && scalingPolicy.getId() == policyId) {
                 alarm.setScalingPolicy(null);
                 saveAlarm(alarm);
+                removed = true;
                 break;
             }
+        }
+        if (!removed) {
+            throw new ScalingPolicyNotFoundException(policyId);
         }
         clusterRepository.save(cluster);
         cluster.setAlarms(alarms);

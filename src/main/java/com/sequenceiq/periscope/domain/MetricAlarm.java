@@ -2,6 +2,8 @@ package com.sequenceiq.periscope.domain;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -11,6 +13,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 @DiscriminatorValue("METRIC")
 public class MetricAlarm extends BaseAlarm {
 
+    @Enumerated(EnumType.STRING)
     private Metric metric;
     private ComparisonOperator comparisonOperator;
     private double threshold;

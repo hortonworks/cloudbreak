@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.monitor.event;
 
-public interface UpdateEvent {
+public interface UpdateEvent extends TypedEvent {
 
     /**
      * Returns the id of the cluster which the update request

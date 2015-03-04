@@ -22,6 +22,11 @@ public class ApplicationUpdateEvent extends ApplicationEvent implements UpdateEv
         return clusterId;
     }
 
+    @Override
+    public EventType getEventType() {
+        return EventType.APP_METRIC;
+    }
+
     public List<ApplicationReport> getReports() {
         return ((QueueAppUpdate) source).getApplicationReports();
     }

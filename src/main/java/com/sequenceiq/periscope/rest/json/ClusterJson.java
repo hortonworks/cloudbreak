@@ -6,7 +6,6 @@ public class ClusterJson implements Json {
     private String host;
     private String port;
     private String state;
-    private String appMovement;
     private Long stackId;
 
     public ClusterJson() {
@@ -42,14 +41,6 @@ public class ClusterJson implements Json {
 
     public void setState(String state) {
         this.state = state;
-    }
-
-    public String getAppMovement() {
-        return appMovement;
-    }
-
-    public void setAppMovement(String appMovement) {
-        this.appMovement = appMovement;
     }
 
     public Long getStackId() {

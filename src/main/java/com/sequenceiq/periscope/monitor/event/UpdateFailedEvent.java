@@ -12,4 +12,9 @@ public class UpdateFailedEvent extends ApplicationEvent implements UpdateEvent {
     public long getClusterId() {
         return (long) source;
     }
+
+    @Override
+    public EventType getEventType() {
+        return EventType.FAILED;
+    }
 }

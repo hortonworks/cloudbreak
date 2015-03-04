@@ -36,7 +36,7 @@ curl -X GET -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/alarms/metric | 
 curl -X DELETE -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/alarms/metric/150 | jq .
 
 # set time alarms
-curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alarmName":"cron-worktime","description":"Number of nodes during worktime","timeZone":"Europe/Budapest","cron":"0 24 15 ? * MON-FRI"}' $HOST/clusters/50/alarms/time | jq .
+curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alarmName":"cron-worktime","description":"Number of nodes during worktime","timeZone":"Europe/Budapest","cron":"0 10 20 ? * MON-FRI"}' $HOST/clusters/50/alarms/time | jq .
 curl -X PUT -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alarmName":"cron-worktime-modified","description":"Number of nodes during worktime","timeZone":"Europe/Budapest","cron":"0 39 16 ? * MON-FRI"}' $HOST/clusters/50/alarms/time/153 | jq .
 curl -X GET -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/alarms/time | jq .
 curl -X DELETE -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/alarms/time/102 | jq .
