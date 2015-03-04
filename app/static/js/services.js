@@ -199,6 +199,7 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         emailNeeded: cluster.email,
                         hostGroups: cluster.hostGroups
                     }
+                    successHandler(cluster);
                     Cluster.save({ id: result.id }, cbCluster, function (result) {
                         cluster.hoursUp = 0;
                         cluster.minutesUp = 0;
