@@ -41,9 +41,7 @@ sourceSets {
         resources {
             srcDir 'src/integrationtest/resources'
         }
-        testSrcDirs = sourceSets.integrationtest.java.srcDirs.asList()
         compileClasspath = sourceSets.test.compileClasspath
-
     }
 }
 
@@ -51,6 +49,7 @@ task integrationtestTest(type: Test) {
     description = "Runs Integration Tests"
     testClassesDir = sourceSets.integrationtest.output.classesDir
     classpath += sourceSets.integrationtest.runtimeClasspath
+    testSrcDirs = sourceSets.integrationtest.java.srcDirs.asList()
 }
 
 checkstyleIntegrationtest {
@@ -62,7 +61,7 @@ configurations {
     deployerJars
     all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     all*.exclude group: 'com.google.guava', module: 'guava-jdk5'
-    testCompile.exclude module: 'groovy-all', version: '2.1.8'
+    testCompile.exclude module: 'groovy-all'
 }
 
 uploadArchives {
@@ -102,12 +101,15 @@ jacocoTestReport {
     }
 }
 
-sonarRunner {
+test {
     jacoco {
         append = false
         destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
         classDumpFile = file("$buildDir/jacoco/classpathdumps")
     }
+}
+
+sonarRunner {
     sonarProperties {
         property "sonar.host.url", "$config.sonar_host_url"
         property "sonar.jdbc.url", "$config.sonar_jdbc_url"
@@ -154,7 +156,6 @@ dependencies {
     compile 'com.sequenceiq:consul-api:1.08'
     compile 'org.codehaus.jettison:jettison:1.3.5'
     compile 'commons-io:commons-io:2.4'
-    compile 'com.google.guava:guava:16.0.1'
     compile 'com.thoughtworks.xstream:xstream:1.4.7'
     compile 'com.github.fommil:openssh:1.0'
     compile group: 'javax.mail', name: 'mail', version: '1.5.0-b01'
@@ -168,6 +169,11 @@ dependencies {
     compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.47'
     compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.47'
     compile 'org.jasypt:jasypt:1.9.2'
+    compile 'com.google.guava:guava:16.0.1'
+    checkstyle('com.puppycrawl.tools:checkstyle:5.7') {
+        exclude group: 'com.google.guava'
+    }
+    checkstyle("com.google.guava:guava:16.0.1") { force = true }
 
     runtime group: 'activation', name: 'activation', version: '1.0.2'
 
@@ -179,10 +185,9 @@ dependencies {
     deployerJars 'org.springframework.build.aws:org.springframework.build.aws.maven:3.0.0.RELEASE'
 }
 
-task wrapper(type: Wrapper) { gradleVersion = "1.12" }
+task wrapper(type: Wrapper) { gradleVersion = "2.3" }
 
 task buildInfo(type: BuildInfoTask) {
-    systemProperties = System.properties
     destination = file("$buildDir")
     applicationPropertiesPath = "$buildDir"
     basename = jar.baseName
