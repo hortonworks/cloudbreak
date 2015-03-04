@@ -30,16 +30,14 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
         long id = event.getClusterId();
         try {
             Cluster cluster = clusterService.get(id);
-            if (!cluster.isRestarting()) {
-                Integer failed = updateFailures.get(id);
-                if (failed == null) {
-                    updateFailures.put(id, 1);
-                } else if (RETRY_THRESHOLD - 1 == failed) {
-                    cluster.setState(ClusterState.SUSPENDED);
-                    updateFailures.remove(id);
-                } else {
-                    updateFailures.put(id, failed + 1);
-                }
+            Integer failed = updateFailures.get(id);
+            if (failed == null) {
+                updateFailures.put(id, 1);
+            } else if (RETRY_THRESHOLD - 1 == failed) {
+                cluster.setState(ClusterState.SUSPENDED);
+                updateFailures.remove(id);
+            } else {
+                updateFailures.put(id, failed + 1);
             }
         } catch (ClusterNotFoundException e) {
             LOGGER.warn(id, "Trying to suspend an already deleted cluster", e);

@@ -70,8 +70,6 @@ public class Cluster {
     @Transient
     private Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
     @Transient
-    private boolean restarting;
-    @Transient
     private long lastScalingActivity;
     @Transient
     private Configuration configuration;
@@ -121,10 +119,6 @@ public class Cluster {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public HostResolution getResolution() {
-        return resolution;
     }
 
     public void setResolution(HostResolution resolution) {
@@ -252,24 +246,12 @@ public class Cluster {
         return state == ClusterState.RUNNING;
     }
 
-    public void allowAppMovement(boolean appMovementAllowed) {
-        this.appMovementAllowed = appMovementAllowed;
-    }
-
     public String getConfigValue(ConfigParam param, String defaultValue) {
         return configuration.get(param.key(), defaultValue);
     }
 
     public long getTotalMB() {
         return metrics == null ? 0 : metrics.getTotalMB();
-    }
-
-    public boolean isRestarting() {
-        return restarting;
-    }
-
-    public void setRestarting(boolean restarting) {
-        this.restarting = restarting;
     }
 
     public long getLastScalingActivity() {
@@ -281,7 +263,6 @@ public class Cluster {
     }
 
     public void updateMetrics(ClusterMetricsInfo metrics) {
-        this.restarting = false;
         this.metrics = metrics == null ? this.metrics : metrics;
     }
 

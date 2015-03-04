@@ -1,7 +1,5 @@
 package com.sequenceiq.periscope.rest.controller;
 
-import java.util.Map;
-
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.registry.ConnectionException;
-import com.sequenceiq.periscope.registry.QueueSetupException;
 import com.sequenceiq.periscope.rest.converter.ClusterConverter;
-import com.sequenceiq.periscope.rest.converter.QueueSetupConverter;
 import com.sequenceiq.periscope.rest.json.ClusterJson;
-import com.sequenceiq.periscope.rest.json.QueueSetupJson;
 import com.sequenceiq.periscope.rest.json.ScalingConfigurationJson;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.service.ClusterService;
@@ -34,8 +29,6 @@ public class ConfigurationController {
     private ClusterService clusterService;
     @Autowired
     private ClusterConverter clusterConverter;
-    @Autowired
-    private QueueSetupConverter queueSetupConverter;
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<ClusterJson> refreshConfiguration(@ModelAttribute("user") PeriscopeUser user,
@@ -57,11 +50,4 @@ public class ConfigurationController {
         return new ResponseEntity<>(clusterService.getScalingConfiguration(user, clusterId), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/queue", method = RequestMethod.POST)
-    public ResponseEntity<QueueSetupJson> setQueueConfig(@ModelAttribute("user") PeriscopeUser user,
-            @PathVariable long clusterId, @RequestBody QueueSetupJson queueSetup) throws ClusterNotFoundException, QueueSetupException {
-        Map<String, String> newSetup = clusterService.setQueueSetup(user, clusterId, queueSetupConverter.convert(queueSetup));
-        QueueSetupJson responseJson = new QueueSetupJson(queueSetup.getSetup(), newSetup);
-        return new ResponseEntity<>(responseJson, HttpStatus.OK);
-    }
 }
