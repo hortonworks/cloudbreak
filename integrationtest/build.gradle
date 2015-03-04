@@ -50,4 +50,4 @@ dependencies {
     compile "org.testng:testng:6.3.1"
 }
 
-task wrapper(type: Wrapper) { gradleVersion = "2.2.1" }
+task wrapper(type: Wrapper) { gradleVersion = "2.3" }
