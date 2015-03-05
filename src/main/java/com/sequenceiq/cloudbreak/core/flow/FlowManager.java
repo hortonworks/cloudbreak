@@ -11,4 +11,5 @@ public interface FlowManager {
     void triggerProvisioning(Object object);
 
     void triggerNext(Class sourceHandlerClass, Object payload, boolean success);
+
 }
