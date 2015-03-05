@@ -10,6 +10,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.MapKeyColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -52,11 +53,14 @@ public class Recipe implements ProvisionEntity {
     private String description;
 
     @ElementCollection(fetch = FetchType.EAGER)
+    @MapKeyColumn(name = "plugin")
+    @Column(name = "execution_type")
     @Enumerated(EnumType.STRING)
     private Map<String, PluginExecutionType> plugins;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @Column(columnDefinition = "TEXT", length = 100000)
+    @MapKeyColumn(name = "key")
+    @Column(name = "value", columnDefinition = "TEXT", length = 100000)
     private Map<String, String> keyValues;
 
     private String account;

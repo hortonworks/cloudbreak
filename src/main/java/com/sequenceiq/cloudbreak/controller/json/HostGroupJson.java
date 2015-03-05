@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import java.util.Set;
+
 import javax.validation.constraints.NotNull;
 
 public class HostGroupJson {
@@ -8,6 +10,7 @@ public class HostGroupJson {
     private String name;
     @NotNull
     private String instanceGroupName;
+    private Set<Long> recipeIds;
 
     public String getName() {
         return name;
@@ -23,5 +26,13 @@ public class HostGroupJson {
 
     public void setInstanceGroupName(String instanceGroupName) {
         this.instanceGroupName = instanceGroupName;
+    }
+
+    public Set<Long> getRecipeIds() {
+        return recipeIds;
+    }
+
+    public void setRecipeIds(Set<Long> recipeIds) {
+        this.recipeIds = recipeIds;
     }
 }

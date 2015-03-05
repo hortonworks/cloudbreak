@@ -13,10 +13,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 @Entity
 @NamedQueries({
         @NamedQuery(
-                name = "HostMetadata.findHostsInHostgroup",
-                query = "SELECT h FROM HostMetadata h "
-                        + "WHERE h.hostGroup.id= :hostGroupId "),
-        @NamedQuery(
                 name = "HostMetadata.findHostsInCluster",
                 query = "SELECT h FROM HostMetadata h "
                         + "WHERE h.hostGroup.cluster.id= :clusterId")

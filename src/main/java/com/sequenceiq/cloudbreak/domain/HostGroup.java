@@ -7,6 +7,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -18,13 +19,20 @@ import javax.persistence.OneToMany;
                 name = "HostGroup.findHostGroupsInCluster",
                 query = "SELECT h FROM HostGroup h "
                         + "LEFT JOIN FETCH h.hostMetadata "
+                        + "LEFT JOIN FETCH h.recipes "
                         + "WHERE h.cluster.id= :clusterId"),
         @NamedQuery(
                 name = "HostGroup.findHostGroupInClusterByName",
                 query = "SELECT h FROM HostGroup h "
                         + "LEFT JOIN FETCH h.hostMetadata "
+                        + "LEFT JOIN FETCH h.recipes "
                         + "WHERE h.cluster.id= :clusterId "
-                        + "AND h.name= :hostGroupName")
+                        + "AND h.name= :hostGroupName"),
+        @NamedQuery(
+                name = "HostGroup.findAllHostGroupsByRecipe",
+                query = "SELECT h FROM HostGroup h "
+                        + "JOIN h.recipes r "
+                        + "WHERE r.id= :recipeId")
 })
 public class HostGroup {
 
@@ -43,6 +51,9 @@ public class HostGroup {
 
     @OneToMany(mappedBy = "hostGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<HostMetadata> hostMetadata = new HashSet<>();
+
+    @ManyToMany
+    private Set<Recipe> recipes = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -82,5 +93,13 @@ public class HostGroup {
 
     public void setHostMetadata(Set<HostMetadata> hostMetadata) {
         this.hostMetadata = hostMetadata;
+    }
+
+    public Set<Recipe> getRecipes() {
+        return recipes;
+    }
+
+    public void setRecipes(Set<Recipe> recipes) {
+        this.recipes = recipes;
     }
 }

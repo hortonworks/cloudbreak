@@ -43,7 +43,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     public void fireCloudbreakEvent(Long stackId, String eventType, String eventMessage) {
         CloudbreakEventData eventData = new CloudbreakEventData(stackId, eventType, eventMessage);
         MDCBuilder.buildMdcContext(eventData);
-        LOGGER.info("Fireing cloudbreak event: {}", eventData);
+        LOGGER.info("Firing Cloudbreak event: {}", eventData);
         Event reactorEvent = Event.wrap(eventData);
         reactor.notify(ReactorConfig.CLOUDBREAK_EVENT, reactorEvent);
     }

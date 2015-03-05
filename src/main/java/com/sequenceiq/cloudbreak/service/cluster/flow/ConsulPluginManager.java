@@ -35,6 +35,7 @@ public class ConsulPluginManager implements PluginManager {
     public static final String FAILED_SIGNAL = "FAILED";
     public static final int POLLING_INTERVAL = 5000;
     public static final int MAX_ATTEMPTS = 30;
+    private static final int MAX_NODE_FILTER_LENGTH = 500;
 
     @Autowired
     private ConsulKVCheckerTask consulKVCheckerTask;
@@ -61,23 +62,43 @@ public class ConsulPluginManager implements PluginManager {
         List<ConsulClient> clients = ConsulUtils.createClients(instanceMetaData);
         for (Map.Entry<String, PluginExecutionType> plugin : plugins.entrySet()) {
             Set<String> installedHosts = new HashSet<>();
-            EventParams eventParams = new EventParams();
             if (PluginExecutionType.ONE_NODE.equals(plugin.getValue())) {
                 String installedHost = FluentIterable.from(hosts).first().get();
                 installedHosts.add(installedHost);
-                eventParams.setNode(installedHost.replace(".node.consul", ""));
             } else {
                 installedHosts.addAll(hosts);
             }
-            String eventId = ConsulUtils.fireEvent(clients, INSTALL_PLUGIN_EVENT, plugin.getKey() + " " + getPluginName(plugin.getKey()), eventParams, null);
-            if (eventId != null) {
-                eventIdMap.put(eventId, installedHosts);
-            } else {
-                throw new PluginFailureException("Failed to install plugins, Consul client couldn't fire the event or failed to retrieve an event ID."
-                        + "Maybe the payload was too long (max. 512 bytes)?");
+            for (Map.Entry<String, Set<String>> nodeFilter : getNodeFilters(installedHosts).entrySet()) {
+                EventParams eventParams = new EventParams();
+                eventParams.setNode(nodeFilter.getKey());
+                String eventId = ConsulUtils.fireEvent(clients, INSTALL_PLUGIN_EVENT, plugin.getKey() + " " + getPluginName(plugin.getKey()), eventParams, null);
+                if (eventId != null) {
+                    eventIdMap.put(eventId, nodeFilter.getValue());
+                } else {
+                    throw new PluginFailureException("Failed to install plugins, Consul client couldn't fire the event or failed to retrieve an event ID."
+                            + "Maybe the payload was too long (max. 512 bytes)?");
+                }
             }
         }
         return eventIdMap;
+    }
+
+    private Map<String, Set<String>> getNodeFilters(Set<String> hosts) {
+        Map<String, Set<String>> nodeFilters = new HashMap<>();
+        StringBuilder nodeFilter = new StringBuilder("");
+        Set<String> hostsForNodeFilter = new HashSet<>();
+        for (String host : hosts) {
+            String shortHost = host.replace(".node.consul", "");
+            if (nodeFilter.length() >= MAX_NODE_FILTER_LENGTH - shortHost.length()) {
+                nodeFilters.put(nodeFilter.deleteCharAt(nodeFilter.length() - 1).toString(), Sets.newHashSet(hostsForNodeFilter));
+                nodeFilter.setLength(0);
+                hostsForNodeFilter.clear();
+            }
+            hostsForNodeFilter.add(host);
+            nodeFilter.append(shortHost).append("|");
+        }
+        nodeFilters.put(nodeFilter.deleteCharAt(nodeFilter.length() - 1).toString(), Sets.newHashSet(hostsForNodeFilter));
+        return nodeFilters;
     }
 
     @Override

@@ -17,7 +17,6 @@ public class ClusterRequest {
     private String name;
     @NotNull
     private Long blueprintId;
-    private Long recipeId;
     @Size(max = 1000)
     private String description;
     @Valid
@@ -47,14 +46,6 @@ public class ClusterRequest {
 
     public void setBlueprintId(Long blueprintId) {
         this.blueprintId = blueprintId;
-    }
-
-    public Long getRecipeId() {
-        return recipeId;
-    }
-
-    public void setRecipeId(Long recipeId) {
-        this.recipeId = recipeId;
     }
 
     public Set<HostGroupJson> getHostGroups() {
