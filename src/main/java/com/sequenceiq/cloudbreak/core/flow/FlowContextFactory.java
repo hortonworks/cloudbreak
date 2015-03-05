@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
 // todo make this class a builder
 public class FlowContextFactory {
@@ -37,11 +38,10 @@ public class FlowContextFactory {
         return provisioningContext;
     }
 
-    public static final ProvisioningContext createMetadataSetupContext(CloudPlatform cloudPlatform, Long stackId, Map<String, Object> setupProperties,
-            Map<String, String> userDataParams) {
+    public static final ProvisioningContext createMetadataSetupContext(CloudPlatform cloudPlatform, Long stackId,
+            Set<CoreInstanceMetaData> coreInstanceMetaData) {
         ProvisioningContext provisioningContext = createProvisioningSetupContext(cloudPlatform, stackId);
-        provisioningContext.getSetupProperties().putAll(setupProperties);
-        provisioningContext.getUserDataParams().putAll(userDataParams);
+        provisioningContext.getCoreInstanceMetaData().addAll(coreInstanceMetaData);
         return provisioningContext;
     }
 

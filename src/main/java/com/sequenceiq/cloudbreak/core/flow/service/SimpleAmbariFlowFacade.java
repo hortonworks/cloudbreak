@@ -104,13 +104,6 @@ public class SimpleAmbariFlowFacade implements AmbariFlowFacade {
         } else {
             LOGGER.info("Ambari has started but there were no cluster request to this stack yet. Won't install cluster now.");
         }
-
-        if (stack.getStatus().equals(Status.AVAILABLE)) {
-            //todo use the retvalue!
-            Object clusterInfo = ambariClusterConnector.buildAmbariCluster(stack);
-        } else {
-            LOGGER.info("Cluster install requested but the stack is not completed yet. Installation will start after the stack is ready.");
-        }
         return provisioningContext;
     }
 
