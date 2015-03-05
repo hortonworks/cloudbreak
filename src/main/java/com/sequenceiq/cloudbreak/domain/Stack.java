@@ -110,7 +110,8 @@ import javax.persistence.Version;
                         + "LEFT JOIN FETCH s.resources "
                         + "LEFT JOIN FETCH s.instanceGroups ig "
                         + "LEFT JOIN FETCH ig.instanceMetaData "
-                        + "WHERE s.ambariIp= :ambariIp"),
+                        + "WHERE s.ambariIp= :ambariIp "
+                        + "AND s.status <> 'DELETE_COMPLETED' "),
         @NamedQuery(
                 name = "Stack.findOneByName",
                 query = "SELECT c FROM Stack c "
