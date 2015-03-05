@@ -74,7 +74,7 @@ public class FlowInitializer implements InitializingBean {
         if (flowHandlersMap.containsKey(handlerClass)) {
             handler = flowHandlersMap.get(handlerClass);
         } else {
-            throw new IllegalStateException("No flowhandler found for" + handlerClass + " Check your configuration");
+            throw new IllegalStateException("No flowhandler found for " + handlerClass + " Check your configuration");
         }
         return (Consumer<Event<?>>) handler;
     }
