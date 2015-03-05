@@ -81,7 +81,8 @@ public class SimpleFlowFacade implements FlowFacade {
             MetadataSetupComplete metadataSetupComplete = (MetadataSetupComplete) metadataSetups.get(provisioningContext.getCloudPlatform())
                     .setupMetadata(stackService.getById(provisioningContext.getStackId()));
             LOGGER.debug("Metadata setup DONE.");
-            return FlowContextFactory.createProvisioningSetupContext(metadataSetupComplete.getCloudPlatform(), metadataSetupComplete.getStackId());
+            return FlowContextFactory.createMetadataSetupContext(provisioningContext.getCloudPlatform(), provisioningContext.getStackId(),
+                    metadataSetupComplete.getCoreInstanceMetaData());
         } catch (Exception e) {
             LOGGER.error("Exception during metadata setup: {}", e.getMessage());
             throw new CloudbreakException(e);
