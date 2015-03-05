@@ -18,12 +18,12 @@ public class CloudbreakErrorHandler implements Consumer<Throwable> {
 
     @Override
     public void accept(Throwable errorData) {
-        LOGGER.debug("Handling error: {}", errorData);
+        LOGGER.info("Handling error: {}", errorData);
         errorLogic(errorData);
     }
 
     public void errorLogic(Throwable errorData) {
-        LOGGER.debug("Performing error logic: {}", errorData);
+        LOGGER.info("Performing error logic: {}", errorData);
         throw new UnsupportedOperationException("Implement me!");
     }
 
