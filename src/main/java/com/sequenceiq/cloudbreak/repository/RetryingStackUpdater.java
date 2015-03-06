@@ -25,14 +25,10 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 public class RetryingStackUpdater {
 
     private static final int MAX_RETRIES = 5;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(RetryingStackUpdater.class);
 
-    @Autowired
-    private StackRepository stackRepository;
-
-    @Autowired
-    private CloudbreakEventService cloudbreakEventService;
+    @Autowired private StackRepository stackRepository;
+    @Autowired private CloudbreakEventService cloudbreakEventService;
 
     public Stack updateStackStatus(Long stackId, Status status, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
@@ -164,24 +160,6 @@ public class RetryingStackUpdater {
         }
     }
 
-    public Stack updateStackCreateComplete(Long stackId) {
-        Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
-        int attempt = 1;
-        try {
-            return doUpdateStackCreateComplete(stackId);
-        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            if (attempt <= MAX_RETRIES) {
-                LOGGER.info("Failed to update stack while trying to set 'CF stack completed'. [attempt: '{}', Cause: {}]. Trying to save it again.",
-                        attempt++, e.getClass().getSimpleName());
-                return doUpdateStackCreateComplete(stackId);
-            } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to set 'CF stack completed')",
-                        stackId), e);
-            }
-        }
-    }
-
     public Stack updateMetadataReady(Long stackId, boolean ready) {
         Stack stack = stackRepository.findById(stackId);
         MDCBuilder.buildMdcContext(stack);
@@ -194,8 +172,7 @@ public class RetryingStackUpdater {
                         attempt++, e.getClass().getSimpleName());
                 return doUpdateMetadataReady(stackId, ready);
             } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to set 'metadataReady')",
-                        stackId), e);
+                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts.(while trying to set 'metadataReady')", stackId), e);
             }
         }
     }
@@ -210,10 +187,9 @@ public class RetryingStackUpdater {
             if (attempt <= MAX_RETRIES) {
                 LOGGER.info("Failed to update stack while trying to set 'nodecount'. [attempt: '{}', Cause: {}]. Trying to save it again.",
                         attempt++, e.getClass().getSimpleName());
-                return doUpdateStackCreateComplete(stackId);
+                return stack;
             } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to set 'nodecount')",
-                        stackId), e);
+                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to set 'nodecount')", stackId), e);
             }
         }
     }
@@ -225,8 +201,7 @@ public class RetryingStackUpdater {
             return stackRepository.save(stack);
         } catch (OptimisticLockException | OptimisticLockingFailureException e) {
             if (attempt <= MAX_RETRIES) {
-                LOGGER.info("Failed to update stack. [attempt: '{}', Cause: {}]. Trying to save it again.",
-                        attempt++, e.getClass().getSimpleName());
+                LOGGER.info("Failed to update stack. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt++, e.getClass().getSimpleName());
                 return stackRepository.save(stack);
             } else {
                 throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts.", stack.getId()), e);
@@ -246,7 +221,6 @@ public class RetryingStackUpdater {
             }
             stack = stackRepository.save(stack);
             LOGGER.info("Updated stack: [status: '{}', statusReason: '{}'].", status.name(), statusReason);
-
             cloudbreakEventService.fireCloudbreakEvent(stackId, status.name(), statusReason);
         }
         return stack;
@@ -296,15 +270,6 @@ public class RetryingStackUpdater {
         stack.setCluster(cluster);
         stack = stackRepository.save(stack);
         LOGGER.info("Saved cluster '{}' for stack.", cluster.getId());
-        return stack;
-    }
-
-    private Stack doUpdateStackCreateComplete(Long stackId) {
-        Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
-        stack.setStackCompleted(true);
-        stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack: [cfStackCompleted: 'true'].");
         return stack;
     }
 

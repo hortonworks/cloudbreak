@@ -154,66 +154,45 @@ public class Stack implements ProvisionEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "stack_generator")
     @SequenceGenerator(name = "stack_generator", sequenceName = "stack_table")
     private Long id;
-
     @Column(nullable = false)
     private String name;
-
     private String owner;
     private String account;
-
     private boolean publicInAccount;
     private String region;
-
-    @Column(length = 1000000, columnDefinition = "TEXT")
-    private String description;
-
-    @Enumerated(EnumType.STRING)
-    private Status status;
-
-    private boolean stackCompleted;
     private String image;
-
     private String ambariIp;
     private String userName;
     private String password;
-
+    private String hash;
+    private int consulServers;
+    private boolean metadataReady;
+    @Column(length = 1000000, columnDefinition = "TEXT")
+    private String description;
     @Column(columnDefinition = "TEXT")
     private String statusReason;
-
-    private String hash;
-
-    private int consulServers;
-
-    private boolean metadataReady;
-
+    @Enumerated(EnumType.STRING)
+    private Status status;
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "key")
     @Column(name = "value", columnDefinition = "TEXT", length = 100000)
     private Map<String, String> parameters;
-
     @OneToOne
     private Credential credential;
-
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Cluster cluster;
-
     @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Resource> resources = new HashSet<>();
-
     @Enumerated(EnumType.STRING)
     private OnFailureAction onFailureActionAction = OnFailureAction.ROLLBACK;
-
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private FailurePolicy failurePolicy;
-
-    @Version
-    private Long version;
-
     @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<InstanceGroup> instanceGroups = new HashSet<>();
-
     @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Subnet> allowedSubnets = new HashSet<>();
+    @Version
+    private Long version;
 
     public Set<InstanceGroup> getInstanceGroups() {
         return instanceGroups;
@@ -293,14 +272,6 @@ public class Stack implements ProvisionEntity {
 
     public void setStatus(Status status) {
         this.status = status;
-    }
-
-    public boolean isStackCompleted() {
-        return stackCompleted;
-    }
-
-    public void setStackCompleted(boolean stackCompleted) {
-        this.stackCompleted = stackCompleted;
     }
 
     public String getAmbariIp() {
@@ -439,6 +410,18 @@ public class Stack implements ProvisionEntity {
         int nodeCount = 0;
         for (InstanceGroup instanceGroup : instanceGroups) {
             nodeCount += instanceGroup.getNodeCount();
+        }
+        return nodeCount;
+    }
+
+    public Integer getFullNodeCountWithoutDecommissionedNodes() {
+        int nodeCount = 0;
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
+                if (!instanceMetaData.getInstanceStatus().equals(InstanceStatus.DECOMMISSIONED)) {
+                    nodeCount++;
+                }
+            }
         }
         return nodeCount;
     }

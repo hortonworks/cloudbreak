@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.Subnet;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
@@ -72,6 +73,9 @@ public class DefaultStackService implements StackService {
 
     @Autowired
     private AmbariClusterConnector ambariClusterConnector;
+
+    @Autowired
+    private InstanceMetaDataRepository instanceMetaDataRepository;
 
     @Resource
     private Map<CloudPlatform, ProvisionSetup> provisionSetups;
@@ -219,12 +223,7 @@ public class DefaultStackService implements StackService {
                         instanceGroup.getNodeCount(), instanceGroup.getGroupName(),
                         -1 * instanceGroupAdjustmentJson.getScalingAdjustment()));
             }
-            int removableHosts = 0;
-            for (InstanceMetaData metadataEntry : stack.getRunningInstanceMetaData()) {
-                if (metadataEntry.isRemovable() && metadataEntry.getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup())) {
-                    removableHosts++;
-                }
-            }
+            int removableHosts = instanceMetaDataRepository.findRemovableInstances(stackId, instanceGroupAdjustmentJson.getInstanceGroup()).size();
             if (removableHosts < -1 * instanceGroupAdjustmentJson.getScalingAdjustment()) {
                 throw new BadRequestException(
                         String.format("There are %s unregistered instances in instance group '%s' but %s were requested. Decommission nodes from the cluster!",

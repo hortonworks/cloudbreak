@@ -26,6 +26,7 @@ import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -86,7 +87,7 @@ public class AmbariRoleAllocator {
                             coreInstanceMetaData.size(), stack.getFullNodeCount()));
                 }
                 for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                    Set<InstanceMetaData> instancesMetaData = prepareInstanceMetaData(coreInstanceMetaData, instanceGroup);
+                    Set<InstanceMetaData> instancesMetaData = prepareInstanceMetaData(coreInstanceMetaData, instanceGroup, InstanceStatus.REGISTERED);
                     stackUpdater.updateStackMetaData(stackId, instancesMetaData, instanceGroup.getGroupName());
                 }
                 stack = stackUpdater.updateMetadataReady(stackId, true);
@@ -120,7 +121,10 @@ public class AmbariRoleAllocator {
         MDCBuilder.buildMdcContext(one);
         try {
             Set<InstanceMetaData> originalMetadata = instanceGroup.getAllInstanceMetaData();
-            Set<InstanceMetaData> instanceMetaData = prepareInstanceMetaData(coreInstanceMetaData, one.getInstanceGroupByInstanceGroupName(instanceGroupName));
+            Set<InstanceMetaData> instanceMetaData = prepareInstanceMetaData(
+                    coreInstanceMetaData,
+                    one.getInstanceGroupByInstanceGroupName(instanceGroupName),
+                    InstanceStatus.UNREGISTERED);
             originalMetadata.addAll(instanceMetaData);
             Stack modifiedStack = stackUpdater.updateStackMetaData(stackId, originalMetadata, instanceGroupName);
             stackUpdater.updateMetadataReady(stackId, true);
@@ -150,7 +154,7 @@ public class AmbariRoleAllocator {
             for (InstanceMetaData instanceMetaData : instancesMetaData) {
                 if (instanceMetaData.getPrivateIp().equalsIgnoreCase(ambariAddress.getAddress().orNull())) {
                     instanceMetaData.setAmbariServer(true);
-                    instanceMetaData.setRemovable(false);
+                    instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
                     return Optional.fromNullable(instanceMetaData.getPublicIp());
                 }
             }
@@ -226,7 +230,7 @@ public class AmbariRoleAllocator {
         return privateIps;
     }
 
-    private Set<InstanceMetaData> prepareInstanceMetaData(Set<CoreInstanceMetaData> coreInstanceMetaData, InstanceGroup instanceGroup) {
+    private Set<InstanceMetaData> prepareInstanceMetaData(Set<CoreInstanceMetaData> coreInstanceMetaData, InstanceGroup instanceGroup, InstanceStatus status) {
         Set<InstanceMetaData> instanceMetaData = new HashSet<>();
         for (CoreInstanceMetaData coreInstanceMetaDataEntry : coreInstanceMetaData) {
             if (coreInstanceMetaDataEntry.getInstanceGroup().getGroupName().equals(instanceGroup.getGroupName())) {
@@ -241,7 +245,7 @@ public class AmbariRoleAllocator {
                 instanceMetaDataEntry.setDockerSubnet(String.format("172.18.%s.1", coreInstanceMetaDataEntry.getPrivateIp().split("\\.")[LAST]));
                 instanceMetaDataEntry.setContainerCount(coreInstanceMetaDataEntry.getContainerCount());
                 instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
-                instanceMetaDataEntry.setRemovable(true);
+                instanceMetaDataEntry.setInstanceStatus(status);
                 instanceMetaDataEntry.setStartDate(timeInMillis);
                 instanceMetaData.add(instanceMetaDataEntry);
             }

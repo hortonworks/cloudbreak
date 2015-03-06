@@ -107,7 +107,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
         int i = 0;
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             for (InstanceMetaData metadataEntry : instanceGroup.getInstanceMetaData()) {
-                if (metadataEntry.isRemovable()) {
+                if (metadataEntry.isDecommissioned() || metadataEntry.isUnRegistered()) {
                     instanceIds.add(metadataEntry.getInstanceId());
                     if (++i >= request.getScalingAdjustment() * -1) {
                         break;

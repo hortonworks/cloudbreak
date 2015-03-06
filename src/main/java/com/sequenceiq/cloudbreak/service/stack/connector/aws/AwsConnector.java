@@ -336,7 +336,6 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     private void sendUpdatedStackCreateComplete(long stackId, String cFStackName, Set<Resource> resourceSet) {
-        stackUpdater.updateStackCreateComplete(stackId);
         LOGGER.info("CloudFormation stack({}) creation completed.", cFStackName);
         LOGGER.info("Publishing {} event.", ReactorConfig.PROVISION_COMPLETE_EVENT);
         reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AWS, stackId, resourceSet)));

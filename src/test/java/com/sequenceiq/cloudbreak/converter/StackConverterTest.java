@@ -179,7 +179,6 @@ public class StackConverterTest {
         Stack result = underTest.convert(stackJson);
         // THEN
         assertEquals(result.getCredential().getId(), stackJson.getCredentialId());
-        // assertEquals(result.getTemplate().getId(), stackJson.getTemplateId());
         assertEquals(result.getStatus(), Status.REQUESTED);
         assertNull(result.getAccount());
         assertNull(result.getOwner());
@@ -206,7 +205,6 @@ public class StackConverterTest {
     private Stack createStack() {
         Stack stack = new Stack();
         stack.setAmbariIp(AMBARI_IP);
-        stack.setStackCompleted(CF_STACK_COMPLETED);
         stack.setCluster(new Cluster());
         stack.setCredential(awsCredential);
         stack.setDescription(DESCRIPTION);
@@ -239,9 +237,7 @@ public class StackConverterTest {
         stackJson.setOwner(DUMMY_HASH);
         stackJson.setInstanceGroups(new ArrayList<InstanceGroupJson>());
         stackJson.setName(DUMMY_NAME);
-        //stackJson.setNodeCount(NODE_COUNT);
         stackJson.setStatus(Status.AVAILABLE);
-        //stackJson.setTemplateId(DUMMY_ID);
         stackJson.setInstanceGroups(new ArrayList<InstanceGroupJson>());
         return stackJson;
     }
