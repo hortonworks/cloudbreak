@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -69,6 +70,7 @@ public class ClusterCreationSuccessHandler implements Consumer<Event<ClusterCrea
             Set<InstanceMetaData> instances = instanceGroup.getInstanceMetaData();
             for (InstanceMetaData instanceMetaData : instances) {
                 instanceMetaData.setRemovable(false);
+                instanceMetaData.setInstanceStatus(InstanceStatus.ALIVE);
             }
             stackUpdater.updateStackMetaData(stack.getId(), instances, instanceGroup.getGroupName());
         }

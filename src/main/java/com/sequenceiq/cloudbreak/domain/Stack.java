@@ -443,6 +443,18 @@ public class Stack implements ProvisionEntity {
         return nodeCount;
     }
 
+    public Integer getFullNodeCountWithoutDecommissionedNodes() {
+        int nodeCount = 0;
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
+                if (!instanceMetaData.getInstanceStatus().equals(InstanceStatus.DECOMMISIONED)) {
+                    nodeCount++;
+                }
+            }
+        }
+        return nodeCount;
+    }
+
     public Set<InstanceMetaData> getRunningInstanceMetaData() {
         Set<InstanceMetaData> instanceMetaDatas = new HashSet<>();
         for (InstanceGroup instanceGroup : instanceGroups) {

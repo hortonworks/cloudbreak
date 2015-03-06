@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -16,16 +18,11 @@ import javax.persistence.NamedQuery;
                         + "AND i.longName= :hostName "
                         + "AND i.terminated = false "),
         @NamedQuery(
-                name = "InstanceMetaData.findUnregisteredHostsInStack",
-                query = "SELECT i FROM InstanceMetaData i "
-                        + "WHERE i.instanceGroup.stack.id= :stackId "
-                        + "AND i.terminated = false "
-                        + "AND i.removable= true"),
-        @NamedQuery(
                 name = "InstanceMetaData.findUnregisteredHostsInInstanceGroup",
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.id= :instanceGroupId "
                         + "AND i.terminated = false "
+                        + "AND i.instanceStatus <> 'DECOMMISIONED' "
                         + "AND i.removable = true"),
         @NamedQuery(
                 name = "InstanceMetaData.findAllInStack",
@@ -39,7 +36,7 @@ import javax.persistence.NamedQuery;
         @NamedQuery(
                 name = "InstanceMetaData.findHostNamesInInstanceGroup",
                 query = "SELECT i.longName FROM InstanceMetaData i "
-                        + "WHERE i.instanceGroup.id= :instanceGroupId")
+                        + "WHERE i.instanceGroup.id = :instanceGroupId")
 })
 public class InstanceMetaData implements ProvisionEntity {
 
@@ -54,6 +51,8 @@ public class InstanceMetaData implements ProvisionEntity {
     private Boolean consulServer;
     private String dockerSubnet;
     private String longName;
+    @Enumerated(EnumType.STRING)
+    private InstanceStatus instanceStatus;
     private Boolean removable;
     private Integer containerCount = 0;
     @ManyToOne
@@ -138,6 +137,22 @@ public class InstanceMetaData implements ProvisionEntity {
         this.longName = longName;
     }
 
+    public InstanceStatus getInstanceStatus() {
+        return instanceStatus;
+    }
+
+    public void setInstanceStatus(InstanceStatus instanceStatus) {
+        this.instanceStatus = instanceStatus;
+    }
+
+    public boolean isDecommisioned() {
+        return instanceStatus.equals(InstanceStatus.DECOMMISIONED);
+    }
+
+    public Integer getContainerCount() {
+        return containerCount;
+    }
+
     public Boolean isRemovable() {
         return removable;
     }
@@ -148,10 +163,6 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public Boolean getRemovable() {
         return removable;
-    }
-
-    public Integer getContainerCount() {
-        return containerCount;
     }
 
     public void setContainerCount(Integer containerCount) {

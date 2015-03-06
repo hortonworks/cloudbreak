@@ -26,6 +26,7 @@ import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -151,6 +152,7 @@ public class AmbariRoleAllocator {
                 if (instanceMetaData.getPrivateIp().equalsIgnoreCase(ambariAddress.getAddress().orNull())) {
                     instanceMetaData.setAmbariServer(true);
                     instanceMetaData.setRemovable(false);
+                    instanceMetaData.setInstanceStatus(InstanceStatus.ALIVE);
                     return Optional.fromNullable(instanceMetaData.getPublicIp());
                 }
             }
@@ -242,6 +244,7 @@ public class AmbariRoleAllocator {
                 instanceMetaDataEntry.setContainerCount(coreInstanceMetaDataEntry.getContainerCount());
                 instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
                 instanceMetaDataEntry.setRemovable(true);
+                instanceMetaDataEntry.setInstanceStatus(InstanceStatus.ALIVE);
                 instanceMetaDataEntry.setStartDate(timeInMillis);
                 instanceMetaData.add(instanceMetaDataEntry);
             }
