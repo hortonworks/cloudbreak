@@ -104,7 +104,6 @@ public class SimpleAmbariFlowFacade implements AmbariFlowFacade {
         } else {
             LOGGER.info("Ambari has started but there were no cluster request to this stack yet. Won't install cluster now.");
         }
-        
         return provisioningContext;
     }
 
