@@ -35,7 +35,7 @@ public class ClusterCreationHandler extends AbstractFlowHandler<ProvisioningCont
 
     @Override
     protected Object assemblePayload(Object serviceResult) {
-        LOGGER.info("assemblePayload() for phase: {}", ((Event) serviceResult).getKey());
+        LOGGER.info("assemblePayload() for phase: {}", serviceResult);
         return serviceResult;
     }
 }
