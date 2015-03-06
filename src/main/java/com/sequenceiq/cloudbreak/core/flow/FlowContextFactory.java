@@ -91,4 +91,10 @@ public class FlowContextFactory {
         context.getResources().addAll(resources);
         return context;
     }
+
+    public static FlowContext createRollbackContext(Long stackId) {
+        ProvisioningContext context = createContext();
+        context.setStackId(stackId);
+        return context;
+    }
 }
