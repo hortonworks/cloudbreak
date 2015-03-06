@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -51,8 +52,10 @@ public class UpdateAmbariHostsSuccessHandler implements Consumer<Event<UpdateAmb
             InstanceMetaData metadataEntry = metadataRepository.findHostInStack(stack.getId(), hostName);
             if (data.isDecommission()) {
                 metadataEntry.setRemovable(true);
+                metadataEntry.setInstanceStatus(InstanceStatus.DECOMMISIONED);
             } else {
                 metadataEntry.setRemovable(false);
+                metadataEntry.setInstanceStatus(InstanceStatus.ALIVE);
             }
             metadataRepository.save(metadataEntry);
         }
