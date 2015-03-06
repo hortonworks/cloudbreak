@@ -31,6 +31,7 @@ public class DownScaleCallable implements Callable<ResourceRequestResult> {
             return ResourceRequestResult.ResourceRequestResultBuilder.builder()
                     .withException(ex)
                     .withFutureResult(FutureResult.FAILED)
+                    .withResources(resource)
                     .withInstanceGroup(stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup()))
                     .build();
         }

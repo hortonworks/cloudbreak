@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.google.common.base.Optional;
@@ -82,6 +83,11 @@ public class ResourceRequestResult {
 
         public ResourceRequestResultBuilder withResources(List<Resource> resources) {
             this.resources = resources;
+            return this;
+        }
+
+        public ResourceRequestResultBuilder withResources(Resource... resources) {
+            this.resources = Arrays.asList(resources);
             return this;
         }
     }

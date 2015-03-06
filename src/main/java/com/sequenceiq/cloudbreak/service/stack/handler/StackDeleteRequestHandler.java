@@ -105,13 +105,13 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
                         futures.add(submit);
                         if (provisionUtil.isRequestFull(stack, futures.size() + 1)) {
                             Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
-                            provisionUtil.checkErrorOccurred(result);
+                            checkErrorOccurred(result);
                             futures = new ArrayList<>();
                         }
                     }
                 }
                 Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
-                provisionUtil.checkErrorOccurred(result);
+                checkErrorOccurred(result);
                 for (int i = networkResourceBuilders.get(data.getCloudPlatform()).size() - 1; i >= 0; i--) {
                     for (Resource resource : stack.getResourcesByType(networkResourceBuilders.get(data.getCloudPlatform()).get(i).resourceType())) {
                         networkResourceBuilders.get(data.getCloudPlatform()).get(i).delete(resource, dCO, stack.getRegion());
@@ -126,5 +126,14 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
             retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_FAILED, "Termination of cluster infrastructure failed: " + ex.getMessage());
         }
     }
+
+
+    private void checkErrorOccurred(Map<FutureResult, List<ResourceRequestResult>> futureResultListMap) throws Exception {
+        List<ResourceRequestResult> resourceRequestResults = futureResultListMap.get(FutureResult.FAILED);
+        if (!resourceRequestResults.isEmpty()) {
+            throw resourceRequestResults.get(0).getException().orNull();
+        }
+    }
+
 
 }
