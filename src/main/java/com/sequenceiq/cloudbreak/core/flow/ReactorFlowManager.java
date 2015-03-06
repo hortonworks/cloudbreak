@@ -32,18 +32,18 @@ public class ReactorFlowManager implements FlowManager {
 
     private String transitionKey(Class handler, boolean success) {
         LOGGER.debug("Transitioning from handler {}. Scenario {}", handler, success ? "SUCCESS" : "ERROR");
-        String transition = null;
+        String transitionKey = null;
         if (transitionMap.containsKey(handler)) {
             if (success) {
-                transition = transitionMap.get(handler).getNext();
+                transitionKey = transitionMap.get(handler).getNext();
             } else {
-                transition = transitionMap.get(handler).getFailure();
+                transitionKey = transitionMap.get(handler).getFailure();
             }
-            LOGGER.debug("Transitioning to [ {} ] from handler [ {} ] ", transition, handler);
+            LOGGER.debug("Transitioning to [ {} ] from handler [ {} ] ", transitionKey, handler);
         } else {
             LOGGER.debug("There is no registered transition from handler {}", handler);
         }
-        return transition;
+        return transitionKey;
     }
 
     @Override
