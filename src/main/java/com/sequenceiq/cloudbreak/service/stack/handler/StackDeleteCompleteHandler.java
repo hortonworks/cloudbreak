@@ -11,10 +11,12 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -35,6 +37,9 @@ public class StackDeleteCompleteHandler implements Consumer<Event<StackDeleteCom
 
     @Autowired
     private RetryingStackUpdater retryingStackUpdater;
+
+    @Autowired
+    private HostGroupRepository hostGroupRepository;
 
     @Autowired
     private CloudbreakEventService cloudbreakEventService;
@@ -58,7 +63,10 @@ public class StackDeleteCompleteHandler implements Consumer<Event<StackDeleteCom
         if (cluster != null) {
             cluster.setName(terminatedName);
             cluster.setBlueprint(null);
-            cluster.setRecipe(null);
+            for (HostGroup hostGroup : hostGroupRepository.findHostGroupsInCluster(cluster.getId())) {
+                hostGroup.getRecipes().clear();
+                hostGroupRepository.save(hostGroup);
+            }
         }
         stack.setCredential(null);
         stack.setName(terminatedName);

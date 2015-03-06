@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
@@ -71,14 +73,6 @@ public class ClusterConverter {
             throw new AccessDeniedException(
                     String.format("Access to blueprint '%s' is denied or blueprint doesn't exist.", clusterRequest.getBlueprintId()), e);
         }
-        if (clusterRequest.getRecipeId() != null) {
-            try {
-                Recipe recipe = recipeRepository.findOne(clusterRequest.getRecipeId());
-                cluster.setRecipe(recipe);
-            } catch (AccessDeniedException e) {
-                throw new AccessDeniedException(String.format("Access to recipe '%s' is denied or recipe doesn't exist.", clusterRequest.getRecipeId()), e);
-            }
-        }
         cluster.setName(clusterRequest.getName());
         cluster.setStatus(Status.REQUESTED);
         cluster.setDescription(clusterRequest.getDescription());
@@ -108,9 +102,6 @@ public class ClusterConverter {
         } else {
             clusterResponse.setBlueprintId(cluster.getBlueprint().getId());
         }
-        if (cluster.getRecipe() != null) {
-            clusterResponse.setRecipeId(cluster.getRecipe().getId());
-        }
         clusterResponse.setDescription(cluster.getDescription() == null ? "" : cluster.getDescription());
         clusterResponse.setHostGroups(convertHostGroupsToJson(hostGroupRepository.findHostGroupsInCluster(cluster.getId())));
         return clusterResponse;
@@ -126,6 +117,16 @@ public class ClusterConverter {
                 throw new BadRequestException(String.format("Cannot find instance group named '%s' in stack '%s'", json.getInstanceGroupName(), stackId));
             }
             hostGroup.setInstanceGroup(instanceGroup);
+            if (json.getRecipeIds() != null) {
+                for (Long recipeId : json.getRecipeIds()) {
+                    try {
+                        Recipe recipe = recipeRepository.findOne(recipeId);
+                        hostGroup.getRecipes().add(recipe);
+                    } catch (AccessDeniedException e) {
+                        throw new AccessDeniedException(String.format("Access to recipe '%s' is denied or recipe doesn't exist.", recipeId), e);
+                    }
+                }
+            }
             hostGroup.setCluster(cluster);
             hostGroups.add(hostGroup);
         }
@@ -138,9 +139,19 @@ public class ClusterConverter {
             HostGroupJson hostGroupJson = new HostGroupJson();
             hostGroupJson.setName(hostGroup.getName());
             hostGroupJson.setInstanceGroupName(hostGroup.getInstanceGroup().getGroupName());
+            hostGroupJson.setRecipeIds(getRecipeIds(hostGroup.getRecipes()));
             hostGroupJsons.add(hostGroupJson);
         }
         return hostGroupJsons;
+    }
+
+    private Set<Long> getRecipeIds(Set<Recipe> recipes) {
+        return FluentIterable.from(recipes).transform(new Function<Recipe, Long>() {
+            @Override
+            public Long apply(Recipe recipe) {
+                return recipe.getId();
+            }
+        }).toSet();
     }
 
 }

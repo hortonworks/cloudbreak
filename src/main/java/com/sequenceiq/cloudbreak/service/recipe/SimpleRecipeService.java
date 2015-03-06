@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
@@ -24,7 +24,7 @@ public class SimpleRecipeService implements RecipeService {
     private RecipeRepository recipeRepository;
 
     @Autowired
-    private ClusterRepository clusterRepository;
+    private HostGroupRepository hostGroupRepository;
 
     @Override
     public Recipe create(CbUser user, Recipe recipe) {
@@ -99,7 +99,7 @@ public class SimpleRecipeService implements RecipeService {
 
     private void delete(Recipe recipe, CbUser user) {
         MDCBuilder.buildMdcContext(recipe);
-        if (clusterRepository.findAllClustersByRecipe(recipe.getId()).isEmpty()) {
+        if (hostGroupRepository.findAllHostGroupsByRecipe(recipe.getId()).isEmpty()) {
             if (!user.getUserId().equals(recipe.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
                 throw new BadRequestException("Public recipes can only be deleted by owners or account admins.");
             } else {

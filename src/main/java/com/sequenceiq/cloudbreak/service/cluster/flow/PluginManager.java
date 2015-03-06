@@ -5,15 +5,18 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
 public interface PluginManager {
 
     void prepareKeyValues(Collection<InstanceMetaData> instanceMetaData, Map<String, String> keyValues);
 
-    Set<String> installPlugins(Collection<InstanceMetaData> instanceMetaData, Collection<String> plugins);
+    Map<String, Set<String>> installPlugins(Collection<InstanceMetaData> instanceMetaData, Map<String, PluginExecutionType> plugins, Set<String> hosts);
 
     Set<String> triggerPlugins(Collection<InstanceMetaData> instanceMetaData, ConsulPluginEvent event);
 
-    void waitForEventFinish(Stack stack, Collection<InstanceMetaData> instanceMetaData, Set<String> eventIds);
+    void waitForEventFinish(Stack stack, Collection<InstanceMetaData> instanceMetaData, Map<String, Set<String>> eventIds);
+
+    void triggerAndWaitForPlugins(Stack stack, ConsulPluginEvent event);
 }

@@ -6,6 +6,7 @@ import javax.persistence.EntityNotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -35,7 +36,7 @@ public class ExceptionControllerAdvice {
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler({ HttpMessageNotReadableException.class, BadRequestException.class })
+    @ExceptionHandler({ TypeMismatchException.class, HttpMessageNotReadableException.class, BadRequestException.class })
     public ResponseEntity<ExceptionResult> badRequest(Exception e) {
         MDCBuilder.buildMdcContext();
         LOGGER.error(e.getMessage(), e);
@@ -76,8 +77,8 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler({ HttpMediaTypeNotSupportedException.class })
     public ResponseEntity<ExceptionResult> httpMediaTypeNotSupported(Exception e) {
         MDCBuilder.buildMdcContext();
-        LOGGER.info(e.getMessage());
-        return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.BAD_REQUEST);
+        LOGGER.error(e.getMessage());
+        return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.NOT_ACCEPTABLE);
     }
 
     @ExceptionHandler({ SubscriptionAlreadyExistException.class })

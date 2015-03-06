@@ -12,4 +12,7 @@ public interface HostGroupRepository extends CrudRepository<HostGroup, Long> {
     Set<HostGroup> findHostGroupsInCluster(@Param("clusterId") Long clusterId);
 
     HostGroup findHostGroupInClusterByName(@Param("clusterId") Long clusterId, @Param("hostGroupName") String hostGroupName);
+
+    Set<HostGroup> findAllHostGroupsByRecipe(@Param("recipeId") Long recipeId);
+
 }

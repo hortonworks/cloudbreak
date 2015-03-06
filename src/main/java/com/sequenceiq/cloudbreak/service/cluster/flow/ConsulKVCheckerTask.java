@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,43 +26,42 @@ public class ConsulKVCheckerTask extends StackBasedStatusCheckerTask<ConsulKVChe
         String expectedValue = context.getExpectedValue();
         String failValue = context.getFailValue();
         List<ConsulClient> clients = context.getConsulClients();
-        LOGGER.info("Checking '{}' different hosts if keys in Consul's key-value store have the expected value", clients.size(), keys, expectedValue);
-        boolean keysFound = true;
-        boolean failed = false;
-        StringBuilder result = new StringBuilder("\n");
+        LOGGER.info("Checking '{}' different hosts if keys in Consul's key-value store have the expected value '{}'", clients.size(), expectedValue);
+        Set<String> failedKeys = new HashSet<>();
+        int matchingKeys = 0;
+        int notFoundKeys = 0;
         for (String key : keys) {
             String value = ConsulUtils.getKVValue(clients, key, null);
             if (value != null) {
                 if (value.equals(failValue)) {
-                    result.append(String.format("Key '%s' found in KV store, and matches the failure signal '%s'.", key, failValue)).append("\n");
-                    failed = true;
+                    failedKeys.add(key);
                 } else if (value.equals(expectedValue)) {
-                    result.append(String.format("Key '%s' found in KV store, and matches the expected value '%s!", key, expectedValue)).append("\n");
-                } else {
-                    result.append(String.format("Key '%s' found in KV store, but doesn't match the expected value '%s.", key, expectedValue)).append("\n");
-                    keysFound = false;
+                    matchingKeys++;
                 }
             } else {
-                result.append(String.format("Key '%s' cannot be found in KV store!", key)).append("\n");
-                keysFound = false;
+                notFoundKeys++;
             }
         }
-        LOGGER.info(result.toString());
-        if (failed) {
-            throw new PluginFailureException(String.format("One or more entries in Consul's key-value store signal failure: %s", result.toString()));
+        LOGGER.info("Keys: [Total: {}, {}: {}, Not {}: {}, Not found: {}, {}: {}]",
+                keys.size(),
+                expectedValue, matchingKeys,
+                expectedValue, keys.size() - matchingKeys - notFoundKeys - failedKeys.size(),
+                notFoundKeys,
+                failValue, failedKeys.size());
+        if (!failedKeys.isEmpty()) {
+            throw new PluginFailureException(String.format("Found failure signal at keys: %s", failedKeys));
         }
-        return keysFound;
+        return matchingKeys == keys.size();
     }
 
     @Override
     public void handleTimeout(ConsulKVCheckerContext ctx) {
-        throw new PluginFailureException(String.format("Operation timed out. Keys '%s' not found or don't have the expected value '%s'.",
-                ctx.getKeys(), ctx.getExpectedValue()));
+        throw new PluginFailureException(String.format("Operation timed out. Keys not found or don't have the expected value '%s'.", ctx.getExpectedValue()));
     }
 
     @Override
     public String successMessage(ConsulKVCheckerContext ctx) {
-        return String.format("Keys '%s' found and have the expected value '%s'.", ctx.getKeys(), ctx.getExpectedValue());
+        return String.format("All %s keys found and have the expected value '%s'.", ctx.getKeys().size(), ctx.getExpectedValue());
     }
 
 }

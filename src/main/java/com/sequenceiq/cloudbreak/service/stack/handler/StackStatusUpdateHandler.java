@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -115,7 +114,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
         MDCBuilder.buildMdcContext(stack);
         if (StatusRequest.STOPPED.equals(statusRequest)) {
             cloudbreakEventService.fireCloudbreakEvent(stackId, Status.STOP_IN_PROGRESS.name(), "Cluster infrastructure is stopping.");
-            triggerConsulEvent(stack, ConsulPluginEvent.STOP_AMBARI_EVENT);
+            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.STOP_AMBARI_EVENT);
             boolean stopped;
             if (cloudPlatform.isWithTemplate()) {
                 CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
@@ -144,7 +143,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                 PollingResult pollingResult = waitForAmbariToStart(updatedStack);
                 if (isSuccess(pollingResult)) {
                     Cluster cluster = clusterRepository.findOneWithLists(updatedStack.getCluster().getId());
-                    triggerConsulEvent(updatedStack, ConsulPluginEvent.START_AMBARI_EVENT);
+                    pluginManager.triggerAndWaitForPlugins(updatedStack, ConsulPluginEvent.START_AMBARI_EVENT);
                     PollingResult hostsJoined = restartAmbariAgentsIfNeeded(updatedStack, waitForHostsToJoin(updatedStack));
                     if (isSuccess(pollingResult)) {
                         String statusReason = "Cluster infrastructure is available, starting of services has been requested. AMBARI_IP:" + stack.getAmbariIp();
@@ -239,14 +238,9 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
     private PollingResult restartAmbariAgentsIfNeeded(Stack stack, PollingResult started) {
         if (!isSuccess(started)) {
             LOGGER.info("Ambari agents couldn't join. Restart ambari agents...");
-            triggerConsulEvent(stack, ConsulPluginEvent.RESTART_AMBARI_EVENT);
+            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.RESTART_AMBARI_EVENT);
             return waitForHostsToJoin(stack);
         }
         return PollingResult.SUCCESS;
-    }
-
-    private void triggerConsulEvent(Stack stack, ConsulPluginEvent event) {
-        Set<String> eventIds = pluginManager.triggerPlugins(stack.getRunningInstanceMetaData(), event);
-        pluginManager.waitForEventFinish(stack, stack.getRunningInstanceMetaData(), eventIds);
     }
 }
