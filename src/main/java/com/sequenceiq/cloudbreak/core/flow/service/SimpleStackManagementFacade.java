@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.FlowContextFactory;
@@ -31,6 +32,7 @@ import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 
+@Service
 public class SimpleStackManagementFacade implements StackManagementFacade {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleStackManagementFacade.class);
 
