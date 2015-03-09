@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -79,7 +80,7 @@ public class StackDeleteCompleteHandler implements Consumer<Event<StackDeleteCom
         for (InstanceMetaData metaData : stack.getRunningInstanceMetaData()) {
             long timeInMillis = Calendar.getInstance().getTimeInMillis();
             metaData.setTerminationDate(timeInMillis);
-            metaData.setTerminated(true);
+            metaData.setInstanceStatus(InstanceStatus.TERMINATED);
         }
     }
 }

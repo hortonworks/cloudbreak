@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -14,24 +16,17 @@ import javax.persistence.NamedQuery;
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.stack.id= :stackId "
                         + "AND i.longName= :hostName "
-                        + "AND i.terminated = false "),
-        @NamedQuery(
-                name = "InstanceMetaData.findUnregisteredHostsInStack",
-                query = "SELECT i FROM InstanceMetaData i "
-                        + "WHERE i.instanceGroup.stack.id= :stackId "
-                        + "AND i.terminated = false "
-                        + "AND i.removable= true"),
+                        + "AND i.instanceStatus <> 'TERMINATED' "),
         @NamedQuery(
                 name = "InstanceMetaData.findUnregisteredHostsInInstanceGroup",
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.id= :instanceGroupId "
-                        + "AND i.terminated = false "
-                        + "AND i.removable = true"),
+                        + "AND i.instanceStatus = 'UNREGISTERED'"),
         @NamedQuery(
                 name = "InstanceMetaData.findAllInStack",
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.stack.id= :stackId "
-                        + "AND i.terminated = false "),
+                        + "AND i.instanceStatus <> 'TERMINATED' "),
         @NamedQuery(
                 name = "InstanceMetaData.findByInstanceId",
                 query = "SELECT i FROM InstanceMetaData i "
@@ -39,7 +34,13 @@ import javax.persistence.NamedQuery;
         @NamedQuery(
                 name = "InstanceMetaData.findHostNamesInInstanceGroup",
                 query = "SELECT i.longName FROM InstanceMetaData i "
-                        + "WHERE i.instanceGroup.id= :instanceGroupId")
+                        + "WHERE i.instanceGroup.id = :instanceGroupId"),
+        @NamedQuery(
+                name = "InstanceMetaData.findRemovableInstances",
+                query = "SELECT i FROM InstanceMetaData i "
+                        + "WHERE i.instanceGroup.stack.id= :stackId "
+                        + "AND i.instanceGroup.groupName= :groupName "
+                        + "AND (i.instanceStatus= 'DECOMMISSIONED' OR i.instanceStatus= 'UNREGISTERED')")
 })
 public class InstanceMetaData implements ProvisionEntity {
 
@@ -54,16 +55,16 @@ public class InstanceMetaData implements ProvisionEntity {
     private Boolean consulServer;
     private String dockerSubnet;
     private String longName;
-    private Boolean removable;
+    @Enumerated(EnumType.STRING)
+    private InstanceStatus instanceStatus;
     private Integer containerCount = 0;
     @ManyToOne
     private InstanceGroup instanceGroup;
     private Long startDate;
     private Long terminationDate;
-    private Boolean terminated;
 
     public InstanceMetaData() {
-        terminated = false;
+
     }
 
     public InstanceGroup getInstanceGroup() {
@@ -138,16 +139,20 @@ public class InstanceMetaData implements ProvisionEntity {
         this.longName = longName;
     }
 
-    public Boolean isRemovable() {
-        return removable;
+    public InstanceStatus getInstanceStatus() {
+        return instanceStatus;
     }
 
-    public void setRemovable(Boolean removable) {
-        this.removable = removable;
+    public void setInstanceStatus(InstanceStatus instanceStatus) {
+        this.instanceStatus = instanceStatus;
     }
 
-    public Boolean getRemovable() {
-        return removable;
+    public boolean isDecommissioned() {
+        return InstanceStatus.DECOMMISSIONED.equals(instanceStatus);
+    }
+
+    public boolean isUnRegistered() {
+        return InstanceStatus.UNREGISTERED.equals(instanceStatus);
     }
 
     public Integer getContainerCount() {
@@ -175,11 +180,7 @@ public class InstanceMetaData implements ProvisionEntity {
     }
 
     public Boolean isTerminated() {
-        return terminated;
-    }
-
-    public void setTerminated(Boolean terminated) {
-        this.terminated = terminated;
+        return InstanceStatus.TERMINATED.equals(instanceStatus);
     }
 
     public Boolean getConsulServer() {

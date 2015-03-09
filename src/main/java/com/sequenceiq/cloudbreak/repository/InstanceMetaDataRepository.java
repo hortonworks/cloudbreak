@@ -20,4 +20,6 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
 
     List<String> findHostNamesInInstanceGroup(@Param("instanceGroupId") Long instanceGroupId);
 
+    Set<InstanceMetaData> findRemovableInstances(@Param("stackId") Long stackId, @Param("groupName") String groupName);
+
 }

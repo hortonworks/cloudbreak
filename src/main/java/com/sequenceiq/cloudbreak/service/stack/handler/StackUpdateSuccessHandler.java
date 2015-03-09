@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -86,7 +87,7 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
             if (instanceIds.contains(instanceMetaData.getInstanceId())) {
                 long timeInMillis = Calendar.getInstance().getTimeInMillis();
                 instanceMetaData.setTerminationDate(timeInMillis);
-                instanceMetaData.setTerminated(true);
+                instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
                 removeAgentFromConsul(stack, clients, instanceMetaData);
             }
         }
