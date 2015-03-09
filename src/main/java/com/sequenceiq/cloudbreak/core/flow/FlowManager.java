@@ -12,4 +12,6 @@ public interface FlowManager {
 
     void triggerNext(Class sourceHandlerClass, Object payload, boolean success);
 
+    void triggerClusterInstall(Object object);
+
 }
