@@ -9,9 +9,7 @@ import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
@@ -34,18 +32,18 @@ import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 import reactor.event.Event;
 import reactor.function.Consumer;
 
-@Service
+//@Service
 public class StackCreationFailureHandler implements Consumer<Event<StackOperationFailure>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCreationFailureHandler.class);
 
-    @Autowired
+//    @Autowired
     private RetryingStackUpdater stackUpdater;
 
-    @Autowired
+//    @Autowired
     private AmbariClusterInstallerMailSenderService ambariClusterInstallerMailSenderService;
 
-    @Autowired
+//    @Autowired
     private StackRepository stackRepository;
 
     @javax.annotation.Resource
@@ -60,10 +58,10 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
     @javax.annotation.Resource
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
 
-    @Autowired
+//    @Autowired
     private AsyncTaskExecutor resourceBuilderExecutor;
 
-    @Autowired
+//    @Autowired
     private CloudbreakEventService cloudbreakEventService;
 
     @Override
