@@ -3,7 +3,7 @@ package com.sequenceiq.periscope.monitor.handler;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.MetricAlarm;
 
-public class MetricResult extends AbstractResult {
+public class MetricResult extends BaseResult {
 
     private final MetricAlarm alarm;
 

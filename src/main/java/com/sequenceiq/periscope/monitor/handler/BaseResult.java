@@ -2,12 +2,12 @@ package com.sequenceiq.periscope.monitor.handler;
 
 import com.sequenceiq.periscope.domain.Cluster;
 
-public abstract class AbstractResult {
+public abstract class BaseResult {
 
     private final boolean alarmHit;
     private final Cluster cluster;
 
-    public AbstractResult(boolean alarmHit, Cluster cluster) {
+    public BaseResult(boolean alarmHit, Cluster cluster) {
         this.alarmHit = alarmHit;
         this.cluster = cluster;
     }

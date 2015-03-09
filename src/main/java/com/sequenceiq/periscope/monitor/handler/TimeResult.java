@@ -3,7 +3,7 @@ package com.sequenceiq.periscope.monitor.handler;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.TimeAlarm;
 
-public class TimeResult extends AbstractResult {
+public class TimeResult extends BaseResult {
 
     private final TimeAlarm alarm;
 
