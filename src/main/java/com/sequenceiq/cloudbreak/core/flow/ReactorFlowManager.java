@@ -56,7 +56,8 @@ public class ReactorFlowManager implements FlowManager {
         ProvisionRequest provisionRequest = (ProvisionRequest) object;
         ProvisioningContext context = FlowContextFactory.createProvisioningSetupContext(provisionRequest.getCloudPlatform(),
                 provisionRequest.getStackId());
-        reactor.notify(FlowInitializer.Phases.PROVISIONING_SETUP.name(), eventFactory.createEvent(context, FlowInitializer.Phases.PROVISIONING_SETUP.name()));
+        String nameOfPhase = FlowInitializer.Phases.PROVISIONING_SETUP.name();
+        reactor.notify(nameOfPhase, eventFactory.createEvent(context, nameOfPhase));
     }
 
     @Override
@@ -68,6 +69,15 @@ public class ReactorFlowManager implements FlowManager {
         } else {
             LOGGER.debug("The handler {} has no transitions.", sourceHandlerClass);
         }
+    }
+
+    @Override
+    public void triggerClusterInstall(Object object) {
+        ProvisionRequest provisionRequest = (ProvisionRequest) object;
+        ProvisioningContext context = FlowContextFactory.createProvisioningSetupContext(provisionRequest.getCloudPlatform(),
+                provisionRequest.getStackId());
+        String nameOfPhase = FlowInitializer.Phases.CLUSTER_CREATION.name();
+        reactor.notify(nameOfPhase, eventFactory.createEvent(context, nameOfPhase));
     }
 
     public static class TransitionFactory {
