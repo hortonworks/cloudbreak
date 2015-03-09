@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
@@ -218,7 +219,7 @@ public class AmbariClusterService implements ClusterService {
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             Set<InstanceMetaData> instances = instanceGroup.getInstanceMetaData();
             for (InstanceMetaData instanceMetaData : instances) {
-                instanceMetaData.setRemovable(false);
+                instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
             }
             stackUpdater.updateStackMetaData(stack.getId(), instances, instanceGroup.getGroupName());
         }
