@@ -15,6 +15,7 @@ public class MetricAlarm extends BaseAlarm {
 
     @Enumerated(EnumType.STRING)
     private Metric metric;
+    @Enumerated(EnumType.STRING)
     private ComparisonOperator comparisonOperator;
     private double threshold;
     private int period;
