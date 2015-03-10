@@ -43,7 +43,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 
 import jersey.repackaged.com.google.common.collect.Maps;
@@ -173,15 +172,13 @@ public class OpenStackConnector implements CloudPlatformConnector {
                         POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
                 if (isSuccess(pollingResult)) {
                     LOGGER.info("Heat stack deleted, publishing {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
-                    reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
                 }
             } catch (HeatStackFailedException e) {
                 LOGGER.error(String.format("Failed to delete Heat stack: %s", stack.getId()), e);
-                stackUpdater.updateStackStatus(stack.getId(), Status.DELETE_FAILED, "Termination of cluster infrastructure failed: " + e.getMessage());
+                throw e;
             }
         } else {
             LOGGER.info("No resource saved for stack, publishing {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
-            reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
         }
     }
 

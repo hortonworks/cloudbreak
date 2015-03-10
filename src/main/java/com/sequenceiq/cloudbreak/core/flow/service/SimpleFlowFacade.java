@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisionContext;
+import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 
 @Service
 public class SimpleFlowFacade implements FlowFacade {
@@ -40,6 +41,9 @@ public class SimpleFlowFacade implements FlowFacade {
 
     @Autowired
     private StackService stackService;
+
+    @Autowired
+    private TerminationService terminationService;
 
     @Override
     public FlowContext setup(FlowContext context) throws CloudbreakException {
@@ -125,6 +129,20 @@ public class SimpleFlowFacade implements FlowFacade {
             return context;
         } catch (Exception e) {
             LOGGER.error("Exception during the cluster build process: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext terminateStack(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Terminating stack. Context: {}", context);
+        try {
+
+            context = terminationService.terminateStack(context);
+            LOGGER.debug("Terminating stack is DONE");
+            return context;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the terminating process: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }

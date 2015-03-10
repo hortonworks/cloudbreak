@@ -14,4 +14,6 @@ public interface FlowManager {
 
     void triggerClusterInstall(Object object);
 
+    void triggerTermination(Object object);
+
 }
