@@ -4,5 +4,8 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 
 public interface StackManagementFacade {
+
     FlowContext stackCreationError(FlowContext context) throws CloudbreakException;
+
+    FlowContext stackTerminationError(FlowContext context) throws CloudbreakException;
 }

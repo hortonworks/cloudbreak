@@ -81,7 +81,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstances;
@@ -282,7 +281,6 @@ public class AwsConnector implements CloudPlatformConnector {
             } catch (AmazonServiceException e) {
                 if (e.getErrorMessage().equals("Stack:" + cFStackName + " does not exist")) {
                     LOGGER.info("AWS CloudFormation stack not found, publishing {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
-                    reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
                     return;
                 } else {
                     throw e;
@@ -299,16 +297,16 @@ public class AwsConnector implements CloudPlatformConnector {
                         .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
                 if (isSuccess(pollingResult)) {
                     LOGGER.info("CloudFormation stack({}) delete completed. Publishing {} event.", cFStackName, ReactorConfig.DELETE_COMPLETE_EVENT);
-                    reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
                 }
             } catch (CloudFormationStackException e) {
                 LOGGER.error(String.format("Failed to delete CloudFormation stack: %s, id:%s", cFStackName, stack.getId()), e);
+
                 stackUpdater.updateStackStatus(stack.getId(), Status.DELETE_FAILED, "Failed to delete stack: " + e.getMessage());
-                throw new BuildStackFailureException(e);
+
+                throw e;
             }
         } else {
             LOGGER.info("No resource saved for stack, publishing {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
-            reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
         }
     }
 

@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstallerMailSenderService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
@@ -62,6 +63,9 @@ public class SimpleStackManagementFacade implements StackManagementFacade {
 
     @Autowired
     private CloudbreakEventService cloudbreakEventService;
+
+    @Autowired
+    private TerminationService terminationService;
 
     @Override
     public FlowContext stackCreationError(FlowContext context) throws CloudbreakException {
@@ -113,6 +117,11 @@ public class SimpleStackManagementFacade implements StackManagementFacade {
             LOGGER.error(String.format("Stack rollback failed on {} stack: ", provisioningContext.getStackId()), ex);
             throw new CloudbreakException(String.format("Stack rollback failed on {} stack: ", provisioningContext.getStackId(), ex));
         }
+    }
+
+    @Override
+    public FlowContext stackTerminationError(FlowContext context) throws CloudbreakException {
+        return terminationService.handleTerminationFailure(context);
     }
 
     private void fireCloudbreakEventIfNeeded(Long stackId, Stack stack) {

@@ -17,6 +17,8 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.MetadataSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ProvisioningHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ProvisioningSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackCreationFailureHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.StackTerminationFailureHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.StackTerminationHandler;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -32,7 +34,9 @@ public class FlowInitializer implements InitializingBean {
         AMBARI_ROLE_ALLOCATION,
         AMBARI_START,
         CLUSTER_CREATION,
-        STACK_CREATION_FAILED
+        STACK_CREATION_FAILED,
+        TERMINATION,
+        TERMINATION_FAILED
     }
 
     @Autowired
@@ -68,8 +72,10 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(Phases.AMBARI_ROLE_ALLOCATION.name()), getHandlerForClass(AmbariRoleAllocationHandler.class));
         reactor.on($(Phases.AMBARI_START.name()), getHandlerForClass(AmbariStartHandler.class));
         reactor.on($(Phases.CLUSTER_CREATION.name()), getHandlerForClass(ClusterCreationHandler.class));
+        reactor.on($(Phases.TERMINATION.name()), getHandlerForClass(StackTerminationHandler.class));
 
         reactor.on($(Phases.STACK_CREATION_FAILED.name()), getHandlerForClass(StackCreationFailureHandler.class));
+        reactor.on($(Phases.TERMINATION_FAILED.name()), getHandlerForClass(StackTerminationFailureHandler.class));
 
     }
 
