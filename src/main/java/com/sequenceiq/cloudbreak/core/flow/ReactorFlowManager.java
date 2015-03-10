@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
+import com.sequenceiq.cloudbreak.core.flow.context.TerminationContext;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
+import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -77,6 +79,14 @@ public class ReactorFlowManager implements FlowManager {
         ProvisioningContext context = FlowContextFactory.createProvisioningSetupContext(provisionRequest.getCloudPlatform(),
                 provisionRequest.getStackId());
         String nameOfPhase = FlowInitializer.Phases.CLUSTER_CREATION.name();
+        reactor.notify(nameOfPhase, eventFactory.createEvent(context, nameOfPhase));
+    }
+
+    @Override
+    public void triggerTermination(Object object) {
+        StackDeleteRequest deleteRequest = (StackDeleteRequest) object;
+        TerminationContext context = new TerminationContext(deleteRequest.getStackId(), deleteRequest.getCloudPlatform());
+        String nameOfPhase = FlowInitializer.Phases.TERMINATION.name();
         reactor.notify(nameOfPhase, eventFactory.createEvent(context, nameOfPhase));
     }
 

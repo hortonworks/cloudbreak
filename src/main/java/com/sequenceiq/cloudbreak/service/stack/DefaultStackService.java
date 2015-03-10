@@ -309,7 +309,7 @@ public class DefaultStackService implements StackService {
             throw new BadRequestException("Stacks can be deleted only by account admins or owners.");
         }
         LOGGER.info("Publishing {} event.", ReactorConfig.DELETE_REQUEST_EVENT);
-        reactor.notify(ReactorConfig.DELETE_REQUEST_EVENT, Event.wrap(new StackDeleteRequest(stack.cloudPlatform(), stack.getId())));
+        flowManager.triggerTermination(new StackDeleteRequest(stack.cloudPlatform(), stack.getId()));
     }
 
     private String generateHash(Stack stack) {
