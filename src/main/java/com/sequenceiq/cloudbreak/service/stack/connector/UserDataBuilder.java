@@ -19,6 +19,9 @@ public class UserDataBuilder {
     @Value("${cb.host.addr}")
     private String hostAddress;
 
+    @Value("${cb.ambari.docker.tag:1.7.0-consul}")
+    private String ambariDockerTag;
+
     private Map<CloudPlatform, String> userDataScripts = new HashMap<>();
 
     public void setUserDataScripts(Map<CloudPlatform, String> userDataScripts) {
@@ -36,6 +39,7 @@ public class UserDataBuilder {
         parameters.put("METADATA_ADDRESS", hostAddress);
         parameters.put("METADATA_HASH", metadataHash);
         parameters.put("CONSUL_SERVER_COUNT", "" + consulServers);
+        parameters.put("AMBARI_DOCKER_TAG", ambariDockerTag);
         String userDataScript = userDataScripts.get(cloudPlatform);
         StringBuilder stringBuilder = new StringBuilder("#!/bin/bash\n");
         for (Entry<String, String> parameter : parameters.entrySet()) {
@@ -47,5 +51,9 @@ public class UserDataBuilder {
 
     protected void setHostAddress(String hostAddress) {
         this.hostAddress = hostAddress;
+    }
+
+    protected void setAmbariDockerTag(String ambariDockerTag) {
+        this.ambariDockerTag = ambariDockerTag;
     }
 }

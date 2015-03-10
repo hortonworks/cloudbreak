@@ -1,4 +1,3 @@
-: ${DOCKER_TAG:=1.7.0-consul}
 : ${CONSUL_IMAGE:=sequenceiq/consul:v0.4.1.ptr}
 
 set -x
@@ -120,7 +119,7 @@ start_ambari_server() {
      --net=host \
      --restart=always \
      -e BRIDGE_IP=$(get_ip) \
-     sequenceiq/ambari:$DOCKER_TAG /start-server
+     sequenceiq/ambari:$AMBARI_DOCKER_TAG /start-server
 
     register_ambari
   fi
@@ -137,7 +136,7 @@ start_ambari_agent() {
     -e HADOOP_CLASSPATH=/data/jars/*:/usr/lib/hadoop/lib/* \
     -v /data/jars:/data/jars \
     $VOLUMES \
-    sequenceiq/ambari:$DOCKER_TAG /start-agent
+    sequenceiq/ambari:$AMBARI_DOCKER_TAG /start-agent
 }
 
 set_disk_as_volumes() {
