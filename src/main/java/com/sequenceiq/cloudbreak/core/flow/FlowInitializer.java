@@ -36,7 +36,8 @@ public class FlowInitializer implements InitializingBean {
         CLUSTER_CREATION,
         STACK_CREATION_FAILED,
         TERMINATION,
-        TERMINATION_FAILED
+        TERMINATION_FAILED,
+        SUCCESS
     }
 
     @Autowired
@@ -65,6 +66,9 @@ public class FlowInitializer implements InitializingBean {
 
         flowManager.registerTransition(AmbariStartHandler.class, ReactorFlowManager.TransitionFactory
                 .createTransition(Phases.AMBARI_START.name(), Phases.CLUSTER_CREATION.name(), Phases.STACK_CREATION_FAILED.name()));
+
+        flowManager.registerTransition(StackTerminationHandler.class, ReactorFlowManager.TransitionFactory
+                .createTransition(Phases.TERMINATION.name(), Phases.SUCCESS.name(), Phases.TERMINATION_FAILED.name()));
 
         reactor.on($(Phases.PROVISIONING_SETUP.name()), getHandlerForClass(ProvisioningSetupHandler.class));
         reactor.on($(Phases.PROVISIONING.name()), getHandlerForClass(ProvisioningHandler.class));

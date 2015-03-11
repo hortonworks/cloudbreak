@@ -81,6 +81,7 @@ public class TerminationService {
 
     public FlowContext handleTerminationFailure(FlowContext context) {
         TerminationContext terminationContext = (TerminationContext) context;
+        LOGGER.info("Stack delete failed on stack {} and set its status to {}.", terminationContext.getStackId(), Status.DELETE_FAILED);
         retryingStackUpdater.updateStackStatus(terminationContext.getStackId(), Status.DELETE_FAILED, terminationContext.getStatusReason());
         return terminationContext;
     }
@@ -102,7 +103,7 @@ public class TerminationService {
 
             finalizeTermination(stack);
         } catch (Exception ex) {
-            LOGGER.error(String.format("Stack delete failed on {} stack: ", stack.getId()), ex);
+            LOGGER.error(String.format("Stack delete failed on '%s' stack: ", stack.getId()), ex);
             String statusReason = "Termination of cluster infrastructure failed: " + ex.getMessage();
             throw new TerminationFailedException(statusReason, ex);
         }

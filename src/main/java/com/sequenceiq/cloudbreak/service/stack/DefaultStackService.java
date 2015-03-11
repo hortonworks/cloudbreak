@@ -308,8 +308,12 @@ public class DefaultStackService implements StackService {
         if (!user.getUserId().equals(stack.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
             throw new BadRequestException("Stacks can be deleted only by account admins or owners.");
         }
-        LOGGER.info("Publishing {} event.", ReactorConfig.DELETE_REQUEST_EVENT);
-        flowManager.triggerTermination(new StackDeleteRequest(stack.cloudPlatform(), stack.getId()));
+        if (!Status.DELETE_COMPLETED.equals(stack.getStatus())) {
+            LOGGER.info("Publishing {} event.", ReactorConfig.DELETE_REQUEST_EVENT);
+            flowManager.triggerTermination(new StackDeleteRequest(stack.cloudPlatform(), stack.getId()));
+        } else {
+            LOGGER.info("Stack is already deleted.");
+        }
     }
 
     private String generateHash(Stack stack) {
