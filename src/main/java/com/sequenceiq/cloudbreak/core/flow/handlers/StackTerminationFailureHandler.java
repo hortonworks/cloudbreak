@@ -7,13 +7,14 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
+import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.service.StackManagementFacade;
 
 import reactor.event.Event;
 
 @Service
-public class StackTerminationFailureHandler extends AbstractFlowHandler<FlowContext> {
+public class StackTerminationFailureHandler extends AbstractFlowHandler<FlowContext> implements FlowHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackTerminationFailureHandler.class);
 
     @Autowired
