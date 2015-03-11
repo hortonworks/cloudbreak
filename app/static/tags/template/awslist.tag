@@ -47,11 +47,20 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="awsebsencrypt">EBS encryption</label>
+
+        <div class="col-sm-9">
+            <i id="awsebsencrypt" ng-show="template.parameters.encrypted" class="form-control-static fa fa-check-circle fa-5" style="color: #4cb84c;"></i>
+            <i id="awsebsencrypt" ng-show="!template.parameters.encrypted" class="form-control-static fa fa-times-circle fa-5" style="color: #f9332f;"></i>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
     <div class="form-group" ng-show="{{template.parameters.spotPrice}}">
         <label class="col-sm-3 control-label" for="awsspotprice">Spot Price</label>
 
         <div class="col-sm-9">
-            <p id="awsspotprice" class="form-control-static">{{template.parameters.spotPrice}}</p>
+            <p id="awsspotprice" class="form-control-static" >{{template.parameters.spotPrice}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
