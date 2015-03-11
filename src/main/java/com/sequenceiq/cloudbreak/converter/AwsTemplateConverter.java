@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.validation.AwsTemplateParam;
+import com.sequenceiq.cloudbreak.domain.AwsEncryption;
 import com.sequenceiq.cloudbreak.domain.AwsInstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AwsVolumeType;
@@ -29,6 +30,7 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         props.put(AwsTemplateParam.INSTANCE_TYPE.getName(), entity.getInstanceType().name());
         props.put(AwsTemplateParam.SSH_LOCATION.getName(), entity.getSshLocation());
         props.put(AwsTemplateParam.VOLUME_TYPE.getName(), entity.getVolumeType());
+        props.put(AwsTemplateParam.ENCRYPTED.getName(), entity.isEncrypted());
         if (entity.getSpotPrice() != null) {
             props.put(AwsTemplateParam.SPOT_PRICE.getName(), entity.getSpotPrice());
         }
@@ -50,10 +52,12 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         awsTemplate.setVolumeCount(json.getVolumeCount() == null ? 0 : json.getVolumeCount());
         awsTemplate.setVolumeSize(json.getVolumeSize() == null ? 0 : json.getVolumeSize());
         awsTemplate.setVolumeType(AwsVolumeType.valueOf(String.valueOf(json.getParameters().get(AwsTemplateParam.VOLUME_TYPE.getName()))));
-        Double spotPrice = json.getParameters().containsKey(AwsTemplateParam.SPOT_PRICE.getName())
+        awsTemplate.setEncrypted(json.getParameters().containsKey(AwsTemplateParam.ENCRYPTED.getName())
+                && Boolean.valueOf(json.getParameters().get(AwsTemplateParam.ENCRYPTED.getName()).toString())
+                ? AwsEncryption.TRUE : AwsEncryption.FALSE);
+        awsTemplate.setSpotPrice(json.getParameters().containsKey(AwsTemplateParam.SPOT_PRICE.getName())
                 && json.getParameters().get(AwsTemplateParam.SPOT_PRICE.getName()) != null
-                ? Double.valueOf(json.getParameters().get(AwsTemplateParam.SPOT_PRICE.getName()).toString()) : null;
-        awsTemplate.setSpotPrice(spotPrice);
+                ? Double.valueOf(json.getParameters().get(AwsTemplateParam.SPOT_PRICE.getName()).toString()) : null);
         return awsTemplate;
     }
 

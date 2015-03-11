@@ -142,7 +142,7 @@ dependencies {
     compile 'org.projectreactor:reactor-spring:1.0.1.RELEASE'
     compile 'net.sf.ehcache:ehcache:2.8.3'
     compile 'org.postgresql:postgresql:9.3-1101-jdbc41'
-    compile('com.amazonaws:aws-java-sdk:1.9.3') {
+    compile('com.amazonaws:aws-java-sdk:1.9.23') {
         exclude group: 'commons-logging'
     }
     compile 'org.hibernate:hibernate-validator:5.1.1.Final'

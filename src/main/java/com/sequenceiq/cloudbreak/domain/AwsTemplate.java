@@ -13,6 +13,8 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private AwsVolumeType volumeType;
     private Double spotPrice;
+    @Enumerated(EnumType.STRING)
+    private AwsEncryption encrypted;
 
     public AwsTemplate() {
     }
@@ -54,4 +56,15 @@ public class AwsTemplate extends Template implements ProvisionEntity {
         this.spotPrice = spotPrice;
     }
 
+    public AwsEncryption getEncrypted() {
+        return encrypted;
+    }
+
+    public boolean isEncrypted() {
+        return AwsEncryption.TRUE.equals(encrypted) ? true : false;
+    }
+
+    public void setEncrypted(AwsEncryption encrypted) {
+        this.encrypted = encrypted;
+    }
 }
