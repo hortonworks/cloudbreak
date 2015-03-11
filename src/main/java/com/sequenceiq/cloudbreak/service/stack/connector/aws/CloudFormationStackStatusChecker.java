@@ -23,14 +23,14 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 
 @Component
-public class CloudFormationStackStatusChecker implements StatusCheckerTask<CloudFormationStackPollerContext> {
+public class CloudFormationStackStatusChecker implements StatusCheckerTask<CloudFormationStackPollerObject> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudFormationStackStatusChecker.class);
 
     @Autowired
     private StackRepository stackRepository;
 
     @Override
-    public boolean checkStatus(CloudFormationStackPollerContext context) {
+    public boolean checkStatus(CloudFormationStackPollerObject context) {
         boolean result = false;
         Stack stack = context.getStack();
         StackStatus successStatus = context.getSuccessStatus();
@@ -63,23 +63,23 @@ public class CloudFormationStackStatusChecker implements StatusCheckerTask<Cloud
     }
 
     @Override
-    public void handleTimeout(CloudFormationStackPollerContext context) {
+    public void handleTimeout(CloudFormationStackPollerObject context) {
         Stack stack = context.getStack();
         throw new CloudFormationStackException(String.format(
                 "AWS CloudFormation stack didn't reach the desired state in the given time frame, stack id: %s, name %s", stack.getId(), stack.getName()));
     }
 
     @Override
-    public String successMessage(CloudFormationStackPollerContext context) {
+    public String successMessage(CloudFormationStackPollerObject context) {
         Stack stack = context.getStack();
         return String.format("AWS CloudFormation stack(%s) reached the desired state '%s'", stack.getId(), context.getSuccessStatus());
     }
 
     @Override
-    public boolean exitPolling(CloudFormationStackPollerContext cloudFormationStackPollerContext) {
-        if (!cloudFormationStackPollerContext.getSuccessStatus().equals(DELETE_COMPLETE)) {
+    public boolean exitPolling(CloudFormationStackPollerObject cloudFormationStackPollerObject) {
+        if (!cloudFormationStackPollerObject.getSuccessStatus().equals(DELETE_COMPLETE)) {
             try {
-                Stack byId = stackRepository.findById(cloudFormationStackPollerContext.getStack().getId());
+                Stack byId = stackRepository.findById(cloudFormationStackPollerObject.getStack().getId());
                 if (byId == null || byId.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
                     return true;
                 }

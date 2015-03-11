@@ -6,7 +6,7 @@ import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
-public class CloudFormationStackPollerContext {
+public class CloudFormationStackPollerObject {
 
     private AmazonCloudFormationClient cloudFormationClient;
     private StackStatus successStatus;
@@ -14,7 +14,7 @@ public class CloudFormationStackPollerContext {
     private List<StackStatus> stackErrorStatuses;
     private Stack stack;
 
-    public CloudFormationStackPollerContext(AmazonCloudFormationClient cloudFormationClient, StackStatus successStatus, StackStatus errorStatus,
+    public CloudFormationStackPollerObject(AmazonCloudFormationClient cloudFormationClient, StackStatus successStatus, StackStatus errorStatus,
             List<StackStatus> stackErrorStatuses, Stack stack) {
         this.cloudFormationClient = cloudFormationClient;
         this.successStatus = successStatus;

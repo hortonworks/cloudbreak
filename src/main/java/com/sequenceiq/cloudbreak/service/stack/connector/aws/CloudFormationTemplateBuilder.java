@@ -26,14 +26,17 @@ public class CloudFormationTemplateBuilder {
     @Autowired
     private Configuration freemarkerConfiguration;
 
-    public String build(Stack stack, boolean existingVPC, String templatePath) {
+    public String build(Stack stack, String snapshotId, boolean existingVPC, String templatePath) {
         Map<String, Object> model = new HashMap<>();
-        model.put("templates", stack.getInstanceGroupsAsList());
+        model.put("instanceGroups", stack.getInstanceGroupsAsList());
         model.put("useSpot", spotPriceNeeded(stack.getInstanceGroups()));
         model.put("existingVPC", existingVPC);
         model.put("subnets", stack.getAllowedSubnets());
         model.put("ports", NetworkUtils.getPorts(stack));
         model.put("cbSubnet", NetworkConfig.SUBNET_16);
+        if (snapshotId != null) {
+            model.put("snapshotId", snapshotId);
+        }
         try {
             return FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(templatePath, "UTF-8"), model);
         } catch (IOException | TemplateException e) {

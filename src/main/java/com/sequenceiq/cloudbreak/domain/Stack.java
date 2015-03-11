@@ -26,6 +26,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import com.sequenceiq.cloudbreak.controller.validation.StackParam;
+
 @Entity
 @Table(name = "Stack", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "account", "name" })
@@ -483,4 +485,11 @@ public class Stack implements ProvisionEntity {
     public void setParameters(Map<String, String> parameters) {
         this.parameters = parameters;
     }
+
+    public boolean isExistingVPC() {
+        return parameters.get(StackParam.VPC_ID.getName()) != null
+                && parameters.get(StackParam.SUBNET_CIDR.getName()) != null
+                && parameters.get(StackParam.IGW_ID.getName()) != null;
+    }
+
 }
