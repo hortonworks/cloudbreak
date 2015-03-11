@@ -92,6 +92,13 @@
     </div>
 
     <div class="form-group">
+            <label class="col-sm-3 control-label" for="aws_ebsencryption">EBS encryption</label>
+            <div class="col-sm-9">
+                <input type="checkbox" name="aws_ebsencryption" id="aws_ebsencryption" ng-model="awsTemp.parameters.encrypted">
+            </div>
+       <!-- .col-sm-9 -->
+    </div>
+    <div class="form-group">
             <label class="col-sm-3 control-label" for="aws_publicinaccount">Public in account</label>
             <div class="col-sm-9">
                 <input type="checkbox" name="aws_publicinaccount" id="aws_publicinaccount" ng-model="awsTemp.public">
