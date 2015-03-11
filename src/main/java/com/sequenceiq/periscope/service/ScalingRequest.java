@@ -16,7 +16,7 @@ public class ScalingRequest implements Runnable {
 
     private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(ScalingRequest.class);
     private static final String AVAILABLE = "AVAILABLE";
-    private static final int STACK_RETRY_COUNT = 100;
+    private static final int STACK_RETRY_COUNT = 1000;
     private static final int CLUSTER_RETRY_COUNT = 3;
     private static final int STACK_AVAILABLE_ACK = 2;
     private static final int SLEEP = 20000;

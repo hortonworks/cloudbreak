@@ -11,14 +11,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.sequenceiq.periscope.log.Logger;
 import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
-import com.sequenceiq.periscope.registry.ConnectionException;
-import com.sequenceiq.periscope.registry.QueueSetupException;
 import com.sequenceiq.periscope.rest.json.ExceptionMessageJson;
 import com.sequenceiq.periscope.rest.json.IdExceptionMessageJson;
-import com.sequenceiq.periscope.service.AlarmNotFoundException;
-import com.sequenceiq.periscope.service.ClusterNotFoundException;
-import com.sequenceiq.periscope.service.NoScalingGroupException;
-import com.sequenceiq.periscope.service.ScalingPolicyNotFoundException;
+import com.sequenceiq.periscope.service.NotFoundException;
 
 @ControllerAdvice
 public class ExceptionController {
@@ -31,21 +26,11 @@ public class ExceptionController {
         return createExceptionMessage(e.getMessage());
     }
 
-    @ExceptionHandler(NoSuchElementException.class)
+    @ExceptionHandler({ NoSuchElementException.class, NotFoundException.class })
     public ResponseEntity<ExceptionMessageJson> handleNotFoundExceptions(Exception e) {
         LOGGER.error(Logger.NOT_CLUSTER_RELATED, "Not found", e);
         String message = e.getMessage();
         return createExceptionMessage(message == null ? "Not found" : message, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(ClusterNotFoundException.class)
-    public ResponseEntity<IdExceptionMessageJson> handleClusterNotFoundException(ClusterNotFoundException e) {
-        return createIdExceptionMessage(e.getId(), "Cluster not found", HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(NoScalingGroupException.class)
-    public ResponseEntity<IdExceptionMessageJson> handleNoScalingGroupException(NoScalingGroupException e) {
-        return createIdExceptionMessage(e.getId(), e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ParseException.class)
@@ -56,26 +41,6 @@ public class ExceptionController {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ExceptionMessageJson> handleNoScalingGroupException(AccessDeniedException e) {
         return createExceptionMessage(e.getMessage(), HttpStatus.FORBIDDEN);
-    }
-
-    @ExceptionHandler(AlarmNotFoundException.class)
-    public ResponseEntity<IdExceptionMessageJson> handleClusterNotFoundException(AlarmNotFoundException e) {
-        return createIdExceptionMessage(e.getId(), "Alarm not found", HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(ScalingPolicyNotFoundException.class)
-    public ResponseEntity<IdExceptionMessageJson> handlePolicyNotFoundException(ScalingPolicyNotFoundException e) {
-        return createIdExceptionMessage(e.getId(), "Scaling policy not found", HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(ConnectionException.class)
-    public ResponseEntity<ExceptionMessageJson> handleConnectionException(ConnectionException e) {
-        return createExceptionMessage(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(QueueSetupException.class)
-    public ResponseEntity<ExceptionMessageJson> handleQueueSetupException(QueueSetupException e) {
-        return createExceptionMessage(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     public static ResponseEntity<ExceptionMessageJson> createExceptionMessage(String message) {

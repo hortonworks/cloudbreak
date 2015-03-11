@@ -2,16 +2,17 @@ package com.sequenceiq.periscope.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import javax.persistence.Table;
 
 @Entity
+@Table(name = "periscope_user")
 public class PeriscopeUser {
 
     @Id
     private String id;
+
     private String email;
+
     private String account;
 
     public PeriscopeUser() {
@@ -45,15 +46,5 @@ public class PeriscopeUser {
 
     public void setAccount(String account) {
         this.account = account;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        return EqualsBuilder.reflectionEquals(this, o);
-    }
-
-    @Override
-    public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
     }
 }

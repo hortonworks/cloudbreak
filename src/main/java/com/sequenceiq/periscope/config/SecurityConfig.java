@@ -11,6 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
@@ -21,11 +25,36 @@ import org.springframework.security.web.authentication.preauth.AbstractPreAuthen
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.sequenceiq.periscope.domain.PeriscopeUser;
+import com.sequenceiq.periscope.service.security.OwnerBasedPermissionEvaluator;
 import com.sequenceiq.periscope.service.security.UserDetailsService;
 import com.sequenceiq.periscope.service.security.UserFilterField;
 
 @Configuration
 public class SecurityConfig {
+
+    @Configuration
+    @EnableGlobalMethodSecurity(prePostEnabled = true)
+    protected static class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
+
+        @Autowired
+        private UserDetailsService userDetailsService;
+
+        @Autowired
+        private OwnerBasedPermissionEvaluator ownerBasedPermissionEvaluator;
+
+        @Bean
+        MethodSecurityExpressionHandler expressionHandler() {
+            DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
+            ownerBasedPermissionEvaluator.setUserDetailsService(userDetailsService);
+            expressionHandler.setPermissionEvaluator(ownerBasedPermissionEvaluator);
+            return expressionHandler;
+        }
+
+        @Override
+        protected MethodSecurityExpressionHandler createExpressionHandler() {
+            return expressionHandler();
+        }
+    }
 
     @Configuration
     @EnableResourceServer

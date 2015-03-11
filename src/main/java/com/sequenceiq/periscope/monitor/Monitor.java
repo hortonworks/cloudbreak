@@ -12,8 +12,8 @@ public interface Monitor extends Job {
 
     String getTriggerExpression();
 
-    Class getRequestType();
+    Class getEvaluatorType();
 
-    Map<String, Object> getRequestContext(Cluster cluster);
+    Map<String, Object> getContext(Cluster cluster);
 
 }

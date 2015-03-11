@@ -11,14 +11,20 @@ import javax.persistence.SequenceGenerator;
 public class Ambari {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "template_generator")
-    @SequenceGenerator(name = "template_generator", sequenceName = "sequence_table")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ambari_generator")
+    @SequenceGenerator(name = "ambari_generator", sequenceName = "sequence_table")
     private long id;
+
+    @Column(name = "ambari_host")
     private String host;
+
+    @Column(name = "ambari_port")
     private String port;
-    @Column(name = "ambariUser")
+
+    @Column(name = "ambari_user")
     private String user;
-    @Column(name = "ambariPass")
+
+    @Column(name = "ambari_pass")
     private String pass;
 
     public Ambari() {

@@ -8,24 +8,23 @@ import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
 import com.sequenceiq.periscope.domain.Cluster;
-import com.sequenceiq.periscope.monitor.request.Request;
-import com.sequenceiq.periscope.registry.ClusterRegistry;
+import com.sequenceiq.periscope.domain.ClusterState;
+import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
+import com.sequenceiq.periscope.service.ClusterService;
 
 public abstract class AbstractMonitor implements Monitor {
 
-    private ClusterRegistry clusterRegistry;
+    private ClusterService clusterService;
     private ApplicationContext applicationContext;
     private ExecutorService executorService;
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         evalContext(context);
-        for (Cluster cluster : clusterRegistry.getAll()) {
-            if (cluster.isRunning()) {
-                Request request = applicationContext.getBean(getRequestType().getSimpleName(), Request.class);
-                request.setContext(getRequestContext(cluster));
-                executorService.submit(request);
-            }
+        for (Cluster cluster : clusterService.findAll(ClusterState.RUNNING)) {
+            EvaluatorExecutor evaluatorExecutor = applicationContext.getBean(getEvaluatorType().getSimpleName(), EvaluatorExecutor.class);
+            evaluatorExecutor.setContext(getContext(cluster));
+            executorService.submit(evaluatorExecutor);
         }
     }
 
@@ -33,7 +32,7 @@ public abstract class AbstractMonitor implements Monitor {
         JobDataMap monitorContext = context.getJobDetail().getJobDataMap();
         applicationContext = (ApplicationContext) monitorContext.get(MonitorContext.APPLICATION_CONTEXT.name());
         executorService = applicationContext.getBean(ExecutorService.class);
-        clusterRegistry = applicationContext.getBean(ClusterRegistry.class);
+        clusterService = applicationContext.getBean(ClusterService.class);
     }
 
 }

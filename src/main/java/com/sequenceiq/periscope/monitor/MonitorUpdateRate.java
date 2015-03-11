@@ -13,6 +13,11 @@ public final class MonitorUpdateRate {
     public static final String YARN_UPDATE_RATE_CRON = "0/20 * * * * ?";
 
     /**
+     * Every 30 seconds.
+     */
+    public static final String METRIC_UPDATE_RATE_CRON = "0/30 * * * * ?";
+
+    /**
      * Every 10 seconds.
      */
     public static final String TIME_UPDATE_RATE_CRON = "0/10 * * * * ?";

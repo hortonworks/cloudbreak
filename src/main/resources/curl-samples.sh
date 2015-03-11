@@ -1,12 +1,9 @@
-UAA=XX
-USERNAME=XX
-PASSWORD=XX
-TOKEN=$(curl -iX POST -H "accept: application/x-www-form-urlencoded" -d 'credentials={"username":"$USERNAME","password":"$PASSWORD"}' "$UAA/oauth/authorize?response_type=token&client_id=periscope-client&scope.0=openid&source=login&redirect_uri=http://periscope.client"  | grep Location | cut -d'=' -f 2 | cut -d'&' -f 1)
+TOKEN=$(curl -iX POST -H "accept: application/x-www-form-urlencoded" -d 'credentials={"username":"XX@sequenceiq.com","password":"YY"}' "$UAA/oauth/authorize?response_type=token&client_id=periscope-client&scope.0=openid&source=login&redirect_uri=http://periscope.client"  | grep Location | cut -d'=' -f 2 | cut -d'&' -f 1)
 HOST=localhost:8080
 
 # cluster
-curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"host":"130.211.148.20", "port":"8080", "user":"admin", "pass":"admin"}' $HOST/clusters | jq .
-curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"host":"146.148.121.175", "port":"8080"}' $HOST/clusters | jq .
+curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"host":"104.154.75.134", "port":"8080", "user":"admin", "pass":"admin"}' $HOST/clusters | jq .
+curl -X PUT -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"host":"104.154.75.135", "port":"8080", "user":"admin", "pass":"admin"}' $HOST/clusters/52 | jq .
 curl -X GET -H "Authorization: Bearer $TOKEN" $HOST/clusters/50 | jq .
 curl -X GET -H "Authorization: Bearer $TOKEN" $HOST/clusters | jq .
 curl -X DELETE -H "Authorization: Bearer $TOKEN" $HOST/clusters/50 | jq .
@@ -30,20 +27,21 @@ curl -X POST -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/configurations 
 curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"setup":[{"name":"default", "capacity":55}, {"name":"high", "capacity":45}]}' $HOST/clusters/50/configurations/queue | jq .
 
 # set metric alarms
-curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alarmName":"freeGlobalResourcesRateLow","description":"Low free global resource rate","metric":"GLOBAL_RESOURCES","threshold":0.5,"comparisonOperator":"LESS_THAN","period":1,"notifications":[{"target":["krisztian.horvath@sequenceiq.com"],"notificationType":"EMAIL"}]}' $HOST/clusters/50/alarms/metric | jq .
-curl -X PUT -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alarmName":"freeGlobalResourcesRateLow","description":"Low free global resource rate","metric":"GLOBAL_RESOURCES","threshold":0.3,"comparisonOperator":"EQUALS","period":2,"notifications":[{"target":["tamas.bihari@sequenceiq.com"],"notificationType":"EMAIL"}]}' $HOST/clusters/50/alarms/metric/150 | jq .
-curl -X GET -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/alarms/metric | jq .
-curl -X DELETE -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/alarms/metric/150 | jq .
+curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alertName":"allocatedmemory","description":"Allocated memory","period":3,"alertDefinition":"allocated_memory", "alertState":"CRITICAL"}' $HOST/clusters/50/alerts/metric | jq .
+curl -X PUT -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alertName":"allocatedmemory","description":"Allocated memory","period":3,"alertDefinition":"allocated_memory", "alertState":"WARN"}' $HOST/clusters/50/alerts/metric | jq .
+curl -X PUT -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alertName":"allocatedmemory","description":"Low free global resource rate","period":5,"alertDefinition":"allocated_memory"}' $HOST/clusters/50/alerts/metric/150 | jq .
+curl -X GET -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/alerts/metric | jq .
+curl -X DELETE -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/alerts/metric/150 | jq .
 
-# set time alarms
-curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alarmName":"cron-worktime","description":"Number of nodes during worktime","timeZone":"Europe/Budapest","cron":"0 10 20 ? * MON-FRI"}' $HOST/clusters/50/alarms/time | jq .
-curl -X PUT -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alarmName":"cron-worktime-modified","description":"Number of nodes during worktime","timeZone":"Europe/Budapest","cron":"0 39 16 ? * MON-FRI"}' $HOST/clusters/50/alarms/time/153 | jq .
-curl -X GET -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/alarms/time | jq .
-curl -X DELETE -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/alarms/time/102 | jq .
+# set time alerts
+curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alertName":"cron-worktime","description":"Number of nodes during worktime","timeZone":"Europe/Budapest","cron":"0 54 10 ? * MON-FRI"}' $HOST/clusters/50/alerts/time | jq .
+curl -X PUT -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alertName":"cron-worktime-modified","description":"Number of nodes during worktime","timeZone":"Europe/Budapest","cron":"0 39 16 ? * MON-FRI"}' $HOST/clusters/50/alerts/time/153 | jq .
+curl -X GET -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/alerts/time | jq .
+curl -X DELETE -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/alerts/time/102 | jq .
 
-# set scaling policy for metric alarms
-curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"name":"upScale","adjustmentType":"NODE_COUNT","scalingAdjustment":2,"hostGroup":"slave_1","alarmId":"151"}' $HOST/clusters/50/policies | jq .
-curl -X PUT -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"name":"upScaleModified","adjustmentType":"EXACT","scalingAdjustment":2,"hostGroup":"slave_1","alarmId":"151"}' $HOST/clusters/50/policies/150 | jq .
+# set scaling policy for metric alerts
+curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"name":"upScale","adjustmentType":"NODE_COUNT","scalingAdjustment":2,"hostGroup":"slave_1","alertId":"151"}' $HOST/clusters/50/policies | jq .
+curl -X PUT -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"name":"upScaleModified","adjustmentType":"EXACT","scalingAdjustment":2,"hostGroup":"slave_1","alertId":"151"}' $HOST/clusters/50/policies/150 | jq .
 curl -X GET -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/policies | jq .
 curl -X DELETE -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/policies/150 | jq .
 

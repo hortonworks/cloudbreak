@@ -6,25 +6,25 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.domain.Cluster;
-import com.sequenceiq.periscope.monitor.evaluator.CronTimeEvaluator;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorContext;
+import com.sequenceiq.periscope.monitor.evaluator.MetricEvaluator;
 
 @Component
-public class TimeMonitor extends AbstractMonitor implements Monitor {
+public class MetricMonitor extends AbstractMonitor implements Monitor {
 
     @Override
     public String getIdentifier() {
-        return "time-monitor";
+        return "metric-monitor";
     }
 
     @Override
     public String getTriggerExpression() {
-        return MonitorUpdateRate.TIME_UPDATE_RATE_CRON;
+        return MonitorUpdateRate.METRIC_UPDATE_RATE_CRON;
     }
 
     @Override
     public Class getEvaluatorType() {
-        return CronTimeEvaluator.class;
+        return MetricEvaluator.class;
     }
 
     @Override

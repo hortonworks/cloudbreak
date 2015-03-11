@@ -1,7 +1,7 @@
 <html>
 
     <body>
-        Alarm: ${alarmName} <br/>
+        Alarm: ${alertName} <br/>
         Description: ${description} <br/>
     </body>
 

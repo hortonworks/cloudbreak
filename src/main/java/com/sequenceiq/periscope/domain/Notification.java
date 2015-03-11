@@ -1,6 +1,8 @@
 package com.sequenceiq.periscope.domain;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -10,10 +12,13 @@ import javax.persistence.SequenceGenerator;
 public class Notification {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "template_generator")
-    @SequenceGenerator(name = "template_generator", sequenceName = "sequence_table")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "notification_generator")
+    @SequenceGenerator(name = "notification_generator", sequenceName = "sequence_table")
     private long id;
+
     private String[] target;
+
+    @Enumerated(EnumType.STRING)
     private NotificationType type;
 
     public long getId() {

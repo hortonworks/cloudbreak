@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.rest.json;
 
-import com.sequenceiq.periscope.registry.ClusterState;
+import com.sequenceiq.periscope.domain.ClusterState;
 
 public class StateJson implements Json {
 
