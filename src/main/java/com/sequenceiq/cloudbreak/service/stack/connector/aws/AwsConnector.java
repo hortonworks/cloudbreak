@@ -348,9 +348,6 @@ public class AwsConnector implements CloudPlatformConnector {
                 }
             } catch (CloudFormationStackException e) {
                 LOGGER.error(String.format("Failed to delete CloudFormation stack: %s, id:%s", cFStackName, stack.getId()), e);
-
-                stackUpdater.updateStackStatus(stack.getId(), Status.DELETE_FAILED, "Failed to delete stack: " + e.getMessage());
-
                 throw e;
             }
         } else {

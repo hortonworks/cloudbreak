@@ -137,7 +137,6 @@ public class SimpleFlowFacade implements FlowFacade {
     public FlowContext terminateStack(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Terminating stack. Context: {}", context);
         try {
-
             context = terminationService.terminateStack(context);
             LOGGER.debug("Terminating stack is DONE");
             return context;
