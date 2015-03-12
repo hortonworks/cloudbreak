@@ -158,9 +158,23 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             });
         }
 
+        $scope.filterByVolumetype = function (element) {
+            try {
+              if(element.encrypted.indexOf($scope.awsTemp.parameters.encrypted) != -1) {
+                 return true;
+              }
+              return false;
+            } catch (err) {
+                return true;
+            }
+        }
+
         $scope.changeAwsInstanceType = function() {
             var instanceType = $scope.awsTemp.parameters.instanceType;
             $scope.awsInstanceType = $filter('filter')($rootScope.config.AWS.instanceType, {key: instanceType}, true)[0];
+            if ($scope.awsTemp.parameters.volumeType == 'Ephemeral') {
+              $scope.awsTemp.parameters.encrypted = false;
+            }
         }
 
         function collapseCreateTemplateFormPanel() {
@@ -174,7 +188,8 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 parameters: {
                     sshLocation: "0.0.0.0/0",
                     instanceType: "M3Large",
-                    volumeType: "Standard"
+                    volumeType: "Standard",
+                    encrypted: false
                 }
             }
         }

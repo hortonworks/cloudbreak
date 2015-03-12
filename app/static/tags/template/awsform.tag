@@ -38,7 +38,7 @@
       <label class="col-sm-3 control-label" for="aws_tvolumetype">Volume type</label>
 
       <div class="col-sm-9">
-        <select class="form-control" id="aws_tvolumetype" name="aws_tvolumetype" ng-options="volumeType.key as volumeType.value for volumeType in $root.config.AWS.volumeTypes" ng-model="awsTemp.parameters.volumeType" ng-change="changeAwsInstanceType()" required>
+        <select class="form-control" id="aws_tvolumetype" name="aws_tvolumetype" ng-options="volumeType.key as volumeType.value for volumeType in $root.config.AWS.volumeTypes | filter:filterByVolumetype" ng-model="awsTemp.parameters.volumeType" ng-change="changeAwsInstanceType()" required>
         </select>
       </div>
       <!-- .col-sm-9 -->
@@ -91,7 +91,7 @@
         </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" ng-hide="awsTemp.parameters.volumeType == 'Ephemeral'">
             <label class="col-sm-3 control-label" for="aws_ebsencryption">EBS encryption</label>
             <div class="col-sm-9">
                 <input type="checkbox" name="aws_ebsencryption" id="aws_ebsencryption" ng-model="awsTemp.parameters.encrypted">
