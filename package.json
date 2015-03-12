@@ -1,6 +1,6 @@
 {
   "name": "uluwatu",
-  "version": "0.1.413",
+  "version": "0.1.414",
   "description": "Cloudbreak frontend.",
   "main": "server.js",
   "author": "SequenceIQ",
