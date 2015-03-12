@@ -42,8 +42,9 @@ public abstract class AbstractFlowHandler<T> implements Consumer<Event<T>>, Flow
             success = true;
         } catch (Throwable t) {
             LOGGER.debug("Consuming the error {}", t);
-            event.consumeError(t);
+//            event.consumeError(t);
             handleErrorFlow(t, event);
+            result = event.getData();
         }
         Object payload = assemblePayload(result);
         next(payload, success);
