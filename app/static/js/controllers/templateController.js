@@ -160,7 +160,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
 
         $scope.filterByVolumetype = function (element) {
             try {
-              if(element.encrypted.indexOf($scope.awsTemp.parameters.encrypted) != -1) {
+              if((element.encryptable && $scope.awsTemp.parameters.encrypted) || !$scope.awsTemp.parameters.encrypted) {
                  return true;
               }
               return false;

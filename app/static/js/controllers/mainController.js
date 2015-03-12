@@ -90,9 +90,9 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
             },
             'AWS': {
                 volumeTypes: [
-                    {key: 'Gp2', value: 'SSD', encrypted: [true, false]},
-                    {key: 'Standard', value: 'Magnetic', encrypted: [true, false]},
-                    {key: 'Ephemeral', value: 'Ephemeral', encrypted: [false]}
+                    {key: 'Gp2', value: 'SSD', encryptable: true},
+                    {key: 'Standard', value: 'Magnetic', encryptable: true},
+                    {key: 'Ephemeral', value: 'Ephemeral', encryptable: false}
                 ],
                 awsRegions : [
                     {key: 'US_EAST_1', value: 'US East(N. Virginia)', cloud: 'AWS'},
