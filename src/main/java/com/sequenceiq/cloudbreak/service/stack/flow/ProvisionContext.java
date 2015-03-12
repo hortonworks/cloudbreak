@@ -134,7 +134,8 @@ public class ProvisionContext {
                 }
             } else {
                 CloudPlatformConnector cloudPlatformConnector = cloudPlatformConnectors.get(cloudPlatform);
-                cloudPlatformConnector.buildStack(stack, userDataScript, setupProperties);
+                Set<Resource> resources = cloudPlatformConnector.buildStack(stack, userDataScript, setupProperties);
+                provisionComplete = new ProvisionComplete(cloudPlatform, stack.getId(), resources);
             }
         } else {
             LOGGER.info("CloudFormation stack creation was requested for a stack, that is not in REQUESTED status anymore. [stackId: '{}', status: '{}']",
