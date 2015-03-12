@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 
 import jersey.repackaged.com.google.common.collect.Maps;
@@ -89,7 +88,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
     private OpenStackInstanceStatusCheckerTask openStackInstanceStatusCheckerTask;
 
     @Override
-    public void buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
+    public Set<Resource> buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
         MDCBuilder.buildMdcContext(stack);
         String stackName = stack.getName();
         OpenStackCredential credential = (OpenStackCredential) stack.getCredential();
@@ -111,14 +110,13 @@ public class OpenStackConnector implements CloudPlatformConnector {
                     POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             if (isSuccess(pollingResult)) {
                 LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
-                reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(
-                        new ProvisionComplete(CloudPlatform.OPENSTACK, stack.getId(), new HashSet<>(resources))));
             }
         } catch (HeatStackFailedException e) {
             LOGGER.error(String.format("Failed to create Heat stack: %s", stack.getId()), e);
             stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_FAILED, "Creation of cluster infrastructure failed: " + e.getMessage());
             throw new BuildStackFailureException(e);
         }
+        return new HashSet<>(resources);
     }
 
     @Override

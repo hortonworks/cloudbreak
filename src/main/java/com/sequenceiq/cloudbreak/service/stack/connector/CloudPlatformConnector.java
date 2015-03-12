@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 
 public interface CloudPlatformConnector {
 
-    void buildStack(Stack stack, String userData, Map<String, Object> setupProperties);
+    Set<Resource> buildStack(Stack stack, String userData, Map<String, Object> setupProperties);
 
     boolean addInstances(Stack stack, String userData, Integer instanceCount, String instanceGroup);
 
