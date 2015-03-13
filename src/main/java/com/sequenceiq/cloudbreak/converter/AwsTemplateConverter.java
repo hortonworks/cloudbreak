@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.validation.AwsTemplateParam;
 import com.sequenceiq.cloudbreak.domain.AwsEncryption;
@@ -58,6 +59,9 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         awsTemplate.setSpotPrice(json.getParameters().containsKey(AwsTemplateParam.SPOT_PRICE.getName())
                 && json.getParameters().get(AwsTemplateParam.SPOT_PRICE.getName()) != null
                 ? Double.valueOf(json.getParameters().get(AwsTemplateParam.SPOT_PRICE.getName()).toString()) : null);
+        if (awsTemplate.isEncrypted() && awsTemplate.getVolumeType().equals(AwsVolumeType.Ephemeral)) {
+            throw new BadRequestException("AwsTemplate can not be both encrypted and ephemeral");
+        }
         return awsTemplate;
     }
 
