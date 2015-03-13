@@ -1,4 +1,5 @@
 #!/bin/bash
+[[ "TRACE" ]] && set -x
 if [ -z "$ULU_CLOUDBREAK_ADDRESS" ]; then
   echo ULU_CLOUDBREAK_ADDRESS must be set;
   MISSING_ENV_VARS=true;
