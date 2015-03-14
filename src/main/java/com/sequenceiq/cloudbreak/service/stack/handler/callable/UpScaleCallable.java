@@ -60,6 +60,7 @@ public class UpScaleCallable implements Callable<ResourceRequestResult> {
         } catch (Exception ex) {
             return ResourceRequestResult.ResourceRequestResultBuilder.builder()
                     .withException(ex)
+                    .withResources(resources)
                     .withFutureResult(FutureResult.FAILED)
                     .withInstanceGroup(stack.getInstanceGroupByInstanceGroupName(instanceGroup))
                     .build();

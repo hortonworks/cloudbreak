@@ -56,11 +56,4 @@ public class ProvisionUtil {
         return result;
     }
 
-    public void checkErrorOccurred(Map<FutureResult, List<ResourceRequestResult>> futureResultListMap) throws Exception {
-        List<ResourceRequestResult> resourceRequestResults = futureResultListMap.get(FutureResult.FAILED);
-        if (!resourceRequestResults.isEmpty()) {
-            throw resourceRequestResults.get(0).getException().orNull();
-        }
-    }
-
 }

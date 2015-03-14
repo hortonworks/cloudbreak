@@ -11,6 +11,7 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
@@ -77,6 +78,7 @@ public class ProvisionContext {
     private ProvisionUtil provisionUtil;
 
     @Autowired
+    @Qualifier("stackFailureHandlerService")
     private FailureHandlerService stackFailureHandlerService;
 
     public void buildStack(final CloudPlatform cloudPlatform, Long stackId, Map<String, Object> setupProperties, Map<String, String> userDataParams) {

@@ -11,6 +11,7 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.stack.FailureHandlerService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
@@ -79,6 +81,10 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
     @Autowired
     private ProvisionUtil provisionUtil;
 
+    @Autowired
+    @Qualifier("upscaleFailureHandlerService")
+    private FailureHandlerService upscaleFailureHandlerService;
+
     @Override
     public void accept(Event<UpdateInstancesRequest> event) {
         final UpdateInstancesRequest request = event.getData();
@@ -120,6 +126,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
         } else {
             ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(stack.cloudPlatform());
             final DeleteContextObject deleteContextObject = resourceBuilderInit.decommissionInit(stack, instanceIds);
+            List<ResourceRequestResult> failedResourceList = new ArrayList<>();
             for (int j = instanceResourceBuilders.get(stack.cloudPlatform()).size() - 1; j >= 0; j--) {
                 List<Future<ResourceRequestResult>> futures = new ArrayList<>();
                 final int index = j;
@@ -136,21 +143,35 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                     futures.add(submit);
                     if (provisionUtil.isRequestFull(stack, futures.size() + 1)) {
                         Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
-                        provisionUtil.checkErrorOccurred(result);
+                        failedResourceList.addAll(result.get(FutureResult.FAILED));
                         futures = new ArrayList<>();
                     }
                 }
                 Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
-                provisionUtil.checkErrorOccurred(result);
+                failedResourceList.addAll(result.get(FutureResult.FAILED));
             }
+            instanceIds.removeAll(filterFailedResources(failedResourceList, instanceIds));
             if (!stackRepository.findById(stack.getId()).isStackInDeletionPhase()) {
                 stackUpdater.removeStackResources(stack.getId(), deleteContextObject.getDecommissionResources());
                 LOGGER.info("Terminated instances in stack: '{}'", instanceIds);
                 LOGGER.info("Publishing {} event.", ReactorConfig.REMOVE_INSTANCES_COMPLETE_EVENT);
-                reactor.notify(ReactorConfig.REMOVE_INSTANCES_COMPLETE_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true,
-                        instanceIds, request.getInstanceGroup())));
+                reactor.notify(ReactorConfig.REMOVE_INSTANCES_COMPLETE_EVENT,
+                        Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds, request.getInstanceGroup())));
             }
         }
+    }
+
+    private Set<String> filterFailedResources(List<ResourceRequestResult> failedResourceList, Set<String> instanceIds) {
+        Set<String> result = new HashSet<>(instanceIds);
+        for (ResourceRequestResult requestResult : failedResourceList) {
+            for (Resource resource : requestResult.getResources()) {
+                String resourceName = resource.getResourceName();
+                if (result.contains(resourceName)) {
+                    result.remove(resourceName);
+                }
+            }
+        }
+        return result;
     }
 
     private void upScaleStack(UpdateInstancesRequest request, Stack stack) throws Exception {
@@ -164,8 +185,10 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                 provisionContextObject.getNetworkResources().addAll(stack.getResourcesByType(resourceBuilder.resourceType()));
             }
             List<Future<ResourceRequestResult>> futures = new ArrayList<>();
-            final Set<ResourceRequestResult> resourceRequestResults = new HashSet<>();
-            for (int i = stack.getFullNodeCount(); i < stack.getFullNodeCount() + request.getScalingAdjustment(); i++) {
+            final Set<ResourceRequestResult> successResourceRequestResults = new HashSet<>();
+            final List<ResourceRequestResult> failedResourceRequestResults = new ArrayList<>();
+            final Integer addNodeCount = request.getScalingAdjustment();
+            for (int i = stack.getFullNodeCount(); i < stack.getFullNodeCount() + addNodeCount; i++) {
                 final int index = i;
                 Future<ResourceRequestResult> submit = resourceBuilderExecutor.submit(
                         UpScaleCallableBuilder.builder()
@@ -180,19 +203,21 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                 futures.add(submit);
                 if (provisionUtil.isRequestFullWithCloudPlatform(stack, futures.size() + 1)) {
                     Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
-                    provisionUtil.checkErrorOccurred(result);
-                    resourceRequestResults.addAll(result.get(FutureResult.SUCCESS));
+                    successResourceRequestResults.addAll(result.get(FutureResult.SUCCESS));
+                    failedResourceRequestResults.addAll(result.get(FutureResult.FAILED));
+                    upscaleFailureHandlerService.handleFailure(stack, failedResourceRequestResults);
                     futures = new ArrayList<>();
                 }
             }
             Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
-            provisionUtil.checkErrorOccurred(result);
-            resourceRequestResults.addAll(result.get(FutureResult.SUCCESS));
+            successResourceRequestResults.addAll(result.get(FutureResult.SUCCESS));
+            failedResourceRequestResults.addAll(result.get(FutureResult.FAILED));
+            upscaleFailureHandlerService.handleFailure(stack, failedResourceRequestResults);
             if (!stackRepository.findById(stack.getId()).isStackInDeletionPhase()) {
                 LOGGER.info("Publishing {} event.", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT);
                 reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
                         Event.wrap(new AddInstancesComplete(stack.cloudPlatform(), stack.getId(),
-                                        collectResources(resourceRequestResults), request.getInstanceGroup())
+                                        collectResources(successResourceRequestResults), request.getInstanceGroup())
                         )
                 );
             }
