@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.service.usages;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -106,6 +108,8 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         stack.setStatus(Status.DELETE_COMPLETED);
         when(stackRepository.findById(1L)).thenReturn(stack);
         when(stackRepository.findAllStackForTemplate(template.getId())).thenReturn(Arrays.asList(stack));
+        given(eventRepository.findCloudbreakEventsForStack(any(Long.class))).willReturn(new ArrayList<CloudbreakEvent>());
+        doNothing().when(eventRepository).delete(anyCollection());
         //WHEN
         underTest.generate();
         //THEN
@@ -174,6 +178,8 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         stack.setStatus(Status.DELETE_COMPLETED);
         when(stackRepository.findById(1L)).thenReturn(stack);
         when(stackRepository.findAllStackForTemplate(template.getId())).thenReturn(Arrays.asList(stack));
+        given(eventRepository.findCloudbreakEventsForStack(any(Long.class))).willReturn(new ArrayList<CloudbreakEvent>());
+        doNothing().when(eventRepository).delete(anyCollection());
         //WHEN
         underTest.generate();
         //THEN
@@ -237,6 +243,8 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         stack.setStatus(Status.DELETE_COMPLETED);
         when(stackRepository.findById(1L)).thenReturn(stack);
         when(stackRepository.findAllStackForTemplate(template.getId())).thenReturn(Arrays.asList(stack));
+        given(eventRepository.findCloudbreakEventsForStack(any(Long.class))).willReturn(new ArrayList<CloudbreakEvent>());
+        doNothing().when(eventRepository).delete(anyCollection());
         //WHEN
         underTest.generate();
         //THEN
