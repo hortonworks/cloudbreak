@@ -15,4 +15,6 @@ public interface CloudbreakEventRepository extends PagingAndSortingRepository<Cl
 
     List<CloudbreakEvent> cloudbreakEventsSince(@Param("owner") String owner, @Param("since") Date since);
 
+    List<CloudbreakEvent> findCloudbreakEventsForStack(@Param("stackId") Long stackId);
+
 }

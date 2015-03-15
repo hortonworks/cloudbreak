@@ -21,7 +21,11 @@ import javax.persistence.Table;
                 name = "CloudbreakEvent.cloudbreakEventsSince",
                 query = "SELECT cbe FROM CloudbreakEvent cbe "
                         + "WHERE cbe.owner= :owner AND cbe.eventTimestamp > :since "
-                        + "ORDER BY cbe.eventTimestamp ASC")
+                        + "ORDER BY cbe.eventTimestamp ASC"),
+        @NamedQuery(
+                name = "CloudbreakEvent.findCloudbreakEventsForStack",
+                query = "SELECT cbe FROM CloudbreakEvent cbe "
+                        + "WHERE cbe.stackId= :stackId")
 })
 @Table(name = "cloudbreakevent")
 public class CloudbreakEvent implements ProvisionEntity {

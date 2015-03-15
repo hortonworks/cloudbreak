@@ -116,6 +116,7 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
             if (stack != null && Status.DELETE_COMPLETED.equals(stack.getStatus())) {
                 stackRepository.delete(stack);
                 deleteTemplatesOfStack(stack);
+                eventRepository.delete(eventRepository.findCloudbreakEventsForStack(stackId));
             }
         }
     }
