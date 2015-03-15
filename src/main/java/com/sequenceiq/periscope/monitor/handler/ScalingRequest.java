@@ -1,4 +1,4 @@
-package com.sequenceiq.periscope.service;
+package com.sequenceiq.periscope.monitor.handler;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -7,8 +7,11 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
+import com.sequenceiq.periscope.domain.ScalingStatus;
 import com.sequenceiq.periscope.log.Logger;
 import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
+import com.sequenceiq.periscope.service.CloudbreakService;
+import com.sequenceiq.periscope.service.HistoryService;
 
 @Component("ScalingRequest")
 @Scope("prototype")
@@ -30,6 +33,8 @@ public class ScalingRequest implements Runnable {
 
     @Autowired
     private CloudbreakService cloudbreakService;
+    @Autowired
+    private HistoryService historyService;
 
     public ScalingRequest(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount) {
         this(cluster, policy, totalNodes, desiredNodeCount, SLEEP, STACK_RETRY_COUNT, CLUSTER_RETRY_COUNT);
@@ -52,16 +57,16 @@ public class ScalingRequest implements Runnable {
             CloudbreakClient client = cloudbreakService.getClient();
             int scalingAdjustment = desiredNodeCount - totalNodes;
             if (scalingAdjustment > 0) {
-                scaleUp(client, scalingAdjustment);
+                scaleUp(client, scalingAdjustment, totalNodes);
             } else {
-                scaleDown(client, scalingAdjustment);
+                scaleDown(client, scalingAdjustment, totalNodes);
             }
         } catch (Exception e) {
             LOGGER.error(Logger.NOT_CLUSTER_RELATED, "Cannot retrieve an oauth token from the identity server", e);
         }
     }
 
-    private void scaleUp(CloudbreakClient client, int scalingAdjustment) {
+    private void scaleUp(CloudbreakClient client, int scalingAdjustment, int totalNodes) {
         String hostGroup = policy.getHostGroup();
         String ambari = cluster.getHost();
         long clusterId = cluster.getId();
@@ -73,8 +78,10 @@ public class ScalingRequest implements Runnable {
             if (ready) {
                 boolean sent = sendInstallRequest(client, scalingAdjustment, hostGroup, clusterId, stackId);
                 if (sent) {
+                    historyService.createEntry(ScalingStatus.SUCCESS, "Successfully upscaled the cluster", totalNodes, policy);
                     LOGGER.info(clusterId, "Install request successfully sent");
                 } else {
+                    historyService.createEntry(ScalingStatus.FAILED, "Could not send install request to cluster", totalNodes, policy);
                     LOGGER.info(clusterId, "Could not send the install request");
                 }
             } else {
@@ -102,7 +109,7 @@ public class ScalingRequest implements Runnable {
         return retry != clusterRetryCount;
     }
 
-    private void scaleDown(CloudbreakClient client, int scalingAdjustment) {
+    private void scaleDown(CloudbreakClient client, int scalingAdjustment, int totalNodes) {
         String hostGroup = policy.getHostGroup();
         String ambari = cluster.getHost();
         long clusterId = cluster.getId();
@@ -114,7 +121,9 @@ public class ScalingRequest implements Runnable {
             if (ready) {
                 LOGGER.info(clusterId, "Sending request to terminate {} instance(s)", scalingAdjustment);
                 client.putStack(stackId, hostGroup, scalingAdjustment);
+                historyService.createEntry(ScalingStatus.SUCCESS, "Successfully downscaled the cluster", totalNodes, policy);
             } else {
+                historyService.createEntry(ScalingStatus.FAILED, "Could not send terminate request to stack", totalNodes, policy);
                 LOGGER.info(clusterId, "Instance(s) didn't stop in time, skipping scaling");
                 // TODO should we force instance termination?
             }

@@ -49,6 +49,11 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
             Cluster cluster = (Cluster) clusterField.get(targetDomainObject);
             return getUserId(cluster);
         } else {
+            Field userIdField = ReflectionUtils.findField(targetDomainObject.getClass(), "userId");
+            if (userIdField != null) {
+                userIdField.setAccessible(true);
+                return (String) userIdField.get(targetDomainObject);
+            }
             return getUserIdFromCluster(targetDomainObject);
         }
     }

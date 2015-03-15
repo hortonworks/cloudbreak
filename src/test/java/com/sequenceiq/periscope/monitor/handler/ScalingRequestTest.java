@@ -1,4 +1,4 @@
-package com.sequenceiq.periscope.service;
+package com.sequenceiq.periscope.monitor.handler;
 
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
@@ -18,6 +18,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
+import com.sequenceiq.periscope.service.CloudbreakService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ScalingRequestTest {

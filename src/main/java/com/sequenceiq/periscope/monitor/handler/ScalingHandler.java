@@ -16,7 +16,6 @@ import com.sequenceiq.periscope.log.Logger;
 import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.service.ClusterService;
-import com.sequenceiq.periscope.service.ScalingRequest;
 import com.sequenceiq.periscope.utils.ClusterUtils;
 
 @Component

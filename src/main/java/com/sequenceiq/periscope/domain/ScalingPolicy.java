@@ -27,6 +27,7 @@ public class ScalingPolicy {
     private String name;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "adjustment_type")
     private AdjustmentType adjustmentType;
 
     @Column(name = "scaling_adjustment")
