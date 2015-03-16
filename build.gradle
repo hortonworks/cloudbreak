@@ -322,7 +322,7 @@ dependencies {
     compile("org.apache.hadoop:hadoop-yarn-client:${hadoopVersion}")
     compile("org.apache.hadoop:hadoop-yarn-server-resourcemanager:${hadoopVersion}")
     compile("org.apache.hadoop:hadoop-common:${hadoopVersion}")
-    compile("com.sequenceiq:ambari-client20:2.0.5")
+    compile("com.sequenceiq:ambari-client20:2.0.6")
     compile("javax.servlet:javax.servlet-api:3.0.1")
     compile("com.sequenceiq:cloudbreak-rest-client:0.2.32")
     compile("org.freemarker:freemarker:2.3.20")

@@ -20,11 +20,15 @@ public class ClusterService {
     private ClusterRepository clusterRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private AlertService alertService;
 
     public Cluster create(PeriscopeUser user, AmbariStack stack) {
         PeriscopeUser periscopeUser = createUserIfAbsent(user);
         Cluster cluster = new Cluster(periscopeUser, stack);
-        return save(cluster);
+        cluster = save(cluster);
+        alertService.addPeriscopeAlerts(cluster);
+        return cluster;
     }
 
     public Cluster update(long clusterId, AmbariStack stack) {

@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.config;
 
+import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Executor;
@@ -19,11 +20,14 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
+import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 import com.sequenceiq.periscope.log.Logger;
 import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
+
+import freemarker.template.TemplateException;
 
 @Configuration
 @EnableAsync
@@ -71,6 +75,15 @@ public class AppConfig implements AsyncConfigurer {
         CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslConnectionSocketFactory).build();
         requestFactory.setHttpClient(httpClient);
         return new RestTemplate(requestFactory);
+    }
+
+    @Bean
+    public freemarker.template.Configuration freemarkerConfiguration() throws IOException, TemplateException {
+        FreeMarkerConfigurationFactoryBean factoryBean = new FreeMarkerConfigurationFactoryBean();
+        factoryBean.setPreferFileSystemAccess(false);
+        factoryBean.setTemplateLoaderPath("classpath:/");
+        factoryBean.afterPropertiesSet();
+        return factoryBean.getObject();
     }
 
     @Override
