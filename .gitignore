@@ -18,3 +18,5 @@ curl_config_admin_user
 startit.sh
 integrationtest/build/
 integrationtest/test-output/
+owners_log/
+stacks_log/

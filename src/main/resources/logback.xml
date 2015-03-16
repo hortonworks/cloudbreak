@@ -4,7 +4,7 @@
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [owner:%X{owner:-spring}] [type:%X{resourceType:-springLog}] [id:%X{resourceId:-}] [name:%X{resourceName:-}] %msg%n</pattern>
+            <pattern>%date{ISO8601} [%thread] %method:%line %highlight(%-5level) %logger{5} - [owner:%X{owner:-spring}] [type:%X{resourceType:-springLog}] [id:%X{resourceId:-}] [name:%X{resourceName:-}] %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -28,6 +28,46 @@
     </logger>
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
+    </root>
+
+    <appender name="OWNER_BASED" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator>
+            <key>owner</key>
+            <defaultValue>spring</defaultValue>
+        </discriminator>
+        <sift>
+            <appender name="FILE-${owner}" class="ch.qos.logback.core.FileAppender">
+                <file>owners_log/${owner}.log</file>
+                <append>false</append>
+                <layout class="ch.qos.logback.classic.PatternLayout">
+                    <encoder>
+                        <pattern>%date{ISO8601} [%thread] %method:%line %highlight(%-5level) %logger{5} - [type:%X{resourceType:-springLog}] [id:%X{resourceId:-}] [name:%X{resourceName:-}] %msg%n</pattern>
+                    </encoder>
+                </layout>
+            </appender>
+        </sift>
+    </appender>
+
+    <logger name="com.sequenceiq" level="DEBUG" additivity="false">
+        <appender-ref ref="OWNER_BASED"/>
+    </logger>
+    <logger name="org.hibernate.type" level="INFO">
+        <appender-ref ref="OWNER_BASED"/>
+    </logger>
+    <logger name="org.hibernate" level="INFO">
+        <appender-ref ref="OWNER_BASED"/>
+    </logger>
+    <logger name="org.hibernate.SQL" level="INFO">
+        <appender-ref ref="OWNER_BASED"/>
+    </logger>
+    <logger name="sql-log" level="INFO">
+        <appender-ref ref="OWNER_BASED"/>
+    </logger>
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder">
+        <level value="OWNER_BASED"/>
+    </logger>
+    <root level="INFO">
+        <appender-ref ref="OWNER_BASED"/>
     </root>
 
 </configuration>

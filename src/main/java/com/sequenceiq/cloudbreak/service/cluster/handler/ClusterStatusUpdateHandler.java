@@ -77,6 +77,7 @@ public class ClusterStatusUpdateHandler implements Consumer<Event<ClusterStatusU
             } else {
                 LOGGER.info("Failed to stop Hadoop services, setting cluster state to: {}", Status.AVAILABLE);
                 stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Failed to stop cluster, some of the services could not started.");
+                cluster.setStatus(Status.AVAILABLE);
             }
         } else {
             boolean started = ambariClusterConnector.startCluster(stack);
@@ -87,8 +88,8 @@ public class ClusterStatusUpdateHandler implements Consumer<Event<ClusterStatusU
                 cloudbreakEventService.fireCloudbreakEvent(stackId, Status.AVAILABLE.name(), "Cluster started successfully.");
             } else {
                 LOGGER.info("Failed to start Hadoop services, setting cluster state to: {}", Status.STOPPED);
-                cluster.setStatus(Status.STOPPED);
                 stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Failed to start cluster, some of the services could not started.");
+                cluster.setStatus(Status.STOPPED);
             }
         }
         clusterRepository.save(cluster);

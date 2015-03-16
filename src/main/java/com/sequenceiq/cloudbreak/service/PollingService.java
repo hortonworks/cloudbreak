@@ -22,6 +22,7 @@ public class PollingService<T> {
      * @param maxAttempts signals how many times will the status check be executed before timeout
      */
     public PollingResult pollWithTimeout(StatusCheckerTask<T> statusCheckerTask, T t, int interval, int maxAttempts) {
+        MDCBuilder.buildMdcContext(t instanceof StackDependentPollerObject ? ((StackDependentPollerObject) t).getStack() : t);
         boolean success = false;
         boolean timeout = false;
         int attempts = 0;
