@@ -193,8 +193,8 @@ public class AmbariClusterService implements ClusterService {
                 }
                 cluster.setStatus(Status.START_IN_PROGRESS);
                 clusterRepository.save(cluster);
-                LOGGER.info("Publishing {} event", ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT);
                 retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest);
+                flowManager.triggerClusterStart(retVal);
             }
         } else {
             if (!Status.AVAILABLE.equals(clusterStatus)) {
@@ -209,6 +209,7 @@ public class AmbariClusterService implements ClusterService {
             clusterRepository.save(cluster);
             LOGGER.info("Publishing {} event", ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT);
             retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest);
+            flowManager.triggerClusterStop(retVal);
         }
 
         return retVal;

@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisionContext;
-import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 
 @Service
 public class SimpleFlowFacade implements FlowFacade {
@@ -34,16 +33,13 @@ public class SimpleFlowFacade implements FlowFacade {
     private Map<CloudPlatform, MetadataSetup> metadataSetups;
 
     @Autowired
-    private AmbariFlowFacade ambariFlowFacade;
+    private ClusterFacade clusterFacade;
 
     @Autowired
     private ProvisionContext provisioningService;
 
     @Autowired
     private StackService stackService;
-
-    @Autowired
-    private TerminationService terminationService;
 
     @Override
     public FlowContext setup(FlowContext context) throws CloudbreakException {
@@ -97,7 +93,7 @@ public class SimpleFlowFacade implements FlowFacade {
     public FlowContext allocateAmbariRoles(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Allocating Ambari roles. Context: {}", context);
         try {
-            ProvisioningContext ambariRoleAllocationContext = (ProvisioningContext) ambariFlowFacade.allocateAmbariRoles(context);
+            ProvisioningContext ambariRoleAllocationContext = (ProvisioningContext) clusterFacade.allocateAmbariRoles(context);
             LOGGER.debug("Allocating Ambari roles DONE.");
             return ambariRoleAllocationContext;
         } catch (Exception e) {
@@ -111,7 +107,7 @@ public class SimpleFlowFacade implements FlowFacade {
         LOGGER.debug("Starting Ambari. Context: {}", context);
 
         try {
-            FlowContext ambariStartContext = ambariFlowFacade.startAmbari(context);
+            FlowContext ambariStartContext = clusterFacade.startAmbari(context);
             LOGGER.debug("Ambari start DONE.");
             return ambariStartContext;
         } catch (Exception e) {
@@ -124,24 +120,11 @@ public class SimpleFlowFacade implements FlowFacade {
     public FlowContext buildAmbariCluster(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Building ambari cluster. Context: {}", context);
         try {
-            context = ambariFlowFacade.buildAmbariCluster(context);
+            context = clusterFacade.buildAmbariCluster(context);
             LOGGER.debug("Building ambari cluster DONE");
             return context;
         } catch (Exception e) {
             LOGGER.error("Exception during the cluster build process: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext terminateStack(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Terminating stack. Context: {}", context);
-        try {
-            context = terminationService.terminateStack(context);
-            LOGGER.debug("Terminating stack is DONE");
-            return context;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the terminating process: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }

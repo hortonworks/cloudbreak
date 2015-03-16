@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow.handlers;
 
+import com.sequenceiq.cloudbreak.core.flow.service.StackFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.context.TerminationContext;
-import com.sequenceiq.cloudbreak.core.flow.service.FlowFacade;
 
 import reactor.event.Event;
 
@@ -18,12 +18,12 @@ public class StackTerminationHandler extends AbstractFlowHandler<TerminationCont
     private static final Logger LOGGER = LoggerFactory.getLogger(StackTerminationHandler.class);
 
     @Autowired
-    private FlowFacade flowFacade;
+    private StackFacade stackFacade;
 
     @Override
     protected Object execute(Event<TerminationContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
-        TerminationContext context = (TerminationContext) flowFacade.terminateStack(event.getData());
+        TerminationContext context = (TerminationContext) stackFacade.terminateStack(event.getData());
         LOGGER.info("Cluster terminated. Context: {}", context);
         return context;
     }

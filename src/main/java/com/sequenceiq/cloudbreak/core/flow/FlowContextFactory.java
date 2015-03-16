@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,5 +97,9 @@ public class FlowContextFactory {
         ProvisioningContext context = createContext();
         context.setStackId(stackId);
         return context;
+    }
+
+    public static final FlowContext createStatusUpdateContext(Long stackId, boolean start) {
+        return new StackStatusUpdateContext(stackId, start);
     }
 }

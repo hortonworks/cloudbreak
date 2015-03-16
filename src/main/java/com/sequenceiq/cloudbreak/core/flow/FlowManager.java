@@ -16,4 +16,12 @@ public interface FlowManager {
 
     void triggerTermination(Object object);
 
+    void triggerStackStop(Object object);
+
+    void triggerStackStart(Object object);
+
+    void triggerClusterStop(Object object);
+
+    void triggerClusterStart(Object object);
+
 }

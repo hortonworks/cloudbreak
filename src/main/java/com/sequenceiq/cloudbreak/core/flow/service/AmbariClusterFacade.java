@@ -2,7 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow.service;
 
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
-import org.jvnet.hk2.annotations.Service;
+import com.sequenceiq.cloudbreak.core.flow.ClusterStartService;
+import com.sequenceiq.cloudbreak.core.flow.ClusterStopService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +26,11 @@ import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplet
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariRoleAllocator;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListenerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
+import org.springframework.stereotype.Service;
 
 @Service
-public class SimpleAmbariFlowFacade implements AmbariFlowFacade {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAmbariFlowFacade.class);
+public class AmbariClusterFacade implements ClusterFacade {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterFacade.class);
     private static final int POLLING_INTERVAL = 5000;
     private static final int MS_PER_SEC = 1000;
     private static final int SEC_PER_MIN = 60;
@@ -52,6 +54,12 @@ public class SimpleAmbariFlowFacade implements AmbariFlowFacade {
 
     @Autowired
     private StackService stackService;
+
+    @Autowired
+    private ClusterStartService clusterStartService;
+
+    @Autowired
+    private ClusterStopService clusterStopService;
 
     @Autowired
     private PollingService<AmbariStartupPollerObject> ambariStartupPollerObjectPollingService;
@@ -105,6 +113,42 @@ public class SimpleAmbariFlowFacade implements AmbariFlowFacade {
             LOGGER.info("Ambari has started but there were no cluster request to this stack yet. Won't install cluster now.");
         }
         return provisioningContext;
+    }
+
+    @Override
+    public FlowContext startCluster(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Starting cluster. Context: {}", context);
+        try {
+            context = clusterStartService.start(context);
+            LOGGER.debug("Starting cluster is DONE.");
+            return context;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the cluster start process: {}", e.getMessage());
+            throw new CloudbreakException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public FlowContext stopCluster(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Stopping cluster. Context: {}", context);
+        try {
+            context = clusterStopService.stop(context);
+            LOGGER.debug("Stopping cluster is DONE.");
+            return context;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the cluster stop process: {}", e.getMessage());
+            throw new CloudbreakException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public FlowContext clusterStartError(FlowContext context) throws CloudbreakException {
+        return clusterStartService.handleClusterStartError(context);
+    }
+
+    @Override
+    public FlowContext clusterStopError(FlowContext context) throws CloudbreakException {
+        return clusterStopService.handleClusterStopError(context);
     }
 
     private void changeAmbariCredentials(String ambariIp, Stack stack) {

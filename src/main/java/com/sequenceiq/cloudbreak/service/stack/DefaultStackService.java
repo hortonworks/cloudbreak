@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
+import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,6 @@ import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
-import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateAllowedSubnetsRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
@@ -196,9 +196,7 @@ public class DefaultStackService implements StackService {
                 throw new BadRequestException(String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stackId));
             }
             stackUpdater.updateStackStatus(stackId, Status.START_IN_PROGRESS, "Cluster infrastructure is now starting.");
-            LOGGER.info("Publishing {} event", ReactorConfig.STACK_STATUS_UPDATE_EVENT);
-            reactor.notify(ReactorConfig.STACK_STATUS_UPDATE_EVENT,
-                    Event.wrap(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), status)));
+            flowManager.triggerStackStart(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), status));
         } else {
             Status clusterStatus = clusterRepository.findOneWithLists(stack.getCluster().getId()).getStatus();
             if (Status.STOP_IN_PROGRESS.equals(clusterStatus)) {
@@ -212,9 +210,7 @@ public class DefaultStackService implements StackService {
                     throw new BadRequestException(
                             String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.", stackId));
                 }
-                LOGGER.info("Publishing {} event.", ReactorConfig.STACK_STATUS_UPDATE_EVENT);
-                reactor.notify(ReactorConfig.STACK_STATUS_UPDATE_EVENT,
-                        Event.wrap(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), status)));
+                flowManager.triggerStackStop(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), status));
             }
         }
     }
