@@ -9,8 +9,8 @@ import javax.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.sequenceiq.cloudbreak.core.flow.service.AmbariFlowFacade;
-import com.sequenceiq.cloudbreak.core.flow.service.SimpleAmbariFlowFacade;
+import com.sequenceiq.cloudbreak.core.flow.service.ClusterFacade;
+import com.sequenceiq.cloudbreak.core.flow.service.AmbariClusterFacade;
 
 @Configuration
 public class FlowConfig {
@@ -28,7 +28,7 @@ public class FlowConfig {
     }
 
     @Bean
-    public AmbariFlowFacade ambariFlowFacade() {
-        return new SimpleAmbariFlowFacade();
+    public ClusterFacade clusterFacade() {
+        return new AmbariClusterFacade();
     }
 }

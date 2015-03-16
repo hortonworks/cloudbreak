@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterCreationFailureHandler;
 import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterCreationSuccessHandler;
 import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterRequestHandler;
-import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterStatusUpdateHandler;
 import com.sequenceiq.cloudbreak.service.cluster.handler.UpdateAmbariHostsFailureHandler;
 import com.sequenceiq.cloudbreak.service.cluster.handler.UpdateAmbariHostsRequestHandler;
 import com.sequenceiq.cloudbreak.service.cluster.handler.UpdateAmbariHostsSuccessHandler;
@@ -22,7 +21,6 @@ import com.sequenceiq.cloudbreak.service.stack.handler.ProvisionCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.ProvisionRequestHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.ProvisionSetupCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.StackCreationSuccessHandler;
-import com.sequenceiq.cloudbreak.service.stack.handler.StackStatusUpdateHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.StackUpdateFailureHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.StackUpdateSuccessHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.UpdateAllowedSubnetSuccessHandler;
@@ -92,12 +90,6 @@ public class ReactorInitializer implements InitializingBean {
     private CloudbreakEventHandler cloudbreakEventHandler;
 
     @Autowired
-    private StackStatusUpdateHandler stackStatusUpdateHandler;
-
-    @Autowired
-    private ClusterStatusUpdateHandler clusterStatusUpdateHandler;
-
-    @Autowired
     private UpdateAllowedSubnetsHandler updateAllowedSubnetsHandler;
 
     @Autowired
@@ -135,9 +127,6 @@ public class ReactorInitializer implements InitializingBean {
         reactor.on($(ReactorConfig.UPDATE_AMBARI_HOSTS_FAILED_EVENT), updateAmbariHostsFailureHandler);
 
         reactor.on($(ReactorConfig.CLOUDBREAK_EVENT), cloudbreakEventHandler);
-
-        reactor.on($(ReactorConfig.STACK_STATUS_UPDATE_EVENT), stackStatusUpdateHandler);
-        reactor.on($(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT), clusterStatusUpdateHandler);
     }
 
 }

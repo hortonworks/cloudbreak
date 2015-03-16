@@ -9,6 +9,10 @@ import java.util.concurrent.Future;
 
 import javax.annotation.Resource;
 
+import com.sequenceiq.cloudbreak.core.flow.ClusterStartService;
+import com.sequenceiq.cloudbreak.core.flow.ClusterStopService;
+import com.sequenceiq.cloudbreak.core.flow.StackStartService;
+import com.sequenceiq.cloudbreak.core.flow.StackStopService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +38,8 @@ import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 
 @Service
-public class SimpleStackManagementFacade implements StackManagementFacade {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleStackManagementFacade.class);
+public class SimpleStackFacade implements StackFacade {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleStackFacade.class);
 
     @Autowired
     private RetryingStackUpdater stackUpdater;
@@ -66,6 +70,18 @@ public class SimpleStackManagementFacade implements StackManagementFacade {
 
     @Autowired
     private TerminationService terminationService;
+
+    @Autowired
+    private StackStartService stackStartService;
+
+    @Autowired
+    private StackStopService stackStopService;
+
+    @Autowired
+    private ClusterStartService clusterStartService;
+
+    @Autowired
+    private ClusterStopService clusterStopService;
 
     @Override
     public FlowContext stackCreationError(FlowContext context) throws CloudbreakException {
@@ -120,8 +136,57 @@ public class SimpleStackManagementFacade implements StackManagementFacade {
     }
 
     @Override
+    public FlowContext start(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Starting stack. Context: {}", context);
+        try {
+            context = stackStartService.start(context);
+            LOGGER.debug("Starting stack is DONE.");
+            return context;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the stack start process: {}", e.getMessage());
+            throw new CloudbreakException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public FlowContext stop(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Stopping stack. Context: {}", context);
+        try {
+            context = stackStopService.stop(context);
+            LOGGER.debug("Stopping stack is DONE.");
+            return context;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the stack stop process: {}", e.getMessage());
+            throw new CloudbreakException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public FlowContext terminateStack(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Terminating stack. Context: {}", context);
+        try {
+            context = terminationService.terminateStack(context);
+            LOGGER.debug("Terminating stack is DONE");
+            return context;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the terminating process: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
     public FlowContext stackTerminationError(FlowContext context) throws CloudbreakException {
         return terminationService.handleTerminationFailure(context);
+    }
+
+    @Override
+    public FlowContext stackStopError(FlowContext context) throws CloudbreakException {
+        return stackStopService.handleStackStopFailure(context);
+    }
+
+    @Override
+    public FlowContext stackStartError(FlowContext context) throws CloudbreakException {
+        return stackStartService.handleStackStartFailure(context);
     }
 
     private void fireCloudbreakEventIfNeeded(Long stackId, Stack stack) {

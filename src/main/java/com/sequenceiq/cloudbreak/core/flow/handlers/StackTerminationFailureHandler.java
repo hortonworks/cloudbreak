@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
-import com.sequenceiq.cloudbreak.core.flow.service.StackManagementFacade;
+import com.sequenceiq.cloudbreak.core.flow.service.StackFacade;
 
 import reactor.event.Event;
 
@@ -18,12 +18,12 @@ public class StackTerminationFailureHandler extends AbstractFlowHandler<FlowCont
     private static final Logger LOGGER = LoggerFactory.getLogger(StackTerminationFailureHandler.class);
 
     @Autowired
-    private StackManagementFacade stackManagementFacade;
+    private StackFacade stackFacade;
 
     @Override
     protected Object execute(Event<FlowContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
-        FlowContext context = stackManagementFacade.stackTerminationError(event.getData());
+        FlowContext context = stackFacade.stackTerminationError(event.getData());
         LOGGER.info("Stack creation failure  handled. Context: {}", context);
         return context;
     }
