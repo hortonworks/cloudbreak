@@ -117,6 +117,16 @@ public class SimpleCredentialService implements CredentialService {
         delete(credential, user);
     }
 
+    @Override
+    public Credential update(Long id) throws Exception {
+        Credential credential = credentialRepository.findOne(id);
+        if (credential == null) {
+            throw new NotFoundException(String.format("Credential '%s' not found.", id));
+        } else {
+            return credentialHandlers.get(credential.cloudPlatform()).update(credential);
+        }
+    }
+
     private void delete(Credential credential, CbUser user) {
         if (!user.getUserId().equals(credential.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
             throw new BadRequestException("Credentials can be deleted only by account admins or owners.");

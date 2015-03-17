@@ -23,4 +23,6 @@ public interface CredentialService {
 
     void delete(String name, CbUser user);
 
+    Credential update(Long id) throws Exception;
+
 }

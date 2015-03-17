@@ -41,6 +41,11 @@ public class GccCredentialHandler implements CredentialHandler<GccCredential> {
         return true;
     }
 
+    @Override
+    public GccCredential update(GccCredential credential) throws Exception {
+        return credential;
+    }
+
     private void validateCredential(GccCredential gccCredential) {
         MDCBuilder.buildMdcContext(gccCredential);
         try {

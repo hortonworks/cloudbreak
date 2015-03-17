@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 public class DefaultBlueprintLoaderService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBlueprintLoaderService.class);
 
-    @Value("#{'${cb.blueprint.defaults}'.split(',')}")
+    @Value("#{'${cb.blueprint.defaults:multi-node-hdfs-yarn,hdp-multinode-default}'.split(',')}")
     private List<String> blueprintArray;
 
     @Autowired

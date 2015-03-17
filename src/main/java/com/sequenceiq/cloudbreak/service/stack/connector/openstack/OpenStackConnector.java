@@ -19,6 +19,7 @@ import org.openstack4j.model.heat.StackUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -54,10 +55,12 @@ import reactor.event.Event;
 public class OpenStackConnector implements CloudPlatformConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackConnector.class);
-    private static final String TEMPLATE_PATH = "templates/openstack-heat.ftl";
     private static final int POLLING_INTERVAL = 5000;
     private static final int MAX_POLLING_ATTEMPTS = 100;
     private static final long OPERATION_TIMEOUT = 5L;
+
+    @Value("${cb.openstack.heat.template.path:templates/openstack-heat.ftl}")
+    private String openStackHeatTemplatePath;
 
     @Autowired
     private OpenStackUtil openStackUtil;
@@ -95,7 +98,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
         String stackName = stack.getName();
         OpenStackCredential credential = (OpenStackCredential) stack.getCredential();
         List<InstanceGroup> instanceGroups = stack.getInstanceGroupsAsList();
-        String heatTemplate = heatTemplateBuilder.build(stack, TEMPLATE_PATH, userData);
+        String heatTemplate = heatTemplateBuilder.build(stack, openStackHeatTemplatePath, userData);
         OSClient osClient = openStackUtil.createOSClient(credential);
         org.openstack4j.model.heat.Stack openStackStack = osClient
                 .heat()
@@ -128,7 +131,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
         InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         group.setNodeCount(group.getNodeCount() + adjustment);
         try {
-            String heatTemplate = heatTemplateBuilder.add(stack, TEMPLATE_PATH, userData,
+            String heatTemplate = heatTemplateBuilder.add(stack, openStackHeatTemplatePath, userData,
                     instanceMetaDataRepository.findAllInStack(stack.getId()), instanceGroup, adjustment);
             PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
             if (isSuccess(pollingResult)) {
@@ -147,7 +150,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
     public boolean removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
         try {
             String userDataScript = userDataBuilder.build(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>());
-            String heatTemplate = heatTemplateBuilder.remove(stack, TEMPLATE_PATH, userDataScript,
+            String heatTemplate = heatTemplateBuilder.remove(stack, openStackHeatTemplatePath, userDataScript,
                     instanceMetaDataRepository.findAllInStack(stack.getId()), instanceIds, instanceGroup);
             PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
             if (isSuccess(pollingResult)) {
@@ -208,7 +211,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
     @Override
     public void updateAllowedSubnets(Stack stack, String userData) throws UpdateFailedException {
         Set<InstanceMetaData> metadata = instanceMetaDataRepository.findAllInStack(stack.getId());
-        String heatTemplate = heatTemplateBuilder.update(stack, TEMPLATE_PATH, userData, metadata);
+        String heatTemplate = heatTemplateBuilder.update(stack, openStackHeatTemplatePath, userData, metadata);
         PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
         if (isExited(pollingResult)) {
             throw new UpdateFailedException(new IllegalStateException());

@@ -47,6 +47,11 @@ public class OpenStackCredentialHandler implements CredentialHandler<OpenStackCr
         return true;
     }
 
+    @Override
+    public OpenStackCredential update(OpenStackCredential credential) throws Exception {
+        return credential;
+    }
+
     private void createCredentialIfAbsent(OpenStackCredential credential) {
         OSClient osClient = openStackUtil.createOSClient(credential);
         String keyPairName = openStackUtil.getKeyPairName(credential);

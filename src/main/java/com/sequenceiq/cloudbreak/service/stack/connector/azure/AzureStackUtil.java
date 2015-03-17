@@ -6,6 +6,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
@@ -98,19 +101,7 @@ public class AzureStackUtil {
     public AzureCredential generateAzureServiceFiles(AzureCredential azureCredential) throws IOException, GeneralSecurityException {
         String serviceFilesPathWithoutExtension = azureCredential.getId() == null ? "/tmp/" + new Date().getTime() : "/tmp/" + azureCredential.getId();
         try {
-            keyGeneratorService.generateKey("cloudbreak", azureCredential, "mydomain", serviceFilesPathWithoutExtension + ".jks");
-            KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-            char[] pass = azureCredential.getJks().toCharArray();
-            FileInputStream fis = null;
-            try {
-                fis = new FileInputStream(new File(serviceFilesPathWithoutExtension + ".jks"));
-                ks.load(fis, pass);
-            } finally {
-                if (fis != null) {
-                    fis.close();
-                }
-            }
-            Certificate certificate = ks.getCertificate("mydomain");
+            Certificate certificate = getCertificate(azureCredential, serviceFilesPathWithoutExtension);
             final FileOutputStream os = new FileOutputStream(serviceFilesPathWithoutExtension + ".cer");
             os.write(Base64.encodeBase64(certificate.getEncoded(), true));
             os.close();
@@ -121,6 +112,22 @@ public class AzureStackUtil {
             throw new InternalServerException("There was a problem with the certificate generation", e);
         }
         return azureCredential;
+    }
+
+    private Certificate getCertificate(AzureCredential azureCredential, String serviceFilesPathWithoutExtension) throws Exception {
+        keyGeneratorService.generateKey("cloudbreak", azureCredential, "mydomain", serviceFilesPathWithoutExtension + ".jks");
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        char[] pass = azureCredential.getJks().toCharArray();
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(new File(serviceFilesPathWithoutExtension + ".jks"));
+            ks.load(fis, pass);
+        } finally {
+            if (fis != null) {
+                fis.close();
+            }
+        }
+        return ks.getCertificate("mydomain");
     }
 
     public AzureCredential generateAzureSshCerFile(AzureCredential azureCredential) throws IOException, GeneralSecurityException {
@@ -139,6 +146,25 @@ public class AzureStackUtil {
             throw new InternalServerException(e.getMessage());
         }
 
+        return azureCredential;
+    }
+
+    public AzureCredential refreshCerfile(AzureCredential azureCredential) throws Exception {
+        String serviceFilesPathWithoutExtension = azureCredential.getId() == null
+                ? "/tmp/refresh/" + new Date().getTime() : "/tmp/refresh/" + azureCredential.getId();
+        String oldFile = "/tmp/" + azureCredential.getId();
+        File files = new File("/tmp/refresh/");
+        if (!files.exists()) {
+            files.mkdirs();
+        }
+        Certificate certificate = getCertificate(azureCredential, serviceFilesPathWithoutExtension);
+        final FileOutputStream os = new FileOutputStream(serviceFilesPathWithoutExtension + ".cer");
+        os.write(Base64.encodeBase64(certificate.getEncoded(), true));
+        os.close();
+        Files.copy(Paths.get(serviceFilesPathWithoutExtension + ".cer"), Paths.get(oldFile + ".cer"), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(Paths.get(serviceFilesPathWithoutExtension + ".jks"), Paths.get(oldFile + ".jks"), StandardCopyOption.REPLACE_EXISTING);
+        azureCredential.setCerFile(FileReaderUtils.readFileFromPath(oldFile + ".cer"));
+        azureCredential.setJksFile(FileReaderUtils.readBinaryFileFromPath(oldFile + ".jks"));
         return azureCredential;
     }
 
