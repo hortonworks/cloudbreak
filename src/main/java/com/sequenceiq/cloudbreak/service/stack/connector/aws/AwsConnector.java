@@ -24,6 +24,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonServiceException;
@@ -112,6 +113,9 @@ public class AwsConnector implements CloudPlatformConnector {
     private static final String CLOUDBREAK_EBS_SNAPSHOT = "cloudbreak-ebs-snapshot";
     private static final int SNAPSHOT_VOLUME_SIZE = 10;
 
+    @Value("${cb.aws.cf.template.path:templates/aws-cf-stack.ftl}")
+    private String awsCloudformationTemplatePath;
+
     @Autowired private AwsStackUtil awsStackUtil;
     @Autowired private Reactor reactor;
     @Autowired private ASGroupStatusCheckerTask asGroupStatusCheckerTask;
@@ -143,7 +147,7 @@ public class AwsConnector implements CloudPlatformConnector {
         CreateStackRequest createStackRequest = new CreateStackRequest()
                 .withStackName(cFStackName)
                 .withOnFailure(OnFailure.valueOf(stack.getOnFailureActionAction().name()))
-                .withTemplateBody(cfTemplateBuilder.build(stack, snapshotId, stack.isExistingVPC(), "templates/aws-cf-stack.ftl"))
+                .withTemplateBody(cfTemplateBuilder.build(stack, snapshotId, stack.isExistingVPC(), awsCloudformationTemplatePath))
                 .withParameters(getStackParameters(stack, userData, awsCredential, cFStackName, stack.isExistingVPC()));
         client.createStack(createStackRequest);
         Resource resource = new Resource(ResourceType.CLOUDFORMATION_STACK, cFStackName, stack, null);
@@ -282,7 +286,7 @@ public class AwsConnector implements CloudPlatformConnector {
         String snapshotId = getEbsSnapshotIdIfNeeded(stack);
         UpdateStackRequest updateStackRequest = new UpdateStackRequest()
                 .withStackName(cFStackName)
-                .withTemplateBody(cfTemplateBuilder.build(stack, snapshotId, stack.isExistingVPC(), "templates/aws-cf-stack.ftl"))
+                .withTemplateBody(cfTemplateBuilder.build(stack, snapshotId, stack.isExistingVPC(), awsCloudformationTemplatePath))
                 .withParameters(getStackParameters(stack, userData, (AwsCredential) stack.getCredential(), stack.getName(), stack.isExistingVPC()));
         AmazonCloudFormationClient cloudFormationClient = awsStackUtil.createCloudFormationClient(stack);
         cloudFormationClient.updateStack(updateStackRequest);

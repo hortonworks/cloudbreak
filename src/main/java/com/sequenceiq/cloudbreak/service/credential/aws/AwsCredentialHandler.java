@@ -69,6 +69,11 @@ public class AwsCredentialHandler implements CredentialHandler<AwsCredential> {
         return result;
     }
 
+    @Override
+    public AwsCredential update(AwsCredential credential) throws Exception {
+        return credential;
+    }
+
     private AwsCredential importKeyPairs(AwsCredential awsCredential) {
         MDCBuilder.buildMdcContext(awsCredential);
         try {

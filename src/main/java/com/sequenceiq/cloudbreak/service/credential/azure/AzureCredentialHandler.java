@@ -41,6 +41,11 @@ public class AzureCredentialHandler implements CredentialHandler<AzureCredential
         return true;
     }
 
+    @Override
+    public AzureCredential update(AzureCredential credential) throws Exception {
+        return azureStackUtil.refreshCerfile(credential);
+    }
+
     private void validateCertificateFile(AzureCredential azureCredential) {
         MDCBuilder.buildMdcContext(azureCredential);
         try {
@@ -56,4 +61,5 @@ public class AzureCredentialHandler implements CredentialHandler<AzureCredential
             throw new BadRequestException(errorMessage, e);
         }
     }
+
 }

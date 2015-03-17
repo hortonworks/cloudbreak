@@ -137,6 +137,19 @@ public class CredentialController {
         return null;
     }
 
+    @RequestMapping(value = "credentials/certificate/{credentialId}", method = RequestMethod.PUT)
+    @ResponseBody
+    public ModelAndView refreshCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
+        Credential credential = credentialService.update(credentialId);
+        if (credential instanceof AzureCredential) {
+            File cerFile = azureStackUtil.buildAzureCerFile((AzureCredential) credential);
+            response.setContentType("application/octet-stream");
+            response.setHeader("Content-Disposition", "attachment;filename=" + user.getUsername() + ".cer");
+            FileCopyUtils.copy(Files.readAllBytes(cerFile.toPath()), response.getOutputStream());
+        }
+        return null;
+    }
+
     @RequestMapping(value = "credentials/{credentialId}/sshkey", method = RequestMethod.GET)
     @ResponseBody
     public ModelAndView getSshFile(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {

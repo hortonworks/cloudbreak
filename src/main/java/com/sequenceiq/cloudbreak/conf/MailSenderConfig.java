@@ -28,7 +28,6 @@ public class MailSenderConfig {
 
     @Value("${cb.smtp.sender.from}")
     private String msgFrom;
-
     @Bean
     public MailSender mailSender() {
         MailSender mailSender = new JavaMailSenderImpl();

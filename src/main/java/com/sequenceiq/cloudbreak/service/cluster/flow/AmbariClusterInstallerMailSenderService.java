@@ -33,6 +33,12 @@ public class AmbariClusterInstallerMailSenderService {
     @Value("${cb.smtp.sender.from: no-reply@sequenceiq.com}")
     private String msgFrom;
 
+    @Value("${cb.success.cluster.installer.mail.template.path:templates/cluster-installer-mail-success.ftl}")
+    private String successClusterInstallerMailTemplatePath;
+
+    @Value("${cb.failed.cluster.installer.mail.template.path:templates/cluster-installer-mail-fail.ftl}")
+    private String failedClusterInstallerMailTemplatePath;
+
     @Autowired
     private MailSender mailSender;
 
@@ -72,12 +78,12 @@ public class AmbariClusterInstallerMailSenderService {
     }
 
     public void sendSuccessEmail(String email, String ambariServer) {
-        MimeMessagePreparator mimeMessagePreparator = prepareSuccessMessage(email, "templates/cluster-installer-mail-success.ftl", "SUCCESS", ambariServer);
+        MimeMessagePreparator mimeMessagePreparator = prepareSuccessMessage(email, successClusterInstallerMailTemplatePath, "SUCCESS", ambariServer);
         sendInstallationEmail(mimeMessagePreparator);
     }
 
     public void sendFailEmail(String email) {
-        MimeMessagePreparator mimeMessagePreparator = prepareFailMessage(email, "templates/cluster-installer-mail-fail.ftl", "FAILED");
+        MimeMessagePreparator mimeMessagePreparator = prepareFailMessage(email, failedClusterInstallerMailTemplatePath, "FAILED");
         sendInstallationEmail(mimeMessagePreparator);
     }
 

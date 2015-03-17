@@ -14,6 +14,7 @@
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="PublicKeyReaderUtil.java"/>
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="ProvisionContext.java" />
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="MDCBuilder.java"/>
+    <suppress id="sysout" files="VersionedApplication.java"/>
     <suppress checks="MagicNumberCheck" files="test|Dummy|Mock|simulator" />
     <suppress id="IllegalTypeImpl" files="test" />
     <suppress checks="IllegalCatch" files="test" />
