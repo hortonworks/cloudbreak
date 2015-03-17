@@ -244,6 +244,10 @@ public class DefaultStackService implements StackService {
                 Math.abs(instanceGroupAdjustmentJson.getScalingAdjustment())));
         LOGGER.info("Publishing {} event [scalingAdjustment: '{}']", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT,
                 instanceGroupAdjustmentJson.getScalingAdjustment());
+        /*
+            - trigger up- or down-scaling flow depending on scaling adjustment
+            - separate up and down scale
+         */
         reactor.notify(ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT,
                 Event.wrap(new UpdateInstancesRequest(stack.cloudPlatform(), stack.getId(),
                         instanceGroupAdjustmentJson.getScalingAdjustment(), instanceGroupAdjustmentJson.getInstanceGroup())));

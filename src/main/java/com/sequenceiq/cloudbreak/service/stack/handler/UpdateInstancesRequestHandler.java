@@ -87,6 +87,10 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
 
     @Override
     public void accept(Event<UpdateInstancesRequest> event) {
+        /*
+            - separate up and down scale logic an individual service so separate logic from handler
+            - not to forget migrating upscaleFailureHandlerService
+         */
         final UpdateInstancesRequest request = event.getData();
         final Stack stack = stackRepository.findOneWithLists(request.getStackId());
         MDCBuilder.buildMdcContext(stack);
