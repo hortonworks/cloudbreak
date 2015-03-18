@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
+import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.service.FlowFacade;
 
@@ -31,6 +32,11 @@ public class ClusterCreationHandler extends AbstractFlowHandler<ProvisioningCont
     @Override
     protected void handleErrorFlow(Throwable throwable, Object data) {
         LOGGER.info("handleErrorFlow() for phase: {}", ((Event) data).getKey());
+        try {
+            FlowContext context = flowFacade.clusterCreationFailed((FlowContext) data);
+        } catch (CloudbreakException e) {
+            LOGGER.error("Error during handling cluster creation failure. Ex.:", e);
+        }
     }
 
     @Override

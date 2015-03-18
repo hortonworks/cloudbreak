@@ -128,4 +128,19 @@ public class SimpleFlowFacade implements FlowFacade {
             throw new CloudbreakException(e);
         }
     }
+
+    @Override
+    public FlowContext clusterCreationFailed(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Cluster creation failed. Context: {}", context);
+        try {
+            context = clusterFacade.clusterCreationFailed(context);
+            LOGGER.debug("Cluster creation failure handled.");
+            return context;
+        } catch (Exception e) {
+            LOGGER.error("Exception during cluster creation failure handling!: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+
+    }
+
 }

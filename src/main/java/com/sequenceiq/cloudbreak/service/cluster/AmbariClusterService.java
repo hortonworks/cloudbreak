@@ -239,6 +239,15 @@ public class AmbariClusterService implements ClusterService {
         return cluster;
     }
 
+    @Override public Cluster updateClusterStatus(Long clusterId, Status status, String statusReason) {
+        LOGGER.debug("Updating cluster status. clusterId: {}, status: {}, statusReason: {}", clusterId, status, statusReason);
+        Cluster cluster = clusterRepository.findById(clusterId);
+        cluster.setStatus(status);
+        cluster.setStatusReason(statusReason);
+        cluster = clusterRepository.save(cluster);
+        return cluster;
+    }
+
     private int getReplicationFactor(AmbariClient ambariClient, String hostGroup) {
         try {
             Map<String, String> configuration = configurationService.getConfiguration(ambariClient, hostGroup);

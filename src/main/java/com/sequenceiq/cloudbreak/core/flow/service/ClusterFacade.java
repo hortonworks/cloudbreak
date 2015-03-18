@@ -22,4 +22,5 @@ public interface ClusterFacade {
 
     FlowContext clusterStopError(FlowContext context) throws CloudbreakException;
 
+    FlowContext clusterCreationFailed(FlowContext context) throws CloudbreakException;
 }

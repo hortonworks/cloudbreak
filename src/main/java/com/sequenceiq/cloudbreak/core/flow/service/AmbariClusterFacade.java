@@ -2,17 +2,19 @@ package com.sequenceiq.cloudbreak.core.flow.service;
 
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
-import com.sequenceiq.cloudbreak.core.flow.ClusterStartService;
-import com.sequenceiq.cloudbreak.core.flow.ClusterStopService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.flow.ClusterStartService;
+import com.sequenceiq.cloudbreak.core.flow.ClusterStopService;
 import com.sequenceiq.cloudbreak.core.flow.FlowContextFactory;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -20,13 +22,15 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstallerMailSenderService;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariRoleAllocator;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListenerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
-import org.springframework.stereotype.Service;
 
 @Service
 public class AmbariClusterFacade implements ClusterFacade {
@@ -56,6 +60,9 @@ public class AmbariClusterFacade implements ClusterFacade {
     private StackService stackService;
 
     @Autowired
+    private ClusterService clusterService;
+
+    @Autowired
     private ClusterStartService clusterStartService;
 
     @Autowired
@@ -63,6 +70,12 @@ public class AmbariClusterFacade implements ClusterFacade {
 
     @Autowired
     private PollingService<AmbariStartupPollerObject> ambariStartupPollerObjectPollingService;
+
+    @Autowired
+    private AmbariClusterInstallerMailSenderService ambariClusterInstallerMailSenderService;
+
+    @Autowired
+    private CloudbreakEventService eventService;
 
     @Override
     public FlowContext allocateAmbariRoles(FlowContext context) throws Exception {
@@ -149,6 +162,22 @@ public class AmbariClusterFacade implements ClusterFacade {
     @Override
     public FlowContext clusterStopError(FlowContext context) throws CloudbreakException {
         return clusterStopService.handleClusterStopError(context);
+    }
+
+    @Override
+    public FlowContext clusterCreationFailed(FlowContext flowContext) throws CloudbreakException {
+        LOGGER.debug("Handling cluster creation failure. Context: {}", flowContext);
+        ProvisioningContext context = (ProvisioningContext) flowContext;
+
+        Cluster cluster = clusterService.updateClusterStatus(context.getClusterId(), Status.CREATE_FAILED, context.getMessage());
+        MDCBuilder.buildMdcContext(cluster);
+
+        stackUpdater.updateStackStatus(context.getStackId(), Status.AVAILABLE, "Cluster installation failed. Error: " + context.getMessage());
+        eventService.fireCloudbreakEvent(context.getStackId(), "CLUSTER_CREATION_FAILED", context.getMessage());
+        if (cluster.getEmailNeeded()) {
+            ambariClusterInstallerMailSenderService.sendFailEmail(cluster.getOwner());
+        }
+        return context;
     }
 
     private void changeAmbariCredentials(String ambariIp, Stack stack) {
