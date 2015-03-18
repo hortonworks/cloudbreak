@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.core.flow.StackStartService;
 import com.sequenceiq.cloudbreak.core.flow.StackStopService;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
+import com.sequenceiq.cloudbreak.core.flow.context.TerminationContext;
 import com.sequenceiq.cloudbreak.core.flow.context.UpdateInstancesContext;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -163,7 +164,8 @@ public class SimpleStackFacade implements StackFacade {
     public FlowContext terminateStack(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Terminating stack. Context: {}", context);
         try {
-            context = terminationService.terminateStack(context);
+            TerminationContext terminationContext = (TerminationContext) context;
+            terminationService.terminateStack(terminationContext.getStackId(), terminationContext.getCloudPlatform());
             LOGGER.debug("Terminating stack is DONE");
             return context;
         } catch (Exception e) {
@@ -174,7 +176,9 @@ public class SimpleStackFacade implements StackFacade {
 
     @Override
     public FlowContext stackTerminationError(FlowContext context) throws CloudbreakException {
-        return terminationService.handleTerminationFailure(context);
+        TerminationContext terminationContext = (TerminationContext) context;
+        terminationService.handleTerminationFailure(terminationContext.getStackId(), terminationContext.getStatusReason());
+        return context;
     }
 
     @Override
