@@ -22,4 +22,6 @@ public interface StackFacade {
     FlowContext upscaleStack(FlowContext context) throws CloudbreakException;
 
     FlowContext downscaleStack(FlowContext context) throws CloudbreakException;
+
+    FlowContext handleScalingFailure(FlowContext context) throws CloudbreakException;
 }

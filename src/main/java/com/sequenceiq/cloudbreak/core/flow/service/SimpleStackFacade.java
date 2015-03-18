@@ -16,8 +16,6 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.flow.ClusterStartService;
-import com.sequenceiq.cloudbreak.core.flow.ClusterStopService;
 import com.sequenceiq.cloudbreak.core.flow.FlowContextFactory;
 import com.sequenceiq.cloudbreak.core.flow.StackStartService;
 import com.sequenceiq.cloudbreak.core.flow.StackStopService;
@@ -28,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.OnFailureAction;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstallerMailSenderService;
@@ -207,7 +206,21 @@ public class SimpleStackFacade implements StackFacade {
             stackScalingService.downscaleStack(updateContext.getStackId(), updateContext.getInstanceGroup(), updateContext.getScalingAdjustment());
             return context;
         } catch (Exception e) {
-            LOGGER.error("Exception during the upscaling of stack: {}", e.getMessage());
+            LOGGER.error("Exception during the downscaling of stack: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext handleScalingFailure(FlowContext context) throws CloudbreakException {
+        try {
+            UpdateInstancesContext updateContext = (UpdateInstancesContext) context;
+            stackUpdater.updateMetadataReady(updateContext.getStackId(), true);
+            stackUpdater.updateStackStatus(updateContext.getStackId(), Status.AVAILABLE, "Stack update failed. " + updateContext.getErrorMessage());
+            stackUpdater.updateStackStatusReason(updateContext.getStackId(), updateContext.getErrorMessage());
+            return updateContext;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the handling of stack scaling failure: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }

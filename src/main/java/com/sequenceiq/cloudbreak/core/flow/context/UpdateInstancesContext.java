@@ -10,6 +10,7 @@ public class UpdateInstancesContext implements FlowContext {
     private Long stackId;
     private Integer scalingAdjustment;
     private String instanceGroup;
+    private String errorMessage = "";
 
     public UpdateInstancesContext() { }
 
@@ -24,15 +25,39 @@ public class UpdateInstancesContext implements FlowContext {
         return cloudPlatform;
     }
 
+    public void setCloudPlatform(CloudPlatform cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
+    }
+
     public Long getStackId() {
         return stackId;
+    }
+
+    public void setStackId(Long stackId) {
+        this.stackId = stackId;
     }
 
     public Integer getScalingAdjustment() {
         return scalingAdjustment;
     }
 
+    public void setScalingAdjustment(Integer scalingAdjustment) {
+        this.scalingAdjustment = scalingAdjustment;
+    }
+
     public String getInstanceGroup() {
         return instanceGroup;
+    }
+
+    public void setInstanceGroup(String instanceGroup) {
+        this.instanceGroup = instanceGroup;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }

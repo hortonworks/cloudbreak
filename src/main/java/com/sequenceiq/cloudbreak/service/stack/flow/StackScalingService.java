@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.service.stack.FailureHandlerService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
-import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 import com.sequenceiq.cloudbreak.service.stack.handler.callable.DownScaleCallable;
 import com.sequenceiq.cloudbreak.service.stack.handler.callable.UpScaleCallable;
@@ -46,7 +45,6 @@ import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 
 import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Service
 public class StackScalingService {
@@ -109,7 +107,6 @@ public class StackScalingService {
         Set<String> instanceIds = getUnregisteredInstanceIds(scalingAdjustment, stack);
         if (stack.isCloudPlatformUsedWithTemplate()) {
             cloudPlatformConnectors.get(stack.cloudPlatform()).removeInstances(stack, instanceIds, instanceGroupName);
-            //Find solution for cancellable polling problem!!!
         } else {
             removeInstancesWithResources(stack, instanceIds);
         }
@@ -133,7 +130,6 @@ public class StackScalingService {
         int nodeCount = instanceGroup.getNodeCount() + stackUpdateSuccess.getInstanceIds().size();
         stackUpdater.updateNodeCount(stack.getId(), nodeCount, instanceGroupName);
         eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(), "Billing changed due to upscaling of cluster infrastructure.");
-
         setStackAndMetadataAvailable(scalingAdjustment, stack);
     }
 
@@ -304,11 +300,5 @@ public class StackScalingService {
             }
         }
         return resourceList;
-    }
-
-    private void notifyUpdateFailed(Stack stack, String detailedMessage) {
-        MDCBuilder.buildMdcContext(stack);
-        LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_FAILED_EVENT);
-        reactor.notify(ReactorConfig.STACK_UPDATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stack.getId(), detailedMessage)));
     }
 }

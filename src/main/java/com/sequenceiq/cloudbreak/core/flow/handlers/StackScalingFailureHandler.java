@@ -15,8 +15,8 @@ import com.sequenceiq.cloudbreak.core.flow.service.FlowFacade;
 import reactor.event.Event;
 
 @Component
-public class StackDownscaleHandler extends AbstractFlowHandler<UpdateInstancesContext> implements FlowHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackDownscaleHandler.class);
+public class StackScalingFailureHandler extends AbstractFlowHandler<UpdateInstancesContext> implements FlowHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackScalingFailureHandler.class);
 
     @Autowired
     private FlowFacade flowFacade;
@@ -24,19 +24,14 @@ public class StackDownscaleHandler extends AbstractFlowHandler<UpdateInstancesCo
     @Override
     protected Object execute(Event<UpdateInstancesContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
-        FlowContext context = flowFacade.downscaleStack(event.getData());
-        LOGGER.info("Upscale of stack finished. Context: {}", context);
+        FlowContext context = flowFacade.handleStackScalingFailure(event.getData());
+        LOGGER.info("Scaling failure was handled. Context: {}", context);
         return context;
     }
 
     @Override
     protected void handleErrorFlow(Throwable throwable, Object data) {
-        Event event = (Event) data;
-        LOGGER.info("handleErrorFlow() for phase: {}", event.getKey());
-        UpdateInstancesContext context = (UpdateInstancesContext) event.getData();
-        CloudbreakException exc = (CloudbreakException) throwable;
-        context.setErrorMessage(exc.getMessage());
-        event.setData(context);
+
     }
 
     @Override

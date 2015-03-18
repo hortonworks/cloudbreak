@@ -31,7 +31,12 @@ public class StackUpscaleHandler extends AbstractFlowHandler<UpdateInstancesCont
 
     @Override
     protected void handleErrorFlow(Throwable throwable, Object data) {
-
+        Event event = (Event) data;
+        LOGGER.info("handleErrorFlow() for phase: {}", event.getKey());
+        UpdateInstancesContext context = (UpdateInstancesContext) event.getData();
+        CloudbreakException exc = (CloudbreakException) throwable;
+        context.setErrorMessage(exc.getMessage());
+        event.setData(context);
     }
 
     @Override

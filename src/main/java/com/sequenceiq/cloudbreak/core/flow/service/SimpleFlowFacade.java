@@ -224,4 +224,17 @@ public class SimpleFlowFacade implements FlowFacade {
             throw new CloudbreakException(e);
         }
     }
+
+    @Override
+    public FlowContext handleStackScalingFailure(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Handling stack scaling failure. Context: {}", context);
+        try {
+            context = stackFacade.handleScalingFailure(context);
+            LOGGER.debug("Handling of stack scaling failure is DONE");
+            return context;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the downscaling of stack: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
 }
