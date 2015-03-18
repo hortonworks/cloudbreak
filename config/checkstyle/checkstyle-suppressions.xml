@@ -50,6 +50,9 @@
     <suppress id="string-instantiation" files="AmbariConfigurationService.java"/>
     <suppress id="string-instantiation" files="RemoteUserDetailsService.java"/>
     <suppress checks="InnerAssignment" files="ScalingPolicyConverter.java" />
+    <suppress id="sysout" files="VersionedApplication.java"/>
+    <suppress checks="HideUtilityClassConstructor" files=".*Application.java" />
+
     <!-- -->
 
     <!-- suppress everything in generated code -->
