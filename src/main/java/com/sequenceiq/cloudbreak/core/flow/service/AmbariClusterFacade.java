@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow.service;
 
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
+import java.util.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,11 +11,10 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.flow.ClusterStartService;
-import com.sequenceiq.cloudbreak.core.flow.ClusterStopService;
 import com.sequenceiq.cloudbreak.core.flow.FlowContextFactory;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
+import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -61,12 +62,6 @@ public class AmbariClusterFacade implements ClusterFacade {
 
     @Autowired
     private ClusterService clusterService;
-
-    @Autowired
-    private ClusterStartService clusterStartService;
-
-    @Autowired
-    private ClusterStopService clusterStopService;
 
     @Autowired
     private PollingService<AmbariStartupPollerObject> ambariStartupPollerObjectPollingService;
@@ -132,7 +127,20 @@ public class AmbariClusterFacade implements ClusterFacade {
     public FlowContext startCluster(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Starting cluster. Context: {}", context);
         try {
-            context = clusterStartService.start(context);
+            StackStatusUpdateContext startContext = (StackStatusUpdateContext) context;
+            Stack stack = stackService.getById(startContext.getStackId());
+            Cluster cluster = stack.getCluster();
+            MDCBuilder.buildMdcContext(cluster);
+            boolean started = ambariClusterConnector.startCluster(stack);
+            if (started) {
+                LOGGER.info("Successfully started Hadoop services, setting cluster state to: {}", Status.AVAILABLE);
+                cluster.setUpSince(new Date().getTime());
+                cluster.setStatus(Status.AVAILABLE);
+                clusterService.updateCluster(cluster);
+                eventService.fireCloudbreakEvent(startContext.getStackId(), Status.AVAILABLE.name(), "Cluster started successfully.");
+            } else {
+                throw new CloudbreakException("Failed to start cluster, some of the services could not start.");
+            }
             LOGGER.debug("Starting cluster is DONE.");
             return context;
         } catch (Exception e) {
@@ -145,8 +153,21 @@ public class AmbariClusterFacade implements ClusterFacade {
     public FlowContext stopCluster(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Stopping cluster. Context: {}", context);
         try {
-            context = clusterStopService.stop(context);
-            LOGGER.debug("Stopping cluster is DONE.");
+            StackStatusUpdateContext startContext = (StackStatusUpdateContext) context;
+            Cluster cluster = clusterService.retrieveCluster(startContext.getStackId());
+            MDCBuilder.buildMdcContext(cluster);
+            eventService.fireCloudbreakEvent(startContext.getStackId(), Status.STOP_IN_PROGRESS.name(), "Services are stopping.");
+            boolean stopped = ambariClusterConnector.stopCluster(stackService.getById(startContext.getStackId()));
+            if (stopped) {
+                cluster.setStatus(Status.STOPPED);
+                cluster = clusterService.updateCluster(cluster);
+                eventService.fireCloudbreakEvent(startContext.getStackId(), Status.AVAILABLE.name(), "Services have been stopped successfully.");
+                if (Status.STOP_REQUESTED.equals(stackService.getById(startContext.getStackId()).getStatus())) {
+                    LOGGER.info("Hadoop services stopped, stack stop requested.");
+                }
+            } else {
+                throw new CloudbreakException("Failed to stop cluster, some of the services could not stopped.");
+            }
             return context;
         } catch (Exception e) {
             LOGGER.error("Exception during the cluster stop process: {}", e.getMessage());
@@ -156,12 +177,45 @@ public class AmbariClusterFacade implements ClusterFacade {
 
     @Override
     public FlowContext clusterStartError(FlowContext context) throws CloudbreakException {
-        return clusterStartService.handleClusterStartError(context);
+        LOGGER.debug("Handling cluster start failure. Context: {} ", context);
+        try {
+            StackStatusUpdateContext startContext = (StackStatusUpdateContext) context;
+            Cluster cluster = clusterService.retrieveCluster(startContext.getStackId());
+            cluster.setStatus(Status.STOPPED);
+            clusterService.updateCluster(cluster);
+            stackUpdater.updateStackStatus(startContext.getStackId(), Status.AVAILABLE, startContext.getStatusReason());
+            return context;
+        } catch (Exception e) {
+            LOGGER.error("Exception during handling cluster start failure", e.getMessage());
+            throw new CloudbreakException(e.getMessage(), e);
+        }
     }
 
     @Override
     public FlowContext clusterStopError(FlowContext context) throws CloudbreakException {
-        return clusterStopService.handleClusterStopError(context);
+        LOGGER.debug("Handling cluster stop failure. Context: {} ", context);
+        try {
+            StackStatusUpdateContext stopContext = (StackStatusUpdateContext) context;
+            Cluster cluster = clusterService.retrieveCluster(stopContext.getStackId());
+            MDCBuilder.buildMdcContext(cluster);
+
+            eventService.fireCloudbreakEvent(stopContext.getStackId(), Status.STOP_IN_PROGRESS.name(), "Services are stopping.");
+            boolean stopped = ambariClusterConnector.stopCluster(stackService.getById(stopContext.getStackId()));
+            if (stopped) {
+                cluster.setStatus(Status.STOPPED);
+                cluster = clusterService.updateCluster(cluster);
+                eventService.fireCloudbreakEvent(stopContext.getStackId(), Status.AVAILABLE.name(), "Services have been stopped successfully.");
+                if (Status.STOP_REQUESTED.equals(stackService.getById(stopContext.getStackId()).getStatus())) {
+                    LOGGER.info("Hadoop services stopped, stack stop requested.");
+                }
+            } else {
+                throw new CloudbreakException("Failed to stop cluster, some of the services could not stopped.");
+            }
+            return context;
+        } catch (Exception e) {
+            LOGGER.error("Exception during handling cluster stop failure", e.getMessage());
+            throw new CloudbreakException(e.getMessage(), e);
+        }
     }
 
     @Override

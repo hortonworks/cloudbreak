@@ -9,10 +9,6 @@ import java.util.concurrent.Future;
 
 import javax.annotation.Resource;
 
-import com.sequenceiq.cloudbreak.core.flow.ClusterStartService;
-import com.sequenceiq.cloudbreak.core.flow.ClusterStopService;
-import com.sequenceiq.cloudbreak.core.flow.StackStartService;
-import com.sequenceiq.cloudbreak.core.flow.StackStopService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +17,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.FlowContextFactory;
+import com.sequenceiq.cloudbreak.core.flow.StackStartService;
+import com.sequenceiq.cloudbreak.core.flow.StackStopService;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
@@ -76,12 +74,6 @@ public class SimpleStackFacade implements StackFacade {
 
     @Autowired
     private StackStopService stackStopService;
-
-    @Autowired
-    private ClusterStartService clusterStartService;
-
-    @Autowired
-    private ClusterStopService clusterStopService;
 
     @Override
     public FlowContext stackCreationError(FlowContext context) throws CloudbreakException {

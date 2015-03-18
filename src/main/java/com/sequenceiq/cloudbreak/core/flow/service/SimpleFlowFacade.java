@@ -36,6 +36,9 @@ public class SimpleFlowFacade implements FlowFacade {
     private ClusterFacade clusterFacade;
 
     @Autowired
+    private StackFacade stackFacade;
+
+    @Autowired
     private ProvisionContext provisioningService;
 
     @Autowired
