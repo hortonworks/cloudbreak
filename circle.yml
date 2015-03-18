@@ -1,7 +1,3 @@
-machine:
-  services:
-    - docker
-
 dependencies:
   pre:
     - make circleci
@@ -9,7 +5,8 @@ dependencies:
   override:
     - make build
   post:
-    - cp build/* $CIRCLE_ARTIFACTS
+    - tar -czvf $CIRCLE_ARTIFACTS/cbd-linux.tgz -C build/Linux cbd
+    - tar -czvf $CIRCLE_ARTIFACTS/cbd-darwin.tgz -C build/Darwin cbd
 
 test:
   override:
