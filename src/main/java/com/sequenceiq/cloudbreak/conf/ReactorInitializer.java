@@ -13,19 +13,15 @@ import com.sequenceiq.cloudbreak.service.cluster.handler.UpdateAmbariHostsFailur
 import com.sequenceiq.cloudbreak.service.cluster.handler.UpdateAmbariHostsRequestHandler;
 import com.sequenceiq.cloudbreak.service.cluster.handler.UpdateAmbariHostsSuccessHandler;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventHandler;
-import com.sequenceiq.cloudbreak.service.stack.handler.AddInstancesCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.AmbariRoleAllocationCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.MetadataSetupCompleteHandler;
-import com.sequenceiq.cloudbreak.service.stack.handler.MetadataUpdateCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.ProvisionCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.ProvisionRequestHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.ProvisionSetupCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.StackCreationSuccessHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.StackUpdateFailureHandler;
-import com.sequenceiq.cloudbreak.service.stack.handler.StackUpdateSuccessHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.UpdateAllowedSubnetSuccessHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.UpdateAllowedSubnetsHandler;
-import com.sequenceiq.cloudbreak.service.stack.handler.UpdateInstancesRequestHandler;
 
 import reactor.core.Reactor;
 
@@ -61,18 +57,6 @@ public class ReactorInitializer implements InitializingBean {
 
     @Autowired
     private AmbariRoleAllocationCompleteHandler ambariRoleAllocationCompleteHandler;
-
-    @Autowired
-    private UpdateInstancesRequestHandler updateInstancesRequestHandler;
-
-    @Autowired
-    private AddInstancesCompleteHandler addInstancesCompleteHandler;
-
-    @Autowired
-    private MetadataUpdateCompleteHandler metadataUpdateCompleteHandler;
-
-    @Autowired
-    private StackUpdateSuccessHandler stackUpdateSuccessHandler;
 
     @Autowired
     private StackUpdateFailureHandler stackUpdateFailureHandler;
@@ -113,13 +97,8 @@ public class ReactorInitializer implements InitializingBean {
         reactor.on($(ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT), clusterCreationSuccessHandler);
         reactor.on($(ReactorConfig.CLUSTER_CREATE_FAILED_EVENT), clusterCreationFailureHandler);
 
-        reactor.on($(ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT), updateInstancesRequestHandler);
         reactor.on($(ReactorConfig.UPDATE_SUBNET_REQUEST_EVENT), updateAllowedSubnetsHandler);
         reactor.on($(ReactorConfig.UPDATE_SUBNET_COMPLETE_EVENT), updateAllowedSubnetSuccessHandler);
-        reactor.on($(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT), addInstancesCompleteHandler);
-        reactor.on($(ReactorConfig.REMOVE_INSTANCES_COMPLETE_EVENT), stackUpdateSuccessHandler);
-        reactor.on($(ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT), metadataUpdateCompleteHandler);
-        reactor.on($(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT), stackUpdateSuccessHandler);
         reactor.on($(ReactorConfig.STACK_UPDATE_FAILED_EVENT), stackUpdateFailureHandler);
 
         reactor.on($(ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT), updateAmbariHostsRequestHandler);

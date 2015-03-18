@@ -26,9 +26,9 @@ import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 
 @Component
 @Qualifier("upscaleFailureHandlerService")
-public class UpdateScaleFailureHandlerService implements FailureHandlerService {
+public class ScalingFailureHandlerService implements FailureHandlerService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UpdateScaleFailureHandlerService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScalingFailureHandlerService.class);
     private static final double ONE_HUNDRED = 100.0;
 
     @Autowired

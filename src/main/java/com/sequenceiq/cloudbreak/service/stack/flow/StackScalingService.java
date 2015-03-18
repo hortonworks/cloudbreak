@@ -37,8 +37,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
-import com.sequenceiq.cloudbreak.service.stack.handler.callable.DownScaleCallable;
-import com.sequenceiq.cloudbreak.service.stack.handler.callable.UpScaleCallable;
+import com.sequenceiq.cloudbreak.service.stack.flow.callable.DownScaleCallable;
+import com.sequenceiq.cloudbreak.service.stack.flow.callable.UpScaleCallable;
 import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
@@ -103,12 +103,12 @@ public class StackScalingService {
 
 
     public void downscaleStack(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
-        Stack stack = stackService.get(stackId);
+        Stack stack = stackService.getById(stackId);
         Set<String> instanceIds = getUnregisteredInstanceIds(scalingAdjustment, stack);
         if (stack.isCloudPlatformUsedWithTemplate()) {
             cloudPlatformConnectors.get(stack.cloudPlatform()).removeInstances(stack, instanceIds, instanceGroupName);
         } else {
-            removeInstancesWithResources(stack, instanceIds);
+            instanceIds = removeInstancesWithResources(stack, instanceIds);
         }
         updateRemovedResourcesState(stack, instanceIds, stack.getInstanceGroupByInstanceGroupName(instanceGroupName));
         setStackAndMetadataAvailable(scalingAdjustment, stack);
@@ -116,7 +116,7 @@ public class StackScalingService {
 
     public void upscaleStack(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
         Set<Resource> resources = null;
-        Stack stack = stackService.get(stackId);
+        Stack stack = stackService.getById(stackId);
         String userDataScript = userDataBuilder.build(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>());
         if (stack.isCloudPlatformUsedWithTemplate()) {
             cloudPlatformConnectors.get(stack.cloudPlatform()).addInstances(stack, userDataScript, scalingAdjustment, instanceGroupName);
@@ -149,7 +149,8 @@ public class StackScalingService {
         return instanceIds;
     }
 
-    private void removeInstancesWithResources(Stack stack, Set<String> instanceIds) throws Exception {
+    private Set<String> removeInstancesWithResources(Stack stack, final Set<String> origInstanceIds) throws Exception {
+        Set<String> instanceIds = new HashSet<>(origInstanceIds);
         ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(stack.cloudPlatform());
         final DeleteContextObject deleteContextObject = resourceBuilderInit.decommissionInit(stack, instanceIds);
         List<ResourceRequestResult> failedResourceList = new ArrayList<>();
@@ -176,12 +177,15 @@ public class StackScalingService {
             Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
             failedResourceList.addAll(result.get(FutureResult.FAILED));
         }
-        instanceIds.removeAll(filterFailedResources(failedResourceList, instanceIds));
-        if (!stackService.get(stack.getId()).isStackInDeletionPhase()) {
+        instanceIds = filterFailedResources(failedResourceList, instanceIds);
+        if (!stackService.getById(stack.getId()).isStackInDeletionPhase()) {
             stackUpdater.removeStackResources(stack.getId(), deleteContextObject.getDecommissionResources());
             LOGGER.info("Terminated instances in stack: '{}'", instanceIds);
             LOGGER.info("Publishing {} event.", ReactorConfig.REMOVE_INSTANCES_COMPLETE_EVENT);
+        } else {
+            throw new ScalingFailedException("Downscaling of stack failed, because the stack is already in deletion phase.");
         }
+        return instanceIds;
     }
 
     private Set<String> filterFailedResources(List<ResourceRequestResult> failedResourceList, Set<String> instanceIds) {
@@ -278,8 +282,8 @@ public class StackScalingService {
         successResourceRequestResults.addAll(result.get(FutureResult.SUCCESS));
         failedResourceRequestResults.addAll(result.get(FutureResult.FAILED));
         upscaleFailureHandlerService.handleFailure(stack, failedResourceRequestResults);
-        if (!stackService.get(stack.getId()).isStackInDeletionPhase()) {
-            LOGGER.info("Publishing {} event.", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT);
+        if (stackService.getById(stack.getId()).isStackInDeletionPhase()) {
+            throw new ScalingFailedException("Upscaling of stack failed, because the stack is already in deletion phase.");
         }
         return collectResources(successResourceRequestResults);
     }
