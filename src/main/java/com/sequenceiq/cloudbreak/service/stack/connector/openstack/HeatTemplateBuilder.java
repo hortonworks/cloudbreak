@@ -32,7 +32,7 @@ public class HeatTemplateBuilder {
     public static final String CB_INSTANCE_GROUP_NAME = "cb_instance_group_name";
     public static final String CB_INSTANCE_PRIVATE_ID = "cb_instance_private_id";
     private static final int PRIVATE_ID_PART = 2;
-    private static final String MOUNT_PREFIX = "/mnt/fs";
+    private static final String MOUNT_PREFIX = "/hadoopfs/fs";
     private static final String DEVICE_PREFIX = "/dev/vd";
     private static final char[] DEVICE_CHAR = {'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'};
 

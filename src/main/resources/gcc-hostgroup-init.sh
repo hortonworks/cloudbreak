@@ -1,4 +1,5 @@
 : ${CONSUL_IMAGE:=sequenceiq/consul:v0.4.1.ptr}
+: ${CONSUL_WATCH_IMAGE:=sequenceiq/docker-consul-watch-plugn:1.7.0-consul}
 
 set -x
 
@@ -64,6 +65,19 @@ get_consul_opts() {
   fi
 }
 
+start_consul_watch() {
+  docker rm -f consul-watch &> /dev/null
+  docker run -d \
+    --name consul-watch \
+    --privileged \
+    --net=host \
+    --restart=always \
+    -e TRACE=1 \
+    -e BRIDGE_IP=$(get_ip) \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    $CONSUL_WATCH_IMAGE
+}
+
 does_cluster_exist() {
   ip_arr=($(get_vpc_peers))
   for ip in "${ip_arr[@]}"; do
@@ -96,6 +110,7 @@ con() {
 use_dns_first() {
   docker exec ambari-agent sed -i "/^hosts:/ s/ *files dns/ dns files/" /etc/nsswitch.conf
   docker exec consul sed -i "/^hosts:/ s/ *files dns/ dns files/" /etc/nsswitch.conf
+  docker exec consul-watch sed -i "/^hosts:/ s/ *files dns/ dns files/" /etc/nsswitch.conf
 }
 
 start_ambari_agent() {
@@ -105,8 +120,8 @@ start_ambari_agent() {
 }
 
 set_disk_as_volumes() {
-  for fn in `ls /mnt/ | grep fs`; do
-    VOLUMES="$VOLUMES -v /mnt/$fn:/mnt/$fn"
+  for fn in `ls /hadoopfs/ | grep fs`; do
+    VOLUMES="$VOLUMES -v /hadoopfs/$fn:/hadoopfs/$fn"
   done
 }
 
@@ -133,9 +148,9 @@ main() {
     fix_hostname
     start_consul
     start_ambari_agent
+    start_consul_watch
     use_dns_first
   fi
 }
 
 [[ "$0" == "$BASH_SOURCE" ]] && main "$@"
-
