@@ -2,6 +2,8 @@
 
 ### Fixed
 
+- `make release` creates binary with X.X.X version when on release branch otherwise X.X.X-gitrev
+
 ### Added
 
 ### Removed
@@ -11,7 +13,7 @@
 ## [v0.0.2] - 2015-03-19
 
 ### Added
-
+Added
 - selfupdate command
 - gray debug to stderr
 

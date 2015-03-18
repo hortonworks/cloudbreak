@@ -5,10 +5,16 @@ VERSION=$(shell cat VERSION)
 GIT_REV=$(shell git rev-parse --short HEAD)
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 
+ifeq ($(GIT_BRANCH), release)
+FLAGS="-X main.Version $(VERSION)"
+else
+FLAGS="-X main.Version $(VERSION) -X main.GitRevision $(GIT_REV)"
+endif
+
 build:
 	go-bindata include
-	mkdir -p build/Linux  && GOOS=linux  go build -ldflags "-X main.Version $(VERSION) -X main.GitRevision $(GIT_REV)" -o build/Linux/$(BINARYNAME)
-	mkdir -p build/Darwin && GOOS=darwin go build -ldflags "-X main.Version $(VERSION) -X main.GitRevision $(GIT_REV)" -o build/Darwin/$(BINARYNAME)
+	mkdir -p build/Linux  && GOOS=linux  go build -ldflags $(FLAGS) -o build/Linux/$(BINARYNAME)
+	mkdir -p build/Darwin && GOOS=darwin go build -ldflags $(FLAGS) -o build/Darwin/$(BINARYNAME)
 
 install: build
 	install build/$(shell uname -s)/$(BINARYNAME) /usr/local/bin
