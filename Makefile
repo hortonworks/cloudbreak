@@ -3,6 +3,7 @@ BINARYNAME=cbd
 ARCH=$(shell uname -m)
 VERSION=$(shell cat VERSION)
 GIT_REV=$(shell git rev-parse --short HEAD)
+GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 
 build:
 	go-bindata include
@@ -22,13 +23,10 @@ release:
 	tar -zcf release/$(NAME)_$(VERSION)_Linux_$(ARCH).tgz -C build/Linux $(BINARYNAME)
 	tar -zcf release/$(NAME)_$(VERSION)_Darwin_$(ARCH).tgz -C build/Darwin $(BINARYNAME)
 	gh-release checksums sha256
-	gh-release create sequenceiq/$(NAME) $(VERSION) $(GIT_REV) v$(VERSION)
+	gh-release create sequenceiq/$(NAME) $(VERSION) $(GIT_BRANCH) v$(VERSION)
 
 circleci:
 	rm ~/.gitconfig
-ifneq ($(CIRCLE_BRANCH), release)
-	echo build-$$CIRCLE_BUILD_NUM > VERSION
-endif
 
 clean:
 	rm -rf build release
