@@ -2,18 +2,20 @@ package com.sequenceiq.cloudbreak.core.flow;
 
 import java.util.HashMap;
 import java.util.Map;
-import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
-import com.sequenceiq.cloudbreak.core.flow.FlowInitializer.Phases;
-import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
-import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
-import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.core.flow.FlowInitializer.Phases;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
+import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.TerminationContext;
+import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
+import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
+import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -119,6 +121,16 @@ public class ReactorFlowManager implements FlowManager {
         StackDeleteRequest deleteRequest = (StackDeleteRequest) object;
         TerminationContext context = new TerminationContext(deleteRequest.getStackId(), deleteRequest.getCloudPlatform());
         reactor.notify(Phases.TERMINATION.name(), eventFactory.createEvent(context, Phases.TERMINATION.name()));
+    }
+
+    @Override
+    public void triggerStackUpscale(Object object) {
+
+    }
+
+    @Override
+    public void triggerStackDownscale(Object object) {
+
     }
 
     public static class TransitionFactory {

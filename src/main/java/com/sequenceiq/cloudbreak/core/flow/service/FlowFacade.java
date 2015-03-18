@@ -30,4 +30,7 @@ public interface FlowFacade {
 
     FlowContext clusterStopError(FlowContext flowContext) throws CloudbreakException;
 
+    FlowContext upscaleStack(FlowContext context) throws CloudbreakException;
+
+    FlowContext downscaleStack(FlowContext context) throws CloudbreakException;
 }
