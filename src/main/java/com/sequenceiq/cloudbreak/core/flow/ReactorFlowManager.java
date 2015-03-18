@@ -12,10 +12,12 @@ import com.sequenceiq.cloudbreak.core.flow.FlowInitializer.Phases;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.TerminationContext;
+import com.sequenceiq.cloudbreak.core.flow.context.UpdateInstancesContext;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
+import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -125,12 +127,16 @@ public class ReactorFlowManager implements FlowManager {
 
     @Override
     public void triggerStackUpscale(Object object) {
-
+        UpdateInstancesRequest updateRequest = (UpdateInstancesRequest) object;
+        UpdateInstancesContext context = new UpdateInstancesContext(updateRequest);
+        reactor.notify(Phases.STACK_UPSCALE.name(), eventFactory.createEvent(context, Phases.STACK_UPSCALE.name()));
     }
 
     @Override
     public void triggerStackDownscale(Object object) {
-
+        UpdateInstancesRequest updateRequest = (UpdateInstancesRequest) object;
+        UpdateInstancesContext context = new UpdateInstancesContext(updateRequest);
+        reactor.notify(Phases.STACK_DOWNSCALE.name(), eventFactory.createEvent(context, Phases.STACK_DOWNSCALE.name()));
     }
 
     public static class TransitionFactory {

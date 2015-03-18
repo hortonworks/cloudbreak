@@ -6,12 +6,6 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStartHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStatusUpdateFailureHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStopHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.StackStartHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.StackStatusUpdateFailureHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.StackStopHandler;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,10 +13,16 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariRoleAllocationHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterCreationHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStartHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStatusUpdateFailureHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStopHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.MetadataSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ProvisioningHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ProvisioningSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackCreationFailureHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.StackStartHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.StackStatusUpdateFailureHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.StackStopHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackTerminationFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackTerminationHandler;
 
@@ -45,6 +45,8 @@ public class FlowInitializer implements InitializingBean {
         STACK_START_FAILED,
         STACK_STOP,
         STACK_STOP_FAILED,
+        STACK_UPSCALE,
+        STACK_DOWNSCALE,
         CLUSTER_START,
         CLUSTER_START_FAILED,
         CLUSTER_STOP,

@@ -19,8 +19,6 @@ import org.springframework.stereotype.Service;
 
 import com.ecwid.consul.v1.ConsulClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
-import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
-import com.sequenceiq.cloudbreak.core.flow.context.UpdateInstancesFlowContext;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -106,52 +104,47 @@ public class StackScalingService {
     private AmbariRoleAllocator ambariRoleAllocator;
 
 
-    public FlowContext downscaleStack(FlowContext context) throws Exception {
-        UpdateInstancesFlowContext updateContext = (UpdateInstancesFlowContext) context;
-        Stack stack = stackService.get(updateContext.getStackId());
-        Set<String> instanceIds = getUnregisteredInstanceIds(updateContext, stack);
+    public void downscaleStack(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
+        Stack stack = stackService.get(stackId);
+        Set<String> instanceIds = getUnregisteredInstanceIds(scalingAdjustment, stack);
         if (stack.isCloudPlatformUsedWithTemplate()) {
-            cloudPlatformConnectors.get(stack.cloudPlatform()).removeInstances(stack, instanceIds, updateContext.getInstanceGroup());
+            cloudPlatformConnectors.get(stack.cloudPlatform()).removeInstances(stack, instanceIds, instanceGroupName);
             //Find solution for cancellable polling problem!!!
         } else {
             removeInstancesWithResources(stack, instanceIds);
         }
-        updateRemovedResourcesState(stack, instanceIds, stack.getInstanceGroupByInstanceGroupName(updateContext.getInstanceGroup()));
-        setStackAndMetadataAvailable(updateContext, stack);
-        return context;
+        updateRemovedResourcesState(stack, instanceIds, stack.getInstanceGroupByInstanceGroupName(instanceGroupName));
+        setStackAndMetadataAvailable(scalingAdjustment, stack);
     }
 
-    public FlowContext upscaleStack(FlowContext context) throws Exception {
+    public void upscaleStack(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
         Set<Resource> resources = null;
-        UpdateInstancesFlowContext updateContext = (UpdateInstancesFlowContext) context;
-        String instanceGroupName = updateContext.getInstanceGroup();
-        Stack stack = stackService.get(updateContext.getStackId());
+        Stack stack = stackService.get(stackId);
         String userDataScript = userDataBuilder.build(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>());
         if (stack.isCloudPlatformUsedWithTemplate()) {
-            cloudPlatformConnectors.get(stack.cloudPlatform()).addInstances(stack, userDataScript, updateContext.getScalingAdjustment(), instanceGroupName);
+            cloudPlatformConnectors.get(stack.cloudPlatform()).addInstances(stack, userDataScript, scalingAdjustment, instanceGroupName);
         } else {
-            resources = createInstancesWithResources(stack, userDataScript, updateContext.getScalingAdjustment(), instanceGroupName);
+            resources = createInstancesWithResources(stack, userDataScript, scalingAdjustment, instanceGroupName);
         }
         InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
-        Set<CoreInstanceMetaData> coreInstanceMetaData = metadataSetupContext.updateMetadata(updateContext.getCloudPlatform(),
-                stack.getId(), resources, instanceGroupName);
+        Set<CoreInstanceMetaData> coreInstanceMetaData = metadataSetupContext.updateMetadata(stack.cloudPlatform(), stack.getId(),
+                resources, instanceGroupName);
         StackUpdateSuccess stackUpdateSuccess = ambariRoleAllocator.updateInstanceMetadata(stack.getId(), coreInstanceMetaData, instanceGroupName);
         int nodeCount = instanceGroup.getNodeCount() + stackUpdateSuccess.getInstanceIds().size();
         stackUpdater.updateNodeCount(stack.getId(), nodeCount, instanceGroupName);
         eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(), "Billing changed due to upscaling of cluster infrastructure.");
 
-        setStackAndMetadataAvailable(updateContext, stack);
-        return context;
+        setStackAndMetadataAvailable(scalingAdjustment, stack);
     }
 
-    private Set<String> getUnregisteredInstanceIds(UpdateInstancesFlowContext updateContext, Stack stack) {
+    private Set<String> getUnregisteredInstanceIds(Integer scalingAdjustment, Stack stack) {
         Set<String> instanceIds = new HashSet<>();
         int i = 0;
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             for (InstanceMetaData metadataEntry : instanceGroup.getInstanceMetaData()) {
                 if (metadataEntry.isDecommissioned() || metadataEntry.isUnRegistered()) {
                     instanceIds.add(metadataEntry.getInstanceId());
-                    if (++i >= updateContext.getScalingAdjustment() * -1) {
+                    if (++i >= scalingAdjustment * -1) {
                         break;
                     }
                 }
@@ -249,9 +242,9 @@ public class StackScalingService {
                 MAX_POLLING_ATTEMPTS);
     }
 
-    private void setStackAndMetadataAvailable(UpdateInstancesFlowContext updateContext, Stack stack) {
+    private void setStackAndMetadataAvailable(Integer scalingAdjustment, Stack stack) {
         stackUpdater.updateMetadataReady(stack.getId(), true);
-        String statusCause = String.format("%sscaling of cluster infrastructure was successful.", updateContext.getScalingAdjustment() < 0 ? "Down" : "Up");
+        String statusCause = String.format("%sscaling of cluster infrastructure was successful.", scalingAdjustment < 0 ? "Down" : "Up");
         stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, statusCause);
     }
 

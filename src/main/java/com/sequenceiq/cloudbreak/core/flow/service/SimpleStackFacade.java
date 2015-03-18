@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.core.flow.StackStartService;
 import com.sequenceiq.cloudbreak.core.flow.StackStopService;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
+import com.sequenceiq.cloudbreak.core.flow.context.UpdateInstancesContext;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.OnFailureAction;
@@ -190,7 +191,8 @@ public class SimpleStackFacade implements StackFacade {
     @Override
     public FlowContext upscaleStack(FlowContext context) throws CloudbreakException {
         try {
-            context = stackScalingService.upscaleStack(context);
+            UpdateInstancesContext updateContext = (UpdateInstancesContext) context;
+            stackScalingService.upscaleStack(updateContext.getStackId(), updateContext.getInstanceGroup(), updateContext.getScalingAdjustment());
             return context;
         } catch (Exception e) {
             LOGGER.error("Exception during the upscaling of stack: {}", e.getMessage());
@@ -201,7 +203,8 @@ public class SimpleStackFacade implements StackFacade {
     @Override
     public FlowContext downscaleStack(FlowContext context) throws CloudbreakException {
         try {
-            context = stackScalingService.downscaleStack(context);
+            UpdateInstancesContext updateContext = (UpdateInstancesContext) context;
+            stackScalingService.downscaleStack(updateContext.getStackId(), updateContext.getInstanceGroup(), updateContext.getScalingAdjustment());
             return context;
         } catch (Exception e) {
             LOGGER.error("Exception during the upscaling of stack: {}", e.getMessage());
