@@ -14,6 +14,13 @@ single binary to your PATH. The one-liner way is:
 curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install | bash
 ```
 
+## Update
+
+The tool is capable of upgrade itself:
+```
+cbd update
+```
+
 ## Core Containers
 
 - **uaa**: OAuth Identity Server
