@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.FlowContextFactory;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
+import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
@@ -108,7 +109,6 @@ public class SimpleFlowFacade implements FlowFacade {
     @Override
     public FlowContext startAmbari(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Starting Ambari. Context: {}", context);
-
         try {
             FlowContext ambariStartContext = clusterFacade.startAmbari(context);
             LOGGER.debug("Ambari start DONE.");
@@ -143,7 +143,58 @@ public class SimpleFlowFacade implements FlowFacade {
             LOGGER.error("Exception during cluster creation failure handling!: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
+    }
 
+    @Override
+    public FlowContext startCluster(FlowContext flowContext) throws CloudbreakException {
+        LOGGER.debug("Starting cluster. Context: {}", flowContext);
+        try {
+            flowContext = clusterFacade.startCluster(flowContext);
+            LOGGER.debug("Cluster started.");
+            return flowContext;
+        } catch (Exception e) {
+            LOGGER.error("Exception during cluster start!: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext clusterStartError(FlowContext flowContext) throws CloudbreakException {
+        LOGGER.debug("Starting cluster. Context: {}", flowContext);
+        try {
+            flowContext = (StackStatusUpdateContext) clusterFacade.clusterStartError(flowContext);
+            LOGGER.debug("Cluster started.");
+            return flowContext;
+        } catch (Exception e) {
+            LOGGER.error("Exception during cluster start!: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext stopCluster(FlowContext flowContext) throws CloudbreakException {
+        LOGGER.debug("Stopping cluster. Context: {}", flowContext);
+        try {
+            flowContext = (StackStatusUpdateContext) clusterFacade.stopCluster(flowContext);
+            LOGGER.debug("Cluster stopped.");
+            return flowContext;
+        } catch (Exception e) {
+            LOGGER.error("Exception during cluster stop!: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext clusterStopError(FlowContext flowContext) throws CloudbreakException {
+        LOGGER.debug("Handling cluster stop failure. Context: {}", flowContext);
+        try {
+            flowContext = (StackStatusUpdateContext) clusterFacade.clusterStopError(flowContext);
+            LOGGER.debug("Cluster stop failure handled.");
+            return flowContext;
+        } catch (Exception e) {
+            LOGGER.error("Exception during cluster stop failure!: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
     }
 
 }
