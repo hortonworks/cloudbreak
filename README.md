@@ -1,5 +1,10 @@
 Cloudbreak Deployer helps to deploy a cloudbreak environment into docker containers.
 
+## Requirements
+
+Right now **Linux** and **OSX** 64 bit binaries are released from Cloudbreak Deployer. For anything else we will create a special docker container.
+The deployment itself needs only **Dcoker 1.5.0** or later.
+
 ## Installation
 
 To install Cloudbreak Deployer, you just have to unzip the platform specific
