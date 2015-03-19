@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow.handlers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
@@ -10,7 +9,6 @@ import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
-import com.sequenceiq.cloudbreak.core.flow.service.FlowFacade;
 
 import reactor.event.Event;
 
@@ -18,14 +16,11 @@ import reactor.event.Event;
 public class ProvisioningSetupHandler extends AbstractFlowHandler<ProvisioningContext> implements FlowHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisioningSetupHandler.class);
 
-    @Autowired
-    private FlowFacade flowFacade;
-
     @Override
     protected Object execute(Event<ProvisioningContext> event) throws CloudbreakException {
         LOGGER.info("Executing provisioning setup logic. Event: {}", event);
         FlowContext provisioningContext = event.getData();
-        provisioningContext = flowFacade.setup(provisioningContext);
+        provisioningContext = getFlowFacade().setup(provisioningContext);
         return provisioningContext;
     }
 
