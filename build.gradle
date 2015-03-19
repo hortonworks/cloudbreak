@@ -33,30 +33,6 @@ jar {
     baseName = 'cloudbreak'
 }
 
-sourceSets {
-    integrationtest {
-        java {
-            srcDir 'src/integrationtest/java'
-        }
-        resources {
-            srcDir 'src/integrationtest/resources'
-        }
-        compileClasspath = sourceSets.test.compileClasspath
-    }
-}
-
-task integrationtestTest(type: Test) {
-    description = "Runs Integration Tests"
-    testClassesDir = sourceSets.integrationtest.output.classesDir
-    classpath += sourceSets.integrationtest.runtimeClasspath
-    testSrcDirs = sourceSets.integrationtest.java.srcDirs.asList()
-}
-
-checkstyleIntegrationtest {
-    ignoreFailures = false
-    configProperties = ['config_loc': "$projectDir/config/checkstyle"]
-}
-
 configurations {
     deployerJars
     all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
