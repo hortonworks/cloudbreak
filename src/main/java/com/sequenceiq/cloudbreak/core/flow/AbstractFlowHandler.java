@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.flow.service.FlowFacade;
 
 import reactor.event.Event;
 import reactor.function.Consumer;
@@ -27,6 +28,9 @@ public abstract class AbstractFlowHandler<T> implements Consumer<Event<T>>, Flow
     @Autowired
     private FlowManager flowManager;
 
+    @Autowired
+    private FlowFacade flowFacade;
+
     /**
      * Template method for flow reactor event consumer logic.
      *
@@ -42,7 +46,7 @@ public abstract class AbstractFlowHandler<T> implements Consumer<Event<T>>, Flow
             success = true;
         } catch (Throwable t) {
             LOGGER.debug("Consuming the error {}", t);
-//            event.consumeError(t);
+            //            event.consumeError(t);
             handleErrorFlow(t, event);
             result = event.getData();
         }
@@ -81,5 +85,9 @@ public abstract class AbstractFlowHandler<T> implements Consumer<Event<T>>, Flow
      * @return the payload for the next phase of the flow
      */
     protected abstract Object assemblePayload(Object serviceResult);
+
+    protected FlowFacade getFlowFacade() {
+        return flowFacade;
+    }
 
 }
