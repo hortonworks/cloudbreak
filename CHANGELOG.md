@@ -8,10 +8,26 @@
 
 ### Changed
 
-## [v0.0.2] - 2015-03-19
+## Unreleased
+
+## [v0.0.3] - 2015-03-19
+
+### Fixed
+
+- `make release` creates binary with X.X.X version when on release branch otherwise X.X.X-gitrev
 
 ### Added
 
+- Docs: release process described
+
+### Removed
+
+### Changed
+
+## [v0.0.2] - 2015-03-19
+
+### Added
+Added
 - selfupdate command
 - gray debug to stderr
 
