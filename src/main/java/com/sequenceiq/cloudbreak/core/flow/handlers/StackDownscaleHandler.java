@@ -9,34 +9,37 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
-import com.sequenceiq.cloudbreak.core.flow.context.UpdateInstancesContext;
+import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.service.FlowFacade;
 
 import reactor.event.Event;
 
 @Component
-public class StackDownscaleHandler extends AbstractFlowHandler<UpdateInstancesContext> implements FlowHandler {
+public class StackDownscaleHandler extends AbstractFlowHandler<StackScalingContext> implements FlowHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDownscaleHandler.class);
 
     @Autowired
     private FlowFacade flowFacade;
 
     @Override
-    protected Object execute(Event<UpdateInstancesContext> event) throws CloudbreakException {
+    protected Object execute(Event<StackScalingContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
         FlowContext context = flowFacade.downscaleStack(event.getData());
-        LOGGER.info("Upscale of stack finished. Context: {}", context);
+        LOGGER.info("Upscale of stack is finished. Context: {}", context);
         return context;
     }
 
     @Override
     protected void handleErrorFlow(Throwable throwable, Object data) {
-        Event event = (Event) data;
-        LOGGER.info("handleErrorFlow() for phase: {}", event.getKey());
-        UpdateInstancesContext context = (UpdateInstancesContext) event.getData();
-        CloudbreakException exc = (CloudbreakException) throwable;
-        context.setErrorMessage(exc.getMessage());
-        event.setData(context);
+        Event<StackScalingContext> event = (Event<StackScalingContext>) data;
+        StackScalingContext scalingContext = event.getData();
+        LOGGER.info("execute() for phase: {}", event.getKey());
+        try {
+            FlowContext context = flowFacade.handleStackScalingFailure(scalingContext);
+            LOGGER.info("Stack downscaling failure is handled. Context: {}", context);
+        } catch (CloudbreakException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
     }
 
     @Override

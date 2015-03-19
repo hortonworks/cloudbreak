@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow.handlers;
 
-import com.sequenceiq.cloudbreak.core.flow.service.StackFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +8,9 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
+import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.TerminationContext;
+import com.sequenceiq.cloudbreak.core.flow.service.FlowFacade;
 
 import reactor.event.Event;
 
@@ -18,23 +19,27 @@ public class StackTerminationHandler extends AbstractFlowHandler<TerminationCont
     private static final Logger LOGGER = LoggerFactory.getLogger(StackTerminationHandler.class);
 
     @Autowired
-    private StackFacade stackFacade;
+    private FlowFacade flowFacade;
 
     @Override
     protected Object execute(Event<TerminationContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
-        TerminationContext context = (TerminationContext) stackFacade.terminateStack(event.getData());
+        TerminationContext context = (TerminationContext) flowFacade.terminateStack(event.getData());
         LOGGER.info("Cluster terminated. Context: {}", context);
         return context;
     }
 
     @Override
     protected void handleErrorFlow(Throwable throwable, Object data) {
-        Event event = (Event) data;
-        TerminationContext context = (TerminationContext) event.getData();
-        CloudbreakException exc = (CloudbreakException) throwable;
-        LOGGER.info("handleErrorFlow() for phase: {}", event.getKey());
-        event.setData(new TerminationContext(context.getStackId(), context.getCloudPlatform(), exc.getMessage()));
+        Event<TerminationContext> event = (Event<TerminationContext>) data;
+        TerminationContext terminationContext = event.getData();
+        LOGGER.info("execute() for phase: {}", event.getKey());
+        try {
+            FlowContext context = flowFacade.stackTerminationError(terminationContext);
+            LOGGER.info("Stack termination failure is handled. Context: {}", context);
+        } catch (CloudbreakException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
     }
 
     @Override

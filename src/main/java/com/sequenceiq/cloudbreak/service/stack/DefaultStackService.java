@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -269,6 +270,16 @@ public class DefaultStackService implements StackService {
             }
         }
         throw new NotFoundException("Metadata not found on stack.");
+    }
+
+    @Override
+    public InstanceMetaData updateMetaDataStatus(Long id, String hostName, InstanceStatus status) {
+        InstanceMetaData metaData = instanceMetaDataRepository.findHostInStack(id, hostName);
+        if (metaData == null) {
+            throw new NotFoundException(String.format("Metadata not found on stack:'%s' with hostname: '%s'.", id, hostName));
+        }
+        metaData.setInstanceStatus(status);
+        return instanceMetaDataRepository.save(metaData);
     }
 
     @Override

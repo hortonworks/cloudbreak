@@ -35,4 +35,14 @@ public interface FlowFacade {
     FlowContext downscaleStack(FlowContext context) throws CloudbreakException;
 
     FlowContext handleStackScalingFailure(FlowContext context) throws CloudbreakException;
+
+    FlowContext upscaleCluster(FlowContext context) throws CloudbreakException;
+
+    FlowContext downscaleCluster(FlowContext context) throws CloudbreakException;
+
+    FlowContext terminateStack(FlowContext flowContext) throws CloudbreakException;
+
+    FlowContext stackTerminationError(FlowContext context) throws CloudbreakException;
+
+    FlowContext handleClusterScalingFailure(FlowContext context) throws CloudbreakException;
 }

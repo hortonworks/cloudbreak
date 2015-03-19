@@ -9,11 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.core.flow.FlowInitializer.Phases;
+import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.TerminationContext;
-import com.sequenceiq.cloudbreak.core.flow.context.UpdateInstancesContext;
+import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
+import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
@@ -128,15 +130,29 @@ public class ReactorFlowManager implements FlowManager {
     @Override
     public void triggerStackUpscale(Object object) {
         UpdateInstancesRequest updateRequest = (UpdateInstancesRequest) object;
-        UpdateInstancesContext context = new UpdateInstancesContext(updateRequest);
+        StackScalingContext context = new StackScalingContext(updateRequest);
         reactor.notify(Phases.STACK_UPSCALE.name(), eventFactory.createEvent(context, Phases.STACK_UPSCALE.name()));
     }
 
     @Override
     public void triggerStackDownscale(Object object) {
         UpdateInstancesRequest updateRequest = (UpdateInstancesRequest) object;
-        UpdateInstancesContext context = new UpdateInstancesContext(updateRequest);
+        StackScalingContext context = new StackScalingContext(updateRequest);
         reactor.notify(Phases.STACK_DOWNSCALE.name(), eventFactory.createEvent(context, Phases.STACK_DOWNSCALE.name()));
+    }
+
+    @Override
+    public void triggerClusterUpscale(Object object) {
+        UpdateAmbariHostsRequest request = (UpdateAmbariHostsRequest) object;
+        ClusterScalingContext context = new ClusterScalingContext(request);
+        reactor.notify(Phases.CLUSTER_UPSCALE.name(), eventFactory.createEvent(context, Phases.CLUSTER_UPSCALE.name()));
+    }
+
+    @Override
+    public void triggerClusterDownscale(Object object) {
+        UpdateAmbariHostsRequest request = (UpdateAmbariHostsRequest) object;
+        ClusterScalingContext context = new ClusterScalingContext(request);
+        reactor.notify(Phases.CLUSTER_DOWNSCALE.name(), eventFactory.createEvent(context, Phases.CLUSTER_DOWNSCALE.name()));
     }
 
     public static class TransitionFactory {

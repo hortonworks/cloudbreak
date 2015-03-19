@@ -4,7 +4,7 @@ package com.sequenceiq.cloudbreak.core.flow.context;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 
-public class UpdateInstancesContext implements FlowContext {
+public class StackScalingContext implements FlowContext {
 
     private CloudPlatform cloudPlatform;
     private Long stackId;
@@ -12,9 +12,9 @@ public class UpdateInstancesContext implements FlowContext {
     private String instanceGroup;
     private String errorMessage = "";
 
-    public UpdateInstancesContext() { }
+    public StackScalingContext() { }
 
-    public UpdateInstancesContext(UpdateInstancesRequest updateInstancesRequest) {
+    public StackScalingContext(UpdateInstancesRequest updateInstancesRequest) {
         this.cloudPlatform = updateInstancesRequest.getCloudPlatform();
         this.stackId = updateInstancesRequest.getStackId();
         this.scalingAdjustment = updateInstancesRequest.getScalingAdjustment();
