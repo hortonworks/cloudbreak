@@ -8,6 +8,13 @@
 
 ### Changed
 
+## [v0.0.2] - 2015-03-19
+
+### Added
+
+- selfupdate command
+- gray debug to stderr
+
 ## [v0.0.1] - 2015-03-18
 
 ## Added
