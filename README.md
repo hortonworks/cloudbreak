@@ -29,3 +29,8 @@ When you wan’t a new release, all you have to do:
 Once the PR is merged, CircleCI will a new release on [githu](),
 with the help of the [gh-release](https://github.com/progrium/gh-release) tool.
 
+## Credits
+
+This tool, and the PR driven release, is very much inspired by [glidergun](https://github.com/gliderlabs/glidergun). Actually it
+could be a fork of it. The reason it’s not a fork, because we wanted to have our own binary with all modules
+built in, so only a single binary is needed.
