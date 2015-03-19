@@ -26,8 +26,22 @@ When you wan’t a new release, all you have to do:
   - update `CHANGELOG.md` with the release date
   - create a new **Unreleased** section in top of `CHANGELOG.md`
 
-Once the PR is merged, CircleCI will a new release on [githu](),
-with the help of the [gh-release](https://github.com/progrium/gh-release) tool.
+Once the PR is merged, CircleCI will:
+- create a new release on [github releases tab](https://github.com/sequenceiq/cloudbreak-deployer/releases), with the help of the [gh-release](https://github.com/progrium/gh-release).
+- it will create the git tag with `v` prefix like: `v0.0.3`
+
+Sample command when version 0.0.3 was released:
+
+```
+git fetch && git checkout -b release-0.0.3
+echo '0.0.3' > VERSION
+
+# edit CHANGELOG.md
+
+git commit -m "release 0.0.3" VERSION CHANGELOG.md
+git push origin release-0.0.3
+hub pull-request -b release -m "release 0.0.3"
+```
 
 ## Credits
 
