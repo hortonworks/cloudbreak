@@ -6,12 +6,6 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStartHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStatusUpdateFailureHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStopHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.StackStartHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.StackStatusUpdateFailureHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.StackStopHandler;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,12 +13,21 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariRoleAllocationHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterCreationHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterDownscaleHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStartHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStatusUpdateFailureHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStopHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterUpscaleHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.MetadataSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ProvisioningHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ProvisioningSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackCreationFailureHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.StackTerminationFailureHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.StackDownscaleHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.StackStartHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.StackStatusUpdateFailureHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.StackStopHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackTerminationHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.StackUpscaleHandler;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -45,10 +48,15 @@ public class FlowInitializer implements InitializingBean {
         STACK_START_FAILED,
         STACK_STOP,
         STACK_STOP_FAILED,
+        STACK_UPSCALE,
+        STACK_DOWNSCALE,
+        STACK_SCALING_FAILED,
         CLUSTER_START,
         CLUSTER_START_FAILED,
         CLUSTER_STOP,
         CLUSTER_STOP_FAILED,
+        CLUSTER_UPSCALE,
+        CLUSTER_DOWNSCALE,
         TERMINATION,
         TERMINATION_FAILED,
         SUCCESS
@@ -82,7 +90,7 @@ public class FlowInitializer implements InitializingBean {
                 .createTransition(Phases.AMBARI_START.name(), Phases.CLUSTER_CREATION.name(), Phases.STACK_CREATION_FAILED.name()));
 
         flowManager.registerTransition(StackTerminationHandler.class, ReactorFlowManager.TransitionFactory
-                .createTransition(Phases.TERMINATION.name(), Phases.SUCCESS.name(), Phases.TERMINATION_FAILED.name()));
+                .createTransition(Phases.TERMINATION.name(), Phases.SUCCESS.name(), null));
 
         flowManager.registerTransition(StackStartHandler.class, ReactorFlowManager.TransitionFactory
                 .createTransition(Phases.STACK_START.name(), Phases.CLUSTER_START.name(), Phases.STACK_START_FAILED.name()));
@@ -96,6 +104,12 @@ public class FlowInitializer implements InitializingBean {
         flowManager.registerTransition(StackStopHandler.class, ReactorFlowManager.TransitionFactory
                 .createTransition(Phases.STACK_STOP.name(), Phases.SUCCESS.name(), Phases.STACK_STOP_FAILED.name()));
 
+        flowManager.registerTransition(StackUpscaleHandler.class, ReactorFlowManager.TransitionFactory
+                .createTransition(Phases.STACK_UPSCALE.name(), Phases.SUCCESS.name(), null));
+
+        flowManager.registerTransition(StackDownscaleHandler.class, ReactorFlowManager.TransitionFactory
+                .createTransition(Phases.STACK_DOWNSCALE.name(), Phases.SUCCESS.name(), null));
+
         reactor.on($(Phases.PROVISIONING_SETUP.name()), getHandlerForClass(ProvisioningSetupHandler.class));
         reactor.on($(Phases.PROVISIONING.name()), getHandlerForClass(ProvisioningHandler.class));
         reactor.on($(Phases.METADATA_SETUP.name()), getHandlerForClass(MetadataSetupHandler.class));
@@ -103,18 +117,20 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(Phases.AMBARI_START.name()), getHandlerForClass(AmbariStartHandler.class));
         reactor.on($(Phases.CLUSTER_CREATION.name()), getHandlerForClass(ClusterCreationHandler.class));
         reactor.on($(Phases.TERMINATION.name()), getHandlerForClass(StackTerminationHandler.class));
-
         reactor.on($(Phases.STACK_START.name()), getHandlerForClass(StackStartHandler.class));
         reactor.on($(Phases.STACK_STOP.name()), getHandlerForClass(StackStopHandler.class));
+        reactor.on($(Phases.STACK_UPSCALE.name()), getHandlerForClass(StackUpscaleHandler.class));
+        reactor.on($(Phases.STACK_DOWNSCALE.name()), getHandlerForClass(StackDownscaleHandler.class));
         reactor.on($(Phases.CLUSTER_START.name()), getHandlerForClass(ClusterStartHandler.class));
         reactor.on($(Phases.CLUSTER_STOP.name()), getHandlerForClass(ClusterStopHandler.class));
+        reactor.on($(Phases.CLUSTER_UPSCALE.name()), getHandlerForClass(ClusterUpscaleHandler.class));
+        reactor.on($(Phases.CLUSTER_DOWNSCALE.name()), getHandlerForClass(ClusterDownscaleHandler.class));
+
         reactor.on($(Phases.STACK_CREATION_FAILED.name()), getHandlerForClass(StackCreationFailureHandler.class));
-        reactor.on($(Phases.TERMINATION_FAILED.name()), getHandlerForClass(StackTerminationFailureHandler.class));
         reactor.on($(Phases.STACK_STOP_FAILED.name()), getHandlerForClass(StackStatusUpdateFailureHandler.class));
         reactor.on($(Phases.STACK_START_FAILED.name()), getHandlerForClass(StackStatusUpdateFailureHandler.class));
         reactor.on($(Phases.CLUSTER_STOP_FAILED.name()), getHandlerForClass(ClusterStatusUpdateFailureHandler.class));
         reactor.on($(Phases.CLUSTER_START_FAILED.name()), getHandlerForClass(ClusterStatusUpdateFailureHandler.class));
-
 
     }
 

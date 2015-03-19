@@ -2,18 +2,24 @@ package com.sequenceiq.cloudbreak.core.flow;
 
 import java.util.HashMap;
 import java.util.Map;
-import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
-import com.sequenceiq.cloudbreak.core.flow.FlowInitializer.Phases;
-import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
-import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
-import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.core.flow.FlowInitializer.Phases;
+import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
+import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.TerminationContext;
+import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
+import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
+import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
+import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
+import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
+import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -119,6 +125,34 @@ public class ReactorFlowManager implements FlowManager {
         StackDeleteRequest deleteRequest = (StackDeleteRequest) object;
         TerminationContext context = new TerminationContext(deleteRequest.getStackId(), deleteRequest.getCloudPlatform());
         reactor.notify(Phases.TERMINATION.name(), eventFactory.createEvent(context, Phases.TERMINATION.name()));
+    }
+
+    @Override
+    public void triggerStackUpscale(Object object) {
+        UpdateInstancesRequest updateRequest = (UpdateInstancesRequest) object;
+        StackScalingContext context = new StackScalingContext(updateRequest);
+        reactor.notify(Phases.STACK_UPSCALE.name(), eventFactory.createEvent(context, Phases.STACK_UPSCALE.name()));
+    }
+
+    @Override
+    public void triggerStackDownscale(Object object) {
+        UpdateInstancesRequest updateRequest = (UpdateInstancesRequest) object;
+        StackScalingContext context = new StackScalingContext(updateRequest);
+        reactor.notify(Phases.STACK_DOWNSCALE.name(), eventFactory.createEvent(context, Phases.STACK_DOWNSCALE.name()));
+    }
+
+    @Override
+    public void triggerClusterUpscale(Object object) {
+        UpdateAmbariHostsRequest request = (UpdateAmbariHostsRequest) object;
+        ClusterScalingContext context = new ClusterScalingContext(request);
+        reactor.notify(Phases.CLUSTER_UPSCALE.name(), eventFactory.createEvent(context, Phases.CLUSTER_UPSCALE.name()));
+    }
+
+    @Override
+    public void triggerClusterDownscale(Object object) {
+        UpdateAmbariHostsRequest request = (UpdateAmbariHostsRequest) object;
+        ClusterScalingContext context = new ClusterScalingContext(request);
+        reactor.notify(Phases.CLUSTER_DOWNSCALE.name(), eventFactory.createEvent(context, Phases.CLUSTER_DOWNSCALE.name()));
     }
 
     public static class TransitionFactory {

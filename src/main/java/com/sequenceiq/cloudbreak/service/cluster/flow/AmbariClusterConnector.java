@@ -163,39 +163,33 @@ public class AmbariClusterConnector {
         }
     }
 
-    public void installAmbariNode(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
+    public Set<String> installAmbariNode(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
+        Set<String> result = new HashSet<>();
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         MDCBuilder.buildMdcContext(cluster);
-        try {
-            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Adding new host(s) to the cluster.");
-            AmbariClient ambariClient = clientService.create(stack);
-            if (PollingResult.SUCCESS.equals(waitForHosts(stack, ambariClient))) {
-                HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
-                List<String> hosts = findFreeHosts(stack.getId(), hostGroup, hostGroupAdjustment.getScalingAdjustment());
-                Set<HostGroup> hostGroupAsSet = Sets.newHashSet(hostGroup);
-                Set<HostMetadata> hostMetadata = addHostMetadata(cluster, hosts, hostGroupAdjustment);
-                if (recipesFound(hostGroupAsSet)) {
-                    recipeEngine.setupRecipesOnHosts(stack, hostGroup.getRecipes(), hostMetadata);
-                }
-                PollingResult pollingResult = waitForAmbariOperations(stack, ambariClient, installServices(hosts, stack, ambariClient, hostGroupAdjustment));
+        stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Adding new host(s) to the cluster.");
+        AmbariClient ambariClient = clientService.create(stack);
+        if (PollingResult.SUCCESS.equals(waitForHosts(stack, ambariClient))) {
+            HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
+            List<String> hosts = findFreeHosts(stack.getId(), hostGroup, hostGroupAdjustment.getScalingAdjustment());
+            Set<HostGroup> hostGroupAsSet = Sets.newHashSet(hostGroup);
+            Set<HostMetadata> hostMetadata = addHostMetadata(cluster, hosts, hostGroupAdjustment);
+            if (recipesFound(hostGroupAsSet)) {
+                recipeEngine.setupRecipesOnHosts(stack, hostGroup.getRecipes(), hostMetadata);
+            }
+            PollingResult pollingResult = waitForAmbariOperations(stack, ambariClient, installServices(hosts, stack, ambariClient, hostGroupAdjustment));
+            if (isSuccess(pollingResult)) {
+                pollingResult = waitForAmbariOperations(stack, ambariClient, singletonMap("START_SERVICES", ambariClient.startAllServices()));
                 if (isSuccess(pollingResult)) {
-                    pollingResult = waitForAmbariOperations(stack, ambariClient, singletonMap("START_SERVICES", ambariClient.startAllServices()));
+                    pollingResult = restartHadoopServices(stack, ambariClient, false);
                     if (isSuccess(pollingResult)) {
-                        pollingResult = restartHadoopServices(stack, ambariClient, false);
-                        if (isSuccess(pollingResult)) {
-                            updateHostSuccessful(cluster, new HashSet<>(hosts), false);
-                        }
+                        result.addAll(hosts);
                     }
                 }
             }
-        } catch (AmbariHostsUnavailableException | AmbariOperationFailedException e) {
-            LOGGER.error(e.getMessage(), e);
-            updateHostFailed(cluster, e.getMessage(), true);
-        } catch (Exception e) {
-            LOGGER.error(UNHANDLED_EXCEPTION_MSG, e);
-            updateHostFailed(cluster, UNHANDLED_EXCEPTION_MSG, true);
         }
+        return result;
     }
 
     private List<String> getHostNames(Set<InstanceMetaData> instances) {
@@ -208,46 +202,43 @@ public class AmbariClusterConnector {
         }).toList();
     }
 
-    public void decommissionAmbariNodes(Long stackId, HostGroupAdjustmentJson adjustmentRequest, List<HostMetadata> decommissionCandidates) {
+    public Set<String> decommissionAmbariNodes(Long stackId, HostGroupAdjustmentJson adjustmentRequest, List<HostMetadata> decommissionCandidates) {
+        Set<String> result = new HashSet<>();
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(cluster);
         LOGGER.info("Decommission requested");
-        try {
-            int adjustment = Math.abs(adjustmentRequest.getScalingAdjustment());
-            String hostGroupName = adjustmentRequest.getHostGroup();
-            LOGGER.info("Decommissioning {} hosts from host group '{}'", adjustment, hostGroupName);
-            String statusReason = String.format("Removing '%s' node(s) from the cluster.", adjustment);
-            stackUpdater.updateStackStatus(stackId, Status.UPDATE_IN_PROGRESS, statusReason);
-            String eventMsg = String.format("Removing '%s' node(s) from the '%s' hostgroup.", adjustment, hostGroupName);
-            eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), eventMsg, hostGroupName);
-            AmbariClient ambariClient = clientService.create(stack);
-            String blueprintName = stack.getCluster().getBlueprint().getBlueprintName();
-            Set<String> components = ambariClient.getComponentsCategory(blueprintName, hostGroupName).keySet();
-            Map<String, HostMetadata> hostsToRemove = selectHostsToRemove(decommissionCandidates, stack, adjustment);
-            List<String> hostList = new ArrayList<>(hostsToRemove.keySet());
-            PollingResult pollingResult = waitForAmbariOperations(stack, ambariClient, decommissionComponents(ambariClient, hostList, components));
+        int adjustment = Math.abs(adjustmentRequest.getScalingAdjustment());
+        String hostGroupName = adjustmentRequest.getHostGroup();
+        LOGGER.info("Decommissioning {} hosts from host group '{}'", adjustment, hostGroupName);
+        String statusReason = String.format("Removing '%s' node(s) from the cluster.", adjustment);
+        stackUpdater.updateStackStatus(stackId, Status.UPDATE_IN_PROGRESS, statusReason);
+        String eventMsg = String.format("Removing '%s' node(s) from the '%s' hostgroup.", adjustment, hostGroupName);
+        eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), eventMsg, hostGroupName);
+        AmbariClient ambariClient = clientService.create(stack);
+        String blueprintName = stack.getCluster().getBlueprint().getBlueprintName();
+        Set<String> components = ambariClient.getComponentsCategory(blueprintName, hostGroupName).keySet();
+        Map<String, HostMetadata> hostsToRemove = selectHostsToRemove(decommissionCandidates, stack, adjustment);
+        List<String> hostList = new ArrayList<>(hostsToRemove.keySet());
+        PollingResult pollingResult = waitForAmbariOperations(stack, ambariClient, decommissionComponents(ambariClient, hostList, components));
+        if (isSuccess(pollingResult)) {
+            pollingResult = waitForDataNodeDecommission(stack, ambariClient);
             if (isSuccess(pollingResult)) {
-                pollingResult = waitForDataNodeDecommission(stack, ambariClient);
+                pollingResult = stopHadoopComponents(stack, ambariClient, hostList);
                 if (isSuccess(pollingResult)) {
-                    pollingResult = stopHadoopComponents(stack, ambariClient, hostList);
+                    deleteHostsFromAmbari(ambariClient, hostList, new ArrayList<>(components));
+                    pollingResult = restartHadoopServices(stack, ambariClient, true);
                     if (isSuccess(pollingResult)) {
-                        deleteHostsFromAmbari(ambariClient, hostList, new ArrayList<>(components));
-                        pollingResult = restartHadoopServices(stack, ambariClient, true);
-                        if (isSuccess(pollingResult)) {
-                            cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-                            HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupName);
-                            hostGroup.getHostMetadata().removeAll(hostsToRemove.values());
-                            hostGroupRepository.save(hostGroup);
-                            updateHostSuccessful(cluster, hostsToRemove.keySet(), true);
-                        }
+                        cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
+                        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupName);
+                        hostGroup.getHostMetadata().removeAll(hostsToRemove.values());
+                        hostGroupRepository.save(hostGroup);
+                        result.addAll(hostsToRemove.keySet());
                     }
                 }
             }
-        } catch (Exception e) {
-            LOGGER.error(UNHANDLED_EXCEPTION_MSG, e);
-            updateHostFailed(cluster, UNHANDLED_EXCEPTION_MSG, false);
         }
+        return result;
     }
 
     public boolean stopCluster(Stack stack) {
@@ -309,9 +300,13 @@ public class AmbariClusterConnector {
         return waitForAmbariOperations(stack, ambariClient, singletonMap("MR_SMOKE_TEST", id));
     }
 
-    private PollingResult stopHadoopComponents(Stack stack, AmbariClient ambariClient, List<String> hosts) throws HttpResponseException {
-        int requestId = ambariClient.stopAllComponentsOnHosts(hosts);
-        return waitForAmbariOperations(stack, ambariClient, singletonMap("Stopping components on the decommissioned hosts", requestId));
+    private PollingResult stopHadoopComponents(Stack stack, AmbariClient ambariClient, List<String> hosts) {
+        try {
+            int requestId = ambariClient.stopAllComponentsOnHosts(hosts);
+            return waitForAmbariOperations(stack, ambariClient, singletonMap("Stopping components on the decommissioned hosts", requestId));
+        } catch (HttpResponseException e) {
+            throw new AmbariOperationFailedException("Ambari client could not stop components.", e);
+        }
     }
 
     private void deleteHostsFromAmbari(AmbariClient ambariClient, List<String> hosts, List<String> components) {

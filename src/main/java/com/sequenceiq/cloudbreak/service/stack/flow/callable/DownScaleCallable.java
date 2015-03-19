@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.handler.callable;
+package com.sequenceiq.cloudbreak.service.stack.flow.callable;
 
 import java.util.concurrent.Callable;
 

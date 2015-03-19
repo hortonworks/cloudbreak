@@ -24,4 +24,12 @@ public interface FlowManager {
 
     void triggerClusterStart(Object object);
 
+    void triggerStackUpscale(Object object);
+
+    void triggerStackDownscale(Object object);
+
+    void triggerClusterUpscale(Object object);
+
+    void triggerClusterDownscale(Object object);
+
 }

@@ -21,15 +21,19 @@ import com.sequenceiq.cloudbreak.core.flow.StackStartService;
 import com.sequenceiq.cloudbreak.core.flow.StackStopService;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
+import com.sequenceiq.cloudbreak.core.flow.context.TerminationContext;
+import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.OnFailureAction;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstallerMailSenderService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
@@ -74,6 +78,9 @@ public class SimpleStackFacade implements StackFacade {
 
     @Autowired
     private StackStopService stackStopService;
+
+    @Autowired
+    private StackScalingService stackScalingService;
 
     @Override
     public FlowContext stackCreationError(FlowContext context) throws CloudbreakException {
@@ -157,7 +164,8 @@ public class SimpleStackFacade implements StackFacade {
     public FlowContext terminateStack(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Terminating stack. Context: {}", context);
         try {
-            context = terminationService.terminateStack(context);
+            TerminationContext terminationContext = (TerminationContext) context;
+            terminationService.terminateStack(terminationContext.getStackId(), terminationContext.getCloudPlatform());
             LOGGER.debug("Terminating stack is DONE");
             return context;
         } catch (Exception e) {
@@ -168,7 +176,9 @@ public class SimpleStackFacade implements StackFacade {
 
     @Override
     public FlowContext stackTerminationError(FlowContext context) throws CloudbreakException {
-        return terminationService.handleTerminationFailure(context);
+        TerminationContext terminationContext = (TerminationContext) context;
+        terminationService.handleTerminationFailure(terminationContext.getStackId(), terminationContext.getStatusReason());
+        return context;
     }
 
     @Override
@@ -179,6 +189,44 @@ public class SimpleStackFacade implements StackFacade {
     @Override
     public FlowContext stackStartError(FlowContext context) throws CloudbreakException {
         return stackStartService.handleStackStartFailure(context);
+    }
+
+    @Override
+    public FlowContext upscaleStack(FlowContext context) throws CloudbreakException {
+        try {
+            StackScalingContext updateContext = (StackScalingContext) context;
+            stackScalingService.upscaleStack(updateContext.getStackId(), updateContext.getInstanceGroup(), updateContext.getScalingAdjustment());
+            return context;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the upscaling of stack: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext downscaleStack(FlowContext context) throws CloudbreakException {
+        try {
+            StackScalingContext updateContext = (StackScalingContext) context;
+            stackScalingService.downscaleStack(updateContext.getStackId(), updateContext.getInstanceGroup(), updateContext.getScalingAdjustment());
+            return context;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the downscaling of stack: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext handleScalingFailure(FlowContext context) throws CloudbreakException {
+        try {
+            StackScalingContext updateContext = (StackScalingContext) context;
+            stackUpdater.updateMetadataReady(updateContext.getStackId(), true);
+            stackUpdater.updateStackStatus(updateContext.getStackId(), Status.AVAILABLE, "Stack update failed. " + updateContext.getErrorMessage());
+            stackUpdater.updateStackStatusReason(updateContext.getStackId(), updateContext.getErrorMessage());
+            return updateContext;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the handling of stack scaling failure: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
     }
 
     private void fireCloudbreakEventIfNeeded(Long stackId, Stack stack) {

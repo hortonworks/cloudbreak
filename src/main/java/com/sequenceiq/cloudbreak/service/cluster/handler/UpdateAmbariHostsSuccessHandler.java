@@ -48,16 +48,20 @@ public class UpdateAmbariHostsSuccessHandler implements Consumer<Event<UpdateAmb
         MDCBuilder.buildMdcContext(cluster);
         LOGGER.info("Accepted {} event.", ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT);
         Stack stack = stackRepository.findStackWithListsForCluster(data.getClusterId());
+        updateResourcesStatus(data.isDecommission(), hostNames, stack);
+    }
+
+    private void updateResourcesStatus(boolean decommission, Set<String> hostNames, Stack stack) {
         for (String hostName : hostNames) {
             InstanceMetaData metadataEntry = metadataRepository.findHostInStack(stack.getId(), hostName);
-            if (data.isDecommission()) {
+            if (decommission) {
                 metadataEntry.setInstanceStatus(InstanceStatus.DECOMMISSIONED);
             } else {
                 metadataEntry.setInstanceStatus(InstanceStatus.REGISTERED);
             }
             metadataRepository.save(metadataEntry);
         }
-        String cause = data.isDecommission() ? "Down" : "Up";
+        String cause = decommission ? "Down" : "Up";
         String statusReason =  String.format("%sscale of cluster finished successfully. AMBARI_IP:%s", cause, stack.getAmbariIp());
         stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, statusReason);
     }

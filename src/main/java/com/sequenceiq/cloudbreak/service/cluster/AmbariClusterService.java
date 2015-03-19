@@ -142,26 +142,17 @@ public class AmbariClusterService implements ClusterService {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(cluster);
-        boolean decommissionRequest = validateRequest(stack, hostGroupAdjustment);
-        List<HostMetadata> downScaleCandidates = new ArrayList<>();
-        if (decommissionRequest) {
-            AmbariClient ambariClient = clientService.create(stack);
-            int replication = getReplicationFactor(ambariClient, hostGroupAdjustment.getHostGroup());
-            HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
-            Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();
-            List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(stack, hostsInHostGroup, hostGroupAdjustment.getHostGroup());
-            int reservedInstances = hostsInHostGroup.size() - filteredHostList.size();
-            verifyNodeCount(cluster, replication, hostGroupAdjustment.getScalingAdjustment(), filteredHostList, reservedInstances);
-            if (doesHostGroupContainDataNode(ambariClient, cluster.getBlueprint().getBlueprintName(), hostGroup.getName())) {
-                downScaleCandidates = checkAndSortByAvailableSpace(stack, ambariClient, replication,
-                        hostGroupAdjustment.getScalingAdjustment(), filteredHostList);
-            } else {
-                downScaleCandidates = filteredHostList;
-            }
-        }
         LOGGER.info("Cluster update requested [BlueprintId: {}]", cluster.getBlueprint().getId());
+        boolean decommissionRequest = validateUpdateHostsRequest(stack, hostGroupAdjustment);
+        List<HostMetadata> downScaleCandidates = collectDownscaleCandidates(hostGroupAdjustment, stack, cluster, decommissionRequest);
+        UpdateAmbariHostsRequest updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, downScaleCandidates, decommissionRequest);
+        if (decommissionRequest) {
+            flowManager.triggerClusterDownscale(updateRequest);
+        } else {
+            flowManager.triggerClusterUpscale(updateRequest);
+        }
         LOGGER.info("Publishing {} event", ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT);
-        return new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, downScaleCandidates, decommissionRequest);
+        return updateRequest;
     }
 
     @Override
@@ -256,6 +247,26 @@ public class AmbariClusterService implements ClusterService {
         return cluster;
     }
 
+    private List<HostMetadata> collectDownscaleCandidates(HostGroupAdjustmentJson adjustmentJson, Stack stack, Cluster cluster, boolean decommissionRequest) {
+        List<HostMetadata> downScaleCandidates = new ArrayList<>();
+        if (decommissionRequest) {
+            AmbariClient ambariClient = clientService.create(stack);
+            int replication = getReplicationFactor(ambariClient, adjustmentJson.getHostGroup());
+            HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), adjustmentJson.getHostGroup());
+            Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();
+            List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(stack, hostsInHostGroup, adjustmentJson.getHostGroup());
+            int reservedInstances = hostsInHostGroup.size() - filteredHostList.size();
+            verifyNodeCount(cluster, replication, adjustmentJson.getScalingAdjustment(), filteredHostList, reservedInstances);
+            if (doesHostGroupContainDataNode(ambariClient, cluster.getBlueprint().getBlueprintName(), hostGroup.getName())) {
+                downScaleCandidates = checkAndSortByAvailableSpace(stack, ambariClient, replication,
+                        adjustmentJson.getScalingAdjustment(), filteredHostList);
+            } else {
+                downScaleCandidates = filteredHostList;
+            }
+        }
+        return downScaleCandidates;
+    }
+
     private int getReplicationFactor(AmbariClient ambariClient, String hostGroup) {
         try {
             Map<String, String> configuration = configurationService.getConfiguration(ambariClient, hostGroup);
@@ -266,7 +277,7 @@ public class AmbariClusterService implements ClusterService {
         }
     }
 
-    private boolean validateRequest(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
+    private boolean validateUpdateHostsRequest(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
         MDCBuilder.buildMdcContext(stack.getCluster());
         HostGroup hostGroup = getHostGroup(stack, hostGroupAdjustment);
         int scalingAdjustment = hostGroupAdjustment.getScalingAdjustment();

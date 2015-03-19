@@ -18,4 +18,10 @@ public interface StackFacade {
     FlowContext stackStopError(FlowContext context) throws CloudbreakException;
 
     FlowContext stackTerminationError(FlowContext context) throws CloudbreakException;
+
+    FlowContext upscaleStack(FlowContext context) throws CloudbreakException;
+
+    FlowContext downscaleStack(FlowContext context) throws CloudbreakException;
+
+    FlowContext handleScalingFailure(FlowContext context) throws CloudbreakException;
 }

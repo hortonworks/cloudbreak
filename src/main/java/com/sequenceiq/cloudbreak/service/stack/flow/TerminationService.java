@@ -16,8 +16,6 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
-import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
-import com.sequenceiq.cloudbreak.core.flow.context.TerminationContext;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -79,17 +77,12 @@ public class TerminationService {
     @Autowired
     private CloudbreakEventService cloudbreakEventService;
 
-    public FlowContext handleTerminationFailure(FlowContext context) {
-        TerminationContext terminationContext = (TerminationContext) context;
-        LOGGER.info("Stack delete failed on stack {} and set its status to {}.", terminationContext.getStackId(), Status.DELETE_FAILED);
-        retryingStackUpdater.updateStackStatus(terminationContext.getStackId(), Status.DELETE_FAILED, terminationContext.getStatusReason());
-        return terminationContext;
+    public void handleTerminationFailure(Long stackId, String errorReason) {
+        LOGGER.info("Stack delete failed on stack {} and set its status to {}.", stackId, Status.DELETE_FAILED);
+        retryingStackUpdater.updateStackStatus(stackId, Status.DELETE_FAILED, errorReason);
     }
 
-    public FlowContext terminateStack(FlowContext context) {
-        TerminationContext terminationContext = (TerminationContext) context;
-        Long stackId = terminationContext.getStackId();
-        CloudPlatform cloudPlatform = terminationContext.getCloudPlatform();
+    public void terminateStack(Long stackId, CloudPlatform cloudPlatform) {
         retryingStackUpdater.updateStackStatus(stackId, Status.DELETE_IN_PROGRESS, "Termination of cluster infrastructure has started.");
         final Stack stack = stackRepository.findOneWithLists(stackId);
         MDCBuilder.buildMdcContext(stack);
@@ -107,7 +100,6 @@ public class TerminationService {
             String statusReason = "Termination of cluster infrastructure failed: " + ex.getMessage();
             throw new TerminationFailedException(statusReason, ex);
         }
-        return context;
     }
 
     private void deleteStackResourcesWithoutTemplate(final CloudPlatform cloudPlatform, final Stack stack) throws Exception {

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow.service;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
 import java.util.Date;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,10 +13,12 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.FlowContextFactory;
+import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -234,6 +237,43 @@ public class AmbariClusterFacade implements ClusterFacade {
         return context;
     }
 
+    @Override
+    public FlowContext upscaleCluster(FlowContext context) throws CloudbreakException {
+        ClusterScalingContext scalingContext = (ClusterScalingContext) context;
+        Stack stack = stackService.getById(scalingContext.getStackId());
+        Set<String> hostNames = ambariClusterConnector.installAmbariNode(scalingContext.getStackId(), scalingContext.getHostGroupAdjustment());
+        if (!hostNames.isEmpty()) {
+            updateInstanceMetadataAfterScaling(false, hostNames, stack);
+        }
+        return context;
+    }
+
+    @Override
+    public FlowContext downscaleCluster(FlowContext context) throws CloudbreakException {
+        ClusterScalingContext scalingContext = (ClusterScalingContext) context;
+        Stack stack = stackService.getById(scalingContext.getStackId());
+        Set<String> hostNames = ambariClusterConnector.decommissionAmbariNodes(scalingContext.getStackId(), scalingContext.getHostGroupAdjustment(),
+                scalingContext.getDecommissionCandidates());
+        if (!hostNames.isEmpty()) {
+            updateInstanceMetadataAfterScaling(true, hostNames, stack);
+        }
+        return context;
+    }
+
+    @Override
+    public FlowContext handleScalingFailure(FlowContext context) throws CloudbreakException {
+        ClusterScalingContext scalingContext = (ClusterScalingContext) context;
+        Stack stack = stackService.getById(scalingContext.getStackId());
+        Cluster cluster = stack.getCluster();
+        cluster.setStatus(Status.UPDATE_FAILED);
+        cluster.setStatusReason(scalingContext.getErrorReason());
+        stackUpdater.updateStackCluster(stack.getId(), cluster);
+        Integer scalingAdjustment = scalingContext.getHostGroupAdjustment().getScalingAdjustment();
+        String statusMessage = scalingAdjustment > 0 ? "new node(s) could not be added." : "node(s) could not be removed.";
+        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "Failed to update cluster because " + statusMessage);
+        return context;
+    }
+
     private void changeAmbariCredentials(String ambariIp, Stack stack) {
         String userName = stack.getUserName();
         String password = stack.getPassword();
@@ -246,5 +286,18 @@ public class AmbariClusterFacade implements ClusterFacade {
             ambariClient.createUser(userName, password, true);
             ambariClient.deleteUser(ADMIN);
         }
+    }
+
+    private void updateInstanceMetadataAfterScaling(boolean decommission, Set<String> hostNames, Stack stack) {
+        for (String hostName : hostNames) {
+            if (decommission) {
+                stackService.updateMetaDataStatus(stack.getId(), hostName, InstanceStatus.DECOMMISSIONED);
+            } else {
+                stackService.updateMetaDataStatus(stack.getId(), hostName, InstanceStatus.REGISTERED);
+            }
+        }
+        String cause = decommission ? "Down" : "Up";
+        String statusReason = String.format("%sscale of cluster finished successfully. AMBARI_IP:%s", cause, stack.getAmbariIp());
+        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, statusReason);
     }
 }
