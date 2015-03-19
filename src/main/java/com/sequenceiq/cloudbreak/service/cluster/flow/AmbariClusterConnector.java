@@ -55,8 +55,6 @@ import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.PluginFailureException;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationFailure;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationSuccess;
-import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsFailure;
-import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsSuccess;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 
 import groovyx.net.http.HttpResponseException;
@@ -192,16 +190,6 @@ public class AmbariClusterConnector {
         return result;
     }
 
-    private List<String> getHostNames(Set<InstanceMetaData> instances) {
-        return FluentIterable.from(instances).transform(new Function<InstanceMetaData, String>() {
-            @Nullable
-            @Override
-            public String apply(@Nullable InstanceMetaData input) {
-                return input.getLongName();
-            }
-        }).toList();
-    }
-
     public Set<String> decommissionAmbariNodes(Long stackId, HostGroupAdjustmentJson adjustmentRequest, List<HostMetadata> decommissionCandidates) {
         Set<String> result = new HashSet<>();
         Stack stack = stackRepository.findOneWithLists(stackId);
@@ -247,6 +235,16 @@ public class AmbariClusterConnector {
 
     public boolean startCluster(Stack stack) {
         return setClusterState(stack, false);
+    }
+
+    private List<String> getHostNames(Set<InstanceMetaData> instances) {
+        return FluentIterable.from(instances).transform(new Function<InstanceMetaData, String>() {
+            @Nullable
+            @Override
+            public String apply(@Nullable InstanceMetaData input) {
+                return input.getLongName();
+            }
+        }).toList();
     }
 
     private boolean recipesFound(Set<HostGroup> hostGroups) {
@@ -510,17 +508,4 @@ public class AmbariClusterConnector {
         LOGGER.info("Publishing {} event", ReactorConfig.CLUSTER_CREATE_FAILED_EVENT);
         reactor.notify(ReactorConfig.CLUSTER_CREATE_FAILED_EVENT, Event.wrap(new ClusterCreationFailure(stack.getId(), cluster.getId(), message)));
     }
-
-    private void updateHostSuccessful(Cluster cluster, Set<String> hostNames, boolean decommission) {
-        MDCBuilder.buildMdcContext(cluster);
-        LOGGER.info("Publishing {} event", ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT);
-        reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT, Event.wrap(new UpdateAmbariHostsSuccess(cluster.getId(), hostNames, decommission)));
-    }
-
-    private void updateHostFailed(Cluster cluster, String message, boolean addingNodes) {
-        MDCBuilder.buildMdcContext(cluster);
-        LOGGER.info("Publishing {} event", ReactorConfig.UPDATE_AMBARI_HOSTS_FAILED_EVENT);
-        reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_FAILED_EVENT, Event.wrap(new UpdateAmbariHostsFailure(cluster.getId(), message, addingNodes)));
-    }
-
 }

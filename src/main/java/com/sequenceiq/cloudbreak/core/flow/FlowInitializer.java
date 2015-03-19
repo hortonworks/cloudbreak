@@ -110,6 +110,12 @@ public class FlowInitializer implements InitializingBean {
         flowManager.registerTransition(StackDownscaleHandler.class, ReactorFlowManager.TransitionFactory
                 .createTransition(Phases.STACK_DOWNSCALE.name(), Phases.SUCCESS.name(), null));
 
+        flowManager.registerTransition(ClusterUpscaleHandler.class, ReactorFlowManager.TransitionFactory
+                .createTransition(Phases.CLUSTER_UPSCALE.name(), Phases.SUCCESS.name(), null));
+
+        flowManager.registerTransition(ClusterDownscaleHandler.class, ReactorFlowManager.TransitionFactory
+                .createTransition(Phases.CLUSTER_DOWNSCALE.name(), Phases.SUCCESS.name(), null));
+
         reactor.on($(Phases.PROVISIONING_SETUP.name()), getHandlerForClass(ProvisioningSetupHandler.class));
         reactor.on($(Phases.PROVISIONING.name()), getHandlerForClass(ProvisioningHandler.class));
         reactor.on($(Phases.METADATA_SETUP.name()), getHandlerForClass(MetadataSetupHandler.class));
