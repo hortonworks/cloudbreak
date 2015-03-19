@@ -2,9 +2,23 @@
 
 ### Fixed
 
+### Added
+
+### Removed
+
+### Changed
+
+## Unreleased
+
+## [v0.0.3] - 2015-03-19
+
+### Fixed
+
 - `make release` creates binary with X.X.X version when on release branch otherwise X.X.X-gitrev
 
 ### Added
+
+- Docs: release process described
 
 ### Removed
 
