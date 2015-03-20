@@ -22,5 +22,15 @@ public class Transition {
     public String getFailure() {
         return failure;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Transition{");
+        sb.append("current='").append(current).append('\'');
+        sb.append(", next='").append(next).append('\'');
+        sb.append(", failure='").append(failure).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }
 

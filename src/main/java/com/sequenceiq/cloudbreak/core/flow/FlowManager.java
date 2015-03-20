@@ -6,8 +6,6 @@ package com.sequenceiq.cloudbreak.core.flow;
  */
 public interface FlowManager {
 
-    void registerTransition(Class handlerClass, Transition transition);
-
     void triggerProvisioning(Object object);
 
     void triggerNext(Class sourceHandlerClass, Object payload, boolean success);
