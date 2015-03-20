@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.StackStatusUpdateFailureHand
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStopHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackTerminationHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackUpscaleHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.UpdateAllowedSubnetsHandler;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -50,7 +51,6 @@ public class FlowInitializer implements InitializingBean {
         STACK_STOP_FAILED,
         STACK_UPSCALE,
         STACK_DOWNSCALE,
-        STACK_SCALING_FAILED,
         CLUSTER_START,
         CLUSTER_START_FAILED,
         CLUSTER_STOP,
@@ -58,7 +58,7 @@ public class FlowInitializer implements InitializingBean {
         CLUSTER_UPSCALE,
         CLUSTER_DOWNSCALE,
         TERMINATION,
-        TERMINATION_FAILED,
+        UPDATE_ALLOWED_SUBNETS,
         SUCCESS
     }
 
@@ -116,6 +116,9 @@ public class FlowInitializer implements InitializingBean {
         flowManager.registerTransition(ClusterDownscaleHandler.class, ReactorFlowManager.TransitionFactory
                 .createTransition(Phases.CLUSTER_DOWNSCALE.name(), Phases.SUCCESS.name(), null));
 
+        flowManager.registerTransition(UpdateAllowedSubnetsHandler.class, ReactorFlowManager.TransitionFactory
+                .createTransition(Phases.UPDATE_ALLOWED_SUBNETS.name(), Phases.SUCCESS.name(), null));
+
         reactor.on($(Phases.PROVISIONING_SETUP.name()), getHandlerForClass(ProvisioningSetupHandler.class));
         reactor.on($(Phases.PROVISIONING.name()), getHandlerForClass(ProvisioningHandler.class));
         reactor.on($(Phases.METADATA_SETUP.name()), getHandlerForClass(MetadataSetupHandler.class));
@@ -131,6 +134,7 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(Phases.CLUSTER_STOP.name()), getHandlerForClass(ClusterStopHandler.class));
         reactor.on($(Phases.CLUSTER_UPSCALE.name()), getHandlerForClass(ClusterUpscaleHandler.class));
         reactor.on($(Phases.CLUSTER_DOWNSCALE.name()), getHandlerForClass(ClusterDownscaleHandler.class));
+        reactor.on($(Phases.UPDATE_ALLOWED_SUBNETS.name()), getHandlerForClass(UpdateAllowedSubnetsHandler.class));
 
         reactor.on($(Phases.STACK_CREATION_FAILED.name()), getHandlerForClass(StackCreationFailureHandler.class));
         reactor.on($(Phases.STACK_STOP_FAILED.name()), getHandlerForClass(StackStatusUpdateFailureHandler.class));

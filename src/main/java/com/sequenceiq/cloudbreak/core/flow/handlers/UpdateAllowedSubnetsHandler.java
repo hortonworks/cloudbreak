@@ -8,30 +8,31 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
-import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
+import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
 
 import reactor.event.Event;
 
 @Component
-public class StackUpscaleHandler extends AbstractFlowHandler<StackScalingContext> implements FlowHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackUpscaleHandler.class);
+public class UpdateAllowedSubnetsHandler extends AbstractFlowHandler<UpdateAllowedSubnetsContext> implements FlowHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpdateAllowedSubnetsHandler.class);
 
     @Override
-    protected Object execute(Event<StackScalingContext> event) throws CloudbreakException {
+    protected Object execute(Event<UpdateAllowedSubnetsContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
-        FlowContext context = getFlowFacade().upscaleStack(event.getData());
-        LOGGER.info("Upscale of stack is finished. Context: {}", context);
+        FlowContext context = getFlowFacade().updateAllowedSubnets(event.getData());
+        LOGGER.info("Allowed subnets are updated. Context: {}", context);
         return context;
     }
 
     @Override
     protected void handleErrorFlow(Throwable throwable, Object data) {
-        Event<StackScalingContext> event = (Event<StackScalingContext>) data;
-        StackScalingContext scalingContext = event.getData();
+        Event<UpdateAllowedSubnetsContext> event = (Event<UpdateAllowedSubnetsContext>) data;
+        UpdateAllowedSubnetsContext context = event.getData();
+        context.setErrorMessage(throwable.getMessage());
         LOGGER.info("execute() for phase: {}", event.getKey());
         try {
-            FlowContext context = getFlowFacade().handleStackScalingFailure(scalingContext);
-            LOGGER.info("Stack upscaling failure is handled. Context: {}", context);
+            getFlowFacade().handleUpdateAllowedSubnetsFailure(context);
+            LOGGER.info("Stack termination failure is handled. Context: {}", context);
         } catch (CloudbreakException e) {
             LOGGER.error(e.getMessage(), e);
         }

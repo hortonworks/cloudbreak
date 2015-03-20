@@ -284,10 +284,10 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
-    public FlowContext stackTerminationError(FlowContext context) throws CloudbreakException {
+    public FlowContext handleStackTerminationFailure(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Handling stack termination failure. Context: {}", context);
         try {
-            context = stackFacade.stackTerminationError(context);
+            context = stackFacade.handleTerminationFailure(context);
             LOGGER.debug("Handling of stack termination failure is DONE");
             return context;
         } catch (CloudbreakException e) {
@@ -309,6 +309,36 @@ public class SimpleFlowFacade implements FlowFacade {
             throw e;
         } catch (Exception e) {
             LOGGER.error("Exception during the handling of cluster scaling failure: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext updateAllowedSubnets(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Update allowed subnet. Context: {}", context);
+        try {
+            context = stackFacade.updateAllowedSubnets(context);
+            LOGGER.debug("Updating of allowed subnet is DONE");
+            return context;
+        } catch (CloudbreakException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the updating of allowed subnet: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext handleUpdateAllowedSubnetsFailure(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Handling 'update allowed subnet' failure. Context: {}", context);
+        try {
+            context = stackFacade.handleUpdateAllowedSubnetsFailure(context);
+            LOGGER.debug("Handling of 'update allowed subnet' failure is DONE");
+            return context;
+        } catch (CloudbreakException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the handling of update allowed subnet failure: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }

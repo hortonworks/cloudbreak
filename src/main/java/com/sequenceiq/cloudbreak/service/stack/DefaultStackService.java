@@ -52,7 +52,6 @@ import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 
 import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Service
 public class DefaultStackService implements StackService {
@@ -249,7 +248,7 @@ public class DefaultStackService implements StackService {
             throw new BadRequestException(String.format("Stack is currently in '%s' state. Security constraints cannot be updated.", stack.getStatus()));
         }
         stackUpdater.updateStackStatus(stackId, Status.UPDATE_IN_PROGRESS, "Updating allowed subnets");
-        reactor.notify(ReactorConfig.UPDATE_SUBNET_REQUEST_EVENT, Event.wrap(new UpdateAllowedSubnetsRequest(stack.cloudPlatform(), stackId, subnetList)));
+        flowManager.triggerUpdateAllowedSubnets(new UpdateAllowedSubnetsRequest(stack.cloudPlatform(), stackId, subnetList));
     }
 
     @Override
