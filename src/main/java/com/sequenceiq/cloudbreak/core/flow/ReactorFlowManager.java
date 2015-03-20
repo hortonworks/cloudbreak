@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.core.flow.FlowInitializer.Phases;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
@@ -56,11 +55,11 @@ public class ReactorFlowManager implements FlowManager {
         ProvisionRequest provisionRequest = (ProvisionRequest) object;
         ProvisioningContext context = FlowContextFactory.createProvisioningSetupContext(provisionRequest.getCloudPlatform(),
                 provisionRequest.getStackId());
-        reactor.notify(Phases.PROVISIONING_SETUP.name(), eventFactory.createEvent(context, Phases.PROVISIONING_SETUP.name()));
+        reactor.notify(FlowPhases.PROVISIONING_SETUP.name(), eventFactory.createEvent(context, FlowPhases.PROVISIONING_SETUP.name()));
     }
 
     private boolean isTriggerKey(String key) {
-        return key != null && !Phases.valueOf(key).equals(Phases.NONE);
+        return key != null && !FlowPhases.valueOf(key).equals(FlowPhases.NONE);
     }
 
     @Override
@@ -68,7 +67,7 @@ public class ReactorFlowManager implements FlowManager {
         ProvisionRequest provisionRequest = (ProvisionRequest) object;
         ProvisioningContext context = FlowContextFactory.createProvisioningSetupContext(provisionRequest.getCloudPlatform(),
                 provisionRequest.getStackId());
-        reactor.notify(Phases.CLUSTER_CREATION.name(), eventFactory.createEvent(context, Phases.CLUSTER_CREATION.name()));
+        reactor.notify(FlowPhases.CLUSTER_CREATION.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_CREATION.name()));
     }
 
     @Override
@@ -76,7 +75,7 @@ public class ReactorFlowManager implements FlowManager {
         StackStatusUpdateRequest statusUpdateRequest = (StackStatusUpdateRequest) object;
         StackStatusUpdateContext context = (StackStatusUpdateContext)
                 FlowContextFactory.createStatusUpdateContext(statusUpdateRequest.getStackId(), false);
-        reactor.notify(Phases.STACK_STOP.name(), eventFactory.createEvent(context, Phases.STACK_STOP.name()));
+        reactor.notify(FlowPhases.STACK_STOP.name(), eventFactory.createEvent(context, FlowPhases.STACK_STOP.name()));
     }
 
     @Override
@@ -84,7 +83,7 @@ public class ReactorFlowManager implements FlowManager {
         StackStatusUpdateRequest statusUpdateRequest = (StackStatusUpdateRequest) object;
         StackStatusUpdateContext context = (StackStatusUpdateContext)
                 FlowContextFactory.createStatusUpdateContext(statusUpdateRequest.getStackId(), true);
-        reactor.notify(Phases.STACK_START.name(), eventFactory.createEvent(context, Phases.STACK_START.name()));
+        reactor.notify(FlowPhases.STACK_START.name(), eventFactory.createEvent(context, FlowPhases.STACK_START.name()));
     }
 
     @Override
@@ -92,7 +91,7 @@ public class ReactorFlowManager implements FlowManager {
         ClusterStatusUpdateRequest statusUpdateRequest = (ClusterStatusUpdateRequest) object;
         StackStatusUpdateContext context = (StackStatusUpdateContext)
                 FlowContextFactory.createStatusUpdateContext(statusUpdateRequest.getStackId(), false);
-        reactor.notify(Phases.CLUSTER_STOP.name(), eventFactory.createEvent(context, Phases.CLUSTER_STOP.name()));
+        reactor.notify(FlowPhases.CLUSTER_STOP.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_STOP.name()));
     }
 
     @Override
@@ -100,49 +99,49 @@ public class ReactorFlowManager implements FlowManager {
         ClusterStatusUpdateRequest statusUpdateRequest = (ClusterStatusUpdateRequest) object;
         StackStatusUpdateContext context = (StackStatusUpdateContext)
                 FlowContextFactory.createStatusUpdateContext(statusUpdateRequest.getStackId(), true);
-        reactor.notify(Phases.CLUSTER_START.name(), eventFactory.createEvent(context, Phases.CLUSTER_START.name()));
+        reactor.notify(FlowPhases.CLUSTER_START.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_START.name()));
     }
 
     @Override
     public void triggerTermination(Object object) {
         StackDeleteRequest deleteRequest = (StackDeleteRequest) object;
         TerminationContext context = new TerminationContext(deleteRequest.getStackId(), deleteRequest.getCloudPlatform());
-        reactor.notify(Phases.TERMINATION.name(), eventFactory.createEvent(context, Phases.TERMINATION.name()));
+        reactor.notify(FlowPhases.TERMINATION.name(), eventFactory.createEvent(context, FlowPhases.TERMINATION.name()));
     }
 
     @Override
     public void triggerStackUpscale(Object object) {
         UpdateInstancesRequest updateRequest = (UpdateInstancesRequest) object;
         StackScalingContext context = new StackScalingContext(updateRequest);
-        reactor.notify(Phases.STACK_UPSCALE.name(), eventFactory.createEvent(context, Phases.STACK_UPSCALE.name()));
+        reactor.notify(FlowPhases.STACK_UPSCALE.name(), eventFactory.createEvent(context, FlowPhases.STACK_UPSCALE.name()));
     }
 
     @Override
     public void triggerStackDownscale(Object object) {
         UpdateInstancesRequest updateRequest = (UpdateInstancesRequest) object;
         StackScalingContext context = new StackScalingContext(updateRequest);
-        reactor.notify(Phases.STACK_DOWNSCALE.name(), eventFactory.createEvent(context, Phases.STACK_DOWNSCALE.name()));
+        reactor.notify(FlowPhases.STACK_DOWNSCALE.name(), eventFactory.createEvent(context, FlowPhases.STACK_DOWNSCALE.name()));
     }
 
     @Override
     public void triggerClusterUpscale(Object object) {
         UpdateAmbariHostsRequest request = (UpdateAmbariHostsRequest) object;
         ClusterScalingContext context = new ClusterScalingContext(request);
-        reactor.notify(Phases.CLUSTER_UPSCALE.name(), eventFactory.createEvent(context, Phases.CLUSTER_UPSCALE.name()));
+        reactor.notify(FlowPhases.CLUSTER_UPSCALE.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_UPSCALE.name()));
     }
 
     @Override
     public void triggerClusterDownscale(Object object) {
         UpdateAmbariHostsRequest request = (UpdateAmbariHostsRequest) object;
         ClusterScalingContext context = new ClusterScalingContext(request);
-        reactor.notify(Phases.CLUSTER_DOWNSCALE.name(), eventFactory.createEvent(context, Phases.CLUSTER_DOWNSCALE.name()));
+        reactor.notify(FlowPhases.CLUSTER_DOWNSCALE.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_DOWNSCALE.name()));
     }
 
     @Override
     public void triggerUpdateAllowedSubnets(Object object) {
         UpdateAllowedSubnetsRequest updateAllowedSubnetsRequest = (UpdateAllowedSubnetsRequest) object;
         UpdateAllowedSubnetsContext context = new UpdateAllowedSubnetsContext(updateAllowedSubnetsRequest);
-        reactor.notify(Phases.UPDATE_ALLOWED_SUBNETS.name(), eventFactory.createEvent(context, Phases.UPDATE_ALLOWED_SUBNETS.name()));
+        reactor.notify(FlowPhases.UPDATE_ALLOWED_SUBNETS.name(), eventFactory.createEvent(context, FlowPhases.UPDATE_ALLOWED_SUBNETS.name()));
     }
 
 }

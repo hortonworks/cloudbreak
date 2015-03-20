@@ -37,33 +37,6 @@ import reactor.function.Consumer;
 @Component
 public class FlowInitializer implements InitializingBean {
 
-    public static enum Phases {
-        PROVISIONING_SETUP,
-        PROVISIONING,
-        METADATA_SETUP,
-        AMBARI_ROLE_ALLOCATION,
-        AMBARI_START,
-        CLUSTER_CREATION,
-        STACK_CREATION_FAILED,
-        STACK_START,
-        STACK_START_FAILED,
-        STACK_STOP,
-        STACK_STOP_FAILED,
-        STACK_UPSCALE,
-        STACK_DOWNSCALE,
-        CLUSTER_START,
-        CLUSTER_START_FAILED,
-        CLUSTER_STOP,
-        CLUSTER_STOP_FAILED,
-        CLUSTER_UPSCALE,
-        CLUSTER_DOWNSCALE,
-        TERMINATION,
-        TERMINATION_FAILED,
-        UPDATE_ALLOWED_SUBNETS,
-        SUCCESS,
-        NONE
-    }
-
     @Autowired
     private Reactor reactor;
 
@@ -77,72 +50,72 @@ public class FlowInitializer implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
 
         transitionKeyService.registerTransition(ProvisioningSetupHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(Phases.PROVISIONING_SETUP.name(), Phases.PROVISIONING.name(), Phases.STACK_CREATION_FAILED.name()));
+                .createTransition(FlowPhases.PROVISIONING_SETUP.name(), FlowPhases.PROVISIONING.name(), FlowPhases.STACK_CREATION_FAILED.name()));
 
         transitionKeyService.registerTransition(ProvisioningHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(Phases.PROVISIONING.name(), Phases.METADATA_SETUP.name(), Phases.STACK_CREATION_FAILED.name()));
+                .createTransition(FlowPhases.PROVISIONING.name(), FlowPhases.METADATA_SETUP.name(), FlowPhases.STACK_CREATION_FAILED.name()));
 
         transitionKeyService.registerTransition(MetadataSetupHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(Phases.METADATA_SETUP.name(), Phases.AMBARI_ROLE_ALLOCATION.name(), Phases.STACK_CREATION_FAILED.name()));
+                .createTransition(FlowPhases.METADATA_SETUP.name(), FlowPhases.AMBARI_ROLE_ALLOCATION.name(), FlowPhases.STACK_CREATION_FAILED.name()));
 
         transitionKeyService.registerTransition(AmbariRoleAllocationHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(Phases.AMBARI_ROLE_ALLOCATION.name(), Phases.AMBARI_START.name(), Phases.STACK_CREATION_FAILED.name()));
+                .createTransition(FlowPhases.AMBARI_ROLE_ALLOCATION.name(), FlowPhases.AMBARI_START.name(), FlowPhases.STACK_CREATION_FAILED.name()));
 
         transitionKeyService.registerTransition(AmbariStartHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(Phases.AMBARI_START.name(), Phases.CLUSTER_CREATION.name(), Phases.STACK_CREATION_FAILED.name()));
+                .createTransition(FlowPhases.AMBARI_START.name(), FlowPhases.CLUSTER_CREATION.name(), FlowPhases.STACK_CREATION_FAILED.name()));
 
         transitionKeyService.registerTransition(StackTerminationHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(Phases.TERMINATION.name(), Phases.SUCCESS.name(), Phases.NONE.name()));
+                .createTransition(FlowPhases.TERMINATION.name(), FlowPhases.SUCCESS.name(), FlowPhases.NONE.name()));
 
         transitionKeyService.registerTransition(StackStartHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(Phases.STACK_START.name(), Phases.CLUSTER_START.name(), Phases.STACK_START_FAILED.name()));
+                .createTransition(FlowPhases.STACK_START.name(), FlowPhases.CLUSTER_START.name(), FlowPhases.STACK_START_FAILED.name()));
 
         transitionKeyService.registerTransition(ClusterStopHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(Phases.CLUSTER_STOP.name(), Phases.STACK_STOP.name(), Phases.CLUSTER_STOP_FAILED.name()));
+                .createTransition(FlowPhases.CLUSTER_STOP.name(), FlowPhases.STACK_STOP.name(), FlowPhases.CLUSTER_STOP_FAILED.name()));
 
         transitionKeyService.registerTransition(ClusterStartHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(Phases.CLUSTER_START.name(), Phases.SUCCESS.name(), Phases.CLUSTER_START_FAILED.name()));
+                .createTransition(FlowPhases.CLUSTER_START.name(), FlowPhases.SUCCESS.name(), FlowPhases.CLUSTER_START_FAILED.name()));
 
         transitionKeyService.registerTransition(StackStopHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(Phases.STACK_STOP.name(), Phases.SUCCESS.name(), Phases.STACK_STOP_FAILED.name()));
+                .createTransition(FlowPhases.STACK_STOP.name(), FlowPhases.SUCCESS.name(), FlowPhases.STACK_STOP_FAILED.name()));
 
         transitionKeyService.registerTransition(StackUpscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(Phases.STACK_UPSCALE.name(), Phases.SUCCESS.name(), Phases.NONE.name()));
+                .createTransition(FlowPhases.STACK_UPSCALE.name(), FlowPhases.SUCCESS.name(), FlowPhases.NONE.name()));
 
         transitionKeyService.registerTransition(StackDownscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(Phases.STACK_DOWNSCALE.name(), Phases.SUCCESS.name(), Phases.NONE.name()));
+                .createTransition(FlowPhases.STACK_DOWNSCALE.name(), FlowPhases.SUCCESS.name(), FlowPhases.NONE.name()));
 
         transitionKeyService.registerTransition(ClusterUpscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(Phases.CLUSTER_UPSCALE.name(), Phases.SUCCESS.name(), Phases.NONE.name()));
+                .createTransition(FlowPhases.CLUSTER_UPSCALE.name(), FlowPhases.SUCCESS.name(), FlowPhases.NONE.name()));
 
         transitionKeyService.registerTransition(ClusterDownscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(Phases.CLUSTER_DOWNSCALE.name(), Phases.SUCCESS.name(), Phases.NONE.name()));
+                .createTransition(FlowPhases.CLUSTER_DOWNSCALE.name(), FlowPhases.SUCCESS.name(), FlowPhases.NONE.name()));
 
         transitionKeyService.registerTransition(UpdateAllowedSubnetsHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(Phases.UPDATE_ALLOWED_SUBNETS.name(), Phases.SUCCESS.name(), null));
+                .createTransition(FlowPhases.UPDATE_ALLOWED_SUBNETS.name(), FlowPhases.SUCCESS.name(), FlowPhases.NONE.name()));
 
-        reactor.on($(Phases.PROVISIONING_SETUP.name()), getHandlerForClass(ProvisioningSetupHandler.class));
-        reactor.on($(Phases.PROVISIONING.name()), getHandlerForClass(ProvisioningHandler.class));
-        reactor.on($(Phases.METADATA_SETUP.name()), getHandlerForClass(MetadataSetupHandler.class));
-        reactor.on($(Phases.AMBARI_ROLE_ALLOCATION.name()), getHandlerForClass(AmbariRoleAllocationHandler.class));
-        reactor.on($(Phases.AMBARI_START.name()), getHandlerForClass(AmbariStartHandler.class));
-        reactor.on($(Phases.CLUSTER_CREATION.name()), getHandlerForClass(ClusterCreationHandler.class));
-        reactor.on($(Phases.TERMINATION.name()), getHandlerForClass(StackTerminationHandler.class));
-        reactor.on($(Phases.STACK_START.name()), getHandlerForClass(StackStartHandler.class));
-        reactor.on($(Phases.STACK_STOP.name()), getHandlerForClass(StackStopHandler.class));
-        reactor.on($(Phases.STACK_UPSCALE.name()), getHandlerForClass(StackUpscaleHandler.class));
-        reactor.on($(Phases.STACK_DOWNSCALE.name()), getHandlerForClass(StackDownscaleHandler.class));
-        reactor.on($(Phases.CLUSTER_START.name()), getHandlerForClass(ClusterStartHandler.class));
-        reactor.on($(Phases.CLUSTER_STOP.name()), getHandlerForClass(ClusterStopHandler.class));
-        reactor.on($(Phases.CLUSTER_UPSCALE.name()), getHandlerForClass(ClusterUpscaleHandler.class));
-        reactor.on($(Phases.CLUSTER_DOWNSCALE.name()), getHandlerForClass(ClusterDownscaleHandler.class));
-        reactor.on($(Phases.UPDATE_ALLOWED_SUBNETS.name()), getHandlerForClass(UpdateAllowedSubnetsHandler.class));
+        reactor.on($(FlowPhases.PROVISIONING_SETUP.name()), getHandlerForClass(ProvisioningSetupHandler.class));
+        reactor.on($(FlowPhases.PROVISIONING.name()), getHandlerForClass(ProvisioningHandler.class));
+        reactor.on($(FlowPhases.METADATA_SETUP.name()), getHandlerForClass(MetadataSetupHandler.class));
+        reactor.on($(FlowPhases.AMBARI_ROLE_ALLOCATION.name()), getHandlerForClass(AmbariRoleAllocationHandler.class));
+        reactor.on($(FlowPhases.AMBARI_START.name()), getHandlerForClass(AmbariStartHandler.class));
+        reactor.on($(FlowPhases.CLUSTER_CREATION.name()), getHandlerForClass(ClusterCreationHandler.class));
+        reactor.on($(FlowPhases.TERMINATION.name()), getHandlerForClass(StackTerminationHandler.class));
+        reactor.on($(FlowPhases.STACK_START.name()), getHandlerForClass(StackStartHandler.class));
+        reactor.on($(FlowPhases.STACK_STOP.name()), getHandlerForClass(StackStopHandler.class));
+        reactor.on($(FlowPhases.STACK_UPSCALE.name()), getHandlerForClass(StackUpscaleHandler.class));
+        reactor.on($(FlowPhases.STACK_DOWNSCALE.name()), getHandlerForClass(StackDownscaleHandler.class));
+        reactor.on($(FlowPhases.CLUSTER_START.name()), getHandlerForClass(ClusterStartHandler.class));
+        reactor.on($(FlowPhases.CLUSTER_STOP.name()), getHandlerForClass(ClusterStopHandler.class));
+        reactor.on($(FlowPhases.CLUSTER_UPSCALE.name()), getHandlerForClass(ClusterUpscaleHandler.class));
+        reactor.on($(FlowPhases.CLUSTER_DOWNSCALE.name()), getHandlerForClass(ClusterDownscaleHandler.class));
+        reactor.on($(FlowPhases.UPDATE_ALLOWED_SUBNETS.name()), getHandlerForClass(UpdateAllowedSubnetsHandler.class));
 
-        reactor.on($(Phases.STACK_CREATION_FAILED.name()), getHandlerForClass(StackCreationFailureHandler.class));
-        reactor.on($(Phases.STACK_STOP_FAILED.name()), getHandlerForClass(StackStatusUpdateFailureHandler.class));
-        reactor.on($(Phases.STACK_START_FAILED.name()), getHandlerForClass(StackStatusUpdateFailureHandler.class));
-        reactor.on($(Phases.CLUSTER_STOP_FAILED.name()), getHandlerForClass(ClusterStatusUpdateFailureHandler.class));
-        reactor.on($(Phases.CLUSTER_START_FAILED.name()), getHandlerForClass(ClusterStatusUpdateFailureHandler.class));
+        reactor.on($(FlowPhases.STACK_CREATION_FAILED.name()), getHandlerForClass(StackCreationFailureHandler.class));
+        reactor.on($(FlowPhases.STACK_STOP_FAILED.name()), getHandlerForClass(StackStatusUpdateFailureHandler.class));
+        reactor.on($(FlowPhases.STACK_START_FAILED.name()), getHandlerForClass(StackStatusUpdateFailureHandler.class));
+        reactor.on($(FlowPhases.CLUSTER_STOP_FAILED.name()), getHandlerForClass(ClusterStatusUpdateFailureHandler.class));
+        reactor.on($(FlowPhases.CLUSTER_START_FAILED.name()), getHandlerForClass(ClusterStatusUpdateFailureHandler.class));
 
     }
 

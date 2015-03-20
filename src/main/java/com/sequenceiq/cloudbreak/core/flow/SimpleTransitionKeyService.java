@@ -46,6 +46,9 @@ public class SimpleTransitionKeyService implements TransitionKeyService {
 
     public static class TransitionFactory {
         public static Transition createTransition(String current, String next, String failure) {
+            if (current == null || next == null || failure == null) {
+                throw new IllegalStateException("Invalid transition definition");
+            }
             return new Transition(current, next, failure);
         }
     }
