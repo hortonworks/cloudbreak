@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow.handlers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
@@ -10,7 +9,6 @@ import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
-import com.sequenceiq.cloudbreak.core.flow.service.FlowFacade;
 
 import reactor.event.Event;
 
@@ -18,13 +16,10 @@ import reactor.event.Event;
 public class StackDownscaleHandler extends AbstractFlowHandler<StackScalingContext> implements FlowHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDownscaleHandler.class);
 
-    @Autowired
-    private FlowFacade flowFacade;
-
     @Override
     protected Object execute(Event<StackScalingContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
-        FlowContext context = flowFacade.downscaleStack(event.getData());
+        FlowContext context = getFlowFacade().downscaleStack(event.getData());
         LOGGER.info("Upscale of stack is finished. Context: {}", context);
         return context;
     }
@@ -35,7 +30,7 @@ public class StackDownscaleHandler extends AbstractFlowHandler<StackScalingConte
         StackScalingContext scalingContext = event.getData();
         LOGGER.info("execute() for phase: {}", event.getKey());
         try {
-            FlowContext context = flowFacade.handleStackScalingFailure(scalingContext);
+            FlowContext context = getFlowFacade().handleStackScalingFailure(scalingContext);
             LOGGER.info("Stack downscaling failure is handled. Context: {}", context);
         } catch (CloudbreakException e) {
             LOGGER.error(e.getMessage(), e);
