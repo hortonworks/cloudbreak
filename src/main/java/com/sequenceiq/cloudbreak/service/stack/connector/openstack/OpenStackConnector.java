@@ -126,7 +126,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public boolean addInstances(Stack stack, String userData, Integer adjustment, String instanceGroup) {
+    public boolean addInstances(Stack stack, String userData, Integer adjustment, String instanceGroup, Boolean withClusterEvent) {
         MDCBuilder.buildMdcContext(stack);
         InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         group.setNodeCount(group.getNodeCount() + adjustment);
@@ -137,7 +137,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
             if (isSuccess(pollingResult)) {
                 LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
                 reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
-                        Event.wrap(new AddInstancesComplete(CloudPlatform.OPENSTACK, stack.getId(), null, instanceGroup)));
+                        Event.wrap(new AddInstancesComplete(CloudPlatform.OPENSTACK, stack.getId(), null, instanceGroup, withClusterEvent)));
             }
         } catch (UpdateFailedException e) {
             LOGGER.error("Failed to update the Heat stack", e);
@@ -154,7 +154,8 @@ public class OpenStackConnector implements CloudPlatformConnector {
                     instanceMetaDataRepository.findAllInStack(stack.getId()), instanceIds, instanceGroup);
             PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
             if (isSuccess(pollingResult)) {
-                reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds, instanceGroup)));
+                reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT,
+                        Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds, instanceGroup, false)));
             }
         } catch (UpdateFailedException e) {
             LOGGER.error("Failed to update the Heat stack", e);

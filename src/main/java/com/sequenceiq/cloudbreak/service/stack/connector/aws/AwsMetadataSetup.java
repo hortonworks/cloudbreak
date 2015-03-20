@@ -23,10 +23,10 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
@@ -112,7 +112,7 @@ public class AwsMetadataSetup implements MetadataSetup {
     }
 
     @Override
-    public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String instanceGroupName) {
+    public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String instanceGroupName, Boolean withClusterEvent) {
         MDCBuilder.buildMdcContext(stack);
         Set<CoreInstanceMetaData> coreInstanceMetadata = new HashSet<>();
         LOGGER.info("Adding new instances to metadata: [stack: '{}']", stack.getId());
@@ -148,7 +148,7 @@ public class AwsMetadataSetup implements MetadataSetup {
         }
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT,
-                Event.wrap(new MetadataUpdateComplete(CloudPlatform.AWS, stack.getId(), coreInstanceMetadata, instanceGroupName)));
+                Event.wrap(new MetadataUpdateComplete(CloudPlatform.AWS, stack.getId(), coreInstanceMetadata, instanceGroupName, withClusterEvent)));
     }
 
     @Override

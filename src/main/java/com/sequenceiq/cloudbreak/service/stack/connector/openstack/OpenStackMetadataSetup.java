@@ -63,7 +63,7 @@ public class OpenStackMetadataSetup implements MetadataSetup {
     }
 
     @Override
-    public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, final String instanceGroupName) {
+    public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, final String instanceGroupName, Boolean withClusterEvent) {
         MDCBuilder.buildMdcContext(stack);
         OSClient osClient = openStackUtil.createOSClient(stack);
         Resource heatResource = stack.getResourceByType(ResourceType.HEAT_STACK);
@@ -94,7 +94,8 @@ public class OpenStackMetadataSetup implements MetadataSetup {
         }
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT,
-                Event.wrap(new MetadataUpdateComplete(CloudPlatform.OPENSTACK, stack.getId(), instancesCoreMetadata, instanceGroupName)));
+                Event.wrap(new MetadataUpdateComplete(CloudPlatform.OPENSTACK, stack.getId(), instancesCoreMetadata, instanceGroupName,
+                        withClusterEvent)));
     }
 
     @Override

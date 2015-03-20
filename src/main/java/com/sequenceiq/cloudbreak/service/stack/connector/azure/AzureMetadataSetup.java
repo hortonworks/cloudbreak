@@ -67,7 +67,7 @@ public class AzureMetadataSetup implements MetadataSetup {
     }
 
     @Override
-    public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup) {
+    public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup, Boolean withClusterEvent) {
         MDCBuilder.buildMdcContext(stack);
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential);
@@ -80,7 +80,7 @@ public class AzureMetadataSetup implements MetadataSetup {
         Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient, resources);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT,
-                Event.wrap(new MetadataUpdateComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas, instanceGroup)));
+                Event.wrap(new MetadataUpdateComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas, instanceGroup, withClusterEvent)));
     }
 
     private Set<CoreInstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient, List<Resource> resources) {

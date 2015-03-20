@@ -12,9 +12,7 @@ import com.sequenceiq.cloudbreak.domain.SubnetJson;
 public class UpdateStackJson implements JsonEntity {
 
     private StatusRequest status;
-
     private InstanceGroupAdjustmentJson instanceGroupAdjustment;
-
     private List<SubnetJson> allowedSubnets;
 
     public UpdateStackJson() {
@@ -44,4 +42,5 @@ public class UpdateStackJson implements JsonEntity {
     public void setAllowedSubnets(List<SubnetJson> allowedSubnets) {
         this.allowedSubnets = allowedSubnets;
     }
+
 }

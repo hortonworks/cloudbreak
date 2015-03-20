@@ -9,26 +9,25 @@ public class AddInstancesComplete extends ProvisionEvent {
 
     private Set<Resource> resources;
     private String instanceGroup;
+    private Boolean withStackUpdate;
 
-    public AddInstancesComplete(CloudPlatform cloudPlatform, Long stackId, Set<Resource> resources, String instanceGroup) {
+    public AddInstancesComplete(CloudPlatform cloudPlatform, Long stackId, Set<Resource> resources, String instanceGroup,
+            Boolean withStackUpdate) {
         super(cloudPlatform, stackId);
         this.resources = resources;
         this.instanceGroup = instanceGroup;
+        this.withStackUpdate = withStackUpdate;
     }
 
     public Set<Resource> getResources() {
         return resources;
     }
 
-    public void setResources(Set<Resource> resources) {
-        this.resources = resources;
-    }
-
     public String getInstanceGroup() {
         return instanceGroup;
     }
 
-    public void setInstanceGroup(String instanceGroup) {
-        this.instanceGroup = instanceGroup;
+    public Boolean isWithStackUpdate() {
+        return withStackUpdate;
     }
 }

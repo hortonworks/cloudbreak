@@ -19,9 +19,8 @@ import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
-import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.controller.json.InstanceGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
@@ -29,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.Subnet;
@@ -209,7 +209,7 @@ public class DefaultStackService implements StackService {
 
     @Override
     public void updateNodeCount(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustmentJson) {
-        Stack stack = stackRepository.findOne(stackId);
+        Stack stack = stackRepository.findById(stackId);
         MDCBuilder.buildMdcContext(stack);
         validateStackStatus(stack);
         validateInstanceGroup(stack, instanceGroupAdjustmentJson.getInstanceGroup());
@@ -237,8 +237,8 @@ public class DefaultStackService implements StackService {
         LOGGER.info("Publishing {} event [scalingAdjustment: '{}']", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT,
                 instanceGroupAdjustmentJson.getScalingAdjustment());
         reactor.notify(ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT,
-                Event.wrap(new UpdateInstancesRequest(stack.cloudPlatform(), stack.getId(),
-                        instanceGroupAdjustmentJson.getScalingAdjustment(), instanceGroupAdjustmentJson.getInstanceGroup())));
+                Event.wrap(new UpdateInstancesRequest(stack.cloudPlatform(), stack.getId(), instanceGroupAdjustmentJson,
+                        instanceGroupAdjustmentJson.getWithClusterEvent())));
     }
 
     @Override

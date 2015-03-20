@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.controller.json.StackJson;
 import com.sequenceiq.cloudbreak.controller.json.StackValidationRequest;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.json.UpdateStackJson;
-import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.converter.MetaDataConverter;
 import com.sequenceiq.cloudbreak.converter.StackConverter;
 import com.sequenceiq.cloudbreak.converter.StackValidationConverter;
@@ -32,6 +31,7 @@ import com.sequenceiq.cloudbreak.converter.SubnetConverter;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 

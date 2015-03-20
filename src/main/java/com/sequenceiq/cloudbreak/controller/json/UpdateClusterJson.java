@@ -27,4 +27,5 @@ public class UpdateClusterJson implements JsonEntity {
     public void setHostGroupAdjustment(HostGroupAdjustmentJson hostGroupAdjustment) {
         this.hostGroupAdjustment = hostGroupAdjustment;
     }
+
 }

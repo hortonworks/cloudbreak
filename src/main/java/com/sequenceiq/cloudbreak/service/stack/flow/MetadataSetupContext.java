@@ -48,11 +48,11 @@ public class MetadataSetupContext {
         }
     }
 
-    public void updateMetadata(CloudPlatform cloudPlatform, Long stackId, Set<Resource> resourceSet, String instanceGroup) {
+    public void updateMetadata(CloudPlatform cloudPlatform, Long stackId, Set<Resource> resourceSet, String instanceGroup, Boolean withStackUpdate) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         MDCBuilder.buildMdcContext(stack);
         try {
-            metadataSetups.get(cloudPlatform).addNewNodesToMetadata(stack, resourceSet, instanceGroup);
+            metadataSetups.get(cloudPlatform).addNewNodesToMetadata(stack, resourceSet, instanceGroup, withStackUpdate);
         } catch (Exception e) {
             String errMessage = "Unhandled exception occurred while updating stack metadata.";
             LOGGER.error(errMessage, e);

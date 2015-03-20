@@ -79,7 +79,7 @@ public class UpdateAllowedSubnetsHandler implements Consumer<Event<UpdateAllowed
             stackUpdater.updateStack(stack);
             LOGGER.info("Publishing {} event.", ReactorConfig.UPDATE_SUBNET_COMPLETE_EVENT);
             reactor.notify(ReactorConfig.UPDATE_SUBNET_COMPLETE_EVENT,
-                    Event.wrap(new StackUpdateSuccess(stack.getId(), false, null, null))
+                    Event.wrap(new StackUpdateSuccess(stack.getId(), false, null, null, false))
             );
         } catch (Exception e) {
             Stack tempStack = stackRepository.findById(stack.getId());

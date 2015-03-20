@@ -89,7 +89,7 @@ public class ClusterController {
                         "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
                         stackStatus));
             }
-            clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
+            clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustment(), updateJson.getHostGroupAdjustment().isWithStackUpdate());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

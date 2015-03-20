@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.ecwid.consul.v1.ConsulClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulAgentLeaveCheckerTask;
@@ -54,6 +56,9 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
     @Autowired
     private ConsulAgentLeaveCheckerTask consulAgentLeaveCheckerTask;
 
+    @Autowired
+    private AmbariClusterService ambariClusterService;
+
     @Override
     public void accept(Event<StackUpdateSuccess> t) {
         StackUpdateSuccess updateSuccess = t.getData();
@@ -73,6 +78,13 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
         stackUpdater.updateMetadataReady(stackId, true);
         String statusCause = String.format("%sscaling of cluster infrastructure was successful.", updateSuccess.isRemoveInstances() ? "Down" : "Up");
         stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, statusCause);
+        if (updateSuccess.isWithClusterEvent() && !updateSuccess.isRemoveInstances()) {
+            HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
+            hostGroupAdjustmentJson.setHostGroup(updateSuccess.getInstanceGroup());
+            hostGroupAdjustmentJson.setScalingAdjustment(updateSuccess.getInstanceIds().size());
+            hostGroupAdjustmentJson.setWithStackUpdate(false);
+            ambariClusterService.updateHosts(updateSuccess.getStackId(), hostGroupAdjustmentJson, updateSuccess.isWithClusterEvent());
+        }
 
     }
 

@@ -184,7 +184,7 @@ public class AmbariClusterConnector {
                     if (isSuccess(pollingResult)) {
                         pollingResult = restartHadoopServices(stack, ambariClient, false);
                         if (isSuccess(pollingResult)) {
-                            updateHostSuccessful(cluster, new HashSet<>(hosts), false);
+                            updateHostSuccessful(cluster, new HashSet<>(hosts), false, hostGroupAdjustment.getHostGroup(), false);
                         }
                     }
                 }
@@ -208,7 +208,8 @@ public class AmbariClusterConnector {
         }).toList();
     }
 
-    public void decommissionAmbariNodes(Long stackId, HostGroupAdjustmentJson adjustmentRequest, List<HostMetadata> decommissionCandidates) {
+    public void decommissionAmbariNodes(Long stackId, HostGroupAdjustmentJson adjustmentRequest, List<HostMetadata> decommissionCandidates,
+            Boolean withStackUpdate) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(cluster);
@@ -239,7 +240,7 @@ public class AmbariClusterConnector {
                             HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupName);
                             hostGroup.getHostMetadata().removeAll(hostsToRemove.values());
                             hostGroupRepository.save(hostGroup);
-                            updateHostSuccessful(cluster, hostsToRemove.keySet(), true);
+                            updateHostSuccessful(cluster, hostsToRemove.keySet(), true, hostGroupName, withStackUpdate);
                         }
                     }
                 }
@@ -516,10 +517,11 @@ public class AmbariClusterConnector {
         reactor.notify(ReactorConfig.CLUSTER_CREATE_FAILED_EVENT, Event.wrap(new ClusterCreationFailure(stack.getId(), cluster.getId(), message)));
     }
 
-    private void updateHostSuccessful(Cluster cluster, Set<String> hostNames, boolean decommission) {
+    private void updateHostSuccessful(Cluster cluster, Set<String> hostNames, boolean decommission, String hostGroup, Boolean withStackUpdate) {
         MDCBuilder.buildMdcContext(cluster);
         LOGGER.info("Publishing {} event", ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT);
-        reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT, Event.wrap(new UpdateAmbariHostsSuccess(cluster.getId(), hostNames, decommission)));
+        reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT,
+                Event.wrap(new UpdateAmbariHostsSuccess(cluster.getId(), hostNames, decommission, hostGroup, withStackUpdate)));
     }
 
     private void updateHostFailed(Cluster cluster, String message, boolean addingNodes) {

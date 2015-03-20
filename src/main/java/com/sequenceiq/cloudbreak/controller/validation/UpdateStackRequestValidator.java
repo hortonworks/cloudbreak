@@ -20,6 +20,11 @@ public class UpdateStackRequestValidator implements ConstraintValidator<ValidUpd
         }
         if (value.getInstanceGroupAdjustment() != null) {
             updateResources++;
+            if (value.getInstanceGroupAdjustment().getWithClusterEvent() && value.getInstanceGroupAdjustment().getScalingAdjustment() < 0) {
+                    addConstraintViolation(context,
+                            "Invalid PUT request on this resource. Update event has to be upscale if you define withClusterEvent = 'true'.");
+                    return false;
+            }
         }
         if (value.getAllowedSubnets() != null) {
             updateResources++;

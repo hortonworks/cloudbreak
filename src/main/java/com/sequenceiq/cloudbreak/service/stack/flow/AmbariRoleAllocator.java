@@ -115,7 +115,7 @@ public class AmbariRoleAllocator {
         }
     }
 
-    public void updateInstanceMetadata(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData, String instanceGroupName) {
+    public void updateInstanceMetadata(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData, String instanceGroupName, Boolean withClusterEvent) {
         Stack one = stackRepository.findOneWithLists(stackId);
         InstanceGroup instanceGroup = one.getInstanceGroupByInstanceGroupName(instanceGroupName);
         MDCBuilder.buildMdcContext(one);
@@ -138,7 +138,8 @@ public class AmbariRoleAllocator {
                     instanceIds.add(metadataEntry.getInstanceId());
                 }
                 LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
-                reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stackId, false, instanceIds, instanceGroupName)));
+                reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT,
+                        Event.wrap(new StackUpdateSuccess(stackId, false, instanceIds, instanceGroupName, withClusterEvent)));
             }
         } catch (Exception e) {
             String errMessage = "Unhandled exception occurred while updating stack metadata.";

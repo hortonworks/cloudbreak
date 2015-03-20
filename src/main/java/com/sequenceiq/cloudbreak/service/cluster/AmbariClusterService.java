@@ -133,7 +133,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public void updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
+    public void updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment, Boolean withStackUpdate) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(cluster);
@@ -157,7 +157,7 @@ public class AmbariClusterService implements ClusterService {
         LOGGER.info("Cluster update requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         LOGGER.info("Publishing {} event", ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT);
         reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT, Event.wrap(
-                new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, downScaleCandidates, decommissionRequest)));
+                new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, downScaleCandidates, decommissionRequest, withStackUpdate)));
     }
 
     @Override
@@ -231,6 +231,9 @@ public class AmbariClusterService implements ClusterService {
         } else {
             validateRegisteredHosts(stack, hostGroupAdjustment);
             validateComponentsCategory(stack, hostGroupAdjustment);
+            if (hostGroupAdjustment.isWithStackUpdate() && hostGroupAdjustment.getScalingAdjustment() > 0) {
+                throw new BadRequestException("ScalingAdjustment has to be decommission if you define withStackUpdate = 'true'.");
+            }
         }
         return downScale;
     }
