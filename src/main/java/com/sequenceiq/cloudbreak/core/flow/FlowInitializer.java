@@ -58,12 +58,11 @@ public class FlowInitializer implements InitializingBean {
         CLUSTER_UPSCALE,
         CLUSTER_DOWNSCALE,
         TERMINATION,
+        TERMINATION_FAILED,
         UPDATE_ALLOWED_SUBNETS,
-        SUCCESS
+        SUCCESS,
+        NONE
     }
-
-    @Autowired
-    private FlowManager flowManager;
 
     @Autowired
     private Reactor reactor;
@@ -71,52 +70,55 @@ public class FlowInitializer implements InitializingBean {
     @Resource
     private Map<Class, FlowHandler> flowHandlersMap;
 
+    @Autowired
+    private TransitionKeyService transitionKeyService;
+
     @Override
     public void afterPropertiesSet() throws Exception {
 
-        flowManager.registerTransition(ProvisioningSetupHandler.class, ReactorFlowManager.TransitionFactory
+        transitionKeyService.registerTransition(ProvisioningSetupHandler.class, SimpleTransitionKeyService.TransitionFactory
                 .createTransition(Phases.PROVISIONING_SETUP.name(), Phases.PROVISIONING.name(), Phases.STACK_CREATION_FAILED.name()));
 
-        flowManager.registerTransition(ProvisioningHandler.class, ReactorFlowManager.TransitionFactory
+        transitionKeyService.registerTransition(ProvisioningHandler.class, SimpleTransitionKeyService.TransitionFactory
                 .createTransition(Phases.PROVISIONING.name(), Phases.METADATA_SETUP.name(), Phases.STACK_CREATION_FAILED.name()));
 
-        flowManager.registerTransition(MetadataSetupHandler.class, ReactorFlowManager.TransitionFactory
+        transitionKeyService.registerTransition(MetadataSetupHandler.class, SimpleTransitionKeyService.TransitionFactory
                 .createTransition(Phases.METADATA_SETUP.name(), Phases.AMBARI_ROLE_ALLOCATION.name(), Phases.STACK_CREATION_FAILED.name()));
 
-        flowManager.registerTransition(AmbariRoleAllocationHandler.class, ReactorFlowManager.TransitionFactory
+        transitionKeyService.registerTransition(AmbariRoleAllocationHandler.class, SimpleTransitionKeyService.TransitionFactory
                 .createTransition(Phases.AMBARI_ROLE_ALLOCATION.name(), Phases.AMBARI_START.name(), Phases.STACK_CREATION_FAILED.name()));
 
-        flowManager.registerTransition(AmbariStartHandler.class, ReactorFlowManager.TransitionFactory
+        transitionKeyService.registerTransition(AmbariStartHandler.class, SimpleTransitionKeyService.TransitionFactory
                 .createTransition(Phases.AMBARI_START.name(), Phases.CLUSTER_CREATION.name(), Phases.STACK_CREATION_FAILED.name()));
 
-        flowManager.registerTransition(StackTerminationHandler.class, ReactorFlowManager.TransitionFactory
-                .createTransition(Phases.TERMINATION.name(), Phases.SUCCESS.name(), null));
+        transitionKeyService.registerTransition(StackTerminationHandler.class, SimpleTransitionKeyService.TransitionFactory
+                .createTransition(Phases.TERMINATION.name(), Phases.SUCCESS.name(), Phases.NONE.name()));
 
-        flowManager.registerTransition(StackStartHandler.class, ReactorFlowManager.TransitionFactory
+        transitionKeyService.registerTransition(StackStartHandler.class, SimpleTransitionKeyService.TransitionFactory
                 .createTransition(Phases.STACK_START.name(), Phases.CLUSTER_START.name(), Phases.STACK_START_FAILED.name()));
 
-        flowManager.registerTransition(ClusterStopHandler.class, ReactorFlowManager.TransitionFactory
+        transitionKeyService.registerTransition(ClusterStopHandler.class, SimpleTransitionKeyService.TransitionFactory
                 .createTransition(Phases.CLUSTER_STOP.name(), Phases.STACK_STOP.name(), Phases.CLUSTER_STOP_FAILED.name()));
 
-        flowManager.registerTransition(ClusterStartHandler.class, ReactorFlowManager.TransitionFactory
+        transitionKeyService.registerTransition(ClusterStartHandler.class, SimpleTransitionKeyService.TransitionFactory
                 .createTransition(Phases.CLUSTER_START.name(), Phases.SUCCESS.name(), Phases.CLUSTER_START_FAILED.name()));
 
-        flowManager.registerTransition(StackStopHandler.class, ReactorFlowManager.TransitionFactory
+        transitionKeyService.registerTransition(StackStopHandler.class, SimpleTransitionKeyService.TransitionFactory
                 .createTransition(Phases.STACK_STOP.name(), Phases.SUCCESS.name(), Phases.STACK_STOP_FAILED.name()));
 
-        flowManager.registerTransition(StackUpscaleHandler.class, ReactorFlowManager.TransitionFactory
-                .createTransition(Phases.STACK_UPSCALE.name(), Phases.SUCCESS.name(), null));
+        transitionKeyService.registerTransition(StackUpscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
+                .createTransition(Phases.STACK_UPSCALE.name(), Phases.SUCCESS.name(), Phases.NONE.name()));
 
-        flowManager.registerTransition(StackDownscaleHandler.class, ReactorFlowManager.TransitionFactory
-                .createTransition(Phases.STACK_DOWNSCALE.name(), Phases.SUCCESS.name(), null));
+        transitionKeyService.registerTransition(StackDownscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
+                .createTransition(Phases.STACK_DOWNSCALE.name(), Phases.SUCCESS.name(), Phases.NONE.name()));
 
-        flowManager.registerTransition(ClusterUpscaleHandler.class, ReactorFlowManager.TransitionFactory
-                .createTransition(Phases.CLUSTER_UPSCALE.name(), Phases.SUCCESS.name(), null));
+        transitionKeyService.registerTransition(ClusterUpscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
+                .createTransition(Phases.CLUSTER_UPSCALE.name(), Phases.SUCCESS.name(), Phases.NONE.name()));
 
-        flowManager.registerTransition(ClusterDownscaleHandler.class, ReactorFlowManager.TransitionFactory
-                .createTransition(Phases.CLUSTER_DOWNSCALE.name(), Phases.SUCCESS.name(), null));
+        transitionKeyService.registerTransition(ClusterDownscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
+                .createTransition(Phases.CLUSTER_DOWNSCALE.name(), Phases.SUCCESS.name(), Phases.NONE.name()));
 
-        flowManager.registerTransition(UpdateAllowedSubnetsHandler.class, ReactorFlowManager.TransitionFactory
+        transitionKeyService.registerTransition(UpdateAllowedSubnetsHandler.class, SimpleTransitionKeyService.TransitionFactory
                 .createTransition(Phases.UPDATE_ALLOWED_SUBNETS.name(), Phases.SUCCESS.name(), null));
 
         reactor.on($(Phases.PROVISIONING_SETUP.name()), getHandlerForClass(ProvisioningSetupHandler.class));

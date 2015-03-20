@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +8,9 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.core.flow.FlowInitializer.Phases;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
+import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.TerminationContext;
-import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
@@ -34,33 +31,24 @@ import reactor.event.Event;
 public class ReactorFlowManager implements FlowManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReactorFlowManager.class);
 
-    private Map<Class, Transition> transitionMap = new HashMap();
-
     @Autowired
     private Reactor reactor;
 
     @Autowired
+    private TransitionKeyService transitionKeyService;
+
+    @Autowired
     private ErrorHandlerAwareFlowEventFactory eventFactory;
 
-    private String transitionKey(Class handler, boolean success) {
-        LOGGER.debug("Transitioning from handler {}. Scenario {}", handler, success ? "SUCCESS" : "ERROR");
-        String transitionKey = null;
-        if (transitionMap.containsKey(handler)) {
-            if (success) {
-                transitionKey = transitionMap.get(handler).getNext();
-            } else {
-                transitionKey = transitionMap.get(handler).getFailure();
-            }
-            LOGGER.debug("Transitioning to [ {} ] from handler [ {} ] ", transitionKey, handler);
-        } else {
-            LOGGER.debug("There is no registered transition from handler {}", handler);
-        }
-        return transitionKey;
-    }
-
     @Override
-    public void registerTransition(Class handlerClass, Transition transition) {
-        transitionMap.put(handlerClass, transition);
+    public void triggerNext(Class sourceHandlerClass, Object payload, boolean success) {
+        String key = success ? transitionKeyService.successKey(sourceHandlerClass) : transitionKeyService.failureKey(sourceHandlerClass);
+        if (isTriggerKey(key)) {
+            Event event = eventFactory.createEvent(payload, key);
+            reactor.notify(key, event);
+        } else {
+            LOGGER.debug("The handler {} has no transitions.", sourceHandlerClass);
+        }
     }
 
     @Override
@@ -71,15 +59,8 @@ public class ReactorFlowManager implements FlowManager {
         reactor.notify(Phases.PROVISIONING_SETUP.name(), eventFactory.createEvent(context, Phases.PROVISIONING_SETUP.name()));
     }
 
-    @Override
-    public void triggerNext(Class sourceHandlerClass, Object payload, boolean success) {
-        String key = transitionKey(sourceHandlerClass, success);
-        if (null != key) {
-            Event event = eventFactory.createEvent(payload, key);
-            reactor.notify(key, event);
-        } else {
-            LOGGER.debug("The handler {} has no transitions.", sourceHandlerClass);
-        }
+    private boolean isTriggerKey(String key) {
+        return key != null && !Phases.valueOf(key).equals(Phases.NONE);
     }
 
     @Override
@@ -162,12 +143,6 @@ public class ReactorFlowManager implements FlowManager {
         UpdateAllowedSubnetsRequest updateAllowedSubnetsRequest = (UpdateAllowedSubnetsRequest) object;
         UpdateAllowedSubnetsContext context = new UpdateAllowedSubnetsContext(updateAllowedSubnetsRequest);
         reactor.notify(Phases.UPDATE_ALLOWED_SUBNETS.name(), eventFactory.createEvent(context, Phases.UPDATE_ALLOWED_SUBNETS.name()));
-    }
-
-    public static class TransitionFactory {
-        public static Transition createTransition(String current, String next, String failure) {
-            return new Transition(current, next, failure);
-        }
     }
 
 }
