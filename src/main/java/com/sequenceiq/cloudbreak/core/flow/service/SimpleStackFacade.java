@@ -2,8 +2,12 @@ package com.sequenceiq.cloudbreak.core.flow.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -15,29 +19,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.FlowContextFactory;
 import com.sequenceiq.cloudbreak.core.flow.StackStartService;
 import com.sequenceiq.cloudbreak.core.flow.StackStopService;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
-import com.sequenceiq.cloudbreak.core.flow.context.TerminationContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
+import com.sequenceiq.cloudbreak.core.flow.context.TerminationContext;
+import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.OnFailureAction;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.domain.Subnet;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstallerMailSenderService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
+import com.sequenceiq.cloudbreak.service.stack.resource.UpdateContextObject;
 
 @Service
 public class SimpleStackFacade implements StackFacade {
@@ -81,6 +91,9 @@ public class SimpleStackFacade implements StackFacade {
 
     @Autowired
     private StackScalingService stackScalingService;
+
+    @Autowired
+    private UserDataBuilder userDataBuilder;
 
     @Override
     public FlowContext stackCreationError(FlowContext context) throws CloudbreakException {
@@ -175,7 +188,7 @@ public class SimpleStackFacade implements StackFacade {
     }
 
     @Override
-    public FlowContext stackTerminationError(FlowContext context) throws CloudbreakException {
+    public FlowContext handleTerminationFailure(FlowContext context) throws CloudbreakException {
         TerminationContext terminationContext = (TerminationContext) context;
         terminationService.handleTerminationFailure(terminationContext.getStackId(), terminationContext.getStatusReason());
         return context;
@@ -221,11 +234,83 @@ public class SimpleStackFacade implements StackFacade {
             StackScalingContext updateContext = (StackScalingContext) context;
             stackUpdater.updateMetadataReady(updateContext.getStackId(), true);
             stackUpdater.updateStackStatus(updateContext.getStackId(), Status.AVAILABLE, "Stack update failed. " + updateContext.getErrorMessage());
-            stackUpdater.updateStackStatusReason(updateContext.getStackId(), updateContext.getErrorMessage());
             return updateContext;
         } catch (Exception e) {
             LOGGER.error("Exception during the handling of stack scaling failure: {}", e.getMessage());
             throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext handleUpdateAllowedSubnetsFailure(FlowContext context) throws CloudbreakException {
+        try {
+            UpdateAllowedSubnetsContext updateContext = (UpdateAllowedSubnetsContext) context;
+            stackUpdater.updateMetadataReady(updateContext.getStackId(), true);
+            stackUpdater.updateStackStatus(updateContext.getStackId(), Status.AVAILABLE, "Stack update failed. " + updateContext.getErrorMessage());
+            return updateContext;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the handling of update allowed subnets failure: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext updateAllowedSubnets(FlowContext context) throws CloudbreakException {
+        UpdateAllowedSubnetsContext request = (UpdateAllowedSubnetsContext) context;
+        Long stackId = request.getStackId();
+        Stack stack = stackRepository.findOneWithLists(stackId);
+        MDCBuilder.buildMdcContext(stack);
+        String userData = userDataBuilder.build(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>());
+        try {
+            LOGGER.info("Accepted {} event on stack.", ReactorConfig.UPDATE_SUBNET_REQUEST_EVENT);
+            stack.setAllowedSubnets(getNewSubnetList(stack, request.getAllowedSubnets()));
+            if (stack.isCloudPlatformUsedWithTemplate()) {
+                cloudPlatformConnectors.get(stack.cloudPlatform()).updateAllowedSubnets(stack, userData);
+            } else {
+                CloudPlatform cloudPlatform = stack.cloudPlatform();
+                UpdateContextObject updateContext = resourceBuilderInits.get(cloudPlatform).updateInit(stack);
+                for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
+                    resourceBuilder.update(updateContext);
+                }
+            }
+            stackUpdater.updateStack(stack);
+            String statusReason = "Security update successfully finished";
+            stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, statusReason);
+            return context;
+        } catch (Exception e) {
+            Stack tempStack = stackRepository.findById(stack.getId());
+            String msg = String.format("Failed to update security constraints with allowed subnets: %s", stack.getAllowedSubnets());
+            if (tempStack.isStackInDeletionPhase()) {
+                msg = String.format("Failed to update security constraints with allowed subnets: %s, because stack is already in deletion phase.",
+                        stack.getAllowedSubnets());
+            }
+            LOGGER.error(msg, e);
+            throw new CloudbreakException(msg, e);
+        }
+    }
+
+    private Set<Subnet> getNewSubnetList(Stack stack, List<Subnet> subnetList) {
+        Set<Subnet> copy = new HashSet<>();
+        for (Subnet subnet : stack.getAllowedSubnets()) {
+            if (!subnet.isModifiable()) {
+                copy.add(subnet);
+                removeFromNewSubnetList(subnet, subnetList);
+            }
+        }
+        for (Subnet subnet : subnetList) {
+            copy.add(subnet);
+        }
+        return copy;
+    }
+
+    private void removeFromNewSubnetList(Subnet subnet, List<Subnet> subnetList) {
+        Iterator<Subnet> iterator = subnetList.iterator();
+        String cidr = subnet.getCidr();
+        while (iterator.hasNext()) {
+            Subnet next = iterator.next();
+            if (next.getCidr().equals(cidr)) {
+                iterator.remove();
+            }
         }
     }
 

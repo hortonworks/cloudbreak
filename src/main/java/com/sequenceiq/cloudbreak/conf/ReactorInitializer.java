@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.service.stack.handler.ProvisionSetupCompleteHan
 import com.sequenceiq.cloudbreak.service.stack.handler.StackCreationSuccessHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.StackUpdateFailureHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.UpdateAllowedSubnetSuccessHandler;
-import com.sequenceiq.cloudbreak.service.stack.handler.UpdateAllowedSubnetsHandler;
 
 import reactor.core.Reactor;
 
@@ -59,9 +58,6 @@ public class ReactorInitializer implements InitializingBean {
     private CloudbreakEventHandler cloudbreakEventHandler;
 
     @Autowired
-    private UpdateAllowedSubnetsHandler updateAllowedSubnetsHandler;
-
-    @Autowired
     private UpdateAllowedSubnetSuccessHandler updateAllowedSubnetSuccessHandler;
 
     @Autowired
@@ -81,7 +77,6 @@ public class ReactorInitializer implements InitializingBean {
         reactor.on($(ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT), clusterCreationSuccessHandler);
         reactor.on($(ReactorConfig.CLUSTER_CREATE_FAILED_EVENT), clusterCreationFailureHandler);
 
-        reactor.on($(ReactorConfig.UPDATE_SUBNET_REQUEST_EVENT), updateAllowedSubnetsHandler);
         reactor.on($(ReactorConfig.UPDATE_SUBNET_COMPLETE_EVENT), updateAllowedSubnetSuccessHandler);
         reactor.on($(ReactorConfig.STACK_UPDATE_FAILED_EVENT), stackUpdateFailureHandler);
 

@@ -42,7 +42,11 @@ public interface FlowFacade {
 
     FlowContext terminateStack(FlowContext flowContext) throws CloudbreakException;
 
-    FlowContext stackTerminationError(FlowContext context) throws CloudbreakException;
+    FlowContext handleStackTerminationFailure(FlowContext context) throws CloudbreakException;
 
     FlowContext handleClusterScalingFailure(FlowContext context) throws CloudbreakException;
+
+    FlowContext updateAllowedSubnets(FlowContext context) throws CloudbreakException;
+
+    FlowContext handleUpdateAllowedSubnetsFailure(FlowContext context) throws CloudbreakException;
 }

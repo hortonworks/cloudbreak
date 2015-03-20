@@ -14,11 +14,13 @@ import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.TerminationContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
+import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
+import com.sequenceiq.cloudbreak.service.stack.event.UpdateAllowedSubnetsRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 
 import reactor.core.Reactor;
@@ -153,6 +155,13 @@ public class ReactorFlowManager implements FlowManager {
         UpdateAmbariHostsRequest request = (UpdateAmbariHostsRequest) object;
         ClusterScalingContext context = new ClusterScalingContext(request);
         reactor.notify(Phases.CLUSTER_DOWNSCALE.name(), eventFactory.createEvent(context, Phases.CLUSTER_DOWNSCALE.name()));
+    }
+
+    @Override
+    public void triggerUpdateAllowedSubnets(Object object) {
+        UpdateAllowedSubnetsRequest updateAllowedSubnetsRequest = (UpdateAllowedSubnetsRequest) object;
+        UpdateAllowedSubnetsContext context = new UpdateAllowedSubnetsContext(updateAllowedSubnetsRequest);
+        reactor.notify(Phases.UPDATE_ALLOWED_SUBNETS.name(), eventFactory.createEvent(context, Phases.UPDATE_ALLOWED_SUBNETS.name()));
     }
 
     public static class TransitionFactory {
