@@ -22,17 +22,5 @@ public class MetadataSetupHandler extends AbstractFlowHandler<ProvisioningContex
         LOGGER.info("Metadata set up. Context: {}", provisioningContext);
         return provisioningContext;
     }
-
-    @Override
-    protected Object handleErrorFlow(Throwable throwable, ProvisioningContext data) {
-        LOGGER.info("handleErrorFlow() for phase: {}", getClass());
-        return data;
-    }
-
-    @Override
-    protected Object assemblePayload(Object serviceResult) {
-        LOGGER.info("assemblePayload() for phase: {}", serviceResult);
-        return serviceResult;
-    }
 }
 

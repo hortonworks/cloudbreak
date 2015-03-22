@@ -29,9 +29,4 @@ public class ClusterDownscaleHandler extends AbstractFlowHandler<ClusterScalingC
         LOGGER.info("handleErrorFlow() for phase: {}", getClass());
         return getFlowFacade().handleClusterScalingFailure(data);
     }
-
-    @Override
-    protected Object assemblePayload(Object serviceResult) {
-        return serviceResult;
-    }
 }

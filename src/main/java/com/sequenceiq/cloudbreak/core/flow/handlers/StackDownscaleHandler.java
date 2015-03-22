@@ -31,9 +31,4 @@ public class StackDownscaleHandler extends AbstractFlowHandler<StackScalingConte
         LOGGER.info("Stack downscaling failure is handled. Context: {}", context);
         return context;
     }
-
-    @Override
-    protected Object assemblePayload(Object serviceResult) {
-        return serviceResult;
-    }
 }

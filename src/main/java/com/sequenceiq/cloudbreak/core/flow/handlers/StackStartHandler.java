@@ -33,10 +33,4 @@ public class StackStartHandler extends AbstractFlowHandler<StackStatusUpdateCont
         LOGGER.info("handleErrorFlow() for phase: {}", getClass());
         return new StackStatusUpdateContext(data.getStackId(), data.isStart(), throwable.getMessage());
     }
-
-    @Override
-    protected Object assemblePayload(Object serviceResult) {
-        LOGGER.info("assemblePayload() for phase: {}", serviceResult);
-        return serviceResult;
-    }
 }

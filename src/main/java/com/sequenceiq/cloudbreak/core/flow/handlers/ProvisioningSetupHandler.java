@@ -23,16 +23,4 @@ public class ProvisioningSetupHandler extends AbstractFlowHandler<ProvisioningCo
         provisioningContext = getFlowFacade().setup(provisioningContext);
         return provisioningContext;
     }
-
-    @Override
-    protected Object handleErrorFlow(Throwable throwable, ProvisioningContext data) throws Exception {
-        LOGGER.debug("Handling error during provisioning setup. Exception {}, Data: {}", throwable.getClass(), data);
-        return data;
-    }
-
-    @Override
-    protected Object assemblePayload(Object serviceResult) {
-        LOGGER.debug("Assembling payload for the next phase. Data: {}", serviceResult);
-        return serviceResult;
-    }
 }

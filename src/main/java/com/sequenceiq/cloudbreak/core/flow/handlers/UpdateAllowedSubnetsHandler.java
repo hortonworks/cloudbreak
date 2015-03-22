@@ -32,9 +32,4 @@ public class UpdateAllowedSubnetsHandler extends AbstractFlowHandler<UpdateAllow
         LOGGER.info("Stack termination failure is handled. Context: {}", context);
         return context;
     }
-
-    @Override
-    protected Object assemblePayload(Object serviceResult) {
-        return serviceResult;
-    }
 }
