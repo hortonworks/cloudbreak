@@ -27,7 +27,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     private String defaultCloudbreakServer;
 
     @Autowired
-    private TemplateAdditionParser templateAdditionParser;
+    private TemplateAdditionHelper templateAdditionHelper;
     @Autowired
     private SuiteContext suiteContext;
     private IntegrationTestContext itContext;
@@ -51,11 +51,11 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         putResourceToContextIfExist(CloudbreakITContextConstants.CREDENTIAL_ID, "/account/credentials/{name}", credentialName);
         putResourceToContextIfExist(CloudbreakITContextConstants.STACK_ID, "/account/stacks/{name}", stackName);
         if (StringUtils.hasLength(instanceGroups)) {
-            List<String[]> instanceGroupStrings = templateAdditionParser.parseCommaSeparatedRows(instanceGroups);
+            List<String[]> instanceGroupStrings = templateAdditionHelper.parseCommaSeparatedRows(instanceGroups);
             itContext.putContextParam(CloudbreakITContextConstants.TEMPLATE_ID, createInstanceGroups(instanceGroupStrings));
         }
         if (StringUtils.hasLength(hostGroups)) {
-            List<String[]> hostGroupStrings = templateAdditionParser.parseCommaSeparatedRows(hostGroups);
+            List<String[]> hostGroupStrings = templateAdditionHelper.parseCommaSeparatedRows(hostGroups);
             itContext.putContextParam(CloudbreakITContextConstants.HOSTGROUP_ID, createHostGroups(hostGroupStrings));
         }
     }

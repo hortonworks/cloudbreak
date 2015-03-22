@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +24,7 @@ import freemarker.template.Template;
 @ContextConfiguration(classes = IntegrationTestConfiguration.class)
 public class GCCTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
     @Autowired
-    private TemplateAdditionParser additionParser;
+    private TemplateAdditionHelper additionHelper;
 
     @Autowired
     private Template gccTemplateCreationTemplate;
@@ -34,7 +33,7 @@ public class GCCTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
     @BeforeMethod
     @Parameters({ "templateAdditions" })
     public void setup(@Optional("master,1;slave_1,3") String templateAdditions) {
-        additions = additionParser.parseTemplateAdditions(templateAdditions);
+        additions = additionHelper.parseTemplateAdditions(templateAdditions);
     }
 
     @Test
@@ -55,14 +54,6 @@ public class GCCTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
                 .post("/user/templates");
         // THEN
         checkResponse(resourceCreationResponse, HttpStatus.CREATED, ContentType.JSON);
-        List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
-        if (instanceGroups == null) {
-            instanceGroups = new ArrayList<>();
-            itContext.putContextParam(CloudbreakITContextConstants.TEMPLATE_ID, instanceGroups, true);
-        }
-        String templateId = resourceCreationResponse.jsonPath().getString("id");
-        for (TemplateAddition addition : additions) {
-            instanceGroups.add(new InstanceGroup(templateId, addition.getGroupName(), addition.getNodeCount()));
-        }
+        additionHelper.handleTemplateAdditions(itContext, resourceCreationResponse.jsonPath().getString("id"), additions);
     }
 }
