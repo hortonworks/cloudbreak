@@ -25,16 +25,19 @@ public class StackTerminationHandler extends AbstractFlowHandler<TerminationCont
     }
 
     @Override
-    protected void handleErrorFlow(Throwable throwable, Object data) {
-        Event<TerminationContext> event = (Event<TerminationContext>) data;
-        TerminationContext terminationContext = event.getData();
-        LOGGER.info("execute() for phase: {}", event.getKey());
+    protected Object handleErrorFlow(Throwable throwable, Object data) {
+        FlowContext context = null;
         try {
-            FlowContext context = getFlowFacade().handleStackTerminationFailure(terminationContext);
+            Event<TerminationContext> event = (Event<TerminationContext>) data;
+            TerminationContext terminationContext = event.getData();
+            LOGGER.info("execute() for phase: {}", event.getKey());
+            context = getFlowFacade().handleStackTerminationFailure(terminationContext);
             LOGGER.info("Stack termination failure is handled. Context: {}", context);
         } catch (CloudbreakException e) {
             LOGGER.error(e.getMessage(), e);
         }
+
+        return context;
     }
 
     @Override

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
+import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 
 import reactor.event.Event;
@@ -22,12 +23,18 @@ public class ClusterStartHandler extends AbstractFlowHandler<StackStatusUpdateCo
     }
 
     @Override
-    protected void handleErrorFlow(Throwable throwable, Object data) {
-        Event event = (Event) data;
-        StackStatusUpdateContext context = (StackStatusUpdateContext) event.getData();
-        CloudbreakException ex = (CloudbreakException) throwable;
-        LOGGER.info("handleErrorFlow() for phase: {}", event.getKey());
-        event.setData(new StackStatusUpdateContext(context.getStackId(), context.isStart(), ex.getMessage()));
+    protected Object handleErrorFlow(Throwable throwable, Object data) {
+        FlowContext context = null;
+        try {
+            Event event = (Event) data;
+            StackStatusUpdateContext stackStatusUpdateContext = (StackStatusUpdateContext) event.getData();
+            CloudbreakException ex = (CloudbreakException) throwable;
+            LOGGER.info("handleErrorFlow() for phase: {}", event.getKey());
+            context = new StackStatusUpdateContext(stackStatusUpdateContext.getStackId(), stackStatusUpdateContext.isStart(), ex.getMessage());
+        } catch (Exception e) {
+            LOGGER.error("Exception durin cluster start process. Ex: {}", e.getMessage());
+        }
+        return context;
     }
 
     @Override

@@ -24,9 +24,9 @@ public class AmbariStartHandler extends AbstractFlowHandler<ProvisioningContext>
     }
 
     @Override
-    protected void handleErrorFlow(Throwable throwable, Object data) {
+    protected Object handleErrorFlow(Throwable throwable, Object data) {
         LOGGER.info("handleErrorFlow() for phase: {}", ((Event) data).getKey());
-
+        return null;
     }
 
     @Override

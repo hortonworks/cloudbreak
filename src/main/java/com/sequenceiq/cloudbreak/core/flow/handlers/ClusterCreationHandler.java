@@ -25,13 +25,15 @@ public class ClusterCreationHandler extends AbstractFlowHandler<ProvisioningCont
     }
 
     @Override
-    protected void handleErrorFlow(Throwable throwable, Object data) {
-        LOGGER.info("handleErrorFlow() for phase: {}", ((Event) data).getKey());
+    protected Object handleErrorFlow(Throwable throwable, Object data) {
+        FlowContext context = null;
         try {
-            FlowContext context = getFlowFacade().clusterCreationFailed((FlowContext) data);
+            LOGGER.info("handleErrorFlow() for phase: {}", ((Event) data).getKey());
+            context = getFlowFacade().clusterCreationFailed((FlowContext) data);
         } catch (CloudbreakException e) {
             LOGGER.error("Error during handling cluster creation failure. Ex.:", e);
         }
+        return context;
     }
 
     @Override

@@ -25,9 +25,9 @@ public class ProvisioningHandler extends AbstractFlowHandler<ProvisioningContext
     }
 
     @Override
-    protected void handleErrorFlow(Throwable throwable, Object data) {
+    protected Object handleErrorFlow(Throwable throwable, Object data) {
         LOGGER.debug("Handling error during provisioning. Exception {}, Data: {}", throwable.getClass(), data);
-
+        return null;
     }
 
     @Override

@@ -25,14 +25,16 @@ public class ClusterDownscaleHandler extends AbstractFlowHandler<ClusterScalingC
     }
 
     @Override
-    protected void handleErrorFlow(Throwable throwable, Object data) {
-        Event<ClusterScalingContext> event = (Event<ClusterScalingContext>) data;
-        ClusterScalingContext scalingContext = event.getData();
+    protected Object handleErrorFlow(Throwable throwable, Object data) {
+        FlowContext context = null;
         try {
-            getFlowFacade().handleClusterScalingFailure(scalingContext);
+            Event<ClusterScalingContext> event = (Event<ClusterScalingContext>) data;
+            ClusterScalingContext scalingContext = event.getData();
+            context = getFlowFacade().handleClusterScalingFailure(scalingContext);
         } catch (CloudbreakException e) {
             LOGGER.error(e.getMessage(), e);
         }
+        return context;
     }
 
     @Override

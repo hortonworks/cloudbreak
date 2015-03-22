@@ -38,20 +38,23 @@ public abstract class AbstractFlowHandler<T> implements Consumer<Event<T>>, Flow
      */
     @Override
     public void accept(Event<T> event) {
+        LOGGER.debug("Executing flow Logic on the event: {}", event);
         Object result = null;
         boolean success = false;
         try {
-            LOGGER.debug("FlowHandler called with event {}", event);
             result = execute(event);
             success = true;
         } catch (Throwable t) {
-            LOGGER.debug("Consuming the error {}", t);
-            //            event.consumeError(t);
-            handleErrorFlow(t, event);
-            result = event.getData();
+            consumeError(event, t);
+            result = handleErrorFlow(t, event);
         }
         Object payload = assemblePayload(result);
         next(payload, success);
+    }
+
+    protected void consumeError(Event<T> event, Throwable t) {
+        LOGGER.debug("Consuming the error {}", t);
+        //event.consumeError(t);
     }
 
     /**
@@ -76,7 +79,7 @@ public abstract class AbstractFlowHandler<T> implements Consumer<Event<T>>, Flow
      * @param data      the received data
      */
 
-    protected abstract void handleErrorFlow(Throwable throwable, Object data);
+    protected abstract Object handleErrorFlow(Throwable throwable, Object data);
 
     /**
      * Assembles the payload for the next phase based on the results of the execution.

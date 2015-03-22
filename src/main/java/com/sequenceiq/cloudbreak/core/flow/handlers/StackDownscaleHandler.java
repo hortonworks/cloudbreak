@@ -25,7 +25,7 @@ public class StackDownscaleHandler extends AbstractFlowHandler<StackScalingConte
     }
 
     @Override
-    protected void handleErrorFlow(Throwable throwable, Object data) {
+    protected Object handleErrorFlow(Throwable throwable, Object data) {
         Event<StackScalingContext> event = (Event<StackScalingContext>) data;
         StackScalingContext scalingContext = event.getData();
         LOGGER.info("execute() for phase: {}", event.getKey());
@@ -35,6 +35,7 @@ public class StackDownscaleHandler extends AbstractFlowHandler<StackScalingConte
         } catch (CloudbreakException e) {
             LOGGER.error(e.getMessage(), e);
         }
+        return null;
     }
 
     @Override

@@ -23,12 +23,12 @@ public class ClusterStopHandler extends AbstractFlowHandler<StackStatusUpdateCon
     }
 
     @Override
-    protected void handleErrorFlow(Throwable throwable, Object data) {
+    protected Object handleErrorFlow(Throwable throwable, Object data) {
         Event event = (Event) data;
         StackStatusUpdateContext context = (StackStatusUpdateContext) event.getData();
         CloudbreakException ex = (CloudbreakException) throwable;
         LOGGER.info("handleErrorFlow() for phase: {}", event.getKey());
-        event.setData(new StackStatusUpdateContext(context.getStackId(), context.isStart(), ex.getMessage()));
+        return new StackStatusUpdateContext(context.getStackId(), context.isStart(), ex.getMessage());
 
     }
 
