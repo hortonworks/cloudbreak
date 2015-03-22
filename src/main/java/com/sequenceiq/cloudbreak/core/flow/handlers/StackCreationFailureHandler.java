@@ -29,7 +29,7 @@ public class StackCreationFailureHandler extends AbstractFlowHandler<FlowContext
     }
 
     @Override
-    protected Object handleErrorFlow(Throwable throwable, Object data) {
+    protected Object handleErrorFlow(Throwable throwable, FlowContext data) throws Exception {
         return data;
     }
 

@@ -24,8 +24,8 @@ public class MetadataSetupHandler extends AbstractFlowHandler<ProvisioningContex
     }
 
     @Override
-    protected Object handleErrorFlow(Throwable throwable, Object data) {
-        LOGGER.info("handleErrorFlow() for phase: {}", ((Event) data).getKey());
+    protected Object handleErrorFlow(Throwable throwable, ProvisioningContext data) {
+        LOGGER.info("handleErrorFlow() for phase: {}", getClass());
         return data;
     }
 

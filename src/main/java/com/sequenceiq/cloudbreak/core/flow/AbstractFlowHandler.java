@@ -46,7 +46,12 @@ public abstract class AbstractFlowHandler<T> implements Consumer<Event<T>>, Flow
             success = true;
         } catch (Throwable t) {
             consumeError(event, t);
-            result = handleErrorFlow(t, event);
+            try {
+                result = handleErrorFlow(t, event.getData());
+            } catch (Exception e) {
+                LOGGER.error("Error during error handling flow");
+                throw new CloudbreakRuntimeException("Error during error handling flow", e);
+            }
         }
         Object payload = assemblePayload(result);
         next(payload, success);
@@ -79,7 +84,7 @@ public abstract class AbstractFlowHandler<T> implements Consumer<Event<T>>, Flow
      * @param data      the received data
      */
 
-    protected abstract Object handleErrorFlow(Throwable throwable, Object data);
+    protected abstract Object handleErrorFlow(Throwable throwable, T data) throws Exception;
 
     /**
      * Assembles the payload for the next phase based on the results of the execution.

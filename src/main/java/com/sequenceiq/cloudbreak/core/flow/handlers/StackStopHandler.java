@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
-import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.service.StackFacade;
 
@@ -29,18 +28,9 @@ public class StackStopHandler extends AbstractFlowHandler<StackStatusUpdateConte
     }
 
     @Override
-    protected Object handleErrorFlow(Throwable throwable, Object data) {
-        FlowContext context = null;
-        try {
-            Event event = (Event) data;
-            StackStatusUpdateContext stackStatusUpdateContext = (StackStatusUpdateContext) event.getData();
-            CloudbreakException exc = (CloudbreakException) throwable;
-            LOGGER.info("handleErrorFlow() for phase: {}", event.getKey());
-            context = new StackStatusUpdateContext(stackStatusUpdateContext.getStackId(), stackStatusUpdateContext.isStart(), exc.getMessage());
-        } catch (Exception e) {
-            LOGGER.error("An error occurred during stack stop failure handling. Ex. :", e.getMessage());
-        }
-        return context;
+    protected Object handleErrorFlow(Throwable throwable, StackStatusUpdateContext data) {
+        LOGGER.info("handleErrorFlow() for phase: {}", getClass());
+        return new StackStatusUpdateContext(data.getStackId(), data.isStart(), throwable.getMessage());
     }
 
     @Override

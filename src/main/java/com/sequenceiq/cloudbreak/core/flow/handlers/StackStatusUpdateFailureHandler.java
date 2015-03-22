@@ -33,7 +33,7 @@ public class StackStatusUpdateFailureHandler extends AbstractFlowHandler<StackSt
     }
 
     @Override
-    protected Object handleErrorFlow(Throwable throwable, Object data) {
+    protected Object handleErrorFlow(Throwable throwable, StackStatusUpdateContext data) throws Exception {
         return data;
     }
 

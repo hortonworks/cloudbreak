@@ -25,18 +25,11 @@ public class UpdateAllowedSubnetsHandler extends AbstractFlowHandler<UpdateAllow
     }
 
     @Override
-    protected Object handleErrorFlow(Throwable throwable, Object data) {
-        FlowContext context = null;
-        try {
-            Event<UpdateAllowedSubnetsContext> event = (Event<UpdateAllowedSubnetsContext>) data;
-            UpdateAllowedSubnetsContext updateAllowedSubnetsContext = event.getData();
-            updateAllowedSubnetsContext.setErrorMessage(throwable.getMessage());
-            LOGGER.info("execute() for phase: {}", event.getKey());
-            context = getFlowFacade().handleUpdateAllowedSubnetsFailure(updateAllowedSubnetsContext);
-            LOGGER.info("Stack termination failure is handled. Context: {}", context);
-        } catch (CloudbreakException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
+    protected Object handleErrorFlow(Throwable throwable, UpdateAllowedSubnetsContext data) throws Exception {
+        LOGGER.info("execute() for phase: {}", getClass());
+        data.setErrorMessage(throwable.getMessage());
+        FlowContext context = getFlowFacade().handleUpdateAllowedSubnetsFailure(data);
+        LOGGER.info("Stack termination failure is handled. Context: {}", context);
         return context;
     }
 

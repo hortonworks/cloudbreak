@@ -25,18 +25,11 @@ public class StackUpscaleHandler extends AbstractFlowHandler<StackScalingContext
     }
 
     @Override
-    protected Object handleErrorFlow(Throwable throwable, Object data) {
-        Object ret = null;
-        Event<StackScalingContext> event = (Event<StackScalingContext>) data;
-        StackScalingContext scalingContext = event.getData();
-        LOGGER.info("execute() for phase: {}", event.getKey());
-        try {
-            ret = getFlowFacade().handleStackScalingFailure(scalingContext);
-            LOGGER.info("Stack upscaling failure is handled. Context: {}", ret);
-        } catch (CloudbreakException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        return ret;
+    protected Object handleErrorFlow(Throwable throwable, StackScalingContext data) throws Exception {
+        LOGGER.info("handleErrorFlow() for phase: {}", getClass());
+        FlowContext context = getFlowFacade().handleStackScalingFailure(data);
+        LOGGER.info("Stack upscaling failure is handled. Context: {}", context);
+        return context;
     }
 
     @Override

@@ -23,7 +23,7 @@ public class ClusterStatusUpdateFailureHandler extends AbstractFlowHandler<Stack
     }
 
     @Override
-    protected Object handleErrorFlow(Throwable throwable, Object data) {
+    protected Object handleErrorFlow(Throwable throwable, StackStatusUpdateContext data) throws Exception {
         return data;
     }
 
