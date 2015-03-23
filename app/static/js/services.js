@@ -66,6 +66,14 @@ uluwatuServices.factory('GlobalCredentialCertificate', ['$resource',
                 transformResponse: function (data, headersGetter) {
                     return {cert: data};
                 }
+            },
+            'update': {
+                method:'PUT',
+                isArray: false,
+                headers: { 'Content-Type': 'application/json' },
+                transformResponse: function (data, headersGetter) {
+                    return {cert: data};
+                }
             }
         });
     }]);

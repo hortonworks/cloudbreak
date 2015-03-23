@@ -49,6 +49,12 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
           $scope.openstackCredential = true;
         }
 
+        $scope.refreshCertificateFile = function(credentialId) {
+          GlobalCredentialCertificate.update({id: credentialId}, {}, function(result) {
+            window.location.href = "credentials/certificate/" + credentialId;
+          });
+        }
+
         $scope.createAwsCredential = function() {
             $scope.credentialAws.cloudPlatform = "AWS";
             $scope.credentialInCreation = true;
