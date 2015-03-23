@@ -1,7 +1,3 @@
-init() {
-    echo "cloudbreak-deployer init ..." | yellow
-}
-
 debug() {
   if [[ "DEBUG" ]]; then
       echo "[DEBUG] $*" | gray
