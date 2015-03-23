@@ -8,6 +8,28 @@
 
 ### Changed
 
+## [v0.0.4] - 2015-03-23
+
+### Fixed
+
+- debug function fixed
+- DEBUG and TRACE env vars are inherited
+
+### Added
+
+- Profile handling added with docs
+- One-liner install added
+- Docs: install and update process described
+- Docs: release process described with sample git commands
+- Print version number in debug mode
+- `update-snap` downloads binary from latest os specific CircleCI binary artifact.
+
+### Removed
+
+### Changed
+
+- Tool specific library renamed from cloudbreak.bash to deployer.bash
+
 ## Unreleased
 
 ## [v0.0.3] - 2015-03-19

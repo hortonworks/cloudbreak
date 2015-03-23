@@ -1,0 +1,21 @@
+
+: ${GIT_ORG:=sequenceiq}
+: ${GIT_PROJECT:=cloudbreak-deployer}
+
+main() {
+    local redirect=$(
+    curl -s \
+        -o /dev/null \
+        -w "%{redirect_url}" \
+        https://github.com/sequenceiq/cloudbreak-deployer/releases/latest
+    )
+    local latest=${redirect##*v}
+    local osarch=$(uname -sm|tr " " _)
+
+    local url="https://github.com/${GIT_ORG}/${GIT_PROJECT}/releases/download/v${latest}/${GIT_PROJECT}_${latest}_${osarch}.tgz"
+
+    curl -Ls $url | tar -xz -C /usr/local/bin/
+}
+
+main
+
