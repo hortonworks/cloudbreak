@@ -2,6 +2,8 @@
 
 ### Fixed
 
+- debug function fixed
+
 ### Added
 
 - One-liner install added
