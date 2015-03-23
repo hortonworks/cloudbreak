@@ -103,6 +103,9 @@ public class FlowInitializer implements InitializingBean {
         transitionKeyService.registerTransition(StackStatusUpdateFailureHandler.class, SimpleTransitionKeyService.TransitionFactory
                 .createTransition(FlowPhases.CLUSTER_CREATION.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
 
+        transitionKeyService.registerTransition(ClusterStatusUpdateFailureHandler.class, SimpleTransitionKeyService.TransitionFactory
+                .createTransition(FlowPhases.CLUSTER_START_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
+
         reactor.on($(FlowPhases.PROVISIONING_SETUP.name()), getHandlerForClass(ProvisioningSetupHandler.class));
         reactor.on($(FlowPhases.PROVISIONING.name()), getHandlerForClass(ProvisioningHandler.class));
         reactor.on($(FlowPhases.METADATA_SETUP.name()), getHandlerForClass(MetadataSetupHandler.class));

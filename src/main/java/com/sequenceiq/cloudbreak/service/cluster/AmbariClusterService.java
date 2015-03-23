@@ -112,7 +112,12 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public Cluster retrieveCluster(Long stackId) {
+    public Cluster retrieveClusterByStackId(Long stackId) {
+        return stackRepository.findById(stackId).getCluster();
+    }
+
+    @Override
+    public Cluster retrieveClusterForCurrentUser(Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
         return stack.getCluster();
     }
