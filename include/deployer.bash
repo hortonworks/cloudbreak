@@ -31,6 +31,15 @@ cbd-update() {
     fi
 }
 
+cbd-update-snap() {
+    declare desc="Updates itself, from the latest snapshot binary"
+
+    url=$(cci-latest sequenceiq/cloudbreak-deployer)
+    debug "Update binary from: $url"
+    curl -Ls $url | tar -zx -C /usr/local/bin/
+
+}
+
 latest-version() {
   #curl -Ls https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/VERSION
   curl -I https://github.com/sequenceiq/cloudbreak-deployer/releases/latest 2>&1 \
@@ -57,6 +66,7 @@ load-profile() {
 main() {
 	set -eo pipefail; [[ "$TRACE" ]] && set -x
 	color-init
+    circle-init
 
     debug "CloudBreak Deployer $(bin-version)"
 
@@ -65,6 +75,7 @@ main() {
     cmd-export cmd-help help
     cmd-export cbd-version version
     cmd-export cbd-update update
+    cmd-export cbd-update-snap update-snap
 
 	if [[ "${!#}" == "-h" || "${!#}" == "--help" ]]; then
 		local args=("$@")

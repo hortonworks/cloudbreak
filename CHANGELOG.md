@@ -12,6 +12,7 @@
 - Docs: install and update process described
 - Docs: release process described with sample git commands
 - Print version number in debug mode
+- `update-snap` downloads binary from latest os specific CircleCI binary artifact.
 
 ### Removed
 

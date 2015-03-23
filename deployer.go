@@ -87,6 +87,7 @@ func main() {
 		"hello":       Hello,
 		"bin-version": BinVersion,
 	}, []string{
+		"include/circle.bash",
 		"include/cmd.bash",
 		"include/color.bash",
 		"include/deployer.bash",
