@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.core.flow.StackStopService;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
+import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.TerminationContext;
 import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
@@ -96,7 +97,7 @@ public class SimpleStackFacade implements StackFacade {
     private UserDataBuilder userDataBuilder;
 
     @Override
-    public FlowContext stackCreationError(FlowContext context) throws CloudbreakException {
+    public FlowContext handleCreationFailure(FlowContext context) throws CloudbreakException {
         ProvisioningContext provisioningContext = (ProvisioningContext) context;
         try {
             final Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
@@ -195,13 +196,15 @@ public class SimpleStackFacade implements StackFacade {
     }
 
     @Override
-    public FlowContext stackStopError(FlowContext context) throws CloudbreakException {
-        return stackStopService.handleStackStopFailure(context);
-    }
-
-    @Override
-    public FlowContext stackStartError(FlowContext context) throws CloudbreakException {
-        return stackStartService.handleStackStartFailure(context);
+    public FlowContext handleStatusUpdateFailure(FlowContext flowContext) throws CloudbreakException {
+        StackStatusUpdateContext context = (StackStatusUpdateContext) flowContext;
+        FlowContext result;
+        if (context.isStart()) {
+            result = stackStartService.handleStackStartFailure(context);
+        } else {
+            result = stackStopService.handleStackStopFailure(context);
+        }
+        return result;
     }
 
     @Override
