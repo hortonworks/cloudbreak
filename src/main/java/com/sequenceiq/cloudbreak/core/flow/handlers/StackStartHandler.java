@@ -6,12 +6,13 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
+import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 
 import reactor.event.Event;
 
 @Service
-public class StackStartHandler extends AbstractFlowHandler<StackStatusUpdateContext> {
+public class StackStartHandler extends AbstractFlowHandler<StackStatusUpdateContext> implements FlowHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStartHandler.class);
 
     @Override
