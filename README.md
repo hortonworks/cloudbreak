@@ -81,14 +81,15 @@ Once the PR is merged, CircleCI will:
 Sample command when version 0.0.3 was released:
 
 ```
-git fetch && git checkout -b release-0.0.3
-echo '0.0.3' > VERSION
+export VER=0.0.5
+git fetch && git checkout -b release-${VER}
+echo $VER > VERSION
 
 # edit CHANGELOG.md
 
-git commit -m "release 0.0.3" VERSION CHANGELOG.md
-git push origin release-0.0.3
-hub pull-request -b release -m "release 0.0.3"
+git commit -m "release $VER" VERSION CHANGELOG.md
+git push origin release-$VER
+hub pull-request -b release -m "release $VER"
 ```
 
 ## Credits
