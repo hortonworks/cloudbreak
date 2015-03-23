@@ -12,7 +12,9 @@ public interface ClusterService {
 
     Cluster create(CbUser user, Long stackId, Cluster clusterRequest);
 
-    Cluster retrieveCluster(Long stackId);
+    Cluster retrieveClusterByStackId(Long stackId);
+
+    Cluster retrieveClusterForCurrentUser(Long stackId);
 
     String getClusterJson(String ambariIp, Long stackId);
 

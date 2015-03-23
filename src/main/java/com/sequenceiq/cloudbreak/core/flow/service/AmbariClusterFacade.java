@@ -157,7 +157,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         LOGGER.debug("Stopping cluster. Context: {}", context);
         try {
             StackStatusUpdateContext startContext = (StackStatusUpdateContext) context;
-            Cluster cluster = clusterService.retrieveCluster(startContext.getStackId());
+            Cluster cluster = clusterService.retrieveClusterByStackId(startContext.getStackId());
             MDCBuilder.buildMdcContext(cluster);
             eventService.fireCloudbreakEvent(startContext.getStackId(), Status.STOP_IN_PROGRESS.name(), "Services are stopping.");
             boolean stopped = ambariClusterConnector.stopCluster(stackService.getById(startContext.getStackId()));
@@ -183,7 +183,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         LOGGER.debug("Handling cluster start failure. Context: {} ", context);
         try {
             StackStatusUpdateContext startContext = (StackStatusUpdateContext) context;
-            Cluster cluster = clusterService.retrieveCluster(startContext.getStackId());
+            Cluster cluster = clusterService.retrieveClusterForCurrentUser(startContext.getStackId());
             cluster.setStatus(Status.STOPPED);
             clusterService.updateCluster(cluster);
             stackUpdater.updateStackStatus(startContext.getStackId(), Status.AVAILABLE, startContext.getStatusReason());
@@ -199,7 +199,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         LOGGER.debug("Handling cluster stop failure. Context: {} ", context);
         try {
             StackStatusUpdateContext stopContext = (StackStatusUpdateContext) context;
-            Cluster cluster = clusterService.retrieveCluster(stopContext.getStackId());
+            Cluster cluster = clusterService.retrieveClusterForCurrentUser(stopContext.getStackId());
             MDCBuilder.buildMdcContext(cluster);
 
             eventService.fireCloudbreakEvent(stopContext.getStackId(), Status.STOP_IN_PROGRESS.name(), "Services are stopping.");
