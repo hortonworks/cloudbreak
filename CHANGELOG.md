@@ -2,6 +2,16 @@
 
 ### Fixed
 
+### Added
+
+### Removed
+
+### Changed
+
+## [v0.0.4] - 2015-03-23
+
+### Fixed
+
 - debug function fixed
 - DEBUG and TRACE env vars are inherited
 
