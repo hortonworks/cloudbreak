@@ -37,11 +37,13 @@ func main() {
 		"hello":       Hello,
 		"bin-version": BinVersion,
 	}, []string{
-		"include/fn.bash",
-		"include/cmd.bash",
-		"include/env.bash",
 		"include/cloudbreak.bash",
+		"include/cmd.bash",
 		"include/color.bash",
+		"include/deps.bash",
+		"include/env.bash",
+		"include/fn.bash",
+		"include/module.bash",
 	}, Asset, true)
 
 }
