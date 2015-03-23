@@ -8,6 +8,10 @@
 
 ### Changed
 
+## [v0.0.5] - 2015-03-23
+
+- `update` command works without dos2unix
+
 ## [v0.0.4] - 2015-03-23
 
 ### Fixed
