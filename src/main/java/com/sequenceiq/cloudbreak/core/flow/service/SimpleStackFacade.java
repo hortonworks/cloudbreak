@@ -21,14 +21,13 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.flow.FlowContextFactory;
 import com.sequenceiq.cloudbreak.core.flow.StackStartService;
 import com.sequenceiq.cloudbreak.core.flow.StackStopService;
+import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
-import com.sequenceiq.cloudbreak.core.flow.context.TerminationContext;
 import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -139,9 +138,11 @@ public class SimpleStackFacade implements StackFacade {
                     }
                 }
             }
-            stackUpdater.updateStackStatusReason(provisioningContext.getStackId(), provisioningContext.getMessage());
+            stackUpdater.updateStackStatusReason(provisioningContext.getStackId(), provisioningContext.getErrorReason());
             fireCloudbreakEventIfNeeded(provisioningContext.getStackId(), stack);
-            return FlowContextFactory.createRollbackContext(provisioningContext.getStackId());
+            return new ProvisioningContext.Builder()
+                    .setDefaultParams(stack.getId(), stack.cloudPlatform())
+                    .build();
         } catch (Exception ex) {
             LOGGER.error(String.format("Stack rollback failed on {} stack: ", provisioningContext.getStackId()), ex);
             throw new CloudbreakException(String.format("Stack rollback failed on {} stack: ", provisioningContext.getStackId(), ex));
@@ -178,8 +179,8 @@ public class SimpleStackFacade implements StackFacade {
     public FlowContext terminateStack(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Terminating stack. Context: {}", context);
         try {
-            TerminationContext terminationContext = (TerminationContext) context;
-            terminationService.terminateStack(terminationContext.getStackId(), terminationContext.getCloudPlatform());
+            DefaultFlowContext defaultFlowContext = (DefaultFlowContext) context;
+            terminationService.terminateStack(defaultFlowContext.getStackId(), defaultFlowContext.getCloudPlatform());
             LOGGER.debug("Terminating stack is DONE");
             return context;
         } catch (Exception e) {
@@ -190,8 +191,8 @@ public class SimpleStackFacade implements StackFacade {
 
     @Override
     public FlowContext handleTerminationFailure(FlowContext context) throws CloudbreakException {
-        TerminationContext terminationContext = (TerminationContext) context;
-        terminationService.handleTerminationFailure(terminationContext.getStackId(), terminationContext.getStatusReason());
+        DefaultFlowContext defaultFlowContext = (DefaultFlowContext) context;
+        terminationService.handleTerminationFailure(defaultFlowContext.getStackId(), defaultFlowContext.getErrorReason());
         return context;
     }
 
@@ -236,7 +237,7 @@ public class SimpleStackFacade implements StackFacade {
         try {
             StackScalingContext updateContext = (StackScalingContext) context;
             stackUpdater.updateMetadataReady(updateContext.getStackId(), true);
-            stackUpdater.updateStackStatus(updateContext.getStackId(), Status.AVAILABLE, "Stack update failed. " + updateContext.getErrorMessage());
+            stackUpdater.updateStackStatus(updateContext.getStackId(), Status.AVAILABLE, "Stack update failed. " + updateContext.getErrorReason());
             return updateContext;
         } catch (Exception e) {
             LOGGER.error("Exception during the handling of stack scaling failure: {}", e.getMessage());
@@ -249,7 +250,7 @@ public class SimpleStackFacade implements StackFacade {
         try {
             UpdateAllowedSubnetsContext updateContext = (UpdateAllowedSubnetsContext) context;
             stackUpdater.updateMetadataReady(updateContext.getStackId(), true);
-            stackUpdater.updateStackStatus(updateContext.getStackId(), Status.AVAILABLE, "Stack update failed. " + updateContext.getErrorMessage());
+            stackUpdater.updateStackStatus(updateContext.getStackId(), Status.AVAILABLE, "Stack update failed. " + updateContext.getErrorReason());
             return updateContext;
         } catch (Exception e) {
             LOGGER.error("Exception during the handling of update allowed subnets failure: {}", e.getMessage());

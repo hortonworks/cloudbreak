@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.flow.FlowContextFactory;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
@@ -81,7 +80,11 @@ public class AmbariClusterFacade implements ClusterFacade {
         ProvisioningContext provisioningContext = (ProvisioningContext) context;
         AmbariRoleAllocationComplete ambariRoleAllocationComplete = ambariRoleAllocator
                 .allocateRoles(provisioningContext.getStackId(), provisioningContext.getCoreInstanceMetaData());
-        return FlowContextFactory.createAmbariStartContext(ambariRoleAllocationComplete.getStack().getId(), ambariRoleAllocationComplete.getAmbariIp());
+        Stack stack = ambariRoleAllocationComplete.getStack();
+        return new ProvisioningContext.Builder()
+                .setDefaultParams(stack.getId(), stack.cloudPlatform())
+                .setAmbariIp(ambariRoleAllocationComplete.getAmbariIp())
+                .build();
     }
 
     @Override
@@ -186,7 +189,7 @@ public class AmbariClusterFacade implements ClusterFacade {
             Cluster cluster = clusterService.retrieveClusterForCurrentUser(startContext.getStackId());
             cluster.setStatus(Status.STOPPED);
             clusterService.updateCluster(cluster);
-            stackUpdater.updateStackStatus(startContext.getStackId(), Status.AVAILABLE, startContext.getStatusReason());
+            stackUpdater.updateStackStatus(startContext.getStackId(), Status.AVAILABLE, startContext.getErrorReason());
             return context;
         } catch (Exception e) {
             LOGGER.error("Exception during handling cluster start failure", e.getMessage());
@@ -226,11 +229,11 @@ public class AmbariClusterFacade implements ClusterFacade {
         LOGGER.debug("Handling cluster creation failure. Context: {}", flowContext);
         ProvisioningContext context = (ProvisioningContext) flowContext;
 
-        Cluster cluster = clusterService.updateClusterStatus(context.getClusterId(), Status.CREATE_FAILED, context.getMessage());
+        Cluster cluster = clusterService.updateClusterStatus(context.getClusterId(), Status.CREATE_FAILED, context.getErrorReason());
         MDCBuilder.buildMdcContext(cluster);
 
-        stackUpdater.updateStackStatus(context.getStackId(), Status.AVAILABLE, "Cluster installation failed. Error: " + context.getMessage());
-        eventService.fireCloudbreakEvent(context.getStackId(), "CLUSTER_CREATION_FAILED", context.getMessage());
+        stackUpdater.updateStackStatus(context.getStackId(), Status.AVAILABLE, "Cluster installation failed. Error: " + context.getErrorReason());
+        eventService.fireCloudbreakEvent(context.getStackId(), "CLUSTER_CREATION_FAILED", context.getErrorReason());
         if (cluster.getEmailNeeded()) {
             ambariClusterInstallerMailSenderService.sendFailEmail(cluster.getOwner());
         }

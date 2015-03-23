@@ -2,20 +2,20 @@ package com.sequenceiq.cloudbreak.core.flow.context;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 
-public class TerminationContext implements FlowContext {
+public class DefaultFlowContext implements FlowContext {
     private Long stackId;
     private CloudPlatform cloudPlatform;
-    private String statusReason;
+    private String errorReason;
 
-    public TerminationContext(Long stackId, CloudPlatform cloudPlatform) {
+    public DefaultFlowContext(Long stackId, CloudPlatform cloudPlatform) {
         this.stackId = stackId;
         this.cloudPlatform = cloudPlatform;
     }
 
-    public TerminationContext(Long stackId, CloudPlatform cloudPlatform, String statusReason) {
+    public DefaultFlowContext(Long stackId, CloudPlatform cloudPlatform, String errorReason) {
         this.stackId = stackId;
         this.cloudPlatform = cloudPlatform;
-        this.statusReason = statusReason;
+        this.errorReason = errorReason;
     }
 
     public Long getStackId() {
@@ -26,7 +26,11 @@ public class TerminationContext implements FlowContext {
         return cloudPlatform;
     }
 
-    public String getStatusReason() {
-        return statusReason;
+    public String getErrorReason() {
+        return errorReason;
+    }
+
+    public void setErrorReason(String errorReason) {
+        this.errorReason = errorReason;
     }
 }

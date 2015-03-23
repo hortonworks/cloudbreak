@@ -1,15 +1,18 @@
 package com.sequenceiq.cloudbreak.service.cluster.event;
 
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 
 public class ClusterStatusUpdateRequest {
 
     private Long stackId;
     private StatusRequest statusRequest;
+    private CloudPlatform cloudPlatform;
 
-    public ClusterStatusUpdateRequest(long stackId, StatusRequest statusRequest) {
+    public ClusterStatusUpdateRequest(long stackId, StatusRequest statusRequest, CloudPlatform cloudPlatform) {
         this.stackId = stackId;
         this.statusRequest = statusRequest;
+        this.cloudPlatform = cloudPlatform;
     }
 
     public long getStackId() {
@@ -28,4 +31,7 @@ public class ClusterStatusUpdateRequest {
         this.statusRequest = statusRequest;
     }
 
+    public CloudPlatform getCloudPlatform() {
+        return cloudPlatform;
+    }
 }

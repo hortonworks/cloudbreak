@@ -31,17 +31,17 @@ public class ReactorFlowManagerTest {
 
     @Test
     public void shouldReturnTheNextSuccessTransition() throws Exception {
-        flowManager.triggerNext(ProvisioningSetupHandler.class, new ProvisioningContext(), true);
+        flowManager.triggerNext(ProvisioningSetupHandler.class, new ProvisioningContext.Builder().build(), true);
     }
 
     @Test
     public void shouldReturnTheNextFailureTransition() throws Exception {
-        flowManager.triggerNext(ProvisioningSetupHandler.class, new ProvisioningContext(), true);
+        flowManager.triggerNext(ProvisioningSetupHandler.class, new ProvisioningContext.Builder().build(), true);
     }
 
     @Test
     public void shouldTriggerProvisioning() {
-        flowManager.triggerProvisioning(new ProvisioningContext());
+        flowManager.triggerProvisioning(new ProvisioningContext.Builder().build());
     }
 
 }

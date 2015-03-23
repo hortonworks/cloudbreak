@@ -9,34 +9,22 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
-public class ProvisioningContext implements FlowContext {
-    private CloudPlatform cloudPlatform;
-    private Long stackId;
+public class ProvisioningContext extends DefaultFlowContext implements FlowContext {
     private Map<String, Object> setupProperties = new HashMap<>();
     private Map<String, String> userDataParams = new HashMap<>();
     private Set<Resource> resources = new HashSet<>();
     private Set<CoreInstanceMetaData> coreInstanceMetaData = new HashSet<>();
     private String ambariIp;
-    private long clusterId;
-    private long clusterCreationTime;
-    private String message;
-    private Set<String> hostNames;
-    private boolean decommision;
+    private Long clusterId;
 
-    public CloudPlatform getCloudPlatform() {
-        return cloudPlatform;
-    }
-
-    public void setCloudPlatform(CloudPlatform cloudPlatform) {
-        this.cloudPlatform = cloudPlatform;
-    }
-
-    public Long getStackId() {
-        return stackId;
-    }
-
-    public void setStackId(Long stackId) {
-        this.stackId = stackId;
+    private ProvisioningContext(Builder builder) {
+        super(builder.stackId, builder.cloudPlatform, builder.errorReason);
+        this.setupProperties = builder.setupProperties;
+        this.userDataParams = builder.userDataParams;
+        this.resources = builder.resources;
+        this.coreInstanceMetaData = builder.coreInstanceMetaData;
+        this.ambariIp = builder.ambariIp;
+        this.clusterId = clusterId;
     }
 
     public Map<String, Object> getSetupProperties() {
@@ -59,59 +47,73 @@ public class ProvisioningContext implements FlowContext {
         return ambariIp;
     }
 
-    public void setAmbariIp(String ambariIp) {
-        this.ambariIp = ambariIp;
-    }
-
-    public long getClusterId() {
+    public Long getClusterId() {
         return clusterId;
-    }
-
-    public void setClusterId(long clusterId) {
-        this.clusterId = clusterId;
-    }
-
-    public long getClusterCreationTime() {
-        return clusterCreationTime;
-    }
-
-    public void setClusterCreationTime(long clusterCreationTime) {
-        this.clusterCreationTime = clusterCreationTime;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public Set<String> getHostNames() {
-        return hostNames;
-    }
-
-    public boolean isDecommision() {
-        return decommision;
-    }
-
-    public void setDecommision(boolean decommision) {
-        this.decommision = decommision;
     }
 
     @Override public String toString() {
         final StringBuilder sb = new StringBuilder("ProvisioningContext{");
-        sb.append("cloudPlatform=").append(cloudPlatform);
-        sb.append(", stackId=").append(stackId);
         sb.append(", setupProperties=").append(setupProperties);
         sb.append(", userDataParams=").append(userDataParams);
         sb.append(", resources=").append(resources);
         sb.append(", coreInstanceMetaData=").append(coreInstanceMetaData);
         sb.append(", ambariIp='").append(ambariIp).append('\'');
-        sb.append(", clusterId=").append(clusterId);
-        sb.append(", clusterCreationTime=").append(clusterCreationTime);
-        sb.append(", message='").append(message).append('\'');
         sb.append('}');
         return sb.toString();
+    }
+
+    public static class Builder {
+        private Long stackId;
+        private CloudPlatform cloudPlatform;
+        private String errorReason = "";
+        private Map<String, Object> setupProperties = new HashMap<>();
+        private Map<String, String> userDataParams = new HashMap<>();
+        private Set<Resource> resources = new HashSet<>();
+        private Set<CoreInstanceMetaData> coreInstanceMetaData = new HashSet<>();
+        private String ambariIp;
+        private Long clusterId;
+
+        public Builder setDefaultParams(Long stackId, CloudPlatform cloudPlatform) {
+            this.stackId = stackId;
+            this.cloudPlatform = cloudPlatform;
+            return this;
+        }
+
+        public Builder setDefaultParams(Long stackId, CloudPlatform cloudPlatform, String errorReason) {
+            this.stackId = stackId;
+            this.cloudPlatform = cloudPlatform;
+            this.errorReason = errorReason;
+            return this;
+        }
+
+        public Builder setProvisionSetupProperties(Map<String, Object> setupProperties, Map<String, String> userDataParams) {
+            this.setupProperties.putAll(setupProperties);
+            this.userDataParams.putAll(userDataParams);
+            return this;
+        }
+
+        public Builder setProvisionedResources(Set<Resource> resources) {
+            this.resources = resources;
+            return this;
+        }
+
+        public Builder setCoreInstanceMetadata(Set<CoreInstanceMetaData> coreInstanceMetaData) {
+            this.coreInstanceMetaData = coreInstanceMetaData;
+            return this;
+        }
+
+        public Builder setAmbariIp(String ambariIp) {
+            this.ambariIp = ambariIp;
+            return this;
+        }
+
+        public Builder setClusterId(Long clusterId) {
+            this.clusterId = clusterId;
+            return this;
+        }
+
+        public ProvisioningContext build() {
+            return new ProvisioningContext(this);
+        }
     }
 }
