@@ -44,6 +44,6 @@ func main() {
 		"include/env.bash",
 		"include/fn.bash",
 		"include/module.bash",
-	}, Asset, true)
+	}, Asset, false)
 
 }

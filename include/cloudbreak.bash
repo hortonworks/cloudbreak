@@ -38,11 +38,30 @@ latest-version() {
       | dos2unix
 }
 
+
+load-profile() {
+    if [ -f Profile ]; then
+        module-load "Profile"
+    else
+        echo "!! No Profile found. Please create a file called 'Profile' in the current dir." | red
+        exit 2
+    fi
+
+    if [[ "$CBD_DEFAULT_PROFILE" && -f "Profile.$CBD_DEFAULT_PROFILE" ]]; then
+		module-load "Profile.$CBD_DEFAULT_PROFILE"
+		echo "* Using default profile $CBD_DEFAULT_PROFILE" | yellow
+		GUN_PROFILE="$CBD_DEFAULT_PROFILE"
+	fi
+}
+
 main() {
 	set -eo pipefail; [[ "$TRACE" ]] && set -x
 	color-init
 
     debug "CloudBreak Deployer $(bin-version)"
+
+    load-profile
+    
     cmd-export cmd-help help
     cmd-export cbd-version version
     cmd-export cbd-update update

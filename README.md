@@ -14,6 +14,27 @@ single binary to your PATH. The one-liner way is:
 curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install | bash
 ```
 
+## Configuration
+
+Configuration is based on environment variables. Cloudbreak Deployer always forks a new
+bash subprocess **without inheriting env vars**. The only way to set env vars relevant to 
+Cloudbreak Deployer is to set them in a file called `Profile`.
+
+### Env specific Profile
+
+`Profile` is always sourced. For example If you have env specific configurations: prod you need
+2 steps:
+
+- create a file called `Profile.prod`
+- set the `CBD_DEFAULT_PROFILE` env variable.
+
+To use a specific profile once:
+```
+CBD_DEFAULT_PROFILE=prod cbd some_commands
+```
+
+For permanent setting you can `export CBD_DEFAULT_PROFILE=prod` in your `.bash_profile`.
+
 ## Debug
 
 If you want to have more detailed output set the `DEBUG` env variable to non-zero:
