@@ -10,9 +10,6 @@
     <!-- resources -->
     <parameter name="credentialName" value="it-gcp-credential" />
     <parameter name="blueprintName" value="multi-node-hdfs-yarn" />
-    <!-- with existing cloud provider templates
-    <parameter name="instanceGroups" value="it-gcp-master,master,1;it-gcp-slave,slave_1,3" />
-    -->
     <test name="init">
         <classes>
             <class name="com.sequenceiq.it.TestSuiteInitializer" />
@@ -50,7 +47,6 @@
             <class name="com.sequenceiq.it.cloudbreak.ClusterCreationTest" />
         </classes>
     </test>
-    <!--
     <test name="stop cluster">
         <parameter name="newStatus" value="STOPPED" />
         <classes>
@@ -63,5 +59,4 @@
             <class name="com.sequenceiq.it.cloudbreak.StatusUpdateTest" />
         </classes>
     </test>
-    -->
 </suite>
