@@ -42,6 +42,7 @@ main() {
 	set -eo pipefail; [[ "$TRACE" ]] && set -x
 	color-init
 
+    debug "CloudBreak Deployer $(bin-version)"
     cmd-export cmd-help help
     cmd-export cbd-version version
     cmd-export cbd-update update

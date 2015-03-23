@@ -9,6 +9,7 @@
 - One-liner install added
 - Docs: install and update process described
 - Docs: release process described with sample git commands
+- Print version number in debug mode
 
 ### Removed
 

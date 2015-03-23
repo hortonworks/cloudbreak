@@ -14,6 +14,13 @@ single binary to your PATH. The one-liner way is:
 curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install | bash
 ```
 
+## Debug
+
+If you want to have more detailed output set the `DEBUG` env variable to non-zero:
+```
+DEBUG=1 cbd some_command
+```
+
 ## Update
 
 The tool is capable of upgrade itself:
