@@ -3,6 +3,7 @@
 ### Fixed
 
 - debug function fixed
+- DEBUG and TRACE env vars are inherited
 
 ### Added
 
