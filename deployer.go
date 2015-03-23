@@ -37,9 +37,9 @@ func main() {
 		"hello":       Hello,
 		"bin-version": BinVersion,
 	}, []string{
-		"include/cloudbreak.bash",
 		"include/cmd.bash",
 		"include/color.bash",
+		"include/deployer.bash",
 		"include/deps.bash",
 		"include/env.bash",
 		"include/fn.bash",

@@ -16,6 +16,8 @@
 
 ### Changed
 
+- Tool specific library renamed from cloudbreak.bash to deployer.bash
+
 ## Unreleased
 
 ## [v0.0.3] - 2015-03-19
