@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import reactor.event.Event;
 
 @Service
-public class ClusterStartHandler extends AbstractFlowHandler<StackStatusUpdateContext> implements FlowHandler{
+public class ClusterStartHandler extends AbstractFlowHandler<StackStatusUpdateContext> implements FlowHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterStartHandler.class);
 
     @Override
