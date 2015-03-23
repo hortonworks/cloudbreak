@@ -15,9 +15,9 @@ public class ClusterStatusUpdateFailureHandler extends AbstractFlowHandler<Stack
     protected Object execute(Event<StackStatusUpdateContext> event) throws CloudbreakException {
         StackStatusUpdateContext context = event.getData();
         if (context.isStart()) {
-            getFlowFacade().clusterStartError(context);
+            getFlowFacade().handleClusterStartFailure(context);
         } else {
-            getFlowFacade().clusterStopError(context);
+            getFlowFacade().handleClusterStopFailure(context);
         }
         return context;
     }

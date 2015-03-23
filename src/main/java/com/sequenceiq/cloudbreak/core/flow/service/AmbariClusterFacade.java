@@ -179,7 +179,7 @@ public class AmbariClusterFacade implements ClusterFacade {
     }
 
     @Override
-    public FlowContext clusterStartError(FlowContext context) throws CloudbreakException {
+    public FlowContext handleStartFailure(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Handling cluster start failure. Context: {} ", context);
         try {
             StackStatusUpdateContext startContext = (StackStatusUpdateContext) context;
@@ -195,7 +195,7 @@ public class AmbariClusterFacade implements ClusterFacade {
     }
 
     @Override
-    public FlowContext clusterStopError(FlowContext context) throws CloudbreakException {
+    public FlowContext handleStopFailure(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Handling cluster stop failure. Context: {} ", context);
         try {
             StackStatusUpdateContext stopContext = (StackStatusUpdateContext) context;
