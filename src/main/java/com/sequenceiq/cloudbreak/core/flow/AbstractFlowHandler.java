@@ -38,17 +38,20 @@ public abstract class AbstractFlowHandler<T> implements Consumer<Event<T>>, Flow
      */
     @Override
     public void accept(Event<T> event) {
+        LOGGER.debug("Executing flow Logic on the event: {}", event);
         Object result = null;
         boolean success = false;
         try {
-            LOGGER.debug("FlowHandler called with event {}", event);
             result = execute(event);
             success = true;
         } catch (Throwable t) {
-            LOGGER.debug("Consuming the error {}", t);
-            //            event.consumeError(t);
-            handleErrorFlow(t, event);
-            result = event.getData();
+            consumeError(event, t);
+            try {
+                result = handleErrorFlow(t, event.getData());
+            } catch (Exception e) {
+                LOGGER.error("Error during error handling flow");
+                throw new CloudbreakRuntimeException("Error during error handling flow", e);
+            }
         }
         Object payload = assemblePayload(result);
         next(payload, success);
@@ -70,21 +73,41 @@ public abstract class AbstractFlowHandler<T> implements Consumer<Event<T>>, Flow
     }
 
     /**
+     * Entry point for custom error flows. Implementers are expected to override this method if errors trigger changes in the flow.
+     *
+     * @param throwable the error occured
+     * @param data      the data received by the handler
+     * @return the result of the error processing
+     * @throws Exception if the error handling fails
+     */
+    protected Object handleErrorFlow(Throwable throwable, T data) throws Exception {
+        LOGGER.info("Default error flow handling for {}", getClass());
+        return data;
+    }
+
+    /**
      * Delegates to the error handling callback. Enhances the error with contextual data from the passed in event.
+     * Implementers are expected to override this method to perform custom error processing!
      *
      * @param throwable the caught exception
-     * @param data      the received data
+     * @param event     the received data
      */
-
-    protected abstract void handleErrorFlow(Throwable throwable, Object data);
+    protected void consumeError(Event<T> event, Throwable throwable) {
+        LOGGER.debug("Default error consumption logic {}", throwable);
+        //event.consumeError(t);
+    }
 
     /**
      * Assembles the payload for the next phase based on the results of the execution.
+     * Implementers are expected to override the default behavior if custom decoration is needed!
      *
      * @param serviceResult the results of the execution
      * @return the payload for the next phase of the flow
      */
-    protected abstract Object assemblePayload(Object serviceResult);
+    protected Object assemblePayload(Object serviceResult) {
+        LOGGER.info("Default service result decoration for {}", getClass());
+        return serviceResult;
+    }
 
     protected FlowFacade getFlowFacade() {
         return flowFacade;

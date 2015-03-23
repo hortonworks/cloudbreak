@@ -21,13 +21,4 @@ public class ClusterStatusUpdateFailureHandler extends AbstractFlowHandler<Stack
         }
         return context;
     }
-
-    @Override
-    protected void handleErrorFlow(Throwable throwable, Object data) {
-    }
-
-    @Override
-    protected Object assemblePayload(Object serviceResult) {
-        return null;
-    }
 }

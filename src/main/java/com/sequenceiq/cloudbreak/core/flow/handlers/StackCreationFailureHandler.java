@@ -27,14 +27,4 @@ public class StackCreationFailureHandler extends AbstractFlowHandler<FlowContext
         LOGGER.info("Stack creation failure  handled. Context: {}", context);
         return context;
     }
-
-    @Override
-    protected void handleErrorFlow(Throwable throwable, Object data) {
-
-    }
-
-    @Override
-    protected Object assemblePayload(Object serviceResult) {
-        return null;
-    }
 }

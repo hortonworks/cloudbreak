@@ -25,18 +25,8 @@ public class ClusterUpscaleHandler extends AbstractFlowHandler<ClusterScalingCon
     }
 
     @Override
-    protected void handleErrorFlow(Throwable throwable, Object data) {
-        Event<ClusterScalingContext> event = (Event<ClusterScalingContext>) data;
-        ClusterScalingContext scalingContext = event.getData();
-        try {
-            getFlowFacade().handleClusterScalingFailure(scalingContext);
-        } catch (CloudbreakException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    protected Object assemblePayload(Object serviceResult) {
-        return serviceResult;
+    protected Object handleErrorFlow(Throwable throwable, ClusterScalingContext data) throws Exception {
+        LOGGER.info("handleErrorFlow() for phase: {}", getClass());
+        return getFlowFacade().handleClusterScalingFailure(data);
     }
 }

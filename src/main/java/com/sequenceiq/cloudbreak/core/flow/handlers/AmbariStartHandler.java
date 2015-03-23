@@ -22,16 +22,4 @@ public class AmbariStartHandler extends AbstractFlowHandler<ProvisioningContext>
         LOGGER.info("Ambari started. Context: {}", provisioningContext);
         return provisioningContext;
     }
-
-    @Override
-    protected void handleErrorFlow(Throwable throwable, Object data) {
-        LOGGER.info("handleErrorFlow() for phase: {}", ((Event) data).getKey());
-
-    }
-
-    @Override
-    protected Object assemblePayload(Object serviceResult) {
-        LOGGER.info("assemblePayload() for phase: {}", serviceResult);
-        return serviceResult;
-    }
 }

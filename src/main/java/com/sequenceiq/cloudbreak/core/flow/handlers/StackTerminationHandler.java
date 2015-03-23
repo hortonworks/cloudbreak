@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
-import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.TerminationContext;
 
 import reactor.event.Event;
@@ -25,21 +24,8 @@ public class StackTerminationHandler extends AbstractFlowHandler<TerminationCont
     }
 
     @Override
-    protected void handleErrorFlow(Throwable throwable, Object data) {
-        Event<TerminationContext> event = (Event<TerminationContext>) data;
-        TerminationContext terminationContext = event.getData();
-        LOGGER.info("execute() for phase: {}", event.getKey());
-        try {
-            FlowContext context = getFlowFacade().handleStackTerminationFailure(terminationContext);
-            LOGGER.info("Stack termination failure is handled. Context: {}", context);
-        } catch (CloudbreakException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    protected Object assemblePayload(Object serviceResult) {
-        LOGGER.info("assemblePayload() for phase: {}", serviceResult);
-        return serviceResult;
+    protected Object handleErrorFlow(Throwable throwable, TerminationContext data) throws Exception {
+        LOGGER.info("execute() for phase: {}", getClass());
+        return getFlowFacade().handleStackTerminationFailure(data);
     }
 }
