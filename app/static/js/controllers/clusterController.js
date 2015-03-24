@@ -134,6 +134,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.prepareParameters = function (cluster) {
+            if (cluster.consulServerCount === null || cluster.consulServerCount === undefined) {
+              delete cluster.consulServerCount;
+            }
             for (var item in cluster.parameters) {
                 if (cluster.parameters[item] === "" || cluster.parameters[item] === undefined) {
                   delete cluster.parameters[item];
@@ -279,7 +282,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 onFailureAction: "ROLLBACK",
                 bestEffort: "BEST_EFFORT",
                 parameters: {},
-                consulServerCount: 3,
                 failurePolicy: {
                   adjustmentType: "BEST_EFFORT",
                 }
