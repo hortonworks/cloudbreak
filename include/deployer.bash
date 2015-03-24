@@ -77,6 +77,10 @@ main() {
     cmd-export cbd-update update
     cmd-export cbd-update-snap update-snap
 
+    if [[ "$DEBUG" ]]; then
+        cmd-export fn-call fn
+    fi
+    
 	if [[ "${!#}" == "-h" || "${!#}" == "--help" ]]; then
 		local args=("$@")
 		unset args[${#args[@]}-1]
