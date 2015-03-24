@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
+import com.sequenceiq.cloudbreak.domain.ScalingType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -114,7 +115,7 @@ public class DefaultStackService implements StackService {
 
     @Override
     public Stack getById(Long id) {
-        Stack retStack = stackRepository.findById(id);
+        Stack retStack = stackRepository.findOneWithLists(id);
         if (retStack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
@@ -226,14 +227,18 @@ public class DefaultStackService implements StackService {
         validateScalingAdjustment(instanceGroupAdjustmentJson, stack);
         LOGGER.info("Publishing {} event [scalingAdjustment: '{}']", UPDATE_INSTANCES_REQUEST_EVENT, instanceGroupAdjustmentJson.getScalingAdjustment());
         int absScalingAdjustment = Math.abs(instanceGroupAdjustmentJson.getScalingAdjustment());
-        UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(stack.cloudPlatform(), stack.getId(),
-                instanceGroupAdjustmentJson.getScalingAdjustment(), instanceGroupAdjustmentJson.getInstanceGroup());
 
         if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
+            UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(stack.cloudPlatform(), stack.getId(),
+                    instanceGroupAdjustmentJson.getScalingAdjustment(), instanceGroupAdjustmentJson.getInstanceGroup(),
+                    instanceGroupAdjustmentJson.getWithClusterEvent() ? ScalingType.UPSCALE_TOGETHER : ScalingType.UPSCALE_ONLY_STACK);
             String statusMessage = "Adding '%s' new instance(s) to the cluster infrastructure.";
             stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, String.format(statusMessage, absScalingAdjustment));
             flowManager.triggerStackUpscale(updateInstancesRequest);
         } else {
+            UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(stack.cloudPlatform(), stack.getId(),
+                    instanceGroupAdjustmentJson.getScalingAdjustment(), instanceGroupAdjustmentJson.getInstanceGroup(),
+                    ScalingType.DOWNSCALE_ONLY_STACK);
             String statusMessage = "Removing '%s' instance(s) from the cluster infrastructure.";
             stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, String.format(statusMessage, absScalingAdjustment));
             flowManager.triggerStackDownscale(updateInstancesRequest);

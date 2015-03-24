@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
+import com.sequenceiq.cloudbreak.domain.ScalingType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
@@ -147,14 +148,17 @@ public class AmbariClusterService implements ClusterService {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(cluster);
-        LOGGER.info("Cluster update requested [BlueprintId: {}]", cluster.getBlueprint().getId());
-        boolean decommissionRequest = validateUpdateHostsRequest(stack, hostGroupAdjustment);
+        boolean decommissionRequest = validateRequest(stack, hostGroupAdjustment);
         List<HostMetadata> downScaleCandidates = collectDownscaleCandidates(hostGroupAdjustment, stack, cluster, decommissionRequest);
-        UpdateAmbariHostsRequest updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, downScaleCandidates,
-                decommissionRequest, stack.cloudPlatform());
+        UpdateAmbariHostsRequest updateRequest;
         if (decommissionRequest) {
+            updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, downScaleCandidates,
+                    decommissionRequest, stack.cloudPlatform(),
+                    hostGroupAdjustment.getWithStackUpdate() ? ScalingType.DOWNSCALE_TOGETHER : ScalingType.DOWNSCALE_ONLY_CLUSTER);
             flowManager.triggerClusterDownscale(updateRequest);
         } else {
+            updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, downScaleCandidates,
+                    decommissionRequest, stack.cloudPlatform(), ScalingType.UPSCALE_ONLY_CLUSTER);
             flowManager.triggerClusterUpscale(updateRequest);
         }
         LOGGER.info("Publishing {} event", ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT);
@@ -251,6 +255,26 @@ public class AmbariClusterService implements ClusterService {
         LOGGER.debug("Updating cluster. clusterId: {}", cluster.getId());
         cluster = clusterRepository.save(cluster);
         return cluster;
+    }
+
+    private boolean validateRequest(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
+        MDCBuilder.buildMdcContext(stack.getCluster());
+        HostGroup hostGroup = getHostGroup(stack, hostGroupAdjustment);
+        int scalingAdjustment = hostGroupAdjustment.getScalingAdjustment();
+        boolean downScale = scalingAdjustment < 0;
+        if (scalingAdjustment == 0) {
+            throw new BadRequestException("No scaling adjustments specified. Nothing to do.");
+        }
+        if (!downScale) {
+            validateUnregisteredHosts(hostGroup, scalingAdjustment);
+        } else {
+            validateRegisteredHosts(stack, hostGroupAdjustment);
+            validateComponentsCategory(stack, hostGroupAdjustment);
+            if (hostGroupAdjustment.getWithStackUpdate() && hostGroupAdjustment.getScalingAdjustment() > 0) {
+                throw new BadRequestException("ScalingAdjustment has to be decommission if you define withStackUpdate = 'true'.");
+            }
+        }
+        return downScale;
     }
 
     private List<HostMetadata> collectDownscaleCandidates(HostGroupAdjustmentJson adjustmentJson, Stack stack, Cluster cluster, boolean decommissionRequest) {

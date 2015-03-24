@@ -141,7 +141,7 @@ public class FlowInitializer implements InitializingBean {
 
     private void registerUpscaleFlows() {
         transitionKeyService.registerTransition(StackUpscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.STACK_UPSCALE.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
+                .createTransition(FlowPhases.STACK_UPSCALE.name(), FlowPhases.CLUSTER_UPSCALE.name(), FlowPhases.NONE.name()));
 
         transitionKeyService.registerTransition(ClusterUpscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
                 .createTransition(FlowPhases.CLUSTER_UPSCALE.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
@@ -152,7 +152,7 @@ public class FlowInitializer implements InitializingBean {
                 .createTransition(FlowPhases.STACK_DOWNSCALE.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
 
         transitionKeyService.registerTransition(ClusterDownscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.CLUSTER_DOWNSCALE.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
+                .createTransition(FlowPhases.CLUSTER_DOWNSCALE.name(), FlowPhases.STACK_DOWNSCALE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerUpdateAllowedSubnetFlow() {
