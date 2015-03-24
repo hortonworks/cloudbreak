@@ -24,7 +24,7 @@ public interface ClusterService {
 
     Cluster clusterCreationSuccess(Long clusterId, long creationFinished, String ambariIp);
 
-    Cluster updateClusterStatus(Long clusterId, Status status, String statusReason);
+    Cluster updateClusterStatusByStackId(Long stackId, Status status, String statusReason);
 
     Cluster updateCluster(Cluster cluster);
 }

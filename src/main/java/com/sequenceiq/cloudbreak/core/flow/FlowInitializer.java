@@ -105,7 +105,7 @@ public class FlowInitializer implements InitializingBean {
                 .createTransition(FlowPhases.CLUSTER_CREATION.name(), FlowPhases.NONE.name(), FlowPhases.CLUSTER_START_FAILED.name()));
 
         transitionKeyService.registerTransition(StackStatusUpdateFailureHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.CLUSTER_CREATION.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
+                .createTransition(FlowPhases.CLUSTER_START_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerTerminationFlow() {

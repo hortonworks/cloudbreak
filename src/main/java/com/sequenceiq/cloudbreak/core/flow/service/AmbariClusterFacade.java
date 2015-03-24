@@ -229,7 +229,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         LOGGER.debug("Handling cluster creation failure. Context: {}", flowContext);
         ProvisioningContext context = (ProvisioningContext) flowContext;
 
-        Cluster cluster = clusterService.updateClusterStatus(context.getClusterId(), Status.CREATE_FAILED, context.getErrorReason());
+        Cluster cluster = clusterService.updateClusterStatusByStackId(context.getStackId(), Status.CREATE_FAILED, context.getErrorReason());
         MDCBuilder.buildMdcContext(cluster);
 
         stackUpdater.updateStackStatus(context.getStackId(), Status.AVAILABLE, "Cluster installation failed. Error: " + context.getErrorReason());

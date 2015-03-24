@@ -15,7 +15,6 @@ public class ProvisioningContext extends DefaultFlowContext implements FlowConte
     private Set<Resource> resources = new HashSet<>();
     private Set<CoreInstanceMetaData> coreInstanceMetaData = new HashSet<>();
     private String ambariIp;
-    private Long clusterId;
 
     private ProvisioningContext(Builder builder) {
         super(builder.stackId, builder.cloudPlatform, builder.errorReason);
@@ -24,7 +23,6 @@ public class ProvisioningContext extends DefaultFlowContext implements FlowConte
         this.resources = builder.resources;
         this.coreInstanceMetaData = builder.coreInstanceMetaData;
         this.ambariIp = builder.ambariIp;
-        this.clusterId = clusterId;
     }
 
     public Map<String, Object> getSetupProperties() {
@@ -47,10 +45,6 @@ public class ProvisioningContext extends DefaultFlowContext implements FlowConte
         return ambariIp;
     }
 
-    public Long getClusterId() {
-        return clusterId;
-    }
-
     @Override public String toString() {
         final StringBuilder sb = new StringBuilder("ProvisioningContext{");
         sb.append(", setupProperties=").append(setupProperties);
@@ -71,7 +65,6 @@ public class ProvisioningContext extends DefaultFlowContext implements FlowConte
         private Set<Resource> resources = new HashSet<>();
         private Set<CoreInstanceMetaData> coreInstanceMetaData = new HashSet<>();
         private String ambariIp;
-        private Long clusterId;
 
         public Builder setDefaultParams(Long stackId, CloudPlatform cloudPlatform) {
             this.stackId = stackId;
@@ -104,11 +97,6 @@ public class ProvisioningContext extends DefaultFlowContext implements FlowConte
 
         public Builder setAmbariIp(String ambariIp) {
             this.ambariIp = ambariIp;
-            return this;
-        }
-
-        public Builder setClusterId(Long clusterId) {
-            this.clusterId = clusterId;
             return this;
         }
 
