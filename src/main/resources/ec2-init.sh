@@ -112,10 +112,6 @@ set_public_host_script() {
 format_disks() {
   /usr/local/disk_mount.sh
 }
-fix_host_sys() {
-  sed -i "/HOSTNAME/d" /etc/sysconfig/network
-  sh -c ' echo "HOSTNAME=localhost.localdomain" >> /etc/sysconfig/network'
-}
 main() {
   if [[ "$1" == "::" ]]; then
     shift
@@ -123,7 +119,6 @@ main() {
   else
     format_disks
     fix_hostname
-    fix_host_sys
     start_consul
     start_ambari_server
     start_ambari_agent
