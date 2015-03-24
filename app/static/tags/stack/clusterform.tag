@@ -58,6 +58,12 @@
                         </div>
                     </div>
                     <div class="form-group" ng-show="showAdvancedOptionForm">
+                      <label class="col-sm-3 control-label" for="consulServerCount">Consul server count</label>
+                      <div class="col-sm-3">
+                        <input class="form-control" type="number" id="consulServerCount" ng-model="cluster.consulServerCount">
+                      </div>
+                    </div>
+                    <div class="form-group" ng-show="showAdvancedOptionForm">
                       <label class="col-sm-3 control-label" for="selectAdjustment">Minimum cluster size</label>
                       <div class="col-sm-3">
                         <select class="form-control" id="bestEffort" ng-model="cluster.bestEffort" ng-change="selectedAdjustmentChange()" ng-disabled="activeCredential.cloudPlatform == 'AWS' || activeCredential.cloudPlatform == 'OPENSTACK'">
