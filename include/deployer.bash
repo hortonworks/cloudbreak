@@ -63,6 +63,12 @@ load-profile() {
 	fi
 }
 
+doctor() {
+    declare desc="Checks everything, and reports a diagnose"
+
+    docker-check-version
+}
+
 main() {
 	set -eo pipefail; [[ "$TRACE" ]] && set -x
 	color-init
@@ -76,7 +82,8 @@ main() {
     cmd-export cbd-version version
     cmd-export cbd-update update
     cmd-export cbd-update-snap update-snap
-
+    cmd-export doctor doctor
+    
     if [[ "$DEBUG" ]]; then
         cmd-export fn-call fn
     fi
