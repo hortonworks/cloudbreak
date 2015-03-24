@@ -7,6 +7,9 @@ public class ProvisionEvent {
     private CloudPlatform cloudPlatform;
     private Long stackId;
 
+    public ProvisionEvent() {
+    }
+
     public ProvisionEvent(CloudPlatform cloudPlatform, Long stackId) {
         this.cloudPlatform = cloudPlatform;
         this.stackId = stackId;

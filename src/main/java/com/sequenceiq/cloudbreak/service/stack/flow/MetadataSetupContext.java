@@ -15,6 +15,8 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
+import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
+import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 
 import reactor.core.Reactor;
@@ -48,16 +50,17 @@ public class MetadataSetupContext {
         }
     }
 
-    public void updateMetadata(CloudPlatform cloudPlatform, Long stackId, Set<Resource> resourceSet, String instanceGroup) {
+    public Set<CoreInstanceMetaData> updateMetadata(CloudPlatform cloudPlatform, Long stackId, Set<Resource> resourceSet, String instanceGroup) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         MDCBuilder.buildMdcContext(stack);
         try {
-            metadataSetups.get(cloudPlatform).addNewNodesToMetadata(stack, resourceSet, instanceGroup);
+            ProvisionEvent provisionEvent = metadataSetups.get(cloudPlatform).addNewNodesToMetadata(stack, resourceSet, instanceGroup);
+            MetadataUpdateComplete context = (MetadataUpdateComplete) provisionEvent;
+            return context.getCoreInstanceMetaData();
         } catch (Exception e) {
             String errMessage = "Unhandled exception occurred while updating stack metadata.";
             LOGGER.error(errMessage, e);
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_FAILED_EVENT, stackId);
-            reactor.notify(ReactorConfig.STACK_UPDATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stackId, errMessage)));
+            throw e;
         }
 
     }

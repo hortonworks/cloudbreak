@@ -42,14 +42,9 @@ import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
-import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 
 import jersey.repackaged.com.google.common.collect.Maps;
 import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Service
 public class OpenStackConnector implements CloudPlatformConnector {
@@ -93,7 +88,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
     private OpenStackInstanceStatusCheckerTask openStackInstanceStatusCheckerTask;
 
     @Override
-    public void buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
+    public Set<Resource> buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
         MDCBuilder.buildMdcContext(stack);
         String stackName = stack.getName();
         OpenStackCredential credential = (OpenStackCredential) stack.getCredential();
@@ -115,14 +110,13 @@ public class OpenStackConnector implements CloudPlatformConnector {
                     POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             if (isSuccess(pollingResult)) {
                 LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
-                reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(
-                        new ProvisionComplete(CloudPlatform.OPENSTACK, stack.getId(), new HashSet<>(resources))));
             }
         } catch (HeatStackFailedException e) {
             LOGGER.error(String.format("Failed to create Heat stack: %s", stack.getId()), e);
             stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_FAILED, "Creation of cluster infrastructure failed: " + e.getMessage());
             throw new BuildStackFailureException(e);
         }
+        return new HashSet<>(resources);
     }
 
     @Override
@@ -136,8 +130,8 @@ public class OpenStackConnector implements CloudPlatformConnector {
             PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
             if (isSuccess(pollingResult)) {
                 LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
-                reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
-                        Event.wrap(new AddInstancesComplete(CloudPlatform.OPENSTACK, stack.getId(), null, instanceGroup)));
+//                reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
+//                        Event.wrap(new AddInstancesComplete(CloudPlatform.OPENSTACK, stack.getId(), null, instanceGroup)));
             }
         } catch (UpdateFailedException e) {
             LOGGER.error("Failed to update the Heat stack", e);
@@ -148,19 +142,20 @@ public class OpenStackConnector implements CloudPlatformConnector {
 
     @Override
     public boolean removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
+        boolean result = false;
         try {
             String userDataScript = userDataBuilder.build(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>());
             String heatTemplate = heatTemplateBuilder.remove(stack, openStackHeatTemplatePath, userDataScript,
                     instanceMetaDataRepository.findAllInStack(stack.getId()), instanceIds, instanceGroup);
             PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
             if (isSuccess(pollingResult)) {
-                reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds, instanceGroup)));
+                result = true;
             }
         } catch (UpdateFailedException e) {
             LOGGER.error("Failed to update the Heat stack", e);
             throw new BuildStackFailureException(e);
         }
-        return true;
+        return result;
     }
 
     @Override
@@ -176,15 +171,13 @@ public class OpenStackConnector implements CloudPlatformConnector {
                         POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
                 if (isSuccess(pollingResult)) {
                     LOGGER.info("Heat stack deleted, publishing {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
-                    reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
                 }
             } catch (HeatStackFailedException e) {
                 LOGGER.error(String.format("Failed to delete Heat stack: %s", stack.getId()), e);
-                stackUpdater.updateStackStatus(stack.getId(), Status.DELETE_FAILED, "Termination of cluster infrastructure failed: " + e.getMessage());
+                throw e;
             }
         } else {
             LOGGER.info("No resource saved for stack, publishing {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
-            reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
         }
     }
 

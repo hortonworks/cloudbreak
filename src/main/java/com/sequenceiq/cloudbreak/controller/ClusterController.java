@@ -48,7 +48,7 @@ public class ClusterController {
     @ResponseBody
     public ResponseEntity<ClusterResponse> retrieveCluster(@PathVariable Long stackId) {
         Stack stack = stackService.get(stackId);
-        Cluster cluster = clusterService.retrieveCluster(stackId);
+        Cluster cluster = clusterService.retrieveClusterForCurrentUser(stackId);
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stackId);
         ClusterResponse response = clusterConverter.convert(cluster, clusterJson);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -58,7 +58,7 @@ public class ClusterController {
     @ResponseBody
     public ResponseEntity<ClusterResponse> retrievePrivateCluster(@ModelAttribute("user") CbUser user, @PathVariable String name) {
         Stack stack = stackService.getPrivateStack(name, user);
-        Cluster cluster = clusterService.retrieveCluster(stack.getId());
+        Cluster cluster = clusterService.retrieveClusterForCurrentUser(stack.getId());
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stack.getId());
         ClusterResponse response = clusterConverter.convert(cluster, clusterJson);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -68,7 +68,7 @@ public class ClusterController {
     @ResponseBody
     public ResponseEntity<ClusterResponse> retrievePublicCluster(@ModelAttribute("user") CbUser user, @PathVariable String name) {
         Stack stack = stackService.getPublicStack(name, user);
-        Cluster cluster = clusterService.retrieveCluster(stack.getId());
+        Cluster cluster = clusterService.retrieveClusterForCurrentUser(stack.getId());
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stack.getId());
         ClusterResponse response = clusterConverter.convert(cluster, clusterJson);
         return new ResponseEntity<>(response, HttpStatus.OK);

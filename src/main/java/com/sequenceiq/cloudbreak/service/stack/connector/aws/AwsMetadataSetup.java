@@ -23,19 +23,17 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
+import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Component
 public class AwsMetadataSetup implements MetadataSetup {
@@ -50,9 +48,6 @@ public class AwsMetadataSetup implements MetadataSetup {
     private AwsStackUtil awsStackUtil;
 
     @Autowired
-    private Reactor reactor;
-
-    @Autowired
     private CloudFormationStackUtil cfStackUtil;
 
     @Autowired
@@ -61,9 +56,8 @@ public class AwsMetadataSetup implements MetadataSetup {
     @Autowired
     private ASGroupStatusCheckerTask asGroupStatusCheckerTask;
 
-
     @Override
-    public void setupMetadata(Stack stack) {
+    public ProvisionEvent setupMetadata(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
 
         Set<CoreInstanceMetaData> coreInstanceMetadata = new HashSet<>();
@@ -101,18 +95,18 @@ public class AwsMetadataSetup implements MetadataSetup {
                             instance.getBlockDeviceMappings().size() - 1,
                             instance.getPrivateDnsName(),
                             instanceGroup
-                            ));
+                    ));
                 }
             }
         }
 
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT,
-                Event.wrap(new MetadataSetupComplete(CloudPlatform.AWS, stack.getId(), coreInstanceMetadata)));
+        return new MetadataSetupComplete(CloudPlatform.AWS, stack.getId(), coreInstanceMetadata);
     }
 
     @Override
-    public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String instanceGroupName) {
+    public ProvisionEvent addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String instanceGroupName) {
+
         MDCBuilder.buildMdcContext(stack);
         Set<CoreInstanceMetaData> coreInstanceMetadata = new HashSet<>();
         LOGGER.info("Adding new instances to metadata: [stack: '{}']", stack.getId());
@@ -147,8 +141,7 @@ public class AwsMetadataSetup implements MetadataSetup {
             }
         }
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT,
-                Event.wrap(new MetadataUpdateComplete(CloudPlatform.AWS, stack.getId(), coreInstanceMetadata, instanceGroupName)));
+        return new MetadataUpdateComplete(CloudPlatform.AWS, stack.getId(), coreInstanceMetadata, instanceGroupName);
     }
 
     @Override

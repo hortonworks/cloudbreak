@@ -25,13 +25,16 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.core.flow.FlowManager;
 import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
@@ -45,10 +48,9 @@ import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
+import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 
 import groovyx.net.http.HttpResponseException;
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Service
 public class AmbariClusterService implements ClusterService {
@@ -74,9 +76,6 @@ public class AmbariClusterService implements ClusterService {
     private HostGroupRepository hostGroupRepository;
 
     @Autowired
-    private Reactor reactor;
-
-    @Autowired
     private AmbariClientService clientService;
 
     @Autowired
@@ -85,8 +84,11 @@ public class AmbariClusterService implements ClusterService {
     @Autowired
     private HostFilterService hostFilterService;
 
+    @Autowired
+    private FlowManager flowManager;
+
     @Override
-    public void create(CbUser user, Long stackId, Cluster cluster) {
+    public Cluster create(CbUser user, Long stackId, Cluster cluster) {
         Stack stack = stackRepository.findOne(stackId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
@@ -102,12 +104,20 @@ public class AmbariClusterService implements ClusterService {
             throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName(), ex);
         }
         stack = stackUpdater.updateStackCluster(stack.getId(), cluster);
-        LOGGER.info("Publishing {} event", ReactorConfig.CLUSTER_REQUESTED_EVENT);
-        reactor.notify(ReactorConfig.CLUSTER_REQUESTED_EVENT, Event.wrap(stack));
+        if (Status.AVAILABLE.equals(stack.getStatus())) {
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.CLUSTER_REQUESTED_EVENT, stack.getId());
+            flowManager.triggerClusterInstall(new ProvisionRequest(stack.cloudPlatform(), stack.getId()));
+        }
+        return cluster;
     }
 
     @Override
-    public Cluster retrieveCluster(Long stackId) {
+    public Cluster retrieveClusterByStackId(Long stackId) {
+        return stackRepository.findById(stackId).getCluster();
+    }
+
+    @Override
+    public Cluster retrieveClusterForCurrentUser(Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
         return stack.getCluster();
     }
@@ -133,35 +143,28 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public void updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
+    public UpdateAmbariHostsRequest updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(cluster);
-        boolean decommissionRequest = validateRequest(stack, hostGroupAdjustment);
-        List<HostMetadata> downScaleCandidates = new ArrayList<>();
-        if (decommissionRequest) {
-            AmbariClient ambariClient = clientService.create(stack);
-            int replication = getReplicationFactor(ambariClient, hostGroupAdjustment.getHostGroup());
-            HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
-            Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();
-            List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(stack, hostsInHostGroup, hostGroupAdjustment.getHostGroup());
-            int reservedInstances = hostsInHostGroup.size() - filteredHostList.size();
-            verifyNodeCount(cluster, replication, hostGroupAdjustment.getScalingAdjustment(), filteredHostList, reservedInstances);
-            if (doesHostGroupContainDataNode(ambariClient, cluster.getBlueprint().getBlueprintName(), hostGroup.getName())) {
-                downScaleCandidates = checkAndSortByAvailableSpace(stack, ambariClient, replication,
-                        hostGroupAdjustment.getScalingAdjustment(), filteredHostList);
-            } else {
-                downScaleCandidates = filteredHostList;
-            }
-        }
         LOGGER.info("Cluster update requested [BlueprintId: {}]", cluster.getBlueprint().getId());
+        boolean decommissionRequest = validateUpdateHostsRequest(stack, hostGroupAdjustment);
+        List<HostMetadata> downScaleCandidates = collectDownscaleCandidates(hostGroupAdjustment, stack, cluster, decommissionRequest);
+        UpdateAmbariHostsRequest updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, downScaleCandidates,
+                decommissionRequest, stack.cloudPlatform());
+        if (decommissionRequest) {
+            flowManager.triggerClusterDownscale(updateRequest);
+        } else {
+            flowManager.triggerClusterUpscale(updateRequest);
+        }
         LOGGER.info("Publishing {} event", ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT);
-        reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT, Event.wrap(
-                new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, downScaleCandidates, decommissionRequest)));
+        return updateRequest;
     }
 
     @Override
-    public void updateStatus(Long stackId, StatusRequest statusRequest) {
+    public ClusterStatusUpdateRequest updateStatus(Long stackId, StatusRequest statusRequest) {
+        ClusterStatusUpdateRequest retVal = null;
+
         Stack stack = stackRepository.findOne(stackId);
         Cluster cluster = stack.getCluster();
         if (cluster == null) {
@@ -187,9 +190,8 @@ public class AmbariClusterService implements ClusterService {
                 }
                 cluster.setStatus(Status.START_IN_PROGRESS);
                 clusterRepository.save(cluster);
-                LOGGER.info("Publishing {} event", ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT);
-                reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
-                        Event.wrap(new ClusterStatusUpdateRequest(stack.getId(), statusRequest)));
+                retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest, stack.cloudPlatform());
+                flowManager.triggerClusterStart(retVal);
             }
         } else {
             if (!Status.AVAILABLE.equals(clusterStatus)) {
@@ -203,9 +205,72 @@ public class AmbariClusterService implements ClusterService {
             cluster.setStatus(Status.STOP_IN_PROGRESS);
             clusterRepository.save(cluster);
             LOGGER.info("Publishing {} event", ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT);
-            reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
-                    Event.wrap(new ClusterStatusUpdateRequest(stack.getId(), statusRequest)));
+            retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest, stack.cloudPlatform());
+            flowManager.triggerClusterStop(retVal);
         }
+
+        return retVal;
+    }
+
+    @Override
+    public Cluster clusterCreationSuccess(Long clusterId, long creationFinished, String ambariIp) {
+        Cluster cluster = clusterRepository.findById(clusterId);
+        MDCBuilder.buildMdcContext(cluster);
+        LOGGER.info("Accepted {} event.", ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT, clusterId);
+        cluster.setStatus(Status.AVAILABLE);
+        cluster.setStatusReason("");
+        cluster.setCreationFinished(creationFinished);
+        cluster.setUpSince(creationFinished);
+        cluster = clusterRepository.save(cluster);
+        Stack stack = stackRepository.findStackWithListsForCluster(clusterId);
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            Set<InstanceMetaData> instances = instanceGroup.getInstanceMetaData();
+            for (InstanceMetaData instanceMetaData : instances) {
+                instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
+            }
+            stackUpdater.updateStackMetaData(stack.getId(), instances, instanceGroup.getGroupName());
+        }
+        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "Cluster installation successfully finished. AMBARI_IP:" + stack.getAmbariIp());
+
+        // send email;
+        return cluster;
+    }
+
+    @Override
+    public Cluster updateClusterStatusByStackId(Long stackId, Status status, String statusReason) {
+        LOGGER.debug("Updating cluster status. stackId: {}, status: {}, statusReason: {}", stackId, status, statusReason);
+        Cluster cluster = stackRepository.findById(stackId).getCluster();
+        cluster.setStatus(status);
+        cluster.setStatusReason(statusReason);
+        cluster = clusterRepository.save(cluster);
+        return cluster;
+    }
+
+    @Override
+    public Cluster updateCluster(Cluster cluster) {
+        LOGGER.debug("Updating cluster. clusterId: {}", cluster.getId());
+        cluster = clusterRepository.save(cluster);
+        return cluster;
+    }
+
+    private List<HostMetadata> collectDownscaleCandidates(HostGroupAdjustmentJson adjustmentJson, Stack stack, Cluster cluster, boolean decommissionRequest) {
+        List<HostMetadata> downScaleCandidates = new ArrayList<>();
+        if (decommissionRequest) {
+            AmbariClient ambariClient = clientService.create(stack);
+            int replication = getReplicationFactor(ambariClient, adjustmentJson.getHostGroup());
+            HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), adjustmentJson.getHostGroup());
+            Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();
+            List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(stack, hostsInHostGroup, adjustmentJson.getHostGroup());
+            int reservedInstances = hostsInHostGroup.size() - filteredHostList.size();
+            verifyNodeCount(cluster, replication, adjustmentJson.getScalingAdjustment(), filteredHostList, reservedInstances);
+            if (doesHostGroupContainDataNode(ambariClient, cluster.getBlueprint().getBlueprintName(), hostGroup.getName())) {
+                downScaleCandidates = checkAndSortByAvailableSpace(stack, ambariClient, replication,
+                        adjustmentJson.getScalingAdjustment(), filteredHostList);
+            } else {
+                downScaleCandidates = filteredHostList;
+            }
+        }
+        return downScaleCandidates;
     }
 
     private int getReplicationFactor(AmbariClient ambariClient, String hostGroup) {
@@ -218,7 +283,7 @@ public class AmbariClusterService implements ClusterService {
         }
     }
 
-    private boolean validateRequest(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
+    private boolean validateUpdateHostsRequest(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
         MDCBuilder.buildMdcContext(stack.getCluster());
         HostGroup hostGroup = getHostGroup(stack, hostGroupAdjustment);
         int scalingAdjustment = hostGroupAdjustment.getScalingAdjustment();
@@ -388,5 +453,4 @@ public class AmbariClusterService implements ClusterService {
         }
         return result;
     }
-
 }

@@ -94,15 +94,10 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
-import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstances;
 
 import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Service
 public class AwsConnector implements CloudPlatformConnector {
@@ -137,7 +132,7 @@ public class AwsConnector implements CloudPlatformConnector {
     @Autowired private SnapshotReadyCheckerTask snapshotReadyCheckerTask;
 
     @Override
-    public void buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
+    public Set<Resource> buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
         MDCBuilder.buildMdcContext(stack);
         Long stackId = stack.getId();
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
@@ -160,13 +155,15 @@ public class AwsConnector implements CloudPlatformConnector {
             PollingResult pollingResult = cloudFormationPollingService
                     .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
             if (isSuccess(pollingResult)) {
-                sendUpdatedStackCreateComplete(stackId, cFStackName, resources);
+                LOGGER.info("CloudFormation stack({}) creation completed.", cFStackName);
+                LOGGER.info("Publishing {} event.", ReactorConfig.PROVISION_COMPLETE_EVENT);
             }
         } catch (CloudFormationStackException e) {
             LOGGER.error(String.format("Failed to create CloudFormation stack: %s", stackId), e);
             stackUpdater.updateStackStatus(stackId, Status.CREATE_FAILED, "Creation of cluster infrastructure failed: " + e.getMessage());
             throw new BuildStackFailureException(e);
         }
+        return resources;
     }
 
     private String getEbsSnapshotIdIfNeeded(Stack stack) {
@@ -251,8 +248,8 @@ public class AwsConnector implements CloudPlatformConnector {
                 .pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         if (isSuccess(pollingResult)) {
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
-            reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
-                    Event.wrap(new AddInstancesComplete(CloudPlatform.AWS, stack.getId(), null, instanceGroup)));
+//            reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
+//                    Event.wrap(new AddInstancesComplete(CloudPlatform.AWS, stack.getId(), null, instanceGroup)));
         }
         return true;
     }
@@ -275,8 +272,8 @@ public class AwsConnector implements CloudPlatformConnector {
         amazonASClient.detachInstances(detachInstancesRequest);
         amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(instanceIds));
         LOGGER.info("Terminated instances in stack '{}': '{}'", stack.getId(), instanceIds);
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds, instanceGroup)));
+//        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, stack.getId());
+//        reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds, instanceGroup)));
         return true;
     }
 
@@ -334,7 +331,6 @@ public class AwsConnector implements CloudPlatformConnector {
             } catch (AmazonServiceException e) {
                 if (e.getErrorMessage().equals("Stack:" + cFStackName + " does not exist")) {
                     LOGGER.info("AWS CloudFormation stack not found, publishing {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
-                    reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
                     return;
                 } else {
                     throw e;
@@ -351,16 +347,13 @@ public class AwsConnector implements CloudPlatformConnector {
                         .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
                 if (isSuccess(pollingResult)) {
                     LOGGER.info("CloudFormation stack({}) delete completed. Publishing {} event.", cFStackName, ReactorConfig.DELETE_COMPLETE_EVENT);
-                    reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
                 }
             } catch (CloudFormationStackException e) {
                 LOGGER.error(String.format("Failed to delete CloudFormation stack: %s, id:%s", cFStackName, stack.getId()), e);
-                stackUpdater.updateStackStatus(stack.getId(), Status.DELETE_FAILED, "Failed to delete stack: " + e.getMessage());
-                throw new BuildStackFailureException(e);
+                throw e;
             }
         } else {
             LOGGER.info("No resource saved for stack, publishing {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
-            reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
         }
     }
 
@@ -379,12 +372,6 @@ public class AwsConnector implements CloudPlatformConnector {
             parameters.add(new Parameter().withParameterKey("InternetGatewayId").withParameterValue(stack.getParameters().get("internetGatewayId")));
         }
         return parameters;
-    }
-
-    private void sendUpdatedStackCreateComplete(long stackId, String cFStackName, Set<Resource> resourceSet) {
-        LOGGER.info("CloudFormation stack({}) creation completed.", cFStackName);
-        LOGGER.info("Publishing {} event.", ReactorConfig.PROVISION_COMPLETE_EVENT);
-        reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AWS, stackId, resourceSet)));
     }
 
     private String getRootDeviceName(Stack stack, AwsCredential awsCredential) {

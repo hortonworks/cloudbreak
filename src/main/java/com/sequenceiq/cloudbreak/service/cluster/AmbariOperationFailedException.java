@@ -8,4 +8,6 @@ public class AmbariOperationFailedException extends InternalServerException {
         super(message);
     }
 
+    public AmbariOperationFailedException(String message, Throwable cause) { super(message, cause); }
+
 }

@@ -2,10 +2,8 @@ package com.sequenceiq.cloudbreak.service.stack.connector.openstack;
 
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.CREDENTIAL;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.openstack4j.api.OSClient;
@@ -24,10 +22,10 @@ import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
+import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 
 import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Component
 public class OpenStackProvisionSetup implements ProvisionSetup {
@@ -41,32 +39,19 @@ public class OpenStackProvisionSetup implements ProvisionSetup {
     private OpenStackUtil openStackUtil;
 
     @Override
-    public void setupProvisioning(Stack stack) {
+    public ProvisionEvent setupProvisioning(Stack stack) throws Exception {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
-                Event.wrap(new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
-                                .withSetupProperty(CREDENTIAL, stack.getCredential())
-                )
-        );
+        return new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
+                .withSetupProperty(CREDENTIAL, stack.getCredential());
     }
 
     @Override
-    public Optional<String> preProvisionCheck(Stack stack) {
+    public String preProvisionCheck(Stack stack) {
         String imageName = stack.getImage();
         OSClient osClient = openStackUtil.createOSClient(stack);
         Optional<String> result = verifyFlavors(osClient, stack.getInstanceGroupsAsList());
-        return result.isPresent() ? result : verifyImage(osClient, imageName);
-    }
-
-    @Override
-    public Map<String, String> getUserDataProperties(Stack stack) {
-        return new HashMap<>();
-    }
-
-    @Override
-    public Map<String, Object> getSetupProperties(Stack stack) {
-        return new HashMap<>();
+        return result.isPresent() ? result.get() : verifyImage(osClient, imageName).get();
     }
 
     @Override
