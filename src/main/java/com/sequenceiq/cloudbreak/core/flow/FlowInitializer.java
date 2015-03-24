@@ -75,10 +75,8 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.UPDATE_ALLOWED_SUBNETS.name()), getHandlerForClass(UpdateAllowedSubnetsHandler.class));
 
         reactor.on($(FlowPhases.STACK_CREATION_FAILED.name()), getHandlerForClass(StackCreationFailureHandler.class));
-        reactor.on($(FlowPhases.STACK_STOP_FAILED.name()), getHandlerForClass(StackStatusUpdateFailureHandler.class));
-        reactor.on($(FlowPhases.STACK_START_FAILED.name()), getHandlerForClass(StackStatusUpdateFailureHandler.class));
-        reactor.on($(FlowPhases.CLUSTER_STOP_FAILED.name()), getHandlerForClass(ClusterStatusUpdateFailureHandler.class));
-        reactor.on($(FlowPhases.CLUSTER_START_FAILED.name()), getHandlerForClass(ClusterStatusUpdateFailureHandler.class));
+        reactor.on($(FlowPhases.STACK_STATUS_UPDATE_FAILED.name()), getHandlerForClass(StackStatusUpdateFailureHandler.class));
+        reactor.on($(FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name()), getHandlerForClass(ClusterStatusUpdateFailureHandler.class));
 
     }
 
@@ -102,55 +100,64 @@ public class FlowInitializer implements InitializingBean {
                 .createTransition(FlowPhases.STACK_CREATION_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
 
         transitionKeyService.registerTransition(ClusterCreationHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.CLUSTER_CREATION.name(), FlowPhases.NONE.name(), FlowPhases.CLUSTER_START_FAILED.name()));
+                .createTransition(FlowPhases.CLUSTER_CREATION.name(), FlowPhases.NONE.name(), FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name()));
 
-        transitionKeyService.registerTransition(StackStatusUpdateFailureHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.CLUSTER_START_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
+        transitionKeyService.registerTransition(ClusterStatusUpdateFailureHandler.class, SimpleTransitionKeyService.TransitionFactory
+                .createTransition(FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerTerminationFlow() {
         transitionKeyService.registerTransition(StackTerminationHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.TERMINATION.name(), FlowPhases.SUCCESS.name(), FlowPhases.NONE.name()));
+                .createTransition(FlowPhases.TERMINATION.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerStartFlows() {
         transitionKeyService.registerTransition(StackStartHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.STACK_START.name(), FlowPhases.CLUSTER_START.name(), FlowPhases.STACK_START_FAILED.name()));
+                .createTransition(FlowPhases.STACK_START.name(), FlowPhases.NONE.name(), FlowPhases.STACK_STATUS_UPDATE_FAILED.name()));
 
         transitionKeyService.registerTransition(ClusterStartHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.CLUSTER_START.name(), FlowPhases.SUCCESS.name(), FlowPhases.CLUSTER_START_FAILED.name()));
+                .createTransition(FlowPhases.CLUSTER_START.name(), FlowPhases.NONE.name(), FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name()));
+
+        transitionKeyService.registerTransition(StackStatusUpdateFailureHandler.class, SimpleTransitionKeyService.TransitionFactory
+                .createTransition(FlowPhases.STACK_STATUS_UPDATE_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
 
         transitionKeyService.registerTransition(ClusterStatusUpdateFailureHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.CLUSTER_START_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
+                .createTransition(FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerStopFlows() {
         transitionKeyService.registerTransition(StackStopHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.STACK_STOP.name(), FlowPhases.SUCCESS.name(), FlowPhases.STACK_STOP_FAILED.name()));
+                .createTransition(FlowPhases.STACK_STOP.name(), FlowPhases.NONE.name(), FlowPhases.STACK_STATUS_UPDATE_FAILED.name()));
 
         transitionKeyService.registerTransition(ClusterStopHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.CLUSTER_STOP.name(), FlowPhases.STACK_STOP.name(), FlowPhases.CLUSTER_STOP_FAILED.name()));
+                .createTransition(FlowPhases.CLUSTER_STOP.name(), FlowPhases.NONE.name(), FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name()));
+
+        transitionKeyService.registerTransition(StackStatusUpdateFailureHandler.class, SimpleTransitionKeyService.TransitionFactory
+                .createTransition(FlowPhases.STACK_STATUS_UPDATE_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
+
+        transitionKeyService.registerTransition(ClusterStatusUpdateFailureHandler.class, SimpleTransitionKeyService.TransitionFactory
+                .createTransition(FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerUpscaleFlows() {
         transitionKeyService.registerTransition(StackUpscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.STACK_UPSCALE.name(), FlowPhases.SUCCESS.name(), FlowPhases.NONE.name()));
+                .createTransition(FlowPhases.STACK_UPSCALE.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
 
         transitionKeyService.registerTransition(ClusterUpscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.CLUSTER_UPSCALE.name(), FlowPhases.SUCCESS.name(), FlowPhases.NONE.name()));
+                .createTransition(FlowPhases.CLUSTER_UPSCALE.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerDownscaleFlows() {
         transitionKeyService.registerTransition(StackDownscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.STACK_DOWNSCALE.name(), FlowPhases.SUCCESS.name(), FlowPhases.NONE.name()));
+                .createTransition(FlowPhases.STACK_DOWNSCALE.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
 
         transitionKeyService.registerTransition(ClusterDownscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.CLUSTER_DOWNSCALE.name(), FlowPhases.SUCCESS.name(), FlowPhases.NONE.name()));
+                .createTransition(FlowPhases.CLUSTER_DOWNSCALE.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerUpdateAllowedSubnetFlow() {
         transitionKeyService.registerTransition(UpdateAllowedSubnetsHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.UPDATE_ALLOWED_SUBNETS.name(), FlowPhases.SUCCESS.name(), FlowPhases.NONE.name()));
+                .createTransition(FlowPhases.UPDATE_ALLOWED_SUBNETS.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
 
