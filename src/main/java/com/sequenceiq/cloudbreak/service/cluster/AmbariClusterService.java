@@ -150,7 +150,8 @@ public class AmbariClusterService implements ClusterService {
         LOGGER.info("Cluster update requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         boolean decommissionRequest = validateUpdateHostsRequest(stack, hostGroupAdjustment);
         List<HostMetadata> downScaleCandidates = collectDownscaleCandidates(hostGroupAdjustment, stack, cluster, decommissionRequest);
-        UpdateAmbariHostsRequest updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, downScaleCandidates, decommissionRequest);
+        UpdateAmbariHostsRequest updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, downScaleCandidates,
+                decommissionRequest, stack.cloudPlatform());
         if (decommissionRequest) {
             flowManager.triggerClusterDownscale(updateRequest);
         } else {
@@ -189,7 +190,7 @@ public class AmbariClusterService implements ClusterService {
                 }
                 cluster.setStatus(Status.START_IN_PROGRESS);
                 clusterRepository.save(cluster);
-                retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest);
+                retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest, stack.cloudPlatform());
                 flowManager.triggerClusterStart(retVal);
             }
         } else {
@@ -204,7 +205,7 @@ public class AmbariClusterService implements ClusterService {
             cluster.setStatus(Status.STOP_IN_PROGRESS);
             clusterRepository.save(cluster);
             LOGGER.info("Publishing {} event", ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT);
-            retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest);
+            retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest, stack.cloudPlatform());
             flowManager.triggerClusterStop(retVal);
         }
 

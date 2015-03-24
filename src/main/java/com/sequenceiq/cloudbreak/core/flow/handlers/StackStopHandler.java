@@ -26,6 +26,6 @@ public class StackStopHandler extends AbstractFlowHandler<StackStatusUpdateConte
     @Override
     protected Object handleErrorFlow(Throwable throwable, StackStatusUpdateContext data) {
         LOGGER.info("handleErrorFlow() for phase: {}", getClass());
-        return new StackStatusUpdateContext(data.getStackId(), data.isStart(), throwable.getMessage());
+        return new StackStatusUpdateContext(data.getStackId(), data.getCloudPlatform(), data.isStart(), throwable.getMessage());
     }
 }

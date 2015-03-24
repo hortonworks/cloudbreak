@@ -1,5 +1,15 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
+import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
+
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
@@ -24,15 +34,6 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.ConsulPluginEvent;
 import com.sequenceiq.cloudbreak.service.cluster.flow.PluginManager;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.Map;
-
-import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
-import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
 @Service
 public class StackStartService extends AbstractStackStatusUpdateService {
@@ -107,10 +108,10 @@ public class StackStartService extends AbstractStackStatusUpdateService {
             Cluster cluster = stack.getCluster();
             cluster.setStatus(Status.START_FAILED);
             clusterRepository.save(cluster);
-            stackUpdater.updateStackStatus(stackStatusUpdateContext.getStackId(), Status.AVAILABLE, stackStatusUpdateContext.getStatusReason());
+            stackUpdater.updateStackStatus(stackStatusUpdateContext.getStackId(), Status.AVAILABLE, stackStatusUpdateContext.getErrorReason());
         } else {
             LOGGER.info("Update stack state to: {}", Status.START_FAILED);
-            stackUpdater.updateStackStatus(stackStatusUpdateContext.getStackId(), Status.START_FAILED, stackStatusUpdateContext.getStatusReason());
+            stackUpdater.updateStackStatus(stackStatusUpdateContext.getStackId(), Status.START_FAILED, stackStatusUpdateContext.getErrorReason());
         }
         return context;
     }

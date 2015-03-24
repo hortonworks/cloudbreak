@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
+import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
-import com.sequenceiq.cloudbreak.core.flow.context.TerminationContext;
 import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
@@ -53,8 +53,8 @@ public class ReactorFlowManager implements FlowManager {
     @Override
     public void triggerProvisioning(Object object) {
         ProvisionRequest provisionRequest = (ProvisionRequest) object;
-        ProvisioningContext context = FlowContextFactory.createProvisioningSetupContext(provisionRequest.getCloudPlatform(),
-                provisionRequest.getStackId());
+        ProvisioningContext context = new ProvisioningContext.Builder().
+                setDefaultParams(provisionRequest.getStackId(), provisionRequest.getCloudPlatform()).build();
         reactor.notify(FlowPhases.PROVISIONING_SETUP.name(), eventFactory.createEvent(context, FlowPhases.PROVISIONING_SETUP.name()));
     }
 
@@ -65,47 +65,43 @@ public class ReactorFlowManager implements FlowManager {
     @Override
     public void triggerClusterInstall(Object object) {
         ProvisionRequest provisionRequest = (ProvisionRequest) object;
-        ProvisioningContext context = FlowContextFactory.createProvisioningSetupContext(provisionRequest.getCloudPlatform(),
-                provisionRequest.getStackId());
+        ProvisioningContext context = new ProvisioningContext.Builder().
+                setDefaultParams(provisionRequest.getStackId(), provisionRequest.getCloudPlatform()).build();
         reactor.notify(FlowPhases.CLUSTER_CREATION.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_CREATION.name()));
     }
 
     @Override
     public void triggerStackStop(Object object) {
         StackStatusUpdateRequest statusUpdateRequest = (StackStatusUpdateRequest) object;
-        StackStatusUpdateContext context = (StackStatusUpdateContext)
-                FlowContextFactory.createStatusUpdateContext(statusUpdateRequest.getStackId(), false);
+        StackStatusUpdateContext context = new StackStatusUpdateContext(statusUpdateRequest.getStackId(), statusUpdateRequest.getCloudPlatform(), false);
         reactor.notify(FlowPhases.STACK_STOP.name(), eventFactory.createEvent(context, FlowPhases.STACK_STOP.name()));
     }
 
     @Override
     public void triggerStackStart(Object object) {
         StackStatusUpdateRequest statusUpdateRequest = (StackStatusUpdateRequest) object;
-        StackStatusUpdateContext context = (StackStatusUpdateContext)
-                FlowContextFactory.createStatusUpdateContext(statusUpdateRequest.getStackId(), true);
+        StackStatusUpdateContext context = new StackStatusUpdateContext(statusUpdateRequest.getStackId(), statusUpdateRequest.getCloudPlatform(), true);
         reactor.notify(FlowPhases.STACK_START.name(), eventFactory.createEvent(context, FlowPhases.STACK_START.name()));
     }
 
     @Override
     public void triggerClusterStop(Object object) {
         ClusterStatusUpdateRequest statusUpdateRequest = (ClusterStatusUpdateRequest) object;
-        StackStatusUpdateContext context = (StackStatusUpdateContext)
-                FlowContextFactory.createStatusUpdateContext(statusUpdateRequest.getStackId(), false);
+        StackStatusUpdateContext context = new StackStatusUpdateContext(statusUpdateRequest.getStackId(), statusUpdateRequest.getCloudPlatform(), false);
         reactor.notify(FlowPhases.CLUSTER_STOP.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_STOP.name()));
     }
 
     @Override
     public void triggerClusterStart(Object object) {
         ClusterStatusUpdateRequest statusUpdateRequest = (ClusterStatusUpdateRequest) object;
-        StackStatusUpdateContext context = (StackStatusUpdateContext)
-                FlowContextFactory.createStatusUpdateContext(statusUpdateRequest.getStackId(), true);
+        StackStatusUpdateContext context = new StackStatusUpdateContext(statusUpdateRequest.getStackId(), statusUpdateRequest.getCloudPlatform(), true);
         reactor.notify(FlowPhases.CLUSTER_START.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_START.name()));
     }
 
     @Override
     public void triggerTermination(Object object) {
         StackDeleteRequest deleteRequest = (StackDeleteRequest) object;
-        TerminationContext context = new TerminationContext(deleteRequest.getStackId(), deleteRequest.getCloudPlatform());
+        DefaultFlowContext context = new DefaultFlowContext(deleteRequest.getStackId(), deleteRequest.getCloudPlatform());
         reactor.notify(FlowPhases.TERMINATION.name(), eventFactory.createEvent(context, FlowPhases.TERMINATION.name()));
     }
 

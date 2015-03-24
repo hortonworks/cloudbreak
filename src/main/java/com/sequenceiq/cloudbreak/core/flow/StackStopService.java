@@ -1,6 +1,13 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
 
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
@@ -15,12 +22,6 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.ConsulPluginEvent;
 import com.sequenceiq.cloudbreak.service.cluster.flow.PluginManager;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 @Service
 public class StackStopService extends AbstractStackStatusUpdateService {
@@ -72,7 +73,7 @@ public class StackStopService extends AbstractStackStatusUpdateService {
     public FlowContext handleStackStopFailure(FlowContext context) {
         StackStatusUpdateContext stopContext = (StackStatusUpdateContext) context;
         LOGGER.info("Update stack state to: {}", Status.STOP_FAILED);
-        stackUpdater.updateStackStatus(stopContext.getStackId(), Status.STOP_FAILED, stopContext.getStatusReason());
+        stackUpdater.updateStackStatus(stopContext.getStackId(), Status.STOP_FAILED, stopContext.getErrorReason());
         return stopContext;
     }
 }

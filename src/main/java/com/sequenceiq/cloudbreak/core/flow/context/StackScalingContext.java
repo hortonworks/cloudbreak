@@ -4,37 +4,21 @@ package com.sequenceiq.cloudbreak.core.flow.context;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 
-public class StackScalingContext implements FlowContext {
+public class StackScalingContext extends DefaultFlowContext implements FlowContext {
 
-    private CloudPlatform cloudPlatform;
-    private Long stackId;
     private Integer scalingAdjustment;
     private String instanceGroup;
-    private String errorMessage = "";
 
-    public StackScalingContext() { }
+    public StackScalingContext(Long stackId, CloudPlatform cloudPlatform, String instanceGroup, Integer scalingAdjustment) {
+        super(stackId, cloudPlatform);
+        this.instanceGroup = instanceGroup;
+        this.scalingAdjustment = scalingAdjustment;
+    }
 
     public StackScalingContext(UpdateInstancesRequest updateInstancesRequest) {
-        this.cloudPlatform = updateInstancesRequest.getCloudPlatform();
-        this.stackId = updateInstancesRequest.getStackId();
+        super(updateInstancesRequest.getStackId(), updateInstancesRequest.getCloudPlatform());
         this.scalingAdjustment = updateInstancesRequest.getScalingAdjustment();
         this.instanceGroup = updateInstancesRequest.getInstanceGroup();
-    }
-
-    public CloudPlatform getCloudPlatform() {
-        return cloudPlatform;
-    }
-
-    public void setCloudPlatform(CloudPlatform cloudPlatform) {
-        this.cloudPlatform = cloudPlatform;
-    }
-
-    public Long getStackId() {
-        return stackId;
-    }
-
-    public void setStackId(Long stackId) {
-        this.stackId = stackId;
     }
 
     public Integer getScalingAdjustment() {
@@ -51,13 +35,5 @@ public class StackScalingContext implements FlowContext {
 
     public void setInstanceGroup(String instanceGroup) {
         this.instanceGroup = instanceGroup;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
     }
 }
