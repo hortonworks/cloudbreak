@@ -7,11 +7,15 @@ public class UpdateAmbariHostsSuccess {
     private Long clusterId;
     private Set<String> hostNames;
     private boolean decommission;
+    private Boolean withStackUpdate;
+    private String hostGroup;
 
-    public UpdateAmbariHostsSuccess(Long clusterId, Set<String> hostNames, boolean decommission) {
+    public UpdateAmbariHostsSuccess(Long clusterId, Set<String> hostNames, boolean decommission, String hostGroup, Boolean withStackUpdate) {
         this.clusterId = clusterId;
         this.hostNames = hostNames;
         this.decommission = decommission;
+        this.withStackUpdate = withStackUpdate;
+        this.hostGroup = hostGroup;
     }
 
     public Long getClusterId() {
@@ -26,15 +30,19 @@ public class UpdateAmbariHostsSuccess {
         return hostNames;
     }
 
-    public void setHostNames(Set<String> hostNames) {
-        this.hostNames = hostNames;
-    }
-
     public boolean isDecommission() {
         return decommission;
     }
 
-    public void setDecommission(boolean decommission) {
-        this.decommission = decommission;
+    public Boolean isWithStackUpdate() {
+        return withStackUpdate;
+    }
+
+    public Boolean getWithStackUpdate() {
+        return withStackUpdate;
+    }
+
+    public String getHostGroup() {
+        return hostGroup;
     }
 }

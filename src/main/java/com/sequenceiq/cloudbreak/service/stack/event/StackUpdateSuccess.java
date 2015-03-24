@@ -8,12 +8,14 @@ public class StackUpdateSuccess {
     private boolean removeInstances;
     private Set<String> instanceIds;
     private String instanceGroup;
+    private Boolean withClusterEvent;
 
-    public StackUpdateSuccess(Long stackId, boolean removeInstances, Set<String> instanceIds, String instanceGroup) {
+    public StackUpdateSuccess(Long stackId, boolean removeInstances, Set<String> instanceIds, String instanceGroup, Boolean withClusterEvent) {
         this.stackId = stackId;
         this.removeInstances = removeInstances;
         this.instanceIds = instanceIds;
         this.instanceGroup = instanceGroup;
+        this.withClusterEvent = withClusterEvent;
     }
 
     public Long getStackId() {
@@ -30,5 +32,9 @@ public class StackUpdateSuccess {
 
     public String getInstanceGroup() {
         return instanceGroup;
+    }
+
+    public Boolean isWithClusterEvent() {
+        return withClusterEvent;
     }
 }

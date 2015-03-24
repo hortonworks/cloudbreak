@@ -56,7 +56,7 @@ public class GccMetadataSetup implements MetadataSetup {
     }
 
     @Override
-    public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup) {
+    public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup, Boolean withClusterEvent) {
         MDCBuilder.buildMdcContext(stack);
         List<Resource> resources = new ArrayList<>();
         for (Resource resource : resourceList) {
@@ -67,7 +67,7 @@ public class GccMetadataSetup implements MetadataSetup {
         Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, resources);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT,
-                Event.wrap(new MetadataUpdateComplete(CloudPlatform.GCC, stack.getId(), instanceMetaDatas, instanceGroup)));
+                Event.wrap(new MetadataUpdateComplete(CloudPlatform.GCC, stack.getId(), instanceMetaDatas, instanceGroup, withClusterEvent)));
     }
 
     private CoreInstanceMetaData getMetadata(Stack stack, Compute compute, Resource resource) {

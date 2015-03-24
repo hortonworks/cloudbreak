@@ -11,13 +11,15 @@ public class UpdateAmbariHostsRequest {
     private HostGroupAdjustmentJson hostGroupAdjustment;
     private List<HostMetadata> decommissionCandidates;
     private boolean decommission;
+    private Boolean withStackUpdate;
 
     public UpdateAmbariHostsRequest(Long stackId, HostGroupAdjustmentJson adjustmentJson,
-            List<HostMetadata> decommissionCandidates, boolean decommission) {
+            List<HostMetadata> decommissionCandidates, boolean decommission, Boolean withStackUpdate) {
         this.stackId = stackId;
         this.decommissionCandidates = decommissionCandidates;
         this.hostGroupAdjustment = adjustmentJson;
         this.decommission = decommission;
+        this.withStackUpdate = withStackUpdate;
     }
 
     public Long getStackId() {
@@ -34,5 +36,9 @@ public class UpdateAmbariHostsRequest {
 
     public List<HostMetadata> getDecommissionCandidates() {
         return decommissionCandidates;
+    }
+
+    public Boolean isWithStackUpdate() {
+        return withStackUpdate;
     }
 }

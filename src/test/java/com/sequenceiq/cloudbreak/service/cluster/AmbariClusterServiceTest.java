@@ -148,7 +148,7 @@ public class AmbariClusterServiceTest {
         hga1.setHostGroup("slave_1");
         hga1.setScalingAdjustment(0);
         // WHEN
-        underTest.updateHosts(stack.getId(), hga1);
+        underTest.updateHosts(stack.getId(), hga1, false);
     }
 
     @Test(expected = BadRequestException.class)
@@ -158,7 +158,7 @@ public class AmbariClusterServiceTest {
         hga1.setHostGroup("slave_1");
         hga1.setScalingAdjustment(-2);
         // WHEN
-        underTest.updateHosts(stack.getId(), hga1);
+        underTest.updateHosts(stack.getId(), hga1, false);
     }
 
     @Test
@@ -183,7 +183,7 @@ public class AmbariClusterServiceTest {
 
         Exception result = null;
         try {
-            underTest.updateHosts(stack.getId(), json);
+            underTest.updateHosts(stack.getId(), json, false);
         } catch (BadRequestException e) {
             result = e;
         }
@@ -214,7 +214,7 @@ public class AmbariClusterServiceTest {
 
         Exception result = null;
         try {
-            underTest.updateHosts(stack.getId(), json);
+            underTest.updateHosts(stack.getId(), json, false);
         } catch (BadRequestException e) {
             result = e;
         }
@@ -266,7 +266,7 @@ public class AmbariClusterServiceTest {
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node4")).thenReturn(instanceMetaData4);
 
-        underTest.updateHosts(stack.getId(), json);
+        underTest.updateHosts(stack.getId(), json, false);
 
         verify(reactor).notify(eventCaptor.capture(), eventCaptor.capture());
         List<HostMetadata> candidates = eventCaptor.getValue().getData().getDecommissionCandidates();
@@ -313,7 +313,7 @@ public class AmbariClusterServiceTest {
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node2")).thenReturn(instanceMetaData2);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
 
-        underTest.updateHosts(stack.getId(), json);
+        underTest.updateHosts(stack.getId(), json, false);
 
         verify(reactor).notify(eventCaptor.capture(), eventCaptor.capture());
         List<HostMetadata> candidates = eventCaptor.getValue().getData().getDecommissionCandidates();
@@ -366,7 +366,7 @@ public class AmbariClusterServiceTest {
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node4")).thenReturn(instanceMetaData3);
 
-        underTest.updateHosts(stack.getId(), json);
+        underTest.updateHosts(stack.getId(), json, false);
 
         verify(reactor).notify(eventCaptor.capture(), eventCaptor.capture());
         List<HostMetadata> candidates = eventCaptor.getValue().getData().getDecommissionCandidates();
@@ -416,7 +416,7 @@ public class AmbariClusterServiceTest {
 
         Exception result = null;
         try {
-            underTest.updateHosts(stack.getId(), json);
+            underTest.updateHosts(stack.getId(), json, false);
         } catch (BadRequestException e) {
             result = e;
         }

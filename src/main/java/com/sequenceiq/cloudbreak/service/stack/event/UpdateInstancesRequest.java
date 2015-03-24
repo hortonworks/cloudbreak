@@ -1,31 +1,25 @@
 package com.sequenceiq.cloudbreak.service.stack.event;
 
+import com.sequenceiq.cloudbreak.controller.json.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 
 public class UpdateInstancesRequest extends ProvisionEvent {
 
-    private Integer scalingAdjustment;
-    private String instanceGroup;
+    private InstanceGroupAdjustmentJson instanceGroupAdjustmentJson;
+    private Boolean withStackUpdate;
 
-    public UpdateInstancesRequest(CloudPlatform cloudPlatform, Long stackId, Integer scalingAdjustment, String instanceGroup) {
+
+    public UpdateInstancesRequest(CloudPlatform cloudPlatform, Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Boolean withStackUpdate) {
         super(cloudPlatform, stackId);
-        this.scalingAdjustment = scalingAdjustment;
-        this.instanceGroup = instanceGroup;
+        this.instanceGroupAdjustmentJson = instanceGroupAdjustmentJson;
+        this.withStackUpdate = withStackUpdate;
     }
 
-    public Integer getScalingAdjustment() {
-        return scalingAdjustment;
+    public InstanceGroupAdjustmentJson getInstanceGroupAdjustmentJson() {
+        return instanceGroupAdjustmentJson;
     }
 
-    public void setScalingAdjustment(Integer scalingAdjustment) {
-        this.scalingAdjustment = scalingAdjustment;
-    }
-
-    public String getInstanceGroup() {
-        return instanceGroup;
-    }
-
-    public void setInstanceGroup(String instanceGroup) {
-        this.instanceGroup = instanceGroup;
+    public Boolean isWithStackUpdate() {
+        return withStackUpdate;
     }
 }

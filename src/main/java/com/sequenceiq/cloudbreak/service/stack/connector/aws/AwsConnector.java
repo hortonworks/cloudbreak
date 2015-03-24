@@ -229,7 +229,7 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public boolean addInstances(Stack stack, String userData, Integer instanceCount, String instanceGroup) {
+    public boolean addInstances(Stack stack, String userData, Integer instanceCount, String instanceGroup, Boolean withClusterEvent) {
         MDCBuilder.buildMdcContext(stack);
         InstanceGroup instanceGroupByInstanceGroupName = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         Integer requiredInstances = instanceGroupByInstanceGroupName.getNodeCount() + instanceCount;
@@ -252,7 +252,7 @@ public class AwsConnector implements CloudPlatformConnector {
         if (isSuccess(pollingResult)) {
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
             reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
-                    Event.wrap(new AddInstancesComplete(CloudPlatform.AWS, stack.getId(), null, instanceGroup)));
+                    Event.wrap(new AddInstancesComplete(CloudPlatform.AWS, stack.getId(), null, instanceGroup, withClusterEvent)));
         }
         return true;
     }
@@ -276,7 +276,8 @@ public class AwsConnector implements CloudPlatformConnector {
         amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(instanceIds));
         LOGGER.info("Terminated instances in stack '{}': '{}'", stack.getId(), instanceIds);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds, instanceGroup)));
+        reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT,
+                Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds, instanceGroup, false)));
         return true;
     }
 

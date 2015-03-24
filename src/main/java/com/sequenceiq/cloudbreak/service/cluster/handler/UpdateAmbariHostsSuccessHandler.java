@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.controller.json.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
@@ -19,6 +20,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsSuccess;
+import com.sequenceiq.cloudbreak.service.stack.DefaultStackService;
 
 import reactor.event.Event;
 import reactor.function.Consumer;
@@ -40,6 +42,9 @@ public class UpdateAmbariHostsSuccessHandler implements Consumer<Event<UpdateAmb
     @Autowired
     private InstanceMetaDataRepository metadataRepository;
 
+    @Autowired
+    private DefaultStackService stackService;
+
     @Override
     public void accept(Event<UpdateAmbariHostsSuccess> event) {
         UpdateAmbariHostsSuccess data = event.getData();
@@ -60,6 +65,13 @@ public class UpdateAmbariHostsSuccessHandler implements Consumer<Event<UpdateAmb
         String cause = data.isDecommission() ? "Down" : "Up";
         String statusReason =  String.format("%sscale of cluster finished successfully. AMBARI_IP:%s", cause, stack.getAmbariIp());
         stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, statusReason);
+        if (data.isWithStackUpdate() && data.isDecommission()) {
+            InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
+            instanceGroupAdjustmentJson.setInstanceGroup(data.getHostGroup());
+            instanceGroupAdjustmentJson.setScalingAdjustment(data.getHostNames().size() * (-1));
+            instanceGroupAdjustmentJson.setWithClusterEvent(false);
+            stackService.updateNodeCount(stack.getId(), instanceGroupAdjustmentJson);
+        }
     }
 
 }

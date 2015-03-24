@@ -94,7 +94,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
             LOGGER.info("Accepted {} event on stack.", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT);
             stackUpdater.updateMetadataReady(stack.getId(), false);
             if (isUpScaleRequest(request)) {
-                upScaleStack(request, stack);
+                upScaleStack(request, stack, request.isWithStackUpdate());
             } else {
                 downScaleStack(request, stack);
             }
@@ -105,7 +105,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
     }
 
     private boolean isUpScaleRequest(UpdateInstancesRequest request) {
-        return request.getScalingAdjustment() > 0;
+        return request.getInstanceGroupAdjustmentJson().getScalingAdjustment() > 0;
     }
 
     private void downScaleStack(UpdateInstancesRequest request, Stack stack) throws Exception {
@@ -115,14 +115,14 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
             for (InstanceMetaData metadataEntry : instanceGroup.getInstanceMetaData()) {
                 if (metadataEntry.isDecommissioned() || metadataEntry.isUnRegistered()) {
                     instanceIds.add(metadataEntry.getInstanceId());
-                    if (++i >= request.getScalingAdjustment() * -1) {
+                    if (++i >= request.getInstanceGroupAdjustmentJson().getScalingAdjustment() * -1) {
                         break;
                     }
                 }
             }
         }
         if (stack.isCloudPlatformUsedWithTemplate()) {
-            cloudPlatformConnectors.get(stack.cloudPlatform()).removeInstances(stack, instanceIds, request.getInstanceGroup());
+            cloudPlatformConnectors.get(stack.cloudPlatform()).removeInstances(stack, instanceIds, request.getInstanceGroupAdjustmentJson().getInstanceGroup());
         } else {
             ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(stack.cloudPlatform());
             final DeleteContextObject deleteContextObject = resourceBuilderInit.decommissionInit(stack, instanceIds);
@@ -156,7 +156,8 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                 LOGGER.info("Terminated instances in stack: '{}'", instanceIds);
                 LOGGER.info("Publishing {} event.", ReactorConfig.REMOVE_INSTANCES_COMPLETE_EVENT);
                 reactor.notify(ReactorConfig.REMOVE_INSTANCES_COMPLETE_EVENT,
-                        Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds, request.getInstanceGroup())));
+                        Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds,
+                                request.getInstanceGroupAdjustmentJson().getInstanceGroup(), request.isWithStackUpdate())));
             }
         }
     }
@@ -174,10 +175,14 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
         return result;
     }
 
-    private void upScaleStack(UpdateInstancesRequest request, Stack stack) throws Exception {
+    private void upScaleStack(UpdateInstancesRequest request, Stack stack, Boolean withStackUpdate) throws Exception {
         String userDataScript = userDataBuilder.build(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>());
         if (stack.isCloudPlatformUsedWithTemplate()) {
-            cloudPlatformConnectors.get(stack.cloudPlatform()).addInstances(stack, userDataScript, request.getScalingAdjustment(), request.getInstanceGroup());
+            cloudPlatformConnectors.get(stack.cloudPlatform())
+                    .addInstances(stack, userDataScript,
+                            request.getInstanceGroupAdjustmentJson().getScalingAdjustment(),
+                            request.getInstanceGroupAdjustmentJson().getInstanceGroup(),
+                            withStackUpdate);
         } else {
             ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(stack.cloudPlatform());
             final ProvisionContextObject provisionContextObject = resourceBuilderInit.provisionInit(stack, userDataScript);
@@ -187,7 +192,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
             List<Future<ResourceRequestResult>> futures = new ArrayList<>();
             final Set<ResourceRequestResult> successResourceRequestResults = new HashSet<>();
             final List<ResourceRequestResult> failedResourceRequestResults = new ArrayList<>();
-            final Integer addNodeCount = request.getScalingAdjustment();
+            final Integer addNodeCount = request.getInstanceGroupAdjustmentJson().getScalingAdjustment();
             for (int i = stack.getFullNodeCount(); i < stack.getFullNodeCount() + addNodeCount; i++) {
                 final int index = i;
                 Future<ResourceRequestResult> submit = resourceBuilderExecutor.submit(
@@ -197,7 +202,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                                 .withIndex(index)
                                 .withProvisionContextObject(provisionContextObject)
                                 .withInstanceResourceBuilders(instanceResourceBuilders)
-                                .withInstanceGroup(request.getInstanceGroup())
+                                .withInstanceGroup(request.getInstanceGroupAdjustmentJson().getInstanceGroup())
                                 .build()
                 );
                 futures.add(submit);
@@ -217,7 +222,9 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                 LOGGER.info("Publishing {} event.", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT);
                 reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
                         Event.wrap(new AddInstancesComplete(stack.cloudPlatform(), stack.getId(),
-                                        collectResources(successResourceRequestResults), request.getInstanceGroup())
+                                        collectResources(successResourceRequestResults),
+                                        request.getInstanceGroupAdjustmentJson().getInstanceGroup(),
+                                        withStackUpdate)
                         )
                 );
             }

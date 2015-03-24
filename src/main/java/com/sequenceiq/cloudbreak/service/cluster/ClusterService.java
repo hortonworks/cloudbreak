@@ -12,7 +12,7 @@ public interface ClusterService {
 
     String getClusterJson(String ambariIp, Long stackId);
 
-    void updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment);
+    void updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment, Boolean withStackUpdate);
 
     void updateStatus(Long stackId, StatusRequest statusRequest);
 }

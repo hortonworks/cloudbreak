@@ -146,7 +146,7 @@ dependencies {
         exclude group: 'commons-logging'
     }
     compile 'org.hibernate:hibernate-validator:5.1.1.Final'
-    compile('com.sequenceiq:azure-rest-client:0.1.24') {
+    compile('com.sequenceiq:azure-rest-client:0.1.26') {
         exclude group: 'log4j';
     }
     compile('com.sequenceiq:ambari-client17:1.7.32') {
