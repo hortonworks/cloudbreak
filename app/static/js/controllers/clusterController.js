@@ -279,6 +279,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 onFailureAction: "ROLLBACK",
                 bestEffort: "BEST_EFFORT",
                 parameters: {},
+                consulServerCount: 3,
                 failurePolicy: {
                   adjustmentType: "BEST_EFFORT",
                 }
