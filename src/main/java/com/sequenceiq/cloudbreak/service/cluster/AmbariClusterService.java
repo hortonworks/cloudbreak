@@ -192,7 +192,7 @@ public class AmbariClusterService implements ClusterService {
                     throw new BadRequestException(
                             String.format("Cannot update the status of cluster '%s' to STARTED, because the stack is not AVAILABLE", clusterId));
                 }
-                cluster.setStatus(Status.START_IN_PROGRESS);
+                cluster.setStatus(Status.START_REQUESTED);
                 clusterRepository.save(cluster);
                 retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest, stack.cloudPlatform());
                 flowManager.triggerClusterStart(retVal);

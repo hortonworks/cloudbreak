@@ -12,7 +12,7 @@ public class StackStatusUpdateContext extends DefaultFlowContext implements Flow
     }
 
     public StackStatusUpdateContext(Long stackId, CloudPlatform cloudPlatform, boolean start, String statusReason) {
-        super(stackId, cloudPlatform);
+        super(stackId, cloudPlatform, statusReason);
         this.start = start;
     }
 

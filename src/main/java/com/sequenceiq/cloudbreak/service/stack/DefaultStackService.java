@@ -202,8 +202,9 @@ public class DefaultStackService implements StackService {
             flowManager.triggerStackStart(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), status));
         } else {
             Status clusterStatus = clusterRepository.findOneWithLists(stack.getCluster().getId()).getStatus();
+            String stopRequestedMsg = "Stopping of cluster infrastructure has been requested.";
             if (Status.STOP_IN_PROGRESS.equals(clusterStatus)) {
-                stackUpdater.updateStackStatus(stackId, Status.STOP_REQUESTED, "Services are stopping, stopping of cluster infrastructure has been requested.");
+                stackUpdater.updateStackStatus(stackId, Status.STOP_REQUESTED, stopRequestedMsg);
             } else {
                 if (!Status.AVAILABLE.equals(stackStatus)) {
                     throw new BadRequestException(
@@ -213,6 +214,7 @@ public class DefaultStackService implements StackService {
                     throw new BadRequestException(
                             String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.", stackId));
                 }
+                stackUpdater.updateStackStatus(stackId, Status.STOP_REQUESTED, stopRequestedMsg);
                 flowManager.triggerStackStop(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), status));
             }
         }

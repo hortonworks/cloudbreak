@@ -126,9 +126,7 @@ public class StackStartService extends AbstractStackStatusUpdateService {
             LOGGER.info("Update stack state to: {}", Status.AVAILABLE);
             stackUpdater.updateStackStatus(updatedStack.getId(), Status.AVAILABLE, statusReason);
         }
-        if (isSuccess(pollingResult) && cluster != null && Status.START_REQUESTED.equals(cluster.getStatus())) {
-            cloudbreakEventService.fireCloudbreakEvent(updatedStack.getId(), Status.START_IN_PROGRESS.name(), "Services are starting.");
-        } else if (!(isSuccess(pollingResult) && !isExited(hostsJoined))
+        if (!(isSuccess(pollingResult) && !isExited(hostsJoined))
                 && cluster != null
                 && Status.START_REQUESTED.equals(cluster.getStatus())) {
             stackStatusUpdateContext.setPollingError(true);

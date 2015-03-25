@@ -45,27 +45,30 @@ public class StackStopService extends AbstractStackStatusUpdateService {
 
     public FlowContext stop(FlowContext context) throws CloudbreakException {
         StackStatusUpdateContext stackStatusUpdateContext = (StackStatusUpdateContext) context;
-
         long stackId = stackStatusUpdateContext.getStackId();
         Stack stack = stackRepository.findOneWithLists(stackId);
         final CloudPlatform cloudPlatform = stack.cloudPlatform();
         MDCBuilder.buildMdcContext(stack);
 
-        cloudbreakEventService.fireCloudbreakEvent(stackId, Status.STOP_IN_PROGRESS.name(), "Cluster infrastructure is stopping.");
-        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.STOP_AMBARI_EVENT);
-        boolean stopped;
-        if (cloudPlatform.isWithTemplate()) {
-            CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
-            stopped = connector.stopAll(stack);
+        if (stack != null && Status.STOP_REQUESTED.equals(stack.getStatus())) {
+            stackUpdater.updateStackStatus(stackId, Status.STOP_IN_PROGRESS, "Cluster infrastructure is stopping.");
+            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.STOP_AMBARI_EVENT);
+            boolean stopped;
+            if (cloudPlatform.isWithTemplate()) {
+                CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
+                stopped = connector.stopAll(stack);
+            } else {
+                stopped = startStopResources(cloudPlatform, stack, false);
+            }
+            if (stopped) {
+                LOGGER.info("Update stack state to: {}", Status.STOPPED);
+                stackUpdater.updateStackStatus(stackId, Status.STOPPED, "Cluster infrastructure stopped successfully.");
+                cloudbreakEventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_STOPPED.name(), "Cluster infrastructure stopped.");
+            } else {
+                throw new CloudbreakException("Unfortunately the cluster infrastructure could not be stopped.");
+            }
         } else {
-            stopped = startStopResources(cloudPlatform, stack, false);
-        }
-        if (stopped) {
-            LOGGER.info("Update stack state to: {}", Status.STOPPED);
-            stackUpdater.updateStackStatus(stackId, Status.STOPPED, "Cluster infrastructure stopped successfully.");
-            cloudbreakEventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_STOPPED.name(), "Cluster infrastructure stopped.");
-        } else {
-            throw new CloudbreakException("Unfortunately the cluster infrastructure could not be stopped.");
+            LOGGER.info("Stack stop has not been requested, stop stack later.");
         }
         return stackStatusUpdateContext;
     }
