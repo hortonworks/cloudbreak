@@ -12,7 +12,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.controller.validation.ValidCredentialRequest;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
+@ApiModel(value = "Credential")
 @ValidCredentialRequest
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CredentialJson implements JsonEntity {
@@ -22,8 +25,11 @@ public class CredentialJson implements JsonEntity {
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "The name of the credential can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
+    @ApiModelProperty(required = true)
     private String name;
+    @ApiModelProperty(required = true)
     private CloudPlatform cloudPlatform;
+    @ApiModelProperty(required = true)
     private Map<String, Object> parameters = new HashMap<>();
     @Size(max = 1000)
     private String description;

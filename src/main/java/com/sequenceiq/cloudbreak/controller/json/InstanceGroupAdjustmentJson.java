@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import com.wordnik.swagger.annotations.ApiModel;
+
+@ApiModel("InstanceGroupAdjustment")
 public class InstanceGroupAdjustmentJson {
 
     private String instanceGroup;

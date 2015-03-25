@@ -1,14 +1,19 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import com.wordnik.swagger.annotations.ApiModelProperty;
+
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
 public class StackValidationRequest implements JsonEntity {
+    @ApiModelProperty(required = true)
     private Set<HostGroupJson> hostGroups = new HashSet<>();
+    @ApiModelProperty(required = true)
     private Set<InstanceGroupJson> instanceGroups = new HashSet<>();
     @NotNull
+    @ApiModelProperty(required = true)
     private Long blueprintId;
 
     public Set<HostGroupJson> getHostGroups() {

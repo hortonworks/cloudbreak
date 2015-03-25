@@ -126,7 +126,9 @@ public class SecurityConfig {
                     .antMatchers("/subscription").access("#oauth2.hasScope('cloudbreak.subscribe')")
                     .antMatchers("/user/recipes").access("#oauth2.hasScope('cloudbreak.recipes')")
                     .antMatchers("/account/recipes").access("#oauth2.hasScope('cloudbreak.recipes')")
-                    .antMatchers("/recipes").access("#oauth2.hasScope('cloudbreak.recipes')");
+                    .antMatchers("/recipes").access("#oauth2.hasScope('cloudbreak.recipes')")
+                    .antMatchers("/env/**", "/metrics/**", "/mappings", "/dump",
+                            "/trace", "/configprops", "/autoconfig", "/beans").denyAll();
         }
     }
 

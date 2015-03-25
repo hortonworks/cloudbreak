@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.controller;
 
 import java.util.List;
 
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,11 +24,13 @@ import com.sequenceiq.cloudbreak.facade.CloudbreakUsagesFacade;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 
 @Controller
+@Api(value = "/usages", description = "Operations on events", position = 6)
 public class CloudbreakUsageController {
 
     @Autowired
     private CloudbreakUsagesFacade cloudbreakUsagesFacade;
 
+    @ApiOperation(value = "retrieve usages by filter parameters", produces = "application/json", notes = "")
     @RequestMapping(method = RequestMethod.GET, value = "/usages")
     @ResponseBody
     public ResponseEntity<List<CloudbreakUsageJson>> deployerUsages(@ModelAttribute("user") CbUser user,
@@ -43,6 +47,7 @@ public class CloudbreakUsageController {
         return new ResponseEntity<>(usages, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve public and private (owned) usages by filter parameters", produces = "application/json", notes = "")
     @RequestMapping(method = RequestMethod.GET, value = "/account/usages")
     @ResponseBody
     public ResponseEntity<List<CloudbreakUsageJson>> accountUsages(@ModelAttribute("user") CbUser user,
@@ -58,6 +63,7 @@ public class CloudbreakUsageController {
         return new ResponseEntity<>(usages, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve private usages by filter parameters", produces = "application/json", notes = "")
     @RequestMapping(method = RequestMethod.GET, value = "/user/usages")
     @ResponseBody
     public ResponseEntity<List<CloudbreakUsageJson>> userUsages(@ModelAttribute("user") CbUser user,
@@ -72,6 +78,7 @@ public class CloudbreakUsageController {
         return new ResponseEntity<>(usages, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "generate usages", produces = "application/json", notes = "")
     @RequestMapping(method = RequestMethod.GET, value = "/usages/generate")
     @ResponseBody
     public ResponseEntity<List<CloudbreakUsageJson>> generateUsages(@ModelAttribute("user") CbUser user) {

@@ -9,6 +9,9 @@ import java.util.UnknownFormatConversionException;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.mangofactory.swagger.annotations.ApiIgnore;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +41,11 @@ import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 
 @Controller
+@Api(value = "/credentials", description = "Operations on credentials", position = 1)
 public class CredentialController {
+
+    private static final String CREDENTIAL_REQUEST_NOTES =
+            "In the credential request, id and public parameters are not considered.";
 
     @Autowired
     private CredentialService credentialService;
@@ -58,18 +65,21 @@ public class CredentialController {
     @Autowired
     private AzureStackUtil azureStackUtil;
 
+    @ApiOperation(value = "create credential as private resource", produces = "application/json", notes = CREDENTIAL_REQUEST_NOTES)
     @RequestMapping(value = "user/credentials", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> savePrivateCredential(@ModelAttribute("user") CbUser user, @Valid @RequestBody CredentialJson credentialRequest) {
         return createCredential(user, credentialRequest, false);
     }
 
+    @ApiOperation(value = "create credential as public or private resource", produces = "application/json", notes = CREDENTIAL_REQUEST_NOTES)
     @RequestMapping(value = "account/credentials", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> saveAccountCredential(@ModelAttribute("user") CbUser user, @Valid @RequestBody CredentialJson credentialRequest) {
         return createCredential(user, credentialRequest, true);
     }
 
+    @ApiOperation(value = "retrieve private credentials", produces = "application/json", notes = "")
     @RequestMapping(value = "user/credentials", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<CredentialJson>> getPrivateCredentials(@ModelAttribute("user") CbUser user) {
@@ -77,6 +87,7 @@ public class CredentialController {
         return new ResponseEntity<>(convertCredentials(credentials), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve public and private (owned) credentials", produces = "application/json", notes = "")
     @RequestMapping(value = "account/credentials", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<CredentialJson>> getAccountCredentials(@ModelAttribute("user") CbUser user) {
@@ -84,6 +95,7 @@ public class CredentialController {
         return new ResponseEntity<>(convertCredentials(credentials), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve a private credential by name", produces = "application/json", notes = "")
     @RequestMapping(value = "user/credentials/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<CredentialJson> getPrivateCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
@@ -91,6 +103,7 @@ public class CredentialController {
         return new ResponseEntity<>(convert(credentials), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve a public or private (owned) credential by name", produces = "application/json", notes = "")
     @RequestMapping(value = "account/credentials/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<CredentialJson> getAccountCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
@@ -98,6 +111,7 @@ public class CredentialController {
         return new ResponseEntity<>(convert(credentials), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve credential by id", produces = "application/json", notes = "")
     @RequestMapping(value = "credentials/{credentialId}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<CredentialJson> getCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId) {
@@ -105,6 +119,7 @@ public class CredentialController {
         return new ResponseEntity<>(convert(credential), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "delete credential by id", produces = "application/json", notes = "")
     @RequestMapping(value = "credentials/{credentialId}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<CredentialJson> deleteCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId) {
@@ -112,6 +127,7 @@ public class CredentialController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @ApiOperation(value = "delete public (owned) or private credential by name", produces = "application/json", notes = "")
     @RequestMapping(value = "account/credentials/{name}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<CredentialJson> deletePublicCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
@@ -119,6 +135,7 @@ public class CredentialController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @ApiOperation(value = "delete private credential by name", produces = "application/json", notes = "")
     @RequestMapping(value = "user/credentials/{name}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<CredentialJson> deletePrivateCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
@@ -126,6 +143,7 @@ public class CredentialController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @ApiIgnore
     @RequestMapping(value = "credentials/certificate/{credentialId}", method = RequestMethod.GET)
     @ResponseBody
     public ModelAndView getJksFile(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
@@ -137,6 +155,7 @@ public class CredentialController {
         return null;
     }
 
+    @ApiIgnore
     @RequestMapping(value = "credentials/certificate/{credentialId}", method = RequestMethod.PUT)
     @ResponseBody
     public ModelAndView refreshCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
@@ -150,6 +169,7 @@ public class CredentialController {
         return null;
     }
 
+    @ApiIgnore
     @RequestMapping(value = "credentials/{credentialId}/sshkey", method = RequestMethod.GET)
     @ResponseBody
     public ModelAndView getSshFile(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {

@@ -9,7 +9,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
+@ApiModel(value = "Blueprint")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BlueprintJson implements JsonEntity {
 
@@ -18,6 +21,7 @@ public class BlueprintJson implements JsonEntity {
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "The blueprint's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
+    @ApiModelProperty(required = true, dataType = "string", example = "multinode-yarn")
     private String name;
     private String blueprintName;
     private String url;
@@ -32,8 +36,8 @@ public class BlueprintJson implements JsonEntity {
         return ambariBlueprint;
     }
 
-    public void setAmbariBlueprint(JsonNode node) {
-        this.ambariBlueprint = node.toString();
+    public void setAmbariBlueprint(JsonNode ambariBlueprint) {
+        this.ambariBlueprint = ambariBlueprint.toString();
     }
 
     public String getBlueprintName() {

@@ -17,8 +17,10 @@ import com.sequenceiq.cloudbreak.controller.validation.ValidStackRequest;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.OnFailureAction;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.SubnetJson;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
+@ApiModel("Stack")
 @ValidStackRequest
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StackJson implements JsonEntity {
@@ -28,14 +30,18 @@ public class StackJson implements JsonEntity {
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
+    @ApiModelProperty(required = true)
     private String name;
     @NotNull
+    @ApiModelProperty(required = true)
     private String region;
     private String owner;
     private String account;
     private boolean publicInAccount;
+    @ApiModelProperty(required = true)
     private CloudPlatform cloudPlatform;
     @NotNull
+    @ApiModelProperty(required = true)
     private Long credentialId;
     private Status status;
     private String ambariServerIp;
@@ -43,11 +49,13 @@ public class StackJson implements JsonEntity {
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "The username can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
+    @ApiModelProperty(required = true)
     private String userName;
     @Size(max = 15, min = 5, message = "The length of the password has to be in range of 5 to 15")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "The password can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
+    @ApiModelProperty(required = true)
     private String password;
     private String image;
     private String hash;
@@ -56,6 +64,7 @@ public class StackJson implements JsonEntity {
     private OnFailureAction onFailureAction = OnFailureAction.ROLLBACK;
     private FailurePolicyJson failurePolicy;
     @Valid
+    @ApiModelProperty(required = true)
     private List<InstanceGroupJson> instanceGroups = new ArrayList<>();
     private Integer consulServerCount;
     private List<SubnetJson> allowedSubnets = new ArrayList<>();

@@ -6,6 +6,8 @@ import java.util.UnknownFormatConversionException;
 
 import javax.validation.Valid;
 
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +34,11 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 @Controller
+@Api(value = "/templates", description = "Operations on templates", position = 2)
 public class TemplateController {
+
+    private static final String TEMPLATE_REQUEST_NOTES =
+            "In the template request, id and public parameters are not considered.";
 
     @Autowired
     private TemplateService templateService;
@@ -49,18 +55,21 @@ public class TemplateController {
     @Autowired
     private OpenStackTemplateConverter openStackTemplateConverter;
 
+    @ApiOperation(value = "create template as private resource", produces = "application/json", notes = TEMPLATE_REQUEST_NOTES)
     @RequestMapping(value = "user/templates", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createPrivateTemplate(@ModelAttribute("user") CbUser user, @RequestBody @Valid TemplateJson templateRequest) {
         return createTemplate(user, templateRequest, false);
     }
 
+    @ApiOperation(value = "create template as public or private resource", produces = "application/json", notes = TEMPLATE_REQUEST_NOTES)
     @RequestMapping(value = "account/templates", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createAccountTemplate(@ModelAttribute("user") CbUser user, @RequestBody @Valid TemplateJson templateRequest) {
         return createTemplate(user, templateRequest, true);
     }
 
+    @ApiOperation(value = "retrieve private templates", produces = "application/json", notes = "")
     @RequestMapping(value = "user/templates", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<TemplateJson>> getPrivateTemplates(@ModelAttribute("user") CbUser user) {
@@ -68,6 +77,7 @@ public class TemplateController {
         return new ResponseEntity<>(convert(templates), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve public and private (owned) templates", produces = "application/json", notes = "")
     @RequestMapping(value = "account/templates", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<TemplateJson>> getAccountTemplates(@ModelAttribute("user") CbUser user) {
@@ -75,6 +85,7 @@ public class TemplateController {
         return new ResponseEntity<>(convert(templates), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve template by id", produces = "application/json", notes = "")
     @RequestMapping(value = "templates/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<TemplateJson> getTemplate(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
@@ -83,6 +94,7 @@ public class TemplateController {
         return new ResponseEntity<>(templateJson, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve a private template by name", produces = "application/json", notes = "")
     @RequestMapping(value = "user/templates/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<TemplateJson> getTemplateInPrivate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
@@ -91,6 +103,7 @@ public class TemplateController {
         return new ResponseEntity<>(templateJson, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve a public or private (owned) template by name", produces = "application/json", notes = "")
     @RequestMapping(value = "account/templates/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<TemplateJson> getTemplateInAccount(@ModelAttribute("user") CbUser user, @PathVariable String name) {
@@ -99,6 +112,7 @@ public class TemplateController {
         return new ResponseEntity<>(templateJson, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "delete template by id", produces = "application/json", notes = "")
     @RequestMapping(value = "templates/{id}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<TemplateJson> deleteTemplate(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
@@ -106,6 +120,7 @@ public class TemplateController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @ApiOperation(value = "delete public (owned) or private template by name", produces = "application/json", notes = "")
     @RequestMapping(value = "account/templates/{name}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<TemplateJson> deletePublicTemplate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
@@ -113,6 +128,7 @@ public class TemplateController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @ApiOperation(value = "delete private template by name", produces = "application/json", notes = "")
     @RequestMapping(value = "user/templates/{name}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<TemplateJson> deletePrivateTemplate(@ModelAttribute("user") CbUser user, @PathVariable String name) {

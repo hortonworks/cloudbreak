@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import com.wordnik.swagger.annotations.ApiModel;
+
+@ApiModel("Id")
 public class IdJson implements JsonEntity {
 
     private Long id;

@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.controller;
 
 import javax.validation.Valid;
 
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Controller
+@Api(value = "/cluster", description = "Operations on cluster", position = 3)
 public class ClusterController {
 
     @Autowired
@@ -36,6 +39,7 @@ public class ClusterController {
     @Autowired
     private StackService stackService;
 
+    @ApiOperation(value = "create cluster as for stack", produces = "application/json", notes = "")
     @RequestMapping(value = "/stacks/{stackId}/cluster", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<String> create(@ModelAttribute("user") CbUser user, @PathVariable Long stackId, @RequestBody @Valid ClusterRequest clusterRequest) {
@@ -44,6 +48,7 @@ public class ClusterController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @ApiOperation(value = "retrieve cluster by stack id", produces = "application/json", notes = "")
     @RequestMapping(value = "/stacks/{stackId}/cluster", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<ClusterResponse> retrieveCluster(@PathVariable Long stackId) {
@@ -54,6 +59,7 @@ public class ClusterController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve cluster by stack name (private)", produces = "application/json", notes = "")
     @RequestMapping(value = "user/stacks/{name}/cluster", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<ClusterResponse> retrievePrivateCluster(@ModelAttribute("user") CbUser user, @PathVariable String name) {
@@ -64,6 +70,7 @@ public class ClusterController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve cluster by stack name (public)", produces = "application/json", notes = "")
     @RequestMapping(value = "account/stacks/{name}/cluster", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<ClusterResponse> retrievePublicCluster(@ModelAttribute("user") CbUser user, @PathVariable String name) {
@@ -74,6 +81,7 @@ public class ClusterController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "update cluster by stack id", produces = "application/json", notes = "")
     @RequestMapping(value = "/stacks/{stackId}/cluster", method = RequestMethod.PUT)
     @ResponseBody
     public ResponseEntity<String> updateCluster(@PathVariable Long stackId, @RequestBody UpdateClusterJson updateJson) {

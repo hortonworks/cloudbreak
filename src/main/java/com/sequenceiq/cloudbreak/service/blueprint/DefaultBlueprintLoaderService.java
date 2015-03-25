@@ -41,9 +41,8 @@ public class DefaultBlueprintLoaderService {
                 blueprintJson.setBlueprintName(blueprintName);
                 blueprintJson.setName(blueprintName);
                 blueprintJson.setDescription(blueprintName);
-                blueprintJson.setAmbariBlueprint(
-                        jsonHelper.createJsonFromString(FileReaderUtils.readFileFromClasspath(String.format("blueprints/%s.bp", blueprintName))));
-
+                blueprintJson.setAmbariBlueprint(jsonHelper.createJsonFromString(FileReaderUtils.readFileFromClasspath(
+                        String.format("blueprints/%s.bp", blueprintName))));
                 Blueprint bp = blueprintConverter.convert(blueprintJson);
                 MDCBuilder.buildMdcContext(bp);
                 bp.setOwner(user.getUserId());
