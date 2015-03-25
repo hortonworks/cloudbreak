@@ -2,7 +2,14 @@
 
 ### Fixed
 
+- removed dos2unix dependency for the update command
+
 ### Added
+
+- doctor command added
+- docker-check-version command added
+- cci-latest accepts branch as parameter, needed for PR testing
+- export fn command in DEBUG mode
 
 ### Removed
 
