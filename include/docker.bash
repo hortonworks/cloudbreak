@@ -1,20 +1,42 @@
 docker-check-version() {
-    declares desc="Checks if docker is at least 1.5.0"
+    declare desc="Checks if docker is at least 1.5.0"
 
-    local ver=$(docker --version 2> /dev/null)
-    if [ $? -gt 0 ]; then
-        echo "[ERROR] docker command not found" | red
+    docker --version &> /dev/null || missing=1
+    if [[ "$missing" ]]; then
+        echo "[ERROR] docker command not found, please install docker. https://docs.docker.com/installation/" | red
         exit 127
     fi
 
-    debug $ver
+    local ver=$(docker --version 2> /dev/null)
+    debug ver=$ver
     local numver=$(echo ${ver%%,*}|sed "s/[a-zA-Z \.]//g")
     debug numeric version: $numver
     
     if [ $numver -lt 150 ]; then
+        local target=$(which docker 2>/dev/null || true)
+        : ${target:=/usr/local/bin/docker}
         echo "[ERROR] Please upgrade your docker version to 1.5.0 or latest" | red
         echo "suggested command:" | red
-        echo "  sudo curl -Lo $(which docker) https://get.docker.com/builds/$(uname -s)/$(uname -m)/docker-latest ; chmod +x  $(which docker)" | green
+        echo "  sudo curl -Lo $target https://get.docker.com/builds/$(uname -s)/$(uname -m)/docker-latest ; chmod +x $target" | green
         exit 1
     fi
+
+    docker version &> /tmp/cbd.log || noserver=1
+    if [[ "$noserver" ]]; then
+        echo "[ERROR] docker version returned an error" | red
+        cat /tmp/cbd.log | yellow
+        exit 127
+    fi
+
+    local serverVer=$(docker version 2> /dev/null | grep "Server version")
+    debug serverVer=$serverVer
+    local numserver=$(echo $serverVer | sed -n "s/[a-zA-Z \.:]//gp")
+    debug numserver=$numserver
+
+    if [ $numserver -lt 150 ]; then
+        echo "[ERROR] Please upgrade your docker version to 1.5.0 or latest" | red
+        echo "[WARNING] your local docker seems to be fine, only the server version is outdated" | yellow
+        exit 1
+    fi
+    
 }
