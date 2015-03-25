@@ -24,7 +24,7 @@
 ### Fixed
 
 - debug function fixed
-- DEBUG and TRACE env vars are inherited
+- DEBUG, TRACE and CBD_DEFAULT_PROFILE env vars are inherited
 
 ### Added
 
