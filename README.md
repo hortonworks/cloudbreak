@@ -44,6 +44,11 @@ If you want to have more detailed output set the `DEBUG` env variable to non-zer
 DEBUG=1 cbd some_command
 ```
 
+You can also use the `doctor` command to diagnose your environment:
+```
+cbd doctor
+```
+
 ## Update
 
 The tool is capable of upgrade itself:
