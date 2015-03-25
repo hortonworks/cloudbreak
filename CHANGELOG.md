@@ -6,6 +6,8 @@
 
 - `make tests` runs unit tests
 - docker unit tests are added
+- start command added: WIP consul, registrator starts
+- kill command addd: stops and removes cloudbreak specific containers
 
 ### Removed
 

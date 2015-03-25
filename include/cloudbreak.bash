@@ -43,3 +43,52 @@ cloudbreak-conf-cbdb() {
 cloudbreak-conf-defaults() {
     env-import CB_BLUEPRINT_DEFAULTS "lambda-architecture,multi-node-hdfs-yarn,hdp-multinode-default"
 }
+
+start_consul() {
+    declare desc="starts consul binding to: $PRIVATE_IP http:8500 dns:53 rpc:8400"
+
+    env-import PRIVATE_IP
+    
+    info $desc
+    docker run -d \
+        -h node1 \
+        --name=consul \
+        --privileged \
+        -e SERVICE_IGNORE=true \
+        -p ${PRIVATE_IP}:53:53/udp \
+        -p ${PRIVATE_IP}:8400:8400 \
+        -p ${PRIVATE_IP}:8500:8500 \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        sequenceiq/consul:$DOCKER_TAG_CONSUL -server -bootstrap -advertise ${PRIVATE_IP}
+}
+
+start_registrator() {
+    declare desc="starts registrator connecting to consul"
+
+    env-import PRIVATE_IP
+    
+    info $desc
+    docker run -d \
+      --name=registrator \
+      --privileged \
+      -v /var/run/docker.sock:/tmp/docker.sock \
+      gliderlabs/registrator:$DOCKER_TAG_REGISTRATOR consul://${PRIVATE_IP}:8500
+}
+
+cloudbreak-deploy() {
+    declare desc="Deploys all Cloudbreak components in docker containers"
+
+    start_consul | gray
+    start_registrator | gray
+}
+
+cloudbreak-destroy() {
+    declare desc="Destroys Cloudbreak related containers"
+
+    local containers="consul registrator"
+    info "stopping containers"
+    docker stop -t 0 $containers | gray
+
+    info "removing containers"
+    docker rm -f $containers | gray
+}

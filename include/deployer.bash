@@ -104,6 +104,9 @@ main() {
     cmd-export env-show
     cmd-export env-export
 
+    cmd-export cloudbreak-deploy start
+    cmd-export cloudbreak-destroy kill
+
     if [[ "$DEBUG" ]]; then
         cmd-export fn-call fn
     fi
