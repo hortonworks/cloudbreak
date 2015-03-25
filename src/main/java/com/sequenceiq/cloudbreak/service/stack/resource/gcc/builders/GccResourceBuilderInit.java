@@ -48,11 +48,10 @@ public class GccResourceBuilderInit implements
     private JsonHelper jsonHelper;
 
     @Override
-    public GccProvisionContextObject provisionInit(Stack stack, String userData) throws Exception {
+    public GccProvisionContextObject provisionInit(Stack stack) throws Exception {
         GccCredential credential = (GccCredential) stack.getCredential();
         GccProvisionContextObject gccProvisionContextObject = new GccProvisionContextObject(stack.getId(), credential.getProjectId(),
                 gccStackUtil.buildCompute(credential, stack));
-        gccProvisionContextObject.setUserData(userData);
         return gccProvisionContextObject;
     }
 

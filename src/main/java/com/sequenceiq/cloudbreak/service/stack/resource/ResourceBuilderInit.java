@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 public interface ResourceBuilderInit
         <P extends ProvisionContextObject, D extends DeleteContextObject, SSCO extends StartStopContextObject, U extends UpdateContextObject> {
 
-    P provisionInit(Stack stack, String userData) throws Exception;
+    P provisionInit(Stack stack) throws Exception;
 
     U updateInit(Stack stack);
 

@@ -139,8 +139,8 @@ public class StackStartService {
     }
 
     private PollingResult waitForHostsToJoin(Stack stack) {
-        AmbariHosts ambariHosts = new AmbariHosts(stack, ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword()),
-                stack.getFullNodeCount());
+        AmbariHosts ambariHosts = new AmbariHosts(stack,  ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(),
+                stack.getPassword()), stack.getFullNodeCount() - stack.getGateWayNodeCount());
         try {
             return ambariHostJoin.pollWithTimeout(
                     ambariHostsJoinStatusCheckerTask,

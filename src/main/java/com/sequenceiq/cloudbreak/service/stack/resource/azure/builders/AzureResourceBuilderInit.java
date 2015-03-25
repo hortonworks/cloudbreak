@@ -33,12 +33,12 @@ public class AzureResourceBuilderInit implements
     private AzureStackUtil azureStackUtil;
 
     @Override
-    public AzureProvisionContextObject provisionInit(Stack stack, String userData) throws Exception {
+    public AzureProvisionContextObject provisionInit(Stack stack) throws Exception {
         AzureCredential credential = (AzureCredential) stack.getCredential();
         AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
         AzureProvisionContextObject azureProvisionContextObject =
                 new AzureProvisionContextObject(stack.getId(), credential.getCommonName(azureLocation),
-                        getOsImageName(credential, azureLocation, stack.getImage()), userData, getAllocatedAddresses(stack));
+                        getOsImageName(credential, azureLocation, stack.getImage()), getAllocatedAddresses(stack));
         return azureProvisionContextObject;
     }
 

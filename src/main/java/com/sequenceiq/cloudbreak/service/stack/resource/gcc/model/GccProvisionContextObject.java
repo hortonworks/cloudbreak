@@ -7,7 +7,6 @@ public class GccProvisionContextObject extends ProvisionContextObject {
 
     private String projectId;
     private Compute compute;
-    private String userData;
 
     public GccProvisionContextObject(Long stackId, String projectId, Compute compute) {
         super(stackId);
@@ -29,14 +28,6 @@ public class GccProvisionContextObject extends ProvisionContextObject {
 
     public void setCompute(Compute compute) {
         this.compute = compute;
-    }
-
-    public String getUserData() {
-        return userData;
-    }
-
-    public void setUserData(String userData) {
-        this.userData = userData;
     }
 
 }

@@ -39,6 +39,11 @@ public abstract class GccSimpleNetworkResourceBuilder implements
         return compute.zoneOperations().get(gccCredential.getProjectId(), region.getValue(), operation.getName());
     }
 
+    protected Compute.RegionOperations.Get createRegionOperations(Compute compute, GccCredential gccCredential, Operation operation, GccZone region)
+            throws IOException {
+        return compute.regionOperations().get(gccCredential.getProjectId(), region.getRegion(), operation.getName());
+    }
+
     protected Compute.GlobalOperations.Get createGlobalOperations(Compute compute, GccCredential gccCredential, Operation operation)
             throws IOException {
         return compute.globalOperations().get(gccCredential.getProjectId(), operation.getName());

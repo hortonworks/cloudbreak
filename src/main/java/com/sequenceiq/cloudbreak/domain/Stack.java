@@ -492,4 +492,23 @@ public class Stack implements ProvisionEntity {
                 && parameters.get(StackParam.IGW_ID.getName()) != null;
     }
 
+    public Set<InstanceGroup> getInstanceGroupsByType(InstanceGroupType instanceGroupType) {
+        Set<InstanceGroup> instanceGroupsList = new HashSet<>();
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            if (instanceGroupType.equals(instanceGroup.getInstanceGroupType())) {
+                instanceGroupsList.add(instanceGroup);
+            }
+        }
+        return instanceGroupsList;
+    }
+
+    public int getGateWayNodeCount() {
+        Set<InstanceGroup> instanceGroupsByType = getInstanceGroupsByType(InstanceGroupType.GATEWAY);
+        int gateWaySize = 0;
+        for (InstanceGroup instanceGroup : instanceGroupsByType) {
+            gateWaySize += instanceGroup.getNodeCount();
+        }
+        return gateWaySize;
+    }
+
 }

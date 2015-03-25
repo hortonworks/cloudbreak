@@ -28,13 +28,13 @@ public class GcpConnector implements CloudPlatformConnector {
     private ParallelCloudResourceManager cloudResourceManager;
 
     @Override
-    public Set<Resource> buildStack(Stack stack, String userDataScript, Map<String, Object> setupProperties) {
-        return cloudResourceManager.buildStackResources(stack, userDataScript, gcpResourceBuilderInit);
+    public Set<Resource> buildStack(Stack stack, String gateWayUserData, String hostGroupUserData, Map<String, Object> setupProperties) {
+        return cloudResourceManager.buildStackResources(stack, gateWayUserData, hostGroupUserData, gcpResourceBuilderInit);
     }
 
     @Override
-    public Set<Resource> addInstances(Stack stack, String userData, Integer instanceCount, String instanceGroup) {
-        return cloudResourceManager.addNewResources(stack, userData, instanceCount, instanceGroup, gcpResourceBuilderInit);
+    public Set<Resource> addInstances(Stack stack, String gateWayUserData, String hostGroupUserData, Integer instanceCount, String instanceGroup) {
+        return cloudResourceManager.addNewResources(stack, hostGroupUserData, instanceCount, instanceGroup, gcpResourceBuilderInit);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class GcpConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public void updateAllowedSubnets(Stack stack, String userData) throws UpdateFailedException {
+    public void updateAllowedSubnets(Stack stack, String gateWayUserData, String hostGroupUserData) throws UpdateFailedException {
         cloudResourceManager.updateAllowedSubnets(stack, gcpResourceBuilderInit);
     }
 }

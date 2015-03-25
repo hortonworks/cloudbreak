@@ -86,7 +86,7 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
 
     @Override
     public CreateResourceRequest buildCreateRequest(GccProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup, Optional<String> userData) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         GccTemplate gccTemplate = (GccTemplate) instanceGroup.orNull().getTemplate();

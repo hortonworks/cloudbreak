@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.OnFailureAction;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -209,10 +210,13 @@ public class SimpleStackFacade implements StackFacade {
         Long stackId = request.getStackId();
         Stack stack = stackRepository.findOneWithLists(stackId);
         MDCBuilder.buildMdcContext(stack);
-        String userData = userDataBuilder.build(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>());
+        String hostGroupUserData = userDataBuilder
+                .buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>(), InstanceGroupType.HOSTGROUP);
+        String gateWayUserData = userDataBuilder
+                .buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>(), InstanceGroupType.GATEWAY);
         try {
             stack.setAllowedSubnets(getNewSubnetList(stack, request.getAllowedSubnets()));
-            cloudPlatformConnectors.get(stack.cloudPlatform()).updateAllowedSubnets(stack, userData);
+            cloudPlatformConnectors.get(stack.cloudPlatform()).updateAllowedSubnets(stack, gateWayUserData, hostGroupUserData);
             stackUpdater.updateStack(stack);
             String statusReason = "Security update successfully finished";
             stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, statusReason);

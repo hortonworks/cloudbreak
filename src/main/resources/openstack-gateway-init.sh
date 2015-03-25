@@ -113,18 +113,10 @@ ENDOFJSON
 
 start_ambari_server() {
   docker rm -f ambari-server &>/dev/null
-  if [[ "$(consul_leader)" ==  "$(get_ip)" ]]; then
-    docker run -d --name=ambari_db --privileged --restart=always -v /data/ambari-server/pgsql/data:/var/lib/postgresql/data -e POSTGRES_PASSWORD=bigdata -e POSTGRES_USER=ambari postgres:9.4.1
-    sleep 10
-    docker run -d --name=ambari-server --privileged --net=host --restart=always -e POSTGRES_DB=$(docker inspect -f "{{.NetworkSettings.IPAddress}}" ambari_db) -e BRIDGE_IP=$(get_ip) sequenceiq/ambari:$AMBARI_DOCKER_TAG /start-server
-    register_ambari
-  fi
-}
-
-start_ambari_agent() {
-  set_public_host_script
-  set_disk_as_volumes
-  docker run -d --name=ambari-agent --privileged --net=host --restart=always -e BRIDGE_IP=$(get_ip) -e HADOOP_CLASSPATH=/data/jars/*:/usr/lib/hadoop/lib/* -v /data/jars:/data/jars $VOLUMES sequenceiq/ambari:$AMBARI_DOCKER_TAG /start-agent
+  docker run -d --name=ambari_db --privileged --restart=always -v /data/ambari-server/pgsql/data:/var/lib/postgresql/data -e POSTGRES_PASSWORD=bigdata -e POSTGRES_USER=ambari postgres:9.4.1
+  sleep 10
+  docker run -d --name=ambari-server --privileged --net=host --restart=always -e POSTGRES_DB=$(docker inspect -f "{{.NetworkSettings.IPAddress}}" ambari_db) -e BRIDGE_IP=$(get_ip) sequenceiq/ambari:$AMBARI_DOCKER_TAG /start-server
+  register_ambari
 }
 
 set_disk_as_volumes() {
@@ -133,9 +125,6 @@ set_disk_as_volumes() {
   done
 }
 
-set_public_host_script() {
-  VOLUMES="$VOLUMES -v /usr/local/public_host_script.sh:/etc/ambari-agent/conf/public-hostname.sh"
-}
 
 format_disks() {
   /usr/local/disk_mount.sh
@@ -150,7 +139,6 @@ main() {
     fix_hostname
     start_consul
     start_ambari_server
-    start_ambari_agent
   fi
 }
 

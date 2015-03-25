@@ -51,6 +51,13 @@
       "MinLength": "9",
       "MaxLength": "50000"
     },
+
+    "CBGateWayUserData" : {
+      "Description" : "Gateway user data to be executed",
+      "Type" : "String",
+      "MinLength": "9",
+      "MaxLength": "50000"
+    },
     
     "KeyName": {
       "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instances",
@@ -250,7 +257,12 @@
         <#if useSpot>
         "SpotPrice"      : ${instanceGroup.template.spotPrice},
         </#if>
+        <#if instanceGroup.instanceGroupType == "HOSTGROUP">
         "UserData"       : { "Fn::Base64" : { "Ref" : "CBUserData"}}
+        </#if>
+        <#if instanceGroup.instanceGroupType == "GATEWAY">
+        "UserData"       : { "Fn::Base64" : { "Ref" : "CBGateWayUserData"}}
+        </#if>
       }
     },
     </#list>

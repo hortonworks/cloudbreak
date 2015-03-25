@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateWay;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -115,6 +117,8 @@ public class ClusterConverter {
             InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stackId, json.getInstanceGroupName());
             if (instanceGroup == null) {
                 throw new BadRequestException(String.format("Cannot find instance group named '%s' in stack '%s'", json.getInstanceGroupName(), stackId));
+            } else if (isGateWay(instanceGroup.getInstanceGroupType())) {
+                throw new BadRequestException(String.format("Cannot define hostgroup on gateway in stack '%s'", json.getInstanceGroupName(), stackId));
             }
             hostGroup.setInstanceGroup(instanceGroup);
             if (json.getRecipeIds() != null) {

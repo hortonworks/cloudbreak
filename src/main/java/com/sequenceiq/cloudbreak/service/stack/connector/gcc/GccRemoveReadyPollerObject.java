@@ -1,13 +1,15 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.gcc;
 
 import com.google.api.services.compute.Compute;
+import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.StackDependentPollerObject;
 
 public class GccRemoveReadyPollerObject extends StackDependentPollerObject {
 
-    private Compute.ZoneOperations.Get zoneOperations;
+    private Optional<Compute.ZoneOperations.Get> zoneOperations = Optional.absent();
+    private Optional<Compute.RegionOperations.Get> regionOperations = Optional.absent();
     private Compute.GlobalOperations.Get globalOperations;
     private String name;
     private String operationName;
@@ -17,13 +19,27 @@ public class GccRemoveReadyPollerObject extends StackDependentPollerObject {
             Stack stack, String name, String operationName, ResourceType resourceType) {
         super(stack);
         this.name = name;
-        this.zoneOperations = zoneOperations;
+        this.zoneOperations = Optional.fromNullable(zoneOperations);
         this.globalOperations = globalOperations;
         this.operationName = operationName;
         this.resourceType = resourceType;
     }
 
-    public Compute.ZoneOperations.Get getZoneOperations() {
+    public GccRemoveReadyPollerObject(Compute.RegionOperations.Get regionOperations, Compute.GlobalOperations.Get globalOperations,
+            Stack stack, String name, String operationName, ResourceType resourceType) {
+        super(stack);
+        this.name = name;
+        this.regionOperations = Optional.fromNullable(regionOperations);
+        this.globalOperations = globalOperations;
+        this.operationName = operationName;
+        this.resourceType = resourceType;
+    }
+
+    public Optional<Compute.RegionOperations.Get> getRegionOperations() {
+        return regionOperations;
+    }
+
+    public Optional<Compute.ZoneOperations.Get> getZoneOperations() {
         return zoneOperations;
     }
 

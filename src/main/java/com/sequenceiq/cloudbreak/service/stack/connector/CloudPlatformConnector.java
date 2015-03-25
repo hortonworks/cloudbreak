@@ -10,9 +10,9 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 
 public interface CloudPlatformConnector {
 
-    Set<Resource> buildStack(Stack stack, String userData, Map<String, Object> setupProperties);
+    Set<Resource> buildStack(Stack stack, String gateWayUserData, String hostGroupUserData, Map<String, Object> setupProperties);
 
-    Set<Resource> addInstances(Stack stack, String userData, Integer instanceCount, String instanceGroup);
+    Set<Resource> addInstances(Stack stack, String gateWayUserData, String hostGroupUserData, Integer instanceCount, String instanceGroup);
 
     Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup);
 
@@ -26,6 +26,6 @@ public interface CloudPlatformConnector {
 
     CloudPlatform getCloudPlatform();
 
-    void updateAllowedSubnets(Stack stack, String userData) throws UpdateFailedException;
+    void updateAllowedSubnets(Stack stack, String gateWayUserData, String hostGroupUserData) throws UpdateFailedException;
 
 }

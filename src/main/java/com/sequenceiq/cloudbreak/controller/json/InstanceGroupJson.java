@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InstanceGroupJson implements JsonEntity {
@@ -24,6 +25,7 @@ public class InstanceGroupJson implements JsonEntity {
     private int nodeCount;
     @NotNull
     private String group;
+    private InstanceGroupType type = InstanceGroupType.HOSTGROUP;
     private Set<InstanceMetaDataJson> metadata = new HashSet<>();
 
     public InstanceGroupJson() {
@@ -72,5 +74,13 @@ public class InstanceGroupJson implements JsonEntity {
     @JsonIgnore
     public void setMetadata(Set<InstanceMetaDataJson> metadata) {
         this.metadata = metadata;
+    }
+
+    public InstanceGroupType getType() {
+        return type;
+    }
+
+    public void setType(InstanceGroupType type) {
+        this.type = type;
     }
 }

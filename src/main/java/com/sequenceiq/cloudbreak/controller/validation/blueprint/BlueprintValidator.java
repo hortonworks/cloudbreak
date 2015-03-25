@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.validation.blueprint;
 
+import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.GATEWAY;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -69,7 +71,7 @@ public class BlueprintValidator {
             instanceGroupNames.add(hostGroup.getInstanceGroup().getId());
         }
 
-        if (instanceGroups.size() != hostGroupsInRequest.size()) {
+        if (instanceGroups.size() - GATEWAY.getFixedNodeCount() != hostGroupsInRequest.size()) {
             throw new BadRequestException("The number of hostgroups must match the number of instance groups on the stack");
         }
     }

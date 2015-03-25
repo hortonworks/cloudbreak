@@ -83,7 +83,7 @@ public class AzureAffinityGroupResourceBuilder extends AzureSimpleNetworkResourc
 
     @Override
     public AzureAffinityGroupCreateRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int i, Optional<InstanceGroup> instanceGroup) throws Exception {
+            List<Resource> buildResources, int i, Optional<InstanceGroup> instanceGroup, Optional<String> userData) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();

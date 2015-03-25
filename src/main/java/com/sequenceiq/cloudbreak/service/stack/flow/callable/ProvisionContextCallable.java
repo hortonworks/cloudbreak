@@ -34,9 +34,11 @@ public class ProvisionContextCallable implements Callable<ResourceRequestResult>
     private final ProvisionContextObject provisionContextObject;
     private final RetryingStackUpdater stackUpdater;
     private final StackRepository stackRepository;
+    private final Optional<String> userData;
 
     private ProvisionContextCallable(Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders, int index, Stack stack,
-            InstanceGroup instanceGroup, ProvisionContextObject provisionContextObject, RetryingStackUpdater stackUpdater, StackRepository stackRepository) {
+            InstanceGroup instanceGroup, ProvisionContextObject provisionContextObject, RetryingStackUpdater stackUpdater,
+            StackRepository stackRepository, Optional<String> userData) {
         this.instanceResourceBuilders = instanceResourceBuilders;
         this.index = index;
         this.stack = stack;
@@ -44,6 +46,7 @@ public class ProvisionContextCallable implements Callable<ResourceRequestResult>
         this.provisionContextObject = provisionContextObject;
         this.stackUpdater = stackUpdater;
         this.stackRepository = stackRepository;
+        this.userData = userData;
     }
 
     @Override
@@ -55,14 +58,14 @@ public class ProvisionContextCallable implements Callable<ResourceRequestResult>
             for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(stack.cloudPlatform())) {
                 ResourceBuilderType resourceBuilderType = resourceBuilder.resourceBuilderType();
                 buildResources = resourceBuilder.buildResources(provisionContextObject, index, resources, Optional.of(instanceGroup));
-                CreateResourceRequest createResourceRequest =
-                        resourceBuilder.buildCreateRequest(provisionContextObject, resources, buildResources, index, Optional.of(instanceGroup));
-                stackUpdater.addStackResources(stack.getId(), createResourceRequest.getBuildableResources());
+                CreateResourceRequest request = resourceBuilder
+                        .buildCreateRequest(provisionContextObject, resources, buildResources, index, Optional.of(instanceGroup), userData);
+                stackUpdater.addStackResources(stack.getId(), request.getBuildableResources());
                 if (stackRepository.findById(stack.getId()).isStackInDeletionPhase()) {
                     break;
                 }
-                resourceBuilder.create(createResourceRequest, stack.getRegion());
-                resources.addAll(createResourceRequest.getBuildableResources());
+                resourceBuilder.create(request, stack.getRegion());
+                resources.addAll(request.getBuildableResources());
                 LOGGER.info("Node {}. creation in progress resource {} creation finished.", index, resourceBuilderType);
             }
         } catch (Exception ex) {
@@ -88,6 +91,7 @@ public class ProvisionContextCallable implements Callable<ResourceRequestResult>
         private ProvisionContextObject provisionContextObject;
         private RetryingStackUpdater stackUpdater;
         private StackRepository stackRepository;
+        private String userData;
 
         public static ProvisionContextCallableBuilder builder() {
             return new ProvisionContextCallableBuilder();
@@ -128,8 +132,14 @@ public class ProvisionContextCallable implements Callable<ResourceRequestResult>
             return this;
         }
 
+        public ProvisionContextCallableBuilder withUserData(String userData) {
+            this.userData = userData;
+            return this;
+        }
+
         public ProvisionContextCallable build() {
-            return new ProvisionContextCallable(instanceResourceBuilders, index, stack, instanceGroup, provisionContextObject, stackUpdater, stackRepository);
+            return new ProvisionContextCallable(instanceResourceBuilders, index, stack, instanceGroup,
+                    provisionContextObject, stackUpdater, stackRepository, userData == null ? Optional.<String>absent() : Optional.fromNullable(userData));
         }
 
     }

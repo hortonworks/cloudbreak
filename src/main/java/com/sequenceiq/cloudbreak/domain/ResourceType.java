@@ -19,6 +19,7 @@ public enum ResourceType {
     // GCC
     GCC_DISK,
     GCC_ATTACHED_DISK,
+    GCC_RESERVED_IP,
     GCC_NETWORK,
     GCC_FIREWALL_IN,
     GCC_FIREWALL_INTERNAL,

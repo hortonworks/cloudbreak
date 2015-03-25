@@ -94,7 +94,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
 
     @Override
     public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup, Optional<String> userData) throws Exception {
         try {
             Stack stack = stackRepository.findById(provisionContextObject.getStackId());
             AzureTemplate azureTemplate = (AzureTemplate) instanceGroup.orNull().getTemplate();
@@ -118,7 +118,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             props.put(SERVICENAME, buildResources.get(0).getResourceName());
             props.put(SUBNETNAME, provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
             props.put(VIRTUAL_NETWORK_IP_ADDRESS, findNextValidIp(provisionContextObject));
-            props.put(CUSTOMDATA, new String(Base64.encodeBase64(provisionContextObject.getUserData().getBytes())));
+            props.put(CUSTOMDATA, new String(Base64.encodeBase64(userData.orNull().getBytes())));
             props.put(VIRTUALNETWORKNAME, provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
             props.put(PORTS, NetworkUtils.getPorts(stack));
             props.put(VMTYPE, azureTemplate.getVmType().vmType().replaceAll(" ", ""));

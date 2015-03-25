@@ -82,7 +82,7 @@ public class GccFireWallInternalResourceBuilder extends GccSimpleNetworkResource
 
     @Override
     public CreateResourceRequest buildCreateRequest(GccProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup, Optional<String> userData) throws Exception {
         Firewall firewall = new Firewall();
         Firewall.Allowed allowed1 = new Firewall.Allowed();
         allowed1.setIPProtocol("tcp");

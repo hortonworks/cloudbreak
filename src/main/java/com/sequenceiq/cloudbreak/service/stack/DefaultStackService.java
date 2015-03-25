@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateWay;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -311,6 +313,9 @@ public class DefaultStackService implements StackService {
     }
 
     private void validateInstanceGroup(Stack stack, String instanceGroup) {
+        if (isGateWay(stack.getInstanceGroupByInstanceGroupName(instanceGroup).getInstanceGroupType())) {
+                        throw new BadRequestException("The Ambari server instancegroup modification is not enabled.");
+        }
         if (stack.getInstanceGroupByInstanceGroupName(instanceGroup) == null) {
             throw new BadRequestException(String.format("Stack '%s' does not have an instanceGroup named '%s'.", stack.getId(), instanceGroup));
         }

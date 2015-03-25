@@ -65,7 +65,7 @@ public class DummyExVirtualMachineResourceBuilder
 
     @Override
     public CreateResourceRequest buildCreateRequest(DummyProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup, Optional<String> userData) throws Exception {
         return new DummyVirtualMachineCreateRequest(new ArrayList<Resource>());
     }
 

@@ -97,36 +97,6 @@ con() {
   curl ${consul_ip}:8500/v1/${path} "$@"
 }
 
-register_ambari() {
-  JSON=$(cat <<ENDOFJSON
-  {
-     "ID":"$(hostname -i):ambari:8080",
-     "Name":"ambari-8080",
-     "Port":8080,
-     "Check":null
-  }
-ENDOFJSON
-  )
-
-  con agent/service/register -X PUT -d @- <<<"$JSON"
-}
-
-use_dns_first() {
-  docker exec ambari-agent sed -i "/^hosts:/ s/ *files dns/ dns files/" /etc/nsswitch.conf
-  docker exec ambari-server sed -i "/^hosts:/ s/ *files dns/ dns files/" /etc/nsswitch.conf
-  docker exec consul sed -i "/^hosts:/ s/ *files dns/ dns files/" /etc/nsswitch.conf
-}
-
-start_ambari_server() {
-  docker rm -f ambari-server &>/dev/null
-  if [[ "$(consul_leader)" ==  "$(get_ip)" ]]; then
-    docker run -d --name=ambari_db --privileged --restart=always -v /data/ambari-server/pgsql/data:/var/lib/postgresql/data -e POSTGRES_PASSWORD=bigdata -e POSTGRES_USER=ambari postgres:9.4.1
-    sleep 10
-    docker run -d --name=ambari-server --privileged --net=host --restart=always -e POSTGRES_DB=$(docker inspect -f "{{.NetworkSettings.IPAddress}}" ambari_db) -e BRIDGE_IP=$(get_ip) sequenceiq/ambari:$AMBARI_DOCKER_TAG /start-server
-    register_ambari
-  fi
-}
-
 start_ambari_agent() {
   set_public_host_script
   set_disk_as_volumes
@@ -147,23 +117,15 @@ format_disks() {
   /usr/local/disk_mount.sh
 }
 
-remove_run_init_scripts() {
-  # avoid re-run init-script
-  sed -i "/run-scripts/d" /usr/share/google/run-startup-scripts
-}
-
 main() {
   if [[ "$1" == "::" ]]; then
     shift
     eval "$@"
   else
-    remove_run_init_scripts
     format_disks
     fix_hostname
     start_consul
-    start_ambari_server
     start_ambari_agent
-    use_dns_first
   fi
 }
 

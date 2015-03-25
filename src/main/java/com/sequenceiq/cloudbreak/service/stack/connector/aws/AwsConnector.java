@@ -111,28 +111,47 @@ public class AwsConnector implements CloudPlatformConnector {
     @Value("${cb.aws.cf.template.path:templates/aws-cf-stack.ftl}")
     private String awsCloudformationTemplatePath;
 
-    @Autowired private AwsStackUtil awsStackUtil;
-    @Autowired private Reactor reactor;
-    @Autowired private ASGroupStatusCheckerTask asGroupStatusCheckerTask;
-    @Autowired private CloudFormationTemplateBuilder cfTemplateBuilder;
-    @Autowired private RetryingStackUpdater stackUpdater;
-    @Autowired private CloudFormationStackUtil cfStackUtil;
-    @Autowired private InstanceMetaDataRepository instanceMetaDataRepository;
-    @Autowired private PollingService<AwsInstances> awsPollingService;
-    @Autowired private PollingService<AutoScalingGroupReady> autoScalingGroupReadyPollingService;
-    @Autowired private PollingService<CloudFormationStackPollerObject> cloudFormationPollingService;
-    @Autowired private PollingService<EbsVolumeStatePollerObject> ebsVolumeStatePollingService;
-    @Autowired private PollingService<SnapshotReadyPollerObject> snapshotReadyPollingService;
-    @Autowired private ClusterRepository clusterRepository;
-    @Autowired private UserDataBuilder userDataBuilder;
-    @Autowired private StackRepository stackRepository;
-    @Autowired private AwsInstanceStatusCheckerTask awsInstanceStatusCheckerTask;
-    @Autowired private CloudFormationStackStatusChecker cloudFormationStackStatusChecker;
-    @Autowired private EbsVolumeStateCheckerTask ebsVolumeStateCheckerTask;
-    @Autowired private SnapshotReadyCheckerTask snapshotReadyCheckerTask;
+    @Autowired
+    private AwsStackUtil awsStackUtil;
+    @Autowired
+    private Reactor reactor;
+    @Autowired
+    private ASGroupStatusCheckerTask asGroupStatusCheckerTask;
+    @Autowired
+    private CloudFormationTemplateBuilder cfTemplateBuilder;
+    @Autowired
+    private RetryingStackUpdater stackUpdater;
+    @Autowired
+    private CloudFormationStackUtil cfStackUtil;
+    @Autowired
+    private InstanceMetaDataRepository instanceMetaDataRepository;
+    @Autowired
+    private PollingService<AwsInstances> awsPollingService;
+    @Autowired
+    private PollingService<AutoScalingGroupReady> autoScalingGroupReadyPollingService;
+    @Autowired
+    private PollingService<CloudFormationStackPollerObject> cloudFormationPollingService;
+    @Autowired
+    private PollingService<EbsVolumeStatePollerObject> ebsVolumeStatePollingService;
+    @Autowired
+    private PollingService<SnapshotReadyPollerObject> snapshotReadyPollingService;
+    @Autowired
+    private ClusterRepository clusterRepository;
+    @Autowired
+    private UserDataBuilder userDataBuilder;
+    @Autowired
+    private StackRepository stackRepository;
+    @Autowired
+    private AwsInstanceStatusCheckerTask awsInstanceStatusCheckerTask;
+    @Autowired
+    private CloudFormationStackStatusChecker cloudFormationStackStatusChecker;
+    @Autowired
+    private EbsVolumeStateCheckerTask ebsVolumeStateCheckerTask;
+    @Autowired
+    private SnapshotReadyCheckerTask snapshotReadyCheckerTask;
 
     @Override
-    public Set<Resource> buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
+    public Set<Resource> buildStack(Stack stack, String gateWayUserData, String hostGroupUserData, Map<String, Object> setupProperties) {
         MDCBuilder.buildMdcContext(stack);
         Long stackId = stack.getId();
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
@@ -143,7 +162,7 @@ public class AwsConnector implements CloudPlatformConnector {
                 .withStackName(cFStackName)
                 .withOnFailure(OnFailure.valueOf(stack.getOnFailureActionAction().name()))
                 .withTemplateBody(cfTemplateBuilder.build(stack, snapshotId, stack.isExistingVPC(), awsCloudformationTemplatePath))
-                .withParameters(getStackParameters(stack, userData, awsCredential, cFStackName, stack.isExistingVPC()));
+                .withParameters(getStackParameters(stack, hostGroupUserData, gateWayUserData, awsCredential, cFStackName, stack.isExistingVPC()));
         client.createStack(createStackRequest);
         Resource resource = new Resource(ResourceType.CLOUDFORMATION_STACK, cFStackName, stack, null);
         Set<Resource> resources = Sets.newHashSet(resource);
@@ -225,7 +244,7 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public Set<Resource> addInstances(Stack stack, String userData, Integer instanceCount, String instanceGroup) {
+    public Set<Resource> addInstances(Stack stack, String gateWayUserData, String hostGroupUserData, Integer instanceCount, String instanceGroup) {
         MDCBuilder.buildMdcContext(stack);
         InstanceGroup instanceGroupByInstanceGroupName = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         Integer requiredInstances = instanceGroupByInstanceGroupName.getNodeCount() + instanceCount;
@@ -247,7 +266,6 @@ public class AwsConnector implements CloudPlatformConnector {
                 .pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         if (!isSuccess(pollingResult)) {
             throw new CloudResourceOperationFailedException("Failed to create CloudFormation stack, because polling reached an invalid end state.");
-
         }
         return Collections.emptySet();
     }
@@ -274,13 +292,14 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public void updateAllowedSubnets(Stack stack, String userData) throws UpdateFailedException {
+    public void updateAllowedSubnets(Stack stack, String gateWayUserData, String hostGroupUserData) throws UpdateFailedException {
         String cFStackName = cfStackUtil.getCfStackName(stack);
         String snapshotId = getEbsSnapshotIdIfNeeded(stack);
         UpdateStackRequest updateStackRequest = new UpdateStackRequest()
                 .withStackName(cFStackName)
                 .withTemplateBody(cfTemplateBuilder.build(stack, snapshotId, stack.isExistingVPC(), awsCloudformationTemplatePath))
-                .withParameters(getStackParameters(stack, userData, (AwsCredential) stack.getCredential(), stack.getName(), stack.isExistingVPC()));
+                .withParameters(getStackParameters(stack, hostGroupUserData, gateWayUserData,
+                        (AwsCredential) stack.getCredential(), stack.getName(), stack.isExistingVPC()));
         AmazonCloudFormationClient cloudFormationClient = awsStackUtil.createCloudFormationClient(stack);
         cloudFormationClient.updateStack(updateStackRequest);
         List<StackStatus> errorStatuses = Arrays.asList(UPDATE_ROLLBACK_COMPLETE, UPDATE_ROLLBACK_FAILED);
@@ -288,7 +307,7 @@ public class AwsConnector implements CloudPlatformConnector {
                 UPDATE_ROLLBACK_IN_PROGRESS, errorStatuses, stack);
         try {
             PollingResult pollingResult = cloudFormationPollingService
-                            .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
+                    .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
             if (!isSuccess(pollingResult)) {
                 throw new UpdateFailedException("Failed to update Heat stack, because polling reached an invalid end state.");
             }
@@ -352,9 +371,11 @@ public class AwsConnector implements CloudPlatformConnector {
         }
     }
 
-    private List<Parameter> getStackParameters(Stack stack, String userData, AwsCredential awsCredential, String stackName, boolean existingVPC) {
+    private List<Parameter> getStackParameters(Stack stack, String hostGroupUserData, String gateWayUserData, AwsCredential awsCredential, String stackName,
+            boolean existingVPC) {
         List<Parameter> parameters = new ArrayList<>(Arrays.asList(
-                new Parameter().withParameterKey("CBUserData").withParameterValue(userData),
+                new Parameter().withParameterKey("CBUserData").withParameterValue(hostGroupUserData),
+                new Parameter().withParameterKey("CBGateWayUserData").withParameterValue(gateWayUserData),
                 new Parameter().withParameterKey("StackName").withParameterValue(stackName),
                 new Parameter().withParameterKey("StackOwner").withParameterValue(awsCredential.getRoleArn()),
                 new Parameter().withParameterKey("KeyName").withParameterValue(awsCredential.getKeyPairName()),

@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.connector;
 
+import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.GATEWAY;
+import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.HOSTGROUP;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +12,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 public class UserDataBuilderTest {
@@ -17,9 +21,12 @@ public class UserDataBuilderTest {
 
     @BeforeClass
     public static void before() throws IOException {
-        Map<CloudPlatform, String> userDataScripts = new HashMap<>();
+        Map<CloudPlatform, Map<InstanceGroupType, String>> userDataScripts = new HashMap<>();
         for (CloudPlatform cloudPlatform : CloudPlatform.values()) {
-            userDataScripts.put(cloudPlatform, FileReaderUtils.readFileFromClasspath(String.format("%s-init-test.sh", cloudPlatform.getInitScriptPrefix())));
+            Map<InstanceGroupType, String> tmpMap = new HashMap<>();
+            tmpMap.put(HOSTGROUP, FileReaderUtils.readFileFromClasspath(String.format("%s-init-test.sh", cloudPlatform.getInitScriptPrefix())));
+            tmpMap.put(GATEWAY, FileReaderUtils.readFileFromClasspath(String.format("%s-init-test.sh", cloudPlatform.getInitScriptPrefix())));
+            userDataScripts.put(cloudPlatform, tmpMap);
         }
         userDataBuilder = new UserDataBuilder();
         userDataBuilder.setUserDataScripts(userDataScripts);
@@ -33,7 +40,7 @@ public class UserDataBuilderTest {
         Map<String, String> map = new HashMap<>();
         map.put("NODE_PREFIX", "testamb");
         map.put("MYDOMAIN", "test.kom");
-        Assert.assertEquals(expectedScript, userDataBuilder.build(CloudPlatform.AWS, "hash123", 3, map));
+        Assert.assertEquals(expectedScript, userDataBuilder.buildUserData(CloudPlatform.AWS, "hash123", 3, map, InstanceGroupType.HOSTGROUP));
     }
 
     @Test
@@ -42,7 +49,7 @@ public class UserDataBuilderTest {
         Map<String, String> map = new HashMap<>();
         map.put("NODE_PREFIX", "testamb");
         map.put("MYDOMAIN", "test.kom");
-        Assert.assertEquals(expectedScript, userDataBuilder.build(CloudPlatform.AZURE, "hash123", 3, map));
+        Assert.assertEquals(expectedScript, userDataBuilder.buildUserData(CloudPlatform.AZURE, "hash123", 3, map, InstanceGroupType.HOSTGROUP));
     }
 
     @Test
@@ -51,7 +58,7 @@ public class UserDataBuilderTest {
         Map<String, String> map = new HashMap<>();
         map.put("NODE_PREFIX", "testamb");
         map.put("MYDOMAIN", "test.kom");
-        Assert.assertEquals(expectedScript, userDataBuilder.build(CloudPlatform.GCC, "hash123", 3, map));
+        Assert.assertEquals(expectedScript, userDataBuilder.buildUserData(CloudPlatform.GCC, "hash123", 3, map, InstanceGroupType.HOSTGROUP));
     }
 
 }
