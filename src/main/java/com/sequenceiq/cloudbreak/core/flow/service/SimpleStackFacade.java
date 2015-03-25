@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.domain.Subnet;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstallerMailSenderService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
@@ -57,7 +57,7 @@ public class SimpleStackFacade implements StackFacade {
     private RetryingStackUpdater stackUpdater;
 
     @Autowired
-    private AmbariClusterInstallerMailSenderService ambariClusterInstallerMailSenderService;
+    private EmailSenderService emailSenderService;
 
     @Autowired
     private StackRepository stackRepository;
