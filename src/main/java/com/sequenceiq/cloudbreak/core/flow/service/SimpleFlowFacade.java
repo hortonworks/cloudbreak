@@ -192,7 +192,6 @@ public class SimpleFlowFacade implements FlowFacade {
         LOGGER.debug("Stopping stack. Context: {}", context);
         try {
             context = stackFacade.stop(context);
-            LOGGER.debug("Stack stopped.");
             return context;
         } catch (Exception e) {
             LOGGER.error("Exception during stack stop!: {}", e.getMessage());
@@ -218,7 +217,6 @@ public class SimpleFlowFacade implements FlowFacade {
         LOGGER.debug("Starting cluster. Context: {}", flowContext);
         try {
             flowContext = clusterFacade.startCluster(flowContext);
-            LOGGER.debug("Cluster started.");
             return flowContext;
         } catch (Exception e) {
             LOGGER.error("Exception during cluster start!: {}", e.getMessage());
