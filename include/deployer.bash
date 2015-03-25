@@ -72,12 +72,12 @@ doctor() {
 main() {
 	set -eo pipefail; [[ "$TRACE" ]] && set -x
 	color-init
+    load-profile
+
     circle-init
 
     debug "CloudBreak Deployer $(bin-version)"
 
-    load-profile
-    
     cmd-export cmd-help help
     cmd-export cbd-version version
     cmd-export cbd-update update
@@ -85,6 +85,7 @@ main() {
     cmd-export doctor doctor
     
     if [[ "$DEBUG" ]]; then
+        cmd-export env-show env
         cmd-export fn-call fn
     fi
     

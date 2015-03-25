@@ -10,6 +10,7 @@
 - docker-check-version command added
 - cci-latest accepts branch as parameter, needed for PR testing
 - export fn command in DEBUG mode
+- export env command in DEBUG mode
 
 ### Removed
 
