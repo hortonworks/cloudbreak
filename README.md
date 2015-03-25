@@ -29,12 +29,6 @@ export MY_VAR=some_value
 export OTHER_VAR=dunno
 ```
 
-Actually the foolowing env vars _are_ inherited: 
-- `HOME`
-- `DEBUG`
-- `TRACE`
-- `CBD_DEFAULT_PROFILE`
-
 ### List of configurations
 
 - **CB_AWS_AMI_MAP** : tbd 
@@ -157,6 +151,16 @@ git commit -m "release $VER" VERSION CHANGELOG.md
 git push origin release-$VER
 hub pull-request -b release -m "release $VER"
 ```
+
+## Ceveats
+
+The **Cloudbreak Deployer** tool opens a clean bash subshell, without inheriting env vars.
+Actually the foolowing env vars _are_ inherited: 
+
+- `HOME`
+- `DEBUG`
+- `TRACE`
+- `CBD_DEFAULT_PROFILE`
 
 ## Credits
 
