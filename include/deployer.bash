@@ -4,6 +4,10 @@ debug() {
   fi
 }
 
+info() {
+    echo "$*" | green 1>&2
+}
+
 cbd-version() {
     declare desc="Displays the version of Cloudbrek Deployer"
     bin-version | green
@@ -77,6 +81,7 @@ doctor() {
     fi
 
     docker-check-version
+    info "Everything is very-very first class !!!"
 }
 
 main() {

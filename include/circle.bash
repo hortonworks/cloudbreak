@@ -3,11 +3,6 @@ circle-init() {
     : ${CIRCLE_TOKEN:=da6ded628881d187fdab480349807c929b6af287}
 }
 
-
-debug() {
-    [[ "$DEBUG" ]] && echo "[DEBUG] $@" | gray 1>&2 || true
-}
-
 cci-latest() {
     declare desc="Get latest build number from CircleCI"
     declare project=$1 branch=${2:-master}

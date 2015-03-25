@@ -2,6 +2,16 @@
 
 ### Fixed
 
+### Added
+
+### Removed
+
+### Changed
+
+## [v0.0.6] - 2015-03-25
+
+### Fixed
+
 - removed dos2unix dependency for the update command
 
 ### Added
@@ -12,12 +22,14 @@
 - export fn command in DEBUG mode
 - export env command in DEBUG mode
 - doctor: add instruction about setting DOCKER_XXX env vars in Profile
+- info() function added to print green text to STDOUT
 
 ### Removed
 
 ### Changed
 
 - HOME env var is also inherited (boot2docker version failed)
+- release process fully automatized
 
 ## [v0.0.5] - 2015-03-23
 
@@ -45,7 +57,7 @@
 
 - Tool specific library renamed from cloudbreak.bash to deployer.bash
 
-## Unreleased
+## [v0.0.6] - 2015-03-25
 
 ## [v0.0.3] - 2015-03-19
 

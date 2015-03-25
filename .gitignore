@@ -1,2 +1,4 @@
 build
 release
+cbd
+bindata.go

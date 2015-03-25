@@ -1,7 +1,6 @@
 docker-check-boot2docker() {
 
     boot2docker version &> /dev/null || local missing=1
-    echo missing=$missing
     if [[ "$missing" ]]; then
         echo "[ERROR] boot2docker command not found, please install by:" | red
         echo "brew install boot2docker" | blue
@@ -9,6 +8,8 @@ docker-check-boot2docker() {
     fi
 
     debug "TODO: check for version and instruction for update ..."
+
+    info "boot2docker: OK" | green
 }
 
 docker-check-version() {
@@ -19,6 +20,7 @@ docker-check-version() {
         echo "[ERROR] docker command not found, please install docker. https://docs.docker.com/installation/" | red
         exit 127
     fi
+    info "docker command: OK"
 
     local ver=$(docker --version 2> /dev/null)
     debug ver=$ver
@@ -33,6 +35,7 @@ docker-check-version() {
         echo "  sudo curl -Lo $target https://get.docker.com/builds/$(uname -s)/$(uname -m)/docker-latest ; chmod +x $target" | blue
         exit 1
     fi
+    info "docker client version: OK"
 
     if ! grep -q DOCKER_HOST Profile; then
         if ! grep DOCKER_HOST $CBD_PROFILE; then
@@ -59,5 +62,5 @@ docker-check-version() {
         echo "[WARNING] your local docker seems to be fine, only the server version is outdated" | yellow
         exit 1
     fi
-    
+    info "docker server version: OK"
 }
