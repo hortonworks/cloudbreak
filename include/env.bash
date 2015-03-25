@@ -15,7 +15,7 @@ env-import() {
 }
 
 env-show() {
-	declare desc="Shows relevant environment variables"
+	declare desc="Shows relevant environment variables, in human readable format"
 	local longest=0
 	for var in "${_env[@]}"; do
 		if [[ "${#var}" -gt "$longest" ]]; then
@@ -26,3 +26,11 @@ env-show() {
 		printf "%-${longest}s = %s\n" "$var" "${!var}"
 	done
 }
+
+env-export() {
+	declare desc="Shows relevant environment variables, in a machine friendly format."
+	for var in "${_env[@]}"; do
+		printf '%s=%s\n' "$var" "${!var}"
+	done
+}
+

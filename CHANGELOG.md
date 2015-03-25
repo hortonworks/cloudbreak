@@ -8,7 +8,9 @@
 
 ### Changed
 
-- env command is always exported, not only in DEBUG mode
+- env command namespace is always exported, not only in DEBUG mode
+- env export: machine friendly config list
+- env show: human readable config list
 
 ## [v0.0.6] - 2015-03-25
 

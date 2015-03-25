@@ -99,7 +99,10 @@ main() {
     cmd-export cbd-update update
     cmd-export cbd-update-snap update-snap
     cmd-export doctor doctor
-    cmd-export env-show env
+
+    cmd-export-ns env "Environment namespace"
+    cmd-export env-show
+    cmd-export env-export
 
     if [[ "$DEBUG" ]]; then
         cmd-export fn-call fn
