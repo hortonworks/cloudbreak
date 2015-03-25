@@ -69,6 +69,23 @@ cbd update
 - consul: Service Registry
 - registrator: automatically registers/deregisters containers into consul
 
+## Contribution
+
+Development process should happen on separate branches. Then a pull-request should be opened as usual.
+To validate the PR the binari `cbd` tool will be tested. Its built by CircleCI for each branch.
+If you want to test the binary CircleCI built from your branch named `fix-something`, 
+
+```
+cbdl update-snap fix-something
+```
+
+## Testing
+
+Shell scripts shouldn’t be exceptions when it comes to unit testing. [basht](https://github.com/progrium/basht)
+is used for testing. See the reasoning about: [why not bats or shunit2](https://github.com/progrium/basht#why-not-bats-or-shunit2)
+
+Please cover your bahs functions with unit tests.
+
 ## Release Process of Clodbreak Deployer tool
 
 the master branch is always built on [CircleCI](https://circleci.com/gh/sequenceiq/cloudbreak-deployer).
