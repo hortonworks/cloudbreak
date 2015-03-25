@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstallerMailSenderService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
@@ -69,7 +69,7 @@ public class AmbariClusterFacade implements ClusterFacade {
     private PollingService<AmbariStartupPollerObject> ambariStartupPollerObjectPollingService;
 
     @Autowired
-    private AmbariClusterInstallerMailSenderService ambariClusterInstallerMailSenderService;
+    private EmailSenderService emailSenderService;
 
     @Autowired
     private CloudbreakEventService eventService;
@@ -243,7 +243,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         stackUpdater.updateStackStatus(context.getStackId(), Status.AVAILABLE, "Cluster installation failed. Error: " + context.getErrorReason());
         eventService.fireCloudbreakEvent(context.getStackId(), "CLUSTER_CREATION_FAILED", context.getErrorReason());
         if (cluster.getEmailNeeded()) {
-            ambariClusterInstallerMailSenderService.sendFailEmail(cluster.getOwner());
+            emailSenderService.sendFailureEmail(cluster.getOwner());
         }
         return context;
     }

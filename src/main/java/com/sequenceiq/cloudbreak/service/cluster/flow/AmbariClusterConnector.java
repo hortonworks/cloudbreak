@@ -116,7 +116,7 @@ public class AmbariClusterConnector {
     private DNDecommissionStatusCheckerTask dnDecommissionStatusCheckerTask;
 
     @Autowired
-    private AmbariClusterInstallerMailSenderService ambariClusterInstallerMailSenderService;
+    private EmailSenderService emailSenderService;
 
     public void buildAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
@@ -259,7 +259,7 @@ public class AmbariClusterConnector {
                 Status.AVAILABLE, "Cluster installation successfully finished. AMBARI_IP:" + stack.getAmbariIp());
 
         if (cluster.getEmailNeeded()) {
-            ambariClusterInstallerMailSenderService.sendSuccessEmail(cluster.getOwner(), stack.getAmbariIp());
+            emailSenderService.sendSuccessEmail(cluster.getOwner(), stack.getAmbariIp());
         }
     }
 

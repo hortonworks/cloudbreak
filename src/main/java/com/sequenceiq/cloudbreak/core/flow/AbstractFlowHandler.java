@@ -75,7 +75,7 @@ public abstract class AbstractFlowHandler<T> implements Consumer<Event<T>>, Flow
     /**
      * Entry point for custom error flows. Implementers are expected to override this method if errors trigger changes in the flow.
      *
-     * @param throwable the error occured
+     * @param throwable the error occurred
      * @param data      the data received by the handler
      * @return the result of the error processing
      * @throws Exception if the error handling fails
