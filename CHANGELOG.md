@@ -19,6 +19,7 @@
 ### Changed
 
 - HOME env var is also inherited (boot2docker version failed)
+- release process fully automatized
 
 ## [v0.0.5] - 2015-03-23
 
