@@ -2,6 +2,12 @@ package com.sequenceiq.cloudbreak.controller;
 
 import java.util.List;
 
+import com.sequenceiq.cloudbreak.controller.doc.ContentType;
+import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
+import com.sequenceiq.cloudbreak.controller.doc.Notes;
+import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions.EventOpDescription;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +24,13 @@ import com.sequenceiq.cloudbreak.facade.CloudbreakEventsFacade;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Controller
+@Api(value = "/events", description = ControllerDescription.EVENT_DESCRIPTION, position = 7)
 public class CloudbreakEventController {
 
     @Autowired
     private CloudbreakEventsFacade cloudbreakEventsFacade;
 
+    @ApiOperation(value = EventOpDescription.GET_BY_TIMESTAMP, produces = ContentType.JSON, notes = Notes.EVENT_NOTES)
     @RequestMapping(method = RequestMethod.GET, value = "/events")
     @ResponseBody
     public ResponseEntity<List<CloudbreakEventsJson>> events(@ModelAttribute("user") CbUser user, @RequestParam(value = "since", required = false) Long since) {

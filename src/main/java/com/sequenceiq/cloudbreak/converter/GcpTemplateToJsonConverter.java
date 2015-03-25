@@ -3,19 +3,19 @@ package com.sequenceiq.cloudbreak.converter;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sequenceiq.cloudbreak.controller.json.TemplateResponse;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.validation.GccTemplateParam;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 
 @Component
-public class GcpTemplateToJsonConverter extends AbstractConversionServiceAwareConverter<GccTemplate, TemplateJson> {
+public class GcpTemplateToJsonConverter extends AbstractConversionServiceAwareConverter<GccTemplate, TemplateResponse> {
 
     @Override
-    public TemplateJson convert(GccTemplate entity) {
-        TemplateJson gccTemplateJson = new TemplateJson();
+    public TemplateResponse convert(GccTemplate entity) {
+        TemplateResponse gccTemplateJson = new TemplateResponse();
         gccTemplateJson.setName(entity.getName());
         gccTemplateJson.setCloudPlatform(CloudPlatform.GCC);
         gccTemplateJson.setId(entity.getId());

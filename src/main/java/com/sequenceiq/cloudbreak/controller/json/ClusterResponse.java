@@ -4,16 +4,27 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.ClusterModelDescription;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 public class ClusterResponse {
 
+    @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
+    @ApiModelProperty(ClusterModelDescription.STATUS)
     private String status;
+    @ApiModelProperty(ClusterModelDescription.HOURS)
     private int hoursUp;
+    @ApiModelProperty(ClusterModelDescription.MINUTES)
     private int minutesUp;
+    @ApiModelProperty(ClusterModelDescription.CLUSTER_NAME)
     private String cluster;
+    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_ID)
     private Long blueprintId;
+    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
+    @ApiModelProperty(ClusterModelDescription.STATUS_REASON)
     private String statusReason;
     private Set<HostGroupJson> hostGroups;
 

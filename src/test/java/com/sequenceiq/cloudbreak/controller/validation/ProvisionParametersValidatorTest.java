@@ -19,6 +19,7 @@ import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
 import javax.validation.metadata.ConstraintDescriptor;
 
+import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 import org.hibernate.validator.internal.engine.constraintvalidation.ConstraintValidatorContextImpl;
 import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.junit.Before;
@@ -31,7 +32,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.google.common.collect.ImmutableList;
-import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -67,7 +67,7 @@ public class ProvisionParametersValidatorTest {
 
     @Test
     public void validAwsTemplateJsonWillReturnTrue() {
-        TemplateJson templateJson = new TemplateJson();
+        TemplateRequest templateJson = new TemplateRequest();
         templateJson.setCloudPlatform(CloudPlatform.AWS);
         templateJson.setDescription("description");
         templateJson.setName("name");
@@ -83,7 +83,7 @@ public class ProvisionParametersValidatorTest {
 
     @Test
     public void validAwsTemplateWithSpecificSshJsonWillReturnTrue() {
-        TemplateJson templateJson = new TemplateJson();
+        TemplateRequest templateJson = new TemplateRequest();
         templateJson.setCloudPlatform(CloudPlatform.AWS);
         templateJson.setDescription("description");
         templateJson.setName("name");
@@ -99,7 +99,7 @@ public class ProvisionParametersValidatorTest {
 
     @Test
     public void validAwsTemplateWithInvalidSshLocationJsonWillReturnTrue() {
-        TemplateJson templateJson = new TemplateJson();
+        TemplateRequest templateJson = new TemplateRequest();
         templateJson.setCloudPlatform(CloudPlatform.AWS);
         templateJson.setDescription("description");
         templateJson.setName("name");
@@ -115,7 +115,7 @@ public class ProvisionParametersValidatorTest {
 
     @Test
     public void validAwsTemplateWithSpotPriceWithIntegerJsonWillReturnTrue() {
-        TemplateJson templateJson = new TemplateJson();
+        TemplateRequest templateJson = new TemplateRequest();
         templateJson.setCloudPlatform(CloudPlatform.AWS);
         templateJson.setDescription("description");
         templateJson.setName("name");
@@ -132,7 +132,7 @@ public class ProvisionParametersValidatorTest {
 
     @Test
     public void validAwsTemplateWithSpotPriceWithStringJsonWillReturnFalse() {
-        TemplateJson templateJson = new TemplateJson();
+        TemplateRequest templateJson = new TemplateRequest();
         templateJson.setCloudPlatform(CloudPlatform.AWS);
         templateJson.setDescription("description");
         templateJson.setName("name");
@@ -149,7 +149,7 @@ public class ProvisionParametersValidatorTest {
 
     @Test
     public void validAwsTemplateWithSpotPriceWithDoubleJsonWillReturnTrue() {
-        TemplateJson templateJson = new TemplateJson();
+        TemplateRequest templateJson = new TemplateRequest();
         templateJson.setCloudPlatform(CloudPlatform.AWS);
         templateJson.setDescription("description");
         templateJson.setName("name");
@@ -166,7 +166,7 @@ public class ProvisionParametersValidatorTest {
 
     @Test
     public void validAwsTemplateWithInvalidSshLocationWithSpecificNumberJsonWillReturnTrue() {
-        TemplateJson templateJson = new TemplateJson();
+        TemplateRequest templateJson = new TemplateRequest();
         templateJson.setCloudPlatform(CloudPlatform.AWS);
         templateJson.setDescription("description");
         templateJson.setName("name");
@@ -182,7 +182,7 @@ public class ProvisionParametersValidatorTest {
 
     @Test
     public void awsTemplateJsonWithInvalidVolumeTypeFails() {
-        TemplateJson templateJson = new TemplateJson();
+        TemplateRequest templateJson = new TemplateRequest();
         templateJson.setCloudPlatform(CloudPlatform.AWS);
         templateJson.setDescription("description");
         templateJson.setName("name");

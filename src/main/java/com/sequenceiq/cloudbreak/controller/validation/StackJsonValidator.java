@@ -8,13 +8,12 @@ import java.util.Map;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import com.sequenceiq.cloudbreak.controller.json.StackRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.StackJson;
-
 @Component
-public class StackJsonValidator implements ConstraintValidator<ValidStackRequest, StackJson> {
+public class StackJsonValidator implements ConstraintValidator<ValidStackRequest, StackRequest> {
 
     @Autowired
     private ParametersRegexValidator regexValidator;
@@ -31,7 +30,7 @@ public class StackJsonValidator implements ConstraintValidator<ValidStackRequest
     }
 
     @Override
-    public boolean isValid(StackJson json, ConstraintValidatorContext context) {
+    public boolean isValid(StackRequest json, ConstraintValidatorContext context) {
         for (String key : json.getParameters().keySet()) {
             if (!allowedParams.contains(key)) {
                 context.buildConstraintViolationWithTemplate("Parameter is not allowed. Valid parameters are " + allowedParams)

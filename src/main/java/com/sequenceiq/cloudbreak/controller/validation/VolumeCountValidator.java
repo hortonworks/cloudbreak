@@ -3,12 +3,12 @@ package com.sequenceiq.cloudbreak.controller.validation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
+import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 import com.sequenceiq.cloudbreak.domain.AwsInstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsVolumeType;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 
-public class VolumeCountValidator implements ConstraintValidator<ValidVolume, TemplateJson> {
+public class VolumeCountValidator implements ConstraintValidator<ValidVolume, TemplateRequest> {
 
     private int maxCount;
     private int minCount;
@@ -24,7 +24,7 @@ public class VolumeCountValidator implements ConstraintValidator<ValidVolume, Te
     }
 
     @Override
-    public boolean isValid(TemplateJson value, ConstraintValidatorContext context) {
+    public boolean isValid(TemplateRequest value, ConstraintValidatorContext context) {
         boolean valid;
         if (isAwsTemplate(value)) {
             if (isEphemeralVolume(value)) {
@@ -41,15 +41,15 @@ public class VolumeCountValidator implements ConstraintValidator<ValidVolume, Te
         return valid;
     }
 
-    private boolean isAwsTemplate(TemplateJson value) {
+    private boolean isAwsTemplate(TemplateRequest value) {
         return CloudPlatform.AWS.equals(value.getCloudPlatform());
     }
 
-    private boolean isEphemeralVolume(TemplateJson value) {
+    private boolean isEphemeralVolume(TemplateRequest value) {
         return AwsVolumeType.Ephemeral.name().equalsIgnoreCase((String) value.getParameters().get(AwsTemplateParam.VOLUME_TYPE.getName()));
     }
 
-    private boolean validateEphemeralParams(ConstraintValidatorContext context, TemplateJson value) {
+    private boolean validateEphemeralParams(ConstraintValidatorContext context, TemplateRequest value) {
         boolean valid = true;
         String instanceType = (String) value.getParameters().get(AwsTemplateParam.INSTANCE_TYPE.getName());
         int maxVolume = AwsInstanceType.valueOf(instanceType).getEphemeralVolumes();
@@ -69,7 +69,7 @@ public class VolumeCountValidator implements ConstraintValidator<ValidVolume, Te
         return valid;
     }
 
-    private boolean isValidVolumeSpecification(ConstraintValidatorContext context, TemplateJson value) {
+    private boolean isValidVolumeSpecification(ConstraintValidatorContext context, TemplateRequest value) {
         boolean valid = true;
         if (!isCountInRange(value.getVolumeCount())) {
             addParameterConstraintViolation(context, "volumeCount", String.format("Volume count must be in range [%s-%s] ", minCount, maxCount));
@@ -96,7 +96,7 @@ public class VolumeCountValidator implements ConstraintValidator<ValidVolume, Te
         return value != null && value >= min && value <= max;
     }
 
-    private boolean isVolumeTypeSpecified(ConstraintValidatorContext context, TemplateJson value) {
+    private boolean isVolumeTypeSpecified(ConstraintValidatorContext context, TemplateRequest value) {
         boolean specified = value.getParameters().get(AwsTemplateParam.VOLUME_TYPE.getName()) != null;
         if (!specified) {
             addParameterConstraintViolation(context, "volumeType", "Volume type must be specified");

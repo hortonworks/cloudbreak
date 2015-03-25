@@ -3,18 +3,18 @@ package com.sequenceiq.cloudbreak.converter;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sequenceiq.cloudbreak.controller.json.CredentialResponse;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.validation.AWSCredentialParam;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 
 @Component
-public class AwsCredentialToJsonConverter extends AbstractConversionServiceAwareConverter<AwsCredential, CredentialJson> {
+public class AwsCredentialToJsonConverter extends AbstractConversionServiceAwareConverter<AwsCredential, CredentialResponse> {
     @Override
-    public CredentialJson convert(AwsCredential source) {
-        CredentialJson credentialJson = new CredentialJson();
+    public CredentialResponse convert(AwsCredential source) {
+        CredentialResponse credentialJson = new CredentialResponse();
         credentialJson.setId(source.getId());
         credentialJson.setCloudPlatform(CloudPlatform.AWS);
         credentialJson.setName(source.getName());

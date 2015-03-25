@@ -1,18 +1,18 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.validation.GccTemplateParam;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccInstanceType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccRawDiskType;
 
 @Component
-public class JsonToGcpTemplateConverter extends AbstractConversionServiceAwareConverter<TemplateJson, GccTemplate> {
+public class JsonToGcpTemplateConverter extends AbstractConversionServiceAwareConverter<TemplateRequest, GccTemplate> {
 
     @Override
-    public GccTemplate convert(TemplateJson source) {
+    public GccTemplate convert(TemplateRequest source) {
         GccTemplate gccTemplate = new GccTemplate();
         gccTemplate.setName(source.getName());
         gccTemplate.setDescription(source.getDescription());

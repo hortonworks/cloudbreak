@@ -1,28 +1,46 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.UsageModelDescription;
+import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.StackModelDescription;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
+
+@ApiModel("CloudbreakUsage")
 public class CloudbreakUsageJson implements JsonEntity {
+    @ApiModelProperty(StackModelDescription.OWNER)
     private String owner;
 
+    @ApiModelProperty(StackModelDescription.USERNAME)
     private String username;
 
+    @ApiModelProperty(StackModelDescription.ACCOUNT)
     private String account;
 
+    @ApiModelProperty(UsageModelDescription.DAY)
     private String day;
 
+    @ApiModelProperty(UsageModelDescription.PROVIDER)
     private String provider;
 
+    @ApiModelProperty(StackModelDescription.REGION)
     private String region;
 
+    @ApiModelProperty(UsageModelDescription.INSTANCE_HOURS)
     private Long instanceHours;
 
+    @ApiModelProperty(StackModelDescription.STACK_ID)
     private Long stackId;
 
+    @ApiModelProperty(StackModelDescription.STACK_NAME)
     private String stackName;
 
+    @ApiModelProperty(UsageModelDescription.COSTS)
     private Double costs;
 
+    @ApiModelProperty(UsageModelDescription.INSTANCE_TYPE)
     private String instanceType;
 
+    @ApiModelProperty(UsageModelDescription.INSTANCE_GROUP)
     private String instanceGroup;
 
     public String getOwner() {

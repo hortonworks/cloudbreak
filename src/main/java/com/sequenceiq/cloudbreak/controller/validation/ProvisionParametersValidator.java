@@ -6,10 +6,9 @@ import java.util.List;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 
 /**
  * Validates a provision request. Because different parameters belong to
@@ -18,7 +17,7 @@ import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
  * format.
  */
 @Component
-public class ProvisionParametersValidator implements ConstraintValidator<ValidProvisionRequest, TemplateJson> {
+public class ProvisionParametersValidator implements ConstraintValidator<ValidProvisionRequest, TemplateRequest> {
 
     @Autowired
     private List<ParameterValidator> parameterValidators;
@@ -37,7 +36,7 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
     }
 
     @Override
-    public boolean isValid(TemplateJson request, ConstraintValidatorContext context) {
+    public boolean isValid(TemplateRequest request, ConstraintValidatorContext context) {
         boolean valid = true;
         switch (request.getCloudPlatform()) {
             case AWS:
@@ -52,7 +51,7 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
         return valid;
     }
 
-    private boolean validateAzureParams(TemplateJson request, ConstraintValidatorContext context) {
+    private boolean validateAzureParams(TemplateRequest request, ConstraintValidatorContext context) {
         for (ParameterValidator validator : parameterValidators) {
             if (!validator.validate(request.getParameters(), context, azureParams)) {
                 return false;
@@ -61,7 +60,7 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
         return true;
     }
 
-    private boolean validateAWSParams(TemplateJson request, ConstraintValidatorContext context) {
+    private boolean validateAWSParams(TemplateRequest request, ConstraintValidatorContext context) {
         for (ParameterValidator validator : parameterValidators) {
             if (!validator.validate(request.getParameters(), context, awsParams)) {
                 return false;

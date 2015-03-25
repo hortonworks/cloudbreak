@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.controller.json.BlueprintRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -37,8 +37,7 @@ public class DefaultBlueprintLoaderService {
         for (String blueprintName : blueprintArray) {
             LOGGER.info("Adding default blueprint '{}' for user '{}'", blueprintName, user.getUsername());
             try {
-                BlueprintJson blueprintJson = new BlueprintJson();
-                blueprintJson.setBlueprintName(blueprintName);
+                BlueprintRequest blueprintJson = new BlueprintRequest();
                 blueprintJson.setName(blueprintName);
                 blueprintJson.setDescription(blueprintName);
                 blueprintJson.setAmbariBlueprint(

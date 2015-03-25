@@ -5,12 +5,15 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.controller.validation.ValidUpdateStackRequest;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
-import com.sequenceiq.cloudbreak.domain.SubnetJson;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
+@ApiModel("UpdateStack")
 @ValidUpdateStackRequest
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UpdateStackJson implements JsonEntity {
 
+    @ApiModelProperty(required = true)
     private StatusRequest status;
 
     private InstanceGroupAdjustmentJson instanceGroupAdjustment;
