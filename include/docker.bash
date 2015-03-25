@@ -1,3 +1,16 @@
+docker-check-boot2docker() {
+
+    boot2docker version &> /dev/null || local missing=1
+    echo missing=$missing
+    if [[ "$missing" ]]; then
+        echo "[ERROR] boot2docker command not found, please install by:" | red
+        echo "brew install boot2docker" | blue
+        exit 127
+    fi
+
+    debug "TODO: check for version and instruction for update ..."
+}
+
 docker-check-version() {
     declare desc="Checks if docker is at least 1.5.0"
 

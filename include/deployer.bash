@@ -67,6 +67,11 @@ load-profile() {
 doctor() {
     declare desc="Checks everything, and reports a diagnose"
 
+    if [[ "$(uname)" == "Darwin" ]]; then
+        debug "checking boot2docker on OSX only ..."
+        docker-check-boot2docker
+    fi
+
     docker-check-version
 }
 
