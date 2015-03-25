@@ -1,4 +1,5 @@
 Cloudbreak Deployer helps to deploy a cloudbreak environment into docker containers.
+For recent changes please check [CHANGELOG.md](https://github.com/sequenceiq/cloudbreak-deployer/blob/master/CHANGELOG.md).
 
 ## Requirements
 
