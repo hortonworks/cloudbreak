@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow.handlers;
 
+import static com.sequenceiq.cloudbreak.domain.ScalingType.isClusterUpScale;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,9 +21,13 @@ public class ClusterUpscaleHandler extends AbstractFlowHandler<ClusterScalingCon
     @Override
     protected Object execute(Event<ClusterScalingContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
-        FlowContext context = getFlowFacade().upscaleCluster(event.getData());
-        LOGGER.info("Upscale of cluster is finished. Context: {}", context);
-        return context;
+        ClusterScalingContext clusterScalingContext = event.getData();
+        if (isClusterUpScale(clusterScalingContext.getScalingType())) {
+            FlowContext context = getFlowFacade().upscaleCluster(clusterScalingContext);
+            LOGGER.info("Upscale of cluster is finished. Context: {}", context);
+            return context;
+        }
+        return clusterScalingContext;
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow.handlers;
 
+import static com.sequenceiq.cloudbreak.domain.ScalingType.isStackDownScale;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,10 +21,16 @@ public class StackDownscaleHandler extends AbstractFlowHandler<StackScalingConte
     @Override
     protected Object execute(Event<StackScalingContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
-        FlowContext context = getFlowFacade().downscaleStack(event.getData());
-        LOGGER.info("Upscale of stack is finished. Context: {}", context);
-        return context;
+        StackScalingContext stackScalingContext = event.getData();
+        if (isStackDownScale(stackScalingContext.getScalingType())) {
+            FlowContext context = getFlowFacade().downscaleStack(stackScalingContext);
+            LOGGER.info("Upscale of stack is finished. Context: {}", context);
+            return context;
+        }
+        return stackScalingContext;
     }
+
+
 
     @Override
     protected Object handleErrorFlow(Throwable throwable, StackScalingContext handlerContext) throws Exception {

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -9,10 +10,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
+import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
@@ -42,6 +51,9 @@ public class SimpleFlowFacade implements FlowFacade {
 
     @Autowired
     private StackService stackService;
+
+    @Autowired
+    private HostGroupService hostGroupService;
 
     @Override
     public FlowContext setup(FlowContext context) throws CloudbreakException {
@@ -270,9 +282,22 @@ public class SimpleFlowFacade implements FlowFacade {
     public FlowContext upscaleStack(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Upscaling of stack. Context: {}", context);
         try {
-            context = stackFacade.upscaleStack(context);
+            StackScalingContext stackScalingContext = (StackScalingContext) stackFacade.upscaleStack(context);
+            Stack stack = stackService.getById(stackScalingContext.getStackId());
+            HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(stack.getCluster().getId(), stackScalingContext.getInstanceGroup());
+            HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
+            hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
+            hostGroupAdjustmentJson.setWithStackUpdate(false);
+            hostGroupAdjustmentJson.setScalingAdjustment(stackScalingContext.getScalingAdjustment());
+            UpdateAmbariHostsRequest updateAmbariHostsRequest = new UpdateAmbariHostsRequest(stackScalingContext.getStackId(),
+                    hostGroupAdjustmentJson,
+                    new ArrayList<HostMetadata>(),
+                    false,
+                    stackScalingContext.getCloudPlatform(),
+                    stackScalingContext.getScalingType());
+            ClusterScalingContext clusterScalingContext = new ClusterScalingContext(updateAmbariHostsRequest);
             LOGGER.debug("Upscaling of stack is DONE");
-            return context;
+            return clusterScalingContext;
         } catch (CloudbreakException e) {
             throw e;
         } catch (Exception e) {
@@ -315,7 +340,16 @@ public class SimpleFlowFacade implements FlowFacade {
         try {
             context = clusterFacade.downscaleCluster(context);
             LOGGER.debug("Downscaling of cluster is DONE");
-            return context;
+            ClusterScalingContext clusterScalingContext = (ClusterScalingContext) context;
+            Stack stack = stackService.getById(clusterScalingContext.getStackId());
+            HostGroup hostGroup = hostGroupService
+                    .getByClusterIdAndName(stack.getCluster().getId(), clusterScalingContext.getHostGroupAdjustment().getHostGroup());
+            StackScalingContext stackScalingContext = new StackScalingContext(clusterScalingContext.getStackId(),
+                    clusterScalingContext.getCloudPlatform(),
+                    hostGroup.getInstanceGroup().getGroupName(),
+                    clusterScalingContext.getDecommissionCandidates().size() * (-1),
+                    clusterScalingContext.getScalingType());
+            return stackScalingContext;
         } catch (CloudbreakException e) {
             throw e;
         } catch (Exception e) {
@@ -398,4 +432,5 @@ public class SimpleFlowFacade implements FlowFacade {
             throw new CloudbreakException(e);
         }
     }
+
 }

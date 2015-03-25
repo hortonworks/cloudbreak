@@ -32,7 +32,12 @@ import javax.persistence.OneToMany;
                 name = "HostGroup.findAllHostGroupsByRecipe",
                 query = "SELECT h FROM HostGroup h "
                         + "JOIN h.recipes r "
-                        + "WHERE r.id= :recipeId")
+                        + "WHERE r.id= :recipeId"),
+        @NamedQuery(
+                name = "HostGroup.findHostGroupsByInstanceGroupName",
+                query = "SELECT h FROM HostGroup h "
+                        + "WHERE h.cluster.id= :clusterId "
+                        + "AND h.instanceGroup.groupName= :instanceGroupName")
 })
 public class HostGroup {
 
