@@ -2,6 +2,16 @@
 
 ### Fixed
 
+### Added
+
+### Removed
+
+### Changed
+
+## [v0.0.6] - 2015-03-25
+
+### Fixed
+
 - removed dos2unix dependency for the update command
 
 ### Added
@@ -47,7 +57,7 @@
 
 - Tool specific library renamed from cloudbreak.bash to deployer.bash
 
-## Unreleased
+## [v0.0.6] - 2015-03-25
 
 ## [v0.0.3] - 2015-03-19
 
