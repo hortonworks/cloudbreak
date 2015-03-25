@@ -50,8 +50,15 @@ public class OpenStackProvisionSetup implements ProvisionSetup {
     public String preProvisionCheck(Stack stack) {
         String imageName = stack.getImage();
         OSClient osClient = openStackUtil.createOSClient(stack);
-        Optional<String> result = verifyFlavors(osClient, stack.getInstanceGroupsAsList());
-        return result.isPresent() ? result.get() : verifyImage(osClient, imageName).get();
+        Optional<String> flavor = verifyFlavors(osClient, stack.getInstanceGroupsAsList());
+        if (flavor.isPresent()) {
+            return flavor.get();
+        }
+        Optional<String> image = verifyImage(osClient, imageName);
+        if (image.isPresent()) {
+            return image.get();
+        }
+        return null;
     }
 
     @Override
