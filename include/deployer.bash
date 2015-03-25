@@ -76,6 +76,7 @@ main() {
     load-profile
 
     circle-init
+    cloudbreak-init
 
     debug "CloudBreak Deployer $(bin-version)"
 

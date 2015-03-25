@@ -89,6 +89,7 @@ func main() {
 		"bin-version": BinVersion,
 	}, []string{
 		"include/circle.bash",
+		"include/cloudbreak.bash",
 		"include/cmd.bash",
 		"include/color.bash",
 		"include/deployer.bash",
