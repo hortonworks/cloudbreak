@@ -11,6 +11,7 @@
 - cci-latest accepts branch as parameter, needed for PR testing
 - export fn command in DEBUG mode
 - export env command in DEBUG mode
+- doctor: add instruction about setting DOCKER_XXX env vars in Profile
 
 ### Removed
 

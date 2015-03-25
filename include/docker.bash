@@ -21,6 +21,14 @@ docker-check-version() {
         exit 1
     fi
 
+    if ! grep -q DOCKER_HOST Profile; then
+        if ! grep DOCKER_HOST $CBD_PROFILE; then
+            echo "[WARNING] no DOCKER_HOST set in profile" | yellow
+            echo "Run the following command to fix:" | yellow
+            echo '  for v in DOCKER_HOST DOCKER_CERT_PATH DOCKER_TLS_VERIFY; do echo export ${v}=${!v}; done >> '$CBD_PROFILE | blue
+        fi
+    fi
+
     docker version &> /tmp/cbd.log || noserver=1
     if [[ "$noserver" ]]; then
         echo "[ERROR] docker version returned an error" | red
