@@ -53,6 +53,8 @@ func application(
 
 	bash.Export("DEBUG", os.Getenv("DEBUG"))
 	bash.Export("TRACE", os.Getenv("TRACE"))
+	bash.Export("HOME", os.Getenv("HOME"))
+	bash.Export("CBD_DEFAULT_PROFILE", os.Getenv("CBD_DEFAULT_PROFILE"))
 
 	if err != nil {
 		log.Fatal(err)
@@ -88,10 +90,12 @@ func main() {
 		"bin-version": BinVersion,
 	}, []string{
 		"include/circle.bash",
+		"include/cloudbreak.bash",
 		"include/cmd.bash",
 		"include/color.bash",
 		"include/deployer.bash",
 		"include/deps.bash",
+		"include/docker.bash",
 		"include/env.bash",
 		"include/fn.bash",
 		"include/module.bash",

@@ -20,7 +20,12 @@ Configuration is based on environment variables. Cloudbreak Deployer always fork
 bash subprocess **without inheriting env vars**. The only way to set env vars relevant to 
 Cloudbreak Deployer is to set them in a file called `Profile`.
 
-Actually 2 env vars _are_ inherited: `DEBUG` and `TRACE`
+Actually the foolowing env vars _are_ inherited: 
+- `HOME`
+- `DEBUG`
+- `TRACE`
+- `CBD_DEFAULT_PROFILE`
+
 
 ### Env specific Profile
 
@@ -44,6 +49,11 @@ If you want to have more detailed output set the `DEBUG` env variable to non-zer
 DEBUG=1 cbd some_command
 ```
 
+You can also use the `doctor` command to diagnose your environment:
+```
+cbd doctor
+```
+
 ## Update
 
 The tool is capable of upgrade itself:
@@ -64,6 +74,23 @@ cbd update
 - consul: Service Registry
 - registrator: automatically registers/deregisters containers into consul
 
+## Contribution
+
+Development process should happen on separate branches. Then a pull-request should be opened as usual.
+To validate the PR the binari `cbd` tool will be tested. Its built by CircleCI for each branch.
+If you want to test the binary CircleCI built from your branch named `fix-something`, 
+
+```
+cbdl update-snap fix-something
+```
+
+## Testing
+
+Shell scripts shouldn’t be exceptions when it comes to unit testing. [basht](https://github.com/progrium/basht)
+is used for testing. See the reasoning about: [why not bats or shunit2](https://github.com/progrium/basht#why-not-bats-or-shunit2)
+
+Please cover your bahs functions with unit tests.
+
 ## Release Process of Clodbreak Deployer tool
 
 the master branch is always built on [CircleCI](https://circleci.com/gh/sequenceiq/cloudbreak-deployer).
@@ -81,14 +108,18 @@ Once the PR is merged, CircleCI will:
 Sample command when version 0.0.3 was released:
 
 ```
-git fetch && git checkout -b release-0.0.3
-echo '0.0.3' > VERSION
+export VER="${OLD_VER%.*}.$((${OLD_VER##*.}+1))"
+export REL_DATE="[v${VER}] - $(date +%Y-%m-%d)"
+git fetch && git checkout -b release-${VER}
+echo $VER > VERSION
 
 # edit CHANGELOG.md
+sed -i "s/## Unreleased/## $REL_DATE/" CHANGELOG.md
+echo -e '## Unreleased\n\n### Fixed\n\n### Added\n\n### Removed\n\n### Changed\n'| cat - CHANGELOG.md | tee CHANGELOG.md
 
-git commit -m "release 0.0.3" VERSION CHANGELOG.md
-git push origin release-0.0.3
-hub pull-request -b release -m "release 0.0.3"
+git commit -m "release $VER" VERSION CHANGELOG.md
+git push origin release-$VER
+hub pull-request -b release -m "release $VER"
 ```
 
 ## Credits

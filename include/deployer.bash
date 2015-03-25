@@ -4,6 +4,10 @@ debug() {
   fi
 }
 
+info() {
+    echo "$*" | green 1>&2
+}
+
 cbd-version() {
     declare desc="Displays the version of Cloudbrek Deployer"
     bin-version | green
@@ -33,8 +37,9 @@ cbd-update() {
 
 cbd-update-snap() {
     declare desc="Updates itself, from the latest snapshot binary"
+    declare branch=${1:-master}
 
-    url=$(cci-latest sequenceiq/cloudbreak-deployer)
+    url=$(cci-latest sequenceiq/cloudbreak-deployer $branch)
     debug "Update binary from: $url"
     curl -Ls $url | tar -zx -C /usr/local/bin/
 
@@ -49,34 +54,57 @@ latest-version() {
 
 
 load-profile() {
-    if [ -f Profile ]; then
-        module-load "Profile"
+    CBD_PROFILE="Profile"
+    if [ -f $CBD_PROFILE ]; then
+        debug "Use profile: $CBD_PROFILE"
+        module-load "$CBD_PROFILE"
     else
-        echo "!! No Profile found. Please create a file called 'Profile' in the current dir." | red
+        echo "!! No Profile found. Please create a file called 'Profile' in the current dir. To fix run:" | red
+        echo " touch Profile" | blue
         exit 2
     fi
 
     if [[ "$CBD_DEFAULT_PROFILE" && -f "Profile.$CBD_DEFAULT_PROFILE" ]]; then
-		module-load "Profile.$CBD_DEFAULT_PROFILE"
-		echo "* Using default profile $CBD_DEFAULT_PROFILE" | yellow
-		GUN_PROFILE="$CBD_DEFAULT_PROFILE"
+        CBD_PROFILE="Profile.$CBD_DEFAULT_PROFILE"
+
+		module-load $CBD_PROFILE
+		debug "Use profile $CBD_DEFAULT_PROFILE"
 	fi
+}
+
+doctor() {
+    declare desc="Checks everything, and reports a diagnose"
+
+    if [[ "$(uname)" == "Darwin" ]]; then
+        debug "checking boot2docker on OSX only ..."
+        docker-check-boot2docker
+    fi
+
+    docker-check-version
+    info "Everything is very-very first class !!!"
 }
 
 main() {
 	set -eo pipefail; [[ "$TRACE" ]] && set -x
 	color-init
+    load-profile
+
     circle-init
+    cloudbreak-init
 
     debug "CloudBreak Deployer $(bin-version)"
 
-    load-profile
-    
     cmd-export cmd-help help
     cmd-export cbd-version version
     cmd-export cbd-update update
     cmd-export cbd-update-snap update-snap
-
+    cmd-export doctor doctor
+    
+    if [[ "$DEBUG" ]]; then
+        cmd-export env-show env
+        cmd-export fn-call fn
+    fi
+    
 	if [[ "${!#}" == "-h" || "${!#}" == "--help" ]]; then
 		local args=("$@")
 		unset args[${#args[@]}-1]
