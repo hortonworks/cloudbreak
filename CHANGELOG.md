@@ -8,6 +8,8 @@
 
 ### Changed
 
+- env command is always exported, not only in DEBUG mode
+
 ## [v0.0.6] - 2015-03-25
 
 ### Fixed

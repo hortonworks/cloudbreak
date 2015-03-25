@@ -99,9 +99,9 @@ main() {
     cmd-export cbd-update update
     cmd-export cbd-update-snap update-snap
     cmd-export doctor doctor
-    
+    cmd-export env-show env
+
     if [[ "$DEBUG" ]]; then
-        cmd-export env-show env
         cmd-export fn-call fn
     fi
     
