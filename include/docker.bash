@@ -9,7 +9,7 @@ docker-check-version() {
 
     local ver=$(docker --version 2> /dev/null)
     debug ver=$ver
-    local numver=$(echo ${ver%%,*}|sed "s/[a-zA-Z \.]//g")
+    local numver=$(echo ${ver%%,*}|sed "s/[^0-9]//g")
     debug numeric version: $numver
     
     if [ $numver -lt 150 ]; then
