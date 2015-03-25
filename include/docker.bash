@@ -14,7 +14,7 @@ docker-check-boot2docker() {
 docker-check-version() {
     declare desc="Checks if docker is at least 1.5.0"
 
-    docker --version &> /dev/null || missing=1
+    docker --version &> /dev/null || local missing=1
     if [[ "$missing" ]]; then
         echo "[ERROR] docker command not found, please install docker. https://docs.docker.com/installation/" | red
         exit 127
