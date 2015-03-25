@@ -30,7 +30,7 @@ docker-check-version() {
         : ${target:=/usr/local/bin/docker}
         echo "[ERROR] Please upgrade your docker version to 1.5.0 or latest" | red
         echo "suggested command:" | red
-        echo "  sudo curl -Lo $target https://get.docker.com/builds/$(uname -s)/$(uname -m)/docker-latest ; chmod +x $target" | green
+        echo "  sudo curl -Lo $target https://get.docker.com/builds/$(uname -s)/$(uname -m)/docker-latest ; chmod +x $target" | blue
         exit 1
     fi
 
