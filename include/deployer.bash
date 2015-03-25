@@ -33,8 +33,9 @@ cbd-update() {
 
 cbd-update-snap() {
     declare desc="Updates itself, from the latest snapshot binary"
+    declare branch=${1:-master}
 
-    url=$(cci-latest sequenceiq/cloudbreak-deployer)
+    url=$(cci-latest sequenceiq/cloudbreak-deployer $branch)
     debug "Update binary from: $url"
     curl -Ls $url | tar -zx -C /usr/local/bin/
 
