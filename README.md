@@ -20,7 +20,12 @@ Configuration is based on environment variables. Cloudbreak Deployer always fork
 bash subprocess **without inheriting env vars**. The only way to set env vars relevant to 
 Cloudbreak Deployer is to set them in a file called `Profile`.
 
-Actually 3 env vars _are_ inherited: `DEBUG`, `TRACE` and `CBD_DEFAULT_PROFILE`
+Actually the foolowing env vars _are_ inherited: 
+- `HOME`
+- `DEBUG`
+- `TRACE`
+- `CBD_DEFAULT_PROFILE`
+
 
 ### Env specific Profile
 

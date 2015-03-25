@@ -53,6 +53,7 @@ func application(
 
 	bash.Export("DEBUG", os.Getenv("DEBUG"))
 	bash.Export("TRACE", os.Getenv("TRACE"))
+	bash.Export("HOME", os.Getenv("HOME"))
 	bash.Export("CBD_DEFAULT_PROFILE", os.Getenv("CBD_DEFAULT_PROFILE"))
 
 	if err != nil {

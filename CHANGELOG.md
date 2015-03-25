@@ -16,6 +16,8 @@
 
 ### Changed
 
+- HOME env var is also inherited (boot2docker version failed)
+
 ## [v0.0.5] - 2015-03-23
 
 - `update` command works without dos2unix
