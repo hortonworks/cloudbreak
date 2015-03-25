@@ -81,6 +81,7 @@ doctor() {
     fi
 
     docker-check-version
+    info "Everything is very-very first class !!!"
 }
 
 main() {
