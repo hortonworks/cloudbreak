@@ -12,6 +12,7 @@
 - export fn command in DEBUG mode
 - export env command in DEBUG mode
 - doctor: add instruction about setting DOCKER_XXX env vars in Profile
+- info() function added to print green text to STDOUT
 
 ### Removed
 
