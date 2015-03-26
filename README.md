@@ -183,6 +183,7 @@ Once the PR is merged, CircleCI will:
 Sample command when version 0.0.3 was released:
 
 ```
+export OLD_VER=$(cat VERSION)
 export VER="${OLD_VER%.*}.$((${OLD_VER##*.}+1))"
 export REL_DATE="[v${VER}] - $(date +%Y-%m-%d)"
 git fetch && git checkout -b release-${VER}
