@@ -7,6 +7,9 @@
 
 ### Added
 
+- uaadb start added
+- identity server start added
+
 ### Removed
 
 ### Changed
