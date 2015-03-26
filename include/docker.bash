@@ -12,6 +12,20 @@ docker-check-boot2docker() {
     info "boot2docker: OK" | green
 }
 
+docker-getversion() {
+    declare desc="Gets the numeric version from version string"
+
+    local versionstr="$*"
+    debug versionstr=$versionstr
+    local fullver=$(echo "${versionstr%,*}" |sed "s/.*version[ :]*//")
+    debug fullver=$fullver
+    # remove -rc2 and similar
+    local numver=$(echo ${fullver%-*} | sed "s/\.//g")
+    debug numver=$numver
+
+    echo $numver
+}
+
 docker-check-version() {
     declare desc="Checks if docker is at least 1.5.0"
 
@@ -23,9 +37,7 @@ docker-check-version() {
     info "docker command: OK"
 
     local ver=$(docker --version 2> /dev/null)
-    debug ver=$ver
-    local numver=$(echo ${ver%%,*}|sed "s/[^0-9]//g")
-    debug numeric version: $numver
+    local numver=$(docker-getversion $ver)
     
     if [ $numver -lt 150 ]; then
         local target=$(which docker 2>/dev/null || true)
@@ -53,9 +65,7 @@ docker-check-version() {
     fi
 
     local serverVer=$(docker version 2> /dev/null | grep "Server version")
-    debug serverVer=$serverVer
-    local numserver=$(echo $serverVer | sed -n "s/[a-zA-Z \.:]//gp")
-    debug numserver=$numserver
+    local numserver=$(docker-getversion $serverVer)
 
     if [ $numserver -lt 150 ]; then
         echo "[ERROR] Please upgrade your docker version to 1.5.0 or latest" | red

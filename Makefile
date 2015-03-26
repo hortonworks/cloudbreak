@@ -8,7 +8,7 @@ GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 ifeq ($(GIT_BRANCH), release)
 FLAGS="-X main.Version $(VERSION)"
 else
-FLAGS="-X main.Version $(VERSION) -X main.GitRevision $(GIT_REV)"
+FLAGS="-X main.Version $(VERSION) -X main.GitRevision $(GIT_BRANCH)-$(GIT_REV)"
 endif
 
 build:
@@ -22,8 +22,12 @@ install: build
 deps:
 	go get -u github.com/jteeuwen/go-bindata/...
 	go get -u github.com/progrium/gh-release/...
+	go get github.com/progrium/basht
 	go get || true
 
+tests:
+	basht include/*.bash test/*.bash
+	
 release:
 	rm -rf release && mkdir release
 	tar -zcf release/$(NAME)_$(VERSION)_Linux_$(ARCH).tgz -C build/Linux $(BINARYNAME)

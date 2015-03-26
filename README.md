@@ -1,4 +1,5 @@
 Cloudbreak Deployer helps to deploy a cloudbreak environment into docker containers.
+For recent changes please check [CHANGELOG.md](https://github.com/sequenceiq/cloudbreak-deployer/blob/master/CHANGELOG.md).
 
 ## Requirements
 
@@ -20,27 +21,82 @@ Configuration is based on environment variables. Cloudbreak Deployer always fork
 bash subprocess **without inheriting env vars**. The only way to set env vars relevant to 
 Cloudbreak Deployer is to set them in a file called `Profile`.
 
-Actually the foolowing env vars _are_ inherited: 
-- `HOME`
-- `DEBUG`
-- `TRACE`
-- `CBD_DEFAULT_PROFILE`
+The `Profile` will be simple **sourced** by bash terms, so you can use the usual syntax
+to set config values:
 
+```
+export MY_VAR=some_value
+export OTHER_VAR=dunno
+```
+
+### List of configurations
+
+- **CB_AWS_AMI_MAP** : tbd 
+- **CB_AZURE_IMAGE_URI** : tbd 
+- **CB_BLUEPRINT_DEFAULTS** : tbd 
+- **CB_DB_ENV_DB** : tbd 
+- **CB_DB_ENV_PASS** : tbd 
+- **CB_DB_ENV_USER** : tbd 
+- **CB_GCP_SOURCE_IMAGE_PATH** : tbd 
+- **CB_HBM2DDL_STRATEGY** : tbd 
+- **CB_OPENSTACK_IMAGE** : tbd 
+- **DOCKER_TAG_ALPINE** : tbd 
+- **DOCKER_TAG_CBSHELL** : tbd 
+- **DOCKER_TAG_CLOUDBREAK** : tbd 
+- **DOCKER_TAG_CONSUL** : tbd 
+- **DOCKER_TAG_PERISCOPE** : tbd 
+- **DOCKER_TAG_POSTGRES** : tbd 
+- **DOCKER_TAG_REGISTRATOR** : tbd 
+- **DOCKER_TAG_SULTANS** : tbd 
+- **DOCKER_TAG_UAA** : tbd 
+- **DOCKER_TAG_ULUWATU** : tbd 
+- **PERISCOPE_DB_HBM2DDL_STRATEGY** : tbd 
 
 ### Env specific Profile
 
-`Profile` is always sourced. For example If you have env specific configurations: prod you need
-2 steps:
+Let’s say you want to use a different `DOCKER_TAG_CLOUDBREAK` for **prod** and **qa** profile.
+`Profile` is always sourced, so you will have two env specific configurations:
+- `Profile.dev`
+- `Profile.qa`
+
+For prod you need:
 
 - create a file called `Profile.prod`
-- set the `CBD_DEFAULT_PROFILE` env variable.
+- wirte the env specific `export DOCKER_TAG_CLOUDBREAK=0.3.99` into `Profile.prod`
+- set the env variable: `CBD_DEFAULT_PROFILE=prod`
 
-To use a specific profile once:
+To use the `prod` specific profile once:
 ```
 CBD_DEFAULT_PROFILE=prod cbd some_commands
 ```
 
 For permanent setting you can `export CBD_DEFAULT_PROFILE=prod` in your `.bash_profile`.
+
+## Usage
+
+You can always get a list of command by issuing without parameters: `cbd`
+
+### Deployment
+
+To start the containers run:
+
+```
+cbd start
+```
+If one of the containers are already running, it won’t be started again.
+
+
+### Skipping containers
+
+If you want the Cloudbreak Deployer to skip one of the containers (for example you have started it
+already with special configuration) you can set `SKIP_XXX` env vars. For example if you want to 
+skip the **consul** container, add an extra line into your `Profile`
+
+```
+SKIP_CONSUL=1
+```
+
+Any value will works: 1/yes/true.
 
 ## Debug
 
@@ -77,8 +133,22 @@ cbd update
 ## Contribution
 
 Development process should happen on separate branches. Then a pull-request should be opened as usual.
-To validate the PR the binari `cbd` tool will be tested. Its built by CircleCI for each branch.
+
+To build the project
+```
+# make deps needed only once
+make deps
+
+make instal
+```
+
+To run the unit tests:
+```
+make tests
+```
+
 If you want to test the binary CircleCI built from your branch named `fix-something`, 
+To validate the PR the binary `cbd` tool will be tested. Its built by CircleCI for each branch.
 
 ```
 cbdl update-snap fix-something
@@ -90,6 +160,11 @@ Shell scripts shouldn’t be exceptions when it comes to unit testing. [basht](h
 is used for testing. See the reasoning about: [why not bats or shunit2](https://github.com/progrium/basht#why-not-bats-or-shunit2)
 
 Please cover your bahs functions with unit tests.
+
+running test performed by:
+```
+make tests
+```
 
 ## Release Process of Clodbreak Deployer tool
 
@@ -121,6 +196,16 @@ git commit -m "release $VER" VERSION CHANGELOG.md
 git push origin release-$VER
 hub pull-request -b release -m "release $VER"
 ```
+
+## Ceveats
+
+The **Cloudbreak Deployer** tool opens a clean bash subshell, without inheriting env vars.
+Actually the foolowing env vars _are_ inherited: 
+
+- `HOME`
+- `DEBUG`
+- `TRACE`
+- `CBD_DEFAULT_PROFILE`
 
 ## Credits
 
