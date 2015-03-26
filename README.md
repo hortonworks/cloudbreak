@@ -107,8 +107,22 @@ cbd update
 ## Contribution
 
 Development process should happen on separate branches. Then a pull-request should be opened as usual.
-To validate the PR the binari `cbd` tool will be tested. Its built by CircleCI for each branch.
+
+To build the project
+```
+# make deps needed only once
+make deps
+
+make instal
+```
+
+To run the unit tests:
+```
+make tests
+```
+
 If you want to test the binary CircleCI built from your branch named `fix-something`, 
+To validate the PR the binary `cbd` tool will be tested. Its built by CircleCI for each branch.
 
 ```
 cbdl update-snap fix-something
