@@ -44,15 +44,29 @@ cloudbreak-conf-defaults() {
     env-import CB_BLUEPRINT_DEFAULTS "lambda-architecture,multi-node-hdfs-yarn,hdp-multinode-default"
 }
 
+check_if_running() {
+    declare desc="Checks if a container is in running state"
+
+    declare container="$1"
+
+    [[ "true" == $(docker inspect -f '{{.State.Running}}' consul) ]]
+}
+
 start_consul() {
     declare desc="starts consul binding to: $PRIVATE_IP http:8500 dns:53 rpc:8400"
 
+    local name=consul
     env-import PRIVATE_IP
     
+    if check_if_running $name; then
+        warn "$name is already running, not starting"
+        return
+    fi
+
     info $desc
     docker run -d \
         -h node1 \
-        --name=consul \
+        --name=$name \
         --privileged \
         -e SERVICE_IGNORE=true \
         -p ${PRIVATE_IP}:53:53/udp \
@@ -65,11 +79,17 @@ start_consul() {
 start_registrator() {
     declare desc="starts registrator connecting to consul"
 
+    local name=registrator
     env-import PRIVATE_IP
     
+    if check_if_running $name; then
+        warn "$name is already running, not starting"
+        return
+    fi
+
     info $desc
     docker run -d \
-      --name=registrator \
+      --name=$name \
       --privileged \
       -v /var/run/docker.sock:/tmp/docker.sock \
       gliderlabs/registrator:$DOCKER_TAG_REGISTRATOR consul://${PRIVATE_IP}:8500
