@@ -44,7 +44,7 @@ cbd-update() {
 }
 
 cbd-update-snap() {
-    declare desc="Updates itself, from the latest snapshot binary"
+    declare desc="Updates itself, from CircleCI, branch name is optional, default: master"
     declare branch=${1:-master}
 
     url=$(cci-latest sequenceiq/cloudbreak-deployer $branch)

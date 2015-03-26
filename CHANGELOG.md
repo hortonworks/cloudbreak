@@ -18,6 +18,7 @@
 - env export: machine friendly config list
 - env show: human readable config list
 - circle runs unit tests
+- snapshot binaries include branch name in version string
 
 ## [v0.0.6] - 2015-03-25
 
