@@ -1,18 +1,12 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -22,7 +16,6 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -31,11 +24,6 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
-import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
-import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
-
-import reactor.core.Reactor;
 
 @Service
 public class TerminationService {
@@ -52,24 +40,6 @@ public class TerminationService {
 
     @Autowired
     private RetryingStackUpdater retryingStackUpdater;
-
-    @javax.annotation.Resource
-    private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
-
-    @javax.annotation.Resource
-    private Map<CloudPlatform, List<ResourceBuilder>> networkResourceBuilders;
-
-    @javax.annotation.Resource
-    private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
-
-    @Autowired
-    private Reactor reactor;
-
-    @Autowired
-    private AsyncTaskExecutor resourceBuilderExecutor;
-
-    @Autowired
-    private ProvisionUtil provisionUtil;
 
     @Autowired
     private HostGroupRepository hostGroupRepository;
@@ -88,68 +58,12 @@ public class TerminationService {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.DELETE_REQUEST_EVENT);
         try {
-            if (!cloudPlatform.isWithTemplate()) {
-                deleteStackResourcesWithoutTemplate(cloudPlatform, stack);
-            } else {
-                cloudPlatformConnectors.get(cloudPlatform).deleteStack(stack, stack.getCredential());
-            }
-
+            cloudPlatformConnectors.get(cloudPlatform).deleteStack(stack, stack.getCredential());
             finalizeTermination(stack);
         } catch (Exception ex) {
             LOGGER.error(String.format("Stack delete failed on '%s' stack: ", stack.getId()), ex);
             String statusReason = "Termination of cluster infrastructure failed: " + ex.getMessage();
             throw new TerminationFailedException(statusReason, ex);
-        }
-    }
-
-    private void deleteStackResourcesWithoutTemplate(final CloudPlatform cloudPlatform, final Stack stack) throws Exception {
-        ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
-        final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
-        List<Future<ResourceRequestResult>> futures = new ArrayList<>();
-        for (int i = instanceResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
-            final int index = i;
-            List<Resource> resourceByType = stack.getResourcesByType(instanceResourceBuilders.get(cloudPlatform).get(i).resourceType());
-            for (final Resource resource : resourceByType) {
-                Future<ResourceRequestResult> submit = resourceBuilderExecutor.submit(new Callable<ResourceRequestResult>() {
-                    @Override
-                    public ResourceRequestResult call() throws Exception {
-                        try {
-                            instanceResourceBuilders.get(cloudPlatform).get(index).delete(resource, dCO, stack.getRegion());
-                            retryingStackUpdater.removeStackResources(stack.getId(), Arrays.asList(resource));
-                            return ResourceRequestResult.ResourceRequestResultBuilder.builder()
-                                    .withFutureResult(FutureResult.SUCCESS)
-                                    .withInstanceGroup(stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup()))
-                                    .build();
-                        } catch (Exception ex) {
-                            return ResourceRequestResult.ResourceRequestResultBuilder.builder()
-                                    .withException(ex)
-                                    .withFutureResult(FutureResult.FAILED)
-                                    .withInstanceGroup(stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup()))
-                                    .build();
-                        }
-                    }
-                });
-                futures.add(submit);
-                if (provisionUtil.isRequestFull(stack, futures.size() + 1)) {
-                    Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
-                    checkErrorOccurred(result);
-                    futures = new ArrayList<>();
-                }
-            }
-        }
-        Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
-        checkErrorOccurred(result);
-        for (int i = networkResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
-            for (Resource resource : stack.getResourcesByType(networkResourceBuilders.get(cloudPlatform).get(i).resourceType())) {
-                networkResourceBuilders.get(cloudPlatform).get(i).delete(resource, dCO, stack.getRegion());
-            }
-        }
-    }
-
-    private void checkErrorOccurred(Map<FutureResult, List<ResourceRequestResult>> futureResultListMap) throws Exception {
-        List<ResourceRequestResult> resourceRequestResults = futureResultListMap.get(FutureResult.FAILED);
-        if (!resourceRequestResults.isEmpty()) {
-            throw resourceRequestResults.get(0).getException().orNull();
         }
     }
 

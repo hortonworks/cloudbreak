@@ -225,6 +225,7 @@ public class IntervalInstanceUsageGeneratorTest {
     public void testGetInstanceHoursShouldCalcExactInstanceHourWhenInstanceIsRunningForTwoDays() throws ParseException {
         InstanceMetaData instance = new InstanceMetaData();
         Calendar cal = Calendar.getInstance();
+        cal.set(2015, 3, 27);
         setCalendarTo(cal, 12, 1, 11, 111);
         Date intervalStart = cal.getTime();
         cal.set(DATE, cal.get(DATE) + 1);

@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
-import com.sequenceiq.cloudbreak.service.stack.flow.ProvisionContext;
+import com.sequenceiq.cloudbreak.service.stack.flow.ProvisioningService;
 
 @Service
 public class SimpleFlowFacade implements FlowFacade {
@@ -47,7 +47,7 @@ public class SimpleFlowFacade implements FlowFacade {
     private StackFacade stackFacade;
 
     @Autowired
-    private ProvisionContext provisioningService;
+    private ProvisioningService provisioningService;
 
     @Autowired
     private StackService stackService;

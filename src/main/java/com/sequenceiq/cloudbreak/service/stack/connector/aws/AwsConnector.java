@@ -11,12 +11,12 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.UPDATE_COM
 import static com.amazonaws.services.cloudformation.model.StackStatus.UPDATE_ROLLBACK_COMPLETE;
 import static com.amazonaws.services.cloudformation.model.StackStatus.UPDATE_ROLLBACK_FAILED;
 import static com.amazonaws.services.cloudformation.model.StackStatus.UPDATE_ROLLBACK_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -92,6 +92,7 @@ import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.connector.CloudResourceOperationFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstanceStatusCheckerTask;
@@ -226,7 +227,7 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public boolean addInstances(Stack stack, String userData, Integer instanceCount, String instanceGroup) {
+    public Set<Resource> addInstances(Stack stack, String userData, Integer instanceCount, String instanceGroup) {
         MDCBuilder.buildMdcContext(stack);
         InstanceGroup instanceGroupByInstanceGroupName = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         Integer requiredInstances = instanceGroupByInstanceGroupName.getNodeCount() + instanceCount;
@@ -246,12 +247,11 @@ public class AwsConnector implements CloudPlatformConnector {
         LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
         PollingResult pollingResult = autoScalingGroupReadyPollingService
                 .pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-        if (isSuccess(pollingResult)) {
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
-//            reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
-//                    Event.wrap(new AddInstancesComplete(CloudPlatform.AWS, stack.getId(), null, instanceGroup)));
+        if (!isSuccess(pollingResult)) {
+            throw new CloudResourceOperationFailedException("Failed to create CloudFormation stack, because polling reached an invalid end state.");
+
         }
-        return true;
+        return Collections.emptySet();
     }
 
     /**
@@ -259,7 +259,7 @@ public class AwsConnector implements CloudPlatformConnector {
      * In this case the ASG size is reduced to zero and the processes are resumed first.
      */
     @Override
-    public boolean removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
+    public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
         MDCBuilder.buildMdcContext(stack);
         Regions region = Regions.valueOf(stack.getRegion());
         AwsCredential credential = (AwsCredential) stack.getCredential();
@@ -272,9 +272,7 @@ public class AwsConnector implements CloudPlatformConnector {
         amazonASClient.detachInstances(detachInstancesRequest);
         amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(instanceIds));
         LOGGER.info("Terminated instances in stack '{}': '{}'", stack.getId(), instanceIds);
-//        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, stack.getId());
-//        reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds, instanceGroup)));
-        return true;
+        return Collections.emptySet();
     }
 
     @Override
@@ -293,8 +291,8 @@ public class AwsConnector implements CloudPlatformConnector {
         try {
             PollingResult pollingResult = cloudFormationPollingService
                             .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
-            if (isExited(pollingResult)) {
-                throw new UpdateFailedException(new IllegalStateException());
+            if (!isSuccess(pollingResult)) {
+                throw new UpdateFailedException("Failed to update Heat stack, because polling reached an invalid end state.");
             }
         } catch (CloudFormationStackException e) {
             throw new UpdateFailedException(e);
@@ -345,8 +343,8 @@ public class AwsConnector implements CloudPlatformConnector {
             try {
                 PollingResult pollingResult = cloudFormationPollingService
                         .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
-                if (isSuccess(pollingResult)) {
-                    LOGGER.info("CloudFormation stack({}) delete completed. Publishing {} event.", cFStackName, ReactorConfig.DELETE_COMPLETE_EVENT);
+                if (!isSuccess(pollingResult)) {
+                    throw new CloudResourceOperationFailedException("Failed to update Heat stack, because polling reached an invalid end state.");
                 }
             } catch (CloudFormationStackException e) {
                 LOGGER.error(String.format("Failed to delete CloudFormation stack: %s, id:%s", cFStackName, stack.getId()), e);
@@ -416,10 +414,11 @@ public class AwsConnector implements CloudPlatformConnector {
                             new AwsInstances(stack, amazonEC2Client, new ArrayList(instances), "Running"),
                             AmbariClusterConnector.POLLING_INTERVAL,
                             AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
-                    if (isSuccess(pollingResult)) {
-                        amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
-                        updateInstanceMetadata(stack, amazonEC2Client, stack.getRunningInstanceMetaData(), instances);
+                    if (!isSuccess(pollingResult)) {
+                        throw new UpdateFailedException("Failed to update Heat stack, because polling reached an invalid end state.");
                     }
+                    amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
+                    updateInstanceMetadata(stack, amazonEC2Client, stack.getRunningInstanceMetaData(), instances);
                 }
             } catch (Exception e) {
                 LOGGER.error(String.format("Failed to %s AWS instances on stack: %s", stopped ? "stop" : "start", stack.getId()), e);

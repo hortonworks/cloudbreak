@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 
 @Service
-public class StackStartService extends AbstractStackStatusUpdateService {
+public class StackStartService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStartService.class);
 
@@ -82,12 +82,8 @@ public class StackStartService extends AbstractStackStatusUpdateService {
         MDCBuilder.buildMdcContext(stack);
 
         boolean started;
-        if (cloudPlatform.isWithTemplate()) {
-            CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
-            started = connector.startAll(stack);
-        } else {
-            started = startStopResources(cloudPlatform, stack, true);
-        }
+        CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
+        started = connector.startAll(stack);
         if (started) {
             final Stack updatedStack = stackRepository.findOneWithLists(stack.getId());
             PollingResult pollingResult = waitForAmbariToStart(updatedStack);
