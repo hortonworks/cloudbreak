@@ -22,8 +22,12 @@ install: build
 deps:
 	go get -u github.com/jteeuwen/go-bindata/...
 	go get -u github.com/progrium/gh-release/...
+	go get github.com/progrium/basht
 	go get || true
 
+tests:
+	basht include/*.bash test/*.bash
+	
 release:
 	rm -rf release && mkdir release
 	tar -zcf release/$(NAME)_$(VERSION)_Linux_$(ARCH).tgz -C build/Linux $(BINARYNAME)

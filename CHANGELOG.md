@@ -4,6 +4,9 @@
 
 ### Added
 
+- `make tests` runs unit tests
+- docker unit tests are added
+
 ### Removed
 
 ### Changed
@@ -11,6 +14,7 @@
 - env command namespace is always exported, not only in DEBUG mode
 - env export: machine friendly config list
 - env show: human readable config list
+- circle runs unit tests
 
 ## [v0.0.6] - 2015-03-25
 
