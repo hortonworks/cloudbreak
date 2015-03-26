@@ -54,20 +54,14 @@ check_if_running() {
 
 check_skip() {
     declare desc="Checks if a container should be skipped: SKIP_XXX"
-    
     declare name=${1:?}
-    local skipVar=SKIP_${name^^}
-    debug skipVar=$skipVar
-
-    local shouldSkip="${!skipVar}"
-    debug "shouldSkip=$shouldSkip"
     
-    if [[ "$shouldSkip" ]] && ! check_if_running $name; then
+    if grep -qi $name <<< "${!SKIP_*}" && ! check_if_running $name; then
         error  "$name should be skipped but its not running ?!"
         exit 1
     fi
     
-    [[ "$shouldSkip" ]]
+    grep -qi $name <<< "${!SKIP_*}"
 }
 
 start_consul() {
@@ -134,9 +128,22 @@ cloudbreak-destroy() {
     declare desc="Destroys Cloudbreak related containers"
 
     local containers="consul registrator"
-    info "stopping containers"
-    docker stop -t 0 $containers | gray
 
-    info "removing containers"
-    docker rm -f $containers | gray
+    info "killing containers: $containers"
+    for name in $containers; do
+        if ! docker inspect $name &>/dev/null ;then
+            warn "no such container: $name"
+        else 
+            if grep -qi $name <<< "${!SKIP_*}"; then
+                warn skipping: $name
+            else
+                debug stop: $name
+                docker stop -t 0 $name | gray
+                debug remove: $name
+                docker rm -f $name | gray
+                
+            fi
+        fi
+    done
+
 }
