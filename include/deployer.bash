@@ -12,6 +12,10 @@ warn() {
     echo "[WARN] $*" | yellow 1>&2
 }
 
+error() {
+    echo "[ERROR] $*" | red 1>&2
+}
+
 cbd-version() {
     declare desc="Displays the version of Cloudbrek Deployer"
     bin-version | green

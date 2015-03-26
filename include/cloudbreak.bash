@@ -49,7 +49,25 @@ check_if_running() {
 
     declare container="$1"
 
-    [[ "true" == $(docker inspect -f '{{.State.Running}}' consul) ]]
+    [[ "true" == $(docker inspect -f '{{.State.Running}}' $container 2>/dev/null) ]]
+}
+
+check_skip() {
+    declare desc="Checks if a container should be skipped: SKIP_XXX"
+    
+    declare name=${1:?}
+    local skipVar=SKIP_${name^^}
+    debug skipVar=$skipVar
+
+    local shouldSkip="${!skipVar}"
+    debug "shouldSkip=$shouldSkip"
+    
+    if [[ "$shouldSkip" ]] && ! check_if_running $name; then
+        error  "$name should be skipped but its not running ?!"
+        exit 1
+    fi
+    
+    [[ "$shouldSkip" ]]
 }
 
 start_consul() {
@@ -58,6 +76,11 @@ start_consul() {
     local name=consul
     env-import PRIVATE_IP
     
+    if check_skip $name; then
+        warn "skipping container: $name"
+        return
+    fi
+
     if check_if_running $name; then
         warn "$name is already running, not starting"
         return
@@ -82,6 +105,11 @@ start_registrator() {
     local name=registrator
     env-import PRIVATE_IP
     
+    if check_skip $name; then
+        warn "skipping container: $name"
+        return
+    fi
+
     if check_if_running $name; then
         warn "$name is already running, not starting"
         return

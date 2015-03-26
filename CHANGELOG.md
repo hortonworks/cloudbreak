@@ -8,6 +8,7 @@
 - docker unit tests are added
 - start command added: WIP consul, registrator starts
 - kill command addd: stops and removes cloudbreak specific containers
+- SKIP_XXX skips the container start
 
 ### Removed
 
