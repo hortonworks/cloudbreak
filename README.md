@@ -121,6 +121,11 @@ is used for testing. See the reasoning about: [why not bats or shunit2](https://
 
 Please cover your bahs functions with unit tests.
 
+running test performed by:
+```
+make tests
+```
+
 ## Release Process of Clodbreak Deployer tool
 
 the master branch is always built on [CircleCI](https://circleci.com/gh/sequenceiq/cloudbreak-deployer).
