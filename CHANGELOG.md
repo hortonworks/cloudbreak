@@ -3,6 +3,7 @@
 ### Fixed
 
 - Fixing deps module, golang fn: checksum added
+- CircleCI mdule defines required jq
 
 ### Added
 

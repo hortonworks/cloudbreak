@@ -1,6 +1,8 @@
 circle-init() {
     # readonly CircleCI token for accessing build artifacts
     : ${CIRCLE_TOKEN:=da6ded628881d187fdab480349807c929b6af287}
+
+    deps-require jq
 }
 
 cci-latest() {
