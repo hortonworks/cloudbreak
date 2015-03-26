@@ -8,6 +8,14 @@ info() {
     echo "$*" | green 1>&2
 }
 
+warn() {
+    echo "[WARN] $*" | yellow 1>&2
+}
+
+error() {
+    echo "[ERROR] $*" | red 1>&2
+}
+
 cbd-version() {
     declare desc="Displays the version of Cloudbrek Deployer"
     bin-version | green
@@ -36,7 +44,7 @@ cbd-update() {
 }
 
 cbd-update-snap() {
-    declare desc="Updates itself, from the latest snapshot binary"
+    declare desc="Updates itself, from CircleCI, branch name is optional, default: master"
     declare branch=${1:-master}
 
     url=$(cci-latest sequenceiq/cloudbreak-deployer $branch)
@@ -103,6 +111,9 @@ main() {
     cmd-export-ns env "Environment namespace"
     cmd-export env-show
     cmd-export env-export
+
+    cmd-export cloudbreak-deploy start
+    cmd-export cloudbreak-destroy kill
 
     if [[ "$DEBUG" ]]; then
         cmd-export fn-call fn

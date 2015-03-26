@@ -8,7 +8,7 @@ GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 ifeq ($(GIT_BRANCH), release)
 FLAGS="-X main.Version $(VERSION)"
 else
-FLAGS="-X main.Version $(VERSION) -X main.GitRevision $(GIT_REV)"
+FLAGS="-X main.Version $(VERSION) -X main.GitRevision $(GIT_BRANCH)-$(GIT_REV)"
 endif
 
 build:

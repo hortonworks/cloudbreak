@@ -72,6 +72,32 @@ CBD_DEFAULT_PROFILE=prod cbd some_commands
 
 For permanent setting you can `export CBD_DEFAULT_PROFILE=prod` in your `.bash_profile`.
 
+## Usage
+
+You can always get a list of command by issuing without parameters: `cbd`
+
+### Deployment
+
+To start the containers run:
+
+```
+cbd start
+```
+If one of the containers are already running, it won’t be started again.
+
+
+### Skipping containers
+
+If you want the Cloudbreak Deployer to skip one of the containers (for example you have started it
+already with special configuration) you can set `SKIP_XXX` env vars. For example if you want to 
+skip the **consul** container, add an extra line into your `Profile`
+
+```
+SKIP_CONSUL=1
+```
+
+Any value will works: 1/yes/true.
+
 ## Debug
 
 If you want to have more detailed output set the `DEBUG` env variable to non-zero:
