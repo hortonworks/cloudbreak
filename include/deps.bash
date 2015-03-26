@@ -7,7 +7,7 @@ deps-init() {
 }
 
 deps-dir() {
-	echo "${GUN_ROOT:?}/.gun" # hmm, glidergun specific...
+	echo "$CBD_ROOT/.deps"
 }
 
 deps-require() {
@@ -59,7 +59,7 @@ deps-install() {
 		unset PREFIX
 	else
 		chmod +x "$tmpfile"
-        mv "$tmpdir/$name" "$(deps-dir)/bin"
+        mv "$tmpfile" "$(deps-dir)/bin"
 	fi
 	cd - > /dev/null
 	rm -rf "${tmpdir:?}"

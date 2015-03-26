@@ -2,6 +2,8 @@
 
 ### Fixed
 
+- Fixing deps module, golang fn: checksum added
+
 ### Added
 
 ### Removed

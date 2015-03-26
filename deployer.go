@@ -1,7 +1,12 @@
 package main
 
 import (
+	"crypto/md5"
+	"crypto/sha1"
+	"crypto/sha256"
 	"fmt"
+	"hash"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -22,8 +27,9 @@ func version() (v string) {
 	return
 }
 
-func Hello(args []string) {
-	fmt.Println("Hello from golang")
+func fatal(msg string) {
+	println("!!", msg)
+	os.Exit(2)
 }
 
 func BinVersion(args []string) {
@@ -79,6 +85,25 @@ func application(
 	os.Exit(status)
 }
 
+func Checksum(args []string) {
+	if len(args) < 1 {
+		fatal("No algorithm specified")
+	}
+	var h hash.Hash
+	switch args[0] {
+	case "md5":
+		h = md5.New()
+	case "sha1":
+		h = sha1.New()
+	case "sha256":
+		h = sha256.New()
+	default:
+		fatal("Algorithm '" + args[0] + "' is unsupported")
+	}
+	io.Copy(h, os.Stdin)
+	fmt.Printf("%x\n", h.Sum(nil))
+}
+
 func main() {
 	if len(os.Args) == 2 && os.Args[1] == "--version" {
 		fmt.Println("CloudBreak Deployer:", version())
@@ -86,7 +111,7 @@ func main() {
 	}
 
 	application(map[string]func([]string){
-		"hello":       Hello,
+		"checksum":    Checksum,
 		"bin-version": BinVersion,
 	}, []string{
 		"include/circle.bash",

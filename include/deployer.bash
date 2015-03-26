@@ -92,8 +92,14 @@ doctor() {
     info "Everything is very-very first class !!!"
 }
 
+cbd-find-root() {
+    CBD_ROOT=$PWD
+}
+
 main() {
 	set -eo pipefail; [[ "$TRACE" ]] && set -x
+
+    cbd-find-root
 	color-init
     load-profile
 
