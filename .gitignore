@@ -2,3 +2,4 @@ build
 release
 cbd
 bindata.go
+Profile*
