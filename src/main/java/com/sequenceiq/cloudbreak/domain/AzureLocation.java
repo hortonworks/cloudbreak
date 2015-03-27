@@ -31,7 +31,7 @@ public enum AzureLocation {
                 return region;
             }
         }
-        throw new IllegalArgumentException("Cannot create enum from " + regionName + " value!");
+        throw new IllegalArgumentException("Cannot getAmbariClient enum from " + regionName + " value!");
     }
 
 }

@@ -77,7 +77,7 @@ public class AmbariClusterService implements ClusterService {
     private HostGroupRepository hostGroupRepository;
 
     @Autowired
-    private AmbariClientService clientService;
+    private AmbariClientProvider ambariClientProvider;
 
     @Autowired
     private AmbariConfigurationService configurationService;
@@ -127,7 +127,7 @@ public class AmbariClusterService implements ClusterService {
     public String getClusterJson(String ambariIp, Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
         MDCBuilder.buildMdcContext(stack);
-        AmbariClient ambariClient = clientService.create(stack);
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword());
         try {
             String clusterJson = ambariClient.getClusterAsJson();
             if (clusterJson == null) {
@@ -280,7 +280,7 @@ public class AmbariClusterService implements ClusterService {
     private List<HostMetadata> collectDownscaleCandidates(HostGroupAdjustmentJson adjustmentJson, Stack stack, Cluster cluster, boolean decommissionRequest) {
         List<HostMetadata> downScaleCandidates = new ArrayList<>();
         if (decommissionRequest) {
-            AmbariClient ambariClient = clientService.create(stack);
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword());
             int replication = getReplicationFactor(ambariClient, adjustmentJson.getHostGroup());
             HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), adjustmentJson.getHostGroup());
             Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();
@@ -325,7 +325,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     private void validateComponentsCategory(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
-        AmbariClient ambariClient = clientService.create(stack);
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword());
         Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(cluster);
         String hostGroup = hostGroupAdjustment.getHostGroup();

@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 
 @Component
@@ -29,20 +29,21 @@ public class AmbariClusterStatusUpdater {
     private RetryingStackUpdater stackUpdater;
 
     @Autowired
-    private AmbariClientService clientService;
+    private AmbariClientProvider ambariClientProvider;
 
     @Autowired
     private CloudbreakEventService cloudbreakEventService;
 
     @Autowired
-    private AmbariClusterStatusFactory clusterStatusFactoy;
+    private AmbariClusterStatusFactory clusterStatusFactory;
 
     public void updateClusterStatus(Stack stack) {
         MDCBuilder.buildMdcContext(stack.getCluster());
         if (isClusterStatusCheckNecessary(stack)) {
             Cluster cluster = stack.getCluster();
             String blueprintName = cluster != null ? cluster.getBlueprint().getBlueprintName() : null;
-            AmbariClusterStatus clusterStatus = clusterStatusFactoy.createClusterStatus(clientService.create(stack), blueprintName);
+            AmbariClusterStatus clusterStatus = clusterStatusFactory
+                    .createClusterStatus(ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword()), blueprintName);
             updateClusterStatus(stack, clusterStatus);
         }
     }

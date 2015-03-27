@@ -117,7 +117,7 @@ public class SimpleTemplateService implements TemplateService {
 
     private void delete(Template template, CbUser user) {
         MDCBuilder.buildMdcContext(template);
-        LOGGER.debug("Deleting template. {} - {}", new Object[]{template.getId(), template.getName()});
+        LOGGER.debug("Deleting template. {} - {}", new Object[] { template.getId(), template.getName() });
         List<Stack> allStackForTemplate = stackRepository.findAllStackForTemplate(template.getId());
         if (allStackForTemplate.isEmpty()) {
             if (!user.getUserId().equals(template.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
