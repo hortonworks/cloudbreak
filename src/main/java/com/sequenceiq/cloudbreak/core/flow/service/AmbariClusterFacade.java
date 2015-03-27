@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
@@ -48,7 +48,7 @@ public class AmbariClusterFacade implements ClusterFacade {
     private AmbariRoleAllocator ambariRoleAllocator;
 
     @Autowired
-    private AmbariClientService clientService;
+    private AmbariClientProvider ambariClientProvider;
 
     @Autowired
     private AmbariStartupListenerTask ambariStartupListenerTask;
@@ -94,7 +94,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         MDCBuilder.buildMdcContext(stack);
 
         AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, provisioningContext.getAmbariIp(),
-                clientService.createDefault(provisioningContext.getAmbariIp()));
+                ambariClientProvider.getDefaultAmbariClient(provisioningContext.getAmbariIp()));
 
         PollingResult pollingResult = ambariStartupPollerObjectPollingService.pollWithTimeout(ambariStartupListenerTask, ambariStartupPollerObject,
                 POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -122,7 +122,10 @@ public class AmbariClusterFacade implements ClusterFacade {
         MDCBuilder.buildMdcContext(stack);
 
         if (stack.getCluster() != null && stack.getCluster().getStatus().equals(Status.REQUESTED)) {
-            ambariClusterConnector.buildAmbariCluster(stack);
+            Cluster cluster = ambariClusterConnector.buildAmbariCluster(stack);
+            if (cluster.getEmailNeeded()) {
+                emailSenderService.sendSuccessEmail(cluster.getOwner(), stack.getAmbariIp());
+            }
         } else {
             LOGGER.info("Ambari has started but there were no cluster request to this stack yet. Won't install cluster now.");
         }
@@ -233,13 +236,11 @@ public class AmbariClusterFacade implements ClusterFacade {
     }
 
     @Override
-    public FlowContext clusterCreationFailed(FlowContext flowContext) throws CloudbreakException {
+    public FlowContext handleClusterCreationFailure(FlowContext flowContext) throws CloudbreakException {
         LOGGER.debug("Handling cluster creation failure. Context: {}", flowContext);
         ProvisioningContext context = (ProvisioningContext) flowContext;
-
         Cluster cluster = clusterService.updateClusterStatusByStackId(context.getStackId(), Status.CREATE_FAILED, context.getErrorReason());
         MDCBuilder.buildMdcContext(cluster);
-
         stackUpdater.updateStackStatus(context.getStackId(), Status.AVAILABLE, "Cluster installation failed. Error: " + context.getErrorReason());
         eventService.fireCloudbreakEvent(context.getStackId(), "CLUSTER_CREATION_FAILED", context.getErrorReason());
         if (cluster.getEmailNeeded()) {
@@ -288,7 +289,7 @@ public class AmbariClusterFacade implements ClusterFacade {
     private void changeAmbariCredentials(String ambariIp, Stack stack) {
         String userName = stack.getUserName();
         String password = stack.getPassword();
-        AmbariClient ambariClient = clientService.createDefault(ambariIp);
+        AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(ambariIp);
         if (ADMIN.equals(userName)) {
             if (!ADMIN.equals(password)) {
                 ambariClient.changePassword(ADMIN, ADMIN, password, true);

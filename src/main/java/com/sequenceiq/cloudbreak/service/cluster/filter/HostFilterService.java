@@ -15,15 +15,14 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariConfigurationService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 
 @Service
 public class HostFilterService {
 
     public static final String RM_WS_PATH = "/ws/v1/cluster";
-    private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterConnector.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HostFilterService.class);
 
     @Autowired
     private List<HostFilter> hostFilters;
@@ -32,13 +31,13 @@ public class HostFilterService {
     private AmbariConfigurationService configurationService;
 
     @Autowired
-    private AmbariClientService clientService;
+    private AmbariClientProvider ambariClientProvider;
 
     public List<HostMetadata> filterHostsForDecommission(Stack stack, Set<HostMetadata> hosts, String hostGroup) {
         MDCBuilder.buildMdcContext(stack);
         List<HostMetadata> filteredList = new ArrayList<>(hosts);
         try {
-            AmbariClient ambariClient = clientService.create(stack);
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword());
             Map<String, String> config = configurationService.getConfiguration(ambariClient, hostGroup);
             for (HostFilter hostFilter : hostFilters) {
                 try {

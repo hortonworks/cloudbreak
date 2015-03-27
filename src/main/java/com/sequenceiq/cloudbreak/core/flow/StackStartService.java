@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClientPollerObject;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
@@ -65,7 +65,7 @@ public class StackStartService extends AbstractStackStatusUpdateService {
     private AmbariHostsJoinStatusCheckerTask ambariHostsJoinStatusCheckerTask;
 
     @Autowired
-    private AmbariClientService clientService;
+    private AmbariClientProvider ambariClientProvider;
 
     @Autowired
     private CloudbreakEventService cloudbreakEventService;
@@ -137,13 +137,14 @@ public class StackStartService extends AbstractStackStatusUpdateService {
     private PollingResult waitForAmbariToStart(Stack stack) {
         return ambariHealthChecker.pollWithTimeout(
                 ambariHealthCheckerTask,
-                new AmbariClientPollerObject(stack, clientService.create(stack)),
+                new AmbariClientPollerObject(stack, ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword())),
                 AmbariClusterConnector.POLLING_INTERVAL,
                 AmbariClusterConnector.MAX_ATTEMPTS_FOR_HOSTS);
     }
 
     private PollingResult waitForHostsToJoin(Stack stack) {
-        AmbariHosts ambariHosts = new AmbariHosts(stack, clientService.create(stack), stack.getFullNodeCount());
+        AmbariHosts ambariHosts = new AmbariHosts(stack, ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword()),
+                stack.getFullNodeCount());
         try {
             return ambariHostJoin.pollWithTimeout(
                     ambariHostsJoinStatusCheckerTask,

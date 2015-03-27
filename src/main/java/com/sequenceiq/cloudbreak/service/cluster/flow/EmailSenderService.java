@@ -52,7 +52,7 @@ public class EmailSenderService {
     public void sendSuccessEmail(String email, String ambariServer) {
         MDCBuilder.buildMdcContext();
         CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, failedClusterInstallerMailTemplatePath, getEmailModel(user.getGivenName(), "SUCCESS", ambariServer));
+        sendEmail(user, successClusterInstallerMailTemplatePath, getEmailModel(user.getGivenName(), "SUCCESS", ambariServer));
     }
 
     @Async
