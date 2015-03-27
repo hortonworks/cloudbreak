@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 
 @Service
-public class StackStopService extends AbstractStackStatusUpdateService {
+public class StackStopService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStopService.class);
 
@@ -54,12 +54,8 @@ public class StackStopService extends AbstractStackStatusUpdateService {
             stackUpdater.updateStackStatus(stackId, Status.STOP_IN_PROGRESS, "Cluster infrastructure is stopping.");
             pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.STOP_AMBARI_EVENT);
             boolean stopped;
-            if (cloudPlatform.isWithTemplate()) {
-                CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
-                stopped = connector.stopAll(stack);
-            } else {
-                stopped = startStopResources(cloudPlatform, stack, false);
-            }
+            CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
+            stopped = connector.stopAll(stack);
             if (stopped) {
                 LOGGER.info("Update stack state to: {}", Status.STOPPED);
                 stackUpdater.updateStackStatus(stackId, Status.STOPPED, "Cluster infrastructure stopped successfully.");

@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,6 +41,7 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.connector.CloudResourceOperationFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 
@@ -108,8 +110,8 @@ public class OpenStackConnector implements CloudPlatformConnector {
             PollingResult pollingResult = pollingService.pollWithTimeout(openStackHeatStackStatusCheckerTask,
                     new OpenStackContext(stack, asList(openStackStack.getId()), osClient, HeatStackStatus.CREATED.getStatus()),
                     POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-            if (isSuccess(pollingResult)) {
-                LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
+            if (!isSuccess(pollingResult)) {
+                throw new CloudResourceOperationFailedException("Failed to create Heat stack, because polling reached an invalid end state.");
             }
         } catch (HeatStackFailedException e) {
             LOGGER.error(String.format("Failed to create Heat stack: %s", stack.getId()), e);
@@ -120,7 +122,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public boolean addInstances(Stack stack, String userData, Integer adjustment, String instanceGroup) {
+    public Set<Resource> addInstances(Stack stack, String userData, Integer adjustment, String instanceGroup) {
         MDCBuilder.buildMdcContext(stack);
         InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         group.setNodeCount(group.getNodeCount() + adjustment);
@@ -128,34 +130,31 @@ public class OpenStackConnector implements CloudPlatformConnector {
             String heatTemplate = heatTemplateBuilder.add(stack, openStackHeatTemplatePath, userData,
                     instanceMetaDataRepository.findAllInStack(stack.getId()), instanceGroup, adjustment);
             PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
-            if (isSuccess(pollingResult)) {
-                LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
-//                reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
-//                        Event.wrap(new AddInstancesComplete(CloudPlatform.OPENSTACK, stack.getId(), null, instanceGroup)));
+            if (!isSuccess(pollingResult)) {
+                throw new UpdateFailedException("Failed to update Heat stack, because polling reached an invalid end state.");
             }
         } catch (UpdateFailedException e) {
             LOGGER.error("Failed to update the Heat stack", e);
             throw new BuildStackFailureException(e);
         }
-        return true;
+        return Collections.emptySet();
     }
 
     @Override
-    public boolean removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
-        boolean result = false;
+    public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
         try {
             String userDataScript = userDataBuilder.build(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>());
             String heatTemplate = heatTemplateBuilder.remove(stack, openStackHeatTemplatePath, userDataScript,
                     instanceMetaDataRepository.findAllInStack(stack.getId()), instanceIds, instanceGroup);
             PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
-            if (isSuccess(pollingResult)) {
-                result = true;
+            if (!isSuccess(pollingResult)) {
+                throw new UpdateFailedException("Failed to update Heat stack, because polling reached an invalid end state.");
             }
         } catch (UpdateFailedException e) {
             LOGGER.error("Failed to update the Heat stack", e);
             throw new BuildStackFailureException(e);
         }
-        return result;
+        return Collections.emptySet();
     }
 
     @Override
@@ -169,8 +168,8 @@ public class OpenStackConnector implements CloudPlatformConnector {
                 PollingResult pollingResult = pollingService.pollWithTimeout(openStackHeatStackDeleteStatusCheckerTask,
                         new OpenStackContext(stack, asList(heatStackId), osClient, HeatStackStatus.DELETED.getStatus()),
                         POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-                if (isSuccess(pollingResult)) {
-                    LOGGER.info("Heat stack deleted, publishing {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
+                if (!isSuccess(pollingResult)) {
+                    throw new CloudResourceOperationFailedException("Failed to delete Heat stack, because polling reached an invalid end state.");
                 }
             } catch (HeatStackFailedException e) {
                 LOGGER.error(String.format("Failed to delete Heat stack: %s", stack.getId()), e);

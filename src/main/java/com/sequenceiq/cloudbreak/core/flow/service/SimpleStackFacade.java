@@ -1,22 +1,17 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 
 import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -38,16 +33,11 @@ import com.sequenceiq.cloudbreak.domain.Subnet;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
-import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
-import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
-import com.sequenceiq.cloudbreak.service.stack.resource.UpdateContextObject;
 
 @Service
 public class SimpleStackFacade implements StackFacade {
@@ -57,25 +47,10 @@ public class SimpleStackFacade implements StackFacade {
     private RetryingStackUpdater stackUpdater;
 
     @Autowired
-    private EmailSenderService emailSenderService;
-
-    @Autowired
     private StackRepository stackRepository;
 
     @Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
-
-    @Resource
-    private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
-
-    @Resource
-    private Map<CloudPlatform, List<ResourceBuilder>> networkResourceBuilders;
-
-    @Resource
-    private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
-
-    @Autowired
-    private AsyncTaskExecutor resourceBuilderExecutor;
 
     @Autowired
     private CloudbreakEventService cloudbreakEventService;
@@ -100,46 +75,17 @@ public class SimpleStackFacade implements StackFacade {
         ProvisioningContext provisioningContext = (ProvisioningContext) context;
         try {
             final Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
-            final CloudPlatform cloudPlatform = provisioningContext.getCloudPlatform();
+            if (!stack.isStackInDeletionPhase()) {
+                final CloudPlatform cloudPlatform = provisioningContext.getCloudPlatform();
 
-            if (!stack.getOnFailureActionAction().equals(OnFailureAction.ROLLBACK)) {
-                LOGGER.debug("Nothing to do. OnFailureAction {}", stack.getOnFailureActionAction());
-            } else {
-                if (cloudPlatform.isWithTemplate()) {
-                    cloudPlatformConnectors.get(cloudPlatform).rollback(stack, stack.getResources());
+                if (!stack.getOnFailureActionAction().equals(OnFailureAction.ROLLBACK)) {
+                    LOGGER.debug("Nothing to do. OnFailureAction {}", stack.getOnFailureActionAction());
                 } else {
-                    ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
-                    final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
-                    for (int i = instanceResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
-                        List<Future<Boolean>> futures = new ArrayList<>();
-                        final int index = i;
-                        List<com.sequenceiq.cloudbreak.domain.Resource> resourceByType =
-                                stack.getResourcesByType(instanceResourceBuilders.get(cloudPlatform).get(i).resourceType());
-                        for (final com.sequenceiq.cloudbreak.domain.Resource resource : resourceByType) {
-                            Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
-                                @Override
-                                public Boolean call() throws Exception {
-                                    instanceResourceBuilders.get(cloudPlatform).get(index).rollback(resource, dCO, stack.getRegion());
-                                    stackUpdater.removeStackResources(stack.getId(), Arrays.asList(resource));
-                                    return true;
-                                }
-                            });
-                            futures.add(submit);
-                        }
-                        for (Future<Boolean> future : futures) {
-                            future.get();
-                        }
-                    }
-                    for (int i = networkResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
-                        for (com.sequenceiq.cloudbreak.domain.Resource resource
-                                : stack.getResourcesByType(networkResourceBuilders.get(cloudPlatform).get(i).resourceType())) {
-                            networkResourceBuilders.get(cloudPlatform).get(i).rollback(resource, dCO, stack.getRegion());
-                        }
-                    }
+                    cloudPlatformConnectors.get(cloudPlatform).rollback(stack, stack.getResources());
                 }
+                stackUpdater.updateStackStatusReason(provisioningContext.getStackId(), provisioningContext.getErrorReason());
+                fireCloudbreakEventIfNeeded(provisioningContext.getStackId(), stack);
             }
-            stackUpdater.updateStackStatusReason(provisioningContext.getStackId(), provisioningContext.getErrorReason());
-            fireCloudbreakEventIfNeeded(provisioningContext.getStackId(), stack);
             return new ProvisioningContext.Builder()
                     .setDefaultParams(stack.getId(), stack.cloudPlatform())
                     .build();
@@ -268,15 +214,7 @@ public class SimpleStackFacade implements StackFacade {
         try {
             LOGGER.info("Accepted {} event on stack.", ReactorConfig.UPDATE_SUBNET_REQUEST_EVENT);
             stack.setAllowedSubnets(getNewSubnetList(stack, request.getAllowedSubnets()));
-            if (stack.isCloudPlatformUsedWithTemplate()) {
-                cloudPlatformConnectors.get(stack.cloudPlatform()).updateAllowedSubnets(stack, userData);
-            } else {
-                CloudPlatform cloudPlatform = stack.cloudPlatform();
-                UpdateContextObject updateContext = resourceBuilderInits.get(cloudPlatform).updateInit(stack);
-                for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
-                    resourceBuilder.update(updateContext);
-                }
-            }
+            cloudPlatformConnectors.get(stack.cloudPlatform()).updateAllowedSubnets(stack, userData);
             stackUpdater.updateStack(stack);
             String statusReason = "Security update successfully finished";
             stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, statusReason);

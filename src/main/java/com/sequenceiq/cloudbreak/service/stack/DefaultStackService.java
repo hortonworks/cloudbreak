@@ -52,8 +52,6 @@ import com.sequenceiq.cloudbreak.service.stack.event.UpdateAllowedSubnetsRequest
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 
-import reactor.core.Reactor;
-
 @Service
 public class DefaultStackService implements StackService {
 
@@ -67,9 +65,6 @@ public class DefaultStackService implements StackService {
 
     @Autowired
     private RetryingStackUpdater stackUpdater;
-
-    @Autowired
-    private Reactor reactor;
 
     @Autowired
     private ClusterRepository clusterRepository;
