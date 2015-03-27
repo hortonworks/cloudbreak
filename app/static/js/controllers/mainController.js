@@ -25,10 +25,14 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                 gccRegions: [
                     {key: 'US_CENTRAL1_A', value: "us-central1-a", cloud: 'GCC'},
                     {key: 'US_CENTRAL1_B', value: "us-central1-b", cloud: 'GCC'},
+                    {key: 'US_CENTRAL1_C', value: "us-central1-c", cloud: 'GCC'},
                     {key: 'US_CENTRAL1_F', value: "us-central1-f", cloud: 'GCC'},
                     {key: 'EUROPE_WEST1_B', value: "europe-west1-b", cloud: 'GCC'},
+                    {key: 'EUROPE_WEST1_C', value: "europe-west1-c", cloud: 'GCC'},
+                    {key: 'EUROPE_WEST1_D', value: "europe-west1-d", cloud: 'GCC'},
                     {key: 'ASIA_EAST1_A', value: "asia-east1-a", cloud: 'GCC'},
-                    {key: 'ASIA_EAST1_B', value: "asia-east1-b", cloud: 'GCC'}
+                    {key: 'ASIA_EAST1_B', value: "asia-east1-b", cloud: 'GCC'},
+                    {key: 'ASIA_EAST1_C', value: "asia-east1-c", cloud: 'GCC'}
                 ],
                 gccDiskTypes: [
                     {key: 'HDD', value: 'Magnetic'},

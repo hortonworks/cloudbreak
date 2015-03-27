@@ -80,8 +80,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
           var actualBp = $filter('filter')($rootScope.blueprints, { id: $scope.cluster.blueprintId});
           var instanceGroups = [];
           var hostGroups = [];
+          instanceGroups.push({templateId: tmpTemplateId, group: "cbgateway", nodeCount: 1, type: "GATEWAY"});
           actualBp[0].ambariBlueprint.host_groups.forEach(function(k){
-            instanceGroups.push({templateId: tmpTemplateId, group: k.name, nodeCount: 1});
+            instanceGroups.push({templateId: tmpTemplateId, group: k.name, nodeCount: 1, type: "HOSTGROUP"});
             hostGroups.push({name: k.name, instanceGroupName: k.name})
           });
           $scope.cluster.instanceGroups = instanceGroups;

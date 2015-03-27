@@ -123,7 +123,7 @@
                                   <div class="form-group" name="templateNodeform{{$index}}" >
                                     <label class="col-sm-3 control-label" for="templateNodeCount{{$index}}">Group size</label>
                                     <div class="col-sm-9">
-                                      <input type="number" name="templateNodeCount{{$index}}" class="form-control" ng-model="instanceGroup.nodeCount" id="templateNodeCount{{$index}}" min="1" max="100000" placeholder="1 - 100000" required>
+                                      <input type="number" name="templateNodeCount{{$index}}" ng-disabled="instanceGroup.type=='GATEWAY'"  class="form-control" ng-model="instanceGroup.nodeCount" id="templateNodeCount{{$index}}" min="1" max="100000" placeholder="1 - 100000" required>
                                         <div class="help-block"
                                           ng-show="clusterCreationForm.templateNodeCount{{$index}}.$dirty && clusterCreationForm.templateNodeCount{{$index}}.$invalid"><i class="fa fa-warning"></i>
                                           {{error_msg.cluster_size_invalid}}
