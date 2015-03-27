@@ -69,7 +69,6 @@ import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
 import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
@@ -155,9 +154,8 @@ public class AwsConnector implements CloudPlatformConnector {
         try {
             PollingResult pollingResult = cloudFormationPollingService
                     .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
-            if (isSuccess(pollingResult)) {
-                LOGGER.info("CloudFormation stack({}) creation completed.", cFStackName);
-                LOGGER.info("Publishing {} event.", ReactorConfig.PROVISION_COMPLETE_EVENT);
+            if (!isSuccess(pollingResult)) {
+                throw new CloudResourceOperationFailedException("Failed to create CloudFormation stack, because polling reached an invalid end state.");
             }
         } catch (CloudFormationStackException e) {
             LOGGER.error(String.format("Failed to create CloudFormation stack: %s", stackId), e);
@@ -328,7 +326,6 @@ public class AwsConnector implements CloudPlatformConnector {
                 client.describeStacks(describeStacksRequest);
             } catch (AmazonServiceException e) {
                 if (e.getErrorMessage().equals("Stack:" + cFStackName + " does not exist")) {
-                    LOGGER.info("AWS CloudFormation stack not found, publishing {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
                     return;
                 } else {
                     throw e;
@@ -351,7 +348,7 @@ public class AwsConnector implements CloudPlatformConnector {
                 throw e;
             }
         } else {
-            LOGGER.info("No resource saved for stack, publishing {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
+            LOGGER.info("No CloudFormation stack saved for stack.");
         }
     }
 

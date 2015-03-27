@@ -20,7 +20,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.google.common.primitives.Ints;
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -114,7 +113,6 @@ public class ParallelCloudResourceManager {
             resourceRequestResults.addAll(provisionUtil.waitForRequestToFinish(stack.getId(), futures).get(FutureResult.FAILED));
             stackFailureHandlerService.handleFailure(stack, resourceRequestResults);
             if (!stackRepository.findById(stack.getId()).isStackInDeletionPhase()) {
-                LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
                 return resourceSet;
             } else {
                 throw new StackCreationFailureException("Failed to create stack resources, because polling reached an invalid end state.");
@@ -204,7 +202,6 @@ public class ParallelCloudResourceManager {
             if (!stackRepository.findById(stack.getId()).isStackInDeletionPhase()) {
                 stackUpdater.removeStackResources(stack.getId(), deleteContextObject.getDecommissionResources());
                 LOGGER.info("Terminated instances in stack: '{}'", instanceIds);
-                LOGGER.info("Publishing {} event.", ReactorConfig.REMOVE_INSTANCES_COMPLETE_EVENT);
             } else {
                 throw new ScalingFailedException("Downscaling of stack failed, because the stack is already in deletion phase.");
             }

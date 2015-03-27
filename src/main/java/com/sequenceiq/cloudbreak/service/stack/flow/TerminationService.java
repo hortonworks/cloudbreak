@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -56,7 +55,6 @@ public class TerminationService {
         retryingStackUpdater.updateStackStatus(stackId, Status.DELETE_IN_PROGRESS, "Termination of cluster infrastructure has started.");
         final Stack stack = stackRepository.findOneWithLists(stackId);
         MDCBuilder.buildMdcContext(stack);
-        LOGGER.info("Accepted {} event.", ReactorConfig.DELETE_REQUEST_EVENT);
         try {
             cloudPlatformConnectors.get(cloudPlatform).deleteStack(stack, stack.getCredential());
             finalizeTermination(stack);

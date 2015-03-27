@@ -28,7 +28,10 @@ import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
+import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
+import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 
 @Service
@@ -43,9 +46,6 @@ public class StackScalingService {
     @Autowired
     private RetryingStackUpdater stackUpdater;
 
-    @javax.annotation.Resource
-    private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
-
     @Autowired
     private UserDataBuilder userDataBuilder;
 
@@ -59,10 +59,13 @@ public class StackScalingService {
     private CloudbreakEventService eventService;
 
     @Autowired
-    private MetadataSetupContext metadataSetupContext;
-
-    @Autowired
     private AmbariRoleAllocator ambariRoleAllocator;
+
+    @javax.annotation.Resource
+    private Map<CloudPlatform, MetadataSetup> metadataSetups;
+
+    @javax.annotation.Resource
+    private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
     public void upscaleStack(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
         Set<Resource> resources = null;
@@ -70,8 +73,7 @@ public class StackScalingService {
         String userDataScript = userDataBuilder.build(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>());
         resources = cloudPlatformConnectors.get(stack.cloudPlatform()).addInstances(stack, userDataScript, scalingAdjustment, instanceGroupName);
         InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
-        Set<CoreInstanceMetaData> coreInstanceMetaData = metadataSetupContext.updateMetadata(stack.cloudPlatform(), stack.getId(),
-                resources, instanceGroupName);
+        Set<CoreInstanceMetaData> coreInstanceMetaData = updateMetadata(stack.cloudPlatform(), stack, resources, instanceGroupName);
         StackUpdateSuccess stackUpdateSuccess = ambariRoleAllocator.updateInstanceMetadata(stack.getId(), coreInstanceMetaData, instanceGroupName);
         int nodeCount = instanceGroup.getNodeCount() + stackUpdateSuccess.getInstanceIds().size();
         stackUpdater.updateNodeCount(stack.getId(), nodeCount, instanceGroupName);
@@ -85,6 +87,18 @@ public class StackScalingService {
         instanceIds = cloudPlatformConnectors.get(stack.cloudPlatform()).removeInstances(stack, instanceIds, instanceGroupName);
         updateRemovedResourcesState(stack, instanceIds, stack.getInstanceGroupByInstanceGroupName(instanceGroupName));
         setStackAndMetadataAvailable(scalingAdjustment, stack);
+    }
+
+    private Set<CoreInstanceMetaData> updateMetadata(CloudPlatform cloudPlatform, Stack stack, Set<Resource> resourceSet, String instanceGroup) {
+        try {
+            ProvisionEvent provisionEvent = metadataSetups.get(cloudPlatform).addNewNodesToMetadata(stack, resourceSet, instanceGroup);
+            MetadataUpdateComplete context = (MetadataUpdateComplete) provisionEvent;
+            return context.getCoreInstanceMetaData();
+        } catch (Exception e) {
+            LOGGER.error("Unhandled exception occurred while updating stack metadata.", e);
+            throw e;
+        }
+
     }
 
     private Set<String> getUnregisteredInstanceIds(Integer scalingAdjustment, Stack stack) {

@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.Compute;
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -36,7 +35,6 @@ public class GccMetadataSetup implements MetadataSetup {
     public ProvisionEvent setupMetadata(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         List<Resource> resourcesByType = stack.getResourcesByType(ResourceType.GCC_INSTANCE);
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
         return new MetadataSetupComplete(CloudPlatform.GCC, stack.getId(), collectMetaData(stack, resourcesByType));
     }
 
@@ -60,7 +58,6 @@ public class GccMetadataSetup implements MetadataSetup {
             }
         }
         Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, resources);
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stack.getId());
         return new MetadataUpdateComplete(CloudPlatform.GCC, stack.getId(), instanceMetaDatas, instanceGroup);
     }
 

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import static com.sequenceiq.cloudbreak.conf.ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +15,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.InstanceGroupAdjustmentJson;
@@ -166,7 +163,6 @@ public class DefaultStackService implements StackService {
         } else {
             try {
                 savedStack = stackRepository.save(stack);
-                LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_REQUEST_EVENT, stack.getId());
                 flowManager.triggerProvisioning(new ProvisionRequest(savedStack.cloudPlatform(), savedStack.getId()));
             } catch (DataIntegrityViolationException ex) {
                 throw new DuplicateKeyValueException(APIResourceType.STACK, stack.getName(), ex);
@@ -222,7 +218,6 @@ public class DefaultStackService implements StackService {
         validateStackStatus(stack);
         validateInstanceGroup(stack, instanceGroupAdjustmentJson.getInstanceGroup());
         validateScalingAdjustment(instanceGroupAdjustmentJson, stack);
-        LOGGER.info("Publishing {} event [scalingAdjustment: '{}']", UPDATE_INSTANCES_REQUEST_EVENT, instanceGroupAdjustmentJson.getScalingAdjustment());
         int absScalingAdjustment = Math.abs(instanceGroupAdjustmentJson.getScalingAdjustment());
 
         if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
@@ -328,7 +323,6 @@ public class DefaultStackService implements StackService {
             throw new BadRequestException("Stacks can be deleted only by account admins or owners.");
         }
         if (!Status.DELETE_COMPLETED.equals(stack.getStatus())) {
-            LOGGER.info("Publishing {} event.", ReactorConfig.DELETE_REQUEST_EVENT);
             flowManager.triggerTermination(new StackDeleteRequest(stack.cloudPlatform(), stack.getId()));
         } else {
             LOGGER.info("Stack is already deleted.");

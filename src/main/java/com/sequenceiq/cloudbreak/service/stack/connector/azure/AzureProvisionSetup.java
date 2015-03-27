@@ -16,7 +16,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloud.azure.client.AzureClientUtil;
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
@@ -106,7 +105,6 @@ public class AzureProvisionSetup implements ProvisionSetup {
             checkCopyStatus(stack, targetImageUri, storageAccountKey);
             createOsImageLink(credential, azureClient, targetImageUri, azureLocation, stack.getImage());
         }
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
         return new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
                 .withSetupProperty(CREDENTIAL, stack.getCredential());
     }

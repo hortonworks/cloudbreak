@@ -19,7 +19,6 @@ import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -99,8 +98,6 @@ public class AwsMetadataSetup implements MetadataSetup {
                 }
             }
         }
-
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
         return new MetadataSetupComplete(CloudPlatform.AWS, stack.getId(), coreInstanceMetadata);
     }
 
@@ -140,7 +137,6 @@ public class AwsMetadataSetup implements MetadataSetup {
                 }
             }
         }
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stack.getId());
         return new MetadataUpdateComplete(CloudPlatform.AWS, stack.getId(), coreInstanceMetadata, instanceGroupName);
     }
 

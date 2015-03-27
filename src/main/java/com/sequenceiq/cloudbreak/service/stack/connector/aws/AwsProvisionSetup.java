@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -23,8 +22,6 @@ public class AwsProvisionSetup implements ProvisionSetup {
     @Override
     public ProvisionEvent setupProvisioning(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
-
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
         return new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
                 .withSetupProperties(new HashMap<String, Object>())
                 .withUserDataParams(getUserDataProperties(stack));
