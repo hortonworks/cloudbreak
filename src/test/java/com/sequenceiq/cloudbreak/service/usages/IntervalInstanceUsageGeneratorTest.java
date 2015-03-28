@@ -32,6 +32,7 @@ public class IntervalInstanceUsageGeneratorTest {
     public void testGetInstanceHoursShouldReturnWithEmptyMapWhenInstanceTerminatedBeforeTheIntervalStart() throws ParseException {
         InstanceMetaData instance = new InstanceMetaData();
         Calendar cal = Calendar.getInstance();
+        cal.set(2015, 1, 27);
         instance.setStartDate(cal.getTimeInMillis());
         cal.set(DATE, cal.get(DATE) + 1);
         instance.setTerminationDate(cal.getTimeInMillis());
@@ -49,6 +50,7 @@ public class IntervalInstanceUsageGeneratorTest {
     public void testGetInstanceHoursShouldReturnWithEmptyMapWhenInstanceStartedAfterTheEndOfTheInterval() throws ParseException {
         InstanceMetaData instance = new InstanceMetaData();
         Calendar cal = Calendar.getInstance();
+        cal.set(2015, 1, 27);
         Date intervalStart = cal.getTime();
         cal.set(DATE, cal.get(DATE) + 1);
         Date intervalEnd = cal.getTime();
@@ -66,6 +68,7 @@ public class IntervalInstanceUsageGeneratorTest {
     public void testGetInstanceHoursShouldCalcHoursWhenInstanceRunInTheInterval() throws ParseException {
         InstanceMetaData instance = new InstanceMetaData();
         Calendar cal = Calendar.getInstance();
+        cal.set(2015, 1, 27);
         setCalendarTo(cal, 12, 0, 0, 0);
         Date intervalStart = cal.getTime();
         cal.set(DATE, cal.get(DATE) + 1);
@@ -84,6 +87,7 @@ public class IntervalInstanceUsageGeneratorTest {
     public void testGetInstanceHoursShouldCalcHoursWhenInstanceStartsInTheIntervalAndDoNotTerminate() throws ParseException {
         InstanceMetaData instance = new InstanceMetaData();
         Calendar cal = Calendar.getInstance();
+        cal.set(2015, 1, 27);
         setCalendarTo(cal, 12, 0, 0, 0);
         Date intervalStart = cal.getTime();
         cal.set(DATE, cal.get(DATE) + 1);
@@ -100,6 +104,7 @@ public class IntervalInstanceUsageGeneratorTest {
     public void testGetInstanceHoursShouldCalcHoursWhenInstanceStartsBeforeTheIntervalAndDoNotTerminate() throws ParseException {
         InstanceMetaData instance = new InstanceMetaData();
         Calendar cal = Calendar.getInstance();
+        cal.set(2015, 1, 27);
         setCalendarTo(cal, 12, 0, 0, 0);
         instance.setStartDate(cal.getTimeInMillis());
         cal.set(DATE, cal.get(DATE) + 1);
@@ -116,6 +121,7 @@ public class IntervalInstanceUsageGeneratorTest {
     public void testGetInstanceHoursShouldCalcHoursWhenInstanceStartsBeforeAndTerminatesAfterTheInterval() throws ParseException {
         InstanceMetaData instance = new InstanceMetaData();
         Calendar cal = Calendar.getInstance();
+        cal.set(2015, 1, 27);
         setCalendarTo(cal, 12, 0, 0, 0);
         instance.setStartDate(cal.getTimeInMillis());
         cal.set(DATE, cal.get(DATE) + 1);
@@ -134,6 +140,7 @@ public class IntervalInstanceUsageGeneratorTest {
     public void testGetInstanceHoursShouldCalcHoursWhenInstanceStartsInTheIntervalAndTerminatesAfterTheInterval() throws ParseException {
         InstanceMetaData instance = new InstanceMetaData();
         Calendar cal = Calendar.getInstance();
+        cal.set(2015, 1, 27);
         setCalendarTo(cal, 12, 0, 0, 0);
         Date intervalStart = cal.getTime();
         cal.set(DATE, cal.get(DATE) + 1);
@@ -152,6 +159,7 @@ public class IntervalInstanceUsageGeneratorTest {
     public void testGetInstanceHoursShouldCalcHoursWhenInstanceStartsBeforeAndTerminatesInTheInterval() throws ParseException {
         InstanceMetaData instance = new InstanceMetaData();
         Calendar cal = Calendar.getInstance();
+        cal.set(2015, 1, 29);
         setCalendarTo(cal, 12, 0, 0, 0);
         instance.setStartDate(cal.getTimeInMillis());
         cal.set(DATE, cal.get(DATE) + 1);
@@ -167,9 +175,10 @@ public class IntervalInstanceUsageGeneratorTest {
     }
 
     @Test
-    public void testGetInstanceHoursShouldCalcHoursWhenInstanceStartAndTerminateAreEqualToTheInterval() throws ParseException {
+    public void testGetInstanceHoursShouldCalcHoursWhenInstanceStartAndTerminateDatesAreEqualToTheInterval() throws ParseException {
         InstanceMetaData instance = new InstanceMetaData();
         Calendar cal = Calendar.getInstance();
+        cal.set(2015, 1, 27);
         setCalendarTo(cal, 12, 0, 0, 0);
         instance.setStartDate(cal.getTimeInMillis());
         Date intervalStart = cal.getTime();
@@ -186,6 +195,7 @@ public class IntervalInstanceUsageGeneratorTest {
     public void testGetInstanceHoursShouldCalcInstanceHourWhenInstanceIsRunningForExactlyOneHour() throws ParseException {
         InstanceMetaData instance = new InstanceMetaData();
         Calendar cal = Calendar.getInstance();
+        cal.set(2015, 1, 26);
         setCalendarTo(cal, 12, 1, 11, 1);
         Date intervalStart = cal.getTime();
         cal.set(DATE, cal.get(DATE) + 1);
@@ -205,6 +215,7 @@ public class IntervalInstanceUsageGeneratorTest {
     public void testGetInstanceHoursShouldCalcInstanceHourWhenInstanceIsRunningForMoreThanOneHour() throws ParseException {
         InstanceMetaData instance = new InstanceMetaData();
         Calendar cal = Calendar.getInstance();
+        cal.set(2015, 1, 27);
         setCalendarTo(cal, 12, 1, 11, 1);
         Date intervalStart = cal.getTime();
         cal.set(DATE, cal.get(DATE) + 1);
@@ -225,7 +236,7 @@ public class IntervalInstanceUsageGeneratorTest {
     public void testGetInstanceHoursShouldCalcExactInstanceHourWhenInstanceIsRunningForTwoDays() throws ParseException {
         InstanceMetaData instance = new InstanceMetaData();
         Calendar cal = Calendar.getInstance();
-        cal.set(2015, 3, 27);
+        cal.set(2015, 2, 27);
         setCalendarTo(cal, 12, 1, 11, 111);
         Date intervalStart = cal.getTime();
         cal.set(DATE, cal.get(DATE) + 1);
@@ -308,6 +319,7 @@ public class IntervalInstanceUsageGeneratorTest {
     public void testGetInstanceHoursShouldCalcHoursForADayWhenTheInstanceRunsLessThanTheOverFlowedMinutesExistOnTheNextDay() throws ParseException {
         InstanceMetaData instance = new InstanceMetaData();
         Calendar cal = Calendar.getInstance();
+        cal.set(2015, 1, 27);
         //from 12:50
         setCalendarTo(cal, 12, 50, 0, 0);
         instance.setStartDate(cal.getTimeInMillis());
