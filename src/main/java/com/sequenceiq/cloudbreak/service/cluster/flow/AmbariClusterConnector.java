@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import static com.sequenceiq.cloudbreak.service.PollingResult.SUCCESS;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.DockerContainer.AMBARI_DB;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.DockerContainer.AMBARI_SERVER;
@@ -65,53 +66,45 @@ public class AmbariClusterConnector {
     public static final int POLLING_INTERVAL = 5000;
     public static final int MAX_ATTEMPTS_FOR_AMBARI_OPS = -1;
     public static final int MAX_ATTEMPTS_FOR_HOSTS = 240;
+    private static final int MAX_ATTEMPTS_FOR_REGION_DECOM = 500;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterConnector.class);
 
     @Autowired
     private StackRepository stackRepository;
-
     @Autowired
     private ClusterRepository clusterRepository;
-
     @Autowired
     private InstanceMetaDataRepository instanceMetadataRepository;
-
     @Autowired
     private HostGroupRepository hostGroupRepository;
-
     @Autowired
     private RetryingStackUpdater stackUpdater;
-
     @Autowired
     private PollingService<AmbariOperations> operationsPollingService;
-
     @Autowired
     private PollingService<AmbariHosts> hostsPollingService;
-
+    @Autowired
+    private PollingService<AmbariHostsWithNames> rsPollerService;
     @Autowired
     private HadoopConfigurationService hadoopConfigurationService;
-
     @Autowired
     private AmbariClientProvider ambariClientProvider;
-
     @Autowired
     private CloudbreakEventService eventService;
-
     @Autowired
     private RecipeEngine recipeEngine;
-
     @Autowired
     private PluginManager pluginManager;
 
     @Autowired
     private AmbariHostsStatusCheckerTask ambariHostsStatusCheckerTask;
-
     @Autowired
     private AmbariOperationsStatusCheckerTask ambariOperationsStatusCheckerTask;
-
     @Autowired
     private DNDecommissionStatusCheckerTask dnDecommissionStatusCheckerTask;
+    @Autowired
+    private RSDecommissionStatusCheckerTask rsDecommissionStatusCheckerTask;
 
     @Autowired
     private AmbariHostsRemover ambariHostsRemover;
@@ -220,16 +213,19 @@ public class AmbariClusterConnector {
         if (isSuccess(pollingResult)) {
             pollingResult = waitForDataNodeDecommission(stack, ambariClient);
             if (isSuccess(pollingResult)) {
-                pollingResult = stopHadoopComponents(stack, ambariClient, hostList);
+                pollingResult = waitForRegionServerDecommission(stack, ambariClient, hostList, components);
                 if (isSuccess(pollingResult)) {
-                    ambariHostsRemover.deleteHosts(stack, hostList, new ArrayList<>(components));
-                    pollingResult = restartHadoopServices(stack, ambariClient, true);
+                    pollingResult = stopHadoopComponents(stack, ambariClient, hostList);
                     if (isSuccess(pollingResult)) {
-                        cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-                        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupName);
-                        hostGroup.getHostMetadata().removeAll(hostsToRemove.values());
-                        hostGroupRepository.save(hostGroup);
-                        result.addAll(hostsToRemove.keySet());
+                        ambariHostsRemover.deleteHosts(stack, hostList, new ArrayList<>(components));
+                        pollingResult = restartHadoopServices(stack, ambariClient, true);
+                        if (isSuccess(pollingResult)) {
+                            cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
+                            HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupName);
+                            hostGroup.getHostMetadata().removeAll(hostsToRemove.values());
+                            hostGroupRepository.save(hostGroup);
+                            result.addAll(hostsToRemove.keySet());
+                        }
                     }
                 }
             }
@@ -317,8 +313,8 @@ public class AmbariClusterConnector {
             decommissionRequests.put("DATANODE_DECOMMISSION", requestId);
         }
         if (components.contains("HBASE_REGIONSERVER")) {
-            int requestId = ambariClient.decommissionHBaseRegionServers(hosts);
-            decommissionRequests.put("HBASE_REGIONSERVER_DECOMMISSION", requestId);
+            ambariClient.decommissionHBaseRegionServers(hosts);
+            ambariClient.setHBaseRegionServersToMaintenance(hosts, true);
         }
         return decommissionRequests;
     }
@@ -481,8 +477,10 @@ public class AmbariClusterConnector {
 
     private Map<String, Integer> installServices(List<String> hosts, Stack stack, AmbariClient ambariClient, HostGroupAdjustmentJson hostGroup) {
         try {
+            Cluster cluster = stack.getCluster();
             ambariClient.addHosts(hosts);
-            int requestId = ambariClient.installComponentsToHosts(hosts, stack.getCluster().getBlueprint().getBlueprintName(), hostGroup.getHostGroup());
+            ambariClient.addComponentsToHosts(hosts, cluster.getBlueprint().getBlueprintName(), hostGroup.getHostGroup());
+            int requestId = ambariClient.setAllComponentsState(stack.getName(), hosts, "INSTALLED", "Install components");
             LOGGER.info("Request is sent to install the host group components. Ambari server: {}", stack.getAmbariIp());
             return singletonMap("Install components to the new hosts", requestId);
         } catch (HttpResponseException e) {
@@ -512,5 +510,17 @@ public class AmbariClusterConnector {
     private PollingResult waitForDataNodeDecommission(Stack stack, AmbariClient ambariClient) {
         LOGGER.info("Waiting for DataNodes to move the blocks to other nodes. stack id: {}", stack.getId());
         return waitForAmbariOperations(stack, ambariClient, dnDecommissionStatusCheckerTask, Collections.<String, Integer>emptyMap());
+    }
+
+    private PollingResult waitForRegionServerDecommission(Stack stack, AmbariClient ambariClient, List<String> hosts, Set<String> components) {
+        if (!components.contains("HBASE_REGIONSERVER")) {
+            return SUCCESS;
+        }
+        LOGGER.info("Waiting for RegionServers to move the regions to other servers");
+        return rsPollerService.pollWithTimeout(
+                rsDecommissionStatusCheckerTask,
+                new AmbariHostsWithNames(stack, ambariClient, hosts),
+                POLLING_INTERVAL,
+                MAX_ATTEMPTS_FOR_REGION_DECOM);
     }
 }
