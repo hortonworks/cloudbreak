@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
@@ -106,7 +105,6 @@ public class AmbariClusterService implements ClusterService {
         }
         stack = stackUpdater.updateStackCluster(stack.getId(), cluster);
         if (Status.AVAILABLE.equals(stack.getStatus())) {
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.CLUSTER_REQUESTED_EVENT, stack.getId());
             flowManager.triggerClusterInstall(new ProvisionRequest(stack.cloudPlatform(), stack.getId()));
         }
         return cluster;
@@ -161,7 +159,6 @@ public class AmbariClusterService implements ClusterService {
                     decommissionRequest, stack.cloudPlatform(), ScalingType.UPSCALE_ONLY_CLUSTER);
             flowManager.triggerClusterUpscale(updateRequest);
         }
-        LOGGER.info("Publishing {} event", ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT);
         return updateRequest;
     }
 
@@ -208,7 +205,6 @@ public class AmbariClusterService implements ClusterService {
             }
             cluster.setStatus(Status.STOP_IN_PROGRESS);
             clusterRepository.save(cluster);
-            LOGGER.info("Publishing {} event", ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT);
             retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest, stack.cloudPlatform());
             flowManager.triggerClusterStop(retVal);
         }
@@ -220,7 +216,6 @@ public class AmbariClusterService implements ClusterService {
     public Cluster clusterCreationSuccess(Long clusterId, long creationFinished, String ambariIp) {
         Cluster cluster = clusterRepository.findById(clusterId);
         MDCBuilder.buildMdcContext(cluster);
-        LOGGER.info("Accepted {} event.", ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT, clusterId);
         cluster.setStatus(Status.AVAILABLE);
         cluster.setStatusReason("");
         cluster.setCreationFinished(creationFinished);

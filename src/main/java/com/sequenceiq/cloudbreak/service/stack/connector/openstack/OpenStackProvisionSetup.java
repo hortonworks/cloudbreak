@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
@@ -29,7 +28,6 @@ import reactor.core.Reactor;
 
 @Component
 public class OpenStackProvisionSetup implements ProvisionSetup {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackProvisionSetup.class);
 
     @Autowired
@@ -41,7 +39,6 @@ public class OpenStackProvisionSetup implements ProvisionSetup {
     @Override
     public ProvisionEvent setupProvisioning(Stack stack) throws Exception {
         MDCBuilder.buildMdcContext(stack);
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
         return new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
                 .withSetupProperty(CREDENTIAL, stack.getCredential());
     }

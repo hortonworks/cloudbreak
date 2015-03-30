@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -57,7 +56,6 @@ public class AzureMetadataSetup implements MetadataSetup {
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential);
         Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient);
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
         return new MetadataSetupComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas);
     }
 
@@ -73,7 +71,6 @@ public class AzureMetadataSetup implements MetadataSetup {
             }
         }
         Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient, resources);
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stack.getId());
         return new MetadataUpdateComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas, instanceGroup);
     }
 

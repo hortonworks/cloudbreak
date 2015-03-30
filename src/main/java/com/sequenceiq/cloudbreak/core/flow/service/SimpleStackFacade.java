@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.StackStartService;
 import com.sequenceiq.cloudbreak.core.flow.StackStopService;
@@ -212,7 +211,6 @@ public class SimpleStackFacade implements StackFacade {
         MDCBuilder.buildMdcContext(stack);
         String userData = userDataBuilder.build(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>());
         try {
-            LOGGER.info("Accepted {} event on stack.", ReactorConfig.UPDATE_SUBNET_REQUEST_EVENT);
             stack.setAllowedSubnets(getNewSubnetList(stack, request.getAllowedSubnets()));
             cloudPlatformConnectors.get(stack.cloudPlatform()).updateAllowedSubnets(stack, userData);
             stackUpdater.updateStack(stack);

@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.catalog.model.CatalogService;
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
@@ -88,12 +87,11 @@ public class AmbariRoleAllocator {
                 if (isSuccess(pollingResult)) {
                     updateWithConsulData(allInstanceMetaData);
                     instanceMetaDataRepository.save(allInstanceMetaData);
-                    LOGGER.info("Publishing {} event", ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT);
                     allocationComplete = new AmbariRoleAllocationComplete(stack, publicAmbariAddress.orNull());
                 }
             }
         } else {
-            LOGGER.info("Metadata is already created, ignoring '{}' event.", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT);
+            LOGGER.info("Metadata is already created, ignoring stack metadata update.");
         }
         return allocationComplete;
     }
@@ -121,7 +119,6 @@ public class AmbariRoleAllocator {
             for (InstanceMetaData metadataEntry : instanceMetaData) {
                 instanceIds.add(metadataEntry.getInstanceId());
             }
-            LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
             stackUpdateSuccess = new StackUpdateSuccess(stackId, false, instanceIds, instanceGroupName);
         }
         return stackUpdateSuccess;

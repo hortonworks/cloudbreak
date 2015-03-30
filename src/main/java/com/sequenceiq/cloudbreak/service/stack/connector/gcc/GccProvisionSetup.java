@@ -20,7 +20,6 @@ import com.google.api.services.compute.model.ImageList;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.StorageObject;
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -97,7 +96,6 @@ public class GccProvisionSetup implements ProvisionSetup {
         }
 
         if (isSuccess(pollingResult)) {
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
             ret = new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
                     .withSetupProperty(CREDENTIAL, stack.getCredential());
         }
