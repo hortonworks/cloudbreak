@@ -26,10 +26,11 @@ public interface ResourceBuilder<P extends ProvisionContextObject,
 
     Boolean stop(SSCO startStopContextObject, Resource resource, String region);
 
-    List<Resource> buildResources(P provisionContextObject, int index, List<Resource> resources, Optional<InstanceGroup> instanceGroup);
+    List<Resource> buildResources(P provisionContextObject, int index, List<Resource> resources,
+            Optional<InstanceGroup> instanceGroup);
 
     CreateResourceRequest buildCreateRequest(P provisionContextObject, List<Resource> resources, List<Resource> buildResources,
-            int index, Optional<InstanceGroup> instanceGroup) throws Exception;
+            int index, Optional<InstanceGroup> instanceGroup, Optional<String> userData) throws Exception;
 
     ResourceType resourceType();
 

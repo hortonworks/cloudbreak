@@ -91,10 +91,10 @@ public class GccNetworkResourceBuilder extends GccSimpleNetworkResourceBuilder {
 
     @Override
     public CreateResourceRequest buildCreateRequest(GccProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup, Optional<String> userData) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         Network network = new Network();
-        network.setName(stack.getName());
+        network.setName(buildResources.get(0).getResourceName());
         network.setIPv4Range(NetworkConfig.SUBNET_16);
         return new GccNetworkCreateRequest(provisionContextObject.getStackId(), network, provisionContextObject.getProjectId(),
                 provisionContextObject.getCompute(), buildResources);

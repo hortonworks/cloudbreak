@@ -5,6 +5,8 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -28,6 +30,8 @@ public class InstanceGroup implements ProvisionEntity, Comparable {
     private Template template;
     private Integer nodeCount;
     private String groupName;
+    @Enumerated(EnumType.STRING)
+    private InstanceGroupType instanceGroupType = InstanceGroupType.HOSTGROUP;
     @ManyToOne
     private Stack stack;
     @OneToMany(mappedBy = "instanceGroup", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -89,6 +93,14 @@ public class InstanceGroup implements ProvisionEntity, Comparable {
 
     public void setInstanceMetaData(Set<InstanceMetaData> instanceMetaData) {
         this.instanceMetaData = instanceMetaData;
+    }
+
+    public InstanceGroupType getInstanceGroupType() {
+        return instanceGroupType;
+    }
+
+    public void setInstanceGroupType(InstanceGroupType instanceGroupType) {
+        this.instanceGroupType = instanceGroupType;
     }
 
     @Override

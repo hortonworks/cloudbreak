@@ -30,15 +30,17 @@ public class UpScaleCallable implements Callable<ResourceRequestResult> {
     private final ProvisionContextObject provisionContextObject;
     private final RetryingStackUpdater stackUpdater;
     private final String instanceGroup;
+    private final Optional<String> userData;
 
     private UpScaleCallable(Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders, int index, Stack stack, String instanceGroup,
-            ProvisionContextObject provisionContextObject, RetryingStackUpdater stackUpdater) {
+            ProvisionContextObject provisionContextObject, RetryingStackUpdater stackUpdater, Optional<String> userData) {
         this.instanceResourceBuilders = instanceResourceBuilders;
         this.index = index;
         this.stack = stack;
         this.instanceGroup = instanceGroup;
         this.provisionContextObject = provisionContextObject;
         this.stackUpdater = stackUpdater;
+        this.userData = userData;
     }
 
     @Override
@@ -52,7 +54,8 @@ public class UpScaleCallable implements Callable<ResourceRequestResult> {
                                 resourceBuilder.buildResources(provisionContextObject, index, resources,
                                         Optional.of(stack.getInstanceGroupByInstanceGroupName(instanceGroup))),
                                 index,
-                                Optional.of(stack.getInstanceGroupByInstanceGroupName(instanceGroup)));
+                                Optional.of(stack.getInstanceGroupByInstanceGroupName(instanceGroup)),
+                                userData);
                 stackUpdater.addStackResources(stack.getId(), createResourceRequest.getBuildableResources());
                 resources.addAll(createResourceRequest.getBuildableResources());
                 resourceBuilder.create(createResourceRequest, stack.getRegion());
@@ -80,6 +83,7 @@ public class UpScaleCallable implements Callable<ResourceRequestResult> {
         private String instanceGroup;
         private ProvisionContextObject provisionContextObject;
         private RetryingStackUpdater stackUpdater;
+        private String userData;
 
         public static UpScaleCallableBuilder builder() {
             return new UpScaleCallableBuilder();
@@ -115,8 +119,14 @@ public class UpScaleCallable implements Callable<ResourceRequestResult> {
             return this;
         }
 
+        public UpScaleCallableBuilder withUserData(String userData) {
+            this.userData = userData;
+            return this;
+        }
+
         public UpScaleCallable build() {
-            return new UpScaleCallable(instanceResourceBuilders, index, stack, instanceGroup, provisionContextObject, stackUpdater);
+            return new UpScaleCallable(instanceResourceBuilders, index, stack, instanceGroup, provisionContextObject, stackUpdater,
+                    userData == null ? Optional.<String>absent() : Optional.fromNullable(userData));
         }
 
     }

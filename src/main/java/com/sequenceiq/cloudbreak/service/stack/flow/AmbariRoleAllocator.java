@@ -70,7 +70,7 @@ public class AmbariRoleAllocator {
         Stack stack = stackRepository.findById(stackId);
         MDCBuilder.buildMdcContext(stack);
         if (!stack.isMetadataReady()) {
-            if (coreInstanceMetaData.size() != stack.getFullNodeCount()) {
+            if (coreInstanceMetaData.size() != stack.getFullNodeCount().intValue()) {
                 throw new WrongMetadataException(String.format(
                         "Size of the collected metadata set does not equal the node count of the stack. [metadata size=%s] [nodecount=%s]",
                         coreInstanceMetaData.size(), stack.getFullNodeCount()));

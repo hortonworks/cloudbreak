@@ -92,7 +92,7 @@ public class AwsProvisionerTest {
         //given(cfTemplateBuilder.build(anyString(), anyInt(), anyBoolean())).willReturn("templatebody");
         Map<String, Object> setupProperties = new HashMap<>();
         // WHEN
-        underTest.buildStack(stack, "test-userdata", setupProperties);
+        underTest.buildStack(stack, "test-userdata", "test-userdata", setupProperties);
         // THEN
         assertEquals("topicArn", createStackRequest.getNotificationARNs().get(0));
         assertEquals("templatebody", createStackRequest.getTemplateBody());

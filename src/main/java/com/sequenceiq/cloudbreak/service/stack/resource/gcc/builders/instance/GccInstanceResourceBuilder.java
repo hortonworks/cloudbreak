@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.gcc.builders.instance;
 
+import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateWay;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
@@ -156,7 +159,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
 
     @Override
     public CreateResourceRequest buildCreateRequest(GccProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup, Optional<String> userData) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         GccTemplate gccTemplate = (GccTemplate) instanceGroup.orNull().getTemplate();
@@ -170,7 +173,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
                 provisionContextObject.getProjectId(), GccZone.valueOf(stack.getRegion()).getValue(), gccTemplate.getGccInstanceType().getValue()));
         instance.setName(buildResources.get(0).getResourceName());
         instance.setCanIpForward(Boolean.TRUE);
-        instance.setNetworkInterfaces(getNetworkInterface(provisionContextObject.getProjectId(), stack.getName()));
+        instance.setNetworkInterfaces(getNetworkInterface(provisionContextObject, stack.getResources(), GccZone.valueOf(stack.getRegion()), instanceGroup));
         instance.setDisks(listOfDisks);
         Tags tags = new Tags();
         tags.setItems(Arrays.asList(instanceGroup.orNull().getGroupName().toString().replaceAll("[^A-Za-z0-9 ]", "")));
@@ -184,12 +187,11 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
 
         Metadata.Items startupScript = new Metadata.Items();
         startupScript.setKey("startup-script");
-        startupScript.setValue(provisionContextObject.getUserData());
+        startupScript.setValue(userData.orNull());
 
         metadata.getItems().add(sshMetaData);
         metadata.getItems().add(startupScript);
         instance.setMetadata(metadata);
-
         return new GccInstanceCreateRequest(provisionContextObject.getStackId(), resources, instance, provisionContextObject.getProjectId(),
                 provisionContextObject.getCompute(), gccTemplate, gccCredential, buildResources);
     }
@@ -201,14 +203,21 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         return getVm.execute();
     }
 
-    private List<NetworkInterface> getNetworkInterface(String projectId, String name) {
+    private List<NetworkInterface> getNetworkInterface(GccProvisionContextObject contextObject, Set<Resource> resources, GccZone gccZone,
+            Optional<InstanceGroup> instanceGroup) throws IOException {
         NetworkInterface iface = new NetworkInterface();
-        iface.setName(name);
+        String networkName = filterResourcesByType(resources, ResourceType.GCC_NETWORK).get(0).getResourceName();
+        iface.setName(networkName);
         AccessConfig accessConfig = new AccessConfig();
-        accessConfig.setName(name);
+        accessConfig.setName(networkName);
         accessConfig.setType("ONE_TO_ONE_NAT");
+        if (instanceGroup.isPresent() && isGateWay(instanceGroup.orNull().getInstanceGroupType())) {
+            Compute.Addresses.Get getReservedIp = contextObject.getCompute().addresses().get(contextObject.getProjectId(), gccZone.getRegion(),
+                    filterResourcesByType(resources, ResourceType.GCC_RESERVED_IP).get(0).getResourceName());
+            accessConfig.setNatIP(getReservedIp.execute().getAddress());
+        }
         iface.setAccessConfigs(ImmutableList.of(accessConfig));
-        iface.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId, name));
+        iface.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", contextObject.getProjectId(), networkName));
         return Arrays.asList(iface);
     }
 

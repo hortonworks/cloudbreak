@@ -73,6 +73,11 @@ resources:
   <#list agents as agent>
   <#assign metadata = agent.metadata?eval>
   <#assign instance_id = metadata.cb_instance_group_name?replace('_', '') + "_" + metadata.cb_instance_private_id>
+  <#if agent.type == "GATEWAY">
+     <#assign userdata = gatewayuserdata>
+  <#elseif agent.type == "HOSTGROUP">
+     <#assign userdata = hostgroupuserdata>
+  </#if>
 
   ambari_${instance_id}:
     type: OS::Nova::Server

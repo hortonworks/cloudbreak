@@ -17,6 +17,7 @@ import com.ecwid.consul.v1.ConsulClient;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -70,9 +71,13 @@ public class StackScalingService {
     public void upscaleStack(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
         Set<Resource> resources = null;
         Stack stack = stackService.getById(stackId);
-        String userDataScript = userDataBuilder.build(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>());
-        resources = cloudPlatformConnectors.get(stack.cloudPlatform()).addInstances(stack, userDataScript, scalingAdjustment, instanceGroupName);
         InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
+        String hostGroupUserData = userDataBuilder
+                .buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>(), InstanceGroupType.HOSTGROUP);
+        String gateWayUserData = userDataBuilder
+                .buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>(), InstanceGroupType.GATEWAY);
+        resources = cloudPlatformConnectors.get(stack.cloudPlatform())
+                .addInstances(stack, hostGroupUserData, gateWayUserData, scalingAdjustment, instanceGroupName);
         Set<CoreInstanceMetaData> coreInstanceMetaData = updateMetadata(stack.cloudPlatform(), stack, resources, instanceGroupName);
         StackUpdateSuccess stackUpdateSuccess = ambariRoleAllocator.updateInstanceMetadata(stack.getId(), coreInstanceMetaData, instanceGroupName);
         int nodeCount = instanceGroup.getNodeCount() + stackUpdateSuccess.getInstanceIds().size();

@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.service.stack.resource.UpdateContextObject;
 
 public class DummyResourceBuilderInit implements ResourceBuilderInit {
     @Override
-    public ProvisionContextObject provisionInit(Stack stack, String userData) throws Exception {
+    public ProvisionContextObject provisionInit(Stack stack) throws Exception {
         return new DummyProvisionContextObject(1L);
     }
 

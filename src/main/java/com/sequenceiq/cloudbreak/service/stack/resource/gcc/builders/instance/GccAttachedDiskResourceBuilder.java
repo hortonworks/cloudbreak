@@ -104,7 +104,7 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
 
     @Override
     public CreateResourceRequest buildCreateRequest(GccProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup, Optional<String> userData) throws Exception {
         List<Disk> disks = new ArrayList<>();
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         GccTemplate gccTemplate = (GccTemplate) instanceGroup.orNull().getTemplate();

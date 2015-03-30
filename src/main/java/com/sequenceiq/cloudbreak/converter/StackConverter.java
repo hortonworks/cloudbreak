@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.GATEWAY;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -127,6 +129,9 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         }
         stack.setStatus(Status.REQUESTED);
         stack.setInstanceGroups(instanceGroupConverter.convertAllJsonToEntity(json.getInstanceGroups(), stack));
+        if (stack.getInstanceGroupsByType(GATEWAY).isEmpty()) {
+            throw new BadRequestException("Gateway instance group not configured");
+        }
         int minNodeCount = ConsulUtils.ConsulServers.NODE_COUNT_LOW.getMin();
         int fullNodeCount = stack.getFullNodeCount();
         if (fullNodeCount < minNodeCount) {
@@ -142,18 +147,22 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         if (json.getFailurePolicy() != null) {
             stack.setFailurePolicy(failurePolicyConverter.convert(json.getFailurePolicy()));
             FailurePolicy failurePolicy = stack.getFailurePolicy();
-            if (failurePolicy.getThreshold() == 0L && !AdjustmentType.BEST_EFFORT.equals(failurePolicy.getAdjustmentType())) {
-                throw new BadRequestException("The threshold can not be 0");
-            }
-            String errorMsg = String.format("At least %s live nodes are required after rollback", consulServers);
-            if (AdjustmentType.EXACT.equals(failurePolicy.getAdjustmentType())) {
-                validateExactCount(stack, consulServers, failurePolicy, errorMsg);
-            } else if (AdjustmentType.PERCENTAGE.equals(failurePolicy.getAdjustmentType())) {
-                validatePercentageCount(stack, consulServers, failurePolicy, errorMsg);
-            }
+            validatFailurePolicy(stack, consulServers, failurePolicy);
         }
         stack.setParameters(json.getParameters());
         return stack;
+    }
+
+    private void validatFailurePolicy(Stack stack, int consulServers, FailurePolicy failurePolicy) {
+        if (failurePolicy.getThreshold() == 0L && !AdjustmentType.BEST_EFFORT.equals(failurePolicy.getAdjustmentType())) {
+            throw new BadRequestException("The threshold can not be 0");
+        }
+        String errorMsg = String.format("At least %s live nodes are required after rollback", consulServers);
+        if (AdjustmentType.EXACT.equals(failurePolicy.getAdjustmentType())) {
+            validateExactCount(stack, consulServers, failurePolicy, errorMsg);
+        } else if (AdjustmentType.PERCENTAGE.equals(failurePolicy.getAdjustmentType())) {
+            validatePercentageCount(stack, consulServers, failurePolicy, errorMsg);
+        }
     }
 
     private void validatePercentageCount(Stack stack, int consulServers, FailurePolicy failurePolicy, String errorMsg) {

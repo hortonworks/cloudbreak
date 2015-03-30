@@ -23,7 +23,11 @@ public class GccResourceCheckerStatus extends StackBasedStatusCheckerTask<GccRes
                 gccResourceReadyPollerObject.getResourceType().name());
         Operation operation = null;
         try {
-            operation = gccResourceReadyPollerObject.getZoneOperations().execute();
+            if (gccResourceReadyPollerObject.getZoneOperations().isPresent()) {
+                operation = gccResourceReadyPollerObject.getZoneOperations().orNull().execute();
+            } else if (gccResourceReadyPollerObject.getRegionOperations().isPresent()) {
+                operation = gccResourceReadyPollerObject.getRegionOperations().orNull().execute();
+            }
             return analyzeOperation(operation, gccResourceReadyPollerObject);
         } catch (IOException e) {
             throw new GccResourceCreationException(String.format(

@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -35,46 +36,51 @@ public class HeatTemplateBuilder {
     private static final String DEVICE_PREFIX = "/dev/vd";
     private static final char[] DEVICE_CHAR = {'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'};
 
+    @Value("${cb.openstack.heat.template.path:templates/openstack-heat.ftl}")
+    private String openStackHeatTemplatePath;
+
     @Autowired
     private Configuration freemarkerConfiguration;
 
-    public String build(Stack stack, String templatePath, String userData) {
+    public String build(Stack stack, String gateWayUserData, String hostGroupUserData) {
         List<OpenStackInstance> agents = generateAgents(stack.getInstanceGroups());
-        return build(stack, templatePath, agents, userData);
+        return build(stack, agents, gateWayUserData, hostGroupUserData);
     }
 
-    public String update(Stack stack, String templatePath, String userData, Set<InstanceMetaData> instanceMetadata) {
+    public String update(Stack stack, String gateWayUserData, String hostGroupUserData, Set<InstanceMetaData> instanceMetadata) {
         List<OpenStackInstance> agents = regenerateAgents(instanceMetadata);
-        return build(stack, templatePath, agents, userData);
+        return build(stack, agents, gateWayUserData, hostGroupUserData);
     }
 
-    public String remove(Stack stack, String templatePath, String userData, Set<InstanceMetaData> instanceMetadata,
+    public String remove(Stack stack, String gateWayUserData, String hostGroupUserData, Set<InstanceMetaData> instanceMetadata,
             Set<String> removeInstances, String instanceGroup) {
         Set<Integer> privateIds = new HashSet<>();
         for (String instanceId : removeInstances) {
             privateIds.add(getPrivateId(instanceId));
         }
         List<OpenStackInstance> agents = generateAgentsWithFilter(instanceMetadata, privateIds, instanceGroup);
-        return build(stack, templatePath, agents, userData);
+        return build(stack, agents, gateWayUserData, hostGroupUserData);
     }
 
-    public String add(Stack stack, String templatePath, String userData, Set<InstanceMetaData> instanceMetadata, String instanceGroup, int adjustment) {
-        List<OpenStackInstance> agents = generateNewAgents(instanceMetadata, instanceGroup, adjustment);
-        return build(stack, templatePath, agents, userData);
+    public String add(Stack stack, String gateWayUserData, String hostGroupUserData, Set<InstanceMetaData> instanceMetadata,
+            String instanceGroup, int adjustment, InstanceGroup group) {
+        List<OpenStackInstance> agents = generateNewAgents(instanceMetadata, instanceGroup, adjustment, group);
+        return build(stack, agents, gateWayUserData, hostGroupUserData);
     }
 
-    private String build(Stack stack, String templatePath, List<OpenStackInstance> agents, String userData) {
+    private String build(Stack stack, List<OpenStackInstance> agents, String gateWayUserData, String hostGroupUserData) {
         try {
             Map<String, Object> model = new HashMap<>();
             model.put("agents", agents);
-            model.put("userdata", formatUserData(userData));
+            model.put("hostgroupuserdata", formatUserData(hostGroupUserData));
+            model.put("gatewayuserdata", formatUserData(gateWayUserData));
             model.put("subnets", stack.getAllowedSubnets());
             model.put("ports", NetworkUtils.getPorts(stack));
             model.put("cbSubnet", NetworkConfig.SUBNET_16);
             model.put("startIP", NetworkConfig.START_IP);
             model.put("endIP", NetworkConfig.END_IP);
             model.put("gatewayIP", NetworkConfig.GATEWAY_IP);
-            return processTemplateIntoString(freemarkerConfiguration.getTemplate(templatePath, "UTF-8"), model);
+            return processTemplateIntoString(freemarkerConfiguration.getTemplate(openStackHeatTemplatePath, "UTF-8"), model);
         } catch (IOException | TemplateException e) {
             throw new InternalServerException("Failed to process the OpenStack HeatTemplate", e);
         }
@@ -89,7 +95,7 @@ public class HeatTemplateBuilder {
             for (int i = 0; i < group.getNodeCount(); i++) {
                 List<OpenStackVolume> volumes = buildVolumes(template.getVolumeCount(), template.getVolumeSize());
                 Map<String, String> metadata = generateMetadata(groupName, privateId);
-                OpenStackInstance instance = new OpenStackInstance(template.getInstanceType(), volumes, metadata);
+                OpenStackInstance instance = new OpenStackInstance(template.getInstanceType(), volumes, metadata, group.getInstanceGroupType());
                 agents.add(instance);
                 ++privateId;
             }
@@ -113,13 +119,13 @@ public class HeatTemplateBuilder {
             OpenStackTemplate template = (OpenStackTemplate) group.getTemplate();
             List<OpenStackVolume> volumes = buildVolumes(template.getVolumeCount(), template.getVolumeSize());
             Map<String, String> metadata = generateMetadata(groupName, privateId);
-            OpenStackInstance agent = new OpenStackInstance(template.getInstanceType(), volumes, metadata);
+            OpenStackInstance agent = new OpenStackInstance(template.getInstanceType(), volumes, metadata, group.getInstanceGroupType());
             agents.add(agent);
         }
         return agents;
     }
 
-    private List<OpenStackInstance> generateNewAgents(Set<InstanceMetaData> instanceMetadata, String instanceGroup, int adjustment) {
+    private List<OpenStackInstance> generateNewAgents(Set<InstanceMetaData> instanceMetadata, String instanceGroup, int adjustment, InstanceGroup group) {
         List<OpenStackInstance> agents = regenerateAgents(instanceMetadata);
         Set<Integer> existingIds = new HashSet<>();
         for (OpenStackInstance agent : agents) {
@@ -136,7 +142,7 @@ public class HeatTemplateBuilder {
             }
             List<OpenStackVolume> volumes = buildVolumes(template.getVolumeCount(), template.getVolumeSize());
             Map<String, String> metadata = generateMetadata(instanceGroup, privateId);
-            OpenStackInstance instance = new OpenStackInstance(template.getInstanceType(), volumes, metadata);
+            OpenStackInstance instance = new OpenStackInstance(template.getInstanceType(), volumes, metadata, group.getInstanceGroupType());
             agents.add(instance);
             adjustment--;
         }

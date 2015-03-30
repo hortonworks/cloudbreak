@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack.resource.gcc;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -56,7 +57,7 @@ public abstract class GccSimpleInstanceResourceBuilder implements
         }
     }
 
-    protected List<Resource> filterResourcesByType(List<Resource> resources, ResourceType resourceType) {
+    protected List<Resource> filterResourcesByType(Collection<Resource> resources, ResourceType resourceType) {
         List<Resource> resourcesTemp = new ArrayList<>();
         for (Resource resource : resources) {
             if (resourceType.equals(resource.getResourceType())) {
