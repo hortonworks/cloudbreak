@@ -147,6 +147,7 @@ public class ParallelCloudResourceManager {
                                 .withProvisionContextObject(provisionContextObject)
                                 .withInstanceResourceBuilders(instanceResourceBuilders)
                                 .withInstanceGroup(instanceGroup)
+                                .withUserData(userDataScript)
                                 .build()
                 );
                 futures.add(submit);
