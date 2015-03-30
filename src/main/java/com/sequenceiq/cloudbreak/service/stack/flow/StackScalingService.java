@@ -77,7 +77,7 @@ public class StackScalingService {
         String gateWayUserData = userDataBuilder
                 .buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>(), InstanceGroupType.GATEWAY);
         resources = cloudPlatformConnectors.get(stack.cloudPlatform())
-                .addInstances(stack, hostGroupUserData, gateWayUserData, scalingAdjustment, instanceGroupName);
+                .addInstances(stack, gateWayUserData, hostGroupUserData, scalingAdjustment, instanceGroupName);
         Set<CoreInstanceMetaData> coreInstanceMetaData = updateMetadata(stack.cloudPlatform(), stack, resources, instanceGroupName);
         StackUpdateSuccess stackUpdateSuccess = ambariRoleAllocator.updateInstanceMetadata(stack.getId(), coreInstanceMetaData, instanceGroupName);
         int nodeCount = instanceGroup.getNodeCount() + stackUpdateSuccess.getInstanceIds().size();

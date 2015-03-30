@@ -242,7 +242,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         Cluster cluster = clusterService.updateClusterStatusByStackId(context.getStackId(), Status.CREATE_FAILED, context.getErrorReason());
         MDCBuilder.buildMdcContext(cluster);
         stackUpdater.updateStackStatus(context.getStackId(), Status.AVAILABLE, "Cluster installation failed. Error: " + context.getErrorReason());
-        eventService.fireCloudbreakEvent(context.getStackId(), "CLUSTER_CREATION_FAILED", context.getErrorReason());
+        eventService.fireCloudbreakEvent(context.getStackId(), Status.CREATE_FAILED.name(), context.getErrorReason());
         if (cluster.getEmailNeeded()) {
             emailSenderService.sendFailureEmail(cluster.getOwner());
         }
