@@ -31,7 +31,7 @@ function ($scope, $rootScope, $filter, Cluster, GlobalStack) {
         $scope.showSuccess(notification.eventMessage, notification.stackName);
         handleStatusChange(notification);
       } else if (errorEvents.indexOf(eventType) > -1) {
-        $scope.showError(notification.eventMessage, notification.stackName);
+        $scope.showErrorMessage(notification.eventMessage, notification.stackName);
         handleStatusChange(notification);
       } else {
         switch(eventType) {
