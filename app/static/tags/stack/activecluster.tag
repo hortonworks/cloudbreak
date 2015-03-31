@@ -13,10 +13,10 @@
                 <div class="tab-content">
                     <section id="cluster-details-pane" ng-class="{ 'active': detailsShow }" ng-show="detailsShow" class="tab-pane fade in">
                         <p class="text-right">
-                            <a href="" class="btn btn-success" role="button" ng-show="activeCluster.status == 'STOPPED'" data-toggle="modal" data-target="#modal-start-cluster">
+                            <a href="" class="btn btn-success" role="button" ng-show="activeCluster.status == 'STOPPED' || (activeCluster.cluster.status == 'START_REQUESTED' && activeCluster.status == 'AVAILABLE')" data-toggle="modal" data-target="#modal-start-cluster">
                                 <i class="fa fa-play fa-fw"></i><span> start</span>
                             </a>
-                            <a href="" class="btn btn-warning" role="button" ng-show="activeCluster.status == 'AVAILABLE'" data-toggle="modal" data-target="#modal-stop-cluster">
+                            <a href="" class="btn btn-warning" role="button" ng-show="(activeCluster.status == 'AVAILABLE' && activeCluster.cluster.status != 'START_REQUESTED') || (activeCluster.status == 'STOP_REQUESTED' && activeCluster.cluster.status == 'STOPPED')" data-toggle="modal" data-target="#modal-stop-cluster">
                                 <i class="fa fa-pause fa-fw"></i><span> stop</span>
                             </a>
                             <a href="" id="terminate-btn" class="btn btn-danger" role="button" data-toggle="modal" data-target="#modal-terminate">
