@@ -71,7 +71,8 @@ public class ConsulPluginManager implements PluginManager {
             for (Map.Entry<String, Set<String>> nodeFilter : getNodeFilters(installedHosts).entrySet()) {
                 EventParams eventParams = new EventParams();
                 eventParams.setNode(nodeFilter.getKey());
-                String eventId = ConsulUtils.fireEvent(clients, INSTALL_PLUGIN_EVENT, plugin.getKey() + " " + getPluginName(plugin.getKey()), eventParams, null);
+                String eventId = ConsulUtils.fireEvent(clients, INSTALL_PLUGIN_EVENT, "TRIGGER_PLUGN " + plugin.getKey() + " " + getPluginName(plugin.getKey()),
+                        eventParams, null);
                 if (eventId != null) {
                     eventIdMap.put(eventId, nodeFilter.getValue());
                 } else {
@@ -104,7 +105,7 @@ public class ConsulPluginManager implements PluginManager {
     @Override
     public Set<String> triggerPlugins(Collection<InstanceMetaData> instanceMetaData, ConsulPluginEvent event) {
         List<ConsulClient> clients = ConsulUtils.createClients(instanceMetaData);
-        String eventId = ConsulUtils.fireEvent(clients, event.getName(), "", null, null);
+        String eventId = ConsulUtils.fireEvent(clients, event.getName(), "TRIGGER_PLUGN_IN_CONTAINER ambari-agent", null, null);
         if (eventId != null) {
             return Sets.newHashSet(eventId);
         } else {
