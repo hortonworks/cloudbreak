@@ -195,44 +195,13 @@ public class AmbariClusterFacade implements ClusterFacade {
     @Override
     public FlowContext handleStartFailure(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Handling cluster start failure. Context: {} ", context);
-        try {
-            StackStatusUpdateContext startContext = (StackStatusUpdateContext) context;
-            Cluster cluster = clusterService.retrieveClusterByStackId(startContext.getStackId());
-            cluster.setStatus(Status.STOPPED);
-            clusterService.updateCluster(cluster);
-            stackUpdater.updateStackStatus(startContext.getStackId(), Status.AVAILABLE, startContext.getErrorReason());
-            return context;
-        } catch (Exception e) {
-            LOGGER.error("Exception during handling cluster start failure", e.getMessage());
-            throw new CloudbreakException(e.getMessage(), e);
-        }
+        return updateStackAndClusterStatus(context, Status.START_FAILED);
     }
 
     @Override
     public FlowContext handleStopFailure(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Handling cluster stop failure. Context: {} ", context);
-        try {
-            StackStatusUpdateContext stopContext = (StackStatusUpdateContext) context;
-            Cluster cluster = clusterService.retrieveClusterByStackId(stopContext.getStackId());
-            MDCBuilder.buildMdcContext(cluster);
-
-            eventService.fireCloudbreakEvent(stopContext.getStackId(), Status.STOP_IN_PROGRESS.name(), "Services are stopping.");
-            boolean stopped = ambariClusterConnector.stopCluster(stackService.getById(stopContext.getStackId()));
-            if (stopped) {
-                cluster.setStatus(Status.STOPPED);
-                cluster = clusterService.updateCluster(cluster);
-                eventService.fireCloudbreakEvent(stopContext.getStackId(), Status.AVAILABLE.name(), "Services have been stopped successfully.");
-                if (Status.STOP_REQUESTED.equals(stackService.getById(stopContext.getStackId()).getStatus())) {
-                    LOGGER.info("Hadoop services stopped, stack stop requested.");
-                }
-            } else {
-                throw new CloudbreakException("Failed to stop cluster, some of the services could not stopped.");
-            }
-            return context;
-        } catch (Exception e) {
-            LOGGER.error("Exception during handling cluster stop failure", e.getMessage());
-            throw new CloudbreakException(e.getMessage(), e);
-        }
+        return updateStackAndClusterStatus(context, Status.STOP_FAILED);
     }
 
     @Override
@@ -281,8 +250,8 @@ public class AmbariClusterFacade implements ClusterFacade {
         cluster.setStatusReason(scalingContext.getErrorReason());
         stackUpdater.updateStackCluster(stack.getId(), cluster);
         Integer scalingAdjustment = scalingContext.getHostGroupAdjustment().getScalingAdjustment();
-        String statusMessage = scalingAdjustment > 0 ? "new node(s) could not be added." : "node(s) could not be removed.";
-        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "Failed to update cluster because " + statusMessage);
+        String statusMessage = scalingAdjustment > 0 ? "New node(s) could not be added to the cluster:" : "Node(s) could not be removed from the cluster:";
+        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, statusMessage + scalingContext.getErrorReason());
         return context;
     }
 
@@ -298,6 +267,15 @@ public class AmbariClusterFacade implements ClusterFacade {
             ambariClient.createUser(userName, password, true);
             ambariClient.deleteUser(ADMIN);
         }
+    }
+
+    private FlowContext updateStackAndClusterStatus(FlowContext context, Status clusterStatus) {
+        StackStatusUpdateContext updateContext = (StackStatusUpdateContext) context;
+        Cluster cluster = clusterService.retrieveClusterByStackId(updateContext.getStackId());
+        cluster.setStatus(clusterStatus);
+        clusterService.updateCluster(cluster);
+        stackUpdater.updateStackStatus(updateContext.getStackId(), Status.AVAILABLE, updateContext.getErrorReason());
+        return context;
     }
 
     private void updateInstanceMetadataAfterScaling(boolean decommission, Set<String> hostNames, Stack stack) {

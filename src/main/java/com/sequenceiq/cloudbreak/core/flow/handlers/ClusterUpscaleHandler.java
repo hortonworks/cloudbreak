@@ -33,6 +33,7 @@ public class ClusterUpscaleHandler extends AbstractFlowHandler<ClusterScalingCon
     @Override
     protected Object handleErrorFlow(Throwable throwable, ClusterScalingContext data) throws Exception {
         LOGGER.info("handleErrorFlow() for phase: {}", getClass());
+        data.setErrorReason(throwable.getMessage());
         return getFlowFacade().handleClusterScalingFailure(data);
     }
 }

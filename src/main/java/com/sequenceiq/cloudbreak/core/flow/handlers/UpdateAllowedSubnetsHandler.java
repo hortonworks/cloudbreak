@@ -26,10 +26,8 @@ public class UpdateAllowedSubnetsHandler extends AbstractFlowHandler<UpdateAllow
 
     @Override
     protected Object handleErrorFlow(Throwable throwable, UpdateAllowedSubnetsContext data) throws Exception {
-        LOGGER.info("execute() for phase: {}", getClass());
+        LOGGER.info("handleErrorFlow() for phase: {}", getClass());
         data.setErrorReason(throwable.getMessage());
-        FlowContext context = getFlowFacade().handleUpdateAllowedSubnetsFailure(data);
-        LOGGER.info("Stack termination failure is handled. Context: {}", context);
-        return context;
+        return getFlowFacade().handleUpdateAllowedSubnetsFailure(data);
     }
 }

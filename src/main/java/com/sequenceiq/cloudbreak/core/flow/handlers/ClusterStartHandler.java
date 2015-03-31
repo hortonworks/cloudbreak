@@ -21,10 +21,4 @@ public class ClusterStartHandler extends AbstractFlowHandler<StackStatusUpdateCo
         StackStatusUpdateContext context = event.getData();
         return getFlowFacade().startCluster(context);
     }
-
-    @Override
-    protected Object handleErrorFlow(Throwable throwable, StackStatusUpdateContext data) {
-        LOGGER.info("handleErrorFlow() for phase: {}", getClass());
-        return new StackStatusUpdateContext(data.getStackId(), data.getCloudPlatform(), data.isStart(), throwable.getMessage());
-    }
 }
