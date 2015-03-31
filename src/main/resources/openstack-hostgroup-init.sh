@@ -139,6 +139,7 @@ main() {
     format_disks
     fix_hostname
     start_consul
+    consul_leader
     start_ambari_agent
     start_consul_watch
   fi

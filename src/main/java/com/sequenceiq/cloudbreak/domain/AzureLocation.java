@@ -15,19 +15,19 @@ public enum AzureLocation {
     SOUTHEAST_ASIA("Southeast Asia"),
     BRAZIL_SOUTH("Brazil South");
 
-    private final String location;
+    private final String region;
 
-    private AzureLocation(String location) {
-        this.location = location;
+    private AzureLocation(String region) {
+        this.region = region;
     }
 
-    public String location() {
-        return this.location;
+    public String region() {
+        return this.region;
     }
 
     public static AzureLocation fromName(String regionName) {
         for (AzureLocation region : AzureLocation.values()) {
-            if (regionName.equals(region.location())) {
+            if (regionName.equals(region.region())) {
                 return region;
             }
         }

@@ -45,6 +45,9 @@ import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.AllocateAddressRequest;
+import com.amazonaws.services.ec2.model.AllocateAddressResult;
+import com.amazonaws.services.ec2.model.AssociateAddressRequest;
 import com.amazonaws.services.ec2.model.CreateSnapshotRequest;
 import com.amazonaws.services.ec2.model.CreateSnapshotResult;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
@@ -58,9 +61,11 @@ import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.DescribeSnapshotsRequest;
 import com.amazonaws.services.ec2.model.DescribeSnapshotsResult;
+import com.amazonaws.services.ec2.model.DomainType;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.Image;
 import com.amazonaws.services.ec2.model.Instance;
+import com.amazonaws.services.ec2.model.ReleaseAddressRequest;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
@@ -77,6 +82,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -156,7 +162,11 @@ public class AwsConnector implements CloudPlatformConnector {
         Long stackId = stack.getId();
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
         AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(Regions.valueOf(stack.getRegion()), awsCredential);
+        AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
+        AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(Regions.valueOf(stack.getRegion()), awsCredential);
         String cFStackName = cfStackUtil.getCfStackName(stack);
+        AllocateAddressRequest allocateAddressRequest = new AllocateAddressRequest().withDomain(DomainType.Standard);
+        AllocateAddressResult allocateAddressResult = amazonEC2Client.allocateAddress(allocateAddressRequest);
         String snapshotId = getEbsSnapshotIdIfNeeded(stack);
         CreateStackRequest createStackRequest = new CreateStackRequest()
                 .withStackName(cFStackName)
@@ -164,8 +174,9 @@ public class AwsConnector implements CloudPlatformConnector {
                 .withTemplateBody(cfTemplateBuilder.build(stack, snapshotId, stack.isExistingVPC(), awsCloudformationTemplatePath))
                 .withParameters(getStackParameters(stack, hostGroupUserData, gateWayUserData, awsCredential, cFStackName, stack.isExistingVPC()));
         client.createStack(createStackRequest);
-        Resource resource = new Resource(ResourceType.CLOUDFORMATION_STACK, cFStackName, stack, null);
-        Set<Resource> resources = Sets.newHashSet(resource);
+        Resource cloudFormationStackResource = new Resource(ResourceType.CLOUDFORMATION_STACK, cFStackName, stack, null);
+        Resource reservedIp = new Resource(ResourceType.AWS_RESERVED_IP, allocateAddressResult.getAllocationId(), stack, null);
+        Set<Resource> resources = Sets.newHashSet(cloudFormationStackResource, reservedIp);
         stack = stackUpdater.updateStackResources(stackId, resources);
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, stackId);
         List<StackStatus> errorStatuses = Arrays.asList(CREATE_FAILED, ROLLBACK_IN_PROGRESS, ROLLBACK_FAILED, ROLLBACK_COMPLETE);
@@ -180,6 +191,14 @@ public class AwsConnector implements CloudPlatformConnector {
             LOGGER.error(String.format("Failed to create CloudFormation stack: %s", stackId), e);
             stackUpdater.updateStackStatus(stackId, Status.CREATE_FAILED, "Creation of cluster infrastructure failed: " + e.getMessage());
             throw new BuildStackFailureException(e);
+        }
+        String gateWayGroupName = stack.getInstanceGroupByType(InstanceGroupType.GATEWAY).getGroupName();
+        List<String> instanceIds = cfStackUtil.getInstanceIds(stack, amazonASClient, client, gateWayGroupName);
+        if (!instanceIds.isEmpty()) {
+            AssociateAddressRequest associateAddressRequest = new AssociateAddressRequest()
+                    .withPublicIp(allocateAddressResult.getPublicIp())
+                    .withInstanceId(instanceIds.get(0));
+            amazonEC2Client.associateAddress(associateAddressRequest);
         }
         return resources;
     }
@@ -338,6 +357,7 @@ public class AwsConnector implements CloudPlatformConnector {
         Resource resource = stack.getResourceByType(ResourceType.CLOUDFORMATION_STACK);
         if (resource != null) {
             AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(Regions.valueOf(stack.getRegion()), awsCredential);
+            AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
             String cFStackName = resource.getResourceName();
             LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", stack.getId(), cFStackName);
             DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
@@ -345,6 +365,7 @@ public class AwsConnector implements CloudPlatformConnector {
                 client.describeStacks(describeStacksRequest);
             } catch (AmazonServiceException e) {
                 if (e.getErrorMessage().equals("Stack:" + cFStackName + " does not exist")) {
+                    releaseReservedIp(stack, amazonEC2Client);
                     return;
                 } else {
                     throw e;
@@ -362,12 +383,22 @@ public class AwsConnector implements CloudPlatformConnector {
                 if (!isSuccess(pollingResult)) {
                     throw new CloudResourceOperationFailedException("Failed to update Heat stack, because polling reached an invalid end state.");
                 }
+                releaseReservedIp(stack, amazonEC2Client);
             } catch (CloudFormationStackException e) {
                 LOGGER.error(String.format("Failed to delete CloudFormation stack: %s, id:%s", cFStackName, stack.getId()), e);
                 throw e;
             }
         } else {
             LOGGER.info("No CloudFormation stack saved for stack.");
+        }
+    }
+
+    private void releaseReservedIp(Stack stack, AmazonEC2Client amazonEC2Client) {
+        Resource resourceByType = stack.getResourceByType(ResourceType.AWS_RESERVED_IP);
+        if (resourceByType != null) {
+            ReleaseAddressRequest releaseAddressRequest = new ReleaseAddressRequest()
+                    .withAllocationId(resourceByType.getResourceName());
+            amazonEC2Client.releaseAddress(releaseAddressRequest);
         }
     }
 

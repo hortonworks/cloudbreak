@@ -28,6 +28,7 @@ public abstract class AzureSimpleNetworkResourceBuilder implements
     protected static final int POLLING_INTERVAL = 5000;
     protected static final int MAX_POLLING_ATTEMPTS = 60;
     protected static final int NOT_FOUND = 404;
+    protected static final int NOT_EXIST = 400;
     protected static final String LOCATION = "location";
     protected static final String DESCRIPTION = "description";
     protected static final String AFFINITYGROUP = "affinityGroup";
@@ -46,7 +47,7 @@ public abstract class AzureSimpleNetworkResourceBuilder implements
 
     protected void httpResponseExceptionHandler(HttpResponseException ex, String resourceName, String user, Stack stack) {
         MDCBuilder.buildMdcContext(stack);
-        if (ex.getStatusCode() != NOT_FOUND) {
+        if (ex.getStatusCode() != NOT_FOUND && ex.getStatusCode() != NOT_EXIST) {
             throw new InternalServerException(ex.getResponse().getData().toString());
         } else {
             LOGGER.error(String.format("Azure resource not found with %s name for %s user.", resourceName, user));

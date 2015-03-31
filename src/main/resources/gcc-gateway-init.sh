@@ -134,7 +134,6 @@ use_dns_first() {
 start_ambari_server() {
   docker rm -f ambari-server &>/dev/null
   docker run -d --name=ambari_db --privileged --restart=always -v /data/ambari-server/pgsql/data:/var/lib/postgresql/data -e POSTGRES_PASSWORD=bigdata -e POSTGRES_USER=ambari postgres:9.4.1
-  sleep 10
   docker run -d --name=ambari-server --privileged --net=host --restart=always -e POSTGRES_DB=$(docker inspect -f "{{.NetworkSettings.IPAddress}}" ambari_db) -e BRIDGE_IP=$(get_ip) sequenceiq/ambari:$AMBARI_DOCKER_TAG /start-server
   register_ambari
 }
@@ -163,6 +162,7 @@ main() {
     format_disks
     fix_hostname
     start_consul
+    consul_leader
     start_ambari_server
     start_consul_watch
     use_dns_first

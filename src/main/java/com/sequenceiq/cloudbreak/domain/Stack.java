@@ -502,6 +502,15 @@ public class Stack implements ProvisionEntity {
         return instanceGroupsList;
     }
 
+    public InstanceGroup getInstanceGroupByType(InstanceGroupType instanceGroupType) {
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            if (instanceGroupType.equals(instanceGroup.getInstanceGroupType())) {
+                return instanceGroup;
+            }
+        }
+        return null;
+    }
+
     public int getGateWayNodeCount() {
         Set<InstanceGroup> instanceGroupsByType = getInstanceGroupsByType(InstanceGroupType.GATEWAY);
         int gateWaySize = 0;
