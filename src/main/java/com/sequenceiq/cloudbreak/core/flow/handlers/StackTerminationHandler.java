@@ -26,6 +26,7 @@ public class StackTerminationHandler extends AbstractFlowHandler<DefaultFlowCont
     @Override
     protected Object handleErrorFlow(Throwable throwable, DefaultFlowContext data) throws Exception {
         LOGGER.info("execute() for phase: {}", getClass());
+        data.setErrorReason(throwable.getMessage());
         return getFlowFacade().handleStackTerminationFailure(data);
     }
 }

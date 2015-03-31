@@ -22,10 +22,4 @@ public class StackStartHandler extends AbstractFlowHandler<StackStatusUpdateCont
         LOGGER.info("Stack started. Context: {}", stackStatusUpdateContext);
         return stackStatusUpdateContext;
     }
-
-    @Override
-    protected Object handleErrorFlow(Throwable throwable, StackStatusUpdateContext data) throws Exception {
-        LOGGER.info("handleErrorFlow() for phase: {}", getClass());
-        return new StackStatusUpdateContext(data.getStackId(), data.getCloudPlatform(), data.isStart(), throwable.getMessage());
-    }
 }

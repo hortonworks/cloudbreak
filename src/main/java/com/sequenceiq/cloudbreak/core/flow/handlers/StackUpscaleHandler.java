@@ -27,6 +27,7 @@ public class StackUpscaleHandler extends AbstractFlowHandler<StackScalingContext
     @Override
     protected Object handleErrorFlow(Throwable throwable, StackScalingContext data) throws Exception {
         LOGGER.info("handleErrorFlow() for phase: {}", getClass());
+        data.setErrorReason(throwable.getMessage());
         return getFlowFacade().handleStackScalingFailure(data);
     }
 }

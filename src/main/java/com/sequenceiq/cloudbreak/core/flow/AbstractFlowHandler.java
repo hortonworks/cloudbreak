@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow.service.FlowFacade;
 
 import reactor.event.Event;
@@ -22,7 +23,7 @@ import reactor.function.Consumer;
  *
  * @param <T> the type of the event payload
  */
-public abstract class AbstractFlowHandler<T> implements Consumer<Event<T>>, FlowHandler {
+public abstract class AbstractFlowHandler<T extends DefaultFlowContext> implements Consumer<Event<T>>, FlowHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFlowHandler.class);
 
     @Autowired
@@ -82,6 +83,7 @@ public abstract class AbstractFlowHandler<T> implements Consumer<Event<T>>, Flow
      */
     protected Object handleErrorFlow(Throwable throwable, T data) throws Exception {
         LOGGER.info("Default error flow handling for {}", getClass());
+        data.setErrorReason(throwable.getMessage());
         return data;
     }
 

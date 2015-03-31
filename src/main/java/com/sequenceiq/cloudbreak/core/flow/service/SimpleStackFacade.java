@@ -81,16 +81,19 @@ public class SimpleStackFacade implements StackFacade {
                 if (!stack.getOnFailureActionAction().equals(OnFailureAction.ROLLBACK)) {
                     LOGGER.debug("Nothing to do. OnFailureAction {}", stack.getOnFailureActionAction());
                 } else {
+                    stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS,
+                            "Rollback is in progress, cause: " + provisioningContext.getErrorReason());
                     cloudPlatformConnectors.get(cloudPlatform).rollback(stack, stack.getResources());
+                    cloudbreakEventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_STOPPED.name(), "Stack creation failed.");
                 }
-                stackUpdater.updateStackStatusReason(provisioningContext.getStackId(), provisioningContext.getErrorReason());
-                fireCloudbreakEventIfNeeded(provisioningContext.getStackId(), stack);
+                stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_FAILED, provisioningContext.getErrorReason());
             }
             return new ProvisioningContext.Builder()
                     .setDefaultParams(stack.getId(), stack.cloudPlatform())
                     .build();
         } catch (Exception ex) {
             LOGGER.error(String.format("Stack rollback failed on {} stack: ", provisioningContext.getStackId()), ex);
+            stackUpdater.updateStackStatus(provisioningContext.getStackId(), Status.CREATE_FAILED, "Rollback failed: " + ex.getMessage());
             throw new CloudbreakException(String.format("Stack rollback failed on {} stack: ", provisioningContext.getStackId(), ex));
         }
     }
@@ -257,11 +260,4 @@ public class SimpleStackFacade implements StackFacade {
             }
         }
     }
-
-    private void fireCloudbreakEventIfNeeded(Long stackId, Stack stack) {
-        if (stack.getOnFailureActionAction().equals(OnFailureAction.ROLLBACK)) {
-            cloudbreakEventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_STOPPED.name(), "Stack creation failed.");
-        }
-    }
-
 }
