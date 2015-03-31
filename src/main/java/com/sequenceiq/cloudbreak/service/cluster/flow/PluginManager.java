@@ -16,7 +16,7 @@ public interface PluginManager {
 
     Set<String> triggerPlugins(Collection<InstanceMetaData> instanceMetaData, ConsulPluginEvent event);
 
-    void waitForEventFinish(Stack stack, Collection<InstanceMetaData> instanceMetaData, Map<String, Set<String>> eventIds);
+    void waitForEventFinish(Stack stack, Collection<InstanceMetaData> instanceMetaData, Map<String, Set<String>> eventIds, Integer timeout);
 
-    void triggerAndWaitForPlugins(Stack stack, ConsulPluginEvent event);
+    void triggerAndWaitForPlugins(Stack stack, ConsulPluginEvent event, Integer timeout);
 }

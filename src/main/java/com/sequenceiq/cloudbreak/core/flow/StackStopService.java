@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
 
+import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
+
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -52,7 +54,7 @@ public class StackStopService {
 
         if (stack != null && Status.STOP_REQUESTED.equals(stack.getStatus())) {
             stackUpdater.updateStackStatus(stackId, Status.STOP_IN_PROGRESS, "Cluster infrastructure is stopping.");
-            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.STOP_AMBARI_EVENT);
+            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.STOP_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT);
             boolean stopped;
             CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
             stopped = connector.stopAll(stack);

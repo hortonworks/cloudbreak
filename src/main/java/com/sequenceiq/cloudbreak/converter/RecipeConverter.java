@@ -8,6 +8,8 @@ import com.sequenceiq.cloudbreak.domain.Recipe;
 @Component
 public class RecipeConverter extends AbstractConverter<RecipeJson, Recipe> {
 
+    public static final int DEFAULT_TIMEOUT = 10;
+
     @Override
     public RecipeJson convert(Recipe recipe) {
         RecipeJson json = new RecipeJson();
@@ -16,6 +18,7 @@ public class RecipeConverter extends AbstractConverter<RecipeJson, Recipe> {
         json.setProperties(recipe.getKeyValues());
         json.setPlugins(recipe.getPlugins());
         json.setId(recipe.getId().toString());
+        json.setTimeout(recipe.getTimeout());
         return json;
     }
 
@@ -26,6 +29,7 @@ public class RecipeConverter extends AbstractConverter<RecipeJson, Recipe> {
         recipe.setDescription(json.getDescription());
         recipe.setKeyValues(json.getProperties());
         recipe.setPlugins(json.getPlugins());
+        recipe.setTimeout(json.getTimeout() == null ? DEFAULT_TIMEOUT : json.getTimeout());
         return recipe;
     }
 

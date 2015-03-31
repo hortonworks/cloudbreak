@@ -34,8 +34,9 @@ public class ConsulPluginManager implements PluginManager {
     public static final String FINISH_SIGNAL = "FINISHED";
     public static final String FAILED_SIGNAL = "FAILED";
     public static final int POLLING_INTERVAL = 5000;
-    public static final int MAX_ATTEMPTS = 30;
-    private static final int MAX_NODE_FILTER_LENGTH = 500;
+    public static final int MAX_NODE_FILTER_LENGTH = 500;
+    public static final int ONE_THOUSAND = 1000;
+    public static final int SECONDS_IN_MINUTE = 60;
 
     @Autowired
     private ConsulKVCheckerTask consulKVCheckerTask;
@@ -115,18 +116,19 @@ public class ConsulPluginManager implements PluginManager {
     }
 
     @Override
-    public void waitForEventFinish(Stack stack, Collection<InstanceMetaData> instanceMetaData, Map<String, Set<String>> eventIds) {
+    public void waitForEventFinish(Stack stack, Collection<InstanceMetaData> instanceMetaData, Map<String, Set<String>> eventIds, Integer timeout) {
         List<ConsulClient> clients = ConsulUtils.createClients(instanceMetaData);
         List<String> keys = generateKeys(eventIds);
+        int calculatedMaxAttempt = (timeout * ONE_THOUSAND * SECONDS_IN_MINUTE) / POLLING_INTERVAL;
         keyValuePollingService.pollWithTimeout(
                 consulKVCheckerTask,
                 new ConsulKVCheckerContext(stack, clients, keys, FINISH_SIGNAL, FAILED_SIGNAL),
-                POLLING_INTERVAL, MAX_ATTEMPTS
+                POLLING_INTERVAL, calculatedMaxAttempt
         );
     }
 
     @Override
-    public void triggerAndWaitForPlugins(Stack stack, ConsulPluginEvent event) {
+    public void triggerAndWaitForPlugins(Stack stack, ConsulPluginEvent event, Integer timeout) {
         Set<InstanceMetaData> instances = stack.getRunningInstanceMetaData();
         Set hosts = getHostnames(hostMetadataRepository.findHostsInCluster(stack.getCluster().getId()));
         Set<String> triggerEventIds = triggerPlugins(instances, event);
@@ -134,7 +136,7 @@ public class ConsulPluginManager implements PluginManager {
         for (String eventId : triggerEventIds) {
             eventIdMap.put(eventId, hosts);
         }
-        waitForEventFinish(stack, instances, eventIdMap);
+        waitForEventFinish(stack, instances, eventIdMap, timeout);
     }
 
     private List<String> generateKeys(Map<String, Set<String>> eventIds) {
