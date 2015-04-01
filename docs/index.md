@@ -15,14 +15,14 @@ Cloudbreak [API documentation](http://docs.cloudbreak.apiary.io/).
 
 ##Overview
 
-Cloudbreak is a RESTful Hadoop as a Service API. Once it is deployed in your favourite servlet container exposes a REST API allowing to span up Hadoop clusters of arbitrary sizes on your selected cloud provider. Provisioning Hadoop has never been easier.
-Cloudbreak is built on the foundation of cloud providers API (Amazon AWS, Microsoft Azure, Google Cloud Platform...), Apache Ambari, Docker containers, Serf and dnsmasq.
+Cloudbreak is a RESTful Hadoop as a Service API. Once it is deployed in your favorite servlet container exposes a REST API allowing to span up Hadoop clusters of arbitrary sizes on your selected cloud provider. Provisioning Hadoop has never been easier.
+Cloudbreak is built on the foundation of cloud providers API (Amazon AWS, Microsoft Azure, Google Cloud Platform...), Apache Ambari, Docker containers, Swarm and Consul.
 
 ##Benefits
 
 ###Secure
-Supports basic, token based and OAuth2 authentication model. The cluster is provisioned in a logically isolated network (Virtual Private Cloud) of your favourite cloud provider.
-Cloudbreak does not store or manage your cloud credentials - it is the end user's responsibility to link the Cloudbreak user with her/his cloud account. We provide utilities to ease this process (IAM on Amazon, certificates on Azure).
+Supports basic, token based and OAuth2 authentication model. The cluster is provisioned in a logically isolated network (Virtual Private Cloud) of your favorite cloud provider.
+Cloudbreak does not store or manage your cloud credentials - it is the end user's responsibility to link the Cloudbreak user with her/his cloud account.
 
 ###Elastic
 Using Cloudbreak API you can provision an arbitrary number of Hadoop nodes - the API does the hard work for you, and span up the infrastructure, configure the network and the selected Hadoop components and services without any user interaction.
@@ -33,10 +33,10 @@ As your workload changes, the API allows you to add or remove nodes on the fly. 
 Once provisioned, new nodes will take up the load and increase the cluster throughput.
 
 ###Declarative Hadoop clusters
-We support declarative Hadoop cluster creation - using blueprints. Blueprints are a declarative definition of a Hadoop cluster. With a blueprint, you specify a stack, the component layout and the configurations to materialise a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different VPC subnets and availability zones, thus you can span up a highly available cluster running on different datacenters or availability zones.
+We support declarative Hadoop cluster creation - using blueprints. Blueprints are a declarative definition of your stack, the component/services layout and the configurations to materialize a Hadoop cluster instance.
 
 ###Flexible
-You have the option to choose your favourite cloud provider and their different pricing models. The API translates the calls towards different vendors. However, you develop and use one common API, there is no need to rewrite your code when changing between cloud providers.
+You have the option to choose your favorite cloud provider and their different pricing models. The API translates the calls towards different vendors. Nevertheless you integrate and use one common API, there is no need to rewrite your code when changing between cloud providers.
 
 <!--overview.md-->
 
@@ -44,17 +44,17 @@ You have the option to choose your favourite cloud provider and their different 
 
 ##How it works?
 
-Cloudbreak launches on-demand Hadoop clusters on your favourite cloud provider in minutes. We have introduced 4 main notions - the core building block of the REST API.
+Cloudbreak launches on-demand Hadoop clusters on your favorite cloud provider in minutes. We have introduced 4 main notions - the core building blocks of the REST API.
 
 ###Templates
 
 A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion.
-Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, SSH setup and can capture and control region-specific infrastructure variations.
+Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
 
 A template can be used repeatedly to create identical copies of the same stack (or to use as a foundation to start a new stack).
 
-The infrastructure specific configuration is available under the Cloudbreak [resources](https://github.com/sequenceiq/cloudbreak/blob/master/src/main/resources/vpc-and-subnet.template).
-As an example, for Amazon EC2, we use [AWS Cloudformation](http://aws.amazon.com/cloudformation/) to define the cloud infrastructure .
+The infrastructure specific configuration is available under the Cloudbreak [resources](https://github.com/sequenceiq/cloudbreak/blob/master/src/main/resources/templates).
+As an example for Amazon EC2, we use [AWS Cloudformation](http://aws.amazon.com/cloudformation/) to define the cloud infrastructure .
 
 For further information please visit our [API documentation](http://docs.cloudbreak.apiary.io/#templates).
 
@@ -66,14 +66,15 @@ For further information please visit our [API documentation](http://docs.cloudbr
 
 ###Blueprints
 
-Ambari Blueprints are a declarative definition of a Hadoop cluster. With a Blueprint, you specify a stack, the component layout and the configurations to materialise a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different VPC subnets and availability zones, thus you can span up a highly available cluster running on different datacenters or availability zones.
+Ambari Blueprints are a declarative definition of a Hadoop cluster. With a Blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
+
 We have a few default blueprints available from multi node blueprints to lambda architectures.
 
 For further information please visit our [API documentation](http://docs.cloudbreak.apiary.io/#blueprints).
 
 ###Cluster
 
-Clusters are materialised Hadoop clusters. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack.
+Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack.
 Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
 
 For further information please visit our [API documentation](http://docs.cloudbreak.apiary.io/#clusters).
@@ -84,7 +85,7 @@ For further information please visit our [API documentation](http://docs.cloudbr
 
 ##Technology
 
-Cloudbreak is built on the foundation of cloud providers APIs, Apache Ambari, Docker containers, Serf and dnsmasq.
+Cloudbreak is built on the foundation of cloud providers APIs, Apache Ambari, Docker containers, Swarm and Consul.
 
 ###Apache Ambari
 
@@ -127,18 +128,28 @@ The main features of Docker are:
 4. Containers are isolated
 5. It can be automated and scripted
 
-###Serf
+###Swarm
 
-Serf is a tool for cluster membership, failure detection, and orchestration that is decentralised, fault-tolerant and highly available. Serf runs on every major platform: Linux, Mac OS X, and Windows. It is extremely lightweight.
-Serf uses an efficient gossip protocol to solve three major problems:
+Docker Swarm is native clustering for Docker. It turns a pool of Docker hosts into a single, virtual host. Swarm serves the standard Docker API.
 
-  * Membership: Serf maintains cluster membership lists and is able to execute custom handler scripts when that membership changes. For example, Serf can maintain the list of Hadoop servers of a cluster and notify the members when nodes come online or go offline.
+  * Distributed container orchestration: Allows to remotely orchestrate Docker containers on different hosts
+    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/swarm.png)
+  * Discovery services: Supports different discovery backends to provide service discovery, as such: token (hosted) and file based, etcd, Consul, Zookeeper.
+  * Advanced scheduling: Swarm will schedule containers on hosts based on different filters and strategies
 
-  * Failure detection and recovery: Serf automatically detects failed nodes within seconds, notifies the rest of the cluster, and executes handler scripts allowing you to handle these events. Serf will attempt to recover failed nodes by reconnecting to them periodically.
-    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/serf-gossip.png)
+###Consul
 
-  * Custom event propagation: Serf can broadcast custom events and queries to the cluster. These can be used to trigger deploys, propagate configuration, etc. Events are simple fire-and-forget broadcast, and Serf makes a best effort to deliver messages in the face of offline nodes or network partitions. Queries provide a simple realtime request/response mechanism.
-    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/serf-event.png)
+Consul it is a tool for discovering and configuring services in your infrastructure. It provides several key features
+
+  * Service Discovery: Clients of Consul can provide a service, such as api or mysql, and other clients can use Consul to discover providers of a given service. Using either DNS or HTTP, applications can easily find the services they depend upon.
+
+  * Health Checking: Consul clients can provide any number of health checks, either associated with a given service ("is the webserver returning 200 OK"), or with the local node ("is memory utilization below 90%"). This information can be used by an operator to monitor cluster health, and it is used by the service discovery components to route traffic away from unhealthy hosts.
+
+  * Key/Value Store: Applications can make use of Consul's hierarchical key/value store for any number of purposes, including dynamic configuration, feature flagging, coordination, leader election, and more. The simple HTTP API makes it easy to use.
+
+  * Multi Datacenter: Consul supports multiple datacenters out of the box. This means users of Consul do not have to worry about building additional layers of abstraction to grow to multiple regions.
+
+    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/consul.png)
 
 <!--technologies.md-->
 
@@ -170,33 +181,25 @@ At high level the supported list of components can be grouped into main categori
 | ZOOKEEPER	  | ZOOKEEPER_CLIENT, ZOOKEEPER_SERVER                                      |
 
 
-_Note: You can run Apache Spark on a cluster provisioned with Cloudbreak by using the `multi-node-hdfs-yarn` blueprint, and use Spark in [yarn-mode](https://spark.apache.org/docs/latest/running-on-yarn.html)._
-
 We provide a list of default Hadoop cluster Blueprints for your convenience, however you can always build and use your own Blueprint.
 
-1. Simple multi node - Apache Ambari blueprint
+1. Full stack multi node - HDP 2.2 blueprint
 
-This is a simple [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/1.6.0/src/main/resources/blueprints/multi-node-hdfs-yarn) which allows you to launch a multi node, fully distributed Hadoop Cluster in the cloud.
-
-It allows you to use the following services: HDFS, YARN, MAPREDUCE2.
-
-2. Full stack multi node - HDP 2.1 blueprint
-
-This is a complex [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/1.6.0/src/main/resources/blueprints/hdp-multinode-default) which allows you to launch a multi node, fully distributed Hadoop Cluster in the cloud.
+This is a complex [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/master/src/main/resources/blueprints/hdp-multinode-default) which allows you to launch a multi node, fully distributed HDP 2.2 Cluster in the cloud.
 
 It allows you to use the following services: HDFS, YARN, MAPREDUCE2, GANGLIA, HBASE, HIVE, HCATALOG, WEBHCAT, NAGIOS, OOZIE, PIG, SQOOP, STORM, TEZ, FALCON, ZOOKEEPER.
 
+2. Simple multi node blueprint
+
+This is a simple [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/master/src/main/resources/blueprints/multi-node-hdfs-yarn) which allows you to launch a multi node, fully distributed Hadoop 2.6 Cluster in the cloud.
+
+It allows you to use the following services: HDFS, YARN, MAPREDUCE2, ZOOKEEPER.
+
 3. Custom blueprints
 
-We allow you to build your own Blueprint - for further instructions please check the Apache Ambari [documentation](https://cwiki.apache.org/confluence/display/AMBARI/Blueprints).
+We allow you to build and use your own Blueprint - for further instructions please check the Apache Ambari [documentation](https://cwiki.apache.org/confluence/display/AMBARI/Blueprints).
 
 When you are creating custom Blueprints you can use the components above to build Hadoop services and use them in your on-demand Hadoop cluster.
-
-We are trying to figure out the hosts to hostgroups assignments - and in order to do so you will need to follow the conventions below:
-
-_Note: Apache Ambari community and SequenceIQ is working on an auto-hostgroup assignment algorithm; in the meantime please follow our conventions and check the default blueprints as examples, or ask us to support you._
-
-When you are creating a Multi node blueprint, all the worker node components (a.k.a. Slaves) will have to be grouped in host groups named `slave_*`. _Replace * with the number of Slave hostgroups_.
 
 The default rule for multi node clusters is that there must be at least as many hosts as the number of host groups. Each NOT slave host groups (master, gateway, etc) will be launched with a cardinality of 1 (1 node per master, gateway, hosts, etc.), and all the rest of the nodes are equally distributed among Slave nodes (if there are multiple slave host groups).
 
@@ -210,8 +213,17 @@ The default rule for multi node clusters is that there must be at least as many 
 
 First and foremost in order to start launching Hadoop clusters you will need to create a Cloudbreak account.
 Cloudbreak supports registration, forgotten and reset password, and login features at API level.
-All passwords that are stored or sent are hashed - communication is always over a secure HTTPS channel. When you are deploying your own Cloudbreak instance we strongly suggest to configure an SSL certificate.
-Users create and launch Hadoop clusters on their own namespace and security context.
+All passwords that are stored or sent are hashed - communication is always over a secure HTTPS channel. When you are deploying your own Cloudbreak instance we strongly suggest to configure an SSL certificate. Users create and launch Hadoop clusters on their own namespace and security context.
+
+Users can be invited under an account by the administrator, and all resources (e.g. templates, blueprints, credentials, clusters) can be shared across account users.
+
+  * Usage explorer: Cloudbreak gives you an up to date overview of cluster usage based on different filtering criteria (start/end date, users, providers, region, etc).
+
+  * Account details: The account details of the user.
+
+  * Manage users: You can invite, active and deactivate users under the account.
+
+###Cloudbreak credentials
 
 Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak **does not** store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc).
 We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak *deployer* is purely acting on behalf of the end user - without having access to the user's account.
@@ -380,8 +392,6 @@ The user name if you want to ssh into one of your instance is `ubuntu` .
 
 `SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later (The key generation process is described in the Configuring the Microsoft Azure account section)
 
-The user name if you want to ssh into one of your instance is `ubuntu`.
-
 
 **Google Cloud Platform**
 
@@ -401,7 +411,6 @@ The user name if you want to ssh into one of your instance is `ubuntu`.
 
 
 ###Manage templates
-
 Using manage templates you can create infrastructure templates.
 
 **Amazon AWS**
@@ -410,22 +419,19 @@ Using manage templates you can create infrastructure templates.
 
 `Description:` short description of your template
 
-`AMI:` the AMI which contains the Docker containers
-
-`SSH location:` allowed inbound SSH access. Use 0.0.0.0/0 as default
-
-`Region:` AWS region where you'd like to launch your cluster
-
 `Instance type:` the Amazon instance type to be used - we suggest to use at least small or medium instances
+
+`Volume type:` option to choose SSD or regular HDD
 
 `Attached volumes per instance:` the number of disks to be attached
 
 `Volume size (GB):` the size of the attached disks (in GB)
 
-`Volume type:` option to choose SSD or regular HDD
-
 `Spot price:` option to set a spot price - not mandatory, if specified we will request spot price instances (which might take a while or never be fulfilled by Amazon)
 
+`EBS encryption:` this feature is supported with all EBS volume types (General Purpose (SSD), Provisioned IOPS (SSD), and Magnetic
+
+`Public in account:` share it with others in the account
 
 **Azure**
 
@@ -433,16 +439,13 @@ Using manage templates you can create infrastructure templates.
 
 `Description:` short description of your template
 
-`Location:` Azure datacenter location where you'd like to launch your cluster
-
-`Image name:` The Azure base image used
-
 `Instance type:` the Azure instance type to be used - we suggest to use at least small or medium instances
 
 `Attached volumes per instance:` the number of disks to be attached
 
 `Volume size (GB):` the size of the attached disks (in GB)
 
+`Public in account:` share it with others in the account
 
 **Google Cloud Platform**
 
@@ -450,16 +453,29 @@ Using manage templates you can create infrastructure templates.
 
 `Description:` short description of your template
 
-`Location:` Google Cloud datacenter location where you'd like to launch your cluster
+`Instance type:` the Google instance type to be used - we suggest to use at least small or medium instances
 
-`Image name:` The Google cloud base image used
-
-`Instance type:` the Azure instance type to be used - we suggest to use at least small or medium instances
+`Volume type:` option to choose SSD or regular HDD
 
 `Attached volumes per instance:` the number of disks to be attached
 
 `Volume size (GB):` the size of the attached disks (in GB)
 
+`Public in account:` share it with others in the account
+
+**OpenStack**
+
+`Name:` name of your template
+
+`Description:` short description of your template
+
+`Public Net Id:` the public net id
+
+`Attached volumes per instance:` the number of disks to be attached
+
+`Volume size (GB):` the size of the attached disks (in GB)
+
+`Public in account:` share it with others in the account
 
 ###Manage blueprints
 Blueprints are your declarative definition of a Hadoop cluster.
@@ -472,12 +488,8 @@ Blueprints are your declarative definition of a Hadoop cluster.
 
 `Manual copy:` you can copy paste your blueprint in this text area
 
-_Note: Apache Ambari community and SequenceIQ is working on an auto-hostgroup assignment algorithm; in the meantime please follow our conventions and check the default blueprints as examples, or ask us to support you._
+`Public in account:` share it with others in the account
 
-_1. When you are creating a Single node blueprint the name of the default host group has to be `master`._
-_2. When you are creating a Multi node blueprint, all the worker node components (a.k.a. Slaves) will have to be grouped in host groups named `slave_*`. Replace * with the number of Slave hostgroups._
-
-_The default rule is that for multi node clusters there must be at least as many hosts as the number of host groups. Each NOT slave host groups (master, gateway, etc) will be launched with a cardinality of 1 (1 node per master, gateway, etc hosts), and all the rest of the nodes are equally distributed among Slave nodes (if there are multiple slave host groups)._
 
 ###Create cluster
 Using the create cluster functionality you will create a cloud Stack and a Hadoop Cluster. In order to create a cluster you will have to select a credential first.
@@ -485,11 +497,17 @@ _Note: Cloudbreak can maintain multiple cloud credentials (even for the same pro
 
 `Cluster name:` your cluster name
 
-`Cluster size:` the number of nodes in your Hadoop cluster
-
-`Template:` your cloud infrastructure template to be used
+`Region`: the region where the cluster is started
 
 `Blueprint:` your Hadoop cluster blueprint
+
+Once the blueprint is selected we parse it and give you the option to select the followings for each **hostgroup**.
+
+`Group size:` the nummber of instances to be started
+
+`Template:` the stack template associated to the hostgroup
+
+`Public in account:` share it with others in the account
 
 Once you have launched the cluster creation you can track the progress either on Cloudbreak UI or your cloud provider management UI.
 
@@ -682,9 +700,9 @@ In order to understand the state of your Hadoop as a Servie stack and the potent
 
 ##QuickStart and installation
 
-We provide you two different ways to start using Cloudbreak. The simplest and easiest solution is hosted by SequenceIQ, however we have two DIY _(do it/deploy it yourself)_ options as well.
+We provide you two different ways to start using Cloudbreak. The simplest and easiest solution is hosted by SequenceIQ, however we encourage you to get Cloudbreak and deployed it on-premise or on your favorite cloud provider.
 
-###Hosted by SequenceIQ - Cloudbreak UI and API  
+###Hosted - Cloudbreak UI and API  
 The easiest way to start your own Hadoop cluster in your favourite cloud provider is to use our hosted solution. We host, maintain and support [Cloudbreak](https://cloudbreak.sequenceiq.com/) for you.
 
 Please note that Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. We do not store your cloud provider account details (such as username, password, keys, private SSL certificates, etc), but work around the concept that Identity and Access Management is fully controlled by you - the end user.
@@ -692,21 +710,16 @@ Please note that Cloudbreak is launching Hadoop clusters on the user's behalf - 
 Though Cloudbreak controls your Hadoop cluster lifecycle (start, stop, pause), we **do not** have access to the launched instances. The Hadoop clusters created by Cloudbreak are private to you.
 
 
-###DIY - Deploying Cloudbreak API using Docker
+###DIY - Deploying Cloudbreak UI and API
 
-To deploy a running Coudbreak instance the only thing you will need to do is to get the code first.
-
-```
-git clone https://github.com/sequenceiq/docker-cloudbreak.git
-cd docker-cloudbreak
-```
-
-Lauch the script below and follow the instructions.
+To deploy a running Cloudbreak instance the only thing you will need to do is to get the code first.
 
 ```
-./start_cloudbreak.sh
+git clone https://github.com/sequenceiq/cloudbreak-deployment.git
+cloudbreak-deployment
 ```
 
+Follow the instructions.
 
 <!--quickstart.md-->
 
@@ -723,8 +736,8 @@ All the Hadoop ecosystem related code, configuration and services are inside Doc
 
 We needed to find a unified way to provision, manage and configure Hadoop clusters - welcome **Apache Ambari**.
 
-###Public Beta - 0.1.21
-The first public beta version of Cloudbreak supports Hadoop on Amazon's EC2 and Microsoft's Azure cloud providers. The currently supported Hadoop is the Hortonworks Data Platform - the 100% open source Hadoop distribution.
+###Public Beta
+The first public beta version of Cloudbreak supports Hadoop on Amazon's EC2, Microsoft's Azure, Google Cloud Platform and OpenStack cloud providers. The supported Hadoop platform is the Hortonworks Data Platform - the 100% open source Hadoop distribution.
 
 Versions:
 
@@ -758,13 +771,11 @@ Consul - 0.4.1
 
 There is an effort by the community and SequenceIQ to bring [Apache Bigtop](http://bigtop.apache.org/) - the Apache Hadoop distribution - under the umbrella of Ambari. Once this effort is finished, Cloudbreak will support Apache Bigtop as a Hadoop distribution as well.
 
-In the meantime we have started an internal R&D project to bring Cloudera's CDH distribution under Apache Ambari - in case you would like to collaborate in this task with us or it sounds interesting to you, don't hesitate to contact us.
-
 Apache Ambari allows you to create your own [custom Hadoop stack](https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=38571133) - and you can use Cloudbreak to provision a cluster based on that.
 
 ####Cloud providers
 
-While we have just released the first public beta version of Cloudbreak, we have already started working on other cloud providers - namely Google Cloud Platform and Digital Ocean.
+While we have just released the first public beta version of Cloudbreak, we have already started working on other cloud providers - namely Rackspace and HP Helion Public Cloud.
 We have received many requests from people to integrate Cloudbreak with 3d party hypervisors and cloud providers - as IBM's SoftLayer. In case you'd like to have your favourite cloud provider listed don't hesitate to contact us or use our SDK and process to add yours. You can fill the following [questionnaire](https://docs.google.com/forms/d/129RVh6VfjRsuuHOcS3VPbFYTdM2SEjANDsGCR5Pul0I/viewform) and request your favourite cloud provider.
 
 Enjoy Cloudbreak - the Hadoop as a Service API which brings you a Hadoop ecosystem in minutes. You are literaly one click or REST call away from a fully functional, distributed Hadoop cluster.
