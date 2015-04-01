@@ -32,9 +32,10 @@ import javax.persistence.NamedQuery;
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceId= :instanceId"),
         @NamedQuery(
-                name = "InstanceMetaData.findHostNamesInInstanceGroup",
+                name = "InstanceMetaData.findAliveInstancesHostNamesInInstanceGroup",
                 query = "SELECT i.longName FROM InstanceMetaData i "
-                        + "WHERE i.instanceGroup.id = :instanceGroupId"),
+                        + "WHERE i.instanceGroup.id = :instanceGroupId "
+                        + "AND i.instanceStatus <> 'TERMINATED' "),
         @NamedQuery(
                 name = "InstanceMetaData.findRemovableInstances",
                 query = "SELECT i FROM InstanceMetaData i "

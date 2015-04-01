@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,9 +15,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.StackStartService;
 import com.sequenceiq.cloudbreak.core.flow.StackStopService;
+import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
@@ -25,6 +28,8 @@ import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.OnFailureAction;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -33,7 +38,9 @@ import com.sequenceiq.cloudbreak.domain.Subnet;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
@@ -69,6 +76,9 @@ public class SimpleStackFacade implements StackFacade {
 
     @Autowired
     private UserDataBuilder userDataBuilder;
+
+    @Autowired
+    private HostGroupService hostGroupService;
 
     @Override
     public FlowContext handleCreationFailure(FlowContext context) throws CloudbreakException {
@@ -162,7 +172,21 @@ public class SimpleStackFacade implements StackFacade {
         try {
             StackScalingContext updateContext = (StackScalingContext) context;
             stackScalingService.upscaleStack(updateContext.getStackId(), updateContext.getInstanceGroup(), updateContext.getScalingAdjustment());
-            return context;
+            Stack stack = stackRepository.findById(updateContext.getStackId());
+            HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
+            hostGroupAdjustmentJson.setWithStackUpdate(false);
+            hostGroupAdjustmentJson.setScalingAdjustment(updateContext.getScalingAdjustment());
+            if (stack.getCluster() != null) {
+                HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(stack.getCluster().getId(), updateContext.getInstanceGroup());
+                hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
+            }
+            UpdateAmbariHostsRequest updateAmbariHostsRequest = new UpdateAmbariHostsRequest(updateContext.getStackId(),
+                    hostGroupAdjustmentJson,
+                    new ArrayList<HostMetadata>(),
+                    false,
+                    updateContext.getCloudPlatform(),
+                    updateContext.getScalingType());
+            return new ClusterScalingContext(updateAmbariHostsRequest);
         } catch (Exception e) {
             LOGGER.error("Exception during the upscaling of stack: {}", e.getMessage());
             throw new CloudbreakException(e);

@@ -22,7 +22,7 @@ public class AmbariServerFilter implements HostFilter {
         List<HostMetadata> copy = new ArrayList<>(hosts);
         for (HostMetadata host : hosts) {
             InstanceMetaData instanceMetaData = instanceMetadataRepository.findHostInStack(stackId, host.getHostName());
-            if (instanceMetaData.getAmbariServer()) {
+            if (instanceMetaData != null && instanceMetaData.getAmbariServer()) {
                 copy.remove(host);
                 break;
             }

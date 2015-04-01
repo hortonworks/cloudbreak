@@ -34,9 +34,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.ScalingType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -238,29 +236,6 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public Cluster clusterCreationSuccess(Long clusterId, long creationFinished, String ambariIp) {
-        Cluster cluster = clusterRepository.findById(clusterId);
-        MDCBuilder.buildMdcContext(cluster);
-        cluster.setStatus(Status.AVAILABLE);
-        cluster.setStatusReason("");
-        cluster.setCreationFinished(creationFinished);
-        cluster.setUpSince(creationFinished);
-        cluster = clusterRepository.save(cluster);
-        Stack stack = stackRepository.findStackWithListsForCluster(clusterId);
-        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            Set<InstanceMetaData> instances = instanceGroup.getInstanceMetaData();
-            for (InstanceMetaData instanceMetaData : instances) {
-                instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
-            }
-            stackUpdater.updateStackMetaData(stack.getId(), instances, instanceGroup.getGroupName());
-        }
-        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "Cluster installation successfully finished. AMBARI_IP:" + stack.getAmbariIp());
-
-        // send email;
-        return cluster;
-    }
-
-    @Override
     public Cluster updateClusterStatusByStackId(Long stackId, Status status, String statusReason) {
         LOGGER.debug("Updating cluster status. stackId: {}, status: {}, statusReason: {}", stackId, status, statusReason);
         Cluster cluster = stackRepository.findById(stackId).getCluster();
@@ -348,23 +323,6 @@ public class AmbariClusterService implements ClusterService {
             LOGGER.error("Cannot connect to Ambari to get the configuration", e);
             throw new BadRequestException("Cannot connect to Ambari");
         }
-    }
-
-    private boolean validateUpdateHostsRequest(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
-        MDCBuilder.buildMdcContext(stack.getCluster());
-        HostGroup hostGroup = getHostGroup(stack, hostGroupAdjustment);
-        int scalingAdjustment = hostGroupAdjustment.getScalingAdjustment();
-        boolean downScale = scalingAdjustment < 0;
-        if (scalingAdjustment == 0) {
-            throw new BadRequestException("No scaling adjustments specified. Nothing to do.");
-        }
-        if (!downScale) {
-            validateUnregisteredHosts(hostGroup, scalingAdjustment);
-        } else {
-            validateRegisteredHosts(stack, hostGroupAdjustment);
-            validateComponentsCategory(stack, hostGroupAdjustment);
-        }
-        return downScale;
     }
 
     private void validateComponentsCategory(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
