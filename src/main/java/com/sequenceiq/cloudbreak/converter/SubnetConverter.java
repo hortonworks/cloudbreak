@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Subnet;
-import com.sequenceiq.cloudbreak.domain.SubnetJson;
+import com.sequenceiq.cloudbreak.controller.json.SubnetJson;
 
 @Component
 public class SubnetConverter extends AbstractConverter<SubnetJson, Subnet> {

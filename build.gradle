@@ -103,6 +103,7 @@ repositories {
     maven { url "http://maven.sequenceiq.com/snapshots" }
     maven { url "http://maven.sequenceiq.com/release" }
     maven { url "http://maven.sequenceiq.com/releases" }
+    maven { url 'http://repo.springsource.org/libs-release-remote/' }
 }
 
 dependencies {
@@ -148,6 +149,9 @@ dependencies {
     compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.47'
     compile 'org.jasypt:jasypt:1.9.2'
     compile 'com.google.guava:guava:16.0.1'
+    compile 'com.wordnik:swagger-core:1.5.2-M1'
+    compile "com.mangofactory:swagger-springmvc:1.0.1"
+    compile "org.ajar:swagger-spring-mvc-ui:0.4"
     checkstyle('com.puppycrawl.tools:checkstyle:5.7') {
         exclude group: 'com.google.guava'
     }

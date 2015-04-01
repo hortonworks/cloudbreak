@@ -1,8 +1,14 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
+
+@ApiModel("HostGroupAdjustment")
 public class HostGroupAdjustmentJson {
 
+    @ApiModelProperty(required = true)
     private String hostGroup;
+    @ApiModelProperty(required = true)
     private Integer scalingAdjustment;
     private Boolean withStackUpdate = false;
 

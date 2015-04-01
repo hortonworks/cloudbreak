@@ -6,6 +6,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -13,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.sequenceiq.cloudbreak.controller.validation.TrustedPlugin;
 import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
 
-
+@ApiModel("Recipe")
 public class RecipeJson implements JsonEntity {
 
     private String id;
@@ -21,6 +23,7 @@ public class RecipeJson implements JsonEntity {
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "The recipe's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
+    @ApiModelProperty(required = true)
     private String name;
     @Size(max = 1000)
     private String description;
@@ -28,6 +31,7 @@ public class RecipeJson implements JsonEntity {
     private Integer timeout;
 
     @TrustedPlugin
+    @ApiModelProperty(required = true)
     private Map<String, PluginExecutionType> plugins;
 
     @JsonProperty("properties")

@@ -5,7 +5,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.validation.Valid;
-
+import com.mangofactory.swagger.annotations.ApiIgnore;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +30,14 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintLoaderService;
 
 @Controller
+@Api(value = "/blueprints", description = "Operations on blueprints", position = 0)
 public class BlueprintController {
+
+    private static final String BLUEPRINT_REQUEST_NOTES =
+            "In the blueprint request, id, blueprintName and public parameters are not considered.";
+
+    private static final String BLUEPRINT_RESPONSE_NOTES =
+            "In the blueprint response, name and url parameters are not considered.";
 
     @Autowired
     private BlueprintService blueprintService;
@@ -41,18 +51,29 @@ public class BlueprintController {
     @Autowired
     private DefaultBlueprintLoaderService defaultBlueprintLoaderService;
 
+    @ApiOperation(value = "create blueprint as private resource", produces = "application/json",
+            notes = BLUEPRINT_REQUEST_NOTES)
     @RequestMapping(value = "user/blueprints", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<IdJson> createPrivateBlueprint(@ModelAttribute("user") CbUser user, @RequestBody @Valid BlueprintJson blueprintRequest) {
+    public ResponseEntity<IdJson> createPrivateBlueprint(
+            @ModelAttribute("user") CbUser user,
+            @ApiParam(name = "blueprint", required = true) @RequestBody @Valid BlueprintJson blueprintRequest) {
         return createBlueprint(user, blueprintRequest, false);
     }
 
+    @ApiOperation(value = "create blueprint as public or private resource", produces = "application/json",
+            notes = BLUEPRINT_REQUEST_NOTES)
     @RequestMapping(value = "account/blueprints", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<IdJson> createAccountBlueprint(@ModelAttribute("user") CbUser user, @RequestBody @Valid BlueprintJson blueprintRequest) {
+    public ResponseEntity<IdJson> createAccountBlueprint(
+            @ModelAttribute("user") CbUser user,
+            @ApiParam(name = "blueprint", required = true) @RequestBody @Valid BlueprintJson blueprintRequest) {
         return createBlueprint(user, blueprintRequest, true);
     }
 
+
+    @ApiOperation(value = "retrieve private blueprints", produces = "application/json",
+            notes = BLUEPRINT_RESPONSE_NOTES)
     @RequestMapping(value = "user/blueprints", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<BlueprintJson>> getPrivateBlueprints(@ModelAttribute("user") CbUser user) {
@@ -64,6 +85,8 @@ public class BlueprintController {
         return new ResponseEntity<>(blueprintConverter.convertAllEntityToJson(blueprints), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve a private blueprint by name", produces = "application/json",
+            notes = BLUEPRINT_RESPONSE_NOTES)
     @RequestMapping(value = "user/blueprints/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<BlueprintJson> getPrivateBlueprint(@ModelAttribute("user") CbUser user, @PathVariable String name) {
@@ -71,16 +94,20 @@ public class BlueprintController {
         return new ResponseEntity<>(blueprintConverter.convert(blueprint), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve a public or private (owned) blueprint by name", produces = "application/json",
+            notes = BLUEPRINT_RESPONSE_NOTES)
     @RequestMapping(value = "account/blueprints/{name}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<BlueprintJson> createAccountBlueprint(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+    public ResponseEntity<BlueprintJson> createAccountBlueprint(@ApiIgnore @ModelAttribute("user") CbUser user, @PathVariable String name) {
         Blueprint blueprint = blueprintService.getPublicBlueprint(name, user);
         return new ResponseEntity<>(blueprintConverter.convert(blueprint), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve public and private (owned) blueprints", produces = "application/json",
+            notes = BLUEPRINT_RESPONSE_NOTES)
     @RequestMapping(value = "account/blueprints", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Set<BlueprintJson>> getAccountBlueprints(@ModelAttribute("user") CbUser user) {
+    public ResponseEntity<Set<BlueprintJson>> getAccountBlueprints(@ApiIgnore @ModelAttribute("user") CbUser user) {
         Set<Blueprint> blueprints = blueprintService.retrieveAccountBlueprints(user);
         if (blueprints.isEmpty()) {
             Set<Blueprint> blueprintsList = defaultBlueprintLoaderService.loadBlueprints(user);
@@ -89,30 +116,38 @@ public class BlueprintController {
         return new ResponseEntity<>(blueprintConverter.convertAllEntityToJson(blueprints), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve blueprint by id", produces = "application/json",
+            notes = BLUEPRINT_RESPONSE_NOTES)
     @RequestMapping(value = "blueprints/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<BlueprintJson> getBlueprint(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+    public ResponseEntity<BlueprintJson> getBlueprint(@ApiIgnore @ModelAttribute("user") CbUser user, @PathVariable Long id) {
         Blueprint blueprint = blueprintService.get(id);
         return new ResponseEntity<>(blueprintConverter.convert(blueprint), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "delete blueprint by id", produces = "application/json",
+            notes = BLUEPRINT_RESPONSE_NOTES)
     @RequestMapping(value = "blueprints/{id}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<BlueprintJson> deleteBlueprint(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+    public ResponseEntity<BlueprintJson> deleteBlueprint(@ApiIgnore @ModelAttribute("user") CbUser user, @PathVariable Long id) {
         blueprintService.delete(id, user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @ApiOperation(value = "delete public (owned) or private blueprint by name", produces = "application/json",
+            notes = BLUEPRINT_RESPONSE_NOTES)
     @RequestMapping(value = "account/blueprints/{name}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<BlueprintJson> deleteBlueprintInAccount(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+    public ResponseEntity<BlueprintJson> deleteBlueprintInAccount(@ApiIgnore @ModelAttribute("user") CbUser user, @PathVariable String name) {
         blueprintService.delete(name, user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @ApiOperation(value = "delete private blueprint by name", produces = "application/json",
+            notes = BLUEPRINT_RESPONSE_NOTES)
     @RequestMapping(value = "user/blueprints/{name}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<BlueprintJson> deleteBlueprintInPrivate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+    public ResponseEntity<BlueprintJson> deleteBlueprintInPrivate(@ApiIgnore @ModelAttribute("user") CbUser user, @PathVariable String name) {
         blueprintService.delete(name, user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

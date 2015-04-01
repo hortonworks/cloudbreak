@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import com.wordnik.swagger.annotations.ApiModelProperty;
+
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -14,13 +16,16 @@ public class ClusterRequest {
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "The name of the cluster can only contain lowercase alphanumeric characters and hyphens and has to start with an alphanumeric character")
     @NotNull
+    @ApiModelProperty(required = true)
     private String name;
     @NotNull
+    @ApiModelProperty(required = true)
     private Long blueprintId;
     @Size(max = 1000)
     private String description;
     @Valid
     @NotNull
+    @ApiModelProperty(required = true)
     private Set<HostGroupJson> hostGroups;
     private Boolean emailNeeded = Boolean.FALSE;
 

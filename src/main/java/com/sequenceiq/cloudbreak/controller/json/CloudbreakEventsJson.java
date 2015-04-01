@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
 import com.sequenceiq.cloudbreak.domain.Status;
+import com.wordnik.swagger.annotations.ApiModel;
 
+@ApiModel("CloudbreakEvent")
 public class CloudbreakEventsJson implements JsonEntity {
 
     private String eventType;

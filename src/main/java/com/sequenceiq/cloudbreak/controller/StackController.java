@@ -6,6 +6,8 @@ import java.util.Set;
 
 import javax.validation.Valid;
 
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +38,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 
 @Controller
+@Api(value = "/stack", description = "Operations on stacks", position = 4)
 public class StackController {
 
     @Autowired
@@ -53,18 +56,21 @@ public class StackController {
     @Autowired
     private StackValidationConverter stackValidationConverter;
 
+    @ApiOperation(value = "create stack as private resource", produces = "application/json", notes = "")
     @RequestMapping(value = "user/stacks", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createPrivateStack(@ModelAttribute("user") CbUser user, @RequestBody @Valid StackJson stackRequest) {
         return createStack(user, stackRequest, false);
     }
 
+    @ApiOperation(value = "create stack as public or private resource", produces = "application/json", notes = "")
     @RequestMapping(value = "account/stacks", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createAccountStack(@ModelAttribute("user") CbUser user, @RequestBody @Valid StackJson stackRequest) {
         return createStack(user, stackRequest, true);
     }
 
+    @ApiOperation(value = "retrieve private stack", produces = "application/json", notes = "")
     @RequestMapping(value = "user/stacks", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<StackJson>> getPrivateStacks(@ModelAttribute("user") CbUser user) {
@@ -72,6 +78,7 @@ public class StackController {
         return new ResponseEntity<>(stackConverter.convertAllEntityToJson(stacks), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve public and private (owned) stack", produces = "application/json", notes = "")
     @RequestMapping(value = "account/stacks", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<StackJson>> getAccountStacks(@ModelAttribute("user") CbUser user) {
@@ -79,6 +86,7 @@ public class StackController {
         return new ResponseEntity<>(stackConverter.convertAllEntityToJson(stacks), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve stack by id", produces = "application/json", notes = "")
     @RequestMapping(value = "stacks/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<StackJson> getStack(@PathVariable Long id) {
@@ -87,6 +95,7 @@ public class StackController {
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve a private stack by name", produces = "application/json", notes = "")
     @RequestMapping(value = "user/stacks/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<StackJson> getStackInPrivate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
@@ -95,6 +104,7 @@ public class StackController {
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve a public or private (owned) stack by name", produces = "application/json", notes = "")
     @RequestMapping(value = "account/stacks/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<StackJson> getStackInPublic(@ModelAttribute("user") CbUser user, @PathVariable String name) {
@@ -103,12 +113,14 @@ public class StackController {
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "retrieve stack status by stack id", produces = "application/json", notes = "")
     @RequestMapping(value = "stacks/{id}/status", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getStackStatus(@PathVariable Long id) {
         return new ResponseEntity<>(stackConverter.convertStackStatus(stackService.get(id)), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "delete stack by id", produces = "application/json", notes = "")
     @RequestMapping(value = "stacks/{id}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<TemplateJson> deleteStack(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
@@ -116,6 +128,7 @@ public class StackController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @ApiOperation(value = "delete private stack by name", produces = "application/json", notes = "")
     @RequestMapping(value = "user/stacks/{name}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<TemplateJson> deletePrivateStack(@ModelAttribute("user") CbUser user, @PathVariable String name) {
@@ -123,6 +136,7 @@ public class StackController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @ApiOperation(value = "delete public (owned) or private stack by name", produces = "application/json", notes = "")
     @RequestMapping(value = "account/stacks/{name}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<TemplateJson> deletePublicStack(@ModelAttribute("user") CbUser user, @PathVariable String name) {
@@ -130,6 +144,7 @@ public class StackController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @ApiOperation(value = "update stack by id", produces = "application/json", notes = "")
     @RequestMapping(value = "stacks/{id}", method = RequestMethod.PUT)
     @ResponseBody
     public ResponseEntity<String> updateStack(@PathVariable Long id, @Valid @RequestBody UpdateStackJson updateRequest) {
@@ -146,6 +161,7 @@ public class StackController {
         }
     }
 
+    @ApiOperation(value = "retrieve stack metadata", produces = "application/json", notes = "")
     @RequestMapping(value = "stacks/metadata/{hash}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<InstanceMetaDataJson>> getStackMetadata(@PathVariable String hash) {
@@ -157,6 +173,7 @@ public class StackController {
         }
     }
 
+    @ApiOperation(value = "retrieve stack by ambari address", produces = "application/json", notes = "")
     @RequestMapping(value = "stacks/ambari", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<StackJson> getStackForAmbari(@RequestBody AmbariAddressJson json) {
@@ -164,6 +181,7 @@ public class StackController {
         return new ResponseEntity<>(stackConverter.convert(stack), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "validate stack", produces = "application/json", notes = "")
     @RequestMapping(value = "stacks/validate", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> validateStack(@RequestBody @Valid StackValidationRequest stackValidationRequest) {
