@@ -181,11 +181,10 @@ public class AmbariClusterService implements ClusterService {
                 cluster.setStatus(Status.START_REQUESTED);
                 clusterRepository.save(cluster);
             } else {
-                if (!Status.STOPPED.equals(clusterStatus)) {
+                if (clusterNotReadyForStart(clusterStatus)) {
                     throw new BadRequestException(
                             String.format("Cannot update the status of cluster '%s' to STARTED, because it isn't in STOPPED state.", clusterId));
-                }
-                if (!Status.AVAILABLE.equals(stackStatus)) {
+                } else if (!Status.AVAILABLE.equals(stackStatus)) {
                     throw new BadRequestException(
                             String.format("Cannot update the status of cluster '%s' to STARTED, because the stack is not AVAILABLE", clusterId));
                 }
@@ -195,21 +194,34 @@ public class AmbariClusterService implements ClusterService {
                 flowManager.triggerClusterStart(retVal);
             }
         } else {
-            if (!Status.AVAILABLE.equals(clusterStatus)) {
+            if (clusterNotReadyForStop(clusterStatus)) {
                 throw new BadRequestException(
                         String.format("Cannot update the status of cluster '%s' to STOPPED, because it isn't in AVAILABLE state.", clusterId));
-            }
-            if (!Status.AVAILABLE.equals(stackStatus) && !Status.STOP_REQUESTED.equals(stackStatus)) {
+            } else if (stackNotReadyForStop(stackStatus)) {
                 throw new BadRequestException(
                         String.format("Cannot update the status of cluster '%s' to STARTED, because the stack is not AVAILABLE", clusterId));
             }
-            cluster.setStatus(Status.STOP_IN_PROGRESS);
-            clusterRepository.save(cluster);
-            retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest, stack.cloudPlatform());
-            flowManager.triggerClusterStop(retVal);
+            if (Status.AVAILABLE.equals(clusterStatus)) {
+                cluster.setStatus(Status.STOP_IN_PROGRESS);
+                clusterRepository.save(cluster);
+                retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest, stack.cloudPlatform());
+                flowManager.triggerClusterStop(retVal);
+            }
         }
 
         return retVal;
+    }
+
+    private boolean stackNotReadyForStop(Status stackStatus) {
+        return !Status.AVAILABLE.equals(stackStatus) && !Status.STOP_REQUESTED.equals(stackStatus);
+    }
+
+    private boolean clusterNotReadyForStop(Status clusterStatus) {
+        return !Status.AVAILABLE.equals(clusterStatus) && !Status.STOPPED.equals(clusterStatus);
+    }
+
+    private boolean clusterNotReadyForStart(Status clusterStatus) {
+        return !Status.STOPPED.equals(clusterStatus) && !Status.START_REQUESTED.equals(clusterStatus);
     }
 
     @Override

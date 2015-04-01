@@ -188,11 +188,14 @@ public class DefaultStackService implements StackService {
         MDCBuilder.buildMdcContext(stack);
         Status stackStatus = stack.getStatus();
         if (status.equals(StatusRequest.STARTED)) {
-            if (!Status.STOPPED.equals(stackStatus)) {
+            Status clusterStatus = clusterRepository.findOneWithLists(stack.getCluster().getId()).getStatus();
+            if (!Status.STOPPED.equals(stackStatus) && !(Status.AVAILABLE.equals(stackStatus) && Status.START_REQUESTED.equals(clusterStatus))) {
                 throw new BadRequestException(String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stackId));
             }
-            stackUpdater.updateStackStatus(stackId, Status.START_IN_PROGRESS, "Cluster infrastructure is now starting.");
-            flowManager.triggerStackStart(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), status));
+            if (!Status.AVAILABLE.equals(stackStatus)) {
+                stackUpdater.updateStackStatus(stackId, Status.START_IN_PROGRESS, "Cluster infrastructure is now starting.");
+                flowManager.triggerStackStart(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), status));
+            }
         } else {
             Status clusterStatus = clusterRepository.findOneWithLists(stack.getCluster().getId()).getStatus();
             String stopRequestedMsg = "Stopping of cluster infrastructure has been requested.";
