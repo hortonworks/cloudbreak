@@ -4,6 +4,7 @@ public enum ResourceType {
     // AZURE
     AZURE_VIRTUAL_MACHINE,
     AZURE_CLOUD_SERVICE,
+    AZURE_RESERVED_IP,
     AZURE_BLOB,
     AZURE_STORAGE,
     AZURE_NETWORK,
@@ -12,6 +13,7 @@ public enum ResourceType {
 
     // AWS
     CLOUDFORMATION_STACK,
+    AWS_RESERVED_IP,
 
     // OPENSTACK
     HEAT_STACK,

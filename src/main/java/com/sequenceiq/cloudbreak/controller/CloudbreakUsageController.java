@@ -89,7 +89,7 @@ public class CloudbreakUsageController {
             zone = transformedZone.getValue();
         } else if (zoneFromJson != null && CloudPlatform.AZURE.name().equals(cloud)) {
             AzureLocation transformedZone = AzureLocation.valueOf(zoneFromJson);
-            zone = transformedZone.location();
+            zone = transformedZone.region();
         }
         return zone;
     }
