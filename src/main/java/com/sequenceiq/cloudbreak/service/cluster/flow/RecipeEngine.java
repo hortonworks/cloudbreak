@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 @Component
 public class RecipeEngine {
 
+    public static final int DEFAULT_RECIPE_TIMEOUT = 15;
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeEngine.class);
 
     @Autowired
@@ -47,11 +48,11 @@ public class RecipeEngine {
     }
 
     public void executePreInstall(Stack stack) {
-        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.PRE_INSTALL);
+        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.PRE_INSTALL, DEFAULT_RECIPE_TIMEOUT);
     }
 
     public void executePostInstall(Stack stack) {
-        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.POST_INSTALL);
+        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.POST_INSTALL, DEFAULT_RECIPE_TIMEOUT);
     }
 
     private void setupProperties(Set<HostGroup> hostGroups, Set<InstanceMetaData> instances) {
@@ -70,7 +71,7 @@ public class RecipeEngine {
         for (Recipe recipe : recipes) {
             Map<String, PluginExecutionType> plugins = recipe.getPlugins();
             Map<String, Set<String>> eventIdMap = pluginManager.installPlugins(instances, plugins, getHostnames(hostMetadata));
-            pluginManager.waitForEventFinish(stack, instances, eventIdMap);
+            pluginManager.waitForEventFinish(stack, instances, eventIdMap, recipe.getTimeout());
         }
     }
 

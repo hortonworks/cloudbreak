@@ -57,6 +57,7 @@ public class Recipe implements ProvisionEntity {
     @Column(name = "execution_type")
     @Enumerated(EnumType.STRING)
     private Map<String, PluginExecutionType> plugins;
+    private Integer timeout;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "key")
@@ -131,5 +132,13 @@ public class Recipe implements ProvisionEntity {
 
     public void setPublicInAccount(boolean publicInAccount) {
         this.publicInAccount = publicInAccount;
+    }
+
+    public Integer getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(Integer timeout) {
+        this.timeout = timeout;
     }
 }

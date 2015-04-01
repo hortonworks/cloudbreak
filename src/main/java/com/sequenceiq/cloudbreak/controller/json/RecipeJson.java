@@ -9,6 +9,7 @@ import javax.validation.constraints.Size;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.sequenceiq.cloudbreak.controller.validation.TrustedPlugin;
 import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
 
@@ -23,6 +24,8 @@ public class RecipeJson implements JsonEntity {
     private String name;
     @Size(max = 1000)
     private String description;
+    @JsonPropertyDescription("Recipe timeout in minutes.")
+    private Integer timeout;
 
     @TrustedPlugin
     private Map<String, PluginExecutionType> plugins;
@@ -70,5 +73,13 @@ public class RecipeJson implements JsonEntity {
 
     public void setPlugins(Map<String, PluginExecutionType> plugins) {
         this.plugins = plugins;
+    }
+
+    public Integer getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(Integer timeout) {
+        this.timeout = timeout;
     }
 }
