@@ -282,7 +282,7 @@ The command generates the following files into the directory you ran the command
 
 (obviously artifacts can be named after your wish)
 
-Fill the form by providing your Azure `Subscription Id`, a file password and the **content** of the previously generated certificate (my_azure_cert.pem).
+Fill the form by providing your Azure `Subscription Id`, and the **content** of the previously generated certificate (my_azure_cert.pem).
 
 _Note:_ Cloudbreak will generate a `JKS` file (stored by the backend) and a `certificate` with the `passphrase`. You will need to upload the generated certificate (that is automatically downloaded to you after the form submission, alternatively you can download it any time from Cloudbreak) to your Azure account:
 
@@ -377,7 +377,7 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 
 `SSH public key:` an SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later
 
-The user name if you want to ssh into one of your instance is `ubuntu` .
+`Public in account:` share it with others in the account
 
 
 **Azure**
@@ -390,7 +390,7 @@ The user name if you want to ssh into one of your instance is `ubuntu` .
 
 `File password:` your generated JKS file password - see Accounts
 
-`SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later (The key generation process is described in the Configuring the Microsoft Azure account section)
+`SSH certificate:` the SSH public certificate in OpenSSH format that's private keypair can be used to log into the launched instances later (The key generation process is described in the Configuring the Microsoft Azure account section)
 
 
 **Google Cloud Platform**
@@ -401,14 +401,32 @@ The user name if you want to ssh into one of your instance is `ubuntu` .
 
 `Project Id:` your GCP Project id - see Accounts
 
-`Service Account Id:` your GCP service account mail address - see Accounts
+`Service Account Email Address:` your GCP service account mail address - see Accounts
 
-`Service Account private key:` your GCP service account generated private key - see Accounts
+`Service Account private (p12) key:` your GCP service account generated private key - see Accounts
 
 `SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later
 
-The user name if you want to ssh into one of your instance is `ubuntu`.
+`Public in account:` share it with others in the account
 
+
+**OpenStack**
+
+`Name:` name of your credential
+
+`Description:` short description of your linked credential
+
+`User:` OpenStack user name
+
+`Password:` OpenStack user's password name
+
+`Tenant Name:` OpenStack tenant's (project) name
+
+`Endpoint:` OpenStack API address endpoint's
+
+`SSH public key:` the SSH public key to be used to log into the launched instances later
+
+`Public in account:` share it with others in the account
 
 ###Manage templates
 Using manage templates you can create infrastructure templates.
@@ -421,7 +439,7 @@ Using manage templates you can create infrastructure templates.
 
 `Instance type:` the Amazon instance type to be used - we suggest to use at least small or medium instances
 
-`Volume type:` option to choose SSD or regular HDD
+`Volume type:` option to choose are SSD, regular HDD (both EBS) or Ephemeral
 
 `Attached volumes per instance:` the number of disks to be attached
 
@@ -439,7 +457,7 @@ Using manage templates you can create infrastructure templates.
 
 `Description:` short description of your template
 
-`Instance type:` the Azure instance type to be used - we suggest to use at least small or medium instances
+`Instance type:` the Azure instance type to be used - we suggest to use at least D2 or D4 instances
 
 `Attached volumes per instance:` the number of disks to be attached
 
@@ -546,6 +564,8 @@ Connecting a new cloud provider means that the Cloudbreak rest API should handle
 
 - *GET*: Describes the cloud resources by communicating with the cloud provider.
 
+- *PUT*: Updates the cloud resources by communicating with the cloud provider.
+
 When connecting a new cloud provider, the `CloudPlatform` enum that holds the providers should be extended first. It is used to find the implementations when a request arrives.
 The main idea is the same behind every method: deal with the database calls in the controller, then call the correct implementation that communicates with the cloud platform. This enables the connectors to be detached from the repository calls, so they should only deal with the communication with the providers.
 
@@ -605,8 +625,7 @@ The last step is a bit different because it requires the implementation of the u
 - `ProvisionSetup`: This step should create every cloud provider resource that will be used during the provisioning. For example the EC2 implementation uses SNS topics to notify Cloudbreak when an EC2 resource creation is completed. These topics are created (or retrieved) in this step, and the identifiers are sent in the `PROVISION_SETUP_COMPLETE` event as a key-value pair. (see `AwsProvisionSetup`)
 
 - `Provisioner`: The actual cloud resource creation is done here. The `PROVISION_COMPLETE` must be sent after every resource creation is initialised. It must contain the type and id of the created resources. This process can be async itself, e.g.: AWS CloudFormation is able to notify clients through an SNS topic when specific resources are created - the `PROVISION_COMPLETE` event is only sent after this notification arrives. `AwsProvisioner` handles the resource requests and `SnsMessageHandler` handles the notifications coming from Amazon SNS.
-There are a few restrictions for the resources to be created: the service must start as many instances as it is specified in the stack object and these instances must be started in a different subnet for every stack. They must also be able to reach the Internet, and a few ports should be open in the subnet.
-We recommend to create and use **pre-installed images** from a vanilla Ubuntu that have Docker and some other required tools installed and the sequenceiq/ambari image downloaded, so these things don't have to be done every time an instance is started. This prevents network issues and shortens the time of the provisioning. We have also created an [Ansible playbook]() that can be used to create the image.
+There are a few restrictions for the resources to be created: the service must start as many instances as it is specified in the stack object and these instances must be started in a different subnet for every stack. They must also be able to reach the Internet, and a few ports should be open in the subnet. We have also created an [Ansible playbook]() that can be used to create the image.
 
 - `MetadataSetup`: The Cloudbreak instance metadata service is detailed [here](#metadata-service). For this to work, the cloud platform connectors must provide details to Cloudbreak about the instances that were started in a stack. The `CoreInstanceMetaData` (private IP in VPC, public IP and instance identifier) of every instance must be retrieved from the cloud platform and must be sent in a `METADATA_SETUP_COMPLETE` event. (see `AwsMetadataSetup`)
 
