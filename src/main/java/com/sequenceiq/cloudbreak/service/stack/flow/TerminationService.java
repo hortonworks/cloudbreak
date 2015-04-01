@@ -79,6 +79,8 @@ public class TerminationService {
         if (cluster != null) {
             cluster.setName(terminatedName);
             cluster.setBlueprint(null);
+            cluster.setStatus(Status.DELETE_COMPLETED);
+            cluster.setStatusReason(DELETE_COMPLETED_MSG);
             for (HostGroup hostGroup : hostGroupRepository.findHostGroupsInCluster(cluster.getId())) {
                 hostGroup.getRecipes().clear();
                 hostGroupRepository.save(hostGroup);
