@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
 
+import static com.sequenceiq.cloudbreak.service.cluster.flow.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
 
 import java.util.Map;
@@ -54,7 +55,7 @@ public class StackStopService {
 
         if (stack != null && Status.STOP_REQUESTED.equals(stack.getStatus())) {
             stackUpdater.updateStackStatus(stackId, Status.STOP_IN_PROGRESS, "Cluster infrastructure is stopping.");
-            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.STOP_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT);
+            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.STOP_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
             boolean stopped;
             CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
             stopped = connector.stopAll(stack);

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import static com.sequenceiq.cloudbreak.service.cluster.flow.DockerContainer.AMBARI_AGENT;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -48,11 +50,11 @@ public class RecipeEngine {
     }
 
     public void executePreInstall(Stack stack) {
-        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.PRE_INSTALL, DEFAULT_RECIPE_TIMEOUT);
+        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.PRE_INSTALL, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
     }
 
     public void executePostInstall(Stack stack) {
-        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.POST_INSTALL, DEFAULT_RECIPE_TIMEOUT);
+        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.POST_INSTALL, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
     }
 
     private void setupProperties(Set<HostGroup> hostGroups, Set<InstanceMetaData> instances) {

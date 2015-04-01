@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.controller.json.HostGroupJson;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -27,4 +30,6 @@ public interface ClusterService {
     Cluster updateClusterStatusByStackId(Long stackId, Status status, String statusReason);
 
     Cluster updateCluster(Cluster cluster);
+
+    Cluster recreate(Long stackId, Long blueprintId, Set<HostGroupJson> hostgroups);
 }

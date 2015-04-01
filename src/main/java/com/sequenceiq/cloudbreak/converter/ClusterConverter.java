@@ -109,7 +109,7 @@ public class ClusterConverter {
         return clusterResponse;
     }
 
-    private Set<HostGroup> convertHostGroupsFromJson(Long stackId, Cluster cluster, Set<HostGroupJson> hostGroupsJsons) {
+    public Set<HostGroup> convertHostGroupsFromJson(Long stackId, Cluster cluster, Set<HostGroupJson> hostGroupsJsons) {
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupJson json : hostGroupsJsons) {
             HostGroup hostGroup = new HostGroup();

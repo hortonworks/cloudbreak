@@ -71,6 +71,14 @@ public class ReactorFlowManager implements FlowManager {
     }
 
     @Override
+    public void triggerClusterReInstall(Object object) {
+        ProvisionRequest provisionRequest = (ProvisionRequest) object;
+        ProvisioningContext context = new ProvisioningContext.Builder().
+                setDefaultParams(provisionRequest.getStackId(), provisionRequest.getCloudPlatform()).build();
+        reactor.notify(FlowPhases.CLUSTER_RESET.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_RESET.name()));
+    }
+
+    @Override
     public void triggerStackStop(Object object) {
         StackStatusUpdateRequest statusUpdateRequest = (StackStatusUpdateRequest) object;
         StackStatusUpdateContext context = new StackStatusUpdateContext(statusUpdateRequest.getStackId(), statusUpdateRequest.getCloudPlatform(), false);

@@ -255,6 +255,21 @@ public class AmbariClusterFacade implements ClusterFacade {
         return context;
     }
 
+    @Override
+    public FlowContext resetAmbariCluster(FlowContext context) throws CloudbreakException {
+        ProvisioningContext provisioningContext = (ProvisioningContext) context;
+        Stack stack = stackService.getById(provisioningContext.getStackId());
+        Cluster cluster = stack.getCluster();
+        MDCBuilder.buildMdcContext(stack);
+        ambariClusterConnector.resetAmbariCluster(provisioningContext.getStackId());
+        cluster.setStatus(Status.REQUESTED);
+        stackUpdater.updateStackCluster(stack.getId(), cluster);
+        return new ProvisioningContext.Builder()
+                .withProvisioningContext(provisioningContext)
+                .setAmbariIp(stack.getAmbariIp())
+                .build();
+    }
+
     private void changeAmbariCredentials(String ambariIp, Stack stack) {
         String userName = stack.getUserName();
         String password = stack.getPassword();

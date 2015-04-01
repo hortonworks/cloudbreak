@@ -83,6 +83,9 @@ public class ClusterController {
         if (updateJson.getStatus() != null) {
             clusterService.updateStatus(stackId, updateJson.getStatus());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else if (updateJson.getBlueprintId() != null && updateJson.getHostgroups() != null && stack.getCluster().isStateFailed()) {
+            clusterService.recreate(stackId, updateJson.getBlueprintId(), updateJson.getHostgroups());
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else if (updateJson.getHostGroupAdjustment() != null) {
             if (!stackStatus.equals(Status.AVAILABLE)) {
                 throw new BadRequestException(String.format(

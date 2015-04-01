@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow;
 
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
 
 import java.util.Map;
@@ -116,7 +117,7 @@ public class StackStartService {
     private void handlePollingResultForStart(StackStatusUpdateContext stackStatusUpdateContext, Stack updatedStack, PollingResult pollingResult)
             throws CloudbreakException {
         Cluster cluster = clusterRepository.findOneWithLists(updatedStack.getCluster().getId());
-        pluginManager.triggerAndWaitForPlugins(updatedStack, ConsulPluginEvent.START_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT);
+        pluginManager.triggerAndWaitForPlugins(updatedStack, ConsulPluginEvent.START_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
         PollingResult hostsJoined = restartAmbariAgentsIfNeeded(updatedStack, waitForHostsToJoin(updatedStack));
         if (isSuccess(pollingResult)) {
             String statusReason = "Cluster infrastructure is available, starting of services has been requested. AMBARI_IP:" + updatedStack.getAmbariIp();
@@ -157,7 +158,7 @@ public class StackStartService {
     private PollingResult restartAmbariAgentsIfNeeded(Stack stack, PollingResult started) {
         if (!isSuccess(started)) {
             LOGGER.info("Ambari agents couldn't join. Restart ambari agents...");
-            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.RESTART_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT);
+            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.RESTART_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
             return waitForHostsToJoin(stack);
         }
         return PollingResult.SUCCESS;

@@ -12,6 +12,8 @@ public interface FlowManager {
 
     void triggerClusterInstall(Object object);
 
+    void triggerClusterReInstall(Object object);
+
     void triggerTermination(Object object);
 
     void triggerStackStop(Object object);

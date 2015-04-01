@@ -56,16 +56,18 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
     @Autowired
     private SecurityService securityService;
 
-    @Value("${cb.aws.ami.map}")
+    @Value("${cb.aws.ami.map:eu-west-1:ami-f3670284,us-east-1:ami-f8477690,ap-northeast-1:ami-34cd3134,sa-east-1:ami-29e45e34,ap-southeast-1:ami-8a2c1fd8,"
+            + "ap-southeast-2:ami-6132405b,us-west-2:ami-57c7ee67,us-west-1:ami-8d42a2c9}")
     private String awsImage;
 
-    @Value("${cb.gcp.source.image.path}")
+    @Value("${cb.gcp.source.image.path:sequenceiqimage/sequenceiq-ambari17-consul-centos-2015-04-02-1413.image.tar.gz}")
     private String gcpImage;
 
-    @Value("${cb.azure.image.uri}")
+    @Value("${cb.azure.image.uri:https://102589fae040d8westeurope.blob.core.windows.net/images/"
+            + "packer-cloudbreak-2015-04-02-centos6-reset_2015-April-2_13-36-os-2015-04-02.vhd}")
     private String azureImage;
 
-    @Value("${cb.openstack.image}")
+    @Value("${cb.openstack.image:cloudbreak-centos-amb17-2015-04-02}")
     private String openStackImage;
 
     @Override

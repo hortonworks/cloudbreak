@@ -5,14 +5,19 @@
         "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 
 <suppressions>
-    <!-- suppressing checks in tests -->
+    <!-- suppressing checks in real classes -->
     <suppress checks="Javadoc.*" files="test|Dummy|Mock"/>
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="test|Dummy|Mock"/>
-    <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="UpdateInstancesRequestHandler.java"/>
-    <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="StackStatusUpdateHandler.java"/>
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="AzureCloudServiceResourceBuilder.java"/>
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="PublicKeyReaderUtil.java"/>
-    <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="ProvisionContext.java"/>
+    <suppress checks="ParameterNumber" files="CloudbreakUsageController.java"/>
+    <suppress checks="IllegalCatch" files="CredentialController.java"/>
+    <suppress checks="IllegalCatch" files="GccRemoveCheckerStatus.java"/>
+    <suppress checks="IllegalCatch" files="GccStackUtil.java"/>
+    <suppress checks="IllegalCatch" files="GccProvisionSetup.java"/>
+    <suppress checks="MagicNumber" files="AzureStackUtil.java"/>
+
+    <!-- suppressing checks in tests -->
     <suppress id="sysout" files="VersionedApplication.java"/>
     <suppress checks="MagicNumberCheck" files="test|Dummy|Mock|simulator"/>
     <suppress id="IllegalTypeImpl" files="test"/>
@@ -20,15 +25,6 @@
     <suppress checks="AbstractClassName" files="test"/>
     <suppress checks="EmptyBlock" files="test"/>
     <suppress checks="HideUtilityClassConstructor" files=".*Application.java"/>
-    <suppress checks="ParameterNumber" files="AzureProvisioner.java"/>
-    <suppress checks="ParameterNumber" files="CloudbreakUsageController.java"/>
-    <suppress checks="IllegalCatch" files="CredentialController.java"/>
-    <suppress checks="IllegalCatch" files="GccDiskCheckerStatus.java"/>
-    <suppress checks="IllegalCatch" files="GccInstanceCheckerStatus.java"/>
-    <suppress checks="IllegalCatch" files="GccRemoveCheckerStatus.java"/>
-    <suppress checks="IllegalCatch" files="GccStackUtil.java"/>
-    <suppress checks="IllegalCatch" files="GccProvisionSetup.java"/>
-    <suppress checks="MagicNumber" files="AzureStackUtil.java"/>
 
     <!-- -->
 
