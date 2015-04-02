@@ -355,7 +355,7 @@ An account user is a user who has been invited to join Cloudbreak by an account 
 ##Cloudbreak UI
 
 When we have started to work on Cloudbreak, our main goal was to create an easy to use, cloud and Hadoop distribution agnostic Hadoop as a Service API. Though we always like to automate everything and approach things with a very DevOps mindset, as a side project we have created a UI for Cloudbreak as well.
-The goal of the UI is to ease to process and allow you to create a Hadoop cluster on your favourite cloud provider in `one-click`.
+The goal of the UI is to ease to process and allow you to create a Hadoop cluster on your favorite cloud provider in `one-click`.
 
 ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/UI-screenshot.png)
 
@@ -722,7 +722,7 @@ In order to understand the state of your Hadoop as a Servie stack and the potent
 We provide you two different ways to start using Cloudbreak. The simplest and easiest solution is hosted by SequenceIQ, however we encourage you to get Cloudbreak and deployed it on-premise or on your favorite cloud provider.
 
 ###Hosted - Cloudbreak UI and API  
-The easiest way to start your own Hadoop cluster in your favourite cloud provider is to use our hosted solution. We host, maintain and support [Cloudbreak](https://cloudbreak.sequenceiq.com/) for you.
+The easiest way to start your own Hadoop cluster in your favorite cloud provider is to use our hosted solution. We host, maintain and support [Cloudbreak](https://cloudbreak.sequenceiq.com/) for you.
 
 Please note that Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. We do not store your cloud provider account details (such as username, password, keys, private SSL certificates, etc), but work around the concept that Identity and Access Management is fully controlled by you - the end user.
 
@@ -794,8 +794,15 @@ Apache Ambari allows you to create your own [custom Hadoop stack](https://cwiki.
 
 ####Cloud providers
 
-While we have just released the first public beta version of Cloudbreak, we have already started working on other cloud providers - namely Rackspace and HP Helion Public Cloud.
-We have received many requests from people to integrate Cloudbreak with 3d party hypervisors and cloud providers - as IBM's SoftLayer. In case you'd like to have your favourite cloud provider listed don't hesitate to contact us or use our SDK and process to add yours. You can fill the following [questionnaire](https://docs.google.com/forms/d/129RVh6VfjRsuuHOcS3VPbFYTdM2SEjANDsGCR5Pul0I/viewform) and request your favourite cloud provider.
+Supported cloud providers:
+
+  * Amazon AWS
+  * Microsoft Azure
+  * Google Cloud Platform
+  * OpenStack
+
+While we have just released the first public beta version of Cloudbreak, we have already started working on other cloud providers - namely *Rackspace* and *HP Helion Public Cloud*.
+We have received many requests from people to integrate Cloudbreak with 3d party hypervisors and cloud providers - as IBM's SoftLayer. In case you'd like to have your favorite cloud provider listed don't hesitate to contact us or use our SDK and process to add yours. You can fill the following [questionnaire](https://docs.google.com/forms/d/129RVh6VfjRsuuHOcS3VPbFYTdM2SEjANDsGCR5Pul0I/viewform) and request your favorite cloud provider. In case you'd like to integrate your favorite provider we are happy to support you and merge your contribution.
 
 Enjoy Cloudbreak - the Hadoop as a Service API which brings you a Hadoop ecosystem in minutes. You are literaly one click or REST call away from a fully functional, distributed Hadoop cluster.
 
@@ -902,4 +909,4 @@ It is your responsibility to ensure that your use and/or transfer does not
 violate applicable laws.
 
 ### Licensing
-Cloudbreak is licensed under the Apache License, Version 2.0. See [LICENSE](http://www.apache.org/licenses/LICENSE-2.0.html) for full license text.
+Cloudbreak is licensed under the Apache License, Version 2.0. See [LICENSE](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/LICENSE) for the full license text.
