@@ -61,6 +61,8 @@ public class Cluster implements ProvisionEntity {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String statusReason;
 
+    private Boolean secure;
+
     private Boolean emailNeeded;
 
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -172,5 +174,13 @@ public class Cluster implements ProvisionEntity {
 
     public boolean isStateFailed() {
         return status.equals(Status.CREATE_FAILED);
+    }
+
+    public boolean isSecure() {
+        return secure == null ? false : secure;
+    }
+gi
+    public void setSecure(Boolean secure) {
+        this.secure = secure;
     }
 }

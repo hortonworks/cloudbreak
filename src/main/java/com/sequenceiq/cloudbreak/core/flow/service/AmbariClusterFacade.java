@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -79,6 +80,9 @@ public class AmbariClusterFacade implements ClusterFacade {
 
     @Autowired
     private HostGroupService hostGroupService;
+
+    @Autowired
+    private ClusterSecurityService securityService;
 
     @Override
     public FlowContext allocateAmbariRoles(FlowContext context) throws Exception {
@@ -227,6 +231,18 @@ public class AmbariClusterFacade implements ClusterFacade {
     }
 
     @Override
+    public FlowContext handleSecurityEnableFailure(FlowContext flowContext) throws CloudbreakException {
+        ProvisioningContext context = (ProvisioningContext) flowContext;
+        Cluster cluster = clusterService.updateClusterStatusByStackId(context.getStackId(), Status.ENABLE_SECURITY_FAILED, context.getErrorReason());
+        MDCBuilder.buildMdcContext(cluster);
+        eventService.fireCloudbreakEvent(context.getStackId(), Status.ENABLE_SECURITY_FAILED.name(), context.getErrorReason());
+        if (cluster.getEmailNeeded()) {
+            emailSenderService.sendFailureEmail(cluster.getOwner());
+        }
+        return context;
+    }
+
+    @Override
     public FlowContext upscaleCluster(FlowContext context) throws CloudbreakException {
         ClusterScalingContext scalingContext = (ClusterScalingContext) context;
         Stack stack = stackService.getById(scalingContext.getStackId());
@@ -288,6 +304,18 @@ public class AmbariClusterFacade implements ClusterFacade {
                 .withProvisioningContext(provisioningContext)
                 .setAmbariIp(stack.getAmbariIp())
                 .build();
+    }
+
+    public FlowContext enableSecurity(FlowContext context) throws CloudbreakException {
+        ProvisioningContext provisioningContext = (ProvisioningContext) context;
+        Stack stack = stackService.getById(provisioningContext.getStackId());
+        if (stack.getCluster().isSecure()) {
+            LOGGER.debug("Cluster security is desired, trying to enable kerberos");
+            securityService.enableKerberosSecurity(stack);
+        } else {
+            LOGGER.debug("Cluster security is not requested");
+        }
+        return provisioningContext;
     }
 
     private void changeAmbariCredentials(String ambariIp, Stack stack) {

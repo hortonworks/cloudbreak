@@ -12,14 +12,13 @@ import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import reactor.event.Event;
 
 @Component
-public class ClusterCreationHandler extends AbstractFlowHandler<ProvisioningContext> implements FlowHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCreationHandler.class);
+public class ClusterSecurityHandler extends AbstractFlowHandler<ProvisioningContext> implements FlowHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterSecurityHandler.class);
 
     @Override
     protected Object execute(Event<ProvisioningContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
-        ProvisioningContext provisioningContext = (ProvisioningContext) getFlowFacade().buildAmbariCluster(event.getData());
-        LOGGER.info("Cluster created. Context: {}", provisioningContext);
+        ProvisioningContext provisioningContext = (ProvisioningContext) getFlowFacade().enableSecurity(event.getData());
         return provisioningContext;
     }
 
@@ -27,6 +26,12 @@ public class ClusterCreationHandler extends AbstractFlowHandler<ProvisioningCont
     protected Object handleErrorFlow(Throwable throwable, ProvisioningContext data) throws Exception {
         LOGGER.info("handleErrorFlow() for phase: {}", getClass());
         data.setErrorReason(throwable.getMessage());
-        return getFlowFacade().handleClusterCreationFailure(data);
+        CloudbreakException exception = (CloudbreakException) throwable;
+        if (exception.getCause() instanceof InterruptedException) {
+            LOGGER.info("Enable kerberos flow has been interrupted");
+        } else {
+            return getFlowFacade().handleSecurityEnableFailure(data);
+        }
+        return data;
     }
 }
