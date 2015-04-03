@@ -24,6 +24,13 @@
     </div>
 </div>
 <div class="form-group">
+    <label class="col-sm-3 control-label" for="gcc_tvolumetype">Volume type</label>
+    <div class="col-sm-9">
+        <select class="form-control" id="gcc_tvolumetype" ng-options="diskType.key as diskType.value for diskType in $root.config.GCC.gccDiskTypes" ng-model="gccTemp.parameters.volumeType">
+        </select>
+    </div>
+</div>
+<div class="form-group">
     <label class="col-sm-3 control-label" for="gcc_tvolumecount">Attached volumes per instance</label>
     <div class="col-sm-9">
         <input type="number" name="gcc_tvolumecount" class="form-control" id="gcc_tvolumecount" min="1" ng-model="gccTemp.volumeCount" placeholder="1 -10" max="10" required>
@@ -40,13 +47,6 @@
              ng-show="gccTemplateForm.gcc_tvolumesize.$dirty && gccTemplateForm.gcc_tvolumesize.$invalid"><i class="fa fa-warning"></i>
             {{error_msg.volume_size_invalid}}
         </div>
-    </div>
-</div>
-<div class="form-group">
-    <label class="col-sm-3 control-label" for="gcc_tvolumetype">Volume type</label>
-    <div class="col-sm-9">
-        <select class="form-control" id="gcc_tvolumetype" ng-options="diskType.key as diskType.value for diskType in $root.config.GCC.gccDiskTypes" ng-model="gccTemp.parameters.volumeType">
-        </select>
     </div>
 </div>
 <div class="form-group">
