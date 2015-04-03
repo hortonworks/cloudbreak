@@ -33,19 +33,19 @@ public class StackDecorator implements Decorator<Stack> {
     @Autowired
     private SecurityService securityService;
 
-    @Value("${cb.aws.ami.map:ap-northeast-1:ami-b8ad69b8,sa-east-1:ami-5f53d642,ap-southeast-1:ami-76350824,eu-west-1:ami-11345766,"
-            + "ap-southeast-2:ami-5148356b,us-east-1:ami-fa181c92,us-west-1:ami-bd5dbff9,us-west-2:ami-fb1326cb}")
-    private String awsImage;
-
-    @Value("${cb.gcp.source.image.path:sequenceiqimage/cb-centos66-amb200-2-2015-04-20-1027.image.tar.gz}")
-    private String gcpImage;
-
     @Value("${cb.azure.image.uri:https://102589fae040d8westeurope.blob.core.windows.net/images/"
             + "cb-centos66-amb200-2015-04-18_2015-April-18_14-11-os-2015-04-18.vhd}")
     private String azureImage;
 
+    @Value("${cb.aws.ami.map:ap-northeast-1:ami-b8ad69b8,sa-east-1:ami-5f53d642,ap-southeast-1:ami-76350824,eu-west-1:ami-11345766,"
+            + "ap-southeast-2:ami-5148356b,us-east-1:ami-fa181c92,us-west-1:ami-bd5dbff9,us-west-2:ami-fb1326cb}")
+    private String awsImage;
+
     @Value("${cb.openstack.image:cb-centos66-amb200-2015-04-19}")
     private String openStackImage;
+
+    @Value("${cb.gcp.source.image.path:sequenceiqimage/cb-centos66-amb200-2-2015-04-20-1027.image.tar.gz}")
+    private String gcpImage;
 
     private enum DecorationData {
         CREDENTIAL_ID,

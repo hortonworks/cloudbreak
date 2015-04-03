@@ -109,7 +109,7 @@ public class AmbariRoleAllocatorTest {
                 anyInt(), anyInt())).willReturn(PollingResult.SUCCESS);
         doReturn(DUMMY_AMBARI_ADDRESS).when(underTest).getAmbariAddress(anyList());
         // WHEN
-        underTest.allocateRoles(1L, coreInstanceMetaData);
+        underTest.allocateRoles(1L);
         // THEN
         verify(stackUpdater, times(1)).updateMetadataReady(1L, true);
     }
@@ -129,7 +129,7 @@ public class AmbariRoleAllocatorTest {
         doReturn(DUMMY_AMBARI_ADDRESS).when(underTest).getAmbariAddress(anyList());
         doNothing().when(underTest).updateWithConsulData(anySet());
         // WHEN
-        underTest.allocateRoles(1L, coreInstanceMetaData);
+        underTest.allocateRoles(1L);
         // THEN
         verify(consulPollingService, times(2)).pollWithTimeout(any(ConsulServiceCheckerTask.class), any(ConsulContext.class),
                 anyInt(), anyInt());

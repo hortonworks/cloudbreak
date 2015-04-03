@@ -16,6 +16,8 @@ public interface FlowFacade {
 
     FlowContext allocateAmbariRoles(FlowContext flowContext) throws CloudbreakException;
 
+    FlowContext finalizeMetadata(FlowContext flowContext) throws CloudbreakException;
+
     FlowContext startAmbari(FlowContext flowContext) throws CloudbreakException;
 
     FlowContext buildAmbariCluster(FlowContext flowContext) throws CloudbreakException;
@@ -63,4 +65,10 @@ public interface FlowFacade {
     FlowContext handleUpdateAllowedSubnetsFailure(FlowContext context) throws CloudbreakException;
 
     FlowContext enableSecurity(FlowContext context) throws CloudbreakException;
+
+    FlowContext setupCluster(FlowContext context) throws CloudbreakException;
+
+    FlowContext upscaleClusterPrepare(FlowContext context) throws CloudbreakException;
+
+    FlowContext upscaleClusterNodes(FlowContext context) throws CloudbreakException;
 }
