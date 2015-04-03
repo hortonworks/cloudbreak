@@ -14,12 +14,16 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariRoleAllocationHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterCreationHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterDownscaleHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterPrepareUpscaleHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterResetHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterSecurityHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStatusUpdateFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStopHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterUpscaleHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterUpscaleSetupNodesHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.FinalizeMetadataHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.MetadataSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ProvisioningHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ProvisioningSetupHandler;
@@ -63,6 +67,8 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.PROVISIONING_SETUP.name()), getHandlerForClass(ProvisioningSetupHandler.class));
         reactor.on($(FlowPhases.PROVISIONING.name()), getHandlerForClass(ProvisioningHandler.class));
         reactor.on($(FlowPhases.METADATA_SETUP.name()), getHandlerForClass(MetadataSetupHandler.class));
+        reactor.on($(FlowPhases.METADATA_FINALIZE.name()), getHandlerForClass(FinalizeMetadataHandler.class));
+        reactor.on($(FlowPhases.CLUSTER_SETUP.name()), getHandlerForClass(ClusterSetupHandler.class));
         reactor.on($(FlowPhases.AMBARI_ROLE_ALLOCATION.name()), getHandlerForClass(AmbariRoleAllocationHandler.class));
         reactor.on($(FlowPhases.AMBARI_START.name()), getHandlerForClass(AmbariStartHandler.class));
         reactor.on($(FlowPhases.CLUSTER_CREATION.name()), getHandlerForClass(ClusterCreationHandler.class));
@@ -76,6 +82,8 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.CLUSTER_START.name()), getHandlerForClass(ClusterStartHandler.class));
         reactor.on($(FlowPhases.CLUSTER_STOP.name()), getHandlerForClass(ClusterStopHandler.class));
         reactor.on($(FlowPhases.CLUSTER_UPSCALE.name()), getHandlerForClass(ClusterUpscaleHandler.class));
+        reactor.on($(FlowPhases.CLUSTER_PREPARE_UPSCALE.name()), getHandlerForClass(ClusterPrepareUpscaleHandler.class));
+        reactor.on($(FlowPhases.CLUSTER_UPSCALE_SETUP_NODES.name()), getHandlerForClass(ClusterUpscaleSetupNodesHandler.class));
         reactor.on($(FlowPhases.CLUSTER_DOWNSCALE.name()), getHandlerForClass(ClusterDownscaleHandler.class));
         reactor.on($(FlowPhases.UPDATE_ALLOWED_SUBNETS.name()), getHandlerForClass(UpdateAllowedSubnetsHandler.class));
 
@@ -93,7 +101,13 @@ public class FlowInitializer implements InitializingBean {
                 .createTransition(FlowPhases.PROVISIONING.name(), FlowPhases.METADATA_SETUP.name(), FlowPhases.STACK_CREATION_FAILED.name()));
 
         transitionKeyService.registerTransition(MetadataSetupHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.METADATA_SETUP.name(), FlowPhases.AMBARI_ROLE_ALLOCATION.name(), FlowPhases.STACK_CREATION_FAILED.name()));
+                .createTransition(FlowPhases.METADATA_SETUP.name(), FlowPhases.METADATA_FINALIZE.name(), FlowPhases.STACK_CREATION_FAILED.name()));
+
+        transitionKeyService.registerTransition(FinalizeMetadataHandler.class, SimpleTransitionKeyService.TransitionFactory
+                .createTransition(FlowPhases.METADATA_FINALIZE.name(), FlowPhases.CLUSTER_SETUP.name(), FlowPhases.STACK_CREATION_FAILED.name()));
+
+        transitionKeyService.registerTransition(ClusterSetupHandler.class, SimpleTransitionKeyService.TransitionFactory
+                .createTransition(FlowPhases.CLUSTER_SETUP.name(), FlowPhases.AMBARI_ROLE_ALLOCATION.name(), FlowPhases.STACK_CREATION_FAILED.name()));
 
         transitionKeyService.registerTransition(AmbariRoleAllocationHandler.class, SimpleTransitionKeyService.TransitionFactory
                 .createTransition(FlowPhases.AMBARI_ROLE_ALLOCATION.name(), FlowPhases.AMBARI_START.name(), FlowPhases.STACK_CREATION_FAILED.name()));
@@ -146,7 +160,13 @@ public class FlowInitializer implements InitializingBean {
 
     private void registerUpscaleFlows() {
         transitionKeyService.registerTransition(StackUpscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.STACK_UPSCALE.name(), FlowPhases.CLUSTER_UPSCALE.name(), FlowPhases.NONE.name()));
+                .createTransition(FlowPhases.STACK_UPSCALE.name(), FlowPhases.CLUSTER_PREPARE_UPSCALE.name(), FlowPhases.NONE.name()));
+
+        transitionKeyService.registerTransition(ClusterPrepareUpscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
+                .createTransition(FlowPhases.CLUSTER_PREPARE_UPSCALE.name(), FlowPhases.CLUSTER_UPSCALE_SETUP_NODES.name(), FlowPhases.NONE.name()));
+
+        transitionKeyService.registerTransition(ClusterUpscaleSetupNodesHandler.class, SimpleTransitionKeyService.TransitionFactory
+                .createTransition(FlowPhases.CLUSTER_UPSCALE_SETUP_NODES.name(), FlowPhases.CLUSTER_UPSCALE.name(), FlowPhases.NONE.name()));
 
         transitionKeyService.registerTransition(ClusterUpscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
                 .createTransition(FlowPhases.CLUSTER_UPSCALE.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));

@@ -72,7 +72,7 @@ public class StackScalingService {
     @javax.annotation.Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
-    public void upscaleStack(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
+    public Set<String> upscaleStack(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
         Set<Resource> resources = null;
         Stack stack = stackService.getById(stackId);
         InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
@@ -88,6 +88,7 @@ public class StackScalingService {
         stackUpdater.updateNodeCount(stack.getId(), nodeCount, instanceGroupName);
         eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(), "Billing changed due to upscaling of cluster infrastructure.");
         setStackAndMetadataAvailable(scalingAdjustment, stack);
+        return stackUpdateSuccess.getInstanceIds();
     }
 
     public void downscaleStack(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.event;
 
 import java.util.List;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -13,10 +14,11 @@ public class UpdateAmbariHostsRequest {
     private CloudPlatform cloudPlatform;
     private HostGroupAdjustmentJson hostGroupAdjustment;
     private List<HostMetadata> decommissionCandidates;
+    private Set<String> upscaleCandidates;
     private boolean decommission;
     private ScalingType scalingType;
 
-    public UpdateAmbariHostsRequest(Long stackId, HostGroupAdjustmentJson adjustmentJson,
+    public UpdateAmbariHostsRequest(Long stackId, HostGroupAdjustmentJson adjustmentJson, Set<String> upscaleCandidates,
             List<HostMetadata> decommissionCandidates, boolean decommission, CloudPlatform cloudPlatform, ScalingType scalingType) {
         this.stackId = stackId;
         this.decommissionCandidates = decommissionCandidates;
@@ -24,6 +26,7 @@ public class UpdateAmbariHostsRequest {
         this.decommission = decommission;
         this.cloudPlatform = cloudPlatform;
         this.scalingType = scalingType;
+        this.upscaleCandidates = upscaleCandidates;
     }
 
     public Long getStackId() {
@@ -44,6 +47,10 @@ public class UpdateAmbariHostsRequest {
 
     public CloudPlatform getCloudPlatform() {
         return cloudPlatform;
+    }
+
+    public Set<String> getUpscaleCandidates() {
+        return upscaleCandidates;
     }
 
     public ScalingType getScalingType() {

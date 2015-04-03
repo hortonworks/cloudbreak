@@ -33,6 +33,8 @@ public final class NetworkUtils {
         ports.add(new Port("Container logs", "8042", "8042", "tcp", aclRules));
         ports.add(new Port("Zeppelin web socket", "9999", "9999", "tcp", aclRules));
         ports.add(new Port("Zeppelin ui", "9998", "9998", "tcp", aclRules));
+        ports.add(new Port("Docker api", "2376", "2376", "tcp", aclRules));
+        ports.add(new Port("Swarm api", "3376", "3376", "tcp", aclRules));
         return ports;
     }
 

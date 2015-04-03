@@ -153,28 +153,25 @@ public class AmbariClusterConnector {
         }
     }
 
-    public Set<String> installAmbariNode(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
+    public Set<String> installAmbariNode(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment, List<HostMetadata> hostMetadata) {
         Set<String> result = new HashSet<>();
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Adding new host(s) to the cluster.");
-        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(stack);
-        if (PollingResult.SUCCESS.equals(waitForHosts(stack, ambariClient))) {
-            HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
-            List<String> hosts = findFreeHosts(stack.getId(), hostGroup, hostGroupAdjustment.getScalingAdjustment());
-            Set<HostGroup> hostGroupAsSet = Sets.newHashSet(hostGroup);
-            Set<HostMetadata> hostMetadata = addHostMetadata(cluster, hosts, hostGroupAdjustment);
-            if (recipesFound(hostGroupAsSet)) {
-                recipeEngine.setupRecipesOnHosts(stack, hostGroup.getRecipes(), hostMetadata);
-            }
-            PollingResult pollingResult = waitForAmbariOperations(stack, ambariClient, installServices(hosts, stack, ambariClient, hostGroupAdjustment));
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword());
+        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
+        List<String> hosts = findFreeHosts(stack.getId(), hostGroup, hostGroupAdjustment.getScalingAdjustment());
+        Set<HostGroup> hostGroupAsSet = Sets.newHashSet(hostGroup);
+        if (recipesFound(hostGroupAsSet)) {
+            recipeEngine.setupRecipesOnHosts(stack, hostGroup.getRecipes(), new HashSet<>(hostMetadata));
+        }
+        PollingResult pollingResult = waitForAmbariOperations(stack, ambariClient, installServices(hosts, stack, ambariClient, hostGroupAdjustment));
+        if (isSuccess(pollingResult)) {
+            pollingResult = waitForAmbariOperations(stack, ambariClient, singletonMap("START_SERVICES", ambariClient.startAllServices()));
             if (isSuccess(pollingResult)) {
-                pollingResult = startComponents(stack, cluster, ambariClient, hostGroup);
+                pollingResult = restartHadoopServices(stack, ambariClient, false);
                 if (isSuccess(pollingResult)) {
-                    pollingResult = restartHadoopServices(stack, ambariClient, false);
-                    if (isSuccess(pollingResult)) {
-                        result.addAll(hosts);
-                    }
+                    result.addAll(hosts);
                 }
             }
         }
@@ -454,20 +451,6 @@ public class AmbariClusterConnector {
         }
         LOGGER.info("Computed host-hostGroup associations: {}", hostGroupMappings);
         return hostGroupMappings;
-    }
-
-    private Set<HostMetadata> addHostMetadata(Cluster cluster, List<String> hosts, HostGroupAdjustmentJson hostGroupAdjustment) {
-        Set<HostMetadata> hostMetadata = new HashSet<>();
-        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
-        for (String host : hosts) {
-            HostMetadata hostMetadataEntry = new HostMetadata();
-            hostMetadataEntry.setHostName(host);
-            hostMetadataEntry.setHostGroup(hostGroup);
-            hostMetadata.add(hostMetadataEntry);
-        }
-        hostGroup.getHostMetadata().addAll(hostMetadata);
-        hostGroupRepository.save(hostGroup);
-        return hostMetadata;
     }
 
     private PollingResult waitForClusterInstall(Stack stack, AmbariClient ambariClient) {

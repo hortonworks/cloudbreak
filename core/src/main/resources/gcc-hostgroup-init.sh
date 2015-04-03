@@ -1,6 +1,3 @@
-: ${CONSUL_IMAGE:=sequenceiq/consul:v0.4.1.ptr}
-: ${CONSUL_WATCH_IMAGE:=sequenceiq/docker-consul-watch-plugn:1.7.0-consul}
-
 set -x
 
 get_ip() {
@@ -15,110 +12,16 @@ fix_hostname() {
   fi
 }
 
-get_vpc_peers() {
-  if [ -z "$METADATA_RESULT" ]; then
-    METADATA_STATUS=204
-    while [ $METADATA_STATUS -ne 200 ]; do
-      METADATA_STATUS=$(curl -sk -m 10 -o /tmp/metadata_result -w "%{http_code}" -X GET -H Content-Type:application/json $METADATA_ADDRESS/stacks/metadata/$METADATA_HASH);
-      [ $METADATA_STATUS -ne 200 ] && sleep 5;
-    done
-
-    [ $METADATA_STATUS -ne 200 ] && exit 1;
-  fi
-
-  METADATA_RESULT=$(cat /tmp/metadata_result)
-  echo $METADATA_RESULT | jq .[].privateIp -r
-}
-
-meta_order() {
-  get_vpc_peers | xargs -n 1 | sort | cat -n | sed 's/ *//;s/\t/ /'
-}
-
-my_order() {
-  local myip=$(get_ip)
-  meta_order | grep "\b${myip}$" | cut -d" " -f 1
-}
-
-consul_join_ip() {
-  meta_order | head -1 | cut -d" " -f 2
-}
-
-start_consul() {
-  get_consul_opts
-  docker rm -f consul &> /dev/null
-  docker run -d --name consul --net=host --restart=always $CONSUL_IMAGE $CONSUL_OPTIONS
-}
-
-get_consul_opts() {
-  CONSUL_OPTIONS="-advertise $(get_ip)"
-
-  if does_cluster_exist; then
-    CONSUL_OPTIONS="$CONSUL_OPTIONS -retry-join $leader"
-  else
-    if [ $(my_order) -gt 1 ]; then
-      CONSUL_OPTIONS="$CONSUL_OPTIONS -retry-join $(consul_join_ip)"
-    fi
-
-    if [ $(my_order) -le "$CONSUL_SERVER_COUNT" ]; then
-      CONSUL_OPTIONS="$CONSUL_OPTIONS -server -bootstrap-expect $CONSUL_SERVER_COUNT"
-    fi
-  fi
-}
-
-start_consul_watch() {
-  docker rm -f consul-watch &> /dev/null
-  docker run -d --name consul-watch --privileged --net=host --restart=always -e TRACE=1 -e BRIDGE_IP=$(get_ip) -v /var/run/docker.sock:/var/run/docker.sock $CONSUL_WATCH_IMAGE
-}
-
-does_cluster_exist() {
-  ip_arr=($(get_vpc_peers))
-  for ip in "${ip_arr[@]}"; do
-    leader=$(curl -s -m 2 ${ip}:8500/v1/status/leader|jq . -r)
-    if [ -n "$leader" ]; then
-      leader=${leader%:*}
-      return 0
-    fi
-  done
-  return 1
-}
-
-consul_leader() {
-  local leader=$(curl -s 127.0.0.1:8500/v1/status/leader|jq . -r)
-  while [ -z "$leader" ]; do
-    sleep 1
-    leader=$(curl -s 127.0.0.1:8500/v1/status/leader|jq . -r)
-  done
-  echo ${leader%:*}
-}
-
-con() {
-  declare path="$1"
-  shift
-  local consul_ip=127.0.0.1
-
-  curl ${consul_ip}:8500/v1/${path} "$@"
-}
-
-use_dns_first() {
-  docker exec ambari-agent sed -i "/^hosts:/ s/ *files dns/ dns files/" /etc/nsswitch.conf
-  docker exec consul sed -i "/^hosts:/ s/ *files dns/ dns files/" /etc/nsswitch.conf
-  docker exec consul-watch sed -i "/^hosts:/ s/ *files dns/ dns files/" /etc/nsswitch.conf
-}
-
-start_ambari_agent() {
-  set_public_host_script
-  set_disk_as_volumes
-  docker run -d --name=ambari-agent --privileged --net=host --restart=always -e BRIDGE_IP=$(get_ip) -e HADOOP_CLASSPATH=/data/jars/*:/usr/lib/hadoop/lib/* -v /data/jars:/data/jars $VOLUMES sequenceiq/ambari:$AMBARI_DOCKER_TAG /start-agent
-}
-
-set_disk_as_volumes() {
-  for fn in `ls /hadoopfs/ | grep fs`; do
-    VOLUMES="$VOLUMES -v /hadoopfs/$fn:/hadoopfs/$fn"
-  done
-}
-
-set_public_host_script() {
-  VOLUMES="$VOLUMES -v /usr/local/public_host_script.sh:/etc/ambari-agent/conf/public-hostname.sh"
+fix_docker_port() {
+  rm -rf /etc/docker/key.json
+  sed -i "/other_args=/d" /etc/sysconfig/docker
+  sh -c ' echo DOCKER_TLS_VERIFY=0 >> /etc/sysconfig/docker'
+  sh -c ' echo other_args=\"--label type=hostgroup --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2376\" >> /etc/sysconfig/docker'
+  service docker restart
+  docker pull sequenceiq/docker-consul-watch-plugn:1.7.0-consul
+  docker pull sequenceiq/munchausen:0.1
+  docker pull swarm:0.2.0-rc2
+  docker pull sequenceiq/registrator:v5.1
 }
 
 format_disks() {
@@ -138,11 +41,7 @@ main() {
     remove_run_init_scripts
     format_disks
     fix_hostname
-    start_consul
-    consul_leader
-    start_ambari_agent
-    start_consul_watch
-    use_dns_first
+    fix_docker_port
   fi
 }
 

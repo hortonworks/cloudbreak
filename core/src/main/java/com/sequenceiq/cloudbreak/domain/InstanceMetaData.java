@@ -18,6 +18,12 @@ import javax.persistence.NamedQuery;
                         + "AND i.longName= :hostName "
                         + "AND i.instanceStatus <> 'TERMINATED' "),
         @NamedQuery(
+                name = "InstanceMetaData.findHostInStackByInstanceId",
+                query = "SELECT i FROM InstanceMetaData i "
+                        + "WHERE i.instanceGroup.stack.id= :stackId "
+                        + "AND i.instanceId= :instanceId "
+                        + "AND i.instanceStatus <> 'TERMINATED' "),
+        @NamedQuery(
                 name = "InstanceMetaData.findUnregisteredHostsInInstanceGroup",
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.id= :instanceGroupId "

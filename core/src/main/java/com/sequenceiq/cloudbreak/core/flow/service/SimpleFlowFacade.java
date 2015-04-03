@@ -118,6 +118,19 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
+    public FlowContext finalizeMetadata(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Finalize Metadata. Context: {}", context);
+        try {
+            ProvisioningContext ambariRoleAllocationContext = (ProvisioningContext) clusterFacade.finalizeMetadata(context);
+            LOGGER.debug("Finalize Metadata roles DONE.");
+            return ambariRoleAllocationContext;
+        } catch (Exception e) {
+            LOGGER.error("Exception during finalize metadata: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
     public FlowContext startAmbari(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Starting Ambari. Context: {}", context);
         try {
@@ -340,6 +353,36 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
+    public FlowContext upscaleClusterPrepare(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Upscaling of cluster prepare. Context: {}", context);
+        try {
+            context = clusterFacade.upscaleClusterPrepare(context);
+            LOGGER.debug("Upscaling of cluster prepare is DONE");
+            return context;
+        } catch (CloudbreakException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the upscaling of cluster prepare: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext upscaleClusterNodes(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Upscaling of cluster nodes prepare. Context: {}", context);
+        try {
+            context = clusterFacade.upscaleClusterNodes(context);
+            LOGGER.debug("Upscaling of cluster nodes prepare is DONE");
+            return context;
+        } catch (CloudbreakException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the upscaling of cluster nodes prepare: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
     public FlowContext downscaleCluster(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Downscaling of cluster. Context: {}", context);
         try {
@@ -425,6 +468,21 @@ public class SimpleFlowFacade implements FlowFacade {
             throw e;
         } catch (Exception e) {
             LOGGER.error("Exception during the handling of update allowed subnet failure: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext setupCluster(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Handling 'munchausen setup' failure. Context: {}", context);
+        try {
+            context = clusterFacade.handleClusterSetup(context);
+            LOGGER.debug("Handling of 'munchausen setup' failure is DONE");
+            return context;
+        } catch (CloudbreakException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the handling of munchausen setup failure: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }

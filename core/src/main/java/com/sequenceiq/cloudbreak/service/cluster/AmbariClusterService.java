@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -149,16 +150,18 @@ public class AmbariClusterService implements ClusterService {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
         boolean decommissionRequest = validateRequest(stack, hostGroupAdjustment);
-        List<HostMetadata> downScaleCandidates = collectDownscaleCandidates(hostGroupAdjustment, stack, cluster, decommissionRequest);
         UpdateAmbariHostsRequest updateRequest;
         if (decommissionRequest) {
-            updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, downScaleCandidates,
+            updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, new HashSet<String>(),
+                    collectDownscaleCandidates(hostGroupAdjustment, stack, cluster, decommissionRequest),
                     decommissionRequest, stack.cloudPlatform(),
                     hostGroupAdjustment.getWithStackUpdate() ? ScalingType.DOWNSCALE_TOGETHER : ScalingType.DOWNSCALE_ONLY_CLUSTER);
             flowManager.triggerClusterDownscale(updateRequest);
         } else {
-            updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, downScaleCandidates,
-                    decommissionRequest, stack.cloudPlatform(), ScalingType.UPSCALE_ONLY_CLUSTER);
+            updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment,
+                    collectUpscaleCandidates(hostGroupAdjustment, cluster), new ArrayList<HostMetadata>(),
+                    decommissionRequest, stack.cloudPlatform(),
+                    ScalingType.UPSCALE_ONLY_CLUSTER);
             flowManager.triggerClusterUpscale(updateRequest);
         }
         return updateRequest;
@@ -280,6 +283,20 @@ public class AmbariClusterService implements ClusterService {
             }
         }
         return downScale;
+    }
+
+    private Set<String> collectUpscaleCandidates(HostGroupAdjustmentJson adjustmentJson, Cluster cluster) {
+        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), adjustmentJson.getHostGroup());
+        Set<InstanceMetaData> unregisteredHostsInInstanceGroup =
+                instanceMetadataRepository.findUnregisteredHostsInInstanceGroup(hostGroup.getInstanceGroup().getId());
+        Set<String> instanceIds = new HashSet<>();
+        for (InstanceMetaData instanceMetaData : unregisteredHostsInInstanceGroup) {
+            instanceIds.add(instanceMetaData.getInstanceId());
+            if (instanceIds.size() >= adjustmentJson.getScalingAdjustment()) {
+                break;
+            }
+        }
+        return instanceIds;
     }
 
     private List<HostMetadata> collectDownscaleCandidates(HostGroupAdjustmentJson adjustmentJson, Stack stack, Cluster cluster, boolean decommissionRequest) {
