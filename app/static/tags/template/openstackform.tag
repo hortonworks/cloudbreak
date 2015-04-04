@@ -22,24 +22,8 @@
             </div>
         </div>
         <!-- .col-sm-9 -->
-
     </div>
-    <div class="form-group">
-        <label class="col-sm-3 control-label" for="openstack_tinstanceType">Instance type</label>
 
-        <div class="col-sm-9">
-          <input type="text" name="openstack_tinstancetype" class="form-control" ng-model="openstackTemp.parameters.instanceType" id="openstack_tinstancetype"
-            placeholder="custom instance type name" required>
-
-            <div class="help-block"
-              ng-show="openstackTemplateForm.openstack_tinstancetype.$dirty && openstackTemplateForm.openstack_tinstancetype.$invalid"><i class="fa fa-warning"></i>
-              {{error_msg.openstack_template_instancetype_invalid}}
-            </div>
-            <!-- .col-sm-9 -->
-          </div>
-        <!-- .col-sm-9 -->
-
-    </div>
     <div class="form-group">
       <label class="col-sm-3 control-label" for="openstack_tpublicNetId">Public Net Id</label>
 
@@ -54,8 +38,24 @@
           <!-- .col-sm-9 -->
         </div>
         <!-- .col-sm-9 -->
+    </div>
 
-      </div>
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="openstack_tinstanceType">Instance type</label>
+
+        <div class="col-sm-9">
+          <input type="text" name="openstack_tinstancetype" class="form-control" ng-model="openstackTemp.parameters.instanceType" id="openstack_tinstancetype"
+            placeholder="custom instance type name" required>
+
+            <div class="help-block"
+              ng-show="openstackTemplateForm.openstack_tinstancetype.$dirty && openstackTemplateForm.openstack_tinstancetype.$invalid"><i class="fa fa-warning"></i>
+              {{error_msg.openstack_template_instancetype_invalid}}
+            </div>
+            <!-- .col-sm-9 -->
+          </div>
+        <!-- .col-sm-9 -->
+    </div>
 
     <div class="form-group" ng-class="{ 'has-error' : openstackTemplateForm.openstack_tvolumecount.$dirty && openstackTemplateForm.openstack_tvolumecount.$invalid }">
         <label class="col-sm-3 control-label" for="openstack_tvolumecount">Attached volumes per instance</label>
