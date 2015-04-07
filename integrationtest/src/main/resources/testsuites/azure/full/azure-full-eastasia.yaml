@@ -1,0 +1,89 @@
+# AZURE credential name must be specified
+name: Azure_full_eastasia_test
+parameters: {
+  cloudProvider: AZURE
+}
+
+tests:
+  - name: init
+    classes:
+      - com.sequenceiq.it.TestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+
+  - name: create gateway template
+    parameters: {
+      azureTemplateName: it-azure-full-gateway3,
+      azureVmType: A5,
+      azureVolumeCount: 1,
+      azureVolumeSize: 50,
+      templateAdditions: "cbgateway,1,GATEWAY"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+
+  - name: create master template
+    parameters: {
+      azureTemplateName: it-azure-full-master3,
+      azureVmType: STANDARD_D4,
+      azureVolumeCount: 2,
+      azureVolumeSize: 100,
+      templateAdditions: "master,1"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+
+  - name: create slave template
+    parameters: {
+      azureTemplateName: it-azure-full-slave3,
+      azureVmType: STANDARD_D11,
+      azureVolumeCount: 3,
+      azureVolumeSize: 200,
+      templateAdditions: "slave_1,3"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+
+  - name: create cluster
+    parameters: {
+      stackName: it-azure-stack3,
+      region: EAST_ASIA,
+      clusterName: it-azure-cluster3,
+      sleepTime: 60000
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.StackCreationTest
+      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
+  - name: stop cluster
+    parameters: {
+      newStatus: STOPPED,
+      sleepTime: 60000
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+
+  - name: start cluster
+    parameters: {
+      newStatus: STARTED,
+      sleepTime: 60000
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+
+  - name: upscale
+    parameters: {
+      instanceGroup: slave_1,
+      scalingAdjustment: 3,
+      sleepTime: 60000
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.ScalingTest
+
+  - name: downscale
+    parameters: {
+      instanceGroup: slave_1,
+      scalingAdjustment: -2,
+      sleepTime: 60000
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.ScalingTest

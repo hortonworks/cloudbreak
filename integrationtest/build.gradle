@@ -44,10 +44,13 @@ dependencies {
     compile group: 'org.freemarker', name: 'freemarker', version: '2.3.21'
     compile group: 'com.jayway.restassured', name: 'rest-assured', version: '2.3.4'
     compile group: 'com.jayway.restassured', name: 'json-path', version: '2.3.4'
+    compile ('com.sequenceiq:cloudbreak-rest-client:0.4.1') {
+        exclude group: 'org.slf4j';
+    }
     compile('com.sequenceiq:ambari-client17:1.7.28') {
         exclude group: 'org.slf4j';
     }
-    compile "org.testng:testng:6.3.1"
+    compile "org.testng:testng:6.8.21"
 }
 
 task wrapper(type: Wrapper) { gradleVersion = "2.3" }

@@ -1,0 +1,93 @@
+spring:
+    freemarker:
+        checkTemplateLocation: false
+
+integrationtest:
+    # uaa properties
+    uaa:
+        server:
+        user:
+        password:
+
+    # cloudbreak properites
+    cloudbreak:
+        server:
+
+    # keystore properties
+    keystore:
+        file:
+        password:
+
+    # gcp credential details
+    gcpcredential:
+       name:
+       projectId:
+       serviceAccountId:
+       p12File:
+       publicKeyFile:
+
+    # aws credential details
+    awscredential:
+       name:
+       roleArn:
+       publicKeyFile:
+
+    cleanup:
+        retryCount: 3
+
+    defaultBlueprintName: multi-node-hdfs-yarn
+    testsuite:
+        threadPoolSize: 3
+    credentialNames:
+        GCP: it-gcp-credential
+        AWS: it-aws-credential
+        AZURE: itazurecredential
+    testSuites:
+        # Full smoke tests with cluster creation, stop-start, upscale-downscale
+        FULL_SMOKE_TEST:
+        - classpath:/testsuites/gcp/smoke/gcp-clustercreate-startstop-updown.yaml
+        - classpath:/testsuites/aws/smoke/aws-clustercreate-startstop-updown.yaml
+        - classpath:/testsuites/azure/smoke/azure-clustercreate-startstop-updown.yaml
+        GCP_FULL_SMOKE_TEST:
+        - classpath:/testsuites/gcp/smoke/gcp-clustercreate-startstop-updown.yaml
+        AWS_FULL_SMOKE_TEST:
+        - classpath:/testsuites/aws/smoke/aws-clustercreate-startstop-updown.yaml
+        AZURE_FULL_SMOKE_TEST:
+        - classpath:/testsuites/azure/smoke/azure-clustercreate-startstop-updown.yaml
+
+        # Simple smoke tests with cluster creation
+        SIMPLE_SMOKE_TEST:
+        - classpath:/testsuites/gcp/smoke/gcp-clustercreate.yaml
+        - classpath:/testsuites/aws/smoke/aws-clustercreate.yaml
+        - classpath:/testsuites/azure/smoke/azure-clustercreate.yaml
+        GCP_SIMPLE_SMOKE_TEST:
+        - classpath:/testsuites/gcp/smoke/gcp-clustercreate.yaml
+        AWS_SIMPLE_SMOKE_TEST:
+        - classpath:/testsuites/aws/smoke/aws-clustercreate.yaml
+        AZURE_SIMPLE_SMOKE_TEST:
+        - classpath:/testsuites/azure/smoke/azure-clustercreate.yaml
+
+        # Smoke tests with cluster creation and stop-start
+        STARTSTOP_SMOKE_TEST:
+        - classpath:/testsuites/gcp/smoke/gcp-clustercreate-startstop.yaml
+        - classpath:/testsuites/aws/smoke/aws-clustercreate-startstop.yaml
+        - classpath:/testsuites/azure/smoke/azure-clustercreate-startstop.yaml
+        GCP_STARTSTOP_SMOKE_TEST:
+        - classpath:/testsuites/gcp/smoke/gcp-clustercreate-startstop.yaml
+        AWS_STARTSTOP_SMOKE_TEST:
+        - classpath:/testsuites/aws/smoke/aws-clustercreate-startstop.yaml
+        AZURE_STARTSTOP_SMOKE_TEST:
+        - classpath:/testsuites/azure/smoke/azure-clustercreate-startstop.yaml
+
+        # Smoke tests with cluster creation and upscale-downscale
+        UPDOWN_SMOKE_TEST:
+        - classpath:/testsuites/gcp/smoke/gcp-clustercreate-updown.yaml
+        - classpath:/testsuites/aws/smoke/aws-clustercreate-updown.yaml
+        - classpath:/testsuites/azure/smoke/azure-clustercreate-updown.yaml
+        GCP_UPDOWN_SMOKE_TEST:
+        - classpath:/testsuites/gcp/smoke/gcp-clustercreate-updown.yaml
+        AWS_UPDOWN_SMOKE_TEST:
+        - classpath:/testsuites/aws/smoke/aws-clustercreate-updown.yaml
+        AZURE_UPDOWN_SMOKE_TEST:
+        - classpath:/testsuites/azure/smoke/azure-clustercreate-updown.yaml
+

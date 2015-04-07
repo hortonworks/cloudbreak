@@ -1,0 +1,88 @@
+# AZURE credential name must be specified
+name: AWS_fullhdp_apnortheast1_test
+parameters: {
+  cloudProvider: AWS,
+  blueprintName: hdp-multinode-default
+}
+
+tests:
+  - name: init
+    classes:
+      - com.sequenceiq.it.TestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+
+  - name: create gateway template
+    parameters: {
+      awsTemplateName: it-aws-fullhdp-gateway1,
+      awsInstanceType: M3Medium,
+      awsVolumeType: Standard,
+      awsVolumeCount: 1,
+      awsVolumeSize: 30,
+      templateAdditions: "cbgateway,1,GATEWAY;gateway,1"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
+
+  - name: create master template
+    parameters: {
+      awsTemplateName: it-aws-fullhdp-master1,
+      awsInstanceType: C3Large,
+      awsVolumeType: Ephemeral,
+      awsVolumeCount: 2,
+      awsVolumeSize: 16,
+      templateAdditions: "master_1,1;master_2,1;master_3,1;master_4,1"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
+
+  - name: create slave template
+    parameters: {
+      awsTemplateName: it-aws-fullhdp-slave1,
+      awsInstanceType: R3Large,
+      awsVolumeType: Gp2,
+      awsVolumeCount: 3,
+      awsVolumeSize: 200,
+      templateAdditions: "slave_1,3"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
+
+  - name: create cluster
+    parameters: {
+      stackName: it-aws-fullhdp-stack1,
+      region: AP_NORTHEAST_1,
+      clusterName: it-aws-fullhdp-cluster1
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.StackCreationTest
+      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
+  - name: upscale
+    parameters: {
+      instanceGroup: slave_1,
+      scalingAdjustment: 3
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.ScalingTest
+
+  - name: downscale
+    parameters: {
+      instanceGroup: slave_1,
+      scalingAdjustment: -2
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.ScalingTest
+
+  - name: stop cluster
+    parameters: {
+      newStatus: STOPPED
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+
+  - name: start cluster
+    parameters: {
+      newStatus: STARTED
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.StatusUpdateTest

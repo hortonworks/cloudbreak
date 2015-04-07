@@ -1,49 +1,44 @@
 package com.sequenceiq.it.cloudbreak;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.StringUtils;
+import org.testng.Assert;
+import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.response.Response;
-import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.config.IntegrationTestConfiguration;
-import com.sequenceiq.it.util.FreeMarkerUtil;
 import com.sequenceiq.it.util.ResourceUtil;
-import com.sequenceiq.it.util.RestUtil;
 
-import freemarker.template.Template;
-
-@ContextConfiguration(classes = IntegrationTestConfiguration.class)
 public class GccCredentialCreationTest extends AbstractCloudbreakIntegrationTest {
-    private static final String URL_PATH = "/user/credentials";
-
-    @Autowired
-    private Template gccCredentialCreationTemplate;
+    @Value("${integrationtest.gcpcredential.name}")
+    private String defaultName;
+    @Value("${integrationtest.gcpcredential.projectId}")
+    private String defaultProjectId;
+    @Value("${integrationtest.gcpcredential.serviceAccountId}")
+    private String defaultServiceAccountId;
+    @Value("${integrationtest.gcpcredential.p12File}")
+    private String defaultP12File;
+    @Value("${integrationtest.gcpcredential.publicKeyFile}")
+    private String defaultPublicKeyFile;
 
     @Test
-    @Parameters({ "projectId", "serviceAccountId", "serviceAccountPrivateKeyP12File", "publicKeyFile" })
-    public void testGCCCredentialCreation(String projectId, String serviceAccountId,
-            String serviceAccountPrivateKeyP12File, String publicKeyFile) throws IOException {
+    @Parameters({ "name", "projectId", "serviceAccountId", "serviceAccountPrivateKeyP12File", "publicKeyFile" })
+    public void testGCCCredentialCreation(@Optional("")String name, @Optional("")String projectId, @Optional("")String serviceAccountId,
+            @Optional("")String serviceAccountPrivateKeyP12File, @Optional("")String publicKeyFile) throws Exception {
         // GIVEN
-        IntegrationTestContext itContext = getItContext();
-        Map<String, Object> templateModel = new HashMap<>();
-        templateModel.put("projectId", projectId);
-        templateModel.put("serviceAccountId", serviceAccountId);
-        templateModel.put("serviceAccountPrivateKey", ResourceUtil.readBase64EncodedContentFromResource(applicationContext, serviceAccountPrivateKeyP12File));
-        templateModel.put("publicKey", ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", ""));
+        name = StringUtils.hasLength(name) ? name : defaultName;
+        projectId = StringUtils.hasLength(projectId) ? projectId : defaultProjectId;
+        serviceAccountId = StringUtils.hasLength(serviceAccountId) ? serviceAccountId : defaultServiceAccountId;
+        serviceAccountPrivateKeyP12File = StringUtils.hasLength(serviceAccountPrivateKeyP12File) ? serviceAccountPrivateKeyP12File : defaultP12File;
+        publicKeyFile = StringUtils.hasLength(publicKeyFile) ? publicKeyFile : defaultPublicKeyFile;
+        String serviceAccountPrivateKey = ResourceUtil.readBase64EncodedContentFromResource(applicationContext, serviceAccountPrivateKeyP12File);
+        String publicKey = ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "");
         // WHEN
-        Response resourceCreationResponse = RestUtil.createEntityRequest(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER),
-                itContext.getContextParam(IntegrationTestContext.AUTH_TOKEN), FreeMarkerUtil.renderTemplate(gccCredentialCreationTemplate, templateModel))
-        .log().all().post(URL_PATH);
+        // TODO publicInAccount
+        String id = getClient().postGccCredential(name, "GCC credential for integartiontest", publicKey, false, projectId, serviceAccountId,
+                serviceAccountPrivateKey);
         // THEN
-        checkResponse(resourceCreationResponse, HttpStatus.CREATED, ContentType.JSON);
-        itContext.putContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, resourceCreationResponse.jsonPath().getString("id"), true);
+        Assert.assertNotNull(id);
+        getItContext().putContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, id, true);
     }
 }
