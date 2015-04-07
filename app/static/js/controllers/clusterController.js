@@ -70,6 +70,21 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }
         }
 
+        $scope.selectBlueprintreinstallChange = function () {
+          var actualBp = $filter('filter')($rootScope.blueprints, { id: $rootScope.reinstallClusterObject.blueprintId});
+          var hostGroups = [];
+          var index = 0;
+          $rootScope.activeCluster.instanceGroups.forEach(function(value) {
+            if (value.type != 'GATEWAY') {
+              var tmpRecipes = $filter('filter')($rootScope.activeCluster.cluster.hostGroups, {instanceGroupName: value.group}, true)[0];
+              hostGroups.push({name: actualBp[0].ambariBlueprint.host_groups[index].name, instanceGroupName: value.group, recipeIds: tmpRecipes.recipeIds});
+              index++;
+            }
+          });
+          $rootScope.reinstallClusterObject.hostgroups = hostGroups;
+          $rootScope.reinstallClusterObject.fullBp = actualBp[0];
+        }
+
         $scope.selectedBlueprintChange = function () {
           var tmpCloudPlatform = $rootScope.activeCredential.cloudPlatform;
           var tmpTemplate = $filter('filter')($rootScope.templates, {cloudPlatform: tmpCloudPlatform}, true)[0];
@@ -160,7 +175,12 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, { id: $rootScope.activeCluster.blueprintId})[0];
             $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {id: $rootScope.activeCluster.credentialId}, true)[0];
             $rootScope.activeCluster.cloudPlatform =  $rootScope.activeClusterCredential.cloudPlatform;
-            $rootScope.activeCluster.metadata = []
+            $rootScope.activeCluster.metadata = [];
+            $rootScope.reinstallClusterObject = {
+              blueprintId: $rootScope.activeClusterBlueprint.id,
+              hostgroups: $rootScope.activeCluster.cluster.hostGroups,
+              fullBp: $rootScope.activeClusterBlueprint,
+            };
             GlobalStack.get({ id: clusterId }, function(success) {
                     var metadata = []
                     angular.forEach(success.instanceGroups, function(item) {
@@ -227,7 +247,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $scope.stopCluster = function (activeCluster) {
             var newStatus = {"status":"STOPPED"};
             Cluster.update({id: activeCluster.id}, newStatus, function(success){
-
                 GlobalStack.update({id: activeCluster.id}, newStatus, function(result){
                   activeCluster.status = "STOP_REQUESTED";
                 }, function(error) {
@@ -236,6 +255,16 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
             }, function(error) {
               $scope.showError(error, $rootScope.error_msg.cluster_stop_failed);
+            });
+        }
+
+        $scope.reinstallCluster = function (activeCluster) {
+            var newInstall = {"blueprintId": $rootScope.reinstallClusterObject.blueprintId, "hostgroups": $rootScope.reinstallClusterObject.hostgroups};
+            Cluster.update({id: activeCluster.id}, newInstall, function(success){
+                  $rootScope.activeCluster.blueprintId = $rootScope.reinstallClusterObject.blueprintId;
+                  $rootScope.activeCluster.cluster.status = 'REQUESTED';
+            }, function(error) {
+              $scope.showError(error, $rootScope.error_msg.cluster_reinstall_failed);
             });
         }
 

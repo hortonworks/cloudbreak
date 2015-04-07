@@ -13,6 +13,9 @@
                 <div class="tab-content">
                     <section id="cluster-details-pane" ng-class="{ 'active': detailsShow }" ng-show="detailsShow" class="tab-pane fade in">
                         <p class="text-right">
+                            <a href="" class="btn btn-success" role="button" ng-show="activeCluster.cluster.status == 'CREATE_FAILED'" data-toggle="modal" data-target="#modal-reset-cluster">
+                                <i class="fa fa-undo fa-fw"></i><span> reinstall</span>
+                            </a>
                             <a href="" class="btn btn-success" role="button" ng-show="activeCluster.status == 'STOPPED' || (activeCluster.cluster.status == 'START_REQUESTED' && activeCluster.status == 'AVAILABLE')" data-toggle="modal" data-target="#modal-start-cluster">
                                 <i class="fa fa-play fa-fw"></i><span> start</span>
                             </a>
@@ -20,7 +23,7 @@
                                 <i class="fa fa-pause fa-fw"></i><span> stop</span>
                             </a>
                             <a href="" id="terminate-btn" class="btn btn-danger" role="button" data-toggle="modal" data-target="#modal-terminate">
-                                <i class="fa fa-times fa-fw"></i><span> terminate</span>
+                                <i class="fa fa-trash-o fa-fw"></i><span> terminate</span>
                             </a>
                         </p>
                         <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
@@ -220,7 +223,7 @@
                             <button type="button" class="btn btn-block btn-default" data-dismiss="modal">cancel</button>
                         </div>
                         <div class="col-xs-6">
-                            <button type="button" class="btn btn-block btn-danger" data-dismiss="modal" id="terminateStackBtn" ng-click="deleteCluster(activeCluster)"><i class="fa fa-times fa-fw"></i>terminate</button>
+                            <button type="button" class="btn btn-block btn-danger" data-dismiss="modal" id="terminateStackBtn" ng-click="deleteCluster(activeCluster)"><i class="fa fa-trash-o fa-fw"></i>terminate</button>
                         </div>
                     </div>
                 </div>
@@ -263,6 +266,62 @@
                         </div>
                         <div class="col-xs-6">
                             <button type="button" class="btn btn-block btn-success" data-dismiss="modal" id="stackStackBtn" ng-click="startCluster(activeCluster)"><i class="fa fa-play fa-fw"></i>start</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-reset-cluster" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <!-- .modal-header -->
+                <div class="modal-body">
+                    <p>Reinstall cluster <strong>{{activeCluster.name}}</strong> with the selected blueprint?</p>
+                    <div class="form">
+                      <div class="row">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="selectBlueprintreinstall">Blueprint</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" id="selectBlueprintreinstall" ng-model="reinstallClusterObject.blueprintId" required ng-change="selectBlueprintreinstallChange()" >
+                                    <option ng-repeat="blueprint in $root.blueprints | orderBy:'name'" data-value="{{blueprint.id}}" value="{{blueprint.id}}" id="{{blueprint.id}}" ng-show="blueprint.ambariBlueprint.host_groups.length === $root.activeClusterBlueprint.ambariBlueprint.host_groups.length">{{blueprint.name}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div style="padding: 1em;padding-bottom: 0px;">
+
+                          <div ng-repeat="newhostgroup in $root.reinstallClusterObject.hostgroups | orderBy:'instanceGroupName'" id="newhostgroups" ng-show="$root.reinstallClusterObject.hostgroups">
+                            <div class="panel panel-default" style="border-top-left-radius: 0.5em; border-top-right-radius: 0.5em;">
+                              <div class="panel-heading" style="border-top-left-radius: 0.5em; border-top-right-radius: 0.5em;">
+                                <h3 class="panel-title">Please select a hostgroup for <kbd>{{newhostgroup.instanceGroupName}}</kbd> instancegroup</h3>
+                              </div>
+                              <div class="panel-body">
+                                <div class="form-group" name="templateNodeform{{$index}}" >
+                                  <label class="col-sm-3 control-label" for="templateNodeCount{{$index}}">Host group</label>
+                                  <div class="col-sm-9">
+                                    <select class="form-control" id="newhostgroupsdiv" ng-model="newhostgroup.name" required ng-options="hgvalue.name as hgvalue.name for hgvalue in $root.reinstallClusterObject.fullBp.ambariBlueprint.host_groups">
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <button type="button" class="btn btn-block btn-default" data-dismiss="modal">cancel</button>
+                        </div>
+                        <div class="col-xs-6">
+                            <button type="button" class="btn btn-block btn-success" data-dismiss="modal" id="stackStackBtn" ng-click="reinstallCluster(activeCluster)"><i class="fa fa-check fa-fw"></i>reinstall</button>
                         </div>
                     </div>
                 </div>
