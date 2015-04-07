@@ -168,7 +168,7 @@ public class AmbariClusterConnector {
             }
             PollingResult pollingResult = waitForAmbariOperations(stack, ambariClient, installServices(hosts, stack, ambariClient, hostGroupAdjustment));
             if (isSuccess(pollingResult)) {
-                pollingResult = waitForAmbariOperations(stack, ambariClient, singletonMap("START_SERVICES", ambariClient.startAllServices()));
+                pollingResult = startComponents(stack, cluster, ambariClient, hostGroup);
                 if (isSuccess(pollingResult)) {
                     pollingResult = restartHadoopServices(stack, ambariClient, false);
                     if (isSuccess(pollingResult)) {
@@ -481,11 +481,13 @@ public class AmbariClusterConnector {
             Cluster cluster = stack.getCluster();
             ambariClient.addHosts(hosts);
             String blueprintName = cluster.getBlueprint().getBlueprintName();
-            ambariClient.addComponentsToHosts(hosts, blueprintName, hostGroup.getHostGroup());
+            String hGroupName = hostGroup.getHostGroup();
+            ambariClient.addComponentsToHosts(hosts, blueprintName, hGroupName);
+            ambariClient.addHostsToConfigGroups(hosts, hGroupName);
             if (cluster.isSecure()) {
                 ambariClient.addComponentsToHosts(hosts, Arrays.asList(securityService.KERBEROS_CLIENT));
             }
-            requests.put("Install components to the new hosts", ambariClient.setAllComponentsState(stack.getName(), hosts, "INSTALLED", "Install components"));
+            requests.put("Install components to the new hosts", ambariClient.installAllComponentsOnHosts(hosts));
             if (cluster.isSecure()) {
                 requests.put("Re-generate missing keytabs", ambariClient.generateKeytabs(true));
             }
@@ -498,6 +500,15 @@ public class AmbariClusterConnector {
             } else {
                 throw new InternalServerException("Something went wrong", e);
             }
+        }
+    }
+
+    private PollingResult startComponents(Stack stack, Cluster cluster, AmbariClient ambariClient, HostGroup hostGroup) {
+        try {
+            int id = ambariClient.startAllComponents(cluster.getBlueprint().getBlueprintName(), hostGroup.getName());
+            return waitForAmbariOperations(stack, ambariClient, singletonMap("START_SERVICES on new hosts", id));
+        } catch (HttpResponseException e) {
+            throw new BadRequestException("Failed to start the components on the new hosts", e);
         }
     }
 

@@ -18,8 +18,7 @@ public class ClusterSecurityHandler extends AbstractFlowHandler<ProvisioningCont
     @Override
     protected Object execute(Event<ProvisioningContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
-        ProvisioningContext provisioningContext = (ProvisioningContext) getFlowFacade().enableSecurity(event.getData());
-        return provisioningContext;
+        return getFlowFacade().enableSecurity(event.getData());
     }
 
     @Override

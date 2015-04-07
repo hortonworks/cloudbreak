@@ -179,7 +179,7 @@ public class Cluster implements ProvisionEntity {
     public boolean isSecure() {
         return secure == null ? false : secure;
     }
-gi
+
     public void setSecure(Boolean secure) {
         this.secure = secure;
     }
