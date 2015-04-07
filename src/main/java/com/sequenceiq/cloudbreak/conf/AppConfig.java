@@ -12,6 +12,8 @@ import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -158,4 +160,10 @@ public class AppConfig {
         String stackServiceComponentsJson = FileReaderUtils.readFileFromClasspath("hdp/hdp-services.json");
         return new StackServiceComponentDescriptorMapFactory(stackServiceComponentsJson, maxCardinalityReps, new ObjectMapper());
     }
+
+    @Bean
+    public PBEStringCleanablePasswordEncryptor pbeStringCleanablePasswordEncryptor() {
+        return new StandardPBEStringEncryptor();
+    }
+
 }

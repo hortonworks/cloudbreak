@@ -7,6 +7,8 @@ import java.util.UnknownFormatConversionException;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -19,10 +21,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
-import com.sequenceiq.cloudbreak.converter.AwsTemplateConverter;
-import com.sequenceiq.cloudbreak.converter.AzureTemplateConverter;
-import com.sequenceiq.cloudbreak.converter.GccTemplateConverter;
-import com.sequenceiq.cloudbreak.converter.OpenStackTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -38,16 +36,8 @@ public class TemplateController {
     private TemplateService templateService;
 
     @Autowired
-    private AwsTemplateConverter awsTemplateConverter;
-
-    @Autowired
-    private GccTemplateConverter gccTemplateConverter;
-
-    @Autowired
-    private AzureTemplateConverter azureTemplateConverter;
-
-    @Autowired
-    private OpenStackTemplateConverter openStackTemplateConverter;
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
 
     @RequestMapping(value = "user/templates", method = RequestMethod.POST)
     @ResponseBody
@@ -127,33 +117,29 @@ public class TemplateController {
     }
 
     private Template convert(TemplateJson templateRequest, boolean publicInAccount) {
+        Template converted = null;
         switch (templateRequest.getCloudPlatform()) {
-            case AWS:
-                return awsTemplateConverter.convert(templateRequest, publicInAccount);
-            case AZURE:
-                return azureTemplateConverter.convert(templateRequest, publicInAccount);
-            case GCC:
-                return gccTemplateConverter.convert(templateRequest, publicInAccount);
-            case OPENSTACK:
-                return openStackTemplateConverter.convert(templateRequest, publicInAccount);
-            default:
-                throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", templateRequest.getCloudPlatform()));
+        case AWS:
+            converted = conversionService.convert(templateRequest, AwsTemplate.class);
+            break;
+        case AZURE:
+            converted = conversionService.convert(templateRequest, AzureTemplate.class);
+            break;
+        case GCC:
+            converted = conversionService.convert(templateRequest, GccTemplate.class);
+            break;
+        case OPENSTACK:
+            converted = conversionService.convert(templateRequest, OpenStackTemplate.class);
+            break;
+        default:
+            throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", templateRequest.getCloudPlatform()));
         }
+        converted.setPublicInAccount(publicInAccount);
+        return converted;
     }
 
     private TemplateJson convert(Template template) {
-        switch (template.cloudPlatform()) {
-            case AWS:
-                return awsTemplateConverter.convert((AwsTemplate) template);
-            case AZURE:
-                return azureTemplateConverter.convert((AzureTemplate) template);
-            case GCC:
-                return gccTemplateConverter.convert((GccTemplate) template);
-            case OPENSTACK:
-                return openStackTemplateConverter.convert((OpenStackTemplate) template);
-            default:
-                throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", template.cloudPlatform()));
-        }
+        return conversionService.convert(template, TemplateJson.class);
     }
 
     private Set<TemplateJson> convert(Set<Template> templates) {

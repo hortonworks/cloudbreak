@@ -1,12 +1,15 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -24,14 +27,12 @@ import com.sequenceiq.cloudbreak.controller.json.StackJson;
 import com.sequenceiq.cloudbreak.controller.json.StackValidationRequest;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.json.UpdateStackJson;
-import com.sequenceiq.cloudbreak.domain.StackValidation;
-import com.sequenceiq.cloudbreak.converter.MetaDataConverter;
-import com.sequenceiq.cloudbreak.converter.StackConverter;
-import com.sequenceiq.cloudbreak.converter.StackValidationConverter;
-import com.sequenceiq.cloudbreak.converter.SubnetConverter;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackValidation;
+import com.sequenceiq.cloudbreak.domain.Subnet;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 
@@ -42,16 +43,8 @@ public class StackController {
     private StackService stackService;
 
     @Autowired
-    private StackConverter stackConverter;
-
-    @Autowired
-    private SubnetConverter subnetConverter;
-
-    @Autowired
-    private MetaDataConverter metaDataConverter;
-
-    @Autowired
-    private StackValidationConverter stackValidationConverter;
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
 
     @RequestMapping(value = "user/stacks", method = RequestMethod.POST)
     @ResponseBody
@@ -69,21 +62,27 @@ public class StackController {
     @ResponseBody
     public ResponseEntity<Set<StackJson>> getPrivateStacks(@ModelAttribute("user") CbUser user) {
         Set<Stack> stacks = stackService.retrievePrivateStacks(user);
-        return new ResponseEntity<>(stackConverter.convertAllEntityToJson(stacks), HttpStatus.OK);
+        return new ResponseEntity<>(convertStacks(stacks), HttpStatus.OK);
+    }
+
+    protected Set<StackJson> convertStacks(Set<Stack> stacks) {
+        return (Set<StackJson>) conversionService.convert(stacks, TypeDescriptor.forObject(stacks),
+                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(StackJson.class)));
     }
 
     @RequestMapping(value = "account/stacks", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<StackJson>> getAccountStacks(@ModelAttribute("user") CbUser user) {
         Set<Stack> stacks = stackService.retrieveAccountStacks(user);
-        return new ResponseEntity<>(stackConverter.convertAllEntityToJson(stacks), HttpStatus.OK);
+
+        return new ResponseEntity<>(convertStacks(stacks), HttpStatus.OK);
     }
 
     @RequestMapping(value = "stacks/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<StackJson> getStack(@PathVariable Long id) {
         Stack stack = stackService.get(id);
-        StackJson stackJson = stackConverter.convert(stack);
+        StackJson stackJson = conversionService.convert(stack, StackJson.class);
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
     }
 
@@ -91,7 +90,7 @@ public class StackController {
     @ResponseBody
     public ResponseEntity<StackJson> getStackInPrivate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
         Stack stack = stackService.getPrivateStack(name, user);
-        StackJson stackJson = stackConverter.convert(stack);
+        StackJson stackJson = conversionService.convert(stack, StackJson.class);
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
     }
 
@@ -99,14 +98,15 @@ public class StackController {
     @ResponseBody
     public ResponseEntity<StackJson> getStackInPublic(@ModelAttribute("user") CbUser user, @PathVariable String name) {
         Stack stack = stackService.getPublicStack(name, user);
-        StackJson stackJson = stackConverter.convert(stack);
+        StackJson stackJson = conversionService.convert(stack, StackJson.class);
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
     }
 
     @RequestMapping(value = "stacks/{id}/status", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getStackStatus(@PathVariable Long id) {
-        return new ResponseEntity<>(stackConverter.convertStackStatus(stackService.get(id)), HttpStatus.OK);
+        Map<String, Object> statusMap = conversionService.convert(stackService.get(id), Map.class);
+        return new ResponseEntity<>(statusMap, HttpStatus.OK);
     }
 
     @RequestMapping(value = "stacks/{id}", method = RequestMethod.DELETE)
@@ -133,6 +133,7 @@ public class StackController {
     @RequestMapping(value = "stacks/{id}", method = RequestMethod.PUT)
     @ResponseBody
     public ResponseEntity<String> updateStack(@PathVariable Long id, @Valid @RequestBody UpdateStackJson updateRequest) {
+        MDCBuilder.buildMdcContext();
         if (updateRequest.getStatus() != null) {
             stackService.updateStatus(id, updateRequest.getStatus());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -140,9 +141,18 @@ public class StackController {
             stackService.updateNodeCount(id, updateRequest.getInstanceGroupAdjustment());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            stackService.updateAllowedSubnets(id,
-                    new ArrayList<>(subnetConverter.convertAllJsonToEntity(updateRequest.getAllowedSubnets(), stackService.get(id))));
+            List<Subnet> subnetList = (List<Subnet>) conversionService.convert(updateRequest.getAllowedSubnets(),
+                    TypeDescriptor.forObject(updateRequest.getAllowedSubnets()),
+                    TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Subnet.class)));
+            decorateSubnetEntities(subnetList, stackService.get(id));
+            stackService.updateAllowedSubnets(id, subnetList);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+    }
+
+    private void decorateSubnetEntities(List<Subnet> subnetList, Stack stack) {
+        for (Subnet subnet : subnetList) {
+            subnet.setStack(stack);
         }
     }
 
@@ -151,7 +161,9 @@ public class StackController {
     public ResponseEntity<Set<InstanceMetaDataJson>> getStackMetadata(@PathVariable String hash) {
         try {
             Set<InstanceMetaData> metaData = stackService.getMetaData(hash);
-            return new ResponseEntity<>(metaDataConverter.convertAllEntityToJson(metaData), HttpStatus.OK);
+            Set<InstanceMetaDataJson> metaDataJsons = (Set<InstanceMetaDataJson>) conversionService.convert(metaData, TypeDescriptor.forObject(metaData),
+                    TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(InstanceMetaDataJson.class)));
+            return new ResponseEntity<>(metaDataJsons, HttpStatus.OK);
         } catch (MetadataIncompleteException e) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -161,19 +173,20 @@ public class StackController {
     @ResponseBody
     public ResponseEntity<StackJson> getStackForAmbari(@RequestBody AmbariAddressJson json) {
         Stack stack = stackService.get(json.getAmbariAddress());
-        return new ResponseEntity<>(stackConverter.convert(stack), HttpStatus.OK);
+        return new ResponseEntity<>(conversionService.convert(stack, StackJson.class), HttpStatus.OK);
     }
 
     @RequestMapping(value = "stacks/validate", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> validateStack(@RequestBody @Valid StackValidationRequest stackValidationRequest) {
-        StackValidation stackValidation = stackValidationConverter.convert(stackValidationRequest);
+        StackValidation stackValidation = conversionService.convert(stackValidationRequest, StackValidation.class);
         stackService.validateStack(stackValidation);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private ResponseEntity<IdJson> createStack(CbUser user, StackJson stackRequest, boolean publicInAccount) {
-        Stack stack = stackConverter.convert(stackRequest, publicInAccount);
+        Stack stack = conversionService.convert(stackRequest, Stack.class);
+        stack.setPublicInAccount(publicInAccount);
         stack = stackService.create(user, stack);
         return new ResponseEntity<>(new IdJson(stack.getId()), HttpStatus.CREATED);
     }

@@ -4,22 +4,25 @@ import static org.apache.commons.lang3.StringUtils.deleteWhitespace;
 
 import java.util.Map;
 
-import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.openstack.OSFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
 @Component
+@Lazy
 public class OpenStackUtil {
 
     private static final String CB_KEYPAIR_NAME = "cb-keypair-";
 
     @Autowired
-    private StandardPBEStringEncryptor encryptor;
+    @Lazy
+    private PBEStringCleanablePasswordEncryptor encryptor;
 
     public OSClient createOSClient(Stack stack) {
         return createOSClient((OpenStackCredential) stack.getCredential());

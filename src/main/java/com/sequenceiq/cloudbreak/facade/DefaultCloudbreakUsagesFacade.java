@@ -1,13 +1,14 @@
 package com.sequenceiq.cloudbreak.facade;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.json.CloudbreakUsageJson;
-import com.sequenceiq.cloudbreak.converter.CloudbreakUsageConverter;
 import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.service.usages.CloudbreakUsageGeneratorService;
@@ -23,13 +24,15 @@ public class DefaultCloudbreakUsagesFacade implements CloudbreakUsagesFacade {
     private CloudbreakUsageGeneratorService cloudbreakUsageGeneratorService;
 
     @Autowired
-    private CloudbreakUsageConverter cloudbreakUsageConverter;
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
 
     @Override
     public List<CloudbreakUsageJson> getUsagesFor(CbUsageFilterParameters params) {
-
         List<CloudbreakUsage> usages = cloudbreakUsagesService.findUsagesFor(params);
-        return new ArrayList<>(cloudbreakUsageConverter.convertAllEntityToJson(usages));
+        return (List<CloudbreakUsageJson>) conversionService
+                .convert(usages, TypeDescriptor.forObject(usages), TypeDescriptor.collection(List.class,
+                        TypeDescriptor.valueOf(CloudbreakUsageJson.class)));
     }
 
     @Override
