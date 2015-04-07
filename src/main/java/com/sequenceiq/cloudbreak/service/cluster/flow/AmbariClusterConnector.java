@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.DockerContainer.AMBARI_DB;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.DockerContainer.AMBARI_SERVER;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
 import static java.util.Collections.singletonMap;
 
 import java.util.ArrayList;
@@ -99,6 +102,9 @@ public class AmbariClusterConnector {
     private RecipeEngine recipeEngine;
 
     @Autowired
+    private PluginManager pluginManager;
+
+    @Autowired
     private AmbariHostsStatusCheckerTask ambariHostsStatusCheckerTask;
 
     @Autowired
@@ -182,6 +188,15 @@ public class AmbariClusterConnector {
             }
         }
         return result;
+    }
+
+    public Cluster resetAmbariCluster(Long stackId) {
+        Stack stack = stackRepository.findOneWithLists(stackId);
+        Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
+        MDCBuilder.buildMdcContext(cluster);
+        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.RESET_AMBARI_DB_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_DB);
+        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.RESET_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_SERVER);
+        return cluster;
     }
 
     public Set<String> decommissionAmbariNodes(Long stackId, HostGroupAdjustmentJson adjustmentRequest, List<HostMetadata> decommissionCandidates) {

@@ -104,9 +104,9 @@ public class ConsulPluginManager implements PluginManager {
     }
 
     @Override
-    public Set<String> triggerPlugins(Collection<InstanceMetaData> instanceMetaData, ConsulPluginEvent event) {
+    public Set<String> triggerPlugins(Collection<InstanceMetaData> instanceMetaData, ConsulPluginEvent event, DockerContainer container) {
         List<ConsulClient> clients = ConsulUtils.createClients(instanceMetaData);
-        String eventId = ConsulUtils.fireEvent(clients, event.getName(), "TRIGGER_PLUGN_IN_CONTAINER ambari-agent", null, null);
+        String eventId = ConsulUtils.fireEvent(clients, event.getName(), "TRIGGER_PLUGN_IN_CONTAINER " + container.getName(), null, null);
         if (eventId != null) {
             return Sets.newHashSet(eventId);
         } else {
@@ -128,10 +128,10 @@ public class ConsulPluginManager implements PluginManager {
     }
 
     @Override
-    public void triggerAndWaitForPlugins(Stack stack, ConsulPluginEvent event, Integer timeout) {
+    public void triggerAndWaitForPlugins(Stack stack, ConsulPluginEvent event, Integer timeout, DockerContainer container) {
         Set<InstanceMetaData> instances = stack.getRunningInstanceMetaData();
         Set hosts = getHostnames(hostMetadataRepository.findHostsInCluster(stack.getCluster().getId()));
-        Set<String> triggerEventIds = triggerPlugins(instances, event);
+        Set<String> triggerEventIds = triggerPlugins(instances, event, container);
         Map<String, Set<String>> eventIdMap = new HashMap<>();
         for (String eventId : triggerEventIds) {
             eventIdMap.put(eventId, hosts);

@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariRoleAllocationHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterCreationHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterDownscaleHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterResetHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStatusUpdateFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStopHandler;
@@ -55,6 +56,7 @@ public class FlowInitializer implements InitializingBean {
         registerStopFlows();
         registerUpscaleFlows();
         registerDownscaleFlows();
+        registerResetFlows();
         registerUpdateAllowedSubnetFlow();
 
         reactor.on($(FlowPhases.PROVISIONING_SETUP.name()), getHandlerForClass(ProvisioningSetupHandler.class));
@@ -63,6 +65,7 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.AMBARI_ROLE_ALLOCATION.name()), getHandlerForClass(AmbariRoleAllocationHandler.class));
         reactor.on($(FlowPhases.AMBARI_START.name()), getHandlerForClass(AmbariStartHandler.class));
         reactor.on($(FlowPhases.CLUSTER_CREATION.name()), getHandlerForClass(ClusterCreationHandler.class));
+        reactor.on($(FlowPhases.CLUSTER_RESET.name()), getHandlerForClass(ClusterResetHandler.class));
         reactor.on($(FlowPhases.TERMINATION.name()), getHandlerForClass(StackTerminationHandler.class));
         reactor.on($(FlowPhases.STACK_START.name()), getHandlerForClass(StackStartHandler.class));
         reactor.on($(FlowPhases.STACK_STOP.name()), getHandlerForClass(StackStopHandler.class));
@@ -150,6 +153,11 @@ public class FlowInitializer implements InitializingBean {
 
         transitionKeyService.registerTransition(ClusterDownscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
                 .createTransition(FlowPhases.CLUSTER_DOWNSCALE.name(), FlowPhases.STACK_DOWNSCALE.name(), FlowPhases.NONE.name()));
+    }
+
+    private void registerResetFlows() {
+        transitionKeyService.registerTransition(ClusterResetHandler.class, SimpleTransitionKeyService.TransitionFactory
+                .createTransition(FlowPhases.CLUSTER_RESET.name(), FlowPhases.AMBARI_START.name(), FlowPhases.NONE.name()));
     }
 
     private void registerUpdateAllowedSubnetFlow() {

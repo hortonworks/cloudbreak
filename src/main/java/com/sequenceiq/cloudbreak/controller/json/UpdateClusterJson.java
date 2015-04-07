@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 
@@ -8,6 +10,8 @@ public class UpdateClusterJson implements JsonEntity {
 
     private HostGroupAdjustmentJson hostGroupAdjustment;
     private StatusRequest status;
+    private Long blueprintId;
+    private Set<HostGroupJson> hostgroups;
 
     public UpdateClusterJson() {
     }
@@ -26,5 +30,21 @@ public class UpdateClusterJson implements JsonEntity {
 
     public void setHostGroupAdjustment(HostGroupAdjustmentJson hostGroupAdjustment) {
         this.hostGroupAdjustment = hostGroupAdjustment;
+    }
+
+    public Long getBlueprintId() {
+        return blueprintId;
+    }
+
+    public Set<HostGroupJson> getHostgroups() {
+        return hostgroups;
+    }
+
+    public void setBlueprintId(Long blueprintId) {
+        this.blueprintId = blueprintId;
+    }
+
+    public void setHostgroups(Set<HostGroupJson> hostgroups) {
+        this.hostgroups = hostgroups;
     }
 }

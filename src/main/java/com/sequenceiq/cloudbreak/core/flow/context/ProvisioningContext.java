@@ -100,6 +100,18 @@ public class ProvisioningContext extends DefaultFlowContext implements FlowConte
             return this;
         }
 
+        public Builder withProvisioningContext(ProvisioningContext provisioningContext) {
+            this.stackId = provisioningContext.getStackId();
+            this.cloudPlatform = provisioningContext.getCloudPlatform();
+            this.errorReason = provisioningContext.getErrorReason();
+            this.setupProperties = provisioningContext.getSetupProperties();
+            this.userDataParams = provisioningContext.getUserDataParams();
+            this.resources = provisioningContext.getResources();
+            this.coreInstanceMetaData = provisioningContext.getCoreInstanceMetaData();
+            this.ambariIp = provisioningContext.getAmbariIp();
+            return this;
+        }
+
         public ProvisioningContext build() {
             return new ProvisioningContext(this);
         }

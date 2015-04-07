@@ -46,11 +46,7 @@ consul_join_ip() {
 start_consul() {
   get_consul_opts
   docker rm -f consul &> /dev/null
-  docker run -d \
-    --name consul \
-    --net=host \
-    --restart=always \
-    $CONSUL_IMAGE $CONSUL_OPTIONS
+  docker run -d --name consul --net=host --restart=always $CONSUL_IMAGE $CONSUL_OPTIONS
 }
 
 get_consul_opts() {
@@ -71,15 +67,7 @@ get_consul_opts() {
 
 start_consul_watch() {
   docker rm -f consul-watch &> /dev/null
-  docker run -d \
-    --name consul-watch \
-    --privileged \
-    --net=host \
-    --restart=always \
-    -e TRACE=1 \
-    -e BRIDGE_IP=$(get_ip) \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    $CONSUL_WATCH_IMAGE
+  docker run -d --name consul-watch --privileged --net=host --restart=always -e TRACE=1 -e BRIDGE_IP=$(get_ip) -v /var/run/docker.sock:/var/run/docker.sock $CONSUL_WATCH_IMAGE
 }
 
 does_cluster_exist() {

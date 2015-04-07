@@ -29,4 +29,6 @@ public interface ClusterFacade {
     FlowContext downscaleCluster(FlowContext context) throws CloudbreakException;
 
     FlowContext handleScalingFailure(FlowContext context) throws CloudbreakException;
+
+    FlowContext resetAmbariCluster(FlowContext context) throws CloudbreakException;
 }

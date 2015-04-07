@@ -169,4 +169,8 @@ public class Cluster implements ProvisionEntity {
     public void setHostGroups(Set<HostGroup> hostGroups) {
         this.hostGroups = hostGroups;
     }
+
+    public boolean isStateFailed() {
+        return status.equals(Status.CREATE_FAILED);
+    }
 }

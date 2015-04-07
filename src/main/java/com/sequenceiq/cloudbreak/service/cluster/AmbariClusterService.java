@@ -24,6 +24,9 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.controller.json.HostGroupJson;
+import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
+import com.sequenceiq.cloudbreak.converter.ClusterConverter;
 import com.sequenceiq.cloudbreak.core.flow.FlowManager;
 import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -39,6 +42,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -64,6 +68,9 @@ public class AmbariClusterService implements ClusterService {
     private StackRepository stackRepository;
 
     @Autowired
+    private BlueprintRepository blueprintRepository;
+
+    @Autowired
     private ClusterRepository clusterRepository;
 
     @Autowired
@@ -86,6 +93,12 @@ public class AmbariClusterService implements ClusterService {
 
     @Autowired
     private FlowManager flowManager;
+
+    @Autowired
+    private BlueprintValidator blueprintValidator;
+
+    @Autowired
+    private ClusterConverter clusterConverter;
 
     @Override
     public Cluster create(CbUser user, Long stackId, Cluster cluster) {
@@ -262,6 +275,29 @@ public class AmbariClusterService implements ClusterService {
         LOGGER.debug("Updating cluster. clusterId: {}", cluster.getId());
         cluster = clusterRepository.save(cluster);
         return cluster;
+    }
+
+    @Override
+    public Cluster recreate(Long stackId,  Long blueprintId, Set<HostGroupJson> hostgroups) {
+        if (blueprintId == null || hostgroups == null) {
+            throw new BadRequestException("Blueprint id and hostGroup assignments can not be null.");
+        }
+        Stack stack = stackRepository.findOne(stackId);
+        Blueprint blueprint = blueprintRepository.findOne(blueprintId);
+        if (blueprint == null) {
+            throw new BadRequestException(String.format("Blueprint not exist with '%s' id.", blueprintId));
+        }
+        Cluster cluster = stack.getCluster();
+        MDCBuilder.buildMdcContext(cluster);
+        Set<HostGroup> hostGroups = clusterConverter.convertHostGroupsFromJson(stackId, cluster, hostgroups);
+        blueprintValidator.validateBlueprintForStack(blueprint, hostGroups, stackRepository.findOne(stackId).getInstanceGroups());
+        cluster.setBlueprint(blueprint);
+        cluster.getHostGroups().removeAll(cluster.getHostGroups());
+        cluster.getHostGroups().addAll(hostGroups);
+        LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
+        stack = stackUpdater.updateStackCluster(stack.getId(), cluster);
+        flowManager.triggerClusterReInstall(new ProvisionRequest(stack.cloudPlatform(), stack.getId()));
+        return stack.getCluster();
     }
 
     private boolean validateRequest(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {

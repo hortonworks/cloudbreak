@@ -20,6 +20,8 @@ public interface FlowFacade {
 
     FlowContext buildAmbariCluster(FlowContext flowContext) throws CloudbreakException;
 
+    FlowContext resetAmbariCluster(FlowContext flowContext) throws CloudbreakException;
+
     FlowContext handleStackCreationFailure(FlowContext context) throws CloudbreakException;
 
     FlowContext handleClusterCreationFailure(FlowContext flowContext) throws CloudbreakException;
