@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
+import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
@@ -42,6 +44,9 @@ public class SimpleFlowFacade implements FlowFacade {
 
     @Autowired
     private StackService stackService;
+
+    @Autowired
+    private CloudbreakEventService cloudbreakEventService;
 
     @Override
     public FlowContext setup(FlowContext context) throws CloudbreakException {
@@ -86,6 +91,8 @@ public class SimpleFlowFacade implements FlowFacade {
             ProvisioningContext provisioningContext = (ProvisioningContext) context;
             MetadataSetupComplete metadataSetupComplete = (MetadataSetupComplete) metadataSetups.get(provisioningContext.getCloudPlatform())
                     .setupMetadata(stackService.getById(provisioningContext.getStackId()));
+            cloudbreakEventService.fireCloudbreakEvent(provisioningContext.getStackId(), BillingStatus.BILLING_STARTED.name(),
+                    "Provision of stack is successfully finished");
             LOGGER.debug("Metadata setup DONE.");
             return new ProvisioningContext.Builder()
                     .setDefaultParams(provisioningContext.getStackId(), provisioningContext.getCloudPlatform())
