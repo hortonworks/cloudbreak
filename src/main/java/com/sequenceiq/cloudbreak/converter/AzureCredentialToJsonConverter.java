@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 
 @Component
-public class AzureCredentialToJson extends AbstractConversionServiceAwareConverter<AzureCredential, CredentialJson> {
+public class AzureCredentialToJsonConverter extends AbstractConversionServiceAwareConverter<AzureCredential, CredentialJson> {
     @Override
     public CredentialJson convert(AzureCredential source) {
         CredentialJson credentialJson = new CredentialJson();
