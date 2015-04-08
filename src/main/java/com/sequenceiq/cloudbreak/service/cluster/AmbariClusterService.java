@@ -24,9 +24,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.controller.json.HostGroupJson;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
-import com.sequenceiq.cloudbreak.converter.ClusterConverter;
 import com.sequenceiq.cloudbreak.core.flow.FlowManager;
 import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -94,9 +92,6 @@ public class AmbariClusterService implements ClusterService {
 
     @Autowired
     private BlueprintValidator blueprintValidator;
-
-    @Autowired
-    private ClusterConverter clusterConverter;
 
     @Override
     public Cluster create(CbUser user, Long stackId, Cluster cluster) {
@@ -253,8 +248,8 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public Cluster recreate(Long stackId,  Long blueprintId, Set<HostGroupJson> hostgroups) {
-        if (blueprintId == null || hostgroups == null) {
+    public Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups) {
+        if (blueprintId == null || hostGroups == null) {
             throw new BadRequestException("Blueprint id and hostGroup assignments can not be null.");
         }
         Stack stack = stackRepository.findOne(stackId);
@@ -264,7 +259,6 @@ public class AmbariClusterService implements ClusterService {
         }
         Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(cluster);
-        Set<HostGroup> hostGroups = clusterConverter.convertHostGroupsFromJson(stackId, cluster, hostgroups);
         blueprintValidator.validateBlueprintForStack(blueprint, hostGroups, stackRepository.findOne(stackId).getInstanceGroups());
         cluster.setBlueprint(blueprint);
         cluster.getHostGroups().removeAll(cluster.getHostGroups());
