@@ -67,7 +67,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         stack.setRegion(source.getRegion());
         stack.setOnFailureActionAction(source.getOnFailureAction());
         if (source.getAllowedSubnets() != null) {
-            stack.setAllowedSubnets(convertSubnets(source.getAllowedSubnets()));
+            stack.setAllowedSubnets(convertSubnets(source.getAllowedSubnets(), stack));
         }
         stack.addAllowedSubnets(securityService.getCloudbreakSubnets(stack));
         try {
@@ -76,7 +76,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
             throw new AccessDeniedException(String.format("Access to credential '%s' is denied or credential doesn't exist", source.getCredentialId()), e);
         }
         stack.setStatus(Status.REQUESTED);
-        stack.setInstanceGroups(convertInstanceGroups(source.getInstanceGroups()));
+        stack.setInstanceGroups(convertInstanceGroups(source.getInstanceGroups(), stack));
         if (stack.getInstanceGroupsByType(GATEWAY).isEmpty()) {
             throw new BadRequestException("Gateway instance group not configured");
         }
@@ -165,14 +165,22 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         return amisMap;
     }
 
-    private Set<Subnet> convertSubnets(List<SubnetJson> source) {
-        return (Set<Subnet>) getConversionService().convert(source,
+    private Set<Subnet> convertSubnets(List<SubnetJson> source, Stack stack) {
+        Set<Subnet> convertedSet = (Set<Subnet>) getConversionService().convert(source,
                 TypeDescriptor.forObject(source),
                 TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(Subnet.class)));
+        for (Subnet subNet : convertedSet) {
+            subNet.setStack(stack);
+        }
+        return convertedSet;
     }
 
-    private Set<InstanceGroup> convertInstanceGroups(List<InstanceGroupJson> instanceGroupJsons) {
-        return (Set<InstanceGroup>) getConversionService().convert(instanceGroupJsons, TypeDescriptor.forObject(instanceGroupJsons),
+    private Set<InstanceGroup> convertInstanceGroups(List<InstanceGroupJson> instanceGroupJsons, Stack stack) {
+        Set<InstanceGroup> convertedSet = (Set<InstanceGroup>) getConversionService().convert(instanceGroupJsons, TypeDescriptor.forObject(instanceGroupJsons),
                 TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(InstanceGroup.class)));
+        for (InstanceGroup instanceGroup : convertedSet) {
+            instanceGroup.setStack(stack);
+        }
+        return convertedSet;
     }
 }
