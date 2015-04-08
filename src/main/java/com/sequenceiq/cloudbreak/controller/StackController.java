@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.domain.Subnet;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 
@@ -45,6 +46,9 @@ public class StackController {
     @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
+
+    @Autowired
+    private Decorator<Stack> stackDecorator;
 
     @RequestMapping(value = "user/stacks", method = RequestMethod.POST)
     @ResponseBody
@@ -186,6 +190,7 @@ public class StackController {
 
     private ResponseEntity<IdJson> createStack(CbUser user, StackJson stackRequest, boolean publicInAccount) {
         Stack stack = conversionService.convert(stackRequest, Stack.class);
+        stack = stackDecorator.decorate(stack, stackRequest.getCredentialId(), stackRequest.getConsulServerCount());
         stack.setPublicInAccount(publicInAccount);
         stack = stackService.create(user, stack);
         return new ResponseEntity<>(new IdJson(stack.getId()), HttpStatus.CREATED);
