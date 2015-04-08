@@ -76,7 +76,7 @@ public class AmbariRoleAllocator {
                         coreInstanceMetaData.size(), stack.getFullNodeCount()));
             }
             for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                Set<InstanceMetaData> instancesMetaData = prepareInstanceMetaData(coreInstanceMetaData, instanceGroup, InstanceStatus.REGISTERED);
+                Set<InstanceMetaData> instancesMetaData = prepareInstanceMetaData(coreInstanceMetaData, instanceGroup, InstanceStatus.UNREGISTERED);
                 stackUpdater.updateStackMetaData(stackId, instancesMetaData, instanceGroup.getGroupName());
             }
             stack = stackUpdater.updateMetadataReady(stackId, true);

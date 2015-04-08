@@ -15,8 +15,10 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
+import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -29,6 +31,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariRoleAllocator;
@@ -73,6 +76,9 @@ public class AmbariClusterFacade implements ClusterFacade {
 
     @Autowired
     private CloudbreakEventService eventService;
+
+    @Autowired
+    private HostGroupService hostGroupService;
 
     @Override
     public FlowContext allocateAmbariRoles(FlowContext context) throws Exception {
@@ -238,7 +244,13 @@ public class AmbariClusterFacade implements ClusterFacade {
         if (!hostNames.isEmpty()) {
             updateInstanceMetadataAfterScaling(true, hostNames, stack);
         }
-        return context;
+        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), scalingContext.getHostGroupAdjustment().getHostGroup());
+        StackScalingContext stackScalingContext = new StackScalingContext(scalingContext.getStackId(),
+                scalingContext.getCloudPlatform(),
+                hostGroup.getInstanceGroup().getGroupName(),
+                scalingContext.getDecommissionCandidates().size() * (-1),
+                scalingContext.getScalingType());
+        return stackScalingContext;
     }
 
     @Override

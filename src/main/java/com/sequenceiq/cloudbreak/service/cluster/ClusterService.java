@@ -24,9 +24,6 @@ public interface ClusterService {
     UpdateAmbariHostsRequest updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment);
 
     ClusterStatusUpdateRequest updateStatus(Long stackId, StatusRequest statusRequest);
-
-    Cluster clusterCreationSuccess(Long clusterId, long creationFinished, String ambariIp);
-
     Cluster updateClusterStatusByStackId(Long stackId, Status status, String statusReason);
 
     Cluster updateCluster(Cluster cluster);

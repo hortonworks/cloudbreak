@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ecwid.consul.v1.ConsulClient;
+import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -62,6 +64,9 @@ public class StackScalingService {
     @Autowired
     private AmbariRoleAllocator ambariRoleAllocator;
 
+    @Autowired
+    private AmbariHostsRemover ambariHostsRemover;
+
     @javax.annotation.Resource
     private Map<CloudPlatform, MetadataSetup> metadataSetups;
 
@@ -88,7 +93,9 @@ public class StackScalingService {
 
     public void downscaleStack(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
         Stack stack = stackService.getById(stackId);
-        Set<String> instanceIds = getUnregisteredInstanceIds(scalingAdjustment, stack);
+        Map<String, String> unregisteredHostNamesByInstanceId = getUnregisteredInstanceIds(instanceGroupName, scalingAdjustment, stack);
+        Set<String> instanceIds = new HashSet<>(unregisteredHostNamesByInstanceId.keySet());
+        deleteHostsFromAmbari(stack, unregisteredHostNamesByInstanceId);
         instanceIds = cloudPlatformConnectors.get(stack.cloudPlatform()).removeInstances(stack, instanceIds, instanceGroupName);
         updateRemovedResourcesState(stack, instanceIds, stack.getInstanceGroupByInstanceGroupName(instanceGroupName));
         setStackAndMetadataAvailable(scalingAdjustment, stack);
@@ -106,20 +113,26 @@ public class StackScalingService {
 
     }
 
-    private Set<String> getUnregisteredInstanceIds(Integer scalingAdjustment, Stack stack) {
-        Set<String> instanceIds = new HashSet<>();
+    private Map<String, String> getUnregisteredInstanceIds(String instanceGroupName, Integer scalingAdjustment, Stack stack) {
+        Map<String, String> instanceIds = new HashMap<>();
+
         int i = 0;
-        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            for (InstanceMetaData metadataEntry : instanceGroup.getInstanceMetaData()) {
-                if (metadataEntry.isDecommissioned() || metadataEntry.isUnRegistered()) {
-                    instanceIds.add(metadataEntry.getInstanceId());
-                    if (++i >= scalingAdjustment * -1) {
-                        break;
-                    }
+        for (InstanceMetaData metaData : stack.getInstanceGroupByInstanceGroupName(instanceGroupName).getInstanceMetaData()) {
+            if (!metaData.getAmbariServer() && !metaData.getConsulServer() && (metaData.isDecommissioned() || metaData.isUnRegistered())) {
+                instanceIds.put(metaData.getInstanceId(), metaData.getLongName());
+                if (++i >= scalingAdjustment * -1) {
+                    break;
                 }
             }
         }
         return instanceIds;
+    }
+
+    private void deleteHostsFromAmbari(Stack stack, Map<String, String> unregisteredHostNamesByInstanceId) {
+        if (stack.getCluster() == null) {
+            List<String> hostList = new ArrayList<>(unregisteredHostNamesByInstanceId.values());
+            ambariHostsRemover.deleteHosts(stack, hostList, new ArrayList<String>());
+        }
     }
 
     private void updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) {

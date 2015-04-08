@@ -22,7 +22,7 @@ public class ConsulServerFilter implements HostFilter {
         List<HostMetadata> copy = new ArrayList<>(hosts);
         for (HostMetadata host : hosts) {
             InstanceMetaData instanceMetaData = instanceMetadataRepository.findHostInStack(stackId, host.getHostName());
-            if (instanceMetaData.getConsulServer()) {
+            if (instanceMetaData != null && instanceMetaData.getConsulServer()) {
                 copy.remove(host);
             }
         }

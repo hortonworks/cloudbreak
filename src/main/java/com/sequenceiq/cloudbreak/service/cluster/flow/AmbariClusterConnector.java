@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.ClusterException;
+import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -112,6 +113,9 @@ public class AmbariClusterConnector {
 
     @Autowired
     private DNDecommissionStatusCheckerTask dnDecommissionStatusCheckerTask;
+
+    @Autowired
+    private AmbariHostsRemover ambariHostsRemover;
 
     public Cluster buildAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
@@ -223,7 +227,7 @@ public class AmbariClusterConnector {
             if (isSuccess(pollingResult)) {
                 pollingResult = stopHadoopComponents(stack, ambariClient, hostList);
                 if (isSuccess(pollingResult)) {
-                    deleteHostsFromAmbari(ambariClient, hostList, new ArrayList<>(components));
+                    ambariHostsRemover.deleteHosts(stack, hostList, new ArrayList<>(components));
                     pollingResult = restartHadoopServices(stack, ambariClient, true);
                     if (isSuccess(pollingResult)) {
                         cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
@@ -254,9 +258,11 @@ public class AmbariClusterConnector {
         cluster.setUpSince(new Date().getTime());
         cluster = clusterRepository.save(cluster);
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            Set<InstanceMetaData> instances = instanceGroup.getInstanceMetaData();
+            Set<InstanceMetaData> instances = instanceGroup.getAllInstanceMetaData();
             for (InstanceMetaData instanceMetaData : instances) {
-                instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
+                if (!instanceMetaData.isTerminated()) {
+                    instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
+                }
             }
             stackUpdater.updateStackMetaData(stack.getId(), instances, instanceGroup.getGroupName());
         }
@@ -334,14 +340,6 @@ public class AmbariClusterConnector {
             return waitForAmbariOperations(stack, ambariClient, singletonMap("Stopping components on the decommissioned hosts", requestId));
         } catch (HttpResponseException e) {
             throw new AmbariOperationFailedException("Ambari client could not stop components.", e);
-        }
-    }
-
-    private void deleteHostsFromAmbari(AmbariClient ambariClient, List<String> hosts, List<String> components) {
-        for (String hostName : hosts) {
-            ambariClient.deleteHostComponents(hostName, components);
-            ambariClient.deleteHost(hostName);
-            ambariClient.unregisterHost(hostName);
         }
     }
 
@@ -455,7 +453,8 @@ public class AmbariClusterConnector {
         Map<String, List<String>> hostGroupMappings = new HashMap<>();
         LOGGER.info("Computing host - hostGroup mappings based on hostGroup - instanceGroup associations");
         for (HostGroup hostGroup : hostGroups) {
-            hostGroupMappings.put(hostGroup.getName(), instanceMetadataRepository.findHostNamesInInstanceGroup(hostGroup.getInstanceGroup().getId()));
+            hostGroupMappings.put(hostGroup.getName(),
+                    instanceMetadataRepository.findAliveInstancesHostNamesInInstanceGroup(hostGroup.getInstanceGroup().getId()));
         }
         LOGGER.info("Computed host-hostGroup associations: {}", hostGroupMappings);
         return hostGroupMappings;
