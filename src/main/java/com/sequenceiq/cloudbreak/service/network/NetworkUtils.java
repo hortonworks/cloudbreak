@@ -31,6 +31,8 @@ public final class NetworkUtils {
         ports.add(new Port("Storm", "8744", "8744", "tcp", aclRules));
         ports.add(new Port("Oozie", "11000", "11000", "tcp", aclRules));
         ports.add(new Port("Container logs", "8042", "8042", "tcp", aclRules));
+        ports.add(new Port("Zeppelin web socket", "9999", "9999", "tcp", aclRules));
+        ports.add(new Port("Zeppelin ui", "9998", "9998", "tcp", aclRules));
         return ports;
     }
 
