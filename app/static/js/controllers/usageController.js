@@ -105,7 +105,12 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
           var result = $filter('filter')(usageByProvider.items, {stackId: item.stackId}, true);
           if (result != undefined && result.length > 0) {
             result[0].instanceHours = result[0].instanceHours + item.instanceHours;
-            result[0].instanceGroups.push({instanceType: item.instanceType, hours: item.instanceHours, name: item.instanceGroup});
+            var summedGroups = $filter('filter')(result[0].instanceGroups, {name: item.instanceGroup}, true);
+            if (summedGroups.length > 0) {
+                summedGroups[0].hours = summedGroups[0].hours + item.instanceHours;
+            } else {
+                result[0].instanceGroups.push({instanceType: item.instanceType, hours: item.instanceHours, name: item.instanceGroup});
+            }
           } else {
             item.instanceGroups = [];
             item.instanceGroups.push({instanceType: item.instanceType, hours:  item.instanceHours, name: item.instanceGroup});
