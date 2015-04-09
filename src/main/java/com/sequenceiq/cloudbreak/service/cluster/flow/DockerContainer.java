@@ -4,7 +4,8 @@ public enum DockerContainer {
 
     AMBARI_SERVER("ambari-server"),
     AMBARI_AGENT("ambari-agent"),
-    AMBARI_DB("ambari_db");
+    AMBARI_DB("ambari_db"),
+    KERBEROS("kerberos");
 
     private final String name;
 

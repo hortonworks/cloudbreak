@@ -17,6 +17,9 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         cluster.setEmailNeeded(source.getEmailNeeded());
         Boolean enableSecurity = source.getEnableSecurity();
         cluster.setSecure(enableSecurity == null ? false : enableSecurity);
+        cluster.setKerberosMasterKey(source.getKerberosMasterKey());
+        cluster.setKerberosAdmin(source.getKerberosAdmin());
+        cluster.setKerberosPassword(source.getKerberosPassword());
         return cluster;
     }
 }

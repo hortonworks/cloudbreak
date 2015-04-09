@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -104,18 +106,6 @@ public class ConsulPluginManager implements PluginManager {
     }
 
     @Override
-    public Set<String> triggerPlugins(Collection<InstanceMetaData> instanceMetaData, ConsulPluginEvent event, DockerContainer container) {
-        List<ConsulClient> clients = ConsulUtils.createClients(instanceMetaData);
-        String eventId = ConsulUtils.fireEvent(clients, event.getName(), "TRIGGER_PLUGN_IN_CONTAINER " + container.getName(), null, null);
-        if (eventId != null) {
-            return Sets.newHashSet(eventId);
-        } else {
-            throw new PluginFailureException("Failed to trigger plugins, Consul client couldn't fire the "
-                    + event.getName() + " event or failed to retrieve an event ID.");
-        }
-    }
-
-    @Override
     public void waitForEventFinish(Stack stack, Collection<InstanceMetaData> instanceMetaData, Map<String, Set<String>> eventIds, Integer timeout) {
         List<ConsulClient> clients = ConsulUtils.createClients(instanceMetaData);
         List<String> keys = generateKeys(eventIds);
@@ -129,14 +119,48 @@ public class ConsulPluginManager implements PluginManager {
 
     @Override
     public void triggerAndWaitForPlugins(Stack stack, ConsulPluginEvent event, Integer timeout, DockerContainer container) {
+        triggerAndWaitForPlugins(stack, event, timeout, container, Collections.<String>emptyList(), null);
+    }
+
+    @Override
+    public void triggerAndWaitForPlugins(Stack stack, ConsulPluginEvent event, Integer timeout, DockerContainer container,
+            List<String> payload, Set<String> hosts) {
         Set<InstanceMetaData> instances = stack.getRunningInstanceMetaData();
-        Set hosts = getHostnames(hostMetadataRepository.findHostsInCluster(stack.getCluster().getId()));
-        Set<String> triggerEventIds = triggerPlugins(instances, event, container);
+        Set<String> targetHosts = hosts;
+        if (hosts == null || hosts.isEmpty()) {
+            targetHosts = getHostnames(hostMetadataRepository.findHostsInCluster(stack.getCluster().getId()));
+        }
+        Set<String> triggerEventIds = triggerPlugins(instances, event, container, payload, targetHosts);
         Map<String, Set<String>> eventIdMap = new HashMap<>();
         for (String eventId : triggerEventIds) {
-            eventIdMap.put(eventId, hosts);
+            eventIdMap.put(eventId, targetHosts);
         }
         waitForEventFinish(stack, instances, eventIdMap, timeout);
+    }
+
+    private Set<String> triggerPlugins(Collection<InstanceMetaData> instanceMetaData, ConsulPluginEvent event,
+            DockerContainer container, List<String> payload, Set<String> hosts) {
+        List<ConsulClient> clients = ConsulUtils.createClients(instanceMetaData);
+        if (hosts == null || hosts.isEmpty()) {
+            return Sets.newHashSet(fireEvent(clients, event, container, payload, null));
+        }
+        Set<String> result = Sets.newHashSet();
+        for (Map.Entry<String, Set<String>> nodeFilter : getNodeFilters(hosts).entrySet()) {
+            EventParams eventParams = new EventParams();
+            eventParams.setNode(nodeFilter.getKey());
+            result.add(fireEvent(clients, event, container, payload, eventParams));
+        }
+        return result;
+    }
+
+    private String fireEvent(List<ConsulClient> clients, ConsulPluginEvent event, DockerContainer container, List<String> payload, EventParams eventParams) {
+        String eventId = ConsulUtils.fireEvent(clients, event.getName(),
+                "TRIGGER_PLUGN_IN_CONTAINER " + container.getName() + " " + StringUtils.join(payload, " "), eventParams, null);
+        if (eventId == null) {
+            throw new PluginFailureException("Failed to trigger plugins, Consul client couldn't fire the "
+                    + event.getName() + " event or failed to retrieve an event ID.");
+        }
+        return eventId;
     }
 
     private List<String> generateKeys(Map<String, Set<String>> eventIds) {

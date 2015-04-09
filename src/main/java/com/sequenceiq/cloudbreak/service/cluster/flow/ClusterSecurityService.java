@@ -1,11 +1,17 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.DockerContainer.KERBEROS;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,10 +49,13 @@ public class ClusterSecurityService {
     private RetryingStackUpdater stackUpdater;
     @Autowired
     private CloudbreakEventService eventService;
+    @Autowired
+    private PluginManager pluginManager;
 
     public void enableKerberosSecurity(Stack stack) throws CloudbreakException {
         try {
             updateClusterState(stack, Status.UPDATE_IN_PROGRESS, "Enabling kerberos security.");
+            createAndStartKDC(stack);
             AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(stack);
             ambariClient.addService(KERBEROS_SERVICE);
             ambariClient.addServiceComponent(KERBEROS_SERVICE, KERBEROS_CLIENT);
@@ -61,7 +70,7 @@ public class ClusterSecurityService {
                 pollingResult = waitForOperation(stack, ambariClient, singletonMap("STOP_SERVICES", ambariClient.stopAllServices()));
                 if (isContinue(pollingResult)) {
                     ambariClient.createKerberosDescriptor(REALM);
-                    ambariClientProvider.setKerberosSession(ambariClient);
+                    ambariClientProvider.setKerberosSession(ambariClient, stack.getCluster());
                     pollingResult = waitForOperation(stack, ambariClient, singletonMap("ENABLE_KERBEROS", ambariClient.enableKerberos()));
                     if (isContinue(pollingResult)) {
                         waitForOperation(stack, ambariClient, singletonMap("START_SERVICES", ambariClient.startAllServices()));
@@ -74,6 +83,17 @@ public class ClusterSecurityService {
         } catch (Exception e) {
             LOGGER.error("Error occurred during enabling the kerberos security", e);
         }
+    }
+
+    private void createAndStartKDC(Stack stack) {
+        Cluster cluster = stack.getCluster();
+        InstanceGroup gateway = stack.getInstanceGroupByType(InstanceGroupType.GATEWAY);
+        Set<String> gatewayHosts = new HashSet<>();
+        for (InstanceMetaData gwNode : gateway.getInstanceMetaData()) {
+            gatewayHosts.add(gwNode.getLongName());
+        }
+        List<String> payload = Arrays.asList(cluster.getKerberosAdmin(), cluster.getKerberosPassword(), cluster.getKerberosMasterKey(), REALM);
+        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.CREATE_KERBEROS_KDC, DEFAULT_RECIPE_TIMEOUT, KERBEROS, payload, gatewayHosts);
     }
 
     private boolean isContinue(PollingResult result) throws InterruptedException {
