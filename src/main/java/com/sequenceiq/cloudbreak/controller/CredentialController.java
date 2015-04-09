@@ -6,10 +6,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UnknownFormatConversionException;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -24,10 +27,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
-import com.sequenceiq.cloudbreak.converter.AwsCredentialConverter;
-import com.sequenceiq.cloudbreak.converter.AzureCredentialConverter;
-import com.sequenceiq.cloudbreak.converter.GccCredentialConverter;
-import com.sequenceiq.cloudbreak.converter.OpenStackCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -40,20 +39,12 @@ import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 @Controller
 public class CredentialController {
 
+    @Resource
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
+
     @Autowired
     private CredentialService credentialService;
-
-    @Autowired
-    private AwsCredentialConverter awsCredentialConverter;
-
-    @Autowired
-    private AzureCredentialConverter azureCredentialConverter;
-
-    @Autowired
-    private GccCredentialConverter gccCredentialConverter;
-
-    @Autowired
-    private OpenStackCredentialConverter openStackCredentialConverter;
 
     @Autowired
     private AzureStackUtil azureStackUtil;
@@ -168,40 +159,48 @@ public class CredentialController {
     }
 
     private Credential convert(CredentialJson json, boolean publicInAccount) {
+        Credential converted = null;
         switch (json.getCloudPlatform()) {
-            case AWS:
-                return awsCredentialConverter.convert(json, publicInAccount);
-            case AZURE:
-                return azureCredentialConverter.convert(json, publicInAccount);
-            case GCC:
-                return gccCredentialConverter.convert(json, publicInAccount);
-            case OPENSTACK:
-                return openStackCredentialConverter.convert(json, publicInAccount);
-            default:
-                throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", json.getCloudPlatform()));
+        case AWS:
+            converted = conversionService.convert(json, AwsCredential.class);
+            break;
+        case AZURE:
+            converted = conversionService.convert(json, AzureCredential.class);
+            break;
+        case GCC:
+            converted = conversionService.convert(json, GccCredential.class);
+            break;
+        case OPENSTACK:
+            converted = conversionService.convert(json, OpenStackCredential.class);
+            break;
+        default:
+            throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", json.getCloudPlatform()));
         }
+        converted.setPublicInAccount(publicInAccount);
+        return converted;
     }
 
     private CredentialJson convert(Credential credential) {
+
         switch (credential.cloudPlatform()) {
-            case AWS:
-                return awsCredentialConverter.convert((AwsCredential) credential);
-            case AZURE:
-                return azureCredentialConverter.convert((AzureCredential) credential);
-            case GCC:
-                return gccCredentialConverter.convert((GccCredential) credential);
-            case OPENSTACK:
-                return openStackCredentialConverter.convert((OpenStackCredential) credential);
-            default:
-                throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credential.cloudPlatform()));
+        case AWS:
+            return conversionService.convert((AwsCredential) credential, CredentialJson.class);
+        case AZURE:
+            return conversionService.convert((AzureCredential) credential, CredentialJson.class);
+        case GCC:
+            return conversionService.convert((GccCredential) credential, CredentialJson.class);
+        case OPENSTACK:
+            return conversionService.convert((OpenStackCredential) credential, CredentialJson.class);
+        default:
+            throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credential.cloudPlatform()));
         }
     }
 
     private Set<CredentialJson> convertCredentials(Set<Credential> credentials) {
-        Set<CredentialJson> jsons = new HashSet<>();
-        for (Credential current : credentials) {
-            jsons.add(convert(current));
+        Set<CredentialJson> jsonSet = new HashSet<>();
+        for (Credential credential : credentials) {
+            jsonSet.add(convert(credential));
         }
-        return jsons;
+        return jsonSet;
     }
 }

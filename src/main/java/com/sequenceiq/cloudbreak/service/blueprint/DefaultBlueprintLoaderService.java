@@ -7,12 +7,13 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
-import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -26,7 +27,8 @@ public class DefaultBlueprintLoaderService {
     private List<String> blueprintArray;
 
     @Autowired
-    private BlueprintConverter blueprintConverter;
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
 
     @Autowired
     private JsonHelper jsonHelper;
@@ -43,8 +45,7 @@ public class DefaultBlueprintLoaderService {
                 blueprintJson.setDescription(blueprintName);
                 blueprintJson.setAmbariBlueprint(
                         jsonHelper.createJsonFromString(FileReaderUtils.readFileFromClasspath(String.format("blueprints/%s.bp", blueprintName))));
-
-                Blueprint bp = blueprintConverter.convert(blueprintJson);
+                Blueprint bp = conversionService.convert(blueprintJson, Blueprint.class);
                 MDCBuilder.buildMdcContext(bp);
                 bp.setOwner(user.getUserId());
                 bp.setAccount(user.getAccount());

@@ -5,6 +5,9 @@ import java.util.Set;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,7 +20,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.RecipeJson;
-import com.sequenceiq.cloudbreak.converter.RecipeConverter;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
@@ -26,7 +28,8 @@ import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 public class RecipeController {
 
     @Autowired
-    private RecipeConverter recipeConverter;
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
 
     @Autowired
     private RecipeService recipeService;
@@ -47,35 +50,35 @@ public class RecipeController {
     @ResponseBody
     public ResponseEntity<Set<RecipeJson>> getPrivateRecipes(@ModelAttribute("user") CbUser user) {
         Set<Recipe> recipes = recipeService.retrievePrivateRecipes(user);
-        return new ResponseEntity<>(recipeConverter.convertAllEntityToJson(recipes), HttpStatus.OK);
+        return new ResponseEntity<>(toJsonSet(recipes), HttpStatus.OK);
     }
 
     @RequestMapping(value = "account/recipes", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<RecipeJson>> getAccountRecipes(@ModelAttribute("user") CbUser user) {
         Set<Recipe> recipes = recipeService.retrieveAccountRecipes(user);
-        return new ResponseEntity<>(recipeConverter.convertAllEntityToJson(recipes), HttpStatus.OK);
+        return new ResponseEntity<>(toJsonSet(recipes), HttpStatus.OK);
     }
 
     @RequestMapping(value = "user/recipes/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<RecipeJson> getPrivateRecipe(@ModelAttribute("user") CbUser user, @PathVariable String name) {
         Recipe recipe = recipeService.getPrivateRecipe(name, user);
-        return new ResponseEntity<>(recipeConverter.convert(recipe), HttpStatus.OK);
+        return new ResponseEntity<>(conversionService.convert(recipe, RecipeJson.class), HttpStatus.OK);
     }
 
     @RequestMapping(value = "account/recipes/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<RecipeJson> getAccountRecipe(@ModelAttribute("user") CbUser user, @PathVariable String name) {
         Recipe recipe = recipeService.getPublicRecipe(name, user);
-        return new ResponseEntity<>(recipeConverter.convert(recipe), HttpStatus.OK);
+        return new ResponseEntity<>(conversionService.convert(recipe, RecipeJson.class), HttpStatus.OK);
     }
 
     @RequestMapping(value = "recipes/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<RecipeJson> getRecipe(@PathVariable Long id) {
         Recipe recipe = recipeService.get(id);
-        return new ResponseEntity<>(recipeConverter.convert(recipe), HttpStatus.OK);
+        return new ResponseEntity<>(conversionService.convert(recipe, RecipeJson.class), HttpStatus.OK);
     }
 
     @RequestMapping(value = "recipes/{id}", method = RequestMethod.DELETE)
@@ -100,7 +103,15 @@ public class RecipeController {
     }
 
     private ResponseEntity<IdJson> createRecipe(CbUser user, RecipeJson recipeRequest, boolean publicInAccount) {
-        Recipe recipe = recipeService.create(user, recipeConverter.convert(recipeRequest, publicInAccount));
+        Recipe recipe = conversionService.convert(recipeRequest, Recipe.class);
+        recipe.setPublicInAccount(publicInAccount);
+        recipe = recipeService.create(user, recipe);
         return new ResponseEntity<>(new IdJson(recipe.getId()), HttpStatus.CREATED);
     }
+
+    private Set<RecipeJson> toJsonSet(Set<Recipe> recipes) {
+        return (Set<RecipeJson>) conversionService.convert(recipes, TypeDescriptor.forObject(recipes),
+                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(RecipeJson.class)));
+    }
+
 }

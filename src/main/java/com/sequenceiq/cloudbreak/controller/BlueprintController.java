@@ -7,6 +7,9 @@ import java.util.Set;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -19,7 +22,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
-import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
@@ -36,7 +38,8 @@ public class BlueprintController {
     private BlueprintRepository blueprintRepository;
 
     @Autowired
-    private BlueprintConverter blueprintConverter;
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
 
     @Autowired
     private DefaultBlueprintLoaderService defaultBlueprintLoaderService;
@@ -61,21 +64,22 @@ public class BlueprintController {
             Set<Blueprint> blueprintsList = defaultBlueprintLoaderService.loadBlueprints(user);
             blueprints = new HashSet<>((ArrayList<Blueprint>) blueprintRepository.save(blueprintsList));
         }
-        return new ResponseEntity<>(blueprintConverter.convertAllEntityToJson(blueprints), HttpStatus.OK);
+        Set<BlueprintJson> jsons = toJsonList(blueprints);
+        return new ResponseEntity<>(jsons, HttpStatus.OK);
     }
 
     @RequestMapping(value = "user/blueprints/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<BlueprintJson> getPrivateBlueprint(@ModelAttribute("user") CbUser user, @PathVariable String name) {
         Blueprint blueprint = blueprintService.getPrivateBlueprint(name, user);
-        return new ResponseEntity<>(blueprintConverter.convert(blueprint), HttpStatus.OK);
+        return new ResponseEntity<>(conversionService.convert(blueprint, BlueprintJson.class), HttpStatus.OK);
     }
 
     @RequestMapping(value = "account/blueprints/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<BlueprintJson> createAccountBlueprint(@ModelAttribute("user") CbUser user, @PathVariable String name) {
         Blueprint blueprint = blueprintService.getPublicBlueprint(name, user);
-        return new ResponseEntity<>(blueprintConverter.convert(blueprint), HttpStatus.OK);
+        return new ResponseEntity<>(conversionService.convert(blueprint, BlueprintJson.class), HttpStatus.OK);
     }
 
     @RequestMapping(value = "account/blueprints", method = RequestMethod.GET)
@@ -86,14 +90,14 @@ public class BlueprintController {
             Set<Blueprint> blueprintsList = defaultBlueprintLoaderService.loadBlueprints(user);
             blueprints = new HashSet<>((ArrayList<Blueprint>) blueprintRepository.save(blueprintsList));
         }
-        return new ResponseEntity<>(blueprintConverter.convertAllEntityToJson(blueprints), HttpStatus.OK);
+        return new ResponseEntity<>(toJsonList(blueprints), HttpStatus.OK);
     }
 
     @RequestMapping(value = "blueprints/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<BlueprintJson> getBlueprint(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
         Blueprint blueprint = blueprintService.get(id);
-        return new ResponseEntity<>(blueprintConverter.convert(blueprint), HttpStatus.OK);
+        return new ResponseEntity<>(conversionService.convert(blueprint, BlueprintJson.class), HttpStatus.OK);
     }
 
     @RequestMapping(value = "blueprints/{id}", method = RequestMethod.DELETE)
@@ -118,8 +122,16 @@ public class BlueprintController {
     }
 
     private ResponseEntity<IdJson> createBlueprint(CbUser user, BlueprintJson blueprintRequest, boolean publicInAccount) {
-        Blueprint blueprint = blueprintConverter.convert(blueprintRequest, publicInAccount);
+        Blueprint blueprint = conversionService.convert(blueprintRequest, Blueprint.class);
+        blueprint.setPublicInAccount(publicInAccount);
         blueprint = blueprintService.create(user, blueprint);
         return new ResponseEntity<>(new IdJson(blueprint.getId()), HttpStatus.CREATED);
     }
+
+    private Set<BlueprintJson> toJsonList(Set<Blueprint> blueprints) {
+        return (Set<BlueprintJson>) conversionService.convert(blueprints,
+                TypeDescriptor.forObject(blueprints),
+                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(BlueprintJson.class)));
+    }
+
 }

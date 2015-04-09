@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.converter.ClusterConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -63,9 +62,6 @@ public class AmbariClusterServiceTest {
 
     @Mock
     private StackRepository stackRepository;
-
-    @Mock
-    private ClusterConverter clusterConverter;
 
     @Mock
     private ClusterRepository clusterRepository;
