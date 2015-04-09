@@ -129,7 +129,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr ng-repeat="group in usage.instanceGroups">
+                      <tr ng-repeat="group in usage.instanceGroups | orderBy:'name'">
                         <td>{{group.name}}</td>
                         <td><p ng-repeat="item in $root.config.GCC.gccInstanceTypes | filter:{key: group.instanceType}">{{item.value}}</p></td>
                         <td>{{group.hours}}</td>
@@ -163,7 +163,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr ng-repeat="group in usage.instanceGroups">
+                      <tr ng-repeat="group in usage.instanceGroups | orderBy:'name'">
                         <td>{{group.name}}</td>
                         <td><p ng-repeat="item in $root.config.AWS.instanceType | filter:{key: group.instanceType}">{{item.value}}</p></td>
                         <td>{{group.hours}}</td>
@@ -197,7 +197,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr ng-repeat="group in usage.instanceGroups">
+                      <tr ng-repeat="group in usage.instanceGroups | orderBy:'name'">
                         <td>{{group.name}}</td>
                         <td><p ng-repeat="item in $root.config.AZURE.azureVmTypes | filter:{key: group.instanceType}">{{item.value}}</p></td>
                         <td>{{group.hours}}</td>
@@ -231,7 +231,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr ng-repeat="group in usage.instanceGroups">
+                      <tr ng-repeat="group in usage.instanceGroups | orderBy:'name'">
                         <td>{{group.name}}</td>
                         <td>{{group.instanceType}}</td>
                         <td>{{group.hours}}</td>
