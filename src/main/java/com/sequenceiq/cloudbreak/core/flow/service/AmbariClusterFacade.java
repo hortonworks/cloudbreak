@@ -309,11 +309,15 @@ public class AmbariClusterFacade implements ClusterFacade {
     public FlowContext enableSecurity(FlowContext context) throws CloudbreakException {
         ProvisioningContext provisioningContext = (ProvisioningContext) context;
         Stack stack = stackService.getById(provisioningContext.getStackId());
-        if (stack.getCluster().isSecure()) {
-            LOGGER.debug("Cluster security is desired, trying to enable kerberos");
-            securityService.enableKerberosSecurity(stack);
+        if (stack.getCluster() == null) {
+            LOGGER.debug("There is no cluster installed on the stack");
         } else {
-            LOGGER.debug("Cluster security is not requested");
+            if (stack.getCluster().isSecure()) {
+                LOGGER.debug("Cluster security is desired, trying to enable kerberos");
+                securityService.enableKerberosSecurity(stack);
+            } else {
+                LOGGER.debug("Cluster security is not requested");
+            }
         }
         return provisioningContext;
     }

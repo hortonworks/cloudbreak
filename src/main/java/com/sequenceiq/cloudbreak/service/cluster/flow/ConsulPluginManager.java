@@ -36,7 +36,7 @@ public class ConsulPluginManager implements PluginManager {
     public static final String FINISH_SIGNAL = "FINISHED";
     public static final String FAILED_SIGNAL = "FAILED";
     public static final int POLLING_INTERVAL = 5000;
-    public static final int MAX_NODE_FILTER_LENGTH = 500;
+    public static final int MAX_NODE_FILTER_LENGTH = 300;
     public static final int ONE_THOUSAND = 1000;
     public static final int SECONDS_IN_MINUTE = 60;
 
@@ -130,25 +130,29 @@ public class ConsulPluginManager implements PluginManager {
         if (hosts == null || hosts.isEmpty()) {
             targetHosts = getHostnames(hostMetadataRepository.findHostsInCluster(stack.getCluster().getId()));
         }
-        Set<String> triggerEventIds = triggerPlugins(instances, event, container, payload, targetHosts);
+        Map<String, Set<String>> triggerEventIds = triggerPlugins(instances, event, container, payload, targetHosts);
         Map<String, Set<String>> eventIdMap = new HashMap<>();
-        for (String eventId : triggerEventIds) {
-            eventIdMap.put(eventId, targetHosts);
+        for (String eventId : triggerEventIds.keySet()) {
+            Set<String> eventHosts = triggerEventIds.get(eventId);
+            if (eventHosts.isEmpty()) {
+                eventHosts = targetHosts;
+            }
+            eventIdMap.put(eventId, eventHosts);
         }
         waitForEventFinish(stack, instances, eventIdMap, timeout);
     }
 
-    private Set<String> triggerPlugins(Collection<InstanceMetaData> instanceMetaData, ConsulPluginEvent event,
+    private Map<String, Set<String>> triggerPlugins(Collection<InstanceMetaData> instanceMetaData, ConsulPluginEvent event,
             DockerContainer container, List<String> payload, Set<String> hosts) {
         List<ConsulClient> clients = ConsulUtils.createClients(instanceMetaData);
         if (hosts == null || hosts.isEmpty()) {
-            return Sets.newHashSet(fireEvent(clients, event, container, payload, null));
+            return Collections.singletonMap(fireEvent(clients, event, container, payload, null), Collections.<String>emptySet());
         }
-        Set<String> result = Sets.newHashSet();
+        Map<String, Set<String>> result = new HashMap<>();
         for (Map.Entry<String, Set<String>> nodeFilter : getNodeFilters(hosts).entrySet()) {
             EventParams eventParams = new EventParams();
             eventParams.setNode(nodeFilter.getKey());
-            result.add(fireEvent(clients, event, container, payload, eventParams));
+            result.put(fireEvent(clients, event, container, payload, eventParams), nodeFilter.getValue());
         }
         return result;
     }

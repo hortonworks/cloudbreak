@@ -162,7 +162,6 @@ main() {
     start_consul
     consul_leader
     start_ambari_server
-    start_ambari_agent
     start_consul_watch
     use_dns_first
   fi
