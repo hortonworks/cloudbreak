@@ -669,6 +669,7 @@ app.post('/permission', function(req, res){
                 getUserByName(req, res, token, adminUserName, 'id,userName,groups', function(adminUserData){
                     isUserAdmin(req, res, adminUserData, function(companyId){
                         updateGroup(token, userId, 'sequenceiq.cloudbreak.admin')
+                        updateGroup(token, userId, 'cloudbreak.usages.account')
                         res.json({user: userId, admin: true})
                     });
                 });
