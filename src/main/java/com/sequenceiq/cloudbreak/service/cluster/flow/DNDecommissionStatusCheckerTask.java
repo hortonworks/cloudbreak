@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
@@ -17,7 +16,6 @@ public class DNDecommissionStatusCheckerTask extends StackBasedStatusCheckerTask
 
     @Override
     public boolean checkStatus(AmbariOperations t) {
-        MDCBuilder.buildMdcContext(t.getStack());
         AmbariClient ambariClient = t.getAmbariClient();
         Map<String, Long> dataNodes = ambariClient.getDecommissioningDataNodes();
         boolean finished = dataNodes.isEmpty();

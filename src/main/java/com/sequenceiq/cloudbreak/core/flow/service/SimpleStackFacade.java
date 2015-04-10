@@ -37,10 +37,10 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.Subnet;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
@@ -54,7 +54,7 @@ public class SimpleStackFacade implements StackFacade {
     private RetryingStackUpdater stackUpdater;
 
     @Autowired
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
@@ -83,8 +83,10 @@ public class SimpleStackFacade implements StackFacade {
     @Override
     public FlowContext handleCreationFailure(FlowContext context) throws CloudbreakException {
         ProvisioningContext provisioningContext = (ProvisioningContext) context;
+        final Stack stack = stackService.getById(provisioningContext.getStackId());
+        MDCBuilder.buildMdcContext(stack);
+        LOGGER.info("Stack creation failure. Context: {}", provisioningContext);
         try {
-            final Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
             if (!stack.isStackInDeletionPhase()) {
                 final CloudPlatform cloudPlatform = provisioningContext.getCloudPlatform();
 
@@ -102,7 +104,7 @@ public class SimpleStackFacade implements StackFacade {
                     .setDefaultParams(stack.getId(), stack.cloudPlatform())
                     .build();
         } catch (Exception ex) {
-            LOGGER.error(String.format("Stack rollback failed on {} stack: ", provisioningContext.getStackId()), ex);
+            LOGGER.error("Stack rollback failed on stack id : {}. Exception:", provisioningContext.getStackId(), ex);
             stackUpdater.updateStackStatus(provisioningContext.getStackId(), Status.CREATE_FAILED, "Rollback failed: " + ex.getMessage());
             throw new CloudbreakException(String.format("Stack rollback failed on {} stack: ", provisioningContext.getStackId(), ex));
         }
@@ -110,22 +112,26 @@ public class SimpleStackFacade implements StackFacade {
 
     @Override
     public FlowContext start(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Starting stack. Context: {}", context);
         try {
-            context = stackStartService.start(context);
+            StackStatusUpdateContext stackStatusUpdateContext = (StackStatusUpdateContext) context;
+            MDCBuilder.buildMdcContext(stackService.getById(stackStatusUpdateContext.getStackId()));
+            LOGGER.debug("Starting stack. Context: {}", stackStatusUpdateContext);
+            context = stackStartService.start(stackStatusUpdateContext);
             LOGGER.debug("Starting stack is DONE.");
             return context;
         } catch (Exception e) {
-            LOGGER.error("Exception during the stack start process: {}", e.getMessage());
+            LOGGER.error("Exception during the stack start process. Exception", e);
             throw new CloudbreakException(e.getMessage(), e);
         }
     }
 
     @Override
     public FlowContext stop(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Stopping stack. Context: {}", context);
         try {
-            context = stackStopService.stop(context);
+            StackStatusUpdateContext stackStatusUpdateContext = (StackStatusUpdateContext) context;
+            MDCBuilder.buildMdcContext(stackService.getById(stackStatusUpdateContext.getStackId()));
+            LOGGER.debug("Stopping stack. Context: {}", stackStatusUpdateContext);
+            context = stackStopService.stop(stackStatusUpdateContext);
             LOGGER.debug("Stopping stack is DONE.");
             return context;
         } catch (Exception e) {
@@ -136,14 +142,15 @@ public class SimpleStackFacade implements StackFacade {
 
     @Override
     public FlowContext terminateStack(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Terminating stack. Context: {}", context);
         try {
             DefaultFlowContext defaultFlowContext = (DefaultFlowContext) context;
+            MDCBuilder.buildMdcContext(stackService.getById(defaultFlowContext.getStackId()));
+            LOGGER.debug("Terminating stack. Context: {}", context);
             terminationService.terminateStack(defaultFlowContext.getStackId(), defaultFlowContext.getCloudPlatform());
             LOGGER.debug("Terminating stack is DONE");
             return context;
         } catch (Exception e) {
-            LOGGER.error("Exception during the terminating process: {}", e.getMessage());
+            LOGGER.error("Exception during the stack termination process: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }
@@ -151,6 +158,8 @@ public class SimpleStackFacade implements StackFacade {
     @Override
     public FlowContext handleTerminationFailure(FlowContext context) throws CloudbreakException {
         DefaultFlowContext defaultFlowContext = (DefaultFlowContext) context;
+        MDCBuilder.buildMdcContext(stackService.getById(defaultFlowContext.getStackId()));
+        LOGGER.info("Termination failure. Context: {}", defaultFlowContext);
         terminationService.handleTerminationFailure(defaultFlowContext.getStackId(), defaultFlowContext.getErrorReason());
         return context;
     }
@@ -158,6 +167,8 @@ public class SimpleStackFacade implements StackFacade {
     @Override
     public FlowContext handleStatusUpdateFailure(FlowContext flowContext) throws CloudbreakException {
         StackStatusUpdateContext context = (StackStatusUpdateContext) flowContext;
+        MDCBuilder.buildMdcContext(stackService.getById(context.getStackId()));
+        LOGGER.info("Status update failure. Context: {}", context);
         FlowContext result;
         if (context.isStart()) {
             result = stackStartService.handleStackStartFailure(context);
@@ -171,8 +182,11 @@ public class SimpleStackFacade implements StackFacade {
     public FlowContext upscaleStack(FlowContext context) throws CloudbreakException {
         try {
             StackScalingContext updateContext = (StackScalingContext) context;
+            MDCBuilder.buildMdcContext(stackService.getById(updateContext.getStackId()));
+            LOGGER.info("Upscale stack. Context: {}", updateContext);
+
             stackScalingService.upscaleStack(updateContext.getStackId(), updateContext.getInstanceGroup(), updateContext.getScalingAdjustment());
-            Stack stack = stackRepository.findById(updateContext.getStackId());
+            Stack stack = stackService.getById(updateContext.getStackId());
             HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
             hostGroupAdjustmentJson.setWithStackUpdate(false);
             hostGroupAdjustmentJson.setScalingAdjustment(updateContext.getScalingAdjustment());
@@ -197,6 +211,8 @@ public class SimpleStackFacade implements StackFacade {
     public FlowContext downscaleStack(FlowContext context) throws CloudbreakException {
         try {
             StackScalingContext updateContext = (StackScalingContext) context;
+            MDCBuilder.buildMdcContext(stackService.getById(updateContext.getStackId()));
+            LOGGER.info("Downscaling stack. Context: {}", updateContext);
             stackScalingService.downscaleStack(updateContext.getStackId(), updateContext.getInstanceGroup(), updateContext.getScalingAdjustment());
             return context;
         } catch (Exception e) {
@@ -209,6 +225,8 @@ public class SimpleStackFacade implements StackFacade {
     public FlowContext handleScalingFailure(FlowContext context) throws CloudbreakException {
         try {
             StackScalingContext updateContext = (StackScalingContext) context;
+            MDCBuilder.buildMdcContext(stackService.getById(updateContext.getStackId()));
+            LOGGER.info("Scaling failure. Context: {}", updateContext);
             stackUpdater.updateMetadataReady(updateContext.getStackId(), true);
             stackUpdater.updateStackStatus(updateContext.getStackId(), Status.AVAILABLE, "Stack update failed. " + updateContext.getErrorReason());
             return updateContext;
@@ -222,36 +240,36 @@ public class SimpleStackFacade implements StackFacade {
     public FlowContext handleUpdateAllowedSubnetsFailure(FlowContext context) throws CloudbreakException {
         try {
             UpdateAllowedSubnetsContext updateContext = (UpdateAllowedSubnetsContext) context;
+            MDCBuilder.buildMdcContext(stackService.getById(updateContext.getStackId()));
+            LOGGER.info("Update allowed subnets failure. Context {}", updateContext);
             stackUpdater.updateMetadataReady(updateContext.getStackId(), true);
             stackUpdater.updateStackStatus(updateContext.getStackId(), Status.AVAILABLE, "Stack update failed. " + updateContext.getErrorReason());
             return updateContext;
         } catch (Exception e) {
-            LOGGER.error("Exception during the handling of update allowed subnets failure: {}", e.getMessage());
+            LOGGER.error("Exception during the handling of update allowed subnet failure: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }
 
     @Override
     public FlowContext updateAllowedSubnets(FlowContext context) throws CloudbreakException {
-        UpdateAllowedSubnetsContext request = (UpdateAllowedSubnetsContext) context;
-        Long stackId = request.getStackId();
-        Stack stack = stackRepository.findOneWithLists(stackId);
-        MDCBuilder.buildMdcContext(stack);
-        String hostGroupUserData = userDataBuilder
-                .buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>(), InstanceGroupType.HOSTGROUP);
-        String gateWayUserData = userDataBuilder
-                .buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>(), InstanceGroupType.GATEWAY);
+        Stack stack = null;
         try {
+            UpdateAllowedSubnetsContext request = (UpdateAllowedSubnetsContext) context;
+            stack = stackService.getById(request.getStackId());
+            MDCBuilder.buildMdcContext(stack);
+            String hostGroupUserData = userDataBuilder.buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(),
+                    new HashMap<String, String>(), InstanceGroupType.HOSTGROUP);
+            String gateWayUserData = userDataBuilder.buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(),
+                    new HashMap<String, String>(), InstanceGroupType.GATEWAY);
             stack.setAllowedSubnets(getNewSubnetList(stack, request.getAllowedSubnets()));
             cloudPlatformConnectors.get(stack.cloudPlatform()).updateAllowedSubnets(stack, gateWayUserData, hostGroupUserData);
             stackUpdater.updateStack(stack);
-            String statusReason = "Security update successfully finished";
-            stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, statusReason);
+            stackUpdater.updateStackStatus(request.getStackId(), Status.AVAILABLE, "Security update successfully finished");
             return context;
         } catch (Exception e) {
-            Stack tempStack = stackRepository.findById(stack.getId());
             String msg = String.format("Failed to update security constraints with allowed subnets: %s", stack.getAllowedSubnets());
-            if (tempStack.isStackInDeletionPhase()) {
+            if (stack != null && stack.isStackInDeletionPhase()) {
                 msg = String.format("Failed to update security constraints with allowed subnets: %s, because stack is already in deletion phase.",
                         stack.getAllowedSubnets());
             }

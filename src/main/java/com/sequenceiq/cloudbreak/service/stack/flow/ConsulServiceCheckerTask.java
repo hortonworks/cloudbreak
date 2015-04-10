@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.catalog.model.CatalogService;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
@@ -19,7 +18,6 @@ public class ConsulServiceCheckerTask extends StackBasedStatusCheckerTask<Consul
 
     @Override
     public boolean checkStatus(ConsulContext consulContext) {
-        MDCBuilder.buildMdcContext(consulContext.getStack());
         String serviceName = consulContext.getTargets().get(0);
         List<ConsulClient> clients = consulContext.getConsulClients();
         LOGGER.info("Checking '{}' different hosts for service registration of '{}'", clients.size(), serviceName);

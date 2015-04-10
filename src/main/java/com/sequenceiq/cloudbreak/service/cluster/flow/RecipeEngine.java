@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 
 @Component
@@ -37,14 +36,12 @@ public class RecipeEngine {
     private PluginManager pluginManager;
 
     public void setupRecipes(Stack stack, Set<HostGroup> hostGroups) {
-        MDCBuilder.buildMdcContext(stack);
         Set<InstanceMetaData> instances = instanceMetadataRepository.findAllInStack(stack.getId());
         setupProperties(hostGroups, instances);
         installPlugins(stack, hostGroups, instances);
     }
 
     public void setupRecipesOnHosts(Stack stack, Set<Recipe> recipes, Set<HostMetadata> hostMetadata) {
-        MDCBuilder.buildMdcContext(stack);
         Set<InstanceMetaData> instances = instanceMetadataRepository.findAllInStack(stack.getId());
         installPluginsOnHosts(stack, recipes, hostMetadata, instances);
     }

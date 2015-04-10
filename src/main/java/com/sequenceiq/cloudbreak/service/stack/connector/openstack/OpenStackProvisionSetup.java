@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
@@ -38,7 +37,6 @@ public class OpenStackProvisionSetup implements ProvisionSetup {
 
     @Override
     public ProvisionEvent setupProvisioning(Stack stack) throws Exception {
-        MDCBuilder.buildMdcContext(stack);
         return new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
                 .withSetupProperty(CREDENTIAL, stack.getCredential());
     }

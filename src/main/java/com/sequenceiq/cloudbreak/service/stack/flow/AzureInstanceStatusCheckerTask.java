@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
@@ -22,7 +21,6 @@ public class AzureInstanceStatusCheckerTask extends StackBasedStatusCheckerTask<
 
     @Override
     public boolean checkStatus(AzureInstances instances) {
-        MDCBuilder.buildMdcContext(instances.getStack());
         AzureClient azureClient = instances.getAzureClient();
         for (String instance : instances.getInstances()) {
             Map<String, String> vmContext = createVMContext(instance);
@@ -49,7 +47,6 @@ public class AzureInstanceStatusCheckerTask extends StackBasedStatusCheckerTask<
 
     @Override
     public String successMessage(AzureInstances t) {
-        MDCBuilder.buildMdcContext(t.getStack());
         return String.format("Azure instances successfully reached status: %s on stack.", t.getStatus());
     }
 

@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
@@ -18,7 +17,6 @@ public class OpenStackHeatStackStatusCheckerTask extends StackBasedStatusChecker
     @Override
     public boolean checkStatus(OpenStackContext context) {
         Stack stack = context.getStack();
-        MDCBuilder.buildMdcContext(stack);
         OSClient osClient = context.getOsClient();
         String heatStackId = context.getSingleResource();
         String stackName = stack.getName();

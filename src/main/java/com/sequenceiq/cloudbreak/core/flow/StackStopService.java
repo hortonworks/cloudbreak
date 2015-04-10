@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
-
 import static com.sequenceiq.cloudbreak.service.cluster.flow.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
 
@@ -18,7 +17,6 @@ import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ConsulPluginEvent;
@@ -51,7 +49,6 @@ public class StackStopService {
         long stackId = stackStatusUpdateContext.getStackId();
         Stack stack = stackRepository.findOneWithLists(stackId);
         final CloudPlatform cloudPlatform = stack.cloudPlatform();
-        MDCBuilder.buildMdcContext(stack);
 
         if (stack != null && Status.STOP_REQUESTED.equals(stack.getStatus())) {
             stackUpdater.updateStackStatus(stackId, Status.STOP_IN_PROGRESS, "Cluster infrastructure is stopping.");

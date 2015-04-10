@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintLoaderService;
@@ -47,18 +48,21 @@ public class BlueprintController {
     @RequestMapping(value = "user/blueprints", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createPrivateBlueprint(@ModelAttribute("user") CbUser user, @RequestBody @Valid BlueprintJson blueprintRequest) {
+        MDCBuilder.buildMdcContext(user);
         return createBlueprint(user, blueprintRequest, false);
     }
 
     @RequestMapping(value = "account/blueprints", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createAccountBlueprint(@ModelAttribute("user") CbUser user, @RequestBody @Valid BlueprintJson blueprintRequest) {
+        MDCBuilder.buildMdcContext(user);
         return createBlueprint(user, blueprintRequest, true);
     }
 
     @RequestMapping(value = "user/blueprints", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<BlueprintJson>> getPrivateBlueprints(@ModelAttribute("user") CbUser user) {
+        MDCBuilder.buildMdcContext(user);
         Set<Blueprint> blueprints = blueprintService.retrievePrivateBlueprints(user);
         if (blueprints.isEmpty()) {
             Set<Blueprint> blueprintsList = defaultBlueprintLoaderService.loadBlueprints(user);
@@ -71,6 +75,7 @@ public class BlueprintController {
     @RequestMapping(value = "user/blueprints/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<BlueprintJson> getPrivateBlueprint(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        MDCBuilder.buildMdcContext(user);
         Blueprint blueprint = blueprintService.getPrivateBlueprint(name, user);
         return new ResponseEntity<>(conversionService.convert(blueprint, BlueprintJson.class), HttpStatus.OK);
     }
@@ -85,6 +90,7 @@ public class BlueprintController {
     @RequestMapping(value = "account/blueprints", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<BlueprintJson>> getAccountBlueprints(@ModelAttribute("user") CbUser user) {
+        MDCBuilder.buildMdcContext(user);
         Set<Blueprint> blueprints = blueprintService.retrieveAccountBlueprints(user);
         if (blueprints.isEmpty()) {
             Set<Blueprint> blueprintsList = defaultBlueprintLoaderService.loadBlueprints(user);
@@ -96,6 +102,7 @@ public class BlueprintController {
     @RequestMapping(value = "blueprints/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<BlueprintJson> getBlueprint(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+        MDCBuilder.buildMdcContext(user);
         Blueprint blueprint = blueprintService.get(id);
         return new ResponseEntity<>(conversionService.convert(blueprint, BlueprintJson.class), HttpStatus.OK);
     }
@@ -103,6 +110,7 @@ public class BlueprintController {
     @RequestMapping(value = "blueprints/{id}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<BlueprintJson> deleteBlueprint(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+        MDCBuilder.buildMdcContext(user);
         blueprintService.delete(id, user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -110,6 +118,7 @@ public class BlueprintController {
     @RequestMapping(value = "account/blueprints/{name}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<BlueprintJson> deleteBlueprintInAccount(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        MDCBuilder.buildMdcContext(user);
         blueprintService.delete(name, user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -117,6 +126,7 @@ public class BlueprintController {
     @RequestMapping(value = "user/blueprints/{name}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<BlueprintJson> deleteBlueprintInPrivate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        MDCBuilder.buildMdcContext(user);
         blueprintService.delete(name, user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

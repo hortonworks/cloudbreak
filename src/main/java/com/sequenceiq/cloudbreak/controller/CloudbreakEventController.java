@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sequenceiq.cloudbreak.controller.json.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.facade.CloudbreakEventsFacade;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Controller
 public class CloudbreakEventController {
@@ -25,6 +26,7 @@ public class CloudbreakEventController {
     @RequestMapping(method = RequestMethod.GET, value = "/events")
     @ResponseBody
     public ResponseEntity<List<CloudbreakEventsJson>> events(@ModelAttribute("user") CbUser user, @RequestParam(value = "since", required = false) Long since) {
+        MDCBuilder.buildMdcContext(user);
         List<CloudbreakEventsJson> cloudbreakEvents = cloudbreakEventsFacade.retrieveEvents(user.getUserId(), since);
         return new ResponseEntity<>(cloudbreakEvents, HttpStatus.OK);
     }

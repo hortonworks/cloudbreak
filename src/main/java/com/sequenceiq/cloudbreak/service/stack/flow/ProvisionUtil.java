@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 
@@ -39,7 +38,6 @@ public class ProvisionUtil {
     public Map<FutureResult, List<ResourceRequestResult>> waitForRequestToFinish(Long stackId, List<Future<ResourceRequestResult>> futures)
             throws Exception {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        MDCBuilder.buildMdcContext(stack);
         Map<FutureResult, List<ResourceRequestResult>> result = new HashMap<>();
         result.put(FutureResult.FAILED, new ArrayList<ResourceRequestResult>());
         result.put(FutureResult.SUCCESS, new ArrayList<ResourceRequestResult>());

@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 
@@ -15,7 +14,6 @@ public class AmbariStartupListenerTask extends StackBasedStatusCheckerTask<Ambar
 
     @Override
     public boolean checkStatus(AmbariStartupPollerObject aSPO) {
-        MDCBuilder.buildMdcContext(aSPO.getStack());
         boolean ambariRunning = false;
         LOGGER.info("Starting polling of Ambari server's status [Ambari server IP: '{}'].", aSPO.getAmbariIp());
         try {

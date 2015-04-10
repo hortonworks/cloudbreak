@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.model.Operation;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 
 @Component
@@ -20,7 +19,6 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
 
     @Override
     public boolean checkStatus(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
-        MDCBuilder.buildMdcContext(gccRemoveReadyPollerObject.getStack());
         LOGGER.info("Checking status of remove '{}' {} on '{}' stack.",
                 gccRemoveReadyPollerObject.getName(),
                 gccRemoveReadyPollerObject.getResourceType().name(),
@@ -77,7 +75,6 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
 
     @Override
     public String successMessage(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
-        MDCBuilder.buildMdcContext(gccRemoveReadyPollerObject.getStack());
         return String.format("Gcc resource '%s'[%s] is removed success on '%s' stack",
                 gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getResourceType(), gccRemoveReadyPollerObject.getStack().getId());
     }
@@ -96,7 +93,6 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
     }
 
     private boolean analyzeOperation(Operation operation, GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
-        MDCBuilder.buildMdcContext(gccRemoveReadyPollerObject.getStack());
         if (operation.getHttpErrorStatusCode() != null || operation.getError() != null) {
             StringBuilder error = new StringBuilder();
             if (operation.getError() != null) {

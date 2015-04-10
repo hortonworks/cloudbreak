@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
@@ -92,7 +91,6 @@ public class GccResourceBuilderInit implements
     }
 
     private ManagedZone buildManagedZone(Dns dns, Stack stack) throws IOException {
-        MDCBuilder.buildMdcContext(stack);
         GccCredential credential = (GccCredential) stack.getCredential();
         ManagedZonesListResponse execute1 = dns.managedZones().list(credential.getProjectId()).execute();
         ManagedZone original = null;

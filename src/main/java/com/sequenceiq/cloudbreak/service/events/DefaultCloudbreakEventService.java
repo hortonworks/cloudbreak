@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventSpecifications;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -42,7 +41,6 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     @Override
     public void fireCloudbreakEvent(Long stackId, String eventType, String eventMessage) {
         CloudbreakEventData eventData = new CloudbreakEventData(stackId, eventType, eventMessage);
-        MDCBuilder.buildMdcContext(eventData);
         LOGGER.info("Firing Cloudbreak event: {}", eventData);
         Event reactorEvent = Event.wrap(eventData);
         reactor.notify(ReactorConfig.CLOUDBREAK_EVENT, reactorEvent);
@@ -51,7 +49,6 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     @Override
     public void fireCloudbreakInstanceGroupEvent(Long stackId, String eventType, String eventMessage, String instanceGroupName) {
         InstanceGroupEventData eventData = new InstanceGroupEventData(stackId, eventType, eventMessage, instanceGroupName);
-        MDCBuilder.buildMdcContext(eventData);
         LOGGER.info("Fireing cloudbreak event: {}", eventData);
         Event reactorEvent = Event.wrap(eventData);
         reactor.notify(ReactorConfig.CLOUDBREAK_EVENT, reactorEvent);
@@ -67,7 +64,6 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         Notification notification = new Notification(stackEvent);
         notificationSender.send(notification);
 
-        MDCBuilder.buildMdcContext(stackEvent);
         LOGGER.info("Event and notification from the event were created: {}", stackEvent);
         return stackEvent;
     }
@@ -118,7 +114,6 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     }
 
     private void populateClusterData(CloudbreakEvent stackEvent, Stack stack) {
-        MDCBuilder.buildMdcContext(stackEvent);
         if (null != stack.getCluster()) {
             stackEvent.setBlueprintId(stack.getCluster().getBlueprint().getId());
             stackEvent.setBlueprintName(stack.getCluster().getBlueprint().getBlueprintName());

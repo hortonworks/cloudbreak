@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
@@ -48,17 +47,14 @@ public class GccStackUtil {
     private static final String EMPTY_BUCKET = "";
 
     public Compute buildCompute(GccCredential gccCredential) {
-        MDCBuilder.buildMdcContext(gccCredential);
         return buildCompute(gccCredential, gccCredential.getName());
     }
 
     public Compute buildCompute(GccCredential gccCredential, Stack stack) {
-        MDCBuilder.buildMdcContext(stack);
         return buildCompute(gccCredential, stack.getName());
     }
 
     public Storage buildStorage(GccCredential gccCredential, Stack stack) {
-        MDCBuilder.buildMdcContext(stack);
         try {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             GoogleCredential credential = buildGoogleCredential(gccCredential, httpTransport);
@@ -87,7 +83,6 @@ public class GccStackUtil {
     }
 
     public CoreInstanceMetaData getMetadata(Stack stack, Compute compute, Resource resource) {
-        MDCBuilder.buildMdcContext(stack);
         GccCredential credential = (GccCredential) stack.getCredential();
         Instance executeInstance = getInstance(stack, compute, resource);
         if (executeInstance != null) {

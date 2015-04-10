@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventSpecifications;
 import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
@@ -65,7 +64,6 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
         Iterable<CloudbreakEvent> cloudbreakEvents;
         Long usagesCount = usageRepository.count();
         Sort sortByTimestamp = new Sort("eventTimestamp");
-        MDCBuilder.buildMdcContext();
         if (usagesCount > 0) {
             Long startOfPreviousDay = getStartOfPreviousDay();
             LOGGER.info("Generate usages from events since '{}'.", new Date(startOfPreviousDay));
@@ -91,7 +89,6 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
     private Map<Long, List<CloudbreakEvent>> groupCloudbreakEventsByStack(Iterable<CloudbreakEvent> userStackEvents) {
         Map<Long, List<CloudbreakEvent>> stackIdToCbEventMap = new HashMap<>();
         for (CloudbreakEvent cbEvent : userStackEvents) {
-            MDCBuilder.buildMdcContext(cbEvent);
             LOGGER.debug("Processing stack {} for user {}", cbEvent.getStackId(), cbEvent.getOwner());
             if (!stackIdToCbEventMap.containsKey(cbEvent.getStackId())) {
                 stackIdToCbEventMap.put(cbEvent.getStackId(), new ArrayList<CloudbreakEvent>());
@@ -103,7 +100,6 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
 
     private void generateDailyUsageForStacks(List<CloudbreakUsage> usageList, Map<Long, List<CloudbreakEvent>> stackEvents) {
         for (Map.Entry<Long, List<CloudbreakEvent>> stackEventEntry : stackEvents.entrySet()) {
-            MDCBuilder.buildMdcContext();
             LOGGER.debug("Processing stackId {} for userid {}", stackEventEntry.getKey());
             List<CloudbreakUsage> stackDailyUsages = stackUsageGenerator.generate(stackEventEntry.getValue());
             usageList.addAll(stackDailyUsages);

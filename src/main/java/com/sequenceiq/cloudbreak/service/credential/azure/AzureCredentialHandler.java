@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 
@@ -47,7 +46,6 @@ public class AzureCredentialHandler implements CredentialHandler<AzureCredential
     }
 
     private void validateCertificateFile(AzureCredential azureCredential) {
-        MDCBuilder.buildMdcContext(azureCredential);
         try {
             InputStream is = new ByteArrayInputStream(azureCredential.getPublicKey().getBytes(StandardCharsets.UTF_8));
             CertificateFactory cf = CertificateFactory.getInstance("X.509");

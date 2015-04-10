@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.ecwid.consul.v1.ConsulClient;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.PluginFailureException;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
@@ -21,7 +20,6 @@ public class ConsulKVCheckerTask extends StackBasedStatusCheckerTask<ConsulKVChe
 
     @Override
     public boolean checkStatus(ConsulKVCheckerContext context) {
-        MDCBuilder.buildMdcContext(context.getStack());
         List<String> keys = context.getKeys();
         String expectedValue = context.getExpectedValue();
         String failValue = context.getFailValue();

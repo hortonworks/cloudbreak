@@ -9,7 +9,6 @@ import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
@@ -30,7 +29,6 @@ public class GccCredentialHandler implements CredentialHandler<GccCredential> {
 
     @Override
     public GccCredential init(GccCredential gccCredential) {
-        MDCBuilder.buildMdcContext(gccCredential);
         rsaPublicKeyValidator.validate(gccCredential);
         validateCredential(gccCredential);
         return gccCredential;
@@ -47,7 +45,6 @@ public class GccCredentialHandler implements CredentialHandler<GccCredential> {
     }
 
     private void validateCredential(GccCredential gccCredential) {
-        MDCBuilder.buildMdcContext(gccCredential);
         try {
             Compute compute = gccStackUtil.buildCompute(gccCredential);
             if (compute == null) {

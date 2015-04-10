@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
@@ -38,7 +37,6 @@ public class AmbariClusterStatusUpdater {
     private AmbariClusterStatusFactory clusterStatusFactory;
 
     public void updateClusterStatus(Stack stack) {
-        MDCBuilder.buildMdcContext(stack.getCluster());
         if (isClusterStatusCheckNecessary(stack)) {
             Cluster cluster = stack.getCluster();
             String blueprintName = cluster != null ? cluster.getBlueprint().getBlueprintName() : null;

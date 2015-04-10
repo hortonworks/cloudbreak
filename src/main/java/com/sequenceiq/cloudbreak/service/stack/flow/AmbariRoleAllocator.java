@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -68,7 +67,6 @@ public class AmbariRoleAllocator {
         AmbariRoleAllocationComplete allocationComplete = null;
 
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         if (!stack.isMetadataReady()) {
             if (coreInstanceMetaData.size() != stack.getFullNodeCount().intValue()) {
                 throw new WrongMetadataException(String.format(
@@ -101,7 +99,6 @@ public class AmbariRoleAllocator {
 
         Stack one = stackRepository.findOneWithLists(stackId);
         InstanceGroup instanceGroup = one.getInstanceGroupByInstanceGroupName(instanceGroupName);
-        MDCBuilder.buildMdcContext(one);
         Set<InstanceMetaData> originalMetadata = instanceGroup.getAllInstanceMetaData();
         Set<InstanceMetaData> instanceMetaData = prepareInstanceMetaData(
                 coreInstanceMetaData,

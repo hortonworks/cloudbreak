@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.RecipeJson;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Recipe;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 
 @Controller
@@ -37,18 +38,21 @@ public class RecipeController {
     @RequestMapping(value = "account/recipes", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createAccountRecipe(@ModelAttribute("user") CbUser user, @RequestBody @Valid RecipeJson recipeRequest) {
+        MDCBuilder.buildMdcContext(user);
         return createRecipe(user, recipeRequest, true);
     }
 
     @RequestMapping(value = "user/recipes", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createUserRecipe(@ModelAttribute("user") CbUser user, @RequestBody @Valid RecipeJson recipeRequest) {
+        MDCBuilder.buildMdcContext(user);
         return createRecipe(user, recipeRequest, false);
     }
 
     @RequestMapping(value = "user/recipes", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<RecipeJson>> getPrivateRecipes(@ModelAttribute("user") CbUser user) {
+        MDCBuilder.buildMdcContext(user);
         Set<Recipe> recipes = recipeService.retrievePrivateRecipes(user);
         return new ResponseEntity<>(toJsonSet(recipes), HttpStatus.OK);
     }
@@ -56,6 +60,7 @@ public class RecipeController {
     @RequestMapping(value = "account/recipes", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<RecipeJson>> getAccountRecipes(@ModelAttribute("user") CbUser user) {
+        MDCBuilder.buildMdcContext(user);
         Set<Recipe> recipes = recipeService.retrieveAccountRecipes(user);
         return new ResponseEntity<>(toJsonSet(recipes), HttpStatus.OK);
     }
@@ -70,34 +75,39 @@ public class RecipeController {
     @RequestMapping(value = "account/recipes/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<RecipeJson> getAccountRecipe(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        MDCBuilder.buildMdcContext(user);
         Recipe recipe = recipeService.getPublicRecipe(name, user);
         return new ResponseEntity<>(conversionService.convert(recipe, RecipeJson.class), HttpStatus.OK);
     }
 
     @RequestMapping(value = "recipes/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<RecipeJson> getRecipe(@PathVariable Long id) {
+    public ResponseEntity<RecipeJson> getRecipe(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+        MDCBuilder.buildMdcContext(user);
         Recipe recipe = recipeService.get(id);
         return new ResponseEntity<>(conversionService.convert(recipe, RecipeJson.class), HttpStatus.OK);
     }
 
     @RequestMapping(value = "recipes/{id}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<String> deleteBlueprint(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+    public ResponseEntity<String> deleteRecipe(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+        MDCBuilder.buildMdcContext(user);
         recipeService.delete(id, user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @RequestMapping(value = "account/recipes/{name}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<String> deleteBlueprintInAccount(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+    public ResponseEntity<String> deleteRecipeInAccount(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        MDCBuilder.buildMdcContext(user);
         recipeService.delete(name, user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @RequestMapping(value = "user/recipes/{name}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<String> deleteBlueprintInPrivate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+    public ResponseEntity<String> deleteRecipeInPrivate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        MDCBuilder.buildMdcContext(user);
         recipeService.delete(name, user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

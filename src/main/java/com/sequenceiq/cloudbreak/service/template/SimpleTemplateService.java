@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
@@ -54,7 +53,6 @@ public class SimpleTemplateService implements TemplateService {
     @Override
     public Template get(Long id) {
         Template template = templateRepository.findOne(id);
-        MDCBuilder.buildMdcContext(template);
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, id));
         } else {
@@ -64,7 +62,6 @@ public class SimpleTemplateService implements TemplateService {
 
     @Override
     public Template create(CbUser user, Template template) {
-        MDCBuilder.buildMdcContext(template);
         LOGGER.debug("Creating template: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Template savedTemplate = null;
         template.setOwner(user.getUserId());
@@ -91,7 +88,6 @@ public class SimpleTemplateService implements TemplateService {
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, name));
         } else {
-            MDCBuilder.buildMdcContext(template);
             return template;
         }
     }
@@ -101,7 +97,6 @@ public class SimpleTemplateService implements TemplateService {
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, name));
         } else {
-            MDCBuilder.buildMdcContext(template);
             return template;
         }
     }
@@ -116,7 +111,6 @@ public class SimpleTemplateService implements TemplateService {
     }
 
     private void delete(Template template, CbUser user) {
-        MDCBuilder.buildMdcContext(template);
         LOGGER.debug("Deleting template. {} - {}", new Object[] { template.getId(), template.getName() });
         List<Stack> allStackForTemplate = stackRepository.findAllStackForTemplate(template.getId());
         if (allStackForTemplate.isEmpty()) {

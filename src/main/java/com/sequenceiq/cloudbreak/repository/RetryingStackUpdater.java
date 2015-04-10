@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 
 @Component
@@ -32,7 +31,6 @@ public class RetryingStackUpdater {
 
     public Stack updateStackStatus(Long stackId, Status status, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         int attempt = 1;
         try {
             return doUpdateStackStatus(stackId, status, statusReason);
@@ -48,7 +46,6 @@ public class RetryingStackUpdater {
 
     public Stack updateStackStatusReason(Long stackId, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         int attempt = 1;
         try {
             return doUpdateStackStatusReason(stackId, statusReason);
@@ -64,7 +61,6 @@ public class RetryingStackUpdater {
 
     public Stack updateStackMetaData(Long stackId, Set<InstanceMetaData> instanceMetaData, String groupName) {
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         int attempt = 1;
         try {
             return doUpdateMetaData(stackId, instanceMetaData, groupName);
@@ -80,7 +76,6 @@ public class RetryingStackUpdater {
 
     public Stack updateStackResources(Long stackId, Set<Resource> resources) {
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         int attempt = 1;
         try {
             return doUpdateResources(stackId, resources);
@@ -94,10 +89,8 @@ public class RetryingStackUpdater {
         }
     }
 
-
     public synchronized Stack addStackResources(Long stackId, List<Resource> resources) {
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         int attempt = 1;
         try {
             return doAddResources(stackId, resources);
@@ -113,7 +106,6 @@ public class RetryingStackUpdater {
 
     public synchronized Stack removeStackResources(Long stackId, List<Resource> resources) {
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         int attempt = 1;
         try {
             return doRemoveResources(stackId, resources);
@@ -129,7 +121,6 @@ public class RetryingStackUpdater {
 
     public Stack updateAmbariIp(Long stackId, String ambariIp) {
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         int attempt = 1;
         try {
             return doUpdateAmbariIp(stackId, ambariIp);
@@ -145,7 +136,6 @@ public class RetryingStackUpdater {
 
     public Stack updateStackCluster(Long stackId, Cluster cluster) {
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         int attempt = 1;
         try {
             return doUpdateStackCluster(stackId, cluster);
@@ -162,7 +152,6 @@ public class RetryingStackUpdater {
 
     public Stack updateMetadataReady(Long stackId, boolean ready) {
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         int attempt = 1;
         try {
             return doUpdateMetadataReady(stackId, ready);
@@ -179,7 +168,6 @@ public class RetryingStackUpdater {
 
     public Stack updateNodeCount(Long stackId, Integer nodeCount, String instanceGroup) {
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         int attempt = 1;
         try {
             return doUpdateNodeCount(stackId, nodeCount, instanceGroup);
@@ -195,7 +183,6 @@ public class RetryingStackUpdater {
     }
 
     public Stack updateStack(Stack stack) {
-        MDCBuilder.buildMdcContext(stack);
         int attempt = 1;
         try {
             return stackRepository.save(stack);
@@ -211,7 +198,6 @@ public class RetryingStackUpdater {
 
     private Stack doUpdateStackStatus(Long stackId, Status status, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         if (!stack.getStatus().equals(Status.DELETE_COMPLETED)) {
             if (status != null) {
                 stack.setStatus(status);
@@ -228,7 +214,6 @@ public class RetryingStackUpdater {
 
     private Stack doUpdateStackStatusReason(Long stackId, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         if (statusReason != null) {
             stack.setStatusReason(statusReason);
         }
@@ -239,7 +224,6 @@ public class RetryingStackUpdater {
 
     private Stack doUpdateMetaData(Long stackId, Set<InstanceMetaData> instanceMetaData, String groupName) {
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         stack.getInstanceGroupByInstanceGroupName(groupName).setInstanceMetaData(instanceMetaData);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack metadata.");
@@ -248,7 +232,6 @@ public class RetryingStackUpdater {
 
     private Stack doUpdateAmbariIp(Long stackId, String ambariIp) {
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         stack.setAmbariIp(ambariIp);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack: [ambariIp: '{}'].", ambariIp);
@@ -257,7 +240,6 @@ public class RetryingStackUpdater {
 
     private Stack doUpdateNodeCount(Long stackId, Integer nodeCount, String instanceGroup) {
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         stack.getInstanceGroupByInstanceGroupName(instanceGroup).setNodeCount(nodeCount);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack: [nodeCount: '{}'].", nodeCount);
@@ -266,7 +248,6 @@ public class RetryingStackUpdater {
 
     private Stack doUpdateStackCluster(Long stackId, Cluster cluster) {
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(cluster);
         stack.setCluster(cluster);
         stack = stackRepository.save(stack);
         LOGGER.info("Saved cluster '{}' for stack.", cluster.getId());
@@ -275,7 +256,6 @@ public class RetryingStackUpdater {
 
     private Stack doUpdateMetadataReady(Long stackId, boolean ready) {
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         stack.setMetadataReady(ready);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack: [metadataReady: 'true'].");
@@ -284,7 +264,6 @@ public class RetryingStackUpdater {
 
     private Stack doUpdateResources(Long stackId, Set<Resource> resources) {
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         stack.setResources(resources);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack resources.");
