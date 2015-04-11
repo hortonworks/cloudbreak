@@ -1,6 +1,6 @@
 # Simple binary dependency management
 
-declare DEPS_REPO="${DEPS_REPO:-https://raw.githubusercontent.com/gliderlabs/glidergun-rack/master/index}"
+declare DEPS_REPO="${DEPS_REPO:-https://raw.githubusercontent.com/lalyos/glidergun-rack/master/index}"
 
 deps-init() {
 	export PATH="$(deps-dir)/bin:$PATH"

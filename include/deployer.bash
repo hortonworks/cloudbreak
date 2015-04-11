@@ -105,6 +105,7 @@ main() {
 
     circle-init
     cloudbreak-init
+    compose-init
 
     debug "CloudBreak Deployer $(bin-version)"
 
