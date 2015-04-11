@@ -165,7 +165,7 @@ public class AwsConnector implements CloudPlatformConnector {
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(Regions.valueOf(stack.getRegion()), awsCredential);
         String cFStackName = cfStackUtil.getCfStackName(stack);
-        AllocateAddressRequest allocateAddressRequest = new AllocateAddressRequest().withDomain(DomainType.Standard);
+        AllocateAddressRequest allocateAddressRequest = new AllocateAddressRequest().withDomain(DomainType.Vpc);
         AllocateAddressResult allocateAddressResult = amazonEC2Client.allocateAddress(allocateAddressRequest);
         String snapshotId = getEbsSnapshotIdIfNeeded(stack);
         CreateStackRequest createStackRequest = new CreateStackRequest()
@@ -196,7 +196,7 @@ public class AwsConnector implements CloudPlatformConnector {
         List<String> instanceIds = cfStackUtil.getInstanceIds(stack, amazonASClient, client, gateWayGroupName);
         if (!instanceIds.isEmpty()) {
             AssociateAddressRequest associateAddressRequest = new AssociateAddressRequest()
-                    .withPublicIp(allocateAddressResult.getPublicIp())
+                    .withAllocationId(allocateAddressResult.getAllocationId())
                     .withInstanceId(instanceIds.get(0));
             amazonEC2Client.associateAddress(associateAddressRequest);
         }
