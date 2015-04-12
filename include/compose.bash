@@ -8,3 +8,9 @@ compose-ps() {
 
     docker-compose ps
 }
+
+compuse-up() {
+    declare desc="Starts containers with docker-compose"
+
+    docker-compose up -d
+}
