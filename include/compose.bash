@@ -1,6 +1,8 @@
 compose-init() {
     deps-require docker-compose
     cmd-export compose-ps ps
+    cmd-export compose-up start
+    cmd-export compose-kill kill
 }
 
 compose-ps() {
@@ -9,8 +11,15 @@ compose-ps() {
     docker-compose ps
 }
 
-compuse-up() {
+compose-up() {
     declare desc="Starts containers with docker-compose"
 
     docker-compose up -d
+}
+
+compose-kill() {
+    declare desc="Kills and removes all cloudbreak related container"
+
+    docker-compose kill
+    docker-compose rm -f
 }
