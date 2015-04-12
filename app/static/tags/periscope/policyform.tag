@@ -44,14 +44,14 @@
 </div>
 <!-- .form-group -->
 
-<div class="form-group" ng-class="{ 'has-error': policyForm.alarmForScaling.$dirty && policyForm.alarmForScaling.$invalid }">
-  <label class="col-sm-3 control-label" for="alarmForScaling">alarm</label>
+<div class="form-group" ng-class="{ 'has-error': policyForm.alertForScaling.$dirty && policyForm.alertForScaling.$invalid }">
+  <label class="col-sm-3 control-label" for="alertForScaling">alert</label>
   <div class="col-sm-9">
-    <select class="form-control" id="alarmForScaling" name="alarmForScaling" ng-model="scalingAction.policy.alarmId" placeholder="select one" required>
-      <option ng-repeat="alarm in alarms" value="{{alarm.id}}" id="alarm-option-{{alarm.id}}">{{alarm.alarmName}} (ID:{{alarm.id}})</option>
+    <select class="form-control" id="alertForScaling" name="alertForScaling" ng-model="scalingAction.policy.alertId" placeholder="select one" required>
+      <option ng-repeat="alert in alerts" value="{{alert.id}}" id="alert-option-{{alert.id}}">{{alert.alertName}} (ID:{{alert.id}})</option>
     </select>
-    <div class="help-block" ng-show="policyForm.alarmForScaling.$dirty && policyForm.alarmForScaling.$invalid">
-      <i class="fa fa-warning"></i> {{error_msg.scaling_policy_alarm_empty}}
+    <div class="help-block" ng-show="policyForm.alertForScaling.$dirty && policyForm.alertForScaling.$invalid">
+      <i class="fa fa-warning"></i> {{error_msg.scaling_policy_alert_empty}}
     </div>
   </div>
   <!-- .col-sm-9 -->

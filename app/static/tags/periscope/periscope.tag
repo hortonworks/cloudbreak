@@ -13,36 +13,36 @@
   <div ng-show="autoScalingSLAPoliciesEnabled">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h5><i class="fa fa-bell-o fa-fw"></i> ALARMS</h5>
+        <h5><i class="fa fa-bell-o fa-fw"></i> ALERTS</h5>
       </div>
       <!-- .panel-heading -->
       <div class="panel-body">
 
         <p class="btn-row-over-panel">
-          <a class="btn btn-success" id="panel-create-periscope-alarm-btn" role="button" data-toggle="collapse" data-target="#panel-create-alarm-collapse">
-            <i class="fa fa-plus fa-fw"></i><span> create alarm</span>
+          <a class="btn btn-success" id="panel-create-periscope-alert-btn" role="button" data-toggle="collapse" data-target="#panel-create-alert-collapse">
+            <i class="fa fa-plus fa-fw"></i><span> create alert</span>
           </a>
         </p>
         <!-- ......... CREATE ALARM FORM ............................................. -->
         <div class="panel panel-default">
-          <div id="panel-create-alarm-collapse" class="panel-under-btn-collapse collapse">
+          <div id="panel-create-alert-collapse" class="panel-under-btn-collapse collapse">
             <div class="panel-body">
               <ul class="nav nav-pills nav-justified" role="tablist" style="padding-bottom:10px">
-                <li class="active"><a ng-click="activateMetricAlarmCreationForm(true)" role="tab" data-toggle="tab">metric based</a>
+                <li class="active"><a ng-click="activateMetricAlertCreationForm(true)" role="tab" data-toggle="tab">metric based</a>
                 </li>
-                <li><a role="tab" ng-click="activateMetricAlarmCreationForm(false)" role="tab" data-toggle="tab">time based</a>
+                <li><a role="tab" ng-click="activateMetricAlertCreationForm(false)" role="tab" data-toggle="tab">time based</a>
                 </li>
               </ul>
 
               <div ng-show="metricBasedAlarm">
-                <form class="form-horizontal" role="form" name="metricBasedAlarmForm">
-                  <div ng-include="'tags/periscope/metricalarmform.tag'"></div>
+                <form class="form-horizontal" role="form" name="metricBasedAlertForm">
+                  <div ng-include="'tags/periscope/metricalertform.tag'"></div>
                 </form>
               </div>
 
               <div ng-show="timeBasedAlarm">
-                <form class="form-horizontal" role="form" name="timeBasedAlarmForm">
-                  <div ng-include="'tags/periscope/timealarmform.tag'"></div>
+                <form class="form-horizontal" role="form" name="timeBasedAlertForm">
+                  <div ng-include="'tags/periscope/timealertform.tag'"></div>
                 </form>
               </div>
 
@@ -52,14 +52,14 @@
         <!-- .panel -->
 
         <!-- ............ ALARM LIST .............................................. -->
-        <div class="panel-group" id="alarm-list-accordion">
+        <div class="panel-group" id="alert-list-accordion">
           <!-- .............. ALARM ................................................. -->
-          <div class="panel panel-default" ng-repeat="alarm in alarms">
-            <div ng-include="'tags/periscope/alarmlist.tag'"></div>
+          <div class="panel panel-default" ng-repeat="alert in alerts">
+            <div ng-include="'tags/periscope/alertlist.tag'"></div>
           </div>
           <!-- .panel -->
         </div>
-        <!-- #alarm-list-accordion -->
+        <!-- #alert-list-accordion -->
 
       </div>
       <!-- .panel-body -->

@@ -247,14 +247,19 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
       return $resource('periscope/clusters/:id/state');
     }]);
 
-    uluwatuServices.factory('MetricAlarm', ['$resource',
+    uluwatuServices.factory('MetricAlert', ['$resource',
     function ($resource) {
-      return $resource('periscope/clusters/:id/alarms/metric/:alarmId', null, {'save': {method:'POST', isArray:false}});
+      return $resource('periscope/clusters/:id/alerts/metric/:alertId', null, {'save': {method:'POST', isArray:false}});
     }]);
 
-    uluwatuServices.factory('TimeAlarm', ['$resource',
+    uluwatuServices.factory('MetricDefinitions', ['$resource',
     function ($resource) {
-      return $resource('periscope/clusters/:id/alarms/time/:alarmId', null, {'save':  {method:'POST', isArray:false}});
+      return $resource('periscope/clusters/:id/alerts/metric/definitions');
+    }]);
+
+    uluwatuServices.factory('TimeAlert', ['$resource',
+    function ($resource) {
+      return $resource('periscope/clusters/:id/alerts/time/:alertId', null, {'save':  {method:'POST', isArray:false}});
     }]);
 
     uluwatuServices.factory('ScalingPolicy', ['$resource',

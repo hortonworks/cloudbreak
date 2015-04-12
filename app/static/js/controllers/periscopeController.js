@@ -2,18 +2,20 @@
 
 var log = log4javascript.getLogger("periscopeController-logger");
 
-angular.module('uluwatuControllers').controller('periscopeController', ['$scope', '$rootScope', '$filter', 'PeriscopeCluster', 'MetricAlarm',
-  'TimeAlarm', 'ScalingPolicy', 'Cluster', 'PeriscopeClusterState', 'PeriscopeClusterScalingConfiguration',
-  function ($scope, $rootScope, $filter, PeriscopeCluster, MetricAlarm, TimeAlarm, ScalingPolicy, Cluster, PeriscopeClusterState, PeriscopeClusterScalingConfiguration) {
+angular.module('uluwatuControllers').controller('periscopeController', ['$scope', '$rootScope', '$filter', 'PeriscopeCluster', 'MetricAlert',
+  'TimeAlert', 'ScalingPolicy', 'Cluster', 'PeriscopeClusterState', 'PeriscopeClusterScalingConfiguration', 'MetricDefinitions',
+  function ($scope, $rootScope, $filter, PeriscopeCluster, MetricAlert, TimeAlert, ScalingPolicy, Cluster, PeriscopeClusterState,
+              PeriscopeClusterScalingConfiguration, MetricDefinitions) {
         $rootScope.periscopeClusters = PeriscopeCluster.query();
-        $scope.alarms = [];
+        $scope.alerts = [];
         $scope.policies = {};
         $scope.scalingConfiguration = {};
         $scope.scalingAction = {};
-        $scope.alarm = {};
+        $scope.alert = {};
         $scope.metricBasedAlarm = true;
         $scope.timeBasedAlarm = false;
         $scope.actPeriscopeCluster = undefined;
+        $scope.alertDefinitions = [];
         resetAlarmForms();
         resetScalingActionForm();
 
@@ -38,6 +40,7 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
         function setActivePeriClusterWithResources(periscopeCluster) {
           $scope.actPeriscopeCluster = periscopeCluster;
           $scope.autoScalingSLAPoliciesEnabled = true;
+          getAlertDefinitions(periscopeCluster.id);
           getAlarms(periscopeCluster.id);
           getScalingConfigurations(periscopeCluster.id);
           getScalingPolicies(periscopeCluster.id);
@@ -48,13 +51,20 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
           $scope.autoScalingSLAPoliciesEnabled = false;
         }
 
-        function getAlarms(id){
-          $scope.alarms=[];
-          MetricAlarm.query({id: id}, function (success) {
-            success.forEach(function(el) { $scope.alarms.push(el); });
+        function getAlertDefinitions(id) {
+          $scope.alertDefinitions = [];
+          MetricDefinitions.query({id: id}, function (success) {
+            success.forEach(function(el) { $scope.alertDefinitions.push(el); });
           });
-          TimeAlarm.query({id: id}, function (success) {
-            success.forEach(function(el) { $scope.alarms.push(el); });
+        }
+
+        function getAlarms(id){
+          $scope.alerts=[];
+          MetricAlert.query({id: id}, function (success) {
+            success.forEach(function(el) { $scope.alerts.push(el); });
+          });
+          TimeAlert.query({id: id}, function (success) {
+            success.forEach(function(el) { $scope.alerts.push(el); });
           });
         }
 
@@ -93,39 +103,29 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
           });
         }
 
-        $scope.activateMetricAlarmCreationForm = function(isMetricAlarm) {
-          $scope.metricBasedAlarm = isMetricAlarm;
-          $scope.timeBasedAlarm = !isMetricAlarm;
+        $scope.activateMetricAlertCreationForm = function(isMetricAlert) {
+          $scope.metricBasedAlarm = isMetricAlert;
+          $scope.timeBasedAlarm = !isMetricAlert;
           resetAlarmForms();
         }
 
-        $scope.createAlarm = function() {
+        $scope.createAlert = function() {
           if ($scope.actPeriscopeCluster != undefined) {
-            if ($scope.alarm.email != undefined) {
-              var notifications = [];
-              notifications.push({
-                "target": [$scope.alarm.email],
-                "notificationType": "EMAIL"
-              });
-              $scope.alarm.notifications = notifications;
-              delete $scope.alarm.email;
-            }
-
             var periClusterId = $scope.actPeriscopeCluster.id;
             if ($scope.metricBasedAlarm) {
-              MetricAlarm.save({id: periClusterId}, $scope.alarm, createAlarmSuccessHandler, createAlarmErrorHandler);
+              MetricAlert.save({id: periClusterId}, $scope.alert, createAlarmSuccessHandler, createAlarmErrorHandler);
             } else {
-              TimeAlarm.save({id: periClusterId}, $scope.alarm, createAlarmSuccessHandler, createAlarmErrorHandler);
+              TimeAlert.save({id: periClusterId}, $scope.alert, createAlarmSuccessHandler, createAlarmErrorHandler);
             }
           }
         }
 
         function createAlarmSuccessHandler(success) {
-          $scope.alarms.push(success);
-          $scope.metricBasedAlarmForm.$setPristine();
-          $scope.timeBasedAlarmForm.$setPristine();
+          $scope.alerts.push(success);
+          $scope.metricBasedAlertForm.$setPristine();
+          $scope.timeBasedAlertForm.$setPristine();
           resetAlarmForms();
-          angular.element(document.querySelector('#panel-create-periscope-alarm-btn')).click();
+          angular.element(document.querySelector('#panel-create-periscope-alert-btn')).click();
         }
 
         function createAlarmErrorHandler(error) {
@@ -133,27 +133,24 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
         }
 
         function resetAlarmForms() {
-          $scope.alarm = {}
-          if ($scope.metricBasedAlarm) {
-            $scope.alarm.metric = "PENDING_CONTAINERS";
-            $scope.alarm.comparisonOperator = "EQUALS";
-          } else {
-            $scope.alarm.timeZone = 'Etc/GMT';
+          $scope.alert = {}
+          if ($scope.timeBasedAlarm) {
+            $scope.alert.timeZone = 'Etc/GMT';
           }
         }
 
-        $scope.deleteAlarm = function(alarm) {
+        $scope.deleteAlarm = function(alert) {
           if ($scope.actPeriscopeCluster != undefined) {
-            if (alarm.metric != undefined) {
-              MetricAlarm.delete({id: $scope.actPeriscopeCluster.id, alarmId: alarm.id}, function(success) { deleteAlarmSuccessHandler(success, alarm, $scope.actPeriscopeCluster.id) }, deleteAlarmErrorHandler);
+            if (alert.alertDefinition != undefined) {
+              MetricAlert.delete({id: $scope.actPeriscopeCluster.id, alertId: alert.id}, function(success) { deleteAlarmSuccessHandler(success, alert, $scope.actPeriscopeCluster.id) }, deleteAlarmErrorHandler);
             } else {
-              TimeAlarm.delete({id: $scope.actPeriscopeCluster.id, alarmId: alarm.id}, function(success) { deleteAlarmSuccessHandler(success, alarm, $scope.actPeriscopeCluster.id) }, deleteAlarmErrorHandler);
+              TimeAlert.delete({id: $scope.actPeriscopeCluster.id, alertId: alert.id}, function(success) { deleteAlarmSuccessHandler(success, alert, $scope.actPeriscopeCluster.id) }, deleteAlarmErrorHandler);
             }
           }
         }
 
         function deleteAlarmSuccessHandler(success, alarm, periClusterId) {
-          $scope.alarms = $filter('filter')($scope.alarms, function(value, index) { return value.id != alarm.id; }, true);
+          $scope.alerts = $filter('filter')($scope.alerts, function(value, index) { return value.id != alarm.id; }, true);
           getScalingPolicies(periClusterId);
         }
 
