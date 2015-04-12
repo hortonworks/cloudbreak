@@ -132,7 +132,6 @@ public class AlertService {
         long clusterId = cluster.getId();
         AmbariClient client = cluster.newAmbariClient();
         try {
-            createAlert(clusterId, client, getAlertDefinition(client, MEMORY_ALERT), MEMORY_ALERT);
             createAlert(clusterId, client, getAlertDefinition(client, CONTAINER_ALERT), CONTAINER_ALERT);
             createAlert(clusterId, client, getAlertDefinition(client, APP_ALERT), APP_ALERT);
         } catch (Exception e) {
