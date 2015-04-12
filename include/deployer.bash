@@ -100,6 +100,7 @@ main() {
 	set -eo pipefail; [[ "$TRACE" ]] && set -x
 
     cbd-find-root
+    deps-init
 	color-init
     load-profile
 
