@@ -160,7 +160,7 @@ pcdb:
     ports:
         - 5432
     volumes:
-        - /var/lib/cloudbreak/periscopedb:/var/lib/postgresql/data \
+        - /var/lib/cloudbreak/periscopedb:/var/lib/postgresql/data
     image: postgres:9.4.0
 
 periscope:
