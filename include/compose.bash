@@ -5,7 +5,7 @@ compose-init() {
     cmd-export compose-kill kill
     cmd-export compose-logs logs
     cmd-export compose-pull pull
-    cmd-export compose-generate-yaml genyaml
+    cmd-export compose-generate-yaml generate
 }
 
 compose-ps() {
@@ -23,6 +23,7 @@ compose-pull() {
 compose-up() {
     declare desc="Starts containers with docker-compose"
 
+    compose-generate-yaml
     docker-compose up -d
 }
 
@@ -40,6 +41,12 @@ compose-logs() {
 }
 
 compose-generate-yaml() {
+    declare desc="Generates docker-compose.yml using config values from Profile"
+
+    if [ -f docker-compose.yml ]; then
+        warn "docker-compose.yml already exists, if you want to regenerate, move it away"
+    else
+        warn "Generating docker-compose.yml ..."
     cat > docker-compose.yml <<EOF
 consul:
     privileged: true
@@ -241,4 +248,5 @@ periscope:
     image: sequenceiq/periscope:$DOCKER_TAG_PERISCOPE
 
 EOF
+  fi
 }

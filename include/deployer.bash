@@ -67,8 +67,26 @@ load-profile() {
         debug "Use profile: $CBD_PROFILE"
         module-load "$CBD_PROFILE"
     else
-        echo "!! No Profile found. Please create a file called 'Profile' in the current dir. To fix run:" | red
-        echo " touch Profile" | blue
+        echo "!! No Profile found. Please create a file called 'Profile' in the current dir." | red
+        echo "Please copy and paste all blue text below:" | red
+
+        if boot2docker version &> /dev/null; then
+            (cat << EOF
+cat > Profile << ENDOFPROFILE
+export PUBLIC_IP=$(boot2docker ip)
+export PRIVATE_IP=\$(docker run alpine sh -c 'ip ro | grep default | cut -d" " -f 3')
+$(boot2docker shellinit 2>/dev/null | sed 's/^ *//')
+ENDOFPROFILE
+EOF
+            ) | blue
+        else
+            (cat << EOF
+cat > Profile << ENDOFPROFILE
+export PRIVATE_IP=\$(docker run alpine sh -c 'ip ro | grep default | cut -d" " -f 3')
+ENDOFPROFILE
+EOF
+             ) | blue
+        fi
         exit 2
     fi
 
