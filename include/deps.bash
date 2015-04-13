@@ -1,13 +1,13 @@
 # Simple binary dependency management
 
-declare DEPS_REPO="${DEPS_REPO:-https://raw.githubusercontent.com/gliderlabs/glidergun-rack/master/index}"
+declare DEPS_REPO="${DEPS_REPO:-https://raw.githubusercontent.com/lalyos/glidergun-rack/master/index}"
 
 deps-init() {
 	export PATH="$(deps-dir)/bin:$PATH"
 }
 
 deps-dir() {
-	echo "${GUN_ROOT:?}/.gun" # hmm, glidergun specific...
+	echo "$CBD_ROOT/.deps"
 }
 
 deps-require() {
@@ -59,7 +59,7 @@ deps-install() {
 		unset PREFIX
 	else
 		chmod +x "$tmpfile"
-        mv "$tmpdir/$name" "$(deps-dir)/bin"
+        mv "$tmpfile" "$(deps-dir)/bin"
 	fi
 	cd - > /dev/null
 	rm -rf "${tmpdir:?}"

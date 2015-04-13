@@ -67,8 +67,26 @@ load-profile() {
         debug "Use profile: $CBD_PROFILE"
         module-load "$CBD_PROFILE"
     else
-        echo "!! No Profile found. Please create a file called 'Profile' in the current dir. To fix run:" | red
-        echo " touch Profile" | blue
+        echo "!! No Profile found. Please create a file called 'Profile' in the current dir." | red
+        echo "Please copy and paste all blue text below:" | red
+
+        if boot2docker version &> /dev/null; then
+            (cat << EOF
+cat > Profile << ENDOFPROFILE
+export PUBLIC_IP=$(boot2docker ip)
+export PRIVATE_IP=\$(docker run alpine sh -c 'ip ro | grep default | cut -d" " -f 3')
+$(boot2docker shellinit 2>/dev/null | sed 's/^ *//')
+ENDOFPROFILE
+EOF
+            ) | blue
+        else
+            (cat << EOF
+cat > Profile << ENDOFPROFILE
+export PRIVATE_IP=\$(docker run alpine sh -c 'ip ro | grep default | cut -d" " -f 3')
+ENDOFPROFILE
+EOF
+             ) | blue
+        fi
         exit 2
     fi
 
@@ -92,13 +110,21 @@ doctor() {
     info "Everything is very-very first class !!!"
 }
 
+cbd-find-root() {
+    CBD_ROOT=$PWD
+}
+
 main() {
 	set -eo pipefail; [[ "$TRACE" ]] && set -x
+
+    cbd-find-root
+    deps-init
 	color-init
     load-profile
 
     circle-init
     cloudbreak-init
+    compose-init
 
     debug "CloudBreak Deployer $(bin-version)"
 
@@ -111,9 +137,6 @@ main() {
     cmd-export-ns env "Environment namespace"
     cmd-export env-show
     cmd-export env-export
-
-    cmd-export cloudbreak-deploy start
-    cmd-export cloudbreak-destroy kill
 
     if [[ "$DEBUG" ]]; then
         cmd-export fn-call fn

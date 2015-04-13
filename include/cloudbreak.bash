@@ -4,6 +4,10 @@ cloudbreak-init() {
   cloudbreak-conf-images
   cloudbreak-conf-cbdb
   cloudbreak-conf-defaults
+  cloudbreak-conf-uaa
+  cloudbreak-conf-smtp
+
+  generate_uaa_config
 }
 
 cloudbreak-conf-tags() {
@@ -19,6 +23,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_ULUWATU 0.1.415
     env-import DOCKER_TAG_SULTANS 0.1.61
     env-import DOCKER_TAG_PERISCOPE 0.1.36
+    env-import DOCKER_TAG_AMBASSADOR latest
 }
 
 cloudbreak-conf-images() {
@@ -30,6 +35,13 @@ cloudbreak-conf-images() {
     env-import CB_OPENSTACK_IMAGE "packer-cloudbreak-centos-2015-03-11"
 }
 
+cloudbreak-conf-smtp() {
+    env-import CLOUDBREAK_SMTP_SENDER_USERNAME " "
+    env-import CLOUDBREAK_SMTP_SENDER_PASSWORD " "
+    env-import CLOUDBREAK_SMTP_SENDER_HOST " "
+    env-import CLOUDBREAK_SMTP_SENDER_PORT " "
+    env-import CLOUDBREAK_SMTP_SENDER_FROM " "
+}
 cloudbreak-conf-cbdb() {
     declare desc="Declares cloudbreak DB config"
 
@@ -40,110 +52,103 @@ cloudbreak-conf-cbdb() {
     env-import PERISCOPE_DB_HBM2DDL_STRATEGY "update"
 }
 
+cloudbreak-conf-uaa() {
+    env-import UAA_CLOUDBREAK_ID cloudbreak
+    env-import UAA_CLOUDBREAK_SECRET $(gen-password)
+
+    env-import UAA_PERISCOPE_ID periscope
+    env-import UAA_PERISCOPE_SECRET $(gen-password)
+
+    env-import UAA_ULUWATU_ID uluwatu
+    env-import UAA_ULUWATU_SECRET $(gen-password)
+
+    env-import UAA_SULTANS_ID sultans
+    env-import UAA_SULTANS_SECRET $(gen-password)
+
+    env-import UAA_CLOUDBREAK_SHELL_ID cloudbreak_shell
+
+    env-import UAA_DEFAULT_USER_EMAIL admin@example.com
+    env-import UAA_DEFAULT_USER_PW cloudbreak
+    env-import UAA_DEFAULT_USER_FIRSTNAME Joe
+    env-import UAA_DEFAULT_USER_LASTNAME Admin
+}
+
 cloudbreak-conf-defaults() {
-    env-import CB_BLUEPRINT_DEFAULTS "lambda-architecture,multi-node-hdfs-yarn,hdp-multinode-default"
-}
-
-check_if_running() {
-    declare desc="Checks if a container is in running state"
-
-    declare container="$1"
-
-    [[ "true" == $(docker inspect -f '{{.State.Running}}' $container 2>/dev/null) ]]
-}
-
-check_skip() {
-    declare desc="Checks if a container should be skipped: SKIP_XXX"
-    declare name=${1:?}
-    
-    if grep -qi $name <<< "${!SKIP_*}" && ! check_if_running $name; then
-        error  "$name should be skipped but its not running ?!"
-        exit 1
-    fi
-    
-    grep -qi $name <<< "${!SKIP_*}"
-}
-
-start_consul() {
-    declare desc="starts consul binding to: $PRIVATE_IP http:8500 dns:53 rpc:8400"
-
-    local name=consul
     env-import PRIVATE_IP
-    
-    if check_skip $name; then
-        warn "skipping container: $name"
-        return
-    fi
+    env-import PUBLIC_IP
 
-    if check_if_running $name; then
-        warn "$name is already running, not starting"
-        return
-    fi
-
-    info $desc
-    docker run -d \
-        -h node1 \
-        --name=$name \
-        --privileged \
-        -e SERVICE_IGNORE=true \
-        -p ${PRIVATE_IP}:53:53/udp \
-        -p ${PRIVATE_IP}:8400:8400 \
-        -p ${PRIVATE_IP}:8500:8500 \
-        -v /var/run/docker.sock:/var/run/docker.sock \
-        sequenceiq/consul:$DOCKER_TAG_CONSUL -server -bootstrap -advertise ${PRIVATE_IP}
+    env-import CB_BLUEPRINT_DEFAULTS "multi-node-hdfs-yarn,lambda-architecture,hdp-multinode-default"
 }
 
-start_registrator() {
-    declare desc="starts registrator connecting to consul"
-
-    local name=registrator
-    env-import PRIVATE_IP
-    
-    if check_skip $name; then
-        warn "skipping container: $name"
-        return
-    fi
-
-    if check_if_running $name; then
-        warn "$name is already running, not starting"
-        return
-    fi
-
-    info $desc
-    docker run -d \
-      --name=$name \
-      --privileged \
-      -v /var/run/docker.sock:/tmp/docker.sock \
-      gliderlabs/registrator:$DOCKER_TAG_REGISTRATOR consul://${PRIVATE_IP}:8500
+gen-password() {
+    date +%s|shasum|head -c 10
 }
 
-cloudbreak-deploy() {
-    declare desc="Deploys all Cloudbreak components in docker containers"
+generate_uaa_config() {
 
-    start_consul | gray
-    start_registrator | gray
+    cat > uaa.yml << EOF
+spring_profiles: postgresql
+
+database:
+  driverClassName: org.postgresql.Driver
+  url: jdbc:postgresql://\${IDENTITY_DB_URL}/postgres
+  username: \${IDENTITY_DB_USER:postgres}
+  password: \${IDENTITY_DB_PASS:}
+
+oauth:
+  client:
+    override: true
+    autoapprove:
+      - ${UAA_CLOUDBREAK_SHELL_ID}
+  clients:
+    ${UAA_SULTANS_ID}:
+      id: ${UAA_SULTANS_ID}
+      secret: ${UAA_SULTANS_SECRET}
+      authorized-grant-types: client_credentials
+      scope: scim.read,scim.write,password.write
+      authorities: uaa.resource,scim.read,scim.write,password.write
+    ${UAA_ULUWATU_ID}:
+      id: ${UAA_ULUWATU_ID}
+      secret: ${UAA_ULUWATU_SECRET}
+      authorized-grant-types: authorization_code,client_credentials
+      scope: cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,cloudbreak.templates,openid,password.write,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,cloudbreak.events,periscope.cluster,cloudbreak.recipes
+      authorities: cloudbreak.subscribe
+      redirect-uri: http://${PUBLIC_IP}:3000/authorize
+    ${UAA_CLOUDBREAK_ID}:
+      id: ${UAA_CLOUDBREAK_ID}
+      secret: ${UAA_CLOUDBREAK_SECRET}
+      authorized-grant-types: client_credentials
+      scope: scim.read,scim.write,password.write
+      authorities: uaa.resource,scim.read,scim.write,password.write
+    ${UAA_PERISCOPE_ID}:
+      id: ${UAA_PERISCOPE_ID}
+      secret: ${UAA_PERISCOPE_SECRET}
+      authorized-grant-types: client_credentials
+      scope: none
+      authorities: cloudbreak.autoscale,uaa.resource,scim.read
+    ${UAA_CLOUDBREAK_SHELL_ID}:
+      id: ${UAA_CLOUDBREAK_SHELL_ID}
+      authorized-grant-types: implicit
+      scope: cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,cloudbreak.recipes,openid,password.write
+      authorities: uaa.none
+      redirect-uri: http://cloudbreak.shell
+
+scim:
+  username_pattern: '[a-z0-9+\-_.@]+'
+  users:
+    - ${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_PW}|${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_FIRSTNAME}|${UAA_DEFAULT_USER_LASTNAME}|openid,cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,sequenceiq.cloudbreak.admin,sequenceiq.cloudbreak.user,sequenceiq.account.seq1234567.SequenceIQ,cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,periscope.cluster,cloudbreak.recipes
+
+EOF
+
 }
 
-cloudbreak-destroy() {
-    declare desc="Destroys Cloudbreak related containers"
-
-    local containers="consul registrator"
-
-    info "killing containers: $containers"
-    for name in $containers; do
-        if ! docker inspect $name &>/dev/null ;then
-            warn "no such container: $name"
-        else 
-            if grep -qi $name <<< "${!SKIP_*}"; then
-                warn skipping: $name
-            else
-                debug stop: $name
-                docker stop -t 0 $name | gray
-                debug remove: $name
-                docker rm -f $name | gray
-                
-            fi
-        fi
-    done
-
+token() {
+    cloudbreak-init
+    local TOKEN=$(curl -siX POST \
+        -H "accept: application/x-www-form-urlencoded" \
+        -d credentials='{"username":"'${UAA_DEFAULT_USER_EMAIL}'","password":"'${UAA_DEFAULT_USER_PW}'"}' \
+        "$(dhp identity)/oauth/authorize?response_type=token&client_id=cloudbreak_shell&scope.0=openid&source=login&redirect_uri=http://cloudbreak.shell" \
+           | grep Location | cut -d'=' -f 2 | cut -d'&' -f 1)
+    debug TOKEN=$TOKEN
 }
+
