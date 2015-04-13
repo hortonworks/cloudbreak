@@ -307,7 +307,7 @@ public class AwsConnector implements CloudPlatformConnector {
         amazonASClient.detachInstances(detachInstancesRequest);
         amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(instanceIds));
         LOGGER.info("Terminated instances in stack '{}': '{}'", stack.getId(), instanceIds);
-        return Collections.emptySet();
+        return instanceIds;
     }
 
     @Override
