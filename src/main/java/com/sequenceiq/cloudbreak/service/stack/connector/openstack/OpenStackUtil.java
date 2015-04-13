@@ -21,7 +21,6 @@ public class OpenStackUtil {
     private static final String CB_KEYPAIR_NAME = "cb-keypair-";
 
     @Autowired
-    @Lazy
     private PBEStringCleanablePasswordEncryptor encryptor;
 
     public OSClient createOSClient(Stack stack) {
