@@ -22,7 +22,7 @@
                                 <option>all</option>
                                 <option value="AWS">Amazon EC2</option>
                                 <option value="AZURE">Microsoft Azure</option>
-                                <option value="GCC">Google Cloud Compute</option>
+                                <option value="GCC">Google Cloud Platform</option>
                             </select>
                         </div>
                     </div>
@@ -74,7 +74,7 @@
                         </thead>
                         <tbody>
                             <tr ng-repeat="event in events| filter:eventFilterFunction">
-                                <td>{{event.cloud}}</td>
+                                <td>{{event.cloud == "GCC" ? "GCP" : event.cloud}}</td>
                                 <td>{{event.owner}}</td>
                                 <td>{{$root.config.EVENT_TYPE[event.eventType]}}</td>
                                 <td>{{event.eventTimestamp}}</td>

@@ -68,7 +68,7 @@
                 <option>all</option>
                 <option value="AWS">Amazon EC2</option>
                 <option value="AZURE">Microsoft Azure</option>
-                <option value="GCC">Google Cloud Compute</option>
+                <option value="GCC">Google Cloud Platform</option>
                 <option value="OPENSTACK">OpenStack</option>
               </select>
             </div>
@@ -115,7 +115,7 @@
             </thead>
             <tbody>
               <tr ng-repeat="usage in gccSum.items">
-                <td ng-if="$index == 0" rowspan="{{gccSum.items.length}}">{{usage.provider}}</td>
+                <td ng-if="$index == 0" rowspan="{{gccSum.items.length}}">GCP</td>
                 <td>{{usage.stackName}}</td>
                 <td>{{usage.username}}</td>
                 <td><p id="awsregion" ng-repeat="item in $root.config.GCC.gccRegions | filter:{key: usage.region}">{{item.value}}</p></td>

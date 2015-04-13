@@ -66,7 +66,7 @@
                         <div class="panel-heading">
                             <h5>
                                 <a href="" data-toggle="collapse" data-parent="#templete-list-accordion" data-target="#panel-template-collapse{{template.id}}"><i class="fa fa-file-o fa-fw"></i>{{template.name}}</a>
-                                <span class="label label-info pull-right" >{{template.cloudPlatform}}</span>
+                                <span class="label label-info pull-right" >{{template.cloudPlatform === "GCC" ? "GCP" : template.cloudPlatform}}</span>
                                 <i class="fa fa-users fa-lg public-account-info pull-right" style="padding-right: 5px" ng-show="template.public"></i>
                             </h5>
                         </div>
