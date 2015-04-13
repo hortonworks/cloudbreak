@@ -4,12 +4,19 @@ compose-init() {
     cmd-export compose-up start
     cmd-export compose-kill kill
     cmd-export compose-logs logs
+    cmd-export compose-pull pull
 }
 
 compose-ps() {
     declare desc="docker-compose: List containers"
 
     docker-compose ps
+}
+
+compose-pull() {
+    declare desc="Pulls service images"
+
+    docker-compose pull
 }
 
 compose-up() {
