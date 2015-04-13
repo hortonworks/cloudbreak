@@ -3,6 +3,7 @@ compose-init() {
     cmd-export compose-ps ps
     cmd-export compose-up start
     cmd-export compose-kill kill
+    cmd-export compose-logs logs
 }
 
 compose-ps() {
@@ -23,3 +24,11 @@ compose-kill() {
     docker-compose kill
     docker-compose rm -f
 }
+
+compose-logs() {
+    declare desc="Whach all container logs in colored version"
+
+    docker-compose logs
+}
+
+
