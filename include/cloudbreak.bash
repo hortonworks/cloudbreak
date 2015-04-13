@@ -5,6 +5,9 @@ cloudbreak-init() {
   cloudbreak-conf-cbdb
   cloudbreak-conf-defaults
   cloudbreak-conf-uaa
+  cloudbreak-conf-smtp
+
+  generate_uaa_config
 }
 
 cloudbreak-conf-tags() {
@@ -20,6 +23,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_ULUWATU 0.1.415
     env-import DOCKER_TAG_SULTANS 0.1.61
     env-import DOCKER_TAG_PERISCOPE 0.1.36
+    env-import DOCKER_TAG_AMBASSADOR latest
 }
 
 cloudbreak-conf-images() {
@@ -31,6 +35,13 @@ cloudbreak-conf-images() {
     env-import CB_OPENSTACK_IMAGE "packer-cloudbreak-centos-2015-03-11"
 }
 
+cloudbreak-conf-smtp() {
+    env-import CLOUDBREAK_SMTP_SENDER_USERNAME " "
+    env-import CLOUDBREAK_SMTP_SENDER_PASSWORD " "
+    env-import CLOUDBREAK_SMTP_SENDER_HOST " "
+    env-import CLOUDBREAK_SMTP_SENDER_PORT " "
+    env-import CLOUDBREAK_SMTP_SENDER_FROM " "
+}
 cloudbreak-conf-cbdb() {
     declare desc="Declares cloudbreak DB config"
 
@@ -66,99 +77,14 @@ cloudbreak-conf-defaults() {
     env-import PRIVATE_IP
     env-import PUBLIC_IP
 
-    env-import CB_BLUEPRINT_DEFAULTS "lambda-architecture,multi-node-hdfs-yarn,hdp-multinode-default"
-}
-
-check_if_running() {
-    declare desc="Checks if a container is in running state"
-
-    declare container="$1"
-
-    [[ "true" == $(docker inspect -f '{{.State.Running}}' $container 2>/dev/null) ]]
-}
-
-check_skip() {
-    declare desc="Checks if a container should be skipped: SKIP_XXX"
-    declare name=${1:?}
-    
-    if grep -qi $name <<< "${!SKIP_*}" && ! check_if_running $name; then
-        error  "$name should be skipped but its not running ?!"
-        exit 1
-    fi
-    
-    grep -qi $name <<< "${!SKIP_*}"
-}
-
-start_consul() {
-    declare desc="starts consul binding to: $PRIVATE_IP http:8500 dns:53 rpc:8400"
-
-    local name=consul
-    
-    if check_skip $name; then
-        warn "skipping container: $name"
-        return
-    fi
-
-    if check_if_running $name; then
-        warn "$name is already running, not starting"
-        return
-    fi
-
-    info $desc
-    docker run -d \
-        -h node1 \
-        --name=$name \
-        --privileged \
-        -e SERVICE_IGNORE=true \
-        -p ${PRIVATE_IP}:53:53/udp \
-        -p ${PRIVATE_IP}:8400:8400 \
-        -p ${PRIVATE_IP}:8500:8500 \
-        -v /var/run/docker.sock:/var/run/docker.sock \
-        sequenceiq/consul:$DOCKER_TAG_CONSUL -server -bootstrap -advertise ${PRIVATE_IP}
-}
-
-start_registrator() {
-    declare desc="starts registrator connecting to consul"
-
-    local name=registrator
-    env-import PRIVATE_IP
-    
-    if check_skip $name; then
-        warn "skipping container: $name"
-        return
-    fi
-
-    if check_if_running $name; then
-        warn "$name is already running, not starting"
-        return
-    fi
-
-    info $desc
-    docker run -d \
-      --name=$name \
-      --privileged \
-      -v /var/run/docker.sock:/tmp/docker.sock \
-      gliderlabs/registrator:$DOCKER_TAG_REGISTRATOR consul://${PRIVATE_IP}:8500
+    env-import CB_BLUEPRINT_DEFAULTS "multi-node-hdfs-yarn,lambda-architecture,hdp-multinode-default"
 }
 
 gen-password() {
     date +%s|shasum|head -c 10
 }
 
-
-prepare_uaa_config() {
-
-    cat > uaa_client_details << EOF
-Cloudbreak client ID: $UAA_CLOUDBREAK_ID
-Cloudbreak client secret: $UAA_CLOUDBREAK_SECRET
-Periscope client ID: $UAA_PERISCOPE_ID
-Periscope client secret: $UAA_PERISCOPE_SECRET
-Uluwatu client ID: $UAA_ULUWATU_ID
-Uluwatu client secret: $UAA_ULUWATU_SECRET
-Sultans client ID: $UAA_SULTANS_ID
-Sultans client secret: $UAA_SULTANS_SECRET
-Cloudbreak Shell client ID: $UAA_CLOUDBREAK_SHELL_ID
-EOF
+generate_uaa_config() {
 
     cat > uaa.yml << EOF
 spring_profiles: postgresql
@@ -214,102 +140,6 @@ scim:
 
 EOF
 
-    info "Saved client ids & secrets for the UAA clients in uaa_client_details and generated uaa.yml config."
-}
-
-start_uaadb() {
-    declare desc="Starts the DB for uaa"
-    
-    local name=uaadb
-    
-    if check_skip $name; then
-        warn "skipping container: $name"
-        return
-    fi
-
-    if check_if_running $name; then
-        warn "$name is already running, not starting"
-        return
-    fi
-    
-    debug starting $name ...
-    docker run --privileged -d -P \
-      --name=$name \
-      -e "SERVICE_NAME=$name" \
-      -e SERVICE_CHECK_CMD='psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"' \
-      -v /var/lib/cloudbreak/uaadb:/var/lib/postgresql/data \
-      postgres:$DOCKER_TAG_POSTGRES
-}
-
-start_identity() {
-    declare desc="Starts the Identity Server"
-
-    wait_for_service uaadb
-    local name=identity
-    
-    if check_skip $name; then
-        warn "skipping container: $name"
-        return
-    fi
-    
-    if check_if_running $name; then
-        warn "$name is already running, not starting"
-        return
-    fi
-
-    debug starting $name ...
-    docker run --privileged -d -P \
-      --name=$name \
-      -e "SERVICE_NAME=$name" \
-      -e SERVICE_CHECK_HTTP=/login \
-      -e IDENTITY_DB_URL=$(dhp uaadb) \
-      -v $PWD/uaa.yml:/uaa/uaa.yml \
-      -v /var/lib/uaa/uaadb:/var/lib/postgresql/data \
-      -p 8089:8080 \
-      sequenceiq/uaa:$DOCKER_TAG_UAA
-
-}
-
-# dig service host ip
-dh() {
-    dig @${PRIVATE_IP} +short $1.service.consul
-}
-
-# dig service port
-dp() {
-    dig @${PRIVATE_IP} +short $1.service.consul SRV | cut -d" " -f 3
-}
-
-# dig host:port
-dhp(){
-    echo $(dh $1):$(dp $1)
-}
-
-wait_for_service() {
-    declare desc="waits for a service entry to appear in consul"
-    declare service=$1
-    : ${service:? required}
-
-    debug "wait for $service gets registered in consul ..."
-    ( docker run -it --rm \
-        --net container:consul \
-        --entrypoint /bin/consul \
-        sequenceiq/consul:$DOCKER_TAG_CONSUL \
-          watch -type=service -service=$service -passingonly=true bash -c 'cat|grep "\[\]" '
-    ) &> /dev/null || true
-    debug "$service is registered: $(dhp $service)"
-}
-
-cloudbreak-deploy() {
-    declare desc="Deploys all Cloudbreak components in docker containers"
-
-    start_consul | gray
-    start_registrator | gray
-    prepare_uaa_config
-    start_uaadb
-    start_identity
-    wait_for_service identity
-    
 }
 
 token() {
@@ -322,25 +152,3 @@ token() {
     debug TOKEN=$TOKEN
 }
 
-cloudbreak-destroy() {
-    declare desc="Destroys Cloudbreak related containers"
-
-    local containers="consul registrator uaadb identiry"
-
-    info "killing containers: $containers"
-    for name in $containers; do
-        if ! docker inspect $name &>/dev/null ;then
-            warn "no such container: $name"
-        else
-            if grep -qi $name <<< "${!SKIP_*}"; then
-                warn skipping: $name
-            else
-                debug stop: $name
-                docker stop -t 0 $name | gray
-                debug remove: $name
-                docker rm -f $name | gray
-            fi
-        fi
-    done
-
-}
