@@ -70,7 +70,7 @@
                         <div class="panel-heading">
                             <h5><a href="" data-toggle="collapse" data-parent="#credential-list-accordion"
                                    data-target="#panel-credential-collapse{{credential.id}}"><i class="fa fa-tag fa-fw"></i>{{credential.name}}</a>
-                                <span class="label label-info pull-right" >{{credential.cloudPlatform}}</span>
+                                <span class="label label-info pull-right" >{{credential.cloudPlatform == "GCC" ? "GCP" : credential.cloudPlatform}}</span>
                                 <i class="fa fa-users fa-lg public-account-info pull-right" style="padding-right: 5px" ng-show="credential.public"></i>
 
                             </h5>
