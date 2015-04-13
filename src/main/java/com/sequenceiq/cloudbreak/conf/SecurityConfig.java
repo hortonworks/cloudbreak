@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,8 +45,7 @@ public class SecurityConfig {
         @Autowired
         private OwnerBasedPermissionEvaluator ownerBasedPermissionEvaluator;
 
-        @Bean
-        MethodSecurityExpressionHandler expressionHandler() {
+        @Bean MethodSecurityExpressionHandler expressionHandler() {
             DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
             ownerBasedPermissionEvaluator.setUserDetailsService(userDetailsService);
             expressionHandler.setPermissionEvaluator(ownerBasedPermissionEvaluator);
@@ -74,8 +74,7 @@ public class SecurityConfig {
         @Autowired
         private UserDetailsService userDetailsService;
 
-        @Bean
-        RemoteTokenServices remoteTokenServices() {
+        @Bean RemoteTokenServices remoteTokenServices() {
             RemoteTokenServices rts = new RemoteTokenServices();
             rts.setClientId(clientId);
             rts.setClientSecret(clientSecret);
@@ -83,8 +82,7 @@ public class SecurityConfig {
             return rts;
         }
 
-        @Bean
-        StandardPBEStringEncryptor encryptor() {
+        @Bean PBEStringCleanablePasswordEncryptor encryptor() {
             StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
             encryptor.setPassword(clientSecret);
             return encryptor;
