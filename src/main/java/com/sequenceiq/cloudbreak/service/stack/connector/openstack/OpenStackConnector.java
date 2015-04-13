@@ -153,7 +153,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
             LOGGER.error("Failed to update the Heat stack", e);
             throw new BuildStackFailureException(e);
         }
-        return Collections.emptySet();
+        return instanceIds;
     }
 
     @Override
