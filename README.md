@@ -14,6 +14,18 @@ single binary to your PATH. The one-liner way is:
 ```
 curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install | bash
 ```
+## Usage
+
+You can always get a list of command by issuing without parameters: `cbd`
+
+### Deployment
+
+To start the containers run:
+
+```
+cbd start
+```
+If one of the containers are already running, it won’t be started again.
 
 ## Configuration
 
@@ -28,29 +40,6 @@ to set config values:
 export MY_VAR=some_value
 export OTHER_VAR=dunno
 ```
-
-### List of configurations
-
-- **CB_AWS_AMI_MAP** : tbd 
-- **CB_AZURE_IMAGE_URI** : tbd 
-- **CB_BLUEPRINT_DEFAULTS** : tbd 
-- **CB_DB_ENV_DB** : tbd 
-- **CB_DB_ENV_PASS** : tbd 
-- **CB_DB_ENV_USER** : tbd 
-- **CB_GCP_SOURCE_IMAGE_PATH** : tbd 
-- **CB_HBM2DDL_STRATEGY** : tbd 
-- **CB_OPENSTACK_IMAGE** : tbd 
-- **DOCKER_TAG_ALPINE** : tbd 
-- **DOCKER_TAG_CBSHELL** : tbd 
-- **DOCKER_TAG_CLOUDBREAK** : tbd 
-- **DOCKER_TAG_CONSUL** : tbd 
-- **DOCKER_TAG_PERISCOPE** : tbd 
-- **DOCKER_TAG_POSTGRES** : tbd 
-- **DOCKER_TAG_REGISTRATOR** : tbd 
-- **DOCKER_TAG_SULTANS** : tbd 
-- **DOCKER_TAG_UAA** : tbd 
-- **DOCKER_TAG_ULUWATU** : tbd 
-- **PERISCOPE_DB_HBM2DDL_STRATEGY** : tbd 
 
 ### Env specific Profile
 
@@ -71,19 +60,6 @@ CBD_DEFAULT_PROFILE=prod cbd some_commands
 ```
 
 For permanent setting you can `export CBD_DEFAULT_PROFILE=prod` in your `.bash_profile`.
-
-## Usage
-
-You can always get a list of command by issuing without parameters: `cbd`
-
-### Deployment
-
-To start the containers run:
-
-```
-cbd start
-```
-If one of the containers are already running, it won’t be started again.
 
 ## Debug
 
@@ -165,6 +141,30 @@ export CLOUDBREAK_SMTP_SENDER_HOST=
 export CLOUDBREAK_SMTP_SENDER_PORT=
 export CLOUDBREAK_SMTP_SENDER_FROM=
 ```
+
+### List of configurations
+
+- **CB_AWS_AMI_MAP** : tbd 
+- **CB_AZURE_IMAGE_URI** : tbd 
+- **CB_BLUEPRINT_DEFAULTS** : tbd 
+- **CB_DB_ENV_DB** : tbd 
+- **CB_DB_ENV_PASS** : tbd 
+- **CB_DB_ENV_USER** : tbd 
+- **CB_GCP_SOURCE_IMAGE_PATH** : tbd 
+- **CB_HBM2DDL_STRATEGY** : tbd 
+- **CB_OPENSTACK_IMAGE** : tbd 
+- **DOCKER_TAG_ALPINE** : tbd 
+- **DOCKER_TAG_CBSHELL** : tbd 
+- **DOCKER_TAG_CLOUDBREAK** : tbd 
+- **DOCKER_TAG_CONSUL** : tbd 
+- **DOCKER_TAG_PERISCOPE** : tbd 
+- **DOCKER_TAG_POSTGRES** : tbd 
+- **DOCKER_TAG_REGISTRATOR** : tbd 
+- **DOCKER_TAG_SULTANS** : tbd 
+- **DOCKER_TAG_UAA** : tbd 
+- **DOCKER_TAG_ULUWATU** : tbd 
+- **PERISCOPE_DB_HBM2DDL_STRATEGY** : tbd 
+
 
 ## Release Process of Clodbreak Deployer tool
 
