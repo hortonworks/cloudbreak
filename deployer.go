@@ -116,6 +116,7 @@ func main() {
 	}, []string{
 		"include/circle.bash",
 		"include/cloudbreak.bash",
+		"include/compose.bash",
 		"include/cmd.bash",
 		"include/color.bash",
 		"include/deployer.bash",
