@@ -85,19 +85,6 @@ cbd start
 ```
 If one of the containers are already running, it won’t be started again.
 
-
-### Skipping containers
-
-If you want the Cloudbreak Deployer to skip one of the containers (for example you have started it
-already with special configuration) you can set `SKIP_XXX` env vars. For example if you want to 
-skip the **consul** container, add an extra line into your `Profile`
-
-```
-SKIP_CONSUL=1
-```
-
-Any value will works: 1/yes/true.
-
 ## Debug
 
 If you want to have more detailed output set the `DEBUG` env variable to non-zero:
@@ -164,6 +151,19 @@ Please cover your bahs functions with unit tests.
 running test performed by:
 ```
 make tests
+```
+
+# Configuration
+
+## SMTP
+
+Put these lines into your `Profile`
+```
+export CLOUDBREAK_SMTP_SENDER_USERNAME=
+export CLOUDBREAK_SMTP_SENDER_PASSWORD=
+export CLOUDBREAK_SMTP_SENDER_HOST=
+export CLOUDBREAK_SMTP_SENDER_PORT=
+export CLOUDBREAK_SMTP_SENDER_FROM=
 ```
 
 ## Release Process of Clodbreak Deployer tool
