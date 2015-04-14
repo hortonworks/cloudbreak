@@ -4,6 +4,8 @@
 
 ### Added
 
+- Install cbd to a directory which is available on $PATH
+
 ### Removed
 
 ### Changed
@@ -142,6 +144,6 @@ Added
 
 - help command added
 - version command added
-- Added --version 
+- Added --version
 - CircleCI build
 - Linux/Darwin binary releases on github
