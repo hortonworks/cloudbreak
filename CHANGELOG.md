@@ -5,6 +5,7 @@
 ### Added
 
 - Install cbd to a directory which is available on $PATH
+- Docker based test for the one-liner install from README.md: `make install-test`
 
 ### Removed
 

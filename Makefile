@@ -32,7 +32,12 @@ deps:
 
 tests:
 	basht include/*.bash test/*.bash
-	
+
+install-test:
+	docker rmi cbd:delme 2>/dev/null || true
+	docker build -f Dockerfile.installtest -t cbd:delme . 
+	docker run --rm cbd:delme cbd --version
+
 release:
 	rm -rf release && mkdir release
 	tar -zcf release/$(NAME)_$(VERSION)_Linux_$(ARCH).tgz -C build/Linux $(BINARYNAME)
