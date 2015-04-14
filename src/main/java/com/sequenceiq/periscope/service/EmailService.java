@@ -5,6 +5,8 @@ import java.util.Map;
 
 import javax.mail.internet.MimeMessage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -20,9 +22,10 @@ import freemarker.template.TemplateException;
 
 @Service
 public class EmailService {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmailService.class);
     @Autowired
     private JavaMailSender mailSender;
+
     @Autowired
     private Configuration freemarkerConfiguration;
 
@@ -33,6 +36,7 @@ public class EmailService {
     public void sendMail(String[] to, String subject, String template, Map<String, String> properties)
             throws IOException, TemplateException {
         String messageBody = generateMessageBody(template, properties);
+        LOGGER.debug("Sending email. Content: {}", messageBody);
         MimeMessagePreparator message = prepareMessage(to, subject, messageBody);
         mailSender.send(message);
     }
