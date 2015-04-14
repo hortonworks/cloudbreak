@@ -65,9 +65,10 @@ public class EmailSenderService {
     private void sendEmail(CbUser user, String template, Map<String, Object> model) {
         try {
             String emailBody = processTemplateIntoString(freemarkerConfiguration.getTemplate(template, "UTF-8"), model);
+            LOGGER.debug("Sending email: {}", emailBody);
             ((JavaMailSender) mailSender).send(prepareMessage(user, "Cloudbreak - stack installation", emailBody));
         } catch (Exception e) {
-            LOGGER.error("Couldn't send stack installation email");
+            LOGGER.error("Could not send email");
             throw new CloudbreakRuntimeException("Exception during cluster install failure email sending.", e);
         }
     }
