@@ -59,6 +59,8 @@ var clientScopes = 'openid' +
 
 
 var periscopeAddress = process.env.ULU_PERISCOPE_ADDRESS;
+var subscriptionAddress = null;
+
 if (!periscopeAddress || (periscopeAddress.substring(0, 7) !== "http://" && periscopeAddress.substring(0, 8) !== "https://")){
   console.log("ULU_PERISCOPE_ADDRESS must be specified and it must be a standard URL: 'http[s]://host[:port]/'");
   environmentSet = false;
@@ -117,8 +119,6 @@ identityServerClient.registerMethod("retrieveToken", identityServerAddress + "oa
 var proxyRestClient = new restClient.Client();
 proxyRestClient.registerMethod("subscribe", cloudbreakAddress + "subscriptions", "POST");
 
-var sultansClient = new restClient.Client();
-
 // cloudbreak config ===========================================================
 
 var cbRequestArgs = {
@@ -167,6 +167,9 @@ app.post('/notifications', function(req, res, next){
 // main page ===================================================================
 
 app.get('/', function(req, res) {
+  if (subscriptionAddress == null) {
+    subscribe()
+  }
   var oauthFlowUrl = sultansAddress
       + 'oauth/authorize?response_type=code'
       + '&client_id=' + clientId
@@ -318,6 +321,43 @@ function proxyPeriscopeRequest(req, res, method){
     res.status(500).send("Uluwatu could not connect to the requested backend.");
   });
 }
+
+// subscription ======================================================================
+
+function subscribe() {
+    console.log("Subscribing client to Cloudbreak notifications");
+    var getClientTokenArgs = {
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      data: 'grant_type=client_credentials'
+    }
+    identityServerClient.methods.retrieveToken(getClientTokenArgs, function(data, response){
+      if (response.statusCode != 200 || !data.access_token){
+        console.log("Couldn't retrieve access token for Uluwatu, couldn't subscribe to Cloudbreak notifications.")
+        console.log(data)
+      } else {
+        var subscribeArgs = {
+          headers: {
+             "Authorization": "Bearer " + data.access_token,
+             "Content-Type": "application/json"
+          },
+          data: { "endpointUrl": hostAddress + "notifications" }
+        }
+        proxyRestClient.methods.subscribe(subscribeArgs, function(data, response){
+          if (response.statusCode === 201 && data.id){
+            console.log("Subscribed to Cloudbreak notifications. Subscription id: [" + data.id + "]");
+            subscriptionAddress = hostAddress
+          } else if (response.statusCode === 409){
+            console.log("Subscription already exist.");
+            subscriptionAddress = hostAddress
+          } else {
+            console.log("Something unexpected happened. Couldn't subscribe to Cloudbreak notifications.")
+            console.log(data)
+          }
+        })
+      }
+    });
+}
+
 // socket ======================================================================
 
 sessionSockets.on('connection', function (err, socket, session) {
@@ -350,33 +390,3 @@ process.on('uncaughtException', function (err) {
 serverPort = process.env.ULU_SERVER_PORT ? process.env.ULU_SERVER_PORT : 3000;
 server.listen(serverPort);
 console.log("App listening on port " + serverPort);
-
-console.log("Subscribing client to Cloudbreak notifications");
-var getClientTokenArgs = {
-  headers: { "Content-Type": "application/x-www-form-urlencoded" },
-  data: 'grant_type=client_credentials'
-}
-identityServerClient.methods.retrieveToken(getClientTokenArgs, function(data, response){
-  if (response.statusCode != 200 || !data.access_token){
-    console.log("Couldn't retrieve access token for Uluwatu, couldn't subscribe to Cloudbreak notifications.")
-    console.log(data)
-  } else {
-    var subscribeArgs = {
-      headers: {
-         "Authorization": "Bearer " + data.access_token,
-         "Content-Type": "application/json"
-      },
-      data: { "endpointUrl": hostAddress + "notifications" }
-    }
-    proxyRestClient.methods.subscribe(subscribeArgs, function(data, response){
-      if (response.statusCode === 201 && data.id){
-        console.log("Subscribed to Cloudbreak notifications. Subscription id: [" + data.id + "]");
-      } else if (response.statusCode === 409){
-        console.log("Subscription already exist.");
-      } else {
-        console.log("Something unexpected happened. Couldn't subscribe to Cloudbreak notifications.")
-        console.log(data)
-      }
-    })
-  }
-});
