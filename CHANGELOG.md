@@ -2,6 +2,8 @@
 
 ### Fixed
 
+- Bash 4.3 is included in the binary, extracted into .deps/bin upon start
+
 ### Added
 
 ### Removed
