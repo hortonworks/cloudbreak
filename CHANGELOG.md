@@ -8,6 +8,18 @@
 
 ### Changed
 
+## [v0.0.9] - 2015-04-14
+
+### Fixed
+
+- Bash 4.3 is included in the binary, extracted into .deps/bin upon start
+
+### Added
+
+### Removed
+
+### Changed
+
 ## [v0.0.8] - 2015-04-13
 
 ### Fixed

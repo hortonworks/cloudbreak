@@ -9,8 +9,7 @@ import (
 	"io"
 	"log"
 	"os"
-	"os/exec"
-	"strings"
+	"runtime"
 
 	"github.com/progrium/go-basher"
 )
@@ -46,15 +45,8 @@ func application(
 	loader func(string) ([]byte, error),
 	copyEnv bool) {
 
-	var bashPath string
-	bashPath, err := exec.LookPath("bash")
-	if err != nil {
-		if strings.Contains(os.Getenv("SHELL"), "bash") {
-			bashPath = os.Getenv("SHELL")
-		} else {
-			bashPath = "/bin/bash"
-		}
-	}
+	bashPath := ".deps/bin/bash-" + runtime.GOOS
+	RestoreAsset(".", bashPath)
 	bash, err := basher.NewContext(bashPath, os.Getenv("DEBUG") != "")
 
 	bash.Export("DEBUG", os.Getenv("DEBUG"))
