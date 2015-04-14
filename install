@@ -13,8 +13,12 @@ main() {
     local osarch=$(uname -sm|tr " " _)
 
     local url="https://github.com/${GIT_ORG}/${GIT_PROJECT}/releases/download/v${latest}/${GIT_PROJECT}_${latest}_${osarch}.tgz"
-
-    curl -Ls $url | tar -xz -C /usr/local/bin/
+    
+    local tagret=/bin
+    if echo $PATH|sed "s/:/\n/g" | grep -q /usr/local/bin; then 
+        target=/usr/local/bin
+    fi
+    curl -Ls $url | tar -xz -C $target
 }
 
 main
