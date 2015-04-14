@@ -98,6 +98,8 @@ start_ambari_agent() {
   set_public_host_script
   set_disk_as_volumes
   docker run -d --name=ambari-agent --privileged --net=host --restart=always -e BRIDGE_IP=$(get_ip) -e HADOOP_CLASSPATH=/data/jars/*:/usr/lib/hadoop/lib/* -v /data/jars:/data/jars $VOLUMES sequenceiq/ambari:$AMBARI_DOCKER_TAG /start-agent
+  sleep 2
+  docker exec ambari-agent sed -i 's/ or not out.startswith(params.hdp_stack_version)//' /usr/lib/ambari-agent/lib/resource_management/libraries/functions/dynamic_variable_interpretation.py
 }
 
 set_disk_as_volumes() {
