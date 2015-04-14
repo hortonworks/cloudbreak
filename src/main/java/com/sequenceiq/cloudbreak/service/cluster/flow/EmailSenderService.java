@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
@@ -40,7 +39,7 @@ public class EmailSenderService {
     private String failedClusterInstallerMailTemplatePath;
 
     @Autowired
-    private MailSender mailSender;
+    private JavaMailSender mailSender;
 
     @Autowired
     private Configuration freemarkerConfiguration;
@@ -65,8 +64,8 @@ public class EmailSenderService {
     private void sendEmail(CbUser user, String template, Map<String, Object> model) {
         try {
             String emailBody = processTemplateIntoString(freemarkerConfiguration.getTemplate(template, "UTF-8"), model);
-            LOGGER.debug("Sending email: {}", emailBody);
-            ((JavaMailSender) mailSender).send(prepareMessage(user, "Cloudbreak - stack installation", emailBody));
+            LOGGER.debug("Sending email. Content: {}", emailBody);
+            mailSender.send(prepareMessage(user, "Cloudbreak - stack installation", emailBody));
         } catch (Exception e) {
             LOGGER.error("Could not send email");
             throw new CloudbreakRuntimeException("Exception during cluster install failure email sending.", e);
