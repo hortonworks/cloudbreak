@@ -9,10 +9,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -26,6 +30,9 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
+import org.springframework.web.client.DefaultResponseErrorHandler;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -62,6 +69,8 @@ public class SecurityConfig {
     @EnableResourceServer
     protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
 
+        public static final Logger LOGGER = LoggerFactory.getLogger(ResourceServerConfiguration.class);
+
         @Value("${cb.client.id}")
         private String clientId;
 
@@ -79,6 +88,7 @@ public class SecurityConfig {
             rts.setClientId(clientId);
             rts.setClientSecret(clientSecret);
             rts.setCheckTokenEndpointUrl(identityServerUrl + "/check_token");
+            rts.setRestTemplate(createRestTemplate());
             return rts;
         }
 
@@ -125,6 +135,22 @@ public class SecurityConfig {
                     .antMatchers("/user/recipes").access("#oauth2.hasScope('cloudbreak.recipes')")
                     .antMatchers("/account/recipes").access("#oauth2.hasScope('cloudbreak.recipes')")
                     .antMatchers("/recipes").access("#oauth2.hasScope('cloudbreak.recipes')");
+        }
+
+        private RestTemplate createRestTemplate() {
+            RestTemplate restTemplate = new RestTemplate();
+            restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
+                @Override
+                public void handleError(ClientHttpResponse response) throws IOException {
+                    LOGGER.error("Error occurred between Cloudbreak and the resource server - check resource server configuration");
+                    if (response.getRawStatusCode() != HttpStatus.BAD_REQUEST.value()) {
+                        super.handleError(response);
+                    } else {
+                        throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, response.getStatusText());
+                    }
+                }
+            });
+            return restTemplate;
         }
     }
 
