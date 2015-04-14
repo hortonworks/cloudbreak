@@ -2,6 +2,12 @@
 : ${GIT_ORG:=sequenceiq}
 : ${GIT_PROJECT:=cloudbreak-deployer}
 
+contains_element() {
+    local e
+    for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
+    return 1
+}
+
 main() {
     local redirect=$(
     curl -s \
@@ -14,8 +20,18 @@ main() {
 
     local url="https://github.com/${GIT_ORG}/${GIT_PROJECT}/releases/download/v${latest}/${GIT_PROJECT}_${latest}_${osarch}.tgz"
 
-    curl -Ls $url | tar -xz -C /usr/local/bin/
+    local supported_install_location=("/usr/local/bin" "/usr/bin" "/bin")
+    IFS=':' read -a env_path <<< "$PATH"
+
+    for i in "${env_path[@]}"
+    do
+      if contains_element "$i" "${supported_install_location[@]}";
+      then
+        curl -Ls $url | tar -xz -C $i
+        echo "cbd has been installed to $i"
+        break;
+      fi
+    done
 }
 
 main
-
