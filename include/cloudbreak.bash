@@ -28,7 +28,7 @@ cloudbreak-conf-tags() {
 
 cloudbreak-conf-images() {
     declare desc="Defines base images for each provider"
-    
+
     env-import CB_AZURE_IMAGE_URI "https://102589fae040d8westeurope.blob.core.windows.net/images/packer-cloudbreak-2015-03-10-centos6_2015-March-10_17-15-os-2015-03-10.vhd"
     env-import CB_GCP_SOURCE_IMAGE_PATH "sequenceiqimage/sequenceiq-ambari17-consul-centos-2015-03-10-1449.image.tar.gz"
     env-import CB_AWS_AMI_MAP "ap-northeast-1:ami-c528c3c5,ap-southeast-2:ami-e7c3b2dd,sa-east-1:ami-c5e55dd8,ap-southeast-1:ami-42c3f510,eu-west-1:ami-bb35a7cc,us-west-1:ami-4b20c70f,us-west-2:ami-eb1f3ddb,us-east-1:ami-00391e68"
@@ -53,17 +53,20 @@ cloudbreak-conf-cbdb() {
 }
 
 cloudbreak-conf-uaa() {
+
+    env-import UAA_DEFAULT_SECRET $(gen-password)
+
     env-import UAA_CLOUDBREAK_ID cloudbreak
-    env-import UAA_CLOUDBREAK_SECRET $(gen-password)
+    env-import UAA_CLOUDBREAK_SECRET $UAA_DEFAULT_SECRET
 
     env-import UAA_PERISCOPE_ID periscope
-    env-import UAA_PERISCOPE_SECRET $(gen-password)
+    env-import UAA_PERISCOPE_SECRET $UAA_DEFAULT_SECRET
 
     env-import UAA_ULUWATU_ID uluwatu
-    env-import UAA_ULUWATU_SECRET $(gen-password)
+    env-import UAA_ULUWATU_SECRET $UAA_DEFAULT_SECRET
 
     env-import UAA_SULTANS_ID sultans
-    env-import UAA_SULTANS_SECRET $(gen-password)
+    env-import UAA_SULTANS_SECRET $UAA_DEFAULT_SECRET
 
     env-import UAA_CLOUDBREAK_SHELL_ID cloudbreak_shell
 
@@ -81,7 +84,7 @@ cloudbreak-conf-defaults() {
 }
 
 gen-password() {
-    date +%s|shasum|head -c 10
+    date +%s | checksum md5 | head -c 10
 }
 
 generate_uaa_config() {
@@ -151,4 +154,3 @@ token() {
            | grep Location | cut -d'=' -f 2 | cut -d'&' -f 1)
     debug TOKEN=$TOKEN
 }
-
