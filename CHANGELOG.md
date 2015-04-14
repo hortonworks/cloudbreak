@@ -2,6 +2,16 @@
 
 ### Fixed
 
+### Added
+
+### Removed
+
+### Changed
+
+## [v0.0.8] - 2015-04-13
+
+### Fixed
+
 - Fixing deps module, golang fn: checksum added
 - CircleCI mdule defines required jq
 - Fixing PATH issue for binary deps
