@@ -6,6 +6,7 @@
 
 ### Added
 
+- Command `init` creates Profile
 - Install cbd to a directory which is available on $PATH
 - Docker based test for the one-liner install from README.md: `make install-test`
 - Use the built in 'checksum' function instead of the external 'shasum' to generate secrets
@@ -18,6 +19,9 @@
 
 - Command `update` by default updates from latest Github release, parameter can point to branch on CircleCI
 - DOCKER_XXX env varibles are inherited, so they not needed in Profile
+- `generate` and compose specific commands are only available when `Profile` exists
+- `generate` command genertes docker-compose.yml **and** uaa.yml
+- `PRIVATE_IP` env var defaults to bridge IP (only PUBLC_IP is required in Profile)
 
 ## [v0.0.9] - 2015-04-14
 

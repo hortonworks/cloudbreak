@@ -74,35 +74,49 @@ latest-version() {
       | sed "s/\r//"
 }
 
-
-load-profile() {
+init-profile() {
     CBD_PROFILE="Profile"
-    if [ -f $CBD_PROFILE ]; then
-        debug "Use profile: $CBD_PROFILE"
-        module-load "$CBD_PROFILE"
-    else
-        echo "!! No Profile found. Please create a file called 'Profile' in the current dir." | red
-        echo "Please copy and paste all blue text below:" | red
 
+    # if the profile exist
+    if [ -f $CBD_PROFILE ]; then
+        warn "$CBD_PROFILE already exist, move away if you want to regenerate"
+    else
+        # if cbd runs on boot2docker (ie osx)
         if boot2docker version &> /dev/null; then
-            (cat << EOF
-cat > Profile << ENDOFPROFILE
+            if [[ "$(boot2docker status)" == "running" ]]; then
+                cat > $CBD_PROFILE <<ENDOFPROFILE
 export PUBLIC_IP=$(boot2docker ip)
-export PRIVATE_IP=\$(docker run alpine sh -c 'ip ro | grep default | cut -d" " -f 3')
 ENDOFPROFILE
-EOF
-            ) | blue
+            else
+                echo "boot2docker isn't running, please start it, with the following 2 commands:" | red
+                echo "boot2docker start" | blue
+                echo '$(boot2docker shellinit)' | blue
+            fi
         else
-            (cat << EOF
-cat > Profile << ENDOFPROFILE
-export PRIVATE_IP=\$(docker run alpine sh -c 'ip ro | grep default | cut -d" " -f 3')
-ENDOFPROFILE
-EOF
-             ) | blue
+            # this is for linux
+            warn "We can not guess your PUBLIC_IP, please run the following command: (replace 1.2.3.4 with a real IP)"
+            echo "echo '1.2.3.4' > $CBD_PROFILE"
         fi
         exit 2
     fi
 
+}
+
+load-profile() {
+
+    CBD_PROFILE="Profile"
+    if [ -f $CBD_PROFILE ]; then
+        debug "Use profile: $CBD_PROFILE"
+        module-load "$CBD_PROFILE"
+        PROFILE_LOADED=true
+    else
+        debug "diollar1=$1"
+        if [[ "$1" != "init" ]];then
+            echo "!! No Profile found. Please initalize your 'Profile' with the init command." | red
+            echo "cbd init" | blue
+        fi
+    fi
+    
     if [[ "$CBD_DEFAULT_PROFILE" && -f "Profile.$CBD_DEFAULT_PROFILE" ]]; then
         CBD_PROFILE="Profile.$CBD_DEFAULT_PROFILE"
 
@@ -127,16 +141,20 @@ cbd-find-root() {
     CBD_ROOT=$PWD
 }
 
+deployer-generate() {
+    compose-generate-yaml
+    generate_uaa_config
+}
+
 main() {
 	set -eo pipefail; [[ "$TRACE" ]] && set -x
 
     cbd-find-root
     deps-init
 	color-init
-    load-profile
+    load-profile "$@"
 
     circle-init
-    cloudbreak-init
     compose-init
 
     debug "CloudBreak Deployer $(bin-version)"
@@ -145,10 +163,20 @@ main() {
     cmd-export cbd-version version
     cmd-export cbd-update update
     cmd-export doctor doctor
+    cmd-export init-profile init
 
     cmd-export-ns env "Environment namespace"
     cmd-export env-show
     cmd-export env-export
+
+    if [[ "$PROFILE_LOADED" ]] ; then
+        cmd-export deployer-generate generate
+        cmd-export compose-ps ps
+        cmd-export compose-up start
+        cmd-export compose-kill kill
+        cmd-export compose-logs logs
+        cmd-export compose-pull pull
+    fi
 
     if [[ "$DEBUG" ]]; then
         cmd-export fn-call fn
