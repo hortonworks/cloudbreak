@@ -6,6 +6,7 @@
 
 - Install cbd to a directory which is available on $PATH
 - Docker based test for the one-liner install from README.md: `make install-test`
+- Use the built in 'checksum' function instead of the external 'shasum' to generate secrets
 
 ### Removed
 

@@ -159,8 +159,8 @@ cloudbreak:
 
 sultans:
     environment:
-        - SL_CLIENT_ID=sultans
-        - SL_CLIENT_SECRET=b6bffc749b
+        - SL_CLIENT_ID=$UAA_SULTANS_ID
+        - SL_CLIENT_SECRET=$UAA_SULTANS_SECRET
         - SERVICE_NAME=sultans
           #- SERVICE_CHECK_HTTP=/
         - SL_PORT=3000
@@ -186,11 +186,11 @@ uluwatu:
           #- SERVICE_CHECK_HTTP=/
         - ULU_OAUTH_REDIRECT_URI=http://$PUBLIC_IP:3000/authorize
         - ULU_SULTANS_ADDRESS=http://$PUBLIC_IP:3001
-        - ULU_OAUTH_CLIENT_ID=uluwatu
-        - ULU_OAUTH_CLIENT_SECRET=b6bffc749b
+        - ULU_OAUTH_CLIENT_ID=$UAA_ULUWATU_ID
+        - ULU_OAUTH_CLIENT_SECRET=$UAA_ULUWATU_SECRET
         - ULU_HOST_ADDRESS=http://$PUBLIC_IP:3000
         - NODE_TLS_REJECT_UNAUTHORIZED=0
-        
+
         - ULU_IDENTITY_ADDRESS=http://backend:8089/
         - ULU_CLOUDBREAK_ADDRESS=http://backend:8080
         - ULU_PERISCOPE_ADDRESS=http://backend:8085/
@@ -202,7 +202,7 @@ uluwatu:
     ports:
         - 3000:3000
     image: sequenceiq/uluwatu-bin:$DOCKER_TAG_ULUWATU
-   
+
 pcdb:
     environment:
         - SERVICE_NAME=pcdb
@@ -223,8 +223,8 @@ periscope:
         - PERISCOPE_SMTP_PASSWORD=$CLOUDBREAK_SMTP_SENDER_PASSWORD
         - PERISCOPE_SMTP_FROM=$CLOUDBREAK_SMTP_SENDER_FROM
         - PERISCOPE_SMTP_PORT=$CLOUDBREAK_SMTP_SENDER_PORT
-        - PERISCOPE_CLIENT_ID=periscope
-        - PERISCOPE_CLIENT_SECRET=b6bffc749b
+        - PERISCOPE_CLIENT_ID=$UAA_PERISCOPE_ID
+        - PERISCOPE_CLIENT_SECRET=$UAA_PERISCOPE_SECRET
         - PERISCOPE_HOSTNAME_RESOLUTION=public
         - ENDPOINTS_AUTOCONFIG_ENABLED=false
         - ENDPOINTS_DUMP_ENABLED=false
