@@ -2,6 +2,8 @@
 
 ### Fixed
 
+- Selfupdate updates the actual running binary intead of the fixed /us/local/bin/cbd
+
 ### Added
 
 - Install cbd to a directory which is available on $PATH
@@ -10,7 +12,11 @@
 
 ### Removed
 
+- `update-snap` command removed, replaced by parametrized `update`
+
 ### Changed
+
+- Command `update` by default updates from latest Github release, parameter can point to branch on CircleCI
 
 ## [v0.0.9] - 2015-04-14
 
