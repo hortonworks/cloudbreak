@@ -17,6 +17,7 @@
 ### Changed
 
 - Command `update` by default updates from latest Github release, parameter can point to branch on CircleCI
+- DOCKER_XXX env varibles are inherited, so they not needed in Profile
 
 ## [v0.0.9] - 2015-04-14
 

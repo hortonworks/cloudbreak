@@ -89,7 +89,6 @@ load-profile() {
 cat > Profile << ENDOFPROFILE
 export PUBLIC_IP=$(boot2docker ip)
 export PRIVATE_IP=\$(docker run alpine sh -c 'ip ro | grep default | cut -d" " -f 3')
-$(boot2docker shellinit 2>/dev/null | sed 's/^ *//')
 ENDOFPROFILE
 EOF
             ) | blue

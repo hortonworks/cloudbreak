@@ -207,6 +207,7 @@ Actually the foolowing env vars _are_ inherited:
 - `DEBUG`
 - `TRACE`
 - `CBD_DEFAULT_PROFILE`
+- all `DOCKER_XXX`
 
 ## Credits
 
