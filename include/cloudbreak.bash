@@ -1,5 +1,6 @@
 
-cloudbreak-init() {
+cloudbreak-config() {
+  env-import PRIVATE_IP $(docker run alpine sh -c 'ip ro | grep default | cut -d" " -f 3')
   cloudbreak-conf-tags
   cloudbreak-conf-images
   cloudbreak-conf-cbdb
@@ -88,7 +89,7 @@ gen-password() {
 }
 
 generate_uaa_config() {
-
+    cloudbreak-config
     cat > uaa.yml << EOF
 spring_profiles: postgresql
 

@@ -1,11 +1,5 @@
 compose-init() {
     deps-require docker-compose
-    cmd-export compose-ps ps
-    cmd-export compose-up start
-    cmd-export compose-kill kill
-    cmd-export compose-logs logs
-    cmd-export compose-pull pull
-    cmd-export compose-generate-yaml generate
 }
 
 compose-ps() {
@@ -42,6 +36,8 @@ compose-logs() {
 
 compose-generate-yaml() {
     declare desc="Generates docker-compose.yml using config values from Profile"
+
+    cloudbreak-config
 
     if [ -f docker-compose.yml ]; then
         warn "docker-compose.yml already exists, if you want to regenerate, move it away"
