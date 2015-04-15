@@ -84,9 +84,7 @@ init-profile() {
         # if cbd runs on boot2docker (ie osx)
         if boot2docker version &> /dev/null; then
             if [[ "$(boot2docker status)" == "running" ]]; then
-                cat > $CBD_PROFILE <<ENDOFPROFILE
-export PUBLIC_IP=$(boot2docker ip)
-ENDOFPROFILE
+                echo "export PUBLIC_IP=$(boot2docker ip)" > $CBD_PROFILE
             else
                 echo "boot2docker isn't running, please start it, with the following 2 commands:" | red
                 echo "boot2docker start" | blue
