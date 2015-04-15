@@ -25,32 +25,46 @@ cbd-version() {
 }
 
 cbd-update() {
-    declare desc="Updates itself"
+    declare desc="Binary selfupdater. Either latest github release (default), or specific branch from CircleCI"
+
+    if [[ "$1" ]]; then
+        cbd-update-snap $1
+    else
+        cbd-update-release
+    fi
+}
+
+cbd-update-release() {
+    declare desc="Updates itself from github release"
 
     local binver=$(bin-version)
     local lastver=$(latest-version)
     local osarch=$(uname -sm | tr " " _ )
+    debug $desc
     debug binver=$binver lastver=$lastver osarch=$osarch | gray
 
     if [[ ${binver} != ${lastver} ]]; then
         debug upgrade needed |yellow
         
         local url=https://github.com/sequenceiq/cloudbreak-deployer/releases/download/v${lastver}/cloudbreak-deployer_${lastver}_${osarch}.tgz
-        debug "latest url: $url"
-        curl -Ls $url | tar -zx -C /usr/local/bin/
+        info "Updating $EXECUTABLE from url: $url"
+        curl -Ls $url | tar -zx -C /tmp
+        mv /tmp/cbd $EXECUTABLE
+        debug $EXECUTABLE is updated
     else
         debug you have the latest version | green
     fi
 }
 
 cbd-update-snap() {
-    declare desc="Updates itself, from CircleCI, branch name is optional, default: master"
-    declare branch=${1:-master}
+    declare desc="Updates itself, from CircleCI branch artifact"
+    declare branch=${1:?branch name is required}
 
     url=$(cci-latest sequenceiq/cloudbreak-deployer $branch)
-    debug "Update binary from: $url"
-    curl -Ls $url | tar -zx -C /usr/local/bin/
-
+    info "Update $EXECUTABLE from: $url"
+    curl -Ls $url | tar -zx -C /tmp
+    mv /tmp/cbd $EXECUTABLE
+    debug $EXECUTABLE is updated
 }
 
 latest-version() {
@@ -131,7 +145,6 @@ main() {
     cmd-export cmd-help help
     cmd-export cbd-version version
     cmd-export cbd-update update
-    cmd-export cbd-update-snap update-snap
     cmd-export doctor doctor
 
     cmd-export-ns env "Environment namespace"
