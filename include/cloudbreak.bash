@@ -7,8 +7,6 @@ cloudbreak-config() {
   cloudbreak-conf-defaults
   cloudbreak-conf-uaa
   cloudbreak-conf-smtp
-
-  generate_uaa_config
 }
 
 cloudbreak-conf-tags() {
