@@ -543,9 +543,21 @@ app.get('/account/details', function(req, res){
                         companyName = splittedGroup[3]
                     }
                 }
-                getUserById(req, res, token, adminUserId, function(adminUserData){
-                    res.json({userName: userData.userName, givenName: userData.givenName, familyName: userData.familyName, company: companyName, companyOwner: adminUserData.userName})
-                });
+                var usrOptions = {
+                     headers: {
+                        'Accept' : 'application/json',
+                        'Authorization' : 'Bearer ' + token,
+                        'Content-Type' : 'application/json'
+                      }
+                 }
+                 needle.get(uaaAddress + '/Users/' + userData.id, usrOptions, function(err, adminUserData) {
+                    if (adminUserData.statusCode == 200) {
+                       res.json({userName: userData.userName, givenName: userData.givenName, familyName: userData.familyName, company: companyName, companyOwner: adminUserData.userName})
+                    } else {
+                        // workaround for default users
+                       res.json({userName: userData.userName, givenName: userData.givenName, familyName: userData.familyName, company: companyName, companyOwner: 'DEFAULT_USER'})
+                    }
+                 });
             });
         });
     });
