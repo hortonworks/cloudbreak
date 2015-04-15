@@ -75,6 +75,8 @@ latest-version() {
 }
 
 init-profile() {
+    declare desc="Creates Profile if missing"
+
     CBD_PROFILE="Profile"
 
     # if the profile exist
@@ -140,6 +142,8 @@ cbd-find-root() {
 }
 
 deployer-generate() {
+    declare desc="Generates docker-compose.yml and uaa.yml"
+
     compose-generate-yaml
     generate_uaa_config
 }
