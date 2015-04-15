@@ -2,6 +2,16 @@
 
 ### Fixed
 
+### Added
+
+### Removed
+
+### Changed
+
+## [v0.1.0] - 2015-04-16
+
+### Fixed
+
 - Selfupdate updates the actual running binary intead of the fixed /us/local/bin/cbd
 
 ### Added
