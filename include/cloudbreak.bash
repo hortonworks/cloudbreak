@@ -7,8 +7,6 @@ cloudbreak-config() {
   cloudbreak-conf-defaults
   cloudbreak-conf-uaa
   cloudbreak-conf-smtp
-
-  generate_uaa_config
 }
 
 cloudbreak-conf-tags() {
@@ -20,10 +18,10 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_POSTGRES 9.4.0
     env-import DOCKER_TAG_UAA 1.8.1-v1
     env-import DOCKER_TAG_CBSHELL 0.2.47
-    env-import DOCKER_TAG_CLOUDBREAK 0.3.92
-    env-import DOCKER_TAG_ULUWATU 0.1.415
-    env-import DOCKER_TAG_SULTANS 0.1.61
-    env-import DOCKER_TAG_PERISCOPE 0.1.36
+    env-import DOCKER_TAG_CLOUDBREAK 0.4.7
+    env-import DOCKER_TAG_ULUWATU 0.4.7
+    env-import DOCKER_TAG_SULTANS 0.4.6
+    env-import DOCKER_TAG_PERISCOPE 0.4.2
     env-import DOCKER_TAG_AMBASSADOR latest
 }
 
@@ -40,7 +38,7 @@ cloudbreak-conf-smtp() {
     env-import CLOUDBREAK_SMTP_SENDER_USERNAME " "
     env-import CLOUDBREAK_SMTP_SENDER_PASSWORD " "
     env-import CLOUDBREAK_SMTP_SENDER_HOST " "
-    env-import CLOUDBREAK_SMTP_SENDER_PORT " "
+    env-import CLOUDBREAK_SMTP_SENDER_PORT 25
     env-import CLOUDBREAK_SMTP_SENDER_FROM " "
 }
 cloudbreak-conf-cbdb() {
@@ -85,7 +83,7 @@ cloudbreak-conf-defaults() {
 }
 
 gen-password() {
-    date +%s | checksum md5 | head -c 10
+    date +%s | checksum sha1 | head -c 10
 }
 
 generate_uaa_config() {
