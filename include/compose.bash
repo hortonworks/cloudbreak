@@ -17,7 +17,7 @@ compose-pull() {
 compose-up() {
     declare desc="Starts containers with docker-compose"
 
-    compose-generate-yaml
+    ideployer-generate
     docker-compose up -d
 }
 
@@ -35,14 +35,14 @@ compose-logs() {
 }
 
 compose-generate-yaml() {
-    declare desc="Generates docker-compose.yml using config values from Profile"
+    declare desc="Generating docker-compose.yml based on Profile settings"
 
     cloudbreak-config
 
     if [ -f docker-compose.yml ]; then
         warn "docker-compose.yml already exists, if you want to regenerate, move it away"
     else
-        warn "Generating docker-compose.yml ..."
+        info "Generating docker-compose.yml ..."
     cat > docker-compose.yml <<EOF
 consul:
     privileged: true

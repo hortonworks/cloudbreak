@@ -4,9 +4,14 @@
 
 ### Added
 
+- Mini Getting Started guide added into README
+
 ### Removed
 
 ### Changed
+
+- Command `generate` prints out some more usefull info
+- uaa.yml generation wont overwrite, just instruct to move existing file (like docker-compose.yml generation)
 
 ## [v0.1.0] - 2015-04-16
 
@@ -27,7 +32,7 @@
 
 ### Changed
 
-- Cloudbreak/Persicope/Uluwatu/Sultans Dcoker images upgraded to 0.4.x
+- Cloudbreak/Persicope/Uluwatu/Sultans Dcoker images upgraded to 0.4.xi
 - Use the built in 'checksum' function instead of the external 'shasum' to generate secrets
 - Command `update` by default updates from latest Github release, parameter can point to branch on CircleCI
 - DOCKER_XXX env varibles are inherited, so they not needed in Profile

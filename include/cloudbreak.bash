@@ -88,7 +88,12 @@ gen-password() {
 
 generate_uaa_config() {
     cloudbreak-config
-    cat > uaa.yml << EOF
+
+    if [ -f uaa.yml ]; then
+        warn "uaa.yml already exists, if you want to regenerate, move it away"
+    else
+    info "Generating Identity server config: uaa.yml ..."
+        cat > uaa.yml << EOF
 spring_profiles: postgresql
 
 database:
@@ -141,7 +146,7 @@ scim:
     - ${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_PW}|${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_FIRSTNAME}|${UAA_DEFAULT_USER_LASTNAME}|openid,cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,sequenceiq.cloudbreak.admin,sequenceiq.cloudbreak.user,sequenceiq.account.seq1234567.SequenceIQ,cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,periscope.cluster,cloudbreak.recipes
 
 EOF
-
+    fi
 }
 
 token() {
