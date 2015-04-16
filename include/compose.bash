@@ -11,6 +11,7 @@ compose-ps() {
 compose-pull() {
     declare desc="Pulls service images"
 
+    [ -f docker-compose.yml ] || deployer-generate
     docker-compose pull
 }
 
