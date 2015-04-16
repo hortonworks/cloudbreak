@@ -38,7 +38,7 @@ cloudbreak-conf-smtp() {
     env-import CLOUDBREAK_SMTP_SENDER_USERNAME " "
     env-import CLOUDBREAK_SMTP_SENDER_PASSWORD " "
     env-import CLOUDBREAK_SMTP_SENDER_HOST " "
-    env-import CLOUDBREAK_SMTP_SENDER_PORT " "
+    env-import CLOUDBREAK_SMTP_SENDER_PORT 25
     env-import CLOUDBREAK_SMTP_SENDER_FROM " "
 }
 cloudbreak-conf-cbdb() {
