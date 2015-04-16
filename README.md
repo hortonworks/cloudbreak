@@ -61,12 +61,36 @@ Configuration is based on environment variables. Cloudbreak Deployer always fork
 bash subprocess **without inheriting env vars**. The only way to set env vars relevant to 
 Cloudbreak Deployer is to set them in a file called `Profile`.
 
+To see all available config variables with their default value:
+```
+cbd env show
+```
+
 The `Profile` will be simple **sourced** by bash terms, so you can use the usual syntax
 to set config values:
 
 ```
 export MY_VAR=some_value
 export OTHER_VAR=dunno
+```
+
+## Default Credentials
+
+If you watch the output of `cbd env` you can see the default identity:
+- user: **admin@example.com**
+- user: **cloudbreak**
+
+These values are than generated into the end of `uaa.yml`.
+To change these values, add 2 lines into your Profile:
+
+```
+export UAA_DEFAULT_USER_EMAIL=myself@example.com
+export UAA_DEFAULT_USER_PW=demo123
+```
+and than you need to recreate configs:
+```
+rm *.yml
+cbd generate
 ```
 
 ### Env specific Profile
