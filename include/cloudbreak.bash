@@ -83,7 +83,7 @@ cloudbreak-conf-defaults() {
 }
 
 gen-password() {
-    date +%s | checksum md5 | head -c 10
+    date +%s | checksum sha1 | head -c 10
 }
 
 generate_uaa_config() {
