@@ -1,13 +1,12 @@
 
-cloudbreak-init() {
+cloudbreak-config() {
+  env-import PRIVATE_IP $(docker run alpine sh -c 'ip ro | grep default | cut -d" " -f 3')
   cloudbreak-conf-tags
   cloudbreak-conf-images
   cloudbreak-conf-cbdb
   cloudbreak-conf-defaults
   cloudbreak-conf-uaa
   cloudbreak-conf-smtp
-
-  generate_uaa_config
 }
 
 cloudbreak-conf-tags() {
@@ -19,16 +18,16 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_POSTGRES 9.4.0
     env-import DOCKER_TAG_UAA 1.8.1-v1
     env-import DOCKER_TAG_CBSHELL 0.2.47
-    env-import DOCKER_TAG_CLOUDBREAK 0.3.92
-    env-import DOCKER_TAG_ULUWATU 0.1.415
-    env-import DOCKER_TAG_SULTANS 0.1.61
-    env-import DOCKER_TAG_PERISCOPE 0.1.36
+    env-import DOCKER_TAG_CLOUDBREAK 0.4.7
+    env-import DOCKER_TAG_ULUWATU 0.4.7
+    env-import DOCKER_TAG_SULTANS 0.4.6
+    env-import DOCKER_TAG_PERISCOPE 0.4.2
     env-import DOCKER_TAG_AMBASSADOR latest
 }
 
 cloudbreak-conf-images() {
     declare desc="Defines base images for each provider"
-    
+
     env-import CB_AZURE_IMAGE_URI "https://102589fae040d8westeurope.blob.core.windows.net/images/packer-cloudbreak-2015-03-10-centos6_2015-March-10_17-15-os-2015-03-10.vhd"
     env-import CB_GCP_SOURCE_IMAGE_PATH "sequenceiqimage/sequenceiq-ambari17-consul-centos-2015-03-10-1449.image.tar.gz"
     env-import CB_AWS_AMI_MAP "ap-northeast-1:ami-c528c3c5,ap-southeast-2:ami-e7c3b2dd,sa-east-1:ami-c5e55dd8,ap-southeast-1:ami-42c3f510,eu-west-1:ami-bb35a7cc,us-west-1:ami-4b20c70f,us-west-2:ami-eb1f3ddb,us-east-1:ami-00391e68"
@@ -39,7 +38,7 @@ cloudbreak-conf-smtp() {
     env-import CLOUDBREAK_SMTP_SENDER_USERNAME " "
     env-import CLOUDBREAK_SMTP_SENDER_PASSWORD " "
     env-import CLOUDBREAK_SMTP_SENDER_HOST " "
-    env-import CLOUDBREAK_SMTP_SENDER_PORT " "
+    env-import CLOUDBREAK_SMTP_SENDER_PORT 25
     env-import CLOUDBREAK_SMTP_SENDER_FROM " "
 }
 cloudbreak-conf-cbdb() {
@@ -53,17 +52,20 @@ cloudbreak-conf-cbdb() {
 }
 
 cloudbreak-conf-uaa() {
+
+    env-import UAA_DEFAULT_SECRET $(gen-password)
+
     env-import UAA_CLOUDBREAK_ID cloudbreak
-    env-import UAA_CLOUDBREAK_SECRET $(gen-password)
+    env-import UAA_CLOUDBREAK_SECRET $UAA_DEFAULT_SECRET
 
     env-import UAA_PERISCOPE_ID periscope
-    env-import UAA_PERISCOPE_SECRET $(gen-password)
+    env-import UAA_PERISCOPE_SECRET $UAA_DEFAULT_SECRET
 
     env-import UAA_ULUWATU_ID uluwatu
-    env-import UAA_ULUWATU_SECRET $(gen-password)
+    env-import UAA_ULUWATU_SECRET $UAA_DEFAULT_SECRET
 
     env-import UAA_SULTANS_ID sultans
-    env-import UAA_SULTANS_SECRET $(gen-password)
+    env-import UAA_SULTANS_SECRET $UAA_DEFAULT_SECRET
 
     env-import UAA_CLOUDBREAK_SHELL_ID cloudbreak_shell
 
@@ -81,11 +83,11 @@ cloudbreak-conf-defaults() {
 }
 
 gen-password() {
-    date +%s|shasum|head -c 10
+    date +%s | checksum sha1 | head -c 10
 }
 
 generate_uaa_config() {
-
+    cloudbreak-config
     cat > uaa.yml << EOF
 spring_profiles: postgresql
 
@@ -151,4 +153,3 @@ token() {
            | grep Location | cut -d'=' -f 2 | cut -d'&' -f 1)
     debug TOKEN=$TOKEN
 }
-

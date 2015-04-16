@@ -25,32 +25,46 @@ cbd-version() {
 }
 
 cbd-update() {
-    declare desc="Updates itself"
+    declare desc="Binary selfupdater. Either latest github release (default), or specific branch from CircleCI"
+
+    if [[ "$1" ]]; then
+        cbd-update-snap $1
+    else
+        cbd-update-release
+    fi
+}
+
+cbd-update-release() {
+    declare desc="Updates itself from github release"
 
     local binver=$(bin-version)
     local lastver=$(latest-version)
     local osarch=$(uname -sm | tr " " _ )
+    debug $desc
     debug binver=$binver lastver=$lastver osarch=$osarch | gray
 
     if [[ ${binver} != ${lastver} ]]; then
         debug upgrade needed |yellow
         
         local url=https://github.com/sequenceiq/cloudbreak-deployer/releases/download/v${lastver}/cloudbreak-deployer_${lastver}_${osarch}.tgz
-        debug "latest url: $url"
-        curl -Ls $url | tar -zx -C /usr/local/bin/
+        info "Updating $EXECUTABLE from url: $url"
+        curl -Ls $url | tar -zx -C /tmp
+        mv /tmp/cbd $EXECUTABLE
+        debug $EXECUTABLE is updated
     else
         debug you have the latest version | green
     fi
 }
 
 cbd-update-snap() {
-    declare desc="Updates itself, from CircleCI, branch name is optional, default: master"
-    declare branch=${1:-master}
+    declare desc="Updates itself, from CircleCI branch artifact"
+    declare branch=${1:?branch name is required}
 
     url=$(cci-latest sequenceiq/cloudbreak-deployer $branch)
-    debug "Update binary from: $url"
-    curl -Ls $url | tar -zx -C /usr/local/bin/
-
+    info "Update $EXECUTABLE from: $url"
+    curl -Ls $url | tar -zx -C /tmp
+    mv /tmp/cbd $EXECUTABLE
+    debug $EXECUTABLE is updated
 }
 
 latest-version() {
@@ -60,36 +74,49 @@ latest-version() {
       | sed "s/\r//"
 }
 
+init-profile() {
+    declare desc="Creates Profile if missing"
 
-load-profile() {
     CBD_PROFILE="Profile"
-    if [ -f $CBD_PROFILE ]; then
-        debug "Use profile: $CBD_PROFILE"
-        module-load "$CBD_PROFILE"
-    else
-        echo "!! No Profile found. Please create a file called 'Profile' in the current dir." | red
-        echo "Please copy and paste all blue text below:" | red
 
+    # if the profile exist
+    if [ -f $CBD_PROFILE ]; then
+        warn "$CBD_PROFILE already exist, move away if you want to regenerate"
+    else
+        # if cbd runs on boot2docker (ie osx)
         if boot2docker version &> /dev/null; then
-            (cat << EOF
-cat > Profile << ENDOFPROFILE
-export PUBLIC_IP=$(boot2docker ip)
-export PRIVATE_IP=\$(docker run alpine sh -c 'ip ro | grep default | cut -d" " -f 3')
-$(boot2docker shellinit 2>/dev/null | sed 's/^ *//')
-ENDOFPROFILE
-EOF
-            ) | blue
+            if [[ "$(boot2docker status)" == "running" ]]; then
+                echo "export PUBLIC_IP=$(boot2docker ip)" > $CBD_PROFILE
+            else
+                echo "boot2docker isn't running, please start it, with the following 2 commands:" | red
+                echo "boot2docker start" | blue
+                echo '$(boot2docker shellinit)' | blue
+            fi
         else
-            (cat << EOF
-cat > Profile << ENDOFPROFILE
-export PRIVATE_IP=\$(docker run alpine sh -c 'ip ro | grep default | cut -d" " -f 3')
-ENDOFPROFILE
-EOF
-             ) | blue
+            # this is for linux
+            warn "We can not guess your PUBLIC_IP, please run the following command: (replace 1.2.3.4 with a real IP)"
+            echo "echo '1.2.3.4' > $CBD_PROFILE"
         fi
         exit 2
     fi
 
+}
+
+load-profile() {
+
+    CBD_PROFILE="Profile"
+    if [ -f $CBD_PROFILE ]; then
+        debug "Use profile: $CBD_PROFILE"
+        module-load "$CBD_PROFILE"
+        PROFILE_LOADED=true
+    else
+        debug "diollar1=$1"
+        if [[ "$1" != "init" ]];then
+            echo "!! No Profile found. Please initalize your 'Profile' with the init command." | red
+            echo "cbd init" | blue
+        fi
+    fi
+    
     if [[ "$CBD_DEFAULT_PROFILE" && -f "Profile.$CBD_DEFAULT_PROFILE" ]]; then
         CBD_PROFILE="Profile.$CBD_DEFAULT_PROFILE"
 
@@ -114,16 +141,22 @@ cbd-find-root() {
     CBD_ROOT=$PWD
 }
 
+deployer-generate() {
+    declare desc="Generates docker-compose.yml and uaa.yml"
+
+    compose-generate-yaml
+    generate_uaa_config
+}
+
 main() {
 	set -eo pipefail; [[ "$TRACE" ]] && set -x
 
     cbd-find-root
     deps-init
 	color-init
-    load-profile
+    load-profile "$@"
 
     circle-init
-    cloudbreak-init
     compose-init
 
     debug "CloudBreak Deployer $(bin-version)"
@@ -131,12 +164,21 @@ main() {
     cmd-export cmd-help help
     cmd-export cbd-version version
     cmd-export cbd-update update
-    cmd-export cbd-update-snap update-snap
     cmd-export doctor doctor
+    cmd-export init-profile init
 
     cmd-export-ns env "Environment namespace"
     cmd-export env-show
     cmd-export env-export
+
+    if [[ "$PROFILE_LOADED" ]] ; then
+        cmd-export deployer-generate generate
+        cmd-export compose-ps ps
+        cmd-export compose-up start
+        cmd-export compose-kill kill
+        cmd-export compose-logs logs
+        cmd-export compose-pull pull
+    fi
 
     if [[ "$DEBUG" ]]; then
         cmd-export fn-call fn

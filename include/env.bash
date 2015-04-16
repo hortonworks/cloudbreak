@@ -16,6 +16,9 @@ env-import() {
 
 env-show() {
 	declare desc="Shows relevant environment variables, in human readable format"
+    
+    # TODO cloudbreak config shouldnt be called here ...
+    cloudbreak-config
 	local longest=0
 	for var in "${_env[@]}"; do
 		if [[ "${#var}" -gt "$longest" ]]; then
@@ -29,6 +32,9 @@ env-show() {
 
 env-export() {
 	declare desc="Shows relevant environment variables, in a machine friendly format."
+    
+    # TODO cloudbreak config shouldnt be called here ...
+    cloudbreak-config
 	for var in "${_env[@]}"; do
 		printf '%s=%s\n' "$var" "${!var}"
 	done

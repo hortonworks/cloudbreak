@@ -12,7 +12,7 @@ To install Cloudbreak Deployer, you just have to unzip the platform specific
 single binary to your PATH. The one-liner way is:
 
 ```
-curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install | bash
+curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install | sh
 ```
 ## Usage
 
@@ -207,6 +207,7 @@ Actually the foolowing env vars _are_ inherited:
 - `DEBUG`
 - `TRACE`
 - `CBD_DEFAULT_PROFILE`
+- all `DOCKER_XXX`
 
 ## Credits
 

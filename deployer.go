@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/progrium/go-basher"
 )
@@ -53,6 +54,12 @@ func application(
 	bash.Export("TRACE", os.Getenv("TRACE"))
 	bash.Export("HOME", os.Getenv("HOME"))
 	bash.Export("CBD_DEFAULT_PROFILE", os.Getenv("CBD_DEFAULT_PROFILE"))
+	for _, e := range os.Environ() {
+		if strings.HasPrefix(e, "DOCKER_") {
+			v := strings.Split(e, "=")
+			bash.Export(v[0], v[1])
+		}
+	}
 
 	if err != nil {
 		log.Fatal(err)
