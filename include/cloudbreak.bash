@@ -18,10 +18,10 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_POSTGRES 9.4.0
     env-import DOCKER_TAG_UAA 1.8.1-v1
     env-import DOCKER_TAG_CBSHELL 0.2.47
-    env-import DOCKER_TAG_CLOUDBREAK 0.3.92
-    env-import DOCKER_TAG_ULUWATU 0.1.415
-    env-import DOCKER_TAG_SULTANS 0.1.61
-    env-import DOCKER_TAG_PERISCOPE 0.1.36
+    env-import DOCKER_TAG_CLOUDBREAK 0.4.7
+    env-import DOCKER_TAG_ULUWATU 0.4.7
+    env-import DOCKER_TAG_SULTANS 0.4.6
+    env-import DOCKER_TAG_PERISCOPE 0.4.2
     env-import DOCKER_TAG_AMBASSADOR latest
 }
 
