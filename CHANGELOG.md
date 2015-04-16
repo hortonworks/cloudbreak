@@ -2,6 +2,8 @@
 
 ### Fixed
 
+- Command `pull` generates yaml files in case they are missing #31
+
 ### Added
 
 - Mini Getting Started guide added into README
@@ -32,7 +34,7 @@
 
 ### Changed
 
-- Cloudbreak/Persicope/Uluwatu/Sultans Dcoker images upgraded to 0.4.xi
+- Cloudbreak/Persicope/Uluwatu/Sultans Dcoker images upgraded to 0.4.x
 - Use the built in 'checksum' function instead of the external 'shasum' to generate secrets
 - Command `update` by default updates from latest Github release, parameter can point to branch on CircleCI
 - DOCKER_XXX env varibles are inherited, so they not needed in Profile
