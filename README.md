@@ -12,21 +12,49 @@ To install Cloudbreak Deployer, you just have to unzip the platform specific
 single binary to your PATH. The one-liner way is:
 
 ```
-curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install | sh
+curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install | sh && cbd --version
 ```
+
 ## Usage
 
-You can always get a list of command by issuing without parameters: `cbd`
+**cbd** will generate some config files, and will download supporting binaries. It is
+advised that you create a dedicated directory for it:
 
-### Deployment
+```
+mkdir cloudbreak-deployment
+cd cloudbreak-deployment
+```
 
-To start the containers run:
+### Initialize
+First lets initialize your directory by creating a `Profile`
+```
+cbd init
+```
 
+### Pull Docker images
+
+All cloudbreak componont, and its supporting db is running in a container.
+To download all needed Docker image, with correct tag, run the command:
+```
+cbd pull
+```
+
+It will take some minutes, depending on your network conditions, so you
+can grab a cup of coffee.
+
+### Deploy cloudbreak
+
+To start all the containers run:
 ```
 cbd start
 ```
 If one of the containers are already running, it won’t be started again.
 
+### Whatch the logs
+
+```
+cbd logs
+```
 ## Configuration
 
 Configuration is based on environment variables. Cloudbreak Deployer always forks a new
