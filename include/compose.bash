@@ -17,7 +17,7 @@ compose-pull() {
 compose-up() {
     declare desc="Starts containers with docker-compose"
 
-    ideployer-generate
+    deployer-generate
     docker-compose up -d
 }
 
