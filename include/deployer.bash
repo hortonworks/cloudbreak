@@ -81,7 +81,8 @@ init-profile() {
 
     # if the profile exist
     if [ -f $CBD_PROFILE ]; then
-        warn "$CBD_PROFILE already exist, move away if you want to regenerate"
+        info "$CBD_PROFILE already exist, now you are ready to run:"
+        echo "cbd generate" | blue
     else
         # if cbd runs on boot2docker (ie osx)
         if boot2docker version &> /dev/null; then
@@ -95,7 +96,7 @@ init-profile() {
         else
             # this is for linux
             warn "We can not guess your PUBLIC_IP, please run the following command: (replace 1.2.3.4 with a real IP)"
-            echo "echo '1.2.3.4' > $CBD_PROFILE"
+            echo "echo export PUBLIC_IP=1.2.3.4 > $CBD_PROFILE"
         fi
         exit 2
     fi
