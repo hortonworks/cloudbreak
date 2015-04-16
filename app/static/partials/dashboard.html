@@ -163,11 +163,13 @@
         <div class="row">
             <div ng-include onload="addPanelJQueryEventListeners('usages'); addDatePickerPanelJQueryEventListeners()" src="'tags/usagepanel.tag'"></div>
         </div>
-        <div class="row">
-            <div ng-include onload="addPanelJQueryEventListeners('account')" src="'tags/accountpanel.tag'"></div>
-        </div>
-        <div class="row">
-            <div ng-include onload="addPanelJQueryEventListeners('users')" src="'tags/userspanel.tag'"></div>
+        <div ng-controller="accountuserController">
+            <div class="row">
+                <div ng-include onload="addPanelJQueryEventListeners('account')" src="'tags/accountpanel.tag'"></div>
+            </div>
+            <div class="row">
+                <div ng-include onload="addPanelJQueryEventListeners('users')" src="'tags/userspanel.tag'"></div>
+            </div>
         </div>
 
     </div>
