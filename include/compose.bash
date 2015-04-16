@@ -173,7 +173,7 @@ sultans:
         - ambassador:backend
     ports:
         - 3001:3000
-    image: sequenceiq/sultans:$DOCKER_TAG_SULTANS
+    image: sequenceiq/sultans-bin:$DOCKER_TAG_SULTANS
 
 uluwatu:
     environment:
