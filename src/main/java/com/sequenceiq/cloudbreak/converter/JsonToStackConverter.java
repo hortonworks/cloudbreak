@@ -3,28 +3,27 @@ package com.sequenceiq.cloudbreak.converter;
 import java.util.List;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.controller.json.StackRequest;
+import com.sequenceiq.cloudbreak.controller.json.SubnetJson;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.InstanceGroupJson;
-import com.sequenceiq.cloudbreak.controller.json.StackJson;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.Subnet;
-import com.sequenceiq.cloudbreak.domain.SubnetJson;
 
 @Component
-public class JsonToStackConverter extends AbstractConversionServiceAwareConverter<StackJson, Stack> {
+public class JsonToStackConverter extends AbstractConversionServiceAwareConverter<StackRequest, Stack> {
 
     @Override
-    public Stack convert(StackJson source) {
+    public Stack convert(StackRequest source) {
         Stack stack = new Stack();
         stack.setName(source.getName());
         stack.setUserName(source.getUserName());
         stack.setPassword(source.getPassword());
-        stack.setPublicInAccount(source.isPublicInAccount());
         stack.setRegion(source.getRegion());
         stack.setOnFailureActionAction(source.getOnFailureAction());
         if (source.getAllowedSubnets() != null) {

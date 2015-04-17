@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Iterator;
 
+import com.sequenceiq.cloudbreak.controller.json.BlueprintRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,19 +17,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.InvalidBlueprintException;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 @Component
-public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConverter<BlueprintJson, Blueprint> {
+public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConverter<BlueprintRequest, Blueprint> {
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonToBlueprintConverter.class);
 
     @Autowired
     private JsonHelper jsonHelper;
 
     @Override
-    public Blueprint convert(BlueprintJson json) {
+    public Blueprint convert(BlueprintRequest json) {
         Blueprint blueprint = new Blueprint();
         if (json.getUrl() != null && !json.getUrl().isEmpty()) {
             String sourceUrl = json.getUrl().trim();

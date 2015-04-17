@@ -1,21 +1,21 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import com.sequenceiq.cloudbreak.controller.json.CredentialRequest;
 import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.validation.OpenStackCredentialParam;
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
 
 @Component
-public class JsonToOpenStackCredentialConverter extends AbstractConversionServiceAwareConverter<CredentialJson, OpenStackCredential> {
+public class JsonToOpenStackCredentialConverter extends AbstractConversionServiceAwareConverter<CredentialRequest, OpenStackCredential> {
 
     @Autowired
     private PBEStringCleanablePasswordEncryptor encryptor;
 
     @Override
-    public OpenStackCredential convert(CredentialJson source) {
+    public OpenStackCredential convert(CredentialRequest source) {
         OpenStackCredential openStackCredential = new OpenStackCredential();
         openStackCredential.setName(source.getName());
         openStackCredential.setDescription(source.getDescription());

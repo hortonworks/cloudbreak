@@ -1,16 +1,16 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import com.sequenceiq.cloudbreak.controller.json.CredentialRequest;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.validation.GccCredentialParam;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 
 @Component
-public class JsonToGcpCredentialConverter extends AbstractConversionServiceAwareConverter<CredentialJson, GccCredential> {
+public class JsonToGcpCredentialConverter extends AbstractConversionServiceAwareConverter<CredentialRequest, GccCredential> {
 
     @Override
-    public GccCredential convert(CredentialJson source) {
+    public GccCredential convert(CredentialRequest source) {
         GccCredential gccCredential = new GccCredential();
         gccCredential.setName(source.getName());
         gccCredential.setServiceAccountId(String.valueOf(source.getParameters().get(GccCredentialParam.SERVICE_ACCOUNT_ID.getName())));

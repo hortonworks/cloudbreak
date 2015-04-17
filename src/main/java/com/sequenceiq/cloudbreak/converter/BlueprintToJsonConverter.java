@@ -1,25 +1,25 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import com.sequenceiq.cloudbreak.controller.json.BlueprintResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.TextNode;
-import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 @Component
-public class BlueprintToJsonConverter extends AbstractConversionServiceAwareConverter<Blueprint, BlueprintJson> {
+public class BlueprintToJsonConverter extends AbstractConversionServiceAwareConverter<Blueprint, BlueprintResponse> {
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintToJsonConverter.class);
 
     @Autowired
     private JsonHelper jsonHelper;
 
     @Override
-    public BlueprintJson convert(Blueprint entity) {
-        BlueprintJson blueprintJson = new BlueprintJson();
+    public BlueprintResponse convert(Blueprint entity) {
+        BlueprintResponse blueprintJson = new BlueprintResponse();
         blueprintJson.setId(String.valueOf(entity.getId()));
         blueprintJson.setBlueprintName(entity.getBlueprintName());
         blueprintJson.setName(entity.getName());

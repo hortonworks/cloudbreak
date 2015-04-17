@@ -1,9 +1,12 @@
-package com.sequenceiq.cloudbreak.domain;
+package com.sequenceiq.cloudbreak.controller.json;
 
-import com.sequenceiq.cloudbreak.controller.json.JsonEntity;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
+@ApiModel("Subnet")
 public class SubnetJson implements JsonEntity {
 
+    @ApiModelProperty(required = true)
     private String subnet;
 
     public SubnetJson() {

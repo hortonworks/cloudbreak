@@ -23,6 +23,7 @@ apply plugin:'license-report'
 
 sourceCompatibility = 1.7
 group = 'com.sequenceiq'
+mainClassName = 'com.sequenceiq.cloudbreak.CloudbreakApplication'
 
 allprojects {
     apply from: "$rootDir/gradle/versioning.gradle"
@@ -148,6 +149,8 @@ dependencies {
     compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.47'
     compile 'org.jasypt:jasypt:1.9.2'
     compile 'com.google.guava:guava:16.0.1'
+    compile 'com.wordnik:swagger-core:1.5.2-M1'
+    compile "com.mangofactory:swagger-springmvc:1.0.2"
     checkstyle('com.puppycrawl.tools:checkstyle:5.7') {
         exclude group: 'com.google.guava'
     }

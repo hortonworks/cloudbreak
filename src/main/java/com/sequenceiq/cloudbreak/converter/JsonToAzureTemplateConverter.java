@@ -1,18 +1,18 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.validation.AzureTemplateParam;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureVmType;
 
 @Component
-public class JsonToAzureTemplateConverter extends AbstractConversionServiceAwareConverter<TemplateJson, AzureTemplate> {
+public class JsonToAzureTemplateConverter extends AbstractConversionServiceAwareConverter<TemplateRequest, AzureTemplate> {
 
     @Override
-    public AzureTemplate convert(TemplateJson source) {
+    public AzureTemplate convert(TemplateRequest source) {
         AzureTemplate azureTemplate = new AzureTemplate();
         azureTemplate.setName(source.getName());
         azureTemplate.setDescription(source.getDescription());

@@ -1,15 +1,30 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.InstanceGroupModelDescription;
+import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.InstanceMetaDataModelDescription;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
+
+@ApiModel("InstanceMetaData")
 public class InstanceMetaDataJson implements JsonEntity {
 
+    @ApiModelProperty(InstanceMetaDataModelDescription.PRIVATE_IP)
     private String privateIp;
+    @ApiModelProperty(InstanceMetaDataModelDescription.PUBLIC_IP)
     private String publicIp;
+    @ApiModelProperty(InstanceMetaDataModelDescription.INSTANCE_ID)
     private String instanceId;
+    @ApiModelProperty(InstanceMetaDataModelDescription.VOLUME_COUNT)
     private Integer volumeCount;
+    @ApiModelProperty(InstanceMetaDataModelDescription.AMBARI_SERVER)
     private Boolean ambariServer;
+    @ApiModelProperty(InstanceMetaDataModelDescription.DOCKER_SUBNET)
     private String dockerSubnet;
+    @ApiModelProperty(InstanceMetaDataModelDescription.LONG_NAME)
     private String longName;
+    @ApiModelProperty(InstanceMetaDataModelDescription.CONTAINER_COUNT)
     private Integer containerCount;
+    @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_GROUP_NAME)
     private String instanceGroup;
 
     public InstanceMetaDataJson() {

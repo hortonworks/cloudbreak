@@ -1,22 +1,44 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.InstanceGroupModelDescription;
+import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.BlueprintModelDescription;
+import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.EventModelDescription;
+import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.domain.Status;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
+@ApiModel("CloudbreakEvent")
 public class CloudbreakEventsJson implements JsonEntity {
 
+    @ApiModelProperty(EventModelDescription.TYPE)
     private String eventType;
+    @ApiModelProperty(EventModelDescription.TIMESTAMP)
     private long eventTimestamp;
+    @ApiModelProperty(EventModelDescription.MESSAGE)
     private String eventMessage;
+    @ApiModelProperty(StackModelDescription.OWNER)
     private String owner;
+    @ApiModelProperty(StackModelDescription.ACCOUNT)
     private String account;
+    @ApiModelProperty(ModelDescriptions.CLOUD_PLATFORM)
     private String cloud;
+    @ApiModelProperty(StackModelDescription.REGION)
     private String region;
+    @ApiModelProperty(StackModelDescription.BLUEPRINT_ID)
     private long blueprintId;
+    @ApiModelProperty(BlueprintModelDescription.BLUEPRINT_NAME)
     private String blueprintName;
+    @ApiModelProperty(StackModelDescription.STACK_ID)
     private Long stackId;
+    @ApiModelProperty(StackModelDescription.STACK_NAME)
     private String stackName;
+    @ApiModelProperty(StackModelDescription.STATUS)
     private Status stackStatus;
+    @ApiModelProperty(InstanceGroupModelDescription.NODE_COUNT)
     private Integer nodeCount;
+    @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_GROUP_NAME)
     private String instanceGroup;
 
     public Integer getNodeCount() {

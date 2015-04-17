@@ -6,11 +6,10 @@ import java.util.List;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import com.sequenceiq.cloudbreak.controller.json.CredentialRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
-
-public class CredentialParametersValidator implements ConstraintValidator<ValidCredentialRequest, CredentialJson> {
+public class CredentialParametersValidator implements ConstraintValidator<ValidCredentialRequest, CredentialRequest> {
 
     @Autowired
     private List<ParameterValidator> parameterValidators;
@@ -34,7 +33,7 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
     }
 
     @Override
-    public boolean isValid(CredentialJson request, ConstraintValidatorContext context) {
+    public boolean isValid(CredentialRequest request, ConstraintValidatorContext context) {
         boolean valid = true;
         switch (request.getCloudPlatform()) {
             case AWS:
@@ -52,7 +51,7 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
         return valid;
     }
 
-    private boolean validateGccParams(CredentialJson request, ConstraintValidatorContext context) {
+    private boolean validateGccParams(CredentialRequest request, ConstraintValidatorContext context) {
         for (ParameterValidator validator : parameterValidators) {
             if (!validator.validate(request.getParameters(), context, requiredGccParams)) {
                 return false;
@@ -61,7 +60,7 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
         return true;
     }
 
-    private boolean validateAzureParams(CredentialJson request, ConstraintValidatorContext context) {
+    private boolean validateAzureParams(CredentialRequest request, ConstraintValidatorContext context) {
         for (ParameterValidator validator : parameterValidators) {
             if (!validator.validate(request.getParameters(), context, requiredAzureParams)) {
                 return false;
@@ -70,7 +69,7 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
         return true;
     }
 
-    private boolean validateAWSParams(CredentialJson request, ConstraintValidatorContext context) {
+    private boolean validateAWSParams(CredentialRequest request, ConstraintValidatorContext context) {
         for (ParameterValidator validator : parameterValidators) {
             if (!validator.validate(request.getParameters(), context, requiredAWSParams)) {
                 return false;

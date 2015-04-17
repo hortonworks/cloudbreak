@@ -5,10 +5,13 @@ import java.util.Map;
 
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import org.springframework.stereotype.Component;
 
-public class StackToStatusConverter extends AbstractConversionServiceAwareConverter<Stack, Map<String, Object>> {
+@Component
+public class StackToStatusConverter extends AbstractConversionServiceAwareConverter<Stack, Map> {
+
     @Override
-    public Map<String, Object> convert(Stack source) {
+    public Map convert(Stack source) {
         Map<String, Object> stackStatus = new HashMap<>();
         stackStatus.put("id", source.getId());
         stackStatus.put("status", source.getStatus().name());

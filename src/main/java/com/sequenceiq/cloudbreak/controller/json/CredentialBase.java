@@ -1,39 +1,34 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import java.util.HashMap;
+import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.controller.validation.ValidCredentialRequest;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-
-@ValidCredentialRequest
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class CredentialJson implements JsonEntity {
-
-    private Long id;
+@ApiModel
+public class CredentialBase implements JsonEntity {
     @Size(max = 100, min = 5, message = "The length of the credential's name has to be in range of 5 to 100")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "The name of the credential can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
+    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
+    @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private CloudPlatform cloudPlatform;
+    @ApiModelProperty(value = ModelDescriptions.CredentialModelDescription.PARAMETERS, required = true)
     private Map<String, Object> parameters = new HashMap<>();
     @Size(max = 1000)
+    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
     @NotNull
+    @ApiModelProperty(value = ModelDescriptions.CredentialModelDescription.PUBLIC_KEY, required = true)
     private String publicKey;
-    private boolean publicInAccount;
-
-    public CredentialJson() {
-
-    }
 
     public String getDescription() {
         return description;
@@ -41,16 +36,6 @@ public class CredentialJson implements JsonEntity {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    @JsonProperty("id")
-    public Long getId() {
-        return id;
-    }
-
-    @JsonIgnore
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -83,14 +68,5 @@ public class CredentialJson implements JsonEntity {
 
     public void setParameters(Map<String, Object> parameters) {
         this.parameters = parameters;
-    }
-
-    @JsonProperty("public")
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
     }
 }

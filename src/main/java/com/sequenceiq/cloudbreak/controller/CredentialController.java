@@ -10,6 +10,14 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.sequenceiq.cloudbreak.controller.doc.ContentType;
+import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
+import com.sequenceiq.cloudbreak.controller.doc.Notes;
+import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions.CredentialOpDescription;
+import com.sequenceiq.cloudbreak.controller.json.CredentialRequest;
+import com.sequenceiq.cloudbreak.controller.json.CredentialResponse;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
@@ -25,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
@@ -38,6 +45,7 @@ import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 
 @Controller
+@Api(value = "/credentials", description = ControllerDescription.CREDENTIAL_DESCRIPTION, position = 1)
 public class CredentialController {
 
     @Resource
@@ -50,84 +58,95 @@ public class CredentialController {
     @Autowired
     private AzureStackUtil azureStackUtil;
 
+    @ApiOperation(value = CredentialOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
     @RequestMapping(value = "user/credentials", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<IdJson> savePrivateCredential(@ModelAttribute("user") CbUser user, @Valid @RequestBody CredentialJson credentialRequest) {
+    public ResponseEntity<IdJson> savePrivateCredential(@ModelAttribute("user") CbUser user, @Valid @RequestBody CredentialRequest credentialRequest) {
         MDCBuilder.buildMdcContext(user);
         return createCredential(user, credentialRequest, false);
     }
 
+    @ApiOperation(value =  CredentialOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
     @RequestMapping(value = "account/credentials", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<IdJson> saveAccountCredential(@ModelAttribute("user") CbUser user, @Valid @RequestBody CredentialJson credentialRequest) {
+    public ResponseEntity<IdJson> saveAccountCredential(@ModelAttribute("user") CbUser user, @Valid @RequestBody CredentialRequest credentialRequest) {
         MDCBuilder.buildMdcContext(user);
         return createCredential(user, credentialRequest, true);
     }
 
+    @ApiOperation(value = CredentialOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
     @RequestMapping(value = "user/credentials", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Set<CredentialJson>> getPrivateCredentials(@ModelAttribute("user") CbUser user) {
+    public ResponseEntity<Set<CredentialResponse>> getPrivateCredentials(@ModelAttribute("user") CbUser user) {
         MDCBuilder.buildMdcContext(user);
         Set<Credential> credentials = credentialService.retrievePrivateCredentials(user);
         return new ResponseEntity<>(convertCredentials(credentials), HttpStatus.OK);
     }
 
+    @ApiOperation(value = CredentialOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
     @RequestMapping(value = "account/credentials", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Set<CredentialJson>> getAccountCredentials(@ModelAttribute("user") CbUser user) {
+    public ResponseEntity<Set<CredentialResponse>> getAccountCredentials(@ModelAttribute("user") CbUser user) {
         MDCBuilder.buildMdcContext(user);
         Set<Credential> credentials = credentialService.retrieveAccountCredentials(user);
         return new ResponseEntity<>(convertCredentials(credentials), HttpStatus.OK);
     }
 
+    @ApiOperation(value = CredentialOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
     @RequestMapping(value = "user/credentials/{name}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<CredentialJson> getPrivateCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+    public ResponseEntity<CredentialResponse> getPrivateCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
         MDCBuilder.buildMdcContext(user);
         Credential credentials = credentialService.getPrivateCredential(name, user);
         return new ResponseEntity<>(convert(credentials), HttpStatus.OK);
     }
 
+    @ApiOperation(value = CredentialOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
     @RequestMapping(value = "account/credentials/{name}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<CredentialJson> getAccountCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+    public ResponseEntity<CredentialResponse> getAccountCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
         MDCBuilder.buildMdcContext(user);
         Credential credentials = credentialService.getPublicCredential(name, user);
         return new ResponseEntity<>(convert(credentials), HttpStatus.OK);
     }
 
+    @ApiOperation(value = CredentialOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
     @RequestMapping(value = "credentials/{credentialId}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<CredentialJson> getCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId) {
+    public ResponseEntity<CredentialResponse> getCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId) {
         MDCBuilder.buildMdcContext(user);
         Credential credential = credentialService.get(credentialId);
         return new ResponseEntity<>(convert(credential), HttpStatus.OK);
     }
 
+    @ApiOperation(value = CredentialOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
     @RequestMapping(value = "credentials/{credentialId}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<CredentialJson> deleteCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId) {
+    public ResponseEntity<CredentialResponse> deleteCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId) {
         MDCBuilder.buildMdcContext(user);
         credentialService.delete(credentialId, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @ApiOperation(value = CredentialOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
     @RequestMapping(value = "account/credentials/{name}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<CredentialJson> deletePublicCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+    public ResponseEntity<CredentialResponse> deletePublicCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
         MDCBuilder.buildMdcContext(user);
         credentialService.delete(name, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @ApiOperation(value = CredentialOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
     @RequestMapping(value = "user/credentials/{name}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<CredentialJson> deletePrivateCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+    public ResponseEntity<CredentialResponse> deletePrivateCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
         MDCBuilder.buildMdcContext(user);
         credentialService.delete(name, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @ApiOperation(value = CredentialOpDescription.GET_JKS_FILE, produces = ContentType.FILE_STREAM, notes = Notes.CREDENTIAL_NOTES)
     @RequestMapping(value = "credentials/certificate/{credentialId}", method = RequestMethod.GET)
     @ResponseBody
     public ModelAndView getJksFile(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
@@ -140,6 +159,7 @@ public class CredentialController {
         return null;
     }
 
+    @ApiOperation(value = CredentialOpDescription.PUT_CERTIFICATE_BY_ID, produces = ContentType.FILE_STREAM, notes = Notes.CREDENTIAL_NOTES)
     @RequestMapping(value = "credentials/certificate/{credentialId}", method = RequestMethod.PUT)
     @ResponseBody
     public ModelAndView refreshCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
@@ -154,6 +174,7 @@ public class CredentialController {
         return null;
     }
 
+    @ApiOperation(value = CredentialOpDescription.GET_SSH_FILE, produces = ContentType.FILE_STREAM, notes = Notes.CREDENTIAL_NOTES)
     @RequestMapping(value = "credentials/{credentialId}/sshkey", method = RequestMethod.GET)
     @ResponseBody
     public ModelAndView getSshFile(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
@@ -166,13 +187,13 @@ public class CredentialController {
         return null;
     }
 
-    private ResponseEntity<IdJson> createCredential(CbUser user, CredentialJson credentialRequest, boolean publicInAccount) {
+    private ResponseEntity<IdJson> createCredential(CbUser user, CredentialRequest credentialRequest, boolean publicInAccount) {
         Credential credential = convert(credentialRequest, publicInAccount);
         credential = credentialService.create(user, credential);
         return new ResponseEntity<>(new IdJson(credential.getId()), HttpStatus.CREATED);
     }
 
-    private Credential convert(CredentialJson json, boolean publicInAccount) {
+    private Credential convert(CredentialRequest json, boolean publicInAccount) {
         Credential converted = null;
         switch (json.getCloudPlatform()) {
         case AWS:
@@ -194,24 +215,24 @@ public class CredentialController {
         return converted;
     }
 
-    private CredentialJson convert(Credential credential) {
+    private CredentialResponse convert(Credential credential) {
 
         switch (credential.cloudPlatform()) {
         case AWS:
-            return conversionService.convert((AwsCredential) credential, CredentialJson.class);
+            return conversionService.convert((AwsCredential) credential, CredentialResponse.class);
         case AZURE:
-            return conversionService.convert((AzureCredential) credential, CredentialJson.class);
+            return conversionService.convert((AzureCredential) credential, CredentialResponse.class);
         case GCC:
-            return conversionService.convert((GccCredential) credential, CredentialJson.class);
+            return conversionService.convert((GccCredential) credential, CredentialResponse.class);
         case OPENSTACK:
-            return conversionService.convert((OpenStackCredential) credential, CredentialJson.class);
+            return conversionService.convert((OpenStackCredential) credential, CredentialResponse.class);
         default:
             throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credential.cloudPlatform()));
         }
     }
 
-    private Set<CredentialJson> convertCredentials(Set<Credential> credentials) {
-        Set<CredentialJson> jsonSet = new HashSet<>();
+    private Set<CredentialResponse> convertCredentials(Set<Credential> credentials) {
+        Set<CredentialResponse> jsonSet = new HashSet<>();
         for (Credential credential : credentials) {
             jsonSet.add(convert(credential));
         }
