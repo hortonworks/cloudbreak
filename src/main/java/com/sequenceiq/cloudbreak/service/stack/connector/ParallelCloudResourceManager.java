@@ -74,12 +74,12 @@ public class ParallelCloudResourceManager {
         try {
             Set<Resource> resourceSet = new HashSet<>();
             CloudPlatform cloudPlatform = stack.cloudPlatform();
-            stackUpdater.updateStackStatus(stack.getId(), Status.REQUESTED, "Creation of cluster infrastructure has been requested.");
+            stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS, "Started creating cluster infrastructure resources");
             final ProvisionContextObject pCO = resourceBuilderInit.provisionInit(stack);
             for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
                 List<Resource> buildResources = resourceBuilder.buildResources(pCO, 0, Arrays.asList(resourceSet), Optional.<InstanceGroup>absent());
                 CreateResourceRequest createResourceRequest = resourceBuilder.buildCreateRequest(pCO, Lists.newArrayList(resourceSet), buildResources, 0,
-                                Optional.<InstanceGroup>absent(), Optional.<String>absent());
+                        Optional.<InstanceGroup>absent(), Optional.<String>absent());
                 stackUpdater.addStackResources(stack.getId(), createResourceRequest.getBuildableResources());
                 resourceSet.addAll(createResourceRequest.getBuildableResources());
                 pCO.getNetworkResources().addAll(createResourceRequest.getBuildableResources());
@@ -364,7 +364,6 @@ public class ParallelCloudResourceManager {
         return byLengthOrdering.sortedCopy(instanceGroupSet);
     }
 
-
     private Set<Resource> collectResources(Set<ResourceRequestResult> resourceSet) {
         Set<Resource> resources = new HashSet<>();
         for (ResourceRequestResult resourceRequestResult : resourceSet) {
@@ -395,7 +394,6 @@ public class ParallelCloudResourceManager {
         }
         return result;
     }
-
 
     private void checkErrorOccurred(Map<FutureResult, List<ResourceRequestResult>> futureResultListMap) throws Exception {
         List<ResourceRequestResult> resourceRequestResults = futureResultListMap.get(FutureResult.FAILED);
