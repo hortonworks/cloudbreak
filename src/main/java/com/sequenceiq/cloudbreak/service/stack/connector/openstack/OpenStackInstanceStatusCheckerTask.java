@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
@@ -20,7 +19,6 @@ public class OpenStackInstanceStatusCheckerTask extends StackBasedStatusCheckerT
     @Override
     public boolean checkStatus(OpenStackContext context) {
         Stack stack = context.getStack();
-        MDCBuilder.buildMdcContext(stack);
         OSClient osClient = context.getOsClient();
         List<String> resources = context.getResources();
         String desiredState = context.getStatus();

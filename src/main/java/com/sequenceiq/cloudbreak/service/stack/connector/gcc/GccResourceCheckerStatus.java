@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.model.Operation;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
@@ -18,7 +17,6 @@ public class GccResourceCheckerStatus extends StackBasedStatusCheckerTask<GccRes
 
     @Override
     public boolean checkStatus(GccResourceReadyPollerObject gccResourceReadyPollerObject) {
-        MDCBuilder.buildMdcContext(gccResourceReadyPollerObject.getStack());
         LOGGER.info("Checking status of Gcc resource '{}' [{}].", gccResourceReadyPollerObject.getName(),
                 gccResourceReadyPollerObject.getResourceType().name());
         Operation operation = null;
@@ -51,13 +49,11 @@ public class GccResourceCheckerStatus extends StackBasedStatusCheckerTask<GccRes
 
     @Override
     public String successMessage(GccResourceReadyPollerObject gccResourceReadyPollerObject) {
-        MDCBuilder.buildMdcContext(gccResourceReadyPollerObject.getStack());
         return String.format("Gcc resource '%s' [%s] is ready on '%s' stack",
                 gccResourceReadyPollerObject.getName(), gccResourceReadyPollerObject.getResourceType().name(), gccResourceReadyPollerObject.getStack().getId());
     }
 
     private boolean analyzeOperation(Operation operation, GccResourceReadyPollerObject gccResourceReadyPollerObject) {
-        MDCBuilder.buildMdcContext(gccResourceReadyPollerObject.getStack());
         if (operation.getHttpErrorStatusCode() != null || operation.getError() != null) {
             StringBuilder error = new StringBuilder();
             if (operation.getError() != null) {

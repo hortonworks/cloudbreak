@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
@@ -76,7 +75,6 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     @Override
     public void update(AzureUpdateContextObject updateContextObject) throws UpdateFailedException {
         Stack stack = updateContextObject.getStack();
-        MDCBuilder.buildMdcContext(stack);
         AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
         List<Port> ports = NetworkUtils.getPorts(stack);
         Resource network = stack.getResourceByType(ResourceType.AZURE_NETWORK);

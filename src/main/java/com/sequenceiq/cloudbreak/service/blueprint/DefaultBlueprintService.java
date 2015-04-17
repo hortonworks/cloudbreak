@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
@@ -55,7 +54,6 @@ public class DefaultBlueprintService implements BlueprintService {
 
     @Override
     public Blueprint create(CbUser user, Blueprint blueprint) {
-        MDCBuilder.buildMdcContext(blueprint);
         LOGGER.debug("Creating blueprint: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Blueprint savedBlueprint = null;
         blueprint.setOwner(user.getUserId());
@@ -71,7 +69,6 @@ public class DefaultBlueprintService implements BlueprintService {
     @Override
     public void delete(Long id, CbUser user) {
         Blueprint blueprint = blueprintRepository.findByIdInAccount(id, user.getAccount());
-        MDCBuilder.buildMdcContext(blueprint);
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", id));
         }
@@ -106,7 +103,6 @@ public class DefaultBlueprintService implements BlueprintService {
     }
 
     private void delete(Blueprint blueprint, CbUser user) {
-        MDCBuilder.buildMdcContext(blueprint);
         if (clusterRepository.findAllClustersByBlueprint(blueprint.getId()).isEmpty()) {
             if (!user.getUserId().equals(blueprint.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
                 throw new BadRequestException("Blueprints can only be deleted by account admins or owners.");

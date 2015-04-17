@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
@@ -33,7 +32,6 @@ public class GccMetadataSetup implements MetadataSetup {
 
     @Override
     public ProvisionEvent setupMetadata(Stack stack) {
-        MDCBuilder.buildMdcContext(stack);
         List<Resource> resourcesByType = stack.getResourcesByType(ResourceType.GCC_INSTANCE);
         return new MetadataSetupComplete(CloudPlatform.GCC, stack.getId(), collectMetaData(stack, resourcesByType));
     }
@@ -49,8 +47,6 @@ public class GccMetadataSetup implements MetadataSetup {
 
     @Override
     public ProvisionEvent addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup) {
-
-        MDCBuilder.buildMdcContext(stack);
         List<Resource> resources = new ArrayList<>();
         for (Resource resource : resourceList) {
             if (ResourceType.GCC_INSTANCE.equals(resource.getResourceType())) {

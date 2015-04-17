@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
@@ -52,7 +51,6 @@ public class AzureMetadataSetup implements MetadataSetup {
 
     @Override
     public ProvisionEvent setupMetadata(Stack stack) {
-        MDCBuilder.buildMdcContext(stack);
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential);
         Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient);
@@ -61,7 +59,6 @@ public class AzureMetadataSetup implements MetadataSetup {
 
     @Override
     public ProvisionEvent addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup) {
-        MDCBuilder.buildMdcContext(stack);
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential);
         List<Resource> resources = new ArrayList<>();
@@ -87,7 +84,6 @@ public class AzureMetadataSetup implements MetadataSetup {
     }
 
     private CoreInstanceMetaData getMetadata(Stack stack, AzureClient azureClient, Resource resource) {
-        MDCBuilder.buildMdcContext(stack);
         Map<String, Object> props = new HashMap<>();
         props.put(NAME, resource.getResourceName());
         props.put(SERVICENAME, resource.getResourceName());

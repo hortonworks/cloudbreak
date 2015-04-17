@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
@@ -64,7 +63,6 @@ public class AzureStackUtil {
     }
 
     public synchronized AzureClient createAzureClient(AzureCredential credential) {
-        MDCBuilder.buildMdcContext(credential);
         try {
             String jksPath = credential.getId() == null ? "/tmp/" + new Date().getTime() + ".jks" : "/tmp/" + credential.getId() + ".jks";
             File jksFile = new File(jksPath);
@@ -174,7 +172,6 @@ public class AzureStackUtil {
     }
 
     public void migrateFilesIfNeeded(AzureCredential credential) {
-        MDCBuilder.buildMdcContext(credential);
         String email = userDetailsService.getDetails(credential.getOwner(), UserFilterField.USERID).getUsername();
         String replace = email.replaceAll("@", "_").replace(".", "_");
         String sshFile = "userdatas/" + replace + "/ssh/" + credential.getId() + "/" + replace + ".cer";

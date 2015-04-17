@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import com.ecwid.consul.v1.ConsulClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
@@ -19,7 +18,6 @@ public class ConsulAgentLeaveCheckerTask extends StackBasedStatusCheckerTask<Con
 
     @Override
     public boolean checkStatus(ConsulContext consulContext) {
-        MDCBuilder.buildMdcContext(consulContext.getStack());
         String nodeName = consulContext.getTargets().get(0);
         List<ConsulClient> clients = consulContext.getConsulClients();
         LOGGER.info("Trying to remove node: {} from consul", nodeName);

@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.Subnet;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
@@ -100,7 +99,6 @@ public class DefaultStackService implements StackService {
     @Override
     public Stack get(Long id) {
         Stack stack = stackRepository.findOne(id);
-        MDCBuilder.buildMdcContext(stack);
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
@@ -130,7 +128,6 @@ public class DefaultStackService implements StackService {
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
-        MDCBuilder.buildMdcContext(stack);
         return stack;
     }
 
@@ -139,7 +136,6 @@ public class DefaultStackService implements StackService {
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
-        MDCBuilder.buildMdcContext(stack);
         return stack;
     }
 
@@ -154,7 +150,6 @@ public class DefaultStackService implements StackService {
 
     @Override
     public Stack create(CbUser user, Stack stack) {
-        MDCBuilder.buildMdcContext(stack);
         Stack savedStack = null;
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
@@ -185,7 +180,6 @@ public class DefaultStackService implements StackService {
     @Override
     public void updateStatus(Long stackId, StatusRequest status) {
         Stack stack = stackRepository.findOne(stackId);
-        MDCBuilder.buildMdcContext(stack);
         Status stackStatus = stack.getStatus();
         if (status.equals(StatusRequest.STARTED)) {
             Status clusterStatus = clusterRepository.findOneWithLists(stack.getCluster().getId()).getStatus();
@@ -219,7 +213,6 @@ public class DefaultStackService implements StackService {
     @Override
     public void updateNodeCount(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustmentJson) {
         Stack stack = stackRepository.findOne(stackId);
-        MDCBuilder.buildMdcContext(stack);
         validateStackStatus(stack);
         validateInstanceGroup(stack, instanceGroupAdjustmentJson.getInstanceGroup());
         validateScalingAdjustment(instanceGroupAdjustmentJson, stack);
@@ -245,7 +238,6 @@ public class DefaultStackService implements StackService {
     @Override
     public void updateAllowedSubnets(Long stackId, List<Subnet> subnetList) {
         Stack stack = stackRepository.findOne(stackId);
-        MDCBuilder.buildMdcContext(stack);
         if (!Status.AVAILABLE.equals(stack.getStatus())) {
             throw new BadRequestException(String.format("Stack is currently in '%s' state. Security constraints cannot be updated.", stack.getStatus()));
         }
@@ -317,7 +309,7 @@ public class DefaultStackService implements StackService {
 
     private void validateInstanceGroup(Stack stack, String instanceGroup) {
         if (isGateWay(stack.getInstanceGroupByInstanceGroupName(instanceGroup).getInstanceGroupType())) {
-                        throw new BadRequestException("The Ambari server instancegroup modification is not enabled.");
+            throw new BadRequestException("The Ambari server instancegroup modification is not enabled.");
         }
         if (stack.getInstanceGroupByInstanceGroupName(instanceGroup) == null) {
             throw new BadRequestException(String.format("Stack '%s' does not have an instanceGroup named '%s'.", stack.getId(), instanceGroup));
@@ -325,7 +317,6 @@ public class DefaultStackService implements StackService {
     }
 
     private void delete(Stack stack, CbUser user) {
-        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Stack delete requested.");
         if (!user.getUserId().equals(stack.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
             throw new BadRequestException("Stacks can be deleted only by account admins or owners.");

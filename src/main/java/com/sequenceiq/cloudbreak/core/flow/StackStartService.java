@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -81,7 +80,6 @@ public class StackStartService {
         long stackId = stackStatusUpdateContext.getStackId();
         Stack stack = stackRepository.findOneWithLists(stackId);
         CloudPlatform cloudPlatform = stack.cloudPlatform();
-        MDCBuilder.buildMdcContext(stack);
 
         boolean started;
         CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);

@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 
@@ -18,7 +17,6 @@ public class AmbariHostsJoinStatusCheckerTask extends StackBasedStatusCheckerTas
 
     @Override
     public boolean checkStatus(AmbariHosts hosts) {
-        MDCBuilder.buildMdcContext(hosts.getStack());
         try {
             AmbariClient ambariClient = hosts.getAmbariClient();
             List<String> hostNames = ambariClient.getClusterHosts();

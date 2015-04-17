@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
@@ -87,7 +86,6 @@ public class OpenStackConnector implements CloudPlatformConnector {
 
     @Override
     public Set<Resource> buildStack(Stack stack, String gateWayUserData, String hostGroupUserData, Map<String, Object> setupProperties) {
-        MDCBuilder.buildMdcContext(stack);
         String stackName = stack.getName();
         OpenStackCredential credential = (OpenStackCredential) stack.getCredential();
         List<InstanceGroup> instanceGroups = stack.getInstanceGroupsAsList();
@@ -119,7 +117,6 @@ public class OpenStackConnector implements CloudPlatformConnector {
 
     @Override
     public Set<Resource> addInstances(Stack stack, String gateWayUserData, String hostGroupUserData, Integer adjustment, String instanceGroup) {
-        MDCBuilder.buildMdcContext(stack);
         InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         group.setNodeCount(group.getNodeCount() + adjustment);
         try {
@@ -140,9 +137,9 @@ public class OpenStackConnector implements CloudPlatformConnector {
     public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
         try {
             String hostGroupUserDataScript = userDataBuilder.buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(),
-                            new HashMap<String, String>(), InstanceGroupType.HOSTGROUP);
+                    new HashMap<String, String>(), InstanceGroupType.HOSTGROUP);
             String gateWayUserDataScript = userDataBuilder.buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(),
-                            new HashMap<String, String>(), InstanceGroupType.GATEWAY);
+                    new HashMap<String, String>(), InstanceGroupType.GATEWAY);
             String heatTemplate = heatTemplateBuilder.remove(stack, gateWayUserDataScript, hostGroupUserDataScript,
                     instanceMetaDataRepository.findAllInStack(stack.getId()), instanceIds, instanceGroup);
             PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
@@ -246,7 +243,6 @@ public class OpenStackConnector implements CloudPlatformConnector {
     }
 
     private boolean setStackState(Stack stack, boolean stopped) {
-        MDCBuilder.buildMdcContext(stack);
         boolean result = true;
         OSClient osClient = openStackUtil.createOSClient(stack);
         Resource heatResource = stack.getResourceByType(ResourceType.HEAT_STACK);

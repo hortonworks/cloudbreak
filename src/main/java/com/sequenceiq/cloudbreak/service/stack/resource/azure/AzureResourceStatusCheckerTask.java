@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 
 import groovyx.net.http.HttpResponseDecorator;
@@ -49,7 +48,6 @@ public abstract class AzureResourceStatusCheckerTask implements StatusCheckerTas
 
     @Override
     public String successMessage(AzureResourcePollerObject t) {
-        MDCBuilder.buildMdcContext(t.getStack());
         return String.format("Azure resource successfully reached status: %s on stack.", t.getStack().getId());
     }
 

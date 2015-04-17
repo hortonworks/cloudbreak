@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
@@ -46,7 +45,6 @@ public abstract class AzureSimpleNetworkResourceBuilder implements
     }
 
     protected void httpResponseExceptionHandler(HttpResponseException ex, String resourceName, String user, Stack stack) {
-        MDCBuilder.buildMdcContext(stack);
         if (ex.getStatusCode() != NOT_FOUND && ex.getStatusCode() != NOT_EXIST) {
             throw new InternalServerException(ex.getResponse().getData().toString());
         } else {

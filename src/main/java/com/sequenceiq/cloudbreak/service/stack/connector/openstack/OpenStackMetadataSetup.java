@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
@@ -37,7 +36,6 @@ public class OpenStackMetadataSetup implements MetadataSetup {
 
     @Override
     public ProvisionEvent setupMetadata(Stack stack) {
-        MDCBuilder.buildMdcContext(stack);
         OSClient osClient = openStackUtil.createOSClient(stack);
         Resource heatResource = stack.getResourceByType(ResourceType.HEAT_STACK);
         String heatStackId = heatResource.getResourceName();
@@ -56,7 +54,6 @@ public class OpenStackMetadataSetup implements MetadataSetup {
 
     @Override
     public ProvisionEvent addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, final String instanceGroupName) {
-        MDCBuilder.buildMdcContext(stack);
         OSClient osClient = openStackUtil.createOSClient(stack);
         Resource heatResource = stack.getResourceByType(ResourceType.HEAT_STACK);
         String heatStackId = heatResource.getResourceName();

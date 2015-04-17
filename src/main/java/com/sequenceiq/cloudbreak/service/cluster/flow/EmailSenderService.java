@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.core.flow.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
@@ -49,14 +48,12 @@ public class EmailSenderService {
 
     @Async
     public void sendSuccessEmail(String email, String ambariServer) {
-        MDCBuilder.buildMdcContext();
         CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
         sendEmail(user, successClusterInstallerMailTemplatePath, getEmailModel(user.getGivenName(), "SUCCESS", ambariServer));
     }
 
     @Async
     public void sendFailureEmail(String email) {
-        MDCBuilder.buildMdcContext();
         CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
         sendEmail(user, failedClusterInstallerMailTemplatePath, getEmailModel(user.getGivenName(), "FAILED", null));
     }

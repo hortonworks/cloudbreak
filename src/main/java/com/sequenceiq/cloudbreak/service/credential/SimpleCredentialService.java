@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
@@ -65,7 +64,6 @@ public class SimpleCredentialService implements CredentialService {
 
     @Override
     public Credential create(CbUser user, Credential credential) {
-        MDCBuilder.buildMdcContext(credential);
         LOGGER.debug("Creating credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         credentialHandlers.get(credential.cloudPlatform()).init(credential);
         credential.setOwner(user.getUserId());

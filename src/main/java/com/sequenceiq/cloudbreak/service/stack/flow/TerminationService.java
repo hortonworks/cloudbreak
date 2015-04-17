@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -54,7 +53,6 @@ public class TerminationService {
     public void terminateStack(Long stackId, CloudPlatform cloudPlatform) {
         retryingStackUpdater.updateStackStatus(stackId, Status.DELETE_IN_PROGRESS, "Termination of cluster infrastructure has started.");
         final Stack stack = stackRepository.findOneWithLists(stackId);
-        MDCBuilder.buildMdcContext(stack);
         try {
             cloudPlatformConnectors.get(cloudPlatform).deleteStack(stack, stack.getCredential());
             finalizeTermination(stack);

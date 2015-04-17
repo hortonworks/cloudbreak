@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.domain.ScalingType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
@@ -96,7 +95,6 @@ public class AmbariClusterService implements ClusterService {
     @Override
     public Cluster create(CbUser user, Long stackId, Cluster cluster) {
         Stack stack = stackRepository.findOne(stackId);
-        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         if (stack.getCluster() != null) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster()
@@ -130,7 +128,6 @@ public class AmbariClusterService implements ClusterService {
     @Override
     public String getClusterJson(String ambariIp, Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
-        MDCBuilder.buildMdcContext(stack);
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword());
         try {
             String clusterJson = ambariClient.getClusterAsJson();
@@ -151,7 +148,6 @@ public class AmbariClusterService implements ClusterService {
     public UpdateAmbariHostsRequest updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
-        MDCBuilder.buildMdcContext(cluster);
         boolean decommissionRequest = validateRequest(stack, hostGroupAdjustment);
         List<HostMetadata> downScaleCandidates = collectDownscaleCandidates(hostGroupAdjustment, stack, cluster, decommissionRequest);
         UpdateAmbariHostsRequest updateRequest;
@@ -177,7 +173,6 @@ public class AmbariClusterService implements ClusterService {
         if (cluster == null) {
             throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stackId));
         }
-        MDCBuilder.buildMdcContext(stack.getCluster());
         long clusterId = cluster.getId();
         Status clusterStatus = cluster.getStatus();
         Status stackStatus = stack.getStatus();
@@ -258,7 +253,6 @@ public class AmbariClusterService implements ClusterService {
             throw new BadRequestException(String.format("Blueprint not exist with '%s' id.", blueprintId));
         }
         Cluster cluster = stack.getCluster();
-        MDCBuilder.buildMdcContext(cluster);
         blueprintValidator.validateBlueprintForStack(blueprint, hostGroups, stackRepository.findOne(stackId).getInstanceGroups());
         cluster.setBlueprint(blueprint);
         cluster.getHostGroups().removeAll(cluster.getHostGroups());
@@ -270,7 +264,6 @@ public class AmbariClusterService implements ClusterService {
     }
 
     private boolean validateRequest(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
-        MDCBuilder.buildMdcContext(stack.getCluster());
         HostGroup hostGroup = getHostGroup(stack, hostGroupAdjustment);
         int scalingAdjustment = hostGroupAdjustment.getScalingAdjustment();
         boolean downScale = scalingAdjustment < 0;
@@ -322,7 +315,6 @@ public class AmbariClusterService implements ClusterService {
     private void validateComponentsCategory(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword());
         Cluster cluster = stack.getCluster();
-        MDCBuilder.buildMdcContext(cluster);
         String hostGroup = hostGroupAdjustment.getHostGroup();
         Blueprint blueprint = cluster.getBlueprint();
         ObjectMapper mapper = new ObjectMapper();
@@ -373,7 +365,6 @@ public class AmbariClusterService implements ClusterService {
     }
 
     private void verifyNodeCount(Cluster cluster, int replication, int scalingAdjustment, List<HostMetadata> filteredHostList, int reservedInstances) {
-        MDCBuilder.buildMdcContext(cluster);
         int adjustment = Math.abs(scalingAdjustment);
         int hostSize = filteredHostList.size();
         if (hostSize + reservedInstances - adjustment <= replication || hostSize < adjustment) {
@@ -389,7 +380,6 @@ public class AmbariClusterService implements ClusterService {
 
     private List<HostMetadata> checkAndSortByAvailableSpace(Stack stack, AmbariClient client, int replication,
             int adjustment, List<HostMetadata> filteredHostList) {
-        MDCBuilder.buildMdcContext(stack.getCluster());
         int removeCount = Math.abs(adjustment);
         Map<String, Map<Long, Long>> dfsSpace = client.getDFSSpace();
         Map<String, Long> sortedAscending = sortByUsedSpace(dfsSpace, false);

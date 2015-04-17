@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
@@ -25,7 +24,6 @@ public class GccImageCheckerStatus extends StackBasedStatusCheckerTask<GccImageR
 
     @Override
     public boolean checkStatus(GccImageReadyPollerObject gccImageReadyPollerObject) {
-        MDCBuilder.buildMdcContext(gccImageReadyPollerObject.getStack());
         LOGGER.info("Checking status of Gcc Image '{}'.", gccImageReadyPollerObject.getName());
         GccCredential credential = (GccCredential) gccImageReadyPollerObject.getStack().getCredential();
         try {
@@ -48,7 +46,6 @@ public class GccImageCheckerStatus extends StackBasedStatusCheckerTask<GccImageR
 
     @Override
     public String successMessage(GccImageReadyPollerObject gccImageReadyPollerObject) {
-        MDCBuilder.buildMdcContext(gccImageReadyPollerObject.getStack());
         return String.format("Gcc image '%s' is ready on '%s' stack",
                 gccImageReadyPollerObject.getName(), gccImageReadyPollerObject.getStack().getId());
     }

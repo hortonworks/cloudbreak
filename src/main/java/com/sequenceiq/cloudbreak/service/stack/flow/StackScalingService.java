@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -136,7 +135,6 @@ public class StackScalingService {
     }
 
     private void updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) {
-        MDCBuilder.buildMdcContext(stack);
         int nodeCount = instanceGroup.getNodeCount() - instanceIds.size();
         stackUpdater.updateNodeCount(stack.getId(), nodeCount, instanceGroup.getGroupName());
 

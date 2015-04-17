@@ -4,6 +4,8 @@ import java.lang.reflect.Field;
 
 import org.slf4j.MDC;
 
+import com.sequenceiq.cloudbreak.domain.CbUser;
+
 public class MDCBuilder {
 
     private MDCBuilder() {
@@ -25,6 +27,12 @@ public class MDCBuilder {
             MDC.put(LoggerContextKey.RESOURCE_ID.toString(), getFieldValue(object, "id"));
             MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), getFieldValue(object, "name"));
             MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), object.getClass().getSimpleName().toUpperCase());
+        }
+    }
+
+    public static void buildMdcContext(CbUser user) {
+        if (user != null) {
+            MDC.put(LoggerContextKey.OWNER_ID.toString(), user.getUserId());
         }
     }
 

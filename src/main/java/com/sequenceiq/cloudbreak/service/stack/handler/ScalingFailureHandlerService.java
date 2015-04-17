@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -46,33 +45,30 @@ public class ScalingFailureHandlerService implements FailureHandlerService {
 
     @Override
     public void handleFailure(Stack stack, List<ResourceRequestResult> failedResourceRequestResults) {
-        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Decrease node counts because threshold was higher");
         handleExceptions(stack, failedResourceRequestResults);
     }
 
     private void handleExceptions(Stack stack, List<ResourceRequestResult> failedResourceRequestResult) {
-        MDCBuilder.buildMdcContext(stack);
         for (ResourceRequestResult exception : failedResourceRequestResult) {
             List<Resource> resourceList = new ArrayList<>();
-            LOGGER.error("Error was occurred which is: " + exception.getException().orNull().getMessage());
+            LOGGER.error("Error: {}", exception.getException().orNull().getMessage());
             for (Resource resource : exception.getResources()) {
                 Resource newResource = resourceRepository.findByStackIdAndName(stack.getId(), resource.getResourceName(), resource.getResourceType());
                 if (newResource != null) {
-                    LOGGER.info(String.format("Resource %s with id %s and type %s was not deleted so added to rollback list.",
-                            newResource.getResourceName(), newResource.getId(), newResource.getResourceType()));
+                    LOGGER.info("Resource will be rolled back. name: {}, id: {}, type: {}", newResource.getResourceName(), newResource.getId(),
+                            newResource.getResourceType());
                     resourceList.add(newResource);
                 }
             }
             if (!resourceList.isEmpty()) {
-                LOGGER.info("Resource list not empty so rollback will start.Resource list size is: " + resourceList.size());
+                LOGGER.info("Rolling back resources for stackId: {}. Resources to be rolled back: {}", stack.getId(), resourceList.size());
                 doRollback(stack, resourceList);
             }
         }
     }
 
     private void doRollback(Stack stack, List<Resource> resourceList) {
-        MDCBuilder.buildMdcContext(stack);
         CloudPlatform cloudPlatform = stack.cloudPlatform();
         ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
         try {
@@ -81,20 +77,17 @@ public class ScalingFailureHandlerService implements FailureHandlerService {
                 ResourceType resourceType = instanceResourceBuilders.get(cloudPlatform).get(i).resourceType();
                 for (Resource tmpResource : resourceList) {
                     if (resourceType.equals(tmpResource.getResourceType())) {
-                        LOGGER.info(String.format("Resource will rollback with %s name %s id and %s type.",
-                                tmpResource.getResourceName(), tmpResource.getId(), tmpResource.getResourceType()));
+                        LOGGER.info("Resource will be rolled back. name: {}, id: {}, type: {}", tmpResource.getResourceName(), tmpResource.getId(),
+                                tmpResource.getResourceType());
                         instanceResourceBuilders.get(cloudPlatform).get(i).delete(tmpResource, dCO, stack.getRegion());
                     }
                 }
             }
         } catch (Exception e) {
-            MDCBuilder.buildMdcContext(stack);
-            LOGGER.info("Resource can not be deleted: " + e.getMessage());
+            LOGGER.error("Resource can't be deleted. Exception: {}", e.getMessage());
         }
         for (Resource tmpResource : resourceList) {
-            MDCBuilder.buildMdcContext(stack);
-            LOGGER.info(String.format("Delete resource %s id %s name %s type with a repository call.",
-                    tmpResource.getId(), tmpResource.getResourceName(), tmpResource.getResourceType()));
+            LOGGER.info("Deleting resource with id {}, name {}, type {}.", tmpResource.getId(), tmpResource.getResourceName(), tmpResource.getResourceType());
             resourceRepository.delete(tmpResource);
         }
     }

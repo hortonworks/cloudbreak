@@ -88,7 +88,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
@@ -158,7 +157,6 @@ public class AwsConnector implements CloudPlatformConnector {
 
     @Override
     public Set<Resource> buildStack(Stack stack, String gateWayUserData, String hostGroupUserData, Map<String, Object> setupProperties) {
-        MDCBuilder.buildMdcContext(stack);
         Long stackId = stack.getId();
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
         AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(Regions.valueOf(stack.getRegion()), awsCredential);
@@ -264,7 +262,6 @@ public class AwsConnector implements CloudPlatformConnector {
 
     @Override
     public Set<Resource> addInstances(Stack stack, String gateWayUserData, String hostGroupUserData, Integer instanceCount, String instanceGroup) {
-        MDCBuilder.buildMdcContext(stack);
         InstanceGroup instanceGroupByInstanceGroupName = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         Integer requiredInstances = instanceGroupByInstanceGroupName.getNodeCount() + instanceCount;
         Regions region = Regions.valueOf(stack.getRegion());
@@ -295,7 +292,6 @@ public class AwsConnector implements CloudPlatformConnector {
      */
     @Override
     public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
-        MDCBuilder.buildMdcContext(stack);
         Regions region = Regions.valueOf(stack.getRegion());
         AwsCredential credential = (AwsCredential) stack.getCredential();
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(region, credential);
@@ -351,7 +347,6 @@ public class AwsConnector implements CloudPlatformConnector {
      */
     @Override
     public void deleteStack(Stack stack, Credential credential) {
-        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Deleting stack: {}", stack.getId());
         AwsCredential awsCredential = (AwsCredential) credential;
         Resource resource = stack.getResourceByType(ResourceType.CLOUDFORMATION_STACK);
@@ -433,7 +428,6 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     private boolean setStackState(Stack stack, boolean stopped) {
-        MDCBuilder.buildMdcContext(stack);
         boolean result = true;
         Regions region = Regions.valueOf(stack.getRegion());
         AwsCredential credential = (AwsCredential) stack.getCredential();
@@ -478,7 +472,6 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     private void updateInstanceMetadata(Stack stack, AmazonEC2Client amazonEC2Client, Set<InstanceMetaData> instanceMetaData, Collection<String> instances) {
-        MDCBuilder.buildMdcContext(stack);
         DescribeInstancesResult describeResult = amazonEC2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instances));
         for (Reservation reservation : describeResult.getReservations()) {
             for (Instance instance : reservation.getInstances()) {
@@ -518,7 +511,6 @@ public class AwsConnector implements CloudPlatformConnector {
                 }
             } catch (AmazonServiceException e) {
                 if (e.getErrorMessage().matches("Resource.*does not exist for stack.*")) {
-                    MDCBuilder.buildMdcContext(stack);
                     LOGGER.info(e.getErrorMessage());
                 } else {
                     throw e;

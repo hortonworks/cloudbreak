@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -49,7 +48,6 @@ public class StackFailureHandlerService implements FailureHandlerService {
 
     @Override
     public void handleFailure(Stack stack, List<ResourceRequestResult> failedResourceRequestResults) {
-        MDCBuilder.buildMdcContext(stack);
         Stack localStack = stackRepository.findById(stack.getId());
         if (localStack.getFailurePolicy() == null) {
             if (failedResourceRequestResults.size() > 0) {
@@ -58,32 +56,32 @@ public class StackFailureHandlerService implements FailureHandlerService {
             }
         } else {
             switch (localStack.getFailurePolicy().getAdjustmentType()) {
-                case EXACT:
-                    if (localStack.getFailurePolicy().getThreshold() > localStack.getFullNodeCount() - failedResourceRequestResults.size()) {
-                        LOGGER.info("Number of failures is more than the threshold so error will throw");
-                        throwError(localStack, failedResourceRequestResults);
-                    } else if (failedResourceRequestResults.size() != 0) {
-                        LOGGER.info("Decrease node counts because threshold was higher");
-                        handleExceptions(localStack, failedResourceRequestResults);
-                    }
-                    break;
-                case PERCENTAGE:
-                    if (Double.valueOf(localStack.getFailurePolicy().getThreshold()) > calculatePercentage(failedResourceRequestResults, localStack)) {
-                        LOGGER.info("Number of failures is more than the threshold so error will throw");
-                        throwError(localStack, failedResourceRequestResults);
-                    } else if (failedResourceRequestResults.size() != 0) {
-                        LOGGER.info("Decrease node counts because threshold was higher");
-                        handleExceptions(localStack, failedResourceRequestResults);
-                    }
-                    break;
-                case BEST_EFFORT:
+            case EXACT:
+                if (localStack.getFailurePolicy().getThreshold() > localStack.getFullNodeCount() - failedResourceRequestResults.size()) {
+                    LOGGER.info("Number of failures is more than the threshold so error will throw");
+                    throwError(localStack, failedResourceRequestResults);
+                } else if (failedResourceRequestResults.size() != 0) {
                     LOGGER.info("Decrease node counts because threshold was higher");
                     handleExceptions(localStack, failedResourceRequestResults);
-                    break;
-                default:
-                    LOGGER.info("Unsupported adjustment type so error will throw");
+                }
+                break;
+            case PERCENTAGE:
+                if (Double.valueOf(localStack.getFailurePolicy().getThreshold()) > calculatePercentage(failedResourceRequestResults, localStack)) {
+                    LOGGER.info("Number of failures is more than the threshold so error will throw");
                     throwError(localStack, failedResourceRequestResults);
-                    break;
+                } else if (failedResourceRequestResults.size() != 0) {
+                    LOGGER.info("Decrease node counts because threshold was higher");
+                    handleExceptions(localStack, failedResourceRequestResults);
+                }
+                break;
+            case BEST_EFFORT:
+                LOGGER.info("Decrease node counts because threshold was higher");
+                handleExceptions(localStack, failedResourceRequestResults);
+                break;
+            default:
+                LOGGER.info("Unsupported adjustment type so error will throw");
+                throwError(localStack, failedResourceRequestResults);
+                break;
             }
         }
     }
@@ -93,7 +91,6 @@ public class StackFailureHandlerService implements FailureHandlerService {
     }
 
     private void handleExceptions(Stack stack, List<ResourceRequestResult> failedResourceRequestResult) {
-        MDCBuilder.buildMdcContext(stack);
         for (ResourceRequestResult exception : failedResourceRequestResult) {
             List<Resource> resourceList = new ArrayList<>();
             LOGGER.error("Error was occurred which is: " + exception.getException().orNull().getMessage());
@@ -114,7 +111,6 @@ public class StackFailureHandlerService implements FailureHandlerService {
 
     private void doRollbackAndDecreaseNodeCount(ResourceRequestResult exception, Stack stack, List<Resource> resourceList,
             List<ResourceRequestResult> resourceRequestResults) {
-        MDCBuilder.buildMdcContext(stack);
         InstanceGroup instanceGroup = instanceGroupRepository.findOne(exception.getInstanceGroup().getId());
         instanceGroup.setNodeCount(instanceGroup.getNodeCount() - 1);
         LOGGER.info(String.format("InstanceGroup %s node count decreased with one so the new node size is: %s",
@@ -140,13 +136,10 @@ public class StackFailureHandlerService implements FailureHandlerService {
                     }
                 }
             } catch (Exception e) {
-                MDCBuilder.buildMdcContext(stack);
-                LOGGER.info("Resource can not be deleted: " + e.getMessage());
+                LOGGER.info("Resource can not be deleted. Reason: {} ", e.getMessage());
             }
             for (Resource tmpResource : resourceList) {
-                MDCBuilder.buildMdcContext(stack);
-                LOGGER.info(String.format("Delete resource %s id %s name %s type with a repository call.",
-                        tmpResource.getId(), tmpResource.getResourceName(), tmpResource.getResourceType()));
+                LOGGER.info("Deleting resource. id: {}, name: {}, type: {}", tmpResource.getId(), tmpResource.getResourceName(), tmpResource.getResourceType());
                 resourceRepository.delete(tmpResource);
             }
         }

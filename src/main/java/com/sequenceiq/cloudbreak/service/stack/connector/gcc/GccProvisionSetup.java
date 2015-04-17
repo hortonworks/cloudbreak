@@ -23,7 +23,6 @@ import com.google.api.services.storage.model.StorageObject;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
@@ -51,7 +50,6 @@ public class GccProvisionSetup implements ProvisionSetup {
 
     @Override
     public ProvisionEvent setupProvisioning(Stack stack) throws Exception {
-        MDCBuilder.buildMdcContext(stack);
         PollingResult pollingResult = PollingResult.SUCCESS;
         ProvisionSetupComplete ret = null;
         try {

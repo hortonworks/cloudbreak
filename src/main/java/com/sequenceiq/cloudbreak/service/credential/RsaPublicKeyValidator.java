@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Component
 public class RsaPublicKeyValidator {
@@ -16,7 +15,6 @@ public class RsaPublicKeyValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(RsaPublicKeyValidator.class);
 
     public void validate(Credential credential) {
-        MDCBuilder.buildMdcContext(credential);
         try {
             PublicKey load = PublicKeyReaderUtil.load(credential.getPublicKey());
         } catch (Exception e) {

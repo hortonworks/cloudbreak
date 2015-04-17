@@ -14,7 +14,6 @@ import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.credential.RsaPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsStackUtil;
@@ -50,7 +49,6 @@ public class AwsCredentialHandler implements CredentialHandler<AwsCredential> {
     @Override
     public boolean delete(AwsCredential awsCredential) {
         boolean result = true;
-        MDCBuilder.buildMdcContext(awsCredential);
         String keyPairName = awsCredential.getKeyPairName();
         for (Regions regions : Regions.values()) {
             if (!Regions.CN_NORTH_1.equals(regions) && !Regions.GovCloud.equals(regions)) {
@@ -75,7 +73,6 @@ public class AwsCredentialHandler implements CredentialHandler<AwsCredential> {
     }
 
     private AwsCredential importKeyPairs(AwsCredential awsCredential) {
-        MDCBuilder.buildMdcContext(awsCredential);
         try {
             Random rnd = new Random();
             String keyPairName = CLOUDBREAK_KEY_NAME + "-" + rnd.nextInt(SUFFIX_RND);
@@ -96,7 +93,6 @@ public class AwsCredentialHandler implements CredentialHandler<AwsCredential> {
     }
 
     private void validateIamRole(AwsCredential awsCredential) {
-        MDCBuilder.buildMdcContext(awsCredential);
         try {
             crossAccountCredentialsProvider.retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
                     crossAccountCredentialsProvider.getExternalId(), awsCredential);

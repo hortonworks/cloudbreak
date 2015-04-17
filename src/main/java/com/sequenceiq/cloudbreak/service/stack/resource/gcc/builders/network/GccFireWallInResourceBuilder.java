@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Subnet;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
@@ -118,7 +117,6 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
     @Override
     public void update(GccUpdateContextObject updateContextObject) throws UpdateFailedException {
         Stack stack = updateContextObject.getStack();
-        MDCBuilder.buildMdcContext(stack);
         Compute compute = updateContextObject.getCompute();
         String project = updateContextObject.getProject();
         String resourceName = stack.getResourceByType(ResourceType.GCC_FIREWALL_IN).getResourceName();

@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.credential.RsaPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.stack.connector.openstack.OpenStackUtil;
@@ -35,7 +34,6 @@ public class OpenStackCredentialHandler implements CredentialHandler<OpenStackCr
 
     @Override
     public OpenStackCredential init(OpenStackCredential credential) {
-        MDCBuilder.buildMdcContext(credential);
         rsaPublicKeyValidator.validate(credential);
         validateCredential(credential);
         createCredentialIfAbsent(credential);
@@ -69,7 +67,6 @@ public class OpenStackCredentialHandler implements CredentialHandler<OpenStackCr
     }
 
     private void validateCredential(OpenStackCredential credential) {
-        MDCBuilder.buildMdcContext(credential);
         try {
             openStackUtil.createOSClient(credential);
         } catch (Exception e) {

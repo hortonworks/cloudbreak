@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.usages;
 
-
 import static java.util.Calendar.DATE;
 import static java.util.Calendar.HOUR_OF_DAY;
 import static java.util.Calendar.MILLISECOND;
@@ -22,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Component
 public class IntervalInstanceUsageGenerator {
@@ -32,7 +30,6 @@ public class IntervalInstanceUsageGenerator {
     private static final double MS_PER_HOUR = 3600000.0;
 
     public Map<String, Long> getInstanceHours(InstanceMetaData instance, Date startTime, Date stopTime) throws ParseException {
-        MDCBuilder.buildMdcContext(instance);
         Map<String, Long> dailyInstanceUsages = new HashMap<>();
         Calendar start = getUsageStart(startTime, stopTime, instance);
         Calendar stop = getUsageStop(startTime, stopTime, instance);

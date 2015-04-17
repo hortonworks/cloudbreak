@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
@@ -57,10 +56,7 @@ public class AwsMetadataSetup implements MetadataSetup {
 
     @Override
     public ProvisionEvent setupMetadata(Stack stack) {
-        MDCBuilder.buildMdcContext(stack);
-
         Set<CoreInstanceMetaData> coreInstanceMetadata = new HashSet<>();
-
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
 
         AmazonCloudFormationClient amazonCFClient = awsStackUtil.createCloudFormationClient(Regions.valueOf(stack.getRegion()), awsCredential);
@@ -103,8 +99,6 @@ public class AwsMetadataSetup implements MetadataSetup {
 
     @Override
     public ProvisionEvent addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String instanceGroupName) {
-
-        MDCBuilder.buildMdcContext(stack);
         Set<CoreInstanceMetaData> coreInstanceMetadata = new HashSet<>();
         LOGGER.info("Adding new instances to metadata: [stack: '{}']", stack.getId());
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
