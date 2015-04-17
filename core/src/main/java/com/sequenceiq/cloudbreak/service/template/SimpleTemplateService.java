@@ -21,11 +21,10 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
-import com.sequenceiq.cloudbreak.service.credential.SimpleCredentialService;
 
 @Service
 public class SimpleTemplateService implements TemplateService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleCredentialService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleTemplateService.class);
     private static final String DELIMITER = "_";
 
     private static final String TEMPLATE_NOT_FOUND_MSG = "Template '%s' not found.";

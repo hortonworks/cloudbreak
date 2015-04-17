@@ -6,7 +6,6 @@ import javax.persistence.Entity;
 public class OpenStackTemplate extends Template implements ProvisionEntity {
 
     private String instanceType;
-    private String publicNetId;
 
     public OpenStackTemplate() {
     }
@@ -17,14 +16,6 @@ public class OpenStackTemplate extends Template implements ProvisionEntity {
 
     public void setInstanceType(String instanceType) {
         this.instanceType = instanceType;
-    }
-
-    public String getPublicNetId() {
-        return publicNetId;
-    }
-
-    public void setPublicNetId(String publicNetId) {
-        this.publicNetId = publicNetId;
     }
 
     @Override

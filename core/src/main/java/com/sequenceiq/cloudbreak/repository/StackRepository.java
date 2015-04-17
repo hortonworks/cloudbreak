@@ -48,4 +48,6 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
     Stack findOneByName(@Param("name") String name, @Param("account") String account);
 
     List<Stack> findByCredential(@Param("credentialId") Long credentialId);
+
+    List<Stack> findAllByNetwork(@Param("networkId") Long networkId);
 }

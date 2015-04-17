@@ -17,13 +17,12 @@ import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.network.NetworkConfig;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
@@ -97,7 +96,8 @@ public class GccFireWallInternalResourceBuilder extends GccSimpleNetworkResource
 
         firewall.setAllowed(ImmutableList.of(allowed1, allowed2, allowed3));
         firewall.setName(buildResources.get(0).getResourceName());
-        firewall.setSourceRanges(ImmutableList.of(NetworkConfig.SUBNET_16));
+        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
+        firewall.setSourceRanges(ImmutableList.of(stack.getNetwork().getSubnetCIDR()));
         firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
                 provisionContextObject.getProjectId(), provisionContextObject.filterResourcesByType(ResourceType.GCC_NETWORK).get(0).getResourceName()));
         return new GccFireWallOutCreateRequest(provisionContextObject.getStackId(), firewall, provisionContextObject.getProjectId(),

@@ -6,5 +6,6 @@ public enum APIResourceType {
     BLUEPRINT,
     CLUSTER,
     CREDENTIAL,
-    RECIPE
+    RECIPE,
+    NETWORK
 }

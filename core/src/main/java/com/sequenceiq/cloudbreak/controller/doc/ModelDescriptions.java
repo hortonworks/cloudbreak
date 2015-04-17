@@ -39,7 +39,6 @@ public class ModelDescriptions {
         public static final String IMAGE = "name of the image for instance creation";
         public static final String CONSUL_SERVER_COUNT = "consul server count";
         public static final String CONSUL_SERVER_COUNT_BY_USER = "user defined consul server count";
-        public static final String PARAMETERS = "additional cloud specific parameters for stack";
         public static final String ALLOWED_SUBNETS = "allowed subnets";
         public static final String FAILURE_ACTION = "action on failure";
         public static final String FAILURE_POLICY = "failure policy in case of failures";
@@ -50,6 +49,7 @@ public class ModelDescriptions {
         public static final String AMBARI_IP = "public ambari ip of the stack";
         public static final String HASH = "unique hash identifier for stack";
         public static final String BLUEPRINT_ID = "id of the referenced blueprint";
+        public static final String NETWORK_ID = "network resource id for the stack";
     }
 
     public static class ClusterModelDescription {
@@ -121,4 +121,8 @@ public class ModelDescriptions {
         public static final String MESSAGE = "message of the event";
     }
 
+    public static class NetworkModelDescription {
+        public static final String PARAMETERS = "provider specific parameters of the specified network";
+        public static final String SUBNET_CIDR = "the subnet definition of the network in CIDR format";
+    }
 }

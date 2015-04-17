@@ -93,5 +93,16 @@ public class OperationDescriptions {
         public static final String GET_BY_TIMESTAMP = "retrieve events by timestamp (long)";
     }
 
-
+    public static class NetworkOpDescription {
+        public static final String POST_PRIVATE = "create network as private resource";
+        public static final String POST_PUBLIC = "create network as public resource";
+        public static final String GET_PRIVATE = "retrieve private networks";
+        public static final String GET_PUBLIC = "retrieve public and private (owned) networks";
+        public static final String GET_PRIVATE_BY_NAME = "retrieve a private network by name";
+        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) network by name";
+        public static final String GET_BY_ID = "retrieve network by id";
+        public static final String DELETE_PRIVATE_BY_NAME = "delete private network by name";
+        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private network by name";
+        public static final String DELETE_BY_ID = "delete network by id";
+    }
 }
