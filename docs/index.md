@@ -16,7 +16,7 @@ Cloudbreak [API documentation](http://docs.cloudbreak.apiary.io/).
 ##Overview
 
 Cloudbreak is a RESTful Hadoop as a Service API. Once it is deployed in your favorite servlet container exposes a REST API allowing to span up Hadoop clusters of arbitrary sizes on your selected cloud provider. Provisioning Hadoop has never been easier.
-Cloudbreak is built on the foundation of cloud providers API (Amazon AWS, Microsoft Azure, Google Cloud Platform...), Apache Ambari, Docker containers, Swarm and Consul.
+Cloudbreak is built on the foundation of cloud providers API (Microsoft Azure, Amazon AWS, Google Cloud Platform, OpenStack), Apache Ambari, Docker containers, Swarm and Consul.
 
 ##Benefits
 
