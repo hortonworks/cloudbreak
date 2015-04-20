@@ -55,7 +55,7 @@ public class TerminationService {
         final Stack stack = stackRepository.findOneWithLists(stackId);
         try {
             cloudPlatformConnectors.get(cloudPlatform).deleteStack(stack, stack.getCredential());
-            finalizeTermination(stack);
+            finalizeTermination(stackId);
         } catch (Exception ex) {
             LOGGER.error(String.format("Stack delete failed on '%s' stack: ", stack.getId()), ex);
             String statusReason = "Termination of cluster infrastructure failed: " + ex.getMessage();
@@ -63,14 +63,14 @@ public class TerminationService {
         }
     }
 
-    private void finalizeTermination(Stack stack) {
+    private void finalizeTermination(Long stackId) {
+        Stack stack = stackRepository.findOneWithLists(stackId);
         cloudbreakEventService.fireCloudbreakEvent(stack.getId(), Status.DELETE_COMPLETED.name(), DELETE_COMPLETED_MSG);
         cloudbreakEventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_STOPPED.name(), BILLING_STOPPED_MSG);
-        updateStackFields(stack);
-        retryingStackUpdater.updateStack(stack);
+        retryingStackUpdater.updateStack(updateStackFields(stack));
     }
 
-    private void updateStackFields(Stack stack) {
+    private Stack updateStackFields(Stack stack) {
         Date now = new Date();
         String terminatedName = stack.getName() + DELIMITER + now.getTime();
         Cluster cluster = stack.getCluster();
@@ -89,6 +89,7 @@ public class TerminationService {
         stack.setStatus(Status.DELETE_COMPLETED);
         stack.setStatusReason(DELETE_COMPLETED_MSG);
         terminateMetaDataInstances(stack);
+        return stack;
     }
 
     private void terminateMetaDataInstances(Stack stack) {
