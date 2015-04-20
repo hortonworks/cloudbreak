@@ -26,9 +26,6 @@
           "name": "HISTORYSERVER"
         },
         {
-          "name": "NAGIOS_SERVER"
-        },
-        {
           "name": "ZOOKEEPER_SERVER"
         }
       ],
