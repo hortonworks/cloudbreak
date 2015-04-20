@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterCreationHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterDownscaleHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterResetHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterSecurityHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStatusUpdateFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStopHandler;
@@ -66,6 +67,7 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.AMBARI_START.name()), getHandlerForClass(AmbariStartHandler.class));
         reactor.on($(FlowPhases.CLUSTER_CREATION.name()), getHandlerForClass(ClusterCreationHandler.class));
         reactor.on($(FlowPhases.CLUSTER_RESET.name()), getHandlerForClass(ClusterResetHandler.class));
+        reactor.on($(FlowPhases.ENABLE_KERBEROS.name()), getHandlerForClass(ClusterSecurityHandler.class));
         reactor.on($(FlowPhases.TERMINATION.name()), getHandlerForClass(StackTerminationHandler.class));
         reactor.on($(FlowPhases.STACK_START.name()), getHandlerForClass(StackStartHandler.class));
         reactor.on($(FlowPhases.STACK_STOP.name()), getHandlerForClass(StackStopHandler.class));
@@ -103,7 +105,10 @@ public class FlowInitializer implements InitializingBean {
                 .createTransition(FlowPhases.STACK_CREATION_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
 
         transitionKeyService.registerTransition(ClusterCreationHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.CLUSTER_CREATION.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
+                .createTransition(FlowPhases.CLUSTER_CREATION.name(), FlowPhases.ENABLE_KERBEROS.name(), FlowPhases.NONE.name()));
+
+        transitionKeyService.registerTransition(ClusterSecurityHandler.class, SimpleTransitionKeyService.TransitionFactory
+                .createTransition(FlowPhases.ENABLE_KERBEROS.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerTerminationFlow() {

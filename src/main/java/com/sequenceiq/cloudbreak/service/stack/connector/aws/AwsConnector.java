@@ -94,7 +94,7 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudResourceOperationFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
@@ -448,15 +448,15 @@ public class AwsConnector implements CloudPlatformConnector {
                     awsPollingService.pollWithTimeout(
                             awsInstanceStatusCheckerTask,
                             new AwsInstances(stack, amazonEC2Client, new ArrayList(instances), "Stopped"),
-                            AmbariClusterConnector.POLLING_INTERVAL,
-                            AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
+                            AmbariOperationService.AMBARI_POLLING_INTERVAL,
+                            AmbariOperationService.MAX_ATTEMPTS_FOR_AMBARI_OPS);
                 } else {
                     amazonEC2Client.startInstances(new StartInstancesRequest().withInstanceIds(instances));
                     PollingResult pollingResult = awsPollingService.pollWithTimeout(
                             awsInstanceStatusCheckerTask,
                             new AwsInstances(stack, amazonEC2Client, new ArrayList(instances), "Running"),
-                            AmbariClusterConnector.POLLING_INTERVAL,
-                            AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
+                            AmbariOperationService.AMBARI_POLLING_INTERVAL,
+                            AmbariOperationService.MAX_ATTEMPTS_FOR_AMBARI_OPS);
                     if (!isSuccess(pollingResult)) {
                         throw new UpdateFailedException("Failed to update Heat stack, because polling reached an invalid end state.");
                     }

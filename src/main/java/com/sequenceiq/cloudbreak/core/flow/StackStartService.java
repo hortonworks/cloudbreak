@@ -27,10 +27,10 @@ import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClientPollerObject;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHealthCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHosts;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHostsJoinStatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ConsulPluginEvent;
 import com.sequenceiq.cloudbreak.service.cluster.flow.PluginManager;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -134,19 +134,19 @@ public class StackStartService {
         return ambariHealthChecker.pollWithTimeout(
                 ambariHealthCheckerTask,
                 new AmbariClientPollerObject(stack, ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword())),
-                AmbariClusterConnector.POLLING_INTERVAL,
-                AmbariClusterConnector.MAX_ATTEMPTS_FOR_HOSTS);
+                AmbariOperationService.AMBARI_POLLING_INTERVAL,
+                AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS);
     }
 
     private PollingResult waitForHostsToJoin(Stack stack) {
         AmbariHosts ambariHosts = new AmbariHosts(stack,  ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(),
-                stack.getPassword()), stack.getFullNodeCount() - stack.getGateWayNodeCount());
+                stack.getPassword()), stack.getFullNodeCount());
         try {
             return ambariHostJoin.pollWithTimeout(
                     ambariHostsJoinStatusCheckerTask,
                     ambariHosts,
-                    AmbariClusterConnector.POLLING_INTERVAL,
-                    AmbariClusterConnector.MAX_ATTEMPTS_FOR_HOSTS);
+                    AmbariOperationService.AMBARI_POLLING_INTERVAL,
+                    AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS);
         } catch (AmbariHostsUnavailableException ex) {
             LOGGER.error(ex.getMessage());
             return PollingResult.EXIT;

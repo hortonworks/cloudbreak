@@ -122,8 +122,18 @@ use_dns_first() {
 start_ambari_server() {
   docker rm -f ambari-server &>/dev/null
   docker run -d --name=ambari_db --privileged --restart=always -v /data/ambari-server/pgsql/data:/var/lib/postgresql/data -e POSTGRES_PASSWORD=bigdata -e POSTGRES_USER=ambari postgres:9.4.1
-  docker run -d --name=ambari-server --privileged --net=host --restart=always -e POSTGRES_DB=$(docker inspect -f "{{.NetworkSettings.IPAddress}}" ambari_db) -e BRIDGE_IP=$(get_ip) sequenceiq/ambari:$AMBARI_DOCKER_TAG /start-server
+  docker run -d --name=ambari-server --privileged --net=host --restart=always -v /etc/krb5.conf:/etc/krb5.conf -e POSTGRES_DB=$(docker inspect -f "{{.NetworkSettings.IPAddress}}" ambari_db) -e BRIDGE_IP=$(get_ip) sequenceiq/ambari:$AMBARI_DOCKER_TAG /start-server
   register_ambari
+}
+
+start_ambari_agent() {
+  set_public_host_script
+  set_disk_as_volumes
+  docker run -d --name=ambari-agent --privileged --net=host --restart=always -e BRIDGE_IP=$(get_ip) -e HADOOP_CLASSPATH=/data/jars/*:/usr/lib/hadoop/lib/* -v /data/jars:/data/jars $VOLUMES sequenceiq/ambari:$AMBARI_DOCKER_TAG /start-agent
+}
+
+set_public_host_script() {
+  VOLUMES="$VOLUMES -v /usr/local/public_host_script.sh:/etc/ambari-agent/conf/public-hostname.sh"
 }
 
 set_disk_as_volumes() {

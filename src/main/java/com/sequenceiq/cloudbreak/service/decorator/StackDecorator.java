@@ -33,18 +33,18 @@ public class StackDecorator implements Decorator<Stack> {
     @Autowired
     private SecurityService securityService;
 
-    @Value("${cb.aws.ami.map:eu-west-1:ami-f3670284,us-east-1:ami-f8477690,ap-northeast-1:ami-34cd3134,sa-east-1:ami-29e45e34,ap-southeast-1:ami-8a2c1fd8,"
-            + "ap-southeast-2:ami-6132405b,us-west-2:ami-57c7ee67,us-west-1:ami-8d42a2c9}")
+    @Value("${cb.aws.ami.map:ap-northeast-1:ami-b8ad69b8,sa-east-1:ami-5f53d642,ap-southeast-1:ami-76350824,eu-west-1:ami-11345766,"
+            + "ap-southeast-2:ami-5148356b,us-east-1:ami-fa181c92,us-west-1:ami-bd5dbff9,us-west-2:ami-fb1326cb}")
     private String awsImage;
 
-    @Value("${cb.gcp.source.image.path:sequenceiqimage/sequenceiq-ambari17-consul-centos-2015-04-02-1413.image.tar.gz}")
+    @Value("${cb.gcp.source.image.path:sequenceiqimage/cb-centos66-amb200-2-2015-04-20-1027.image.tar.gz}")
     private String gcpImage;
 
     @Value("${cb.azure.image.uri:https://102589fae040d8westeurope.blob.core.windows.net/images/"
-            + "packer-cloudbreak-2015-04-02-centos6-reset_2015-April-2_13-36-os-2015-04-02.vhd}")
+            + "cb-centos66-amb200-2015-04-18_2015-April-18_14-11-os-2015-04-18.vhd}")
     private String azureImage;
 
-    @Value("${cb.openstack.image:cloudbreak-centos-amb17-2015-04-02}")
+    @Value("${cb.openstack.image:cb-centos66-amb200-2015-04-19}")
     private String openStackImage;
 
     private enum DecorationData {
@@ -72,16 +72,16 @@ public class StackDecorator implements Decorator<Stack> {
 
     private String prepareImage(Stack stack) {
         switch (stack.cloudPlatform()) {
-        case AWS:
-            return prepareAmis().get(Regions.valueOf(stack.getRegion()).getName());
-        case AZURE:
-            return azureImage;
-        case GCC:
-            return gcpImage;
-        case OPENSTACK:
-            return openStackImage;
-        default:
-            throw new BadRequestException(String.format("Not supported cloud platform: %s", stack.cloudPlatform()));
+            case AWS:
+                return prepareAmis().get(Regions.valueOf(stack.getRegion()).getName());
+            case AZURE:
+                return azureImage;
+            case GCC:
+                return gcpImage;
+            case OPENSTACK:
+                return openStackImage;
+            default:
+                throw new BadRequestException(String.format("Not supported cloud platform: %s", stack.cloudPlatform()));
         }
     }
 

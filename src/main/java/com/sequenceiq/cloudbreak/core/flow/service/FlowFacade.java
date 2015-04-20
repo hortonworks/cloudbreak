@@ -26,6 +26,8 @@ public interface FlowFacade {
 
     FlowContext handleClusterCreationFailure(FlowContext flowContext) throws CloudbreakException;
 
+    FlowContext handleSecurityEnableFailure(FlowContext flowContext) throws CloudbreakException;
+
     FlowContext startStack(FlowContext context) throws CloudbreakException;
 
     FlowContext stopStack(FlowContext context) throws CloudbreakException;
@@ -59,4 +61,6 @@ public interface FlowFacade {
     FlowContext updateAllowedSubnets(FlowContext context) throws CloudbreakException;
 
     FlowContext handleUpdateAllowedSubnetsFailure(FlowContext context) throws CloudbreakException;
+
+    FlowContext enableSecurity(FlowContext context) throws CloudbreakException;
 }

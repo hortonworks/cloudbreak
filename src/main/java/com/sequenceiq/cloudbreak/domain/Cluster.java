@@ -61,6 +61,11 @@ public class Cluster implements ProvisionEntity {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String statusReason;
 
+    private Boolean secure;
+    private String kerberosMasterKey;
+    private String kerberosAdmin;
+    private String kerberosPassword;
+
     private Boolean emailNeeded;
 
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -172,5 +177,37 @@ public class Cluster implements ProvisionEntity {
 
     public boolean isStateFailed() {
         return status.equals(Status.CREATE_FAILED);
+    }
+
+    public boolean isSecure() {
+        return secure == null ? false : secure;
+    }
+
+    public void setSecure(Boolean secure) {
+        this.secure = secure;
+    }
+
+    public String getKerberosMasterKey() {
+        return kerberosMasterKey;
+    }
+
+    public void setKerberosMasterKey(String kerberosMasterKey) {
+        this.kerberosMasterKey = kerberosMasterKey;
+    }
+
+    public String getKerberosAdmin() {
+        return kerberosAdmin;
+    }
+
+    public void setKerberosAdmin(String kerberosAdmin) {
+        this.kerberosAdmin = kerberosAdmin;
+    }
+
+    public String getKerberosPassword() {
+        return kerberosPassword;
+    }
+
+    public void setKerberosPassword(String kerberosPassword) {
+        this.kerberosPassword = kerberosPassword;
     }
 }

@@ -120,6 +120,16 @@ start_ambari_server() {
   register_ambari
 }
 
+start_ambari_agent() {
+  set_public_host_script
+  set_disk_as_volumes
+  docker run -d --name=ambari-agent --privileged --net=host --restart=always -e BRIDGE_IP=$(get_ip) -e HADOOP_CLASSPATH=/data/jars/*:/usr/lib/hadoop/lib/* -v /data/jars:/data/jars $VOLUMES sequenceiq/ambari:$AMBARI_DOCKER_TAG /start-agent
+}
+
+set_public_host_script() {
+  VOLUMES="$VOLUMES -v /usr/local/public_host_script.sh:/etc/ambari-agent/conf/public-hostname.sh"
+}
+
 set_disk_as_volumes() {
   for fn in `ls /hadoopfs/ | grep fs`; do
     VOLUMES="$VOLUMES -v /hadoopfs/$fn:/hadoopfs/$fn"

@@ -183,6 +183,18 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
+    public FlowContext handleSecurityEnableFailure(FlowContext context) throws CloudbreakException {
+        try {
+            context = clusterFacade.handleSecurityEnableFailure(context);
+            LOGGER.debug("Enable kerberos failure handled.");
+            return context;
+        } catch (Exception e) {
+            LOGGER.error("Exception occurred during enabling kerberos. {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
     public FlowContext startStack(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Starting stack. Context: {}", context);
         try {
@@ -413,6 +425,20 @@ public class SimpleFlowFacade implements FlowFacade {
             throw e;
         } catch (Exception e) {
             LOGGER.error("Exception during the handling of update allowed subnet failure: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext enableSecurity(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Enable kerberos security. Context: {}", context);
+        try {
+            context = clusterFacade.enableSecurity(context);
+            return context;
+        } catch (CloudbreakException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Exception occurred during enabling kerberos security, failure: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }
