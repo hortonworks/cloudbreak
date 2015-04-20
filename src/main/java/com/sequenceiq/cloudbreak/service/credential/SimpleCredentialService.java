@@ -65,9 +65,9 @@ public class SimpleCredentialService implements CredentialService {
     @Override
     public Credential create(CbUser user, Credential credential) {
         LOGGER.debug("Creating credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
-        credentialHandlers.get(credential.cloudPlatform()).init(credential);
         credential.setOwner(user.getUserId());
         credential.setAccount(user.getAccount());
+        credentialHandlers.get(credential.cloudPlatform()).init(credential);
         Credential savedCredential;
         try {
             savedCredential = credentialRepository.save(credential);

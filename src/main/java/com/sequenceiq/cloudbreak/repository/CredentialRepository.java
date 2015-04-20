@@ -28,4 +28,6 @@ public interface CredentialRepository extends CrudRepository<Credential, Long> {
 
     Credential findByNameInUser(@Param("name") String name, @Param("owner") String owner);
 
+    Set<Credential> findByRoleArn(@Param("roleArn") String roleArn);
+
 }

@@ -1,9 +1,19 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Entity;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "account", "name" })
+})
+@NamedQuery(
+        name = "Credential.findByRoleArn",
+        query = "SELECT c FROM Credential c "
+                + "WHERE c.roleArn = :roleArn")
 public class AwsCredential extends Credential implements ProvisionEntity {
 
     private String roleArn;
