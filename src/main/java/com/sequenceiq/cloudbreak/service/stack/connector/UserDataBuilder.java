@@ -23,7 +23,7 @@ public class UserDataBuilder {
     @Value("${cb.host.addr}")
     private String hostAddress;
 
-    @Value("${cb.ambari.docker.tag:1.7.0-consul}")
+    @Value("${cb.ambari.docker.tag:2.0.0-consul}")
     private String ambariDockerTag;
 
     private Map<CloudPlatform, Map<InstanceGroupType, String>> userDataScripts = new HashMap<>();
