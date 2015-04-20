@@ -29,9 +29,9 @@
         </div>
       </div>
       <div class="form-group">
-        <label class="col-sm-3 control-label" for="alarm-{{policy.id}}">alarm</label>
+        <label class="col-sm-3 control-label" for="alert-{{policy.id}}">alert</label>
         <div class="col-sm-9">
-          <p id="alarm-{{policy.id}}" class="form-control-static" ng-repeat="alarm in alarms | filter:{id:policy.alarmId}">{{alarm.alarmName}} (ID:{{policy.alarmId}})</p>
+          <p id="alert-{{policy.id}}" class="form-control-static" ng-repeat="alert in alerts | filter:{id:policy.alertId}">{{alert.alertName}} (ID:{{policy.alertId}})</p>
         </div>
       </div>
     </form>
