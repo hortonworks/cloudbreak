@@ -1,13 +1,10 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
-import java.util.Set;
-
 import com.google.common.base.Optional;
 
 public enum AWSCredentialParam implements TemplateParam {
 
-    ROLE_ARN("roleArn", true, String.class, Optional.<String>absent()),
-    SNS_TOPICS("snsTopics", false, Set.class, Optional.<String>absent());
+    ROLE_ARN("roleArn", true, String.class, Optional.<String>absent());
 
     private final String paramName;
     private final Class clazz;

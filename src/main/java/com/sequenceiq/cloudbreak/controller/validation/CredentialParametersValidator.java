@@ -2,12 +2,14 @@ package com.sequenceiq.cloudbreak.controller.validation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.sequenceiq.cloudbreak.controller.json.CredentialRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.sequenceiq.cloudbreak.controller.json.CredentialRequest;
 
 public class CredentialParametersValidator implements ConstraintValidator<ValidCredentialRequest, CredentialRequest> {
 
@@ -37,13 +39,13 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
         boolean valid = true;
         switch (request.getCloudPlatform()) {
             case AWS:
-                valid = validateAWSParams(request, context);
+                valid = validateParams(request.getParameters(), context, requiredAWSParams);
                 break;
             case AZURE:
-                valid = validateAzureParams(request, context);
+                valid = validateParams(request.getParameters(), context, requiredAzureParams);
                 break;
             case GCC:
-                valid = validateGccParams(request, context);
+                valid = validateParams(request.getParameters(), context, requiredGccParams);
                 break;
             default:
                 break;
@@ -51,27 +53,9 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
         return valid;
     }
 
-    private boolean validateGccParams(CredentialRequest request, ConstraintValidatorContext context) {
+    private boolean validateParams(Map<String, Object> params, ConstraintValidatorContext context, List<TemplateParam> paramConstraints) {
         for (ParameterValidator validator : parameterValidators) {
-            if (!validator.validate(request.getParameters(), context, requiredGccParams)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean validateAzureParams(CredentialRequest request, ConstraintValidatorContext context) {
-        for (ParameterValidator validator : parameterValidators) {
-            if (!validator.validate(request.getParameters(), context, requiredAzureParams)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean validateAWSParams(CredentialRequest request, ConstraintValidatorContext context) {
-        for (ParameterValidator validator : parameterValidators) {
-            if (!validator.validate(request.getParameters(), context, requiredAWSParams)) {
+            if (!validator.validate(params, context, paramConstraints)) {
                 return false;
             }
         }

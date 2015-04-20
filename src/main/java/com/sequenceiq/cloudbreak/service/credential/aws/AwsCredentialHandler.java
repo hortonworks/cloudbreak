@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.credential.aws;
 
 import java.util.Random;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,8 @@ import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.credential.RsaPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsStackUtil;
@@ -34,6 +37,9 @@ public class AwsCredentialHandler implements CredentialHandler<AwsCredential> {
     @Autowired
     private AwsStackUtil awsStackUtil;
 
+    @Autowired
+    private CredentialRepository credentialRepository;
+
     @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AWS;
@@ -42,7 +48,8 @@ public class AwsCredentialHandler implements CredentialHandler<AwsCredential> {
     @Override
     public AwsCredential init(AwsCredential awsCredential) {
         rsaPublicKeyValidator.validate(awsCredential);
-        validateIamRole(awsCredential);
+        validateIamRoleUniqueness(awsCredential);
+        validateIamRoleIsAssumable(awsCredential);
         return importKeyPairs(awsCredential);
     }
 
@@ -92,7 +99,17 @@ public class AwsCredentialHandler implements CredentialHandler<AwsCredential> {
         return awsCredential;
     }
 
-    private void validateIamRole(AwsCredential awsCredential) {
+
+    private void validateIamRoleUniqueness(AwsCredential credential) {
+        Set<Credential> credentials = credentialRepository.findByRoleArn(credential.getRoleArn());
+        for (Credential c : credentials) {
+            if (!c.getAccount().equals(credential.getAccount())) {
+                throw new BadRequestException(String.format("IAM role '%s' is already in use by a different account.", credential.getRoleArn()));
+            }
+        }
+    }
+
+    private void validateIamRoleIsAssumable(AwsCredential awsCredential) {
         try {
             crossAccountCredentialsProvider.retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
                     crossAccountCredentialsProvider.getExternalId(), awsCredential);
