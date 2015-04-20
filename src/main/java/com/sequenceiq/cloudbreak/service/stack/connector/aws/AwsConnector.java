@@ -45,6 +45,7 @@ import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.Address;
 import com.amazonaws.services.ec2.model.AllocateAddressRequest;
 import com.amazonaws.services.ec2.model.AllocateAddressResult;
 import com.amazonaws.services.ec2.model.AssociateAddressRequest;
@@ -53,6 +54,8 @@ import com.amazonaws.services.ec2.model.CreateSnapshotResult;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeResult;
+import com.amazonaws.services.ec2.model.DescribeAddressesRequest;
+import com.amazonaws.services.ec2.model.DescribeAddressesResult;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
 import com.amazonaws.services.ec2.model.DescribeImagesRequest;
@@ -61,6 +64,7 @@ import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.DescribeSnapshotsRequest;
 import com.amazonaws.services.ec2.model.DescribeSnapshotsResult;
+import com.amazonaws.services.ec2.model.DisassociateAddressRequest;
 import com.amazonaws.services.ec2.model.DomainType;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.Image;
@@ -352,7 +356,6 @@ public class AwsConnector implements CloudPlatformConnector {
         Resource resource = stack.getResourceByType(ResourceType.CLOUDFORMATION_STACK);
         if (resource != null) {
             AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(Regions.valueOf(stack.getRegion()), awsCredential);
-            AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
             String cFStackName = resource.getResourceName();
             LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", stack.getId(), cFStackName);
             DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
@@ -360,6 +363,7 @@ public class AwsConnector implements CloudPlatformConnector {
                 client.describeStacks(describeStacksRequest);
             } catch (AmazonServiceException e) {
                 if (e.getErrorMessage().equals("Stack:" + cFStackName + " does not exist")) {
+                    AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
                     releaseReservedIp(stack, amazonEC2Client);
                     return;
                 } else {
@@ -376,8 +380,9 @@ public class AwsConnector implements CloudPlatformConnector {
                 PollingResult pollingResult = cloudFormationPollingService
                         .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
                 if (!isSuccess(pollingResult)) {
-                    throw new CloudResourceOperationFailedException("Failed to update Heat stack, because polling reached an invalid end state.");
+                    throw new CloudResourceOperationFailedException("Failed to delete CloudFormation stack, because polling reached an invalid end state.");
                 }
+                AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
                 releaseReservedIp(stack, amazonEC2Client);
             } catch (CloudFormationStackException e) {
                 LOGGER.error(String.format("Failed to delete CloudFormation stack: %s, id:%s", cFStackName, stack.getId()), e);
@@ -388,12 +393,26 @@ public class AwsConnector implements CloudPlatformConnector {
         }
     }
 
-    private void releaseReservedIp(Stack stack, AmazonEC2Client amazonEC2Client) {
-        Resource resourceByType = stack.getResourceByType(ResourceType.AWS_RESERVED_IP);
-        if (resourceByType != null) {
-            ReleaseAddressRequest releaseAddressRequest = new ReleaseAddressRequest()
-                    .withAllocationId(resourceByType.getResourceName());
-            amazonEC2Client.releaseAddress(releaseAddressRequest);
+    private void releaseReservedIp(Stack stack, AmazonEC2Client client) {
+        Resource elasticIpResource = stack.getResourceByType(ResourceType.AWS_RESERVED_IP);
+        if (elasticIpResource != null && elasticIpResource.getResourceName() != null) {
+            Address address = null;
+            try {
+                DescribeAddressesResult describeResult = client.describeAddresses(
+                        new DescribeAddressesRequest().withAllocationIds(elasticIpResource.getResourceName()));
+                address = describeResult.getAddresses().get(0);
+            } catch (AmazonServiceException e) {
+                if (e.getErrorMessage().equals("The allocation ID '" + elasticIpResource.getResourceName() + "' does not exist")) {
+                    LOGGER.warn("Elastic IP with allocation ID '{}' not found. Ignoring IP release.");
+                    return;
+                } else {
+                    throw e;
+                }
+            }
+            if (address.getAssociationId() != null) {
+                client.disassociateAddress(new DisassociateAddressRequest().withAssociationId(elasticIpResource.getResourceName()));
+            }
+            client.releaseAddress(new ReleaseAddressRequest().withAllocationId(elasticIpResource.getResourceName()));
         }
     }
 
