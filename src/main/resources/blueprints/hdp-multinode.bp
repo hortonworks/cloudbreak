@@ -1,0 +1,206 @@
+{
+  "configurations": [
+    {
+      "hive-site": {
+        "javax.jdo.option.ConnectionUserName": "hive",
+        "javax.jdo.option.ConnectionPassword": "hive"
+      }
+    }
+  ],
+  "host_groups": [
+    {
+      "name": "master_1",
+      "components": [
+        {
+          "name": "NAMENODE"
+        },
+        {
+          "name": "ZOOKEEPER_SERVER"
+        },
+        {
+          "name": "HBASE_MASTER"
+        },
+        {
+          "name": "SPARK_JOBHISTORYSERVER"
+        },
+        {
+          "name": "GANGLIA_SERVER"
+        },
+        {
+          "name": "HDFS_CLIENT"
+        },
+        {
+          "name": "YARN_CLIENT"
+        },
+        {
+          "name": "HCAT"
+        },
+        {
+          "name": "GANGLIA_MONITOR"
+        },
+        {
+          "name": "FALCON_SERVER"
+        },
+        {
+          "name": "FLUME_HANDLER"
+        },
+        {
+          "name": "KAFKA_BROKER"
+        }
+      ],
+      "cardinality": "1"
+    },
+    {
+      "name": "master_2",
+      "components": [
+        {
+          "name": "ZOOKEEPER_CLIENT"
+        },
+        {
+          "name": "HISTORYSERVER"
+        },
+        {
+          "name": "HIVE_SERVER"
+        },
+        {
+          "name": "SECONDARY_NAMENODE"
+        },
+        {
+          "name": "HIVE_METASTORE"
+        },
+        {
+          "name": "HDFS_CLIENT"
+        },
+        {
+          "name": "HIVE_CLIENT"
+        },
+        {
+          "name": "YARN_CLIENT"
+        },
+        {
+          "name": "MYSQL_SERVER"
+        },
+        {
+          "name": "GANGLIA_MONITOR"
+        },
+        {
+          "name": "WEBHCAT_SERVER"
+        }
+      ],
+      "cardinality": "1"
+    },
+    {
+      "name": "master_3",
+      "components": [
+        {
+          "name": "RESOURCEMANAGER"
+        },
+        {
+          "name": "APP_TIMELINE_SERVER"
+        },
+        {
+          "name": "SLIDER"
+        },
+        {
+          "name": "ZOOKEEPER_SERVER"
+        },
+        {
+          "name": "GANGLIA_MONITOR"
+        }
+      ],
+      "cardinality": "1"
+    },
+    {
+      "name": "master_4",
+      "components": [
+        {
+          "name": "OOZIE_SERVER"
+        },
+        {
+          "name": "ZOOKEEPER_SERVER"
+        },
+        {
+          "name": "GANGLIA_MONITOR"
+        }
+      ],
+      "cardinality": "1"
+    },
+    {
+      "name": "slave_1",
+      "components": [
+        {
+          "name": "HBASE_REGIONSERVER"
+        },
+        {
+          "name": "NODEMANAGER"
+        },
+        {
+          "name": "SPARK_CLIENT"
+        },
+        {
+          "name": "DATANODE"
+        },
+        {
+          "name": "GANGLIA_MONITOR"
+        },
+        {
+          "name": "FALCON_CLIENT"
+        },
+        {
+          "name": "OOZIE_CLIENT"
+        }
+      ],
+      "cardinality": "${slavesCount}"
+    },
+    {
+      "name": "gateway",
+      "components": [
+        {
+          "name": "AMBARI_SERVER"
+        },
+        {
+          "name": "ZOOKEEPER_CLIENT"
+        },
+        {
+          "name": "PIG"
+        },
+        {
+          "name": "OOZIE_CLIENT"
+        },
+        {
+          "name": "HBASE_CLIENT"
+        },
+        {
+          "name": "HCAT"
+        },
+        {
+          "name": "SQOOP"
+        },
+        {
+          "name": "HDFS_CLIENT"
+        },
+        {
+          "name": "HIVE_CLIENT"
+        },
+        {
+          "name": "YARN_CLIENT"
+        },
+        {
+          "name": "MAPREDUCE2_CLIENT"
+        },
+        {
+          "name": "GANGLIA_MONITOR"
+        },
+        {
+          "name": "KNOX_GATEWAY"
+        }
+      ],
+      "cardinality": "1"
+    }
+  ],
+  "Blueprints": {
+    "blueprint_name": "hdp-multinode",
+    "stack_name": "HDP",
+    "stack_version": "2.2"
+  }
+}
