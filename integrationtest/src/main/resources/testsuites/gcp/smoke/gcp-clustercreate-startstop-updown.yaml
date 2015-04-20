@@ -1,0 +1,87 @@
+# GCP credential name must be specified
+name: Gcp smoke test
+parameters: {
+  cloudProvider: GCP
+}
+
+tests:
+  - name: init
+    classes:
+      - com.sequenceiq.it.TestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+
+  - name: create gateway template
+    parameters: {
+      gccName: it-gcp-smoke-gateway-ssud,
+      gccInstanceType: N1_STANDARD_4,
+      volumeType: HDD,
+      volumeCount: 1,
+      volumeSize: 30,
+      templateAdditions: "cbgateway,1,GATEWAY"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.GCCTemplateCreationTest
+
+  - name: create master template
+    parameters: {
+      gccName: it-gcp-smoke-master-ssud,
+      gccInstanceType: N1_HIGHMEM_8,
+      volumeType: HDD,
+      volumeCount: 2,
+      volumeSize: 100,
+      templateAdditions: "master,1"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.GCCTemplateCreationTest
+
+  - name: create slave template
+    parameters: {
+      gccName: it-gcp-smoke-slave-ssud,
+      gccInstanceType: N1_HIGHCPU_4,
+      volumeType: SSD,
+      volumeCount: 3,
+      volumeSize: 500,
+      templateAdditions: "slave_1,3"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.GCCTemplateCreationTest
+
+  - name: create cluster
+    parameters: {
+      stackName: it-gcp-stack-ssud,
+      region: EUROPE_WEST1_B,
+      clusterName: it-gcp-cluster-ssud
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.StackCreationTest
+      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
+  - name: stop cluster
+    parameters: {
+      newStatus: STOPPED
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+
+  - name: start cluster
+    parameters: {
+      newStatus: STARTED
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+
+  - name: upscale
+    parameters: {
+      instanceGroup: slave_1,
+      scalingAdjustment: 3
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.ScalingTest
+
+  - name: downscale
+    parameters: {
+      instanceGroup: slave_1,
+      scalingAdjustment: -2
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.ScalingTest

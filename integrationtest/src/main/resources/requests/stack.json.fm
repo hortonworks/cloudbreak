@@ -14,7 +14,8 @@
       {
           "templateId":"${instanceGroup.templateId}",
           "group":"${instanceGroup.name}",
-          "nodeCount":${instanceGroup.nodeCount}
+          "nodeCount":${instanceGroup.nodeCount},
+          "type":"${instanceGroup.type}"
       }<#if instanceGroup_has_next>,</#if>
     </#list>
     ]
