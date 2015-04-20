@@ -108,11 +108,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             var blueprint = $filter('filter')($rootScope.blueprints, {id: $scope.cluster.blueprintId}, true)[0];
 
             if (blueprint.hostGroupCount > $scope.cluster.nodeCount) {
-                $scope.showError($rootScope.error_msg.hostgroup_invalid_node_count);
+                $scope.showErrorMessage($rootScope.error_msg.hostgroup_invalid_node_count);
                 return;
             }
             if (blueprint.hostGroupCount === 1 && $scope.cluster.nodeCount != 1) {
-                $scope.showError($rootScope.error_msg.hostgroup_single_invalid);
+                $scope.showErrorMessage($rootScope.error_msg.hostgroup_single_invalid);
                 return;
             }
             $scope.cluster.credentialId = $rootScope.activeCredential.id;
