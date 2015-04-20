@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 @Component
 public class RetryingStackUpdater {
 
+    private static final int INITIAL_ATTEMPT = 1;
     private static final int MAX_RETRIES = 5;
     private static final Logger LOGGER = LoggerFactory.getLogger(RetryingStackUpdater.class);
 
@@ -183,15 +184,18 @@ public class RetryingStackUpdater {
     }
 
     public Stack updateStack(Stack stack) {
-        int attempt = 1;
+        return doUpdateStack(stack, INITIAL_ATTEMPT);
+    }
+
+    private Stack doUpdateStack(Stack stack, int attempt) {
         try {
             return stackRepository.save(stack);
         } catch (OptimisticLockException | OptimisticLockingFailureException e) {
             if (attempt <= MAX_RETRIES) {
-                LOGGER.info("Failed to update stack. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt++, e.getClass().getSimpleName());
-                return stackRepository.save(stack);
+                LOGGER.info("Failed to update stack. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt, e.getClass().getSimpleName());
+                return doUpdateStack(stack, attempt + 1);
             } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts.", stack.getId()), e);
+                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts.", stack.getId(), MAX_RETRIES), e);
             }
         }
     }
