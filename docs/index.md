@@ -7,7 +7,7 @@ Cloudbreak
 
 *Cloudbreak is a cloud agnostic Hadoop as a Service API. Abstracts the provisioning and ease management and monitoring of on-demand clusters.*
 
-Cloudbreak [API documentation](http://docs.cloudbreak.apiary.io/).
+Cloudbreak [API documentation](https://cloudbreak-api.sequenceiq.com/docs/index.html).
 
 <!--main.md-->
 
@@ -56,13 +56,13 @@ A template can be used repeatedly to create identical copies of the same stack (
 The infrastructure specific configuration is available under the Cloudbreak [resources](https://github.com/sequenceiq/cloudbreak/blob/master/src/main/resources/templates).
 As an example for Amazon EC2, we use [AWS Cloudformation](http://aws.amazon.com/cloudformation/) to define the cloud infrastructure .
 
-For further information please visit our [API documentation](http://docs.cloudbreak.apiary.io/#templates).
+For further information please visit our [API documentation](https://cloudbreak-api.sequenceiq.com/docs/index.html#/templates).
 
 ###Stacks
 
 Stacks are template `instances` - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 
-For further information please visit our [API documentation](http://docs.cloudbreak.apiary.io/#stacks).
+For further information please visit our [API documentation](https://cloudbreak-api.sequenceiq.com/docs/index.html#/stack).
 
 ###Blueprints
 
@@ -70,14 +70,14 @@ Ambari Blueprints are a declarative definition of a Hadoop cluster. With a Bluep
 
 We have a few default blueprints available from multi node blueprints to lambda architectures.
 
-For further information please visit our [API documentation](http://docs.cloudbreak.apiary.io/#blueprints).
+For further information please visit our [API documentation](https://cloudbreak-api.sequenceiq.com/docs/index.html#/blueprints).
 
 ###Cluster
 
 Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack.
 Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
 
-For further information please visit our [API documentation](http://docs.cloudbreak.apiary.io/#clusters).
+For further information please visit our [API documentation](https://cloudbreak-api.sequenceiq.com/docs/index.html#/cluster).
 
 <!--howitworks.md-->
 
@@ -171,7 +171,6 @@ At high level the supported list of components can be grouped into main categori
 | HIVE		    | HIVE_CLIENT, HIVE_METASTORE, HIVE_SERVER, MYSQL_SERVER                  |
 | HCATALOG	  | HCAT                                                                    |
 | WEBHCAT		  | WEBHCAT_SERVER                                                          |
-| NAGIOS		  | NAGIOS_SERVER                                                           |
 | OOZIE		    | OOZIE_CLIENT, OOZIE_SERVER                                              |
 | PIG		      | PIG                                                                     |
 | SQOOP		    | SQOOP                                                                   |
@@ -179,6 +178,14 @@ At high level the supported list of components can be grouped into main categori
 | TEZ		      | TEZ_CLIENT                                                              |
 | FALCON		  | FALCON_CLIENT, FALCON_SERVER                                            |
 | ZOOKEEPER	  | ZOOKEEPER_CLIENT, ZOOKEEPER_SERVER                                      |
+| SPARK	  | SPARK_JOBHISTORYSERVER, SPARK_CLIENT                                      |
+| RANGER	  | RANGER_USERSYNC, RANGER_ADMIN                                      |
+| AMBARI_METRICS	  | AMBARI_METRICS, METRICS_COLLECTOR, METRICS_MONITOR                                      |
+| KERBEROS	  | KERBEROS_CLIENT                                      |
+| FLUME	  | FLUME_HANDLER                                      |
+| KAFKA	  | KAFKA_BROKER                                      |
+| KNOX	  | KNOX_GATEWAY                                      |
+| NAGIOS	  | NAGIOS_SERVER                                      |
 
 
 We provide a list of default Hadoop cluster Blueprints for your convenience, however you can always build and use your own Blueprint.
@@ -840,9 +847,7 @@ Product documentation: <a href=http://sequenceiq.com/cloudbreak>http://sequencei
 GitHub: <a href=https://github.com/sequenceiq/cloudbreak/blob/master/docs/index.md>https://github.com/sequenceiq/cloudbreak/blob/master/docs/index.md</a>
 
 
-API documentation: <a href=http://docs.cloudbreak.apiary.io>http://docs.cloudbreak.apiary.io</a>
-
-GitHub: <a href=https://github.com/sequenceiq/cloudbreak/blob/master/apiary.apib>https://github.com/sequenceiq/cloudbreak/blob/master/apiary.apib</a>
+API documentation: <a href=https://cloudbreak-api.sequenceiq.com/docs/index.html>https://cloudbreak.sequenceiq.com/docs</a>
 
 ###Ways to contribute
 
