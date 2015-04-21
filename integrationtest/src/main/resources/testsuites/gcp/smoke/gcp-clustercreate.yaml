@@ -1,5 +1,5 @@
 # GCP credential name must be specified
-name: Gcp smoke test
+name: Gcp_simple_smoketest
 parameters: {
   cloudProvider: GCP
 }

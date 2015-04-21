@@ -1,4 +1,4 @@
-# AZURE credential name must be specified
+# Aws credential name must be specified
 name: AWS smoke test
 parameters: {
   cloudProvider: AWS
@@ -56,6 +56,20 @@ tests:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterCreationTest
 
+  - name: stop cluster
+    parameters: {
+      newStatus: STOPPED
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+
+  - name: start cluster
+    parameters: {
+      newStatus: STARTED
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+
   - name: upscale
     parameters: {
       instanceGroup: slave_1,
@@ -71,17 +85,3 @@ tests:
     }
     classes:
       - com.sequenceiq.it.cloudbreak.ScalingTest
-
-  - name: stop cluster
-    parameters: {
-      newStatus: STOPPED
-    }
-    classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
-
-  - name: start cluster
-    parameters: {
-      newStatus: STARTED
-    }
-    classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest

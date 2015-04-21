@@ -8,12 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.testng.Assert;
 
-import com.jayway.restassured.path.json.JsonPath;
-import com.jayway.restassured.response.Response;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.util.RestUtil;
+
+import groovyx.net.http.HttpResponseException;
 
 public class CloudbreakUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakUtil.class);
@@ -48,16 +47,17 @@ public class CloudbreakUtil {
         do {
             LOGGER.info("Waiting for stack status {}, stack id: {}, current status {} ...", desiredStatus, stackId, stackStatus);
             sleep();
-            Response response = RestUtil.entityPathRequest(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER),
-                    itContext.getContextParam(IntegrationTestContext.AUTH_TOKEN), "stackId", stackId).
-                    get("stacks/{stackId}/status");
-            if (response.getStatusCode() != HttpStatus.OK.value() && response.getStatusCode() != HttpStatus.NOT_FOUND.value()) {
-                continue;
-            }
-            JsonPath stack = response.jsonPath();
-            stackStatus = stack.get(statusPath);
-            if (stackStatus == null) {
-                stackStatus = "DELETE_COMPLETED";
+            CloudbreakClient client = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class);
+
+            try {
+                Map<String, Object> statusResult = (Map<String, Object>) client.getFullStackStatus(Integer.valueOf(stackId));
+                stackStatus = (String) statusResult.get(statusPath);
+            } catch (Exception exception) {
+                if (exception instanceof HttpResponseException && ((HttpResponseException) exception).getStatusCode() == HttpStatus.NOT_FOUND.value()) {
+                    stackStatus = "DELETE_COMPLETED";
+                } else {
+                    continue;
+                }
             }
             retryCount++;
         } while (!desiredStatus.equals(stackStatus) && !stackStatus.contains("FAILED") && retryCount < MAX_RETRY);
