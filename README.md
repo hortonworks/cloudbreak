@@ -1,10 +1,10 @@
-Cloudbreak Deployer helps to deploy a cloudbreak environment into docker containers.
-For recent changes please check [CHANGELOG.md](https://github.com/sequenceiq/cloudbreak-deployer/blob/master/CHANGELOG.md).
+Cloudbreak Deployer helps to deploy a Cloudbreak environment into Docker containers.
+For recent changes please check the [CHANGELOG.md](https://github.com/sequenceiq/cloudbreak-deployer/blob/master/CHANGELOG.md).
 
 ## Requirements
 
-Right now **Linux** and **OSX** 64 bit binaries are released from Cloudbreak Deployer. For anything else we will create a special docker container.
-The deployment itself needs only **Dcoker 1.5.0** or later.
+Currently only **Linux** and **OSX** 64 bit binaries are released for Cloudbreak Deployer. For anything else we will create a special Docker container.
+The deployment itself needs only **Docker 1.5.0** or later.
 
 ## Installation
 
@@ -27,28 +27,30 @@ cd cloudbreak-deployment
 
 ### Initialize
 First lets initialize your directory by creating a `Profile`
+
 ```
 cbd init
 ```
 
 ### Pull Docker images
 
-All cloudbreak componont, and its supporting db is running in a container.
-To download all needed Docker image, with correct tag, run the command:
+All Cloudbreak components and the backend database is running inside containers.
+To download all the needed Docker images, with the correct tag, run the command:
+
 ```
 cbd pull
 ```
 
-It will take some minutes, depending on your network conditions, so you
-can grab a cup of coffee.
+It will take some time, depending on your network connection, so you can grab a cup of coffee.
 
-### Deploy cloudbreak
+### Deploy Cloudbreak
 
 To start all the containers run:
+
 ```
 cbd start
 ```
-If one of the containers are already running, it won’t be started again.
+If one of the container is already running, it won’t be started again.
 
 ### Whatch the logs
 
@@ -57,17 +59,15 @@ cbd logs
 ```
 ## Configuration
 
-Configuration is based on environment variables. Cloudbreak Deployer always forks a new
-bash subprocess **without inheriting env vars**. The only way to set env vars relevant to 
-Cloudbreak Deployer is to set them in a file called `Profile`.
+Configuration is based on environment variables. Cloudbreak Deployer always forks a new bash subprocess **without inheriting environment variables**. The only way to set ENV vars relevant for Cloudbreak Deployer is to set them in a file called `Profile`.
 
 To see all available config variables with their default value:
+
 ```
 cbd env show
 ```
 
-The `Profile` will be simple **sourced** by bash terms, so you can use the usual syntax
-to set config values:
+The `Profile` will be simple **sourced** in bash terms, so you can use the usual syntaxes to set config values:
 
 ```
 export MY_VAR=some_value
@@ -76,12 +76,11 @@ export OTHER_VAR=dunno
 
 ## Default Credentials
 
-If you watch the output of `cbd env` you can see the default identity:
+If you check the output of `cbd env` you can see the default principal/credential combination:
 - user: **admin@example.com**
 - user: **cloudbreak**
 
-These values are than generated into the end of `uaa.yml`.
-To change these values, add 2 lines into your Profile:
+These values are generated in the `uaa.yml` end section. To change these values, add 2 lines into your Profile:
 
 ```
 export UAA_DEFAULT_USER_EMAIL=myself@example.com
@@ -95,7 +94,7 @@ cbd generate
 
 ### Env specific Profile
 
-Let’s say you want to use a different `DOCKER_TAG_CLOUDBREAK` for **prod** and **qa** profile.
+Let’s say you want to use a different version of Cloudbreak `DOCKER_TAG_CLOUDBREAK` for **prod** and **qa** profile.
 `Profile` is always sourced, so you will have two env specific configurations:
 - `Profile.dev`
 - `Profile.qa`
@@ -103,7 +102,7 @@ Let’s say you want to use a different `DOCKER_TAG_CLOUDBREAK` for **prod** and
 For prod you need:
 
 - create a file called `Profile.prod`
-- wirte the env specific `export DOCKER_TAG_CLOUDBREAK=0.3.99` into `Profile.prod`
+- write the env specific `export DOCKER_TAG_CLOUDBREAK=0.3.99` into `Profile.prod`
 - set the env variable: `CBD_DEFAULT_PROFILE=prod`
 
 To use the `prod` specific profile once:
@@ -116,34 +115,37 @@ For permanent setting you can `export CBD_DEFAULT_PROFILE=prod` in your `.bash_p
 ## Debug
 
 If you want to have more detailed output set the `DEBUG` env variable to non-zero:
+
 ```
 DEBUG=1 cbd some_command
 ```
 
 You can also use the `doctor` command to diagnose your environment:
+
 ```
 cbd doctor
 ```
 
 ## Update
 
-The tool is capable of upgrade itself:
+The tool is capable to upgrade itself to a newer version.
+
 ```
 cbd update
 ```
 
-## Core Containers
+## Core Cloudbreak Containers
 
 - **uaa**: OAuth Identity Server
-- cloudbreak
-- persicope
-- uluwatu
-- sultans
+- cloudbreak - the Cloudbreak app
+- persicope - the Periscope app
+- uluwatu - Cloudbreak UI
+- sultans - user management
 
 ## System Level Containers
 
 - consul: Service Registry
-- registrator: automatically registers/deregisters containers into consul
+- registrator: automatically registers/deregisters containers into Consul
 
 ## Contribution
 
@@ -154,16 +156,16 @@ To build the project
 # make deps needed only once
 make deps
 
-make instal
+make install
 ```
 
 To run the unit tests:
+
 ```
 make tests
 ```
 
-If you want to test the binary CircleCI built from your branch named `fix-something`, 
-To validate the PR the binary `cbd` tool will be tested. Its built by CircleCI for each branch.
+If you want to test the binary CircleCI build from your branch named `fix-something`, to validate the PR binary `cbd` tool will be tested. It is built by CircleCI for each branch.
 
 ```
 cbdl update-snap fix-something
@@ -171,12 +173,10 @@ cbdl update-snap fix-something
 
 ## Testing
 
-Shell scripts shouldn’t be exceptions when it comes to unit testing. [basht](https://github.com/progrium/basht)
-is used for testing. See the reasoning about: [why not bats or shunit2](https://github.com/progrium/basht#why-not-bats-or-shunit2)
+Shell scripts shouldn’t raise exceptions when it comes to unit testing. [basht](https://github.com/progrium/basht) is used for testing. See the reasoning: [why not bats or shunit2](https://github.com/progrium/basht#why-not-bats-or-shunit2)
 
-Please cover your bahs functions with unit tests.
+Please cover your bash functions with unit tests and run test with:
 
-running test performed by:
 ```
 make tests
 ```
@@ -217,10 +217,9 @@ export CLOUDBREAK_SMTP_SENDER_FROM=
 - **DOCKER_TAG_ULUWATU** : tbd 
 - **PERISCOPE_DB_HBM2DDL_STRATEGY** : tbd 
 
+## Release Process of the Clodbreak Deployer tool
 
-## Release Process of Clodbreak Deployer tool
-
-the master branch is always built on [CircleCI](https://circleci.com/gh/sequenceiq/cloudbreak-deployer).
+The master branch is always built on [CircleCI](https://circleci.com/gh/sequenceiq/cloudbreak-deployer).
 When you wan’t a new release, all you have to do:
 
 - create a PullRequest for the release branch:
@@ -229,10 +228,10 @@ When you wan’t a new release, all you have to do:
   - create a new **Unreleased** section in top of `CHANGELOG.md`
 
 Once the PR is merged, CircleCI will:
-- create a new release on [github releases tab](https://github.com/sequenceiq/cloudbreak-deployer/releases), with the help of the [gh-release](https://github.com/progrium/gh-release).
+- create a new release on [GitHub releases tab](https://github.com/sequenceiq/cloudbreak-deployer/releases), with the help of [gh-release](https://github.com/progrium/gh-release).
 - it will create the git tag with `v` prefix like: `v0.0.3`
 
-Sample command when version 0.0.3 was released:
+Sample release command(s) of version 0.0.3 release:
 
 ```
 export OLD_VER=$(cat VERSION)
@@ -250,10 +249,10 @@ git push origin release-$VER
 hub pull-request -b release -m "release $VER"
 ```
 
-## Ceveats
+## Caveats
 
-The **Cloudbreak Deployer** tool opens a clean bash subshell, without inheriting env vars.
-Actually the foolowing env vars _are_ inherited: 
+The **Cloudbreak Deployer** tool opens a clean bash subshell, without inheriting ENV vars.
+Actually the foolowing ENV vars _are_ inherited: 
 
 - `HOME`
 - `DEBUG`
@@ -263,6 +262,6 @@ Actually the foolowing env vars _are_ inherited:
 
 ## Credits
 
-This tool, and the PR driven release, is very much inspired by [glidergun](https://github.com/gliderlabs/glidergun). Actually it
+This tool, and the PR driven release, is inspired from [glidergun](https://github.com/gliderlabs/glidergun). Actually it
 could be a fork of it. The reason it’s not a fork, because we wanted to have our own binary with all modules
 built in, so only a single binary is needed.
