@@ -17,6 +17,11 @@ public class DefaultHostGroupService implements HostGroupService {
     }
 
     @Override
+    public HostGroup save(HostGroup hostGroup) {
+        return hostGroupRepository.save(hostGroup);
+    }
+
+    @Override
     public HostGroup getByClusterIdAndInstanceGroupName(Long clusterId, String instanceGroupName) {
         return hostGroupRepository.findHostGroupsByInstanceGroupName(clusterId, instanceGroupName);
     }
