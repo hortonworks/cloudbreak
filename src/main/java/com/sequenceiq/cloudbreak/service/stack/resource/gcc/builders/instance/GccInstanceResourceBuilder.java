@@ -279,14 +279,14 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         if (instance != null) {
             InstanceMetaData metaData = instanceMetaDataRepository.findByInstanceId(resource.getResourceName());
             Stack stack = startStopContextObject.getStack();
-            String publicDnsName = instance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP();
+            String publicIP = instance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP();
             if (metaData.getAmbariServer()) {
-                stack.setAmbariIp(publicDnsName);
+                stack.setAmbariIp(publicIP);
                 Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
                 stack.setCluster(cluster);
                 stackRepository.save(stack);
             }
-            metaData.setPublicIp(publicDnsName);
+            metaData.setPublicIp(publicIP);
             instanceMetaDataRepository.save(metaData);
         } else {
             LOGGER.error(String.format("Can't find instance by resource name (instance id) : %s", resource.getResourceName()));
