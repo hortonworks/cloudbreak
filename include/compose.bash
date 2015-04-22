@@ -17,9 +17,10 @@ compose-pull() {
 
 compose-up() {
     declare desc="Starts containers with docker-compose"
+    declare services="$@"
 
     deployer-generate
-    docker-compose up -d
+    docker-compose up -d $services
 }
 
 compose-kill() {
@@ -128,7 +129,7 @@ cloudbreak:
         - CB_GCP_SOURCE_IMAGE_PATH=$CB_GCP_SOURCE_IMAGE_PATH
         - CB_AWS_AMI_MAP=$CB_AWS_AMI_MAP
         - CB_OPENSTACK_IMAGE=$CB_OPENSTACK_IMAGE
-          #- CB_HBM2DDL_STRATEGY=create
+        - CB_HBM2DDL_STRATEGY=$CB_HBM2DDL_STRATEGY
         - CB_SMTP_SENDER_USERNAME=$CLOUDBREAK_SMTP_SENDER_USERNAME
         - CB_SMTP_SENDER_PASSWORD=$CLOUDBREAK_SMTP_SENDER_PASSWORD
         - CB_SMTP_SENDER_HOST=$CLOUDBREAK_SMTP_SENDER_HOST
