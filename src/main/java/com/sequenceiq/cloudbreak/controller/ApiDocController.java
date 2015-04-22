@@ -8,8 +8,8 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class ApiDocController {
 
-    @RequestMapping(value = "/docs", method = RequestMethod.GET)
+    @RequestMapping(value = "/api", method = RequestMethod.GET)
     public ModelAndView apiDocs() {
-        return new ModelAndView("redirect:/docs/index.html");
+        return new ModelAndView("redirect:/api/index.html");
     }
 }
