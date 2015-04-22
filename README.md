@@ -52,7 +52,7 @@ cbd start
 ```
 If one of the container is already running, it won’t be started again.
 
-### Whatch the logs
+### Watch the logs
 
 ```
 cbd logs
