@@ -14,9 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.io.Resource;
 import org.springframework.util.CollectionUtils;
 import org.testng.TestNG;
@@ -25,7 +26,8 @@ import org.testng.xml.XmlSuite;
 
 import com.sequenceiq.it.cloudbreak.config.ITProps;
 
-@SpringBootApplication
+@EnableAutoConfiguration
+@ComponentScan(basePackages = "com.sequenceiq.it")
 @EnableConfigurationProperties(ITProps.class)
 public class IntegrationTestApp implements CommandLineRunner {
     private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestApp.class);

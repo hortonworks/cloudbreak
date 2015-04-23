@@ -1,0 +1,65 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    }
+}
+
+jar {
+    baseName = 'cloudbreak-integration-test'
+}
+
+apply plugin: 'spring-boot'
+
+mainClassName = 'com.sequenceiq.it.IntegrationTestApp'
+
+dependencies {
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter', version: "${springBootVersion}"
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "${springBootVersion}"
+    compile group: 'org.springframework', name: 'spring-web', version: '4.1.4.RELEASE'
+    compile group: 'org.springframework', name: 'spring-context-support', version: '4.1.4.RELEASE'
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.3.5'
+    compile ('com.sequenceiq:cloudbreak-rest-client:0.4.3') {
+        exclude group: 'org.slf4j';
+    }
+    compile "org.testng:testng:6.8.21"
+}
+
+task buildInfo(type: BuildInfoTask) {
+    destination = file("$buildDir")
+    applicationPropertiesPath = "$buildDir"
+    basename = jar.baseName
+    buildVersion =  projVersion
+
+}
+
+compileJava.dependsOn buildInfo
+
+class BuildInfoTask extends DefaultTask {
+    File destination = new File("build.info")
+    String applicationPropertiesPath
+    String basename
+    String buildVersion
+
+    @TaskAction
+    def writeBuildInfo() {
+        destination.mkdirs()
+        File applicationDestination = new File(applicationPropertiesPath + "/resources/main")
+        applicationDestination.mkdirs()
+        new File(destination, "build.info").withWriter { out ->
+            [
+                    "ARTIFACT_BASENAME=" + basename,
+                    "ARTIFACT_VERSION=" + buildVersion,
+            ].each { out.println it }
+        }
+        new File(applicationDestination, "application.properties").withWriter { out ->
+            [
+                    "info.app.name=" + basename,
+                    "info.app.version=" + buildVersion
+            ].each { out.println it }
+        }
+    }
+}
