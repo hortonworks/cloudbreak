@@ -31,156 +31,43 @@ public class RetryingStackUpdater {
     @Autowired private CloudbreakEventService cloudbreakEventService;
 
     public Stack updateStackStatus(Long stackId, Status status, String statusReason) {
-        Stack stack = stackRepository.findById(stackId);
-        int attempt = 1;
-        try {
-            return doUpdateStackStatus(stackId, status, statusReason);
-        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            LOGGER.info("Failed to update stack status. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt++, e.getClass().getSimpleName());
-            if (attempt <= MAX_RETRIES) {
-                return doUpdateStackStatus(stackId, status, statusReason);
-            } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update status)", stackId), e);
-            }
-        }
+        return doUpdateStackStatus(stackId, status, statusReason, INITIAL_ATTEMPT);
     }
 
     public Stack updateStackStatusReason(Long stackId, String statusReason) {
-        Stack stack = stackRepository.findById(stackId);
-        int attempt = 1;
-        try {
-            return doUpdateStackStatusReason(stackId, statusReason);
-        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            LOGGER.info("Failed to update stack status. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt++, e.getClass().getSimpleName());
-            if (attempt <= MAX_RETRIES) {
-                return doUpdateStackStatusReason(stackId, statusReason);
-            } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update status)", stackId), e);
-            }
-        }
+        return doUpdateStackStatusReason(stackId, statusReason, INITIAL_ATTEMPT);
     }
 
     public Stack updateStackMetaData(Long stackId, Set<InstanceMetaData> instanceMetaData, String groupName) {
-        Stack stack = stackRepository.findById(stackId);
-        int attempt = 1;
-        try {
-            return doUpdateMetaData(stackId, instanceMetaData, groupName);
-        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            LOGGER.info("Failed to update stack status. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt++, e.getClass().getSimpleName());
-            if (attempt <= MAX_RETRIES) {
-                return doUpdateMetaData(stackId, instanceMetaData, groupName);
-            } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update metadata)", stackId), e);
-            }
-        }
+        return doUpdateMetaData(stackId, instanceMetaData, groupName, INITIAL_ATTEMPT);
     }
 
     public Stack updateStackResources(Long stackId, Set<Resource> resources) {
-        Stack stack = stackRepository.findById(stackId);
-        int attempt = 1;
-        try {
-            return doUpdateResources(stackId, resources);
-        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            LOGGER.info("Failed to update stack resources. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt++, e.getClass().getSimpleName());
-            if (attempt <= MAX_RETRIES) {
-                return doUpdateResources(stackId, resources);
-            } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update resources)", stackId), e);
-            }
-        }
+        return doUpdateResources(stackId, resources, INITIAL_ATTEMPT);
     }
 
     public synchronized Stack addStackResources(Long stackId, List<Resource> resources) {
-        Stack stack = stackRepository.findById(stackId);
-        int attempt = 1;
-        try {
-            return doAddResources(stackId, resources);
-        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            LOGGER.info("Failed to update stack resources. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt++, e.getClass().getSimpleName());
-            if (attempt <= MAX_RETRIES) {
-                return doAddResources(stackId, resources);
-            } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update resources)", stackId), e);
-            }
-        }
+        return doAddResources(stackId, resources, INITIAL_ATTEMPT);
     }
 
     public synchronized Stack removeStackResources(Long stackId, List<Resource> resources) {
-        Stack stack = stackRepository.findById(stackId);
-        int attempt = 1;
-        try {
-            return doRemoveResources(stackId, resources);
-        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            LOGGER.info("Failed to update stack resources. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt++, e.getClass().getSimpleName());
-            if (attempt <= MAX_RETRIES) {
-                return doRemoveResources(stackId, resources);
-            } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update resources)", stackId), e);
-            }
-        }
+        return doRemoveResources(stackId, resources, INITIAL_ATTEMPT);
     }
 
     public Stack updateAmbariIp(Long stackId, String ambariIp) {
-        Stack stack = stackRepository.findById(stackId);
-        int attempt = 1;
-        try {
-            return doUpdateAmbariIp(stackId, ambariIp);
-        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            LOGGER.info("Failed to update stack's Ambari IP. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt++, e.getClass().getSimpleName());
-            if (attempt <= MAX_RETRIES) {
-                return doUpdateAmbariIp(stackId, ambariIp);
-            } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update ambariIp)", stackId), e);
-            }
-        }
+        return doUpdateAmbariIp(stackId, ambariIp, INITIAL_ATTEMPT);
     }
 
     public Stack updateStackCluster(Long stackId, Cluster cluster) {
-        Stack stack = stackRepository.findById(stackId);
-        int attempt = 1;
-        try {
-            return doUpdateStackCluster(stackId, cluster);
-        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            if (attempt <= MAX_RETRIES) {
-                LOGGER.info("Failed to update stack while creating corresponding cluster. [attempt: '{}', Cause: {}]. Trying to save it again.",
-                        attempt++, e.getClass().getSimpleName());
-                return doUpdateStackCluster(stackId, cluster);
-            } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to add cluster)", stackId), e);
-            }
-        }
+        return doUpdateStackCluster(stackId, cluster, INITIAL_ATTEMPT);
     }
 
     public Stack updateMetadataReady(Long stackId, boolean ready) {
-        Stack stack = stackRepository.findById(stackId);
-        int attempt = 1;
-        try {
-            return doUpdateMetadataReady(stackId, ready);
-        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            if (attempt <= MAX_RETRIES) {
-                LOGGER.info("Failed to update stack while trying to set 'metadataReady'. [attempt: '{}', Cause: {}]. Trying to save it again.",
-                        attempt++, e.getClass().getSimpleName());
-                return doUpdateMetadataReady(stackId, ready);
-            } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts.(while trying to set 'metadataReady')", stackId), e);
-            }
-        }
+        return doUpdateMetadataReady(stackId, ready, INITIAL_ATTEMPT);
     }
 
     public Stack updateNodeCount(Long stackId, Integer nodeCount, String instanceGroup) {
-        Stack stack = stackRepository.findById(stackId);
-        int attempt = 1;
-        try {
-            return doUpdateNodeCount(stackId, nodeCount, instanceGroup);
-        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            if (attempt <= MAX_RETRIES) {
-                LOGGER.info("Failed to update stack while trying to set 'nodecount'. [attempt: '{}', Cause: {}]. Trying to save it again.",
-                        attempt++, e.getClass().getSimpleName());
-                return stack;
-            } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to set 'nodecount')", stackId), e);
-            }
-        }
+        return doUpdateNodeCount(stackId, nodeCount, instanceGroup, INITIAL_ATTEMPT);
     }
 
     public Stack updateStack(Stack stack) {
@@ -200,108 +87,211 @@ public class RetryingStackUpdater {
         }
     }
 
-    private Stack doUpdateStackStatus(Long stackId, Status status, String statusReason) {
-        Stack stack = stackRepository.findById(stackId);
-        if (!stack.getStatus().equals(Status.DELETE_COMPLETED)) {
-            if (status != null) {
-                stack.setStatus(status);
+    private Stack doUpdateStackStatus(Long stackId, Status status, String statusReason, int attempt) {
+        try {
+            Stack stack = stackRepository.findById(stackId);
+            if (!stack.getStatus().equals(Status.DELETE_COMPLETED)) {
+                if (status != null) {
+                    stack.setStatus(status);
+                }
+                if (statusReason != null) {
+                    stack.setStatusReason(statusReason);
+                }
+                stack = stackRepository.save(stack);
+                LOGGER.info("Updated stack: [status: '{}', statusReason: '{}'].", status.name(), statusReason);
+                cloudbreakEventService.fireCloudbreakEvent(stackId, status.name(), statusReason);
             }
+            return stack;
+        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
+            if (attempt <= MAX_RETRIES) {
+                LOGGER.info("Failed to update stack status. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt, e.getClass().getSimpleName());
+                return doUpdateStackStatus(stackId, status, statusReason, attempt + 1);
+            } else {
+                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update status)",
+                        stackId, MAX_RETRIES), e);
+            }
+        }
+    }
+
+    private Stack doUpdateStackStatusReason(Long stackId, String statusReason, int attempt) {
+        try {
+            Stack stack = stackRepository.findById(stackId);
             if (statusReason != null) {
                 stack.setStatusReason(statusReason);
             }
             stack = stackRepository.save(stack);
-            LOGGER.info("Updated stack: [status: '{}', statusReason: '{}'].", status.name(), statusReason);
-            cloudbreakEventService.fireCloudbreakEvent(stackId, status.name(), statusReason);
+            LOGGER.info("Updated stack: [statusReason: '{}'].", statusReason);
+            return stack;
+        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
+            if (attempt <= MAX_RETRIES) {
+                LOGGER.info("Failed to update stack status. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt, e.getClass().getSimpleName());
+                return doUpdateStackStatusReason(stackId, statusReason, attempt + 1);
+            } else {
+                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update status)",
+                        stackId, MAX_RETRIES), e);
+            }
         }
-        return stack;
     }
 
-    private Stack doUpdateStackStatusReason(Long stackId, String statusReason) {
-        Stack stack = stackRepository.findById(stackId);
-        if (statusReason != null) {
-            stack.setStatusReason(statusReason);
+    private Stack doUpdateMetaData(Long stackId, Set<InstanceMetaData> instanceMetaData, String groupName, int attempt) {
+        try {
+            Stack stack = stackRepository.findById(stackId);
+            stack.getInstanceGroupByInstanceGroupName(groupName).setInstanceMetaData(instanceMetaData);
+            stack = stackRepository.save(stack);
+            LOGGER.info("Updated stack metadata.");
+            return stack;
+        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
+            if (attempt <= MAX_RETRIES) {
+                LOGGER.info("Failed to update stack status. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt, e.getClass().getSimpleName());
+                return doUpdateMetaData(stackId, instanceMetaData, groupName, attempt + 1);
+            } else {
+                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update metadata)",
+                        stackId, MAX_RETRIES), e);
+            }
         }
-        stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack: [statusReason: '{}'].", statusReason);
-        return stack;
     }
 
-    private Stack doUpdateMetaData(Long stackId, Set<InstanceMetaData> instanceMetaData, String groupName) {
-        Stack stack = stackRepository.findById(stackId);
-        stack.getInstanceGroupByInstanceGroupName(groupName).setInstanceMetaData(instanceMetaData);
-        stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack metadata.");
-        return stack;
+    private Stack doUpdateAmbariIp(Long stackId, String ambariIp, int attempt) {
+        try {
+            Stack stack = stackRepository.findById(stackId);
+            stack.setAmbariIp(ambariIp);
+            stack = stackRepository.save(stack);
+            LOGGER.info("Updated stack: [ambariIp: '{}'].", ambariIp);
+            return stack;
+        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
+            if (attempt <= MAX_RETRIES) {
+                LOGGER.info("Failed to update stack's Ambari IP. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt, e.getClass().getSimpleName());
+                return doUpdateAmbariIp(stackId, ambariIp, attempt + 1);
+            } else {
+                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update ambariIp)",
+                        stackId, MAX_RETRIES), e);
+            }
+        }
     }
 
-    private Stack doUpdateAmbariIp(Long stackId, String ambariIp) {
-        Stack stack = stackRepository.findById(stackId);
-        stack.setAmbariIp(ambariIp);
-        stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack: [ambariIp: '{}'].", ambariIp);
-        return stack;
+    private Stack doUpdateNodeCount(Long stackId, Integer nodeCount, String instanceGroup, int attempt) {
+        try {
+            Stack stack = stackRepository.findById(stackId);
+            stack.getInstanceGroupByInstanceGroupName(instanceGroup).setNodeCount(nodeCount);
+            stack = stackRepository.save(stack);
+            LOGGER.info("Updated stack: [nodeCount: '{}'].", nodeCount);
+            return stack;
+        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
+            if (attempt <= MAX_RETRIES) {
+                LOGGER.info("Failed to update stack while trying to set 'nodecount'. [attempt: '{}', Cause: {}]. Trying to save it again.",
+                        attempt, e.getClass().getSimpleName());
+                return doUpdateNodeCount(stackId, nodeCount, instanceGroup, attempt + 1);
+            } else {
+                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts. (while trying to set 'nodecount')",
+                        stackId, MAX_RETRIES), e);
+            }
+        }
     }
 
-    private Stack doUpdateNodeCount(Long stackId, Integer nodeCount, String instanceGroup) {
-        Stack stack = stackRepository.findById(stackId);
-        stack.getInstanceGroupByInstanceGroupName(instanceGroup).setNodeCount(nodeCount);
-        stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack: [nodeCount: '{}'].", nodeCount);
-        return stack;
+    private Stack doUpdateStackCluster(Long stackId, Cluster cluster, int attempt) {
+        try {
+            Stack stack = stackRepository.findById(stackId);
+            stack.setCluster(cluster);
+            stack = stackRepository.save(stack);
+            LOGGER.info("Saved cluster '{}' for stack.", cluster.getId());
+            return stack;
+        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
+            if (attempt <= MAX_RETRIES) {
+                LOGGER.info("Failed to update stack while creating corresponding cluster. [attempt: '{}', Cause: {}]. Trying to save it again.",
+                        attempt, e.getClass().getSimpleName());
+                return doUpdateStackCluster(stackId, cluster, attempt + 1);
+            } else {
+                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts. (while trying to add cluster)",
+                        stackId, MAX_RETRIES), e);
+            }
+        }
     }
 
-    private Stack doUpdateStackCluster(Long stackId, Cluster cluster) {
-        Stack stack = stackRepository.findById(stackId);
-        stack.setCluster(cluster);
-        stack = stackRepository.save(stack);
-        LOGGER.info("Saved cluster '{}' for stack.", cluster.getId());
-        return stack;
+    private Stack doUpdateMetadataReady(Long stackId, boolean ready, int attempt) {
+        try {
+            Stack stack = stackRepository.findById(stackId);
+            stack.setMetadataReady(ready);
+            stack = stackRepository.save(stack);
+            LOGGER.info("Updated stack: [metadataReady: 'true'].");
+            return stack;
+        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
+            if (attempt <= MAX_RETRIES) {
+                LOGGER.info("Failed to update stack while trying to set 'metadataReady'. [attempt: '{}', Cause: {}]. Trying to save it again.",
+                        attempt, e.getClass().getSimpleName());
+                return doUpdateMetadataReady(stackId, ready, attempt + 1);
+            } else {
+                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts.(while trying to set 'metadataReady')",
+                        stackId, MAX_RETRIES), e);
+            }
+        }
     }
 
-    private Stack doUpdateMetadataReady(Long stackId, boolean ready) {
-        Stack stack = stackRepository.findById(stackId);
-        stack.setMetadataReady(ready);
-        stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack: [metadataReady: 'true'].");
-        return stack;
+    private Stack doUpdateResources(Long stackId, Set<Resource> resources, int attempt) {
+        try {
+            Stack stack = stackRepository.findById(stackId);
+            stack.setResources(resources);
+            stack = stackRepository.save(stack);
+            LOGGER.info("Updated stack resources.");
+            return stack;
+        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
+            if (attempt <= MAX_RETRIES) {
+                LOGGER.info("Failed to update stack resources. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt, e.getClass().getSimpleName());
+                return doUpdateResources(stackId, resources, attempt + 1);
+            } else {
+                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update resources)",
+                        stackId, MAX_RETRIES), e);
+            }
+        }
     }
 
-    private Stack doUpdateResources(Long stackId, Set<Resource> resources) {
-        Stack stack = stackRepository.findById(stackId);
-        stack.setResources(resources);
-        stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack resources.");
-        return stack;
+    private Stack doAddResources(Long stackId, List<Resource> resources, int attempt) {
+        try {
+            Stack stack = stackRepository.findOneWithLists(stackId);
+            stack.getResources().addAll(resources);
+            stack = stackRepository.save(stack);
+            LOGGER.info("Updated stack resources.");
+            return stack;
+        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
+            if (attempt <= MAX_RETRIES) {
+                LOGGER.info("Failed to update stack resources. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt, e.getClass().getSimpleName());
+                return doAddResources(stackId, resources, attempt + 1);
+            } else {
+                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update resources)",
+                        stackId, MAX_RETRIES), e);
+            }
+        }
     }
 
-    private Stack doAddResources(Long stackId, List<Resource> resources) {
-        Stack stack = stackRepository.findOneWithLists(stackId);
-        stack.getResources().addAll(resources);
-        stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack resources.");
-        return stack;
-    }
-
-    private Stack doRemoveResources(Long stackId, List<Resource> resources) {
-        Stack stack = stackRepository.findOneWithLists(stackId);
-        Set<Resource> notRemovedResources = new HashSet<>();
-        for (Resource resource : stack.getResources()) {
-            boolean removable = false;
-            for (Resource searchTarget : resources) {
-                if (searchTarget.getResourceName().equals(resource.getResourceName()) && searchTarget.getResourceType().equals(resource.getResourceType())) {
-                    removable = true;
-                    break;
+    private Stack doRemoveResources(Long stackId, List<Resource> resources, int attempt) {
+        try {
+            Stack stack = stackRepository.findOneWithLists(stackId);
+            Set<Resource> notRemovedResources = new HashSet<>();
+            for (Resource resource : stack.getResources()) {
+                boolean removable = false;
+                for (Resource searchTarget : resources) {
+                    if (searchTarget.getResourceName().equals(resource.getResourceName()) && searchTarget.getResourceType().equals(resource.getResourceType())) {
+                        removable = true;
+                        break;
+                    }
+                }
+                if (!removable) {
+                    notRemovedResources.add(resource);
                 }
             }
-            if (!removable) {
-                notRemovedResources.add(resource);
+
+            stack.setResources(notRemovedResources);
+            stack = stackRepository.save(stack);
+            LOGGER.info("Updated stack resources.");
+            return stack;
+        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
+            if (attempt <= MAX_RETRIES) {
+                LOGGER.info("Failed to update stack resources. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt, e.getClass().getSimpleName());
+                return doRemoveResources(stackId, resources, attempt + 1);
+            } else {
+                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update resources)",
+                        stackId, MAX_RETRIES), e);
             }
         }
-
-        stack.setResources(notRemovedResources);
-        stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack resources.");
-        return stack;
     }
 
 }
