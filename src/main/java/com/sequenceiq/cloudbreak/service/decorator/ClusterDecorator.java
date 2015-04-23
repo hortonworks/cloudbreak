@@ -61,7 +61,7 @@ public class ClusterDecorator implements Decorator<Cluster> {
         for (HostGroupJson json : hostGroupsJsons) {
             HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
             hostGroup.setCluster(cluster);
-            hostGroup = hostGroupDecorator.decorate(hostGroup, stackId, json.getInstanceGroupName(), json.getRecipeIds());
+            hostGroup = hostGroupDecorator.decorate(hostGroup, stackId, json.getInstanceGroupName(), json.getRecipeIds(), true);
             hostGroups.add(hostGroup);
         }
         return hostGroups;

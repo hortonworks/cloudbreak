@@ -16,5 +16,4 @@ public interface HostGroupRepository extends CrudRepository<HostGroup, Long> {
     Set<HostGroup> findAllHostGroupsByRecipe(@Param("recipeId") Long recipeId);
 
     HostGroup findHostGroupsByInstanceGroupName(@Param("clusterId") Long clusterId, @Param("instanceGroupName") String instanceGroupName);
-
 }

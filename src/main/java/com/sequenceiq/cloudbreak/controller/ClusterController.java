@@ -5,14 +5,6 @@ import java.util.Set;
 
 import javax.validation.Valid;
 
-import com.sequenceiq.cloudbreak.controller.doc.ContentType;
-import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
-import com.sequenceiq.cloudbreak.controller.doc.Notes;
-import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions.ClusterOpDescription;
-import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
-import com.sequenceiq.cloudbreak.service.decorator.Decorator;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +20,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sequenceiq.cloudbreak.controller.doc.ContentType;
+import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
+import com.sequenceiq.cloudbreak.controller.doc.Notes;
+import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions.ClusterOpDescription;
 import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupJson;
+import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.json.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -39,7 +36,11 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.decorator.Decorator;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 
 @Controller
 @Api(value = "/cluster", description = ControllerDescription.CLUSTER_DESCRIPTION, position = 4)
@@ -58,6 +59,9 @@ public class ClusterController {
 
     @Autowired
     private ClusterService clusterService;
+
+    @Autowired
+    private HostGroupService hostGroupService;
 
     @Autowired
     private StackService stackService;
@@ -127,13 +131,12 @@ public class ClusterController {
         if (updateJson.getBlueprintId() != null && updateJson.getHostgroups() != null && stack.getCluster().isStateFailed()) {
             LOGGER.info("Cluster rebuild request received. Stack id:  {}", stackId);
             Set<HostGroup> hostGroups = new HashSet<>();
-            for (HostGroupJson hostGroupJson : updateJson.getHostgroups()) {
-                HostGroup hostGroup = conversionService.convert(hostGroupJson, HostGroup.class);
-                hostGroup = hostGroupDecorator.decorate(hostGroup, stackId, hostGroupJson.getInstanceGroupName(), hostGroupJson.getRecipeIds());
-                hostGroup.setCluster(stack.getCluster());
-                hostGroups.add(hostGroup);
+            for (HostGroupJson json : updateJson.getHostgroups()) {
+                HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
+                hostGroup = hostGroupDecorator.decorate(hostGroup, stackId, json.getInstanceGroupName(), json.getRecipeIds(), false);
+                hostGroups.add(hostGroupService.save(hostGroup));
             }
-            Cluster cluster = clusterService.recreate(stackId, updateJson.getBlueprintId(), hostGroups);
+            clusterService.recreate(stackId, updateJson.getBlueprintId(), hostGroups);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 

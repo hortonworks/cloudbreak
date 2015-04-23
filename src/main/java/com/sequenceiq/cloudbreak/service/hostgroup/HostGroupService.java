@@ -8,4 +8,6 @@ public interface HostGroupService {
 
     HostGroup getByClusterIdAndName(Long clusterId, String hostGroupName);
 
+    HostGroup save(HostGroup hostGroup);
+
 }
