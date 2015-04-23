@@ -1,204 +1,74 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        jcenter()
-    }
-    dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:1.0.2.RELEASE"
-        classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
-    }
-}
-
 def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
+apply from: "$rootDir/gradle/versioning.gradle"
+ext.config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL())
 
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'spring-boot'
-apply plugin: 'maven'
-apply plugin: 'checkstyle'
-apply plugin: 'jacoco'
-apply plugin: 'sonar-runner'
-apply plugin:'license-report'
-
-sourceCompatibility = 1.7
-group = 'com.sequenceiq'
-mainClassName = 'com.sequenceiq.cloudbreak.CloudbreakApplication'
+ext.projVersion = version
 
 allprojects {
-    apply from: "$rootDir/gradle/versioning.gradle"
-    ext.config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL())
+    apply plugin: 'idea'
+    apply plugin: 'eclipse'
+    group = 'com.sequenceiq'
 }
 
-jar {
-    baseName = 'cloudbreak'
-}
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven'
+    apply plugin: 'checkstyle'
 
-configurations {
-    deployerJars
-    all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
-    all*.exclude group: 'com.google.guava', module: 'guava-jdk5'
-    testCompile.exclude module: 'groovy-all'
-}
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
 
-uploadArchives {
+    version = projVersion
+
+    configurations {
+        deployerJars
+        all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+        all*.exclude group: 'com.google.guava', module: 'guava-jdk5'
+        testCompile.exclude module: 'groovy-all'
+    }
+
+    dependencies {
+        deployerJars("org.springframework.build.aws:org.springframework.build.aws.maven:3.0.0.RELEASE")
+    }
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                configuration = configurations.deployerJars
+                repository(url: "s3://maven.sequenceiq.com/release") {
+                    authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_ACCESS_KEY")
+                }
+                snapshotRepository(url: "s3://maven.sequenceiq.com/snapshots") {
+                    authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
+                }
+            }
+        }
+    }
+
+    checkstyleMain {
+        ignoreFailures = false
+        configProperties = ['config_loc': "$projectDir/config/checkstyle"]
+    }
+
+    checkstyleTest {
+        ignoreFailures = false
+        configProperties = ['config_loc': "$projectDir/config/checkstyle"]
+    }
+
+    dependencies {
+        compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
+            exclude group: 'org.slf4j';
+        }
+        checkstyle('com.puppycrawl.tools:checkstyle:5.7') {
+            exclude group: 'com.google.guava'
+        }
+        checkstyle("com.google.guava:guava:16.0.1") { force = true }
+    }
+
     repositories {
-        mavenDeployer {
-            configuration = configurations.deployerJars
-            repository(url: "s3://maven.sequenceiq.com/releases") {
-                authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
-            }
-            snapshotRepository(url: "s3://maven.sequenceiq.com/snapshots") {
-                authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
-            }
-        }
-    }
-}
-
-checkstyleMain {
-    ignoreFailures = false
-    configProperties = ['config_loc': "$projectDir/config/checkstyle"]
-}
-
-checkstyleTest {
-    ignoreFailures = false
-    configProperties = ['config_loc': "$projectDir/config/checkstyle"]
-}
-
-jacoco {
-    toolVersion = "0.7.1.201405082137"
-    reportsDir = file("$buildDir/reports/jacoco")
-}
-
-jacocoTestReport {
-    reports {
-        xml.enabled false
-        csv.enabled false
-        html.destination "${buildDir}/jacocoHtml"
-    }
-}
-
-test {
-    jacoco {
-        append = false
-        destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
-        classDumpFile = file("$buildDir/jacoco/classpathdumps")
-    }
-}
-
-sonarRunner {
-    sonarProperties {
-        property "sonar.host.url", "$config.sonar_host_url"
-        property "sonar.jdbc.url", "$config.sonar_jdbc_url"
-        property "sonar.jdbc.driverClassName", "com.mysql.jdbc.Driver"
-        property "sonar.jdbc.username", "$System.env.SONAR_USERNAME"
-        property "sonar.jdbc.password", "$System.env.SONAR_PASSWORD"
-        property "project.reporting.outputEncoding", "UTF-8"
-        property "sonar.projectKey", "cloudbreak"
-        property "sonar.projectName", "cloudbreak"
-    }
-}
-
-repositories {
-    mavenCentral()
-    maven { url "http://maven.sequenceiq.com/snapshots" }
-    maven { url "http://maven.sequenceiq.com/release" }
-    maven { url "http://maven.sequenceiq.com/releases" }
-}
-
-dependencies {
-
-    compile 'org.springframework.boot:spring-boot-starter-web:1.0.2.RELEASE'
-    compile 'org.springframework.boot:spring-boot-starter-actuator:1.0.2.RELEASE'
-    compile 'org.springframework.boot:spring-boot-starter-data-jpa:1.0.2.RELEASE'
-    compile 'org.springframework.boot:spring-boot-starter-websocket:1.0.2.RELEASE'
-    compile 'org.springframework.security:spring-security-config:3.2.3.RELEASE'
-    compile 'org.springframework.security:spring-security-web:3.2.3.RELEASE'
-    compile 'org.springframework.security.oauth:spring-security-oauth2:2.0.3.RELEASE'
-    compile 'org.springframework:spring-messaging:4.0.3.RELEASE'
-    compile 'org.projectreactor:reactor-spring:1.0.1.RELEASE'
-    compile 'net.sf.ehcache:ehcache:2.8.3'
-    compile 'org.postgresql:postgresql:9.3-1101-jdbc41'
-    compile('com.amazonaws:aws-java-sdk:1.9.23') {
-        exclude group: 'commons-logging'
-    }
-    compile 'org.hibernate:hibernate-validator:5.1.1.Final'
-    compile('com.sequenceiq:azure-rest-client:0.1.30') {
-        exclude group: 'log4j';
-    }
-    compile('com.sequenceiq:ambari-client20:2.0.14') {
-        exclude group: 'org.slf4j';
-    }
-    compile 'org.apache.commons:commons-lang3:3.3.2'
-    compile 'com.sequenceiq:consul-api:1.08'
-    compile 'org.codehaus.jettison:jettison:1.3.5'
-    compile 'commons-io:commons-io:2.4'
-    compile 'com.thoughtworks.xstream:xstream:1.4.7'
-    compile 'com.github.fommil:openssh:1.0'
-    compile group: 'javax.mail', name: 'mail', version: '1.5.0-b01'
-    compile group: 'org.freemarker', name: 'freemarker', version: '2.3.20'
-    compile group: 'com.google.http-client', name: 'google-http-client-jackson2', version: '1.17.0-rc'
-    compile (group: 'com.google.oauth-client', name: 'google-oauth-client-jetty', version: '1.17.0-rc'){
-        exclude module: 'servlet-api'
-    }
-    compile group: 'com.google.apis', name: 'google-api-services-compute', version: 'v1-rev46-1.19.1'
-    compile group: 'com.google.apis', name: 'google-api-services-storage', version: 'v1-rev6-1.19.0'
-    compile group: 'com.google.apis', name: 'google-api-services-dns', version: 'v1beta1-rev9-1.19.0'
-    compile group: 'org.pacesys', name: 'openstack4j', version: '2.0.0'
-    compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.47'
-    compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.47'
-    compile 'org.jasypt:jasypt:1.9.2'
-    compile 'com.google.guava:guava:16.0.1'
-    compile 'com.wordnik:swagger-core:1.5.2-M1'
-    compile "com.mangofactory:swagger-springmvc:1.0.2"
-    checkstyle('com.puppycrawl.tools:checkstyle:5.7') {
-        exclude group: 'com.google.guava'
-    }
-    checkstyle("com.google.guava:guava:16.0.1") { force = true }
-
-    runtime group: 'activation', name: 'activation', version: '1.0.2'
-
-    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '1.1.8.RELEASE'
-    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-freemarker', version: '1.1.8.RELEASE'
-    testCompile group: 'com.jayway.restassured', name: 'rest-assured', version: '2.3.4'
-    testCompile group: 'com.jayway.restassured', name: 'json-path', version: '2.3.4'
-
-    deployerJars 'org.springframework.build.aws:org.springframework.build.aws.maven:3.0.0.RELEASE'
-}
-
-task wrapper(type: Wrapper) { gradleVersion = "2.3" }
-
-task buildInfo(type: BuildInfoTask) {
-    destination = file("$buildDir")
-    applicationPropertiesPath = "$buildDir"
-    basename = jar.baseName
-    buildVersion = version
-}
-
-compileJava.dependsOn buildInfo
-
-class BuildInfoTask extends DefaultTask {
-    File destination = new File("build.info")
-    String applicationPropertiesPath
-    String basename
-    String buildVersion
-
-    @TaskAction
-    def writeBuildInfo() {
-        destination.mkdirs()
-        File applicationDestination = new File(applicationPropertiesPath + "/resources/main")
-        applicationDestination.mkdirs()
-        new File(destination, "build.info").withWriter { out ->
-            [
-                    "ARTIFACT_BASENAME=" + basename,
-                    "ARTIFACT_VERSION=" + buildVersion,
-            ].each { out.println it }
-        }
-        new File(applicationDestination, "application.properties").withWriter { out ->
-            [
-                    "info.app.name=" + basename,
-                    "info.app.version=" + buildVersion
-            ].each { out.println it }
-        }
+        mavenCentral()
+        maven { url "http://maven.sequenceiq.com/snapshots" }
+        maven { url "http://maven.sequenceiq.com/release" }
+        maven { url "http://maven.sequenceiq.com/releases" }
     }
 }
