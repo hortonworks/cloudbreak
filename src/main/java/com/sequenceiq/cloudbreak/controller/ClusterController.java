@@ -133,7 +133,7 @@ public class ClusterController {
             Set<HostGroup> hostGroups = new HashSet<>();
             for (HostGroupJson json : updateJson.getHostgroups()) {
                 HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
-                hostGroup = hostGroupDecorator.decorate(hostGroup, stackId, json.getInstanceGroupName(), json.getRecipeIds(), RequestMethod.PUT);
+                hostGroup = hostGroupDecorator.decorate(hostGroup, stackId, json.getInstanceGroupName(), json.getRecipeIds(), false);
                 hostGroups.add(hostGroupService.save(hostGroup));
             }
             clusterService.recreate(stackId, updateJson.getBlueprintId(), hostGroups);

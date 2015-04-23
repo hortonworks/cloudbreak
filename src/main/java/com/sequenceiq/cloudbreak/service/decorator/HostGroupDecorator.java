@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -48,13 +47,13 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
         if (null == data || data.length != DecorationData.values().length) {
             throw new IllegalArgumentException("Invalid decoration data provided. Cluster: " + subject.getName());
         }
-
         Long stackId = (Long) data[DecorationData.STACK_ID.ordinal()];
         String instanceGroupName = (String) data[DecorationData.INSTANCEGROUP_NAME.ordinal()];
         Set<Long> receipeIds = (Set<Long>) data[DecorationData.RECEIPE_IDS.ordinal()];
-        RequestMethod requestMethod = (RequestMethod) data[DecorationData.REQUEST_TYPE.ordinal()];
+        boolean postRequest = (boolean) data[DecorationData.REQUEST_TYPE.ordinal()];
 
-        if (RequestMethod.POST.equals(requestMethod)) {
+        LOGGER.debug("Decorating hostgroup on [{}] request.", postRequest ? "POST" : "PUT");
+        if (postRequest) {
             InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stackId, instanceGroupName);
             if (instanceGroup == null) {
                 LOGGER.error("No instancegroup found! stackId: {}, instancegroup name: {}", stackId, instanceGroupName);
@@ -71,14 +70,17 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
                     subject.getRecipes().add(recipe);
                 }
             }
-            return subject;
-        } else if (RequestMethod.PUT.equals(requestMethod)) {
-            Stack stack = stackRepository.findById(stackId);
-            HostGroup hostGroupsByInstanceGroupName = hostGroupRepository.findHostGroupsByInstanceGroupName(stack.getCluster().getId(), instanceGroupName);
-            hostGroupsByInstanceGroupName.setName(subject.getName());
-            return hostGroupsByInstanceGroupName;
+        } else {
+            subject = reloadHostGroup(stackId, instanceGroupName, subject.getName());
         }
-        return null;
+        return subject;
+    }
+
+    private HostGroup reloadHostGroup(Long stackId, String instanceGroupName, String hostGroupName) {
+        Stack stack = stackRepository.findById(stackId);
+        HostGroup hostGroupsByInstanceGroupName = hostGroupRepository.findHostGroupsByInstanceGroupName(stack.getCluster().getId(), instanceGroupName);
+        hostGroupsByInstanceGroupName.setName(hostGroupName);
+        return hostGroupsByInstanceGroupName;
     }
 
 }
