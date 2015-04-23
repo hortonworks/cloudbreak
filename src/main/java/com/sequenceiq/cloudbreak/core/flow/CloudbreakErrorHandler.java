@@ -18,13 +18,17 @@ public class CloudbreakErrorHandler implements Consumer<Throwable> {
 
     @Override
     public void accept(Throwable errorData) {
-        LOGGER.info("Handling error: {}", errorData);
+        LOGGER.info("Consuming error:", errorData);
         errorLogic(errorData);
     }
 
-    public void errorLogic(Throwable errorData) {
-        LOGGER.info("Performing error logic: {}", errorData);
-        throw new UnsupportedOperationException("Implement me!");
+    /**
+     * Place for default error consumption logic. ()
+     *
+     * @param errorData the exception to be consumed
+     */
+    protected void errorLogic(Throwable errorData) {
+        LOGGER.info("Default error consumption logic: Do nothing. Exception message: {}", errorData.getMessage());
     }
 
 }

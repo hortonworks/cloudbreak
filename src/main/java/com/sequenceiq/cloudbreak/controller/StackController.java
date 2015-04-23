@@ -6,15 +6,6 @@ import java.util.Set;
 
 import javax.validation.Valid;
 
-import com.sequenceiq.cloudbreak.controller.doc.ContentType;
-import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
-import com.sequenceiq.cloudbreak.controller.doc.Notes;
-import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions.StackOpDescription;
-import com.sequenceiq.cloudbreak.controller.json.StackRequest;
-import com.sequenceiq.cloudbreak.controller.json.StackResponse;
-import com.sequenceiq.cloudbreak.controller.json.TemplateResponse;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
@@ -29,10 +20,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sequenceiq.cloudbreak.controller.doc.ContentType;
+import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
+import com.sequenceiq.cloudbreak.controller.doc.Notes;
+import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions.StackOpDescription;
 import com.sequenceiq.cloudbreak.controller.json.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
+import com.sequenceiq.cloudbreak.controller.json.StackRequest;
+import com.sequenceiq.cloudbreak.controller.json.StackResponse;
 import com.sequenceiq.cloudbreak.controller.json.StackValidationRequest;
+import com.sequenceiq.cloudbreak.controller.json.TemplateResponse;
 import com.sequenceiq.cloudbreak.controller.json.UpdateStackJson;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -43,6 +41,8 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 
 @Controller
 @Api(value = "/stack", description = ControllerDescription.STACK_DESCRIPTION, position = 3)
@@ -231,6 +231,7 @@ public class StackController {
         stack = stackDecorator.decorate(stack, stackRequest.getCredentialId(), stackRequest.getConsulServerCount());
         stack.setPublicInAccount(publicInAccount);
         stack = stackService.create(user, stack);
+        MDCBuilder.buildMdcContext(stack);
         return new ResponseEntity<>(new IdJson(stack.getId()), HttpStatus.CREATED);
     }
 

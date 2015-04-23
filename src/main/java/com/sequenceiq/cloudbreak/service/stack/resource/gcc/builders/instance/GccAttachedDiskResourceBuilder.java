@@ -3,9 +3,11 @@ package com.sequenceiq.cloudbreak.service.stack.resource.gcc.builders.instance;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.annotation.Order;
@@ -58,10 +60,12 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
         final GccAttachedDiskCreateRequest gADCR = (GccAttachedDiskCreateRequest) createResourceRequest;
         final Stack stack = stackRepository.findById(gADCR.getStackId());
         List<Future<Boolean>> futures = new ArrayList<>();
+        final Map<String, String> mdcCtxMap = MDC.getCopyOfContextMap();
         for (final Disk disk : gADCR.getDisks()) {
             Future<Boolean> submit = intermediateBuilderExecutor.submit(new Callable<Boolean>() {
                 @Override
                 public Boolean call() throws Exception {
+                    MDC.setContextMap(mdcCtxMap);
                     Compute.Disks.Insert insDisk = gADCR.getCompute().disks().insert(gADCR.getProjectId(),
                             GccZone.valueOf(stack.getRegion()).getValue(), disk);
                     Operation execute = insDisk.execute();

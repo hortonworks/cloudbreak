@@ -90,6 +90,7 @@ public class AmbariRoleAllocator {
             }
         } else {
             LOGGER.info("Metadata is already created, ignoring stack metadata update.");
+            allocationComplete = new AmbariRoleAllocationComplete(stack, stack.getAmbariIp());
         }
         return allocationComplete;
     }

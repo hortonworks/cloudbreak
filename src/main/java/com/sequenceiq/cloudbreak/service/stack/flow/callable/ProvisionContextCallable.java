@@ -8,6 +8,7 @@ import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -35,10 +36,11 @@ public class ProvisionContextCallable implements Callable<ResourceRequestResult>
     private final RetryingStackUpdater stackUpdater;
     private final StackRepository stackRepository;
     private final Optional<String> userData;
+    private final Map<String, String> mdcCtxMap;
 
     private ProvisionContextCallable(Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders, int index, Stack stack,
             InstanceGroup instanceGroup, ProvisionContextObject provisionContextObject, RetryingStackUpdater stackUpdater,
-            StackRepository stackRepository, Optional<String> userData) {
+            StackRepository stackRepository, Optional<String> userData, Map<String, String> mdcCtxMap) {
         this.instanceResourceBuilders = instanceResourceBuilders;
         this.index = index;
         this.stack = stack;
@@ -47,6 +49,7 @@ public class ProvisionContextCallable implements Callable<ResourceRequestResult>
         this.stackUpdater = stackUpdater;
         this.stackRepository = stackRepository;
         this.userData = userData;
+        this.mdcCtxMap = mdcCtxMap;
     }
 
     @Override
@@ -54,6 +57,7 @@ public class ProvisionContextCallable implements Callable<ResourceRequestResult>
         LOGGER.info("Node {}. creation starting", index);
         List<Resource> resources = new ArrayList<>();
         List<Resource> buildResources = new ArrayList<>();
+        MDC.setContextMap(mdcCtxMap);
         try {
             for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(stack.cloudPlatform())) {
                 ResourceBuilderType resourceBuilderType = resourceBuilder.resourceBuilderType();
@@ -66,7 +70,7 @@ public class ProvisionContextCallable implements Callable<ResourceRequestResult>
                 }
                 resourceBuilder.create(request, stack.getRegion());
                 resources.addAll(request.getBuildableResources());
-                LOGGER.info("Node {}. creation in progress resource {} creation finished.", index, resourceBuilderType);
+                LOGGER.info("Node {}. resource {} creation finished.", index, resourceBuilderType);
             }
         } catch (Exception ex) {
             return ResourceRequestResult.ResourceRequestResultBuilder.builder()
@@ -92,6 +96,7 @@ public class ProvisionContextCallable implements Callable<ResourceRequestResult>
         private RetryingStackUpdater stackUpdater;
         private StackRepository stackRepository;
         private String userData;
+        private Map<String, String> mdcCtxMap;
 
         public static ProvisionContextCallableBuilder builder() {
             return new ProvisionContextCallableBuilder();
@@ -137,9 +142,15 @@ public class ProvisionContextCallable implements Callable<ResourceRequestResult>
             return this;
         }
 
+        public ProvisionContextCallableBuilder withMdcContextMap(Map<String, String> mdcCtxMap) {
+            this.mdcCtxMap = mdcCtxMap;
+            return this;
+        }
+
         public ProvisionContextCallable build() {
             return new ProvisionContextCallable(instanceResourceBuilders, index, stack, instanceGroup,
-                    provisionContextObject, stackUpdater, stackRepository, userData == null ? Optional.<String>absent() : Optional.fromNullable(userData));
+                    provisionContextObject, stackUpdater, stackRepository, userData == null ? Optional.<String>absent() : Optional.fromNullable(userData),
+                    mdcCtxMap);
         }
 
     }
