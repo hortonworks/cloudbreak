@@ -273,7 +273,7 @@ Once this is configured, Cloudbreak is ready to launch Hadoop clusters on your b
 
 In order to launch Hadoop clusters on the  Microsoft Azure cloud platform you'll need to link your Azure account with Cloudbreak. This can be achieved by creating a new `Azure Credential` in Cloudbreak.
 
-You have to create network manually first in Azure before you start provisoning with Cloudbreak that is a known issue on Azure side.
+You have to create a network manually first on Azure portal before you start provisioning with Cloudbreak (due to a known issue on Azure).
 
 You'll need an X509 certificate with a 2048-bit RSA keypair.
 
@@ -283,11 +283,11 @@ Generate these artifacts with `openssl` by running the following command, and an
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout my_azure_private.key -out my_azure_cert.pem
 ```
 
-The command generates the following files into the directory you ran the command from:
+The command generates the following files into the directory you run the command from:
 
 `my_azure_private.key` and `my_azure_cert.pem`
 
-(obviously artifacts can be named after your wish)
+(obviously artifacts can be named as your prefer)
 
 Fill the form by providing your Azure `Subscription Id`, and the **content** of the previously generated certificate (my_azure_cert.pem).
 
@@ -299,9 +299,9 @@ The JKS file and certificate will be used to encrypt the communication between C
 
 You are done - from now on Cloudbreak can launch Azure instances on your behalf.
 
-_Note:_ Cloudbreak does not store any login details for these instances - when you create **Templates** you can specify a `password` or `SSH Public key` that can be used to login into the launched instances.
+_Note:_ Cloudbreak does not store any login details for these instances - you can specify a `password` or `SSH Public key` that can be used to login into the launched instances.
 
-_Note:_ Because Azure does not directly support third party public images Cloudbreak will copy the used image from VM Depot into your storage account. The steps below need to be finished ONCE and only ONCE before any stack is created for every affinity group - **this is an automated step**  - it's only highlighted here as an explanation of why it takes longer for the first time:
+_Note:_ Because Azure does not directly support third party public images Cloudbreak will copy the used image from VM Depot into your storage account. The steps below need to be finished ONCE and only ONCE before any stack is created for every affinity group - **this is an automated step**  - it's only highlighted here as an explanation of why provisioning takes longer at first time:
 
 _1. Get the VM image - http://vmdepot.msopentech.com/Vhd/Show?vhdId=42480&version=43564_
 
