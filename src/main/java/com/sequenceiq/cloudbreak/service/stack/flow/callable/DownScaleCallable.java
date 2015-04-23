@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack.flow.callable;
 
+import java.util.Map;
 import java.util.concurrent.Callable;
+
+import org.slf4j.MDC;
 
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -15,17 +18,20 @@ public class DownScaleCallable implements Callable<ResourceRequestResult> {
     private final Stack stack;
     private final DeleteContextObject dCO;
     private final Resource resource;
+    private final Map<String, String> mdcCtxMap;
 
-    private DownScaleCallable(ResourceBuilder resourceBuilder, Stack stack, DeleteContextObject dCO, Resource resource) {
+    private DownScaleCallable(ResourceBuilder resourceBuilder, Stack stack, DeleteContextObject dCO, Resource resource, Map<String, String> mdcMap) {
         this.resourceBuilder = resourceBuilder;
         this.stack = stack;
         this.dCO = dCO;
         this.resource = resource;
+        this.mdcCtxMap = mdcMap;
     }
 
     @Override
     public ResourceRequestResult call() throws Exception {
         try {
+            MDC.setContextMap(mdcCtxMap);
             resourceBuilder.delete(resource, dCO, stack.getRegion());
         } catch (Exception ex) {
             return ResourceRequestResult.ResourceRequestResultBuilder.builder()
@@ -47,6 +53,7 @@ public class DownScaleCallable implements Callable<ResourceRequestResult> {
         private Stack stack;
         private DeleteContextObject deleteContextObject;
         private Resource resource;
+        private Map<String, String> mdcCtxMap;
 
         public static DownScaleCallableBuilder builder() {
             return new DownScaleCallableBuilder();
@@ -72,8 +79,13 @@ public class DownScaleCallable implements Callable<ResourceRequestResult> {
             return this;
         }
 
+        public DownScaleCallableBuilder withMdcContextMap(Map<String, String> mdcCtxMap) {
+            this.mdcCtxMap = mdcCtxMap;
+            return this;
+        }
+
         public DownScaleCallable build() {
-            return new DownScaleCallable(resourceBuilder, stack, deleteContextObject, resource);
+            return new DownScaleCallable(resourceBuilder, stack, deleteContextObject, resource, mdcCtxMap);
         }
 
     }

@@ -13,6 +13,7 @@ import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -72,6 +73,7 @@ public class ParallelCloudResourceManager {
 
     public Set<Resource> buildStackResources(Stack stack, String gateWayUserData, String hostGroupUserData, ResourceBuilderInit resourceBuilderInit) {
         try {
+            Map<String, String> ctxMap = MDC.getCopyOfContextMap();
             Set<Resource> resourceSet = new HashSet<>();
             CloudPlatform cloudPlatform = stack.cloudPlatform();
             stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS, "Started creating cluster infrastructure resources");
@@ -102,6 +104,7 @@ public class ParallelCloudResourceManager {
                                     .withStackUpdater(stackUpdater)
                                     .withStackRepository(stackRepository)
                                     .withUserData(isGateWay(instanceGroupEntry.getInstanceGroupType()) ? gateWayUserData : hostGroupUserData)
+                                    .withMdcContextMap(ctxMap)
                                     .build()
                     );
                     futures.add(submit);
@@ -130,6 +133,7 @@ public class ParallelCloudResourceManager {
     public Set<Resource> addNewResources(Stack stack, String userDataScript, Integer scalingAdjustment, String instanceGroup,
             ResourceBuilderInit resourceBuilderInit) {
         try {
+            Map<String, String> ctxMap = MDC.getCopyOfContextMap();
             final ProvisionContextObject provisionContextObject = resourceBuilderInit.provisionInit(stack);
             for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(stack.cloudPlatform())) {
                 provisionContextObject.getNetworkResources().addAll(stack.getResourcesByType(resourceBuilder.resourceType()));
@@ -148,6 +152,7 @@ public class ParallelCloudResourceManager {
                                 .withInstanceResourceBuilders(instanceResourceBuilders)
                                 .withInstanceGroup(instanceGroup)
                                 .withUserData(userDataScript)
+                                .withMdcContextMap(ctxMap)
                                 .build()
                 );
                 futures.add(submit);
@@ -176,6 +181,7 @@ public class ParallelCloudResourceManager {
 
     public Set<String> removeExistingResources(Stack stack, Set<String> origInstanceIds, ResourceBuilderInit resourceBuilderInit) {
         try {
+            Map<String, String> mdcCtxMap = MDC.getCopyOfContextMap();
             Set<String> instanceIds = new HashSet<>(origInstanceIds);
             final DeleteContextObject deleteContextObject = resourceBuilderInit.decommissionInit(stack, instanceIds);
             List<ResourceRequestResult> failedResourceList = new ArrayList<>();
@@ -190,6 +196,7 @@ public class ParallelCloudResourceManager {
                                     .withDeleteContextObject(deleteContextObject)
                                     .withResource(resource)
                                     .withResourceBuilder(resourceBuilder)
+                                    .withMdcContextMap(mdcCtxMap)
                                     .build()
                     );
                     futures.add(submit);
@@ -219,6 +226,7 @@ public class ParallelCloudResourceManager {
 
     public void terminateResources(final Stack stack, ResourceBuilderInit resourceBuilderInit) {
         try {
+            final Map<String, String> mdcCtxMap = MDC.getCopyOfContextMap();
             final CloudPlatform cloudPlatform = stack.cloudPlatform();
             final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
             List<Future<ResourceRequestResult>> futures = new ArrayList<>();
@@ -230,6 +238,7 @@ public class ParallelCloudResourceManager {
                         @Override
                         public ResourceRequestResult call() throws Exception {
                             try {
+                                MDC.setContextMap(mdcCtxMap);
                                 instanceResourceBuilders.get(cloudPlatform).get(index).delete(resource, dCO, stack.getRegion());
                                 stackUpdater.removeStackResources(stack.getId(), Arrays.asList(resource));
                                 return ResourceRequestResult.ResourceRequestResultBuilder.builder()
@@ -269,6 +278,7 @@ public class ParallelCloudResourceManager {
 
     public void rollbackResources(final Stack stack, ResourceBuilderInit resourceBuilderInit) {
         try {
+            final Map<String, String> mdcCtxMap = MDC.getCopyOfContextMap();
             final CloudPlatform cloudPlatform = stack.cloudPlatform();
             final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
             for (int i = instanceResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
@@ -280,6 +290,7 @@ public class ParallelCloudResourceManager {
                     Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
                         @Override
                         public Boolean call() throws Exception {
+                            MDC.setContextMap(mdcCtxMap);
                             instanceResourceBuilders.get(cloudPlatform).get(index).rollback(resource, dCO, stack.getRegion());
                             stackUpdater.removeStackResources(stack.getId(), Arrays.asList(resource));
                             return true;
@@ -307,6 +318,7 @@ public class ParallelCloudResourceManager {
     public boolean startStopResources(Stack stack, final boolean start, ResourceBuilderInit resourceBuilderInit) {
         boolean finished = true;
         CloudPlatform cloudPlatform = stack.cloudPlatform();
+        final Map<String, String> mdcCtxMap = MDC.getCopyOfContextMap();
         try {
             final StartStopContextObject sSCO = resourceBuilderInit.startStopInit(stack);
 
@@ -327,6 +339,7 @@ public class ParallelCloudResourceManager {
                     Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
                         @Override
                         public Boolean call() throws Exception {
+                            MDC.setContextMap(mdcCtxMap);
                             if (start) {
                                 return resourceBuilder.start(sSCO, resource, finalStack.getRegion());
                             } else {
