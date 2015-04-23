@@ -27,15 +27,6 @@
     </div>
     <!-- .form-group -->
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="username">Username</label>
-
-        <div class="col-sm-9">
-            <p id="username" class="form-control-static">ubuntu</p>
-        </div>
-        <!-- .col-sm-9 -->
-    </div>
-    <!-- .form-group -->
-    <div class="form-group">
         <label class="col-sm-3 control-label" for="vmType">VM type</label>
 
         <div class="col-sm-9">
