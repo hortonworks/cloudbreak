@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Iterator;
 
-import com.sequenceiq.cloudbreak.controller.json.BlueprintRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +13,8 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.ambari.client.InvalidBlueprintException;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.json.BlueprintRequest;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
@@ -111,9 +109,6 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
             hasBlueprintInBlueprint(root);
             hasBlueprintNameInBlueprint(root);
             validateHostGroups(root);
-            new AmbariClient().validateBlueprint(blueprintText);
-        } catch (InvalidBlueprintException e) {
-            throw new BadRequestException("Invalid Blueprint: " + e.getMessage(), e);
         } catch (IOException e) {
             throw new BadRequestException("Invalid Blueprint: Failed to parse JSON.", e);
         }
