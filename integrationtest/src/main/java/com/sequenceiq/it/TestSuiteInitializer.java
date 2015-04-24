@@ -27,12 +27,6 @@ public class TestSuiteInitializer extends AbstractTestNGSpringContextTests {
     @Value("${integrationtest.uaa.password}")
     private String defaultUaaPassword;
 
-    @Value("${integrationtest.keystore.file}")
-    private String keystore;
-
-    @Value("${integrationtest.keystore.password}")
-    private String keystorePassword;
-
     @Autowired
     private SuiteContext suiteContext;
     private IntegrationTestContext itContext;
@@ -53,9 +47,6 @@ public class TestSuiteInitializer extends AbstractTestNGSpringContextTests {
     @BeforeSuite(dependsOnMethods = "initSuiteMap", groups = "suiteInit")
     @Parameters({ "uaaServer", "uaaUser", "uaaPassword" })
     public void initTestSuite(@Optional("") String uaaServer, @Optional("") String uaaUser, @Optional("") String uaaPassword) throws Exception {
-/*        if (StringUtils.hasLength(keystore)) {
-            RestAssured.keystore(keystore, keystorePassword);
-        }*/
         uaaServer = getString(uaaServer, defaultUaaServer);
         uaaUser = getString(uaaUser, defaultUaaUser);
         uaaPassword = getString(uaaPassword, defaultUaaPassword);

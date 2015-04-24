@@ -24,22 +24,22 @@ public class ScalingTest extends AbstractCloudbreakIntegrationTest {
     public void testScaling(@Optional("slave_1") String instanceGroup, @Optional("1") int scalingAdjustment) throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
-        String stackIdStr = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
-        Integer stackId = Integer.valueOf(stackIdStr);
+        String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
+        int stackIntId = Integer.valueOf(stackId);
         // WHEN
         CloudbreakClient client = getClient();
         if (scalingAdjustment < 0) {
-            client.putCluster(stackId, instanceGroup, scalingAdjustment, false);
-            CloudbreakUtil.waitForStackStatus(itContext, stackIdStr, "AVAILABLE");
-            client.putStack(stackId, instanceGroup, scalingAdjustment);
-            CloudbreakUtil.waitForStackStatus(itContext, stackIdStr, "AVAILABLE");
+            client.putCluster(stackIntId, instanceGroup, scalingAdjustment, false);
+            CloudbreakUtil.waitForStackStatus(itContext, stackId, "AVAILABLE");
+            client.putStack(stackIntId, instanceGroup, scalingAdjustment);
+            CloudbreakUtil.waitForStackStatus(itContext, stackId, "AVAILABLE");
         } else {
-            client.putStack(stackId, instanceGroup, scalingAdjustment);
-            CloudbreakUtil.waitForStackStatus(itContext, stackIdStr, "AVAILABLE");
-            client.putCluster(stackId, instanceGroup, scalingAdjustment, false);
-            CloudbreakUtil.waitForStackStatus(itContext, stackIdStr, "AVAILABLE");
+            client.putStack(stackIntId, instanceGroup, scalingAdjustment);
+            CloudbreakUtil.waitForStackStatus(itContext, stackId, "AVAILABLE");
+            client.putCluster(stackIntId, instanceGroup, scalingAdjustment, false);
+            CloudbreakUtil.waitForStackStatus(itContext, stackId, "AVAILABLE");
         }
         // THEN
-        CloudbreakUtil.checkClusterAvailability(client, stackIdStr);
+        CloudbreakUtil.checkClusterAvailability(client, stackId);
     }
 }

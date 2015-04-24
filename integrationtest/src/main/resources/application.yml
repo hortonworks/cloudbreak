@@ -13,11 +13,6 @@ integrationtest:
     cloudbreak:
         server:
 
-    # keystore properties
-    keystore:
-        file:
-        password:
-
     # gcp credential details
     gcpcredential:
        name:
@@ -38,6 +33,9 @@ integrationtest:
     defaultBlueprintName: multi-node-hdfs-yarn
     testsuite:
         threadPoolSize: 3
+        skipRemainingTestsAfterOneFailed: true
+        cleanUpOnFailure: true
+
     credentialNames:
         GCP: it-gcp-credential
         AWS: it-aws-credential

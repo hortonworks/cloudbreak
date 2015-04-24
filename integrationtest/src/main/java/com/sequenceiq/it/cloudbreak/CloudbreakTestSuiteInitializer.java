@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.ConfigFileApplicationContextInitializer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.testng.ITestContext;
 import org.testng.annotations.AfterSuite;
@@ -38,6 +39,10 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     private int cleanUpRetryCount;
     @Value("${integrationtest.defaultBlueprintName}")
     private String defaultBlueprintName;
+    @Value("${integrationtest.testsuite.skipRemainingTestsAfterOneFailed}")
+    private boolean skipRemainingSuiteTestsAfterOneFailed;
+    @Value("${integrationtest.testsuite.cleanUpOnFailure}")
+    private boolean cleanUpOnFailure;
 
     @Autowired
     private ITProps itProps;
@@ -62,6 +67,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             @Optional("") String instanceGroups, @Optional("") String hostGroups, @Optional("") String blueprintName, @Optional("") String stackName)
             throws Exception {
         cloudbreakServer = StringUtils.hasLength(cloudbreakServer) ? cloudbreakServer : defaultCloudbreakServer;
+        itContext.putContextParam(CloudbreakITContextConstants.SKIP_REMAINING_SUITETEST_AFTER_ONE_FAILED, skipRemainingSuiteTestsAfterOneFailed);
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER, cloudbreakServer);
         CloudbreakClient client = new CloudbreakClient(cloudbreakServer, itContext.getContextParam(IntegrationTestContext.AUTH_TOKEN));
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, client);
@@ -136,10 +142,10 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         return hostGroups;
     }
 
-    @AfterSuite
+    @AfterSuite(alwaysRun = true)
     @Parameters("cleanUp")
     public void cleanUp(@Optional("true") boolean cleanUp) throws Exception {
-        if (cleanUp) {
+        if (isCleanUpNeeded(cleanUp)) {
             CloudbreakClient client = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class);
             String stackId = itContext.getCleanUpParameter(CloudbreakITContextConstants.STACK_ID);
             for (int i = 0; i < cleanUpRetryCount; i++) {
@@ -204,5 +210,10 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             result = true;
         }
         return result;
+    }
+
+    private boolean isCleanUpNeeded(boolean cleanUp) {
+        boolean noTestsFailed = CollectionUtils.isEmpty(itContext.getContextParam(CloudbreakITContextConstants.FAILED_TESTS, List.class));
+        return cleanUp && (cleanUpOnFailure || (!cleanUpOnFailure && noTestsFailed));
     }
 }

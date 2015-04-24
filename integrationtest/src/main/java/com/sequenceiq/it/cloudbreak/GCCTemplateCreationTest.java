@@ -27,8 +27,8 @@ public class GCCTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
             @Optional("HDD") String volumeType, @Optional("1") String volumeCount, @Optional("30") String volumeSize) throws Exception {
         // GIVEN
         // WHEN
-        // TODO: VolumeType is missing from rest client, publicInAccount
-        String id = getClient().postGccTemplate(gccName, "GCC template for integration testing", gccInstanceType, volumeCount, volumeSize, false);
+        // TODO: publicInAccount
+        String id = getClient().postGccTemplate(gccName, "GCC template for integration testing", gccInstanceType, volumeType, volumeCount, volumeSize, false);
         // THEN
         Assert.assertNotNull(id);
         additionHelper.handleTemplateAdditions(getItContext(), id, additions);

@@ -1,4 +1,4 @@
-# AZURE credential name must be specified
+# Aws credential name must be specified
 name: AWS smoke test
 parameters: {
   cloudProvider: AWS
