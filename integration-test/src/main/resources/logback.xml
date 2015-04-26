@@ -15,7 +15,7 @@
         <sift>
             <appender name="FILE-${suite}" class="ch.qos.logback.core.FileAppender">
                 <file>suites_log/${suite}-${date}.log</file>
-                <append>false</append>
+                <append>true</append>
                 <layout class="ch.qos.logback.classic.PatternLayout">
                     <encoder>
                         <pattern>%date{ISO8601} [%thread] %-5level [suite:%X{suite:-nosuite}] - %msg%n</pattern>
