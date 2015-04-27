@@ -1,42 +1,5 @@
 -- // create baseline
 
---
--- PostgreSQL database dump
---
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SET check_function_bodies = false;
-SET client_min_messages = warning;
-
---
--- Name: postgres; Type: COMMENT; Schema: -; Owner: postgres
---
-
-COMMENT ON DATABASE postgres IS 'default administrative connection database';
-
-
---
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner:
---
-
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
-
---
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner:
---
-
-COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
-
-
-SET search_path = public, pg_catalog;
-
-SET default_tablespace = '';
-
-SET default_with_oids = false;
 
 --
 -- Name: blueprint; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
@@ -54,9 +17,6 @@ CREATE TABLE blueprint (
     publicinaccount boolean NOT NULL
 );
 
-
-ALTER TABLE blueprint OWNER TO postgres;
-
 --
 -- Name: blueprint_table; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -68,8 +28,6 @@ CREATE SEQUENCE blueprint_table
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE blueprint_table OWNER TO postgres;
 
 --
 -- Name: cloudbreakevent; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
@@ -94,8 +52,6 @@ CREATE TABLE cloudbreakevent (
 );
 
 
-ALTER TABLE cloudbreakevent OWNER TO postgres;
-
 --
 -- Name: cloudbreakusage; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
 --
@@ -115,8 +71,6 @@ CREATE TABLE cloudbreakusage (
     stackname character varying(255)
 );
 
-
-ALTER TABLE cloudbreakusage OWNER TO postgres;
 
 --
 -- Name: cluster; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
@@ -141,8 +95,6 @@ CREATE TABLE cluster (
     blueprint_id bigint
 );
 
-
-ALTER TABLE cluster OWNER TO postgres;
 
 --
 -- Name: credential; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
@@ -175,9 +127,6 @@ CREATE TABLE credential (
     temporaryawscredentials_accesskeyid character varying(255)
 );
 
-
-ALTER TABLE credential OWNER TO postgres;
-
 --
 -- Name: credential_table; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -190,8 +139,6 @@ CREATE SEQUENCE credential_table
     CACHE 1;
 
 
-ALTER TABLE credential_table OWNER TO postgres;
-
 --
 -- Name: failurepolicy; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
 --
@@ -202,8 +149,6 @@ CREATE TABLE failurepolicy (
     threshold bigint
 );
 
-
-ALTER TABLE failurepolicy OWNER TO postgres;
 
 --
 -- Name: hibernate_sequence; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -217,7 +162,6 @@ CREATE SEQUENCE hibernate_sequence
     CACHE 1;
 
 
-ALTER TABLE hibernate_sequence OWNER TO postgres;
 
 --
 -- Name: hostgroup; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
@@ -231,7 +175,6 @@ CREATE TABLE hostgroup (
 );
 
 
-ALTER TABLE hostgroup OWNER TO postgres;
 
 --
 -- Name: hostgroup_recipe; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
@@ -243,7 +186,6 @@ CREATE TABLE hostgroup_recipe (
 );
 
 
-ALTER TABLE hostgroup_recipe OWNER TO postgres;
 
 --
 -- Name: hostmetadata; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
@@ -255,8 +197,6 @@ CREATE TABLE hostmetadata (
     hostgroup_id bigint
 );
 
-
-ALTER TABLE hostmetadata OWNER TO postgres;
 
 --
 -- Name: instancegroup; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
@@ -271,8 +211,6 @@ CREATE TABLE instancegroup (
     template_id bigint
 );
 
-
-ALTER TABLE instancegroup OWNER TO postgres;
 
 --
 -- Name: instancemetadata; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
@@ -296,7 +234,6 @@ CREATE TABLE instancemetadata (
 );
 
 
-ALTER TABLE instancemetadata OWNER TO postgres;
 
 --
 -- Name: recipe; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
@@ -313,7 +250,6 @@ CREATE TABLE recipe (
 );
 
 
-ALTER TABLE recipe OWNER TO postgres;
 
 --
 -- Name: recipe_keyvalues; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
@@ -326,8 +262,6 @@ CREATE TABLE recipe_keyvalues (
 );
 
 
-ALTER TABLE recipe_keyvalues OWNER TO postgres;
-
 --
 -- Name: recipe_plugins; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
 --
@@ -338,8 +272,6 @@ CREATE TABLE recipe_plugins (
     plugin character varying(255) NOT NULL
 );
 
-
-ALTER TABLE recipe_plugins OWNER TO postgres;
 
 --
 -- Name: resource; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
@@ -354,8 +286,6 @@ CREATE TABLE resource (
 );
 
 
-ALTER TABLE resource OWNER TO postgres;
-
 --
 -- Name: sequence_table; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -367,8 +297,6 @@ CREATE SEQUENCE sequence_table
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE sequence_table OWNER TO postgres;
 
 --
 -- Name: stack; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
@@ -399,8 +327,6 @@ CREATE TABLE stack (
 );
 
 
-ALTER TABLE stack OWNER TO postgres;
-
 --
 -- Name: stack_parameters; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
 --
@@ -411,8 +337,6 @@ CREATE TABLE stack_parameters (
     key character varying(255) NOT NULL
 );
 
-
-ALTER TABLE stack_parameters OWNER TO postgres;
 
 --
 -- Name: stack_table; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -426,8 +350,6 @@ CREATE SEQUENCE stack_table
     CACHE 1;
 
 
-ALTER TABLE stack_table OWNER TO postgres;
-
 --
 -- Name: subnet; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
 --
@@ -440,8 +362,6 @@ CREATE TABLE subnet (
 );
 
 
-ALTER TABLE subnet OWNER TO postgres;
-
 --
 -- Name: subscription; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
 --
@@ -452,8 +372,6 @@ CREATE TABLE subscription (
     endpoint character varying(255)
 );
 
-
-ALTER TABLE subscription OWNER TO postgres;
 
 --
 -- Name: template; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
@@ -482,8 +400,6 @@ CREATE TABLE template (
 );
 
 
-ALTER TABLE template OWNER TO postgres;
-
 --
 -- Name: temporaryawscredentials; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
 --
@@ -495,8 +411,6 @@ CREATE TABLE temporaryawscredentials (
     validuntil bigint NOT NULL
 );
 
-
-ALTER TABLE temporaryawscredentials OWNER TO postgres;
 
 --
 -- Name: blueprint_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace:
@@ -671,7 +585,7 @@ ALTER TABLE ONLY temporaryawscredentials
 --
 
 ALTER TABLE ONLY credential
-    ADD CONSTRAINT uk_4k41j29yr72m8g4jswkxae3wf UNIQUE (account, name);
+    ADD CONSTRAINT uk_credential_account_name UNIQUE (account, name);
 
 
 --
@@ -679,7 +593,7 @@ ALTER TABLE ONLY credential
 --
 
 ALTER TABLE ONLY blueprint
-    ADD CONSTRAINT uk_6linr69q0qs341t4dwksmj2k5 UNIQUE (account, name);
+    ADD CONSTRAINT uk_blueprint_account_name UNIQUE (account, name);
 
 
 --
@@ -687,7 +601,7 @@ ALTER TABLE ONLY blueprint
 --
 
 ALTER TABLE ONLY recipe
-    ADD CONSTRAINT uk_mo42wgq8xghku0pud0d7u9gxq UNIQUE (account, name);
+    ADD CONSTRAINT uk_recipe_account_name UNIQUE (account, name);
 
 
 --
@@ -695,7 +609,7 @@ ALTER TABLE ONLY recipe
 --
 
 ALTER TABLE ONLY template
-    ADD CONSTRAINT uk_pcvp0gu76lf195n5e4bwn62hb UNIQUE (account, name);
+    ADD CONSTRAINT uk_template_account_name UNIQUE (account, name);
 
 
 --
@@ -703,7 +617,7 @@ ALTER TABLE ONLY template
 --
 
 ALTER TABLE ONLY stack
-    ADD CONSTRAINT uk_q7w7pdmjrdfy3qfst9l8nr2qb UNIQUE (account, name);
+    ADD CONSTRAINT uk_stack_account_name UNIQUE (account, name);
 
 
 --
@@ -711,7 +625,7 @@ ALTER TABLE ONLY stack
 --
 
 ALTER TABLE ONLY cluster
-    ADD CONSTRAINT uk_qdso8lss2eqqwfaombyqmv02g UNIQUE (account, name);
+    ADD CONSTRAINT uk_cluster_account_name UNIQUE (account, name);
 
 
 --
@@ -719,7 +633,7 @@ ALTER TABLE ONLY cluster
 --
 
 ALTER TABLE ONLY credential
-    ADD CONSTRAINT fk_51q9ax178o05oeghwi0hr8is5 FOREIGN KEY (temporaryawscredentials_accesskeyid) REFERENCES temporaryawscredentials(accesskeyid);
+    ADD CONSTRAINT fk_credential_temporaryawscredentials_accesskeyid FOREIGN KEY (temporaryawscredentials_accesskeyid) REFERENCES temporaryawscredentials(accesskeyid);
 
 
 --
@@ -727,7 +641,7 @@ ALTER TABLE ONLY credential
 --
 
 ALTER TABLE ONLY hostmetadata
-    ADD CONSTRAINT fk_5k57kt8hao4tipnk2umnxe0yn FOREIGN KEY (hostgroup_id) REFERENCES hostgroup(id);
+    ADD CONSTRAINT fk_credential_hostgroup_id FOREIGN KEY (hostgroup_id) REFERENCES hostgroup(id);
 
 
 --
@@ -735,7 +649,7 @@ ALTER TABLE ONLY hostmetadata
 --
 
 ALTER TABLE ONLY stack
-    ADD CONSTRAINT fk_7175vk9tgmhvq04moxgqv5e8o FOREIGN KEY (credential_id) REFERENCES credential(id);
+    ADD CONSTRAINT fk_stack_credential_id FOREIGN KEY (credential_id) REFERENCES credential(id);
 
 
 --
@@ -743,7 +657,7 @@ ALTER TABLE ONLY stack
 --
 
 ALTER TABLE ONLY stack
-    ADD CONSTRAINT fk_72cagekv8hcc33jeb47cyxyri FOREIGN KEY (failurepolicy_id) REFERENCES failurepolicy(id);
+    ADD CONSTRAINT fk_stack_failurepolicy_id FOREIGN KEY (failurepolicy_id) REFERENCES failurepolicy(id);
 
 
 --
@@ -751,7 +665,7 @@ ALTER TABLE ONLY stack
 --
 
 ALTER TABLE ONLY recipe_keyvalues
-    ADD CONSTRAINT fk_8u5d88nlm8c16970kb9km4sft FOREIGN KEY (recipe_id) REFERENCES recipe(id);
+    ADD CONSTRAINT fk_recipe_keyvalues_recipe_id FOREIGN KEY (recipe_id) REFERENCES recipe(id);
 
 
 --
@@ -759,7 +673,7 @@ ALTER TABLE ONLY recipe_keyvalues
 --
 
 ALTER TABLE ONLY instancegroup
-    ADD CONSTRAINT fk_92s82wcie3ogn4ohtjrbrmhaq FOREIGN KEY (stack_id) REFERENCES stack(id);
+    ADD CONSTRAINT fk_instancegroup_stack_id FOREIGN KEY (stack_id) REFERENCES stack(id);
 
 
 --
@@ -767,7 +681,7 @@ ALTER TABLE ONLY instancegroup
 --
 
 ALTER TABLE ONLY stack
-    ADD CONSTRAINT fk_al5gsr371caho71l56lx1c9ff FOREIGN KEY (cluster_id) REFERENCES cluster(id);
+    ADD CONSTRAINT fk_stack_cluster_id FOREIGN KEY (cluster_id) REFERENCES cluster(id);
 
 
 --
@@ -775,7 +689,7 @@ ALTER TABLE ONLY stack
 --
 
 ALTER TABLE ONLY resource
-    ADD CONSTRAINT fk_exmyy4cp2bumxgas1fu7ngsn0 FOREIGN KEY (resource_stack) REFERENCES stack(id);
+    ADD CONSTRAINT fk_resource_resource_stack FOREIGN KEY (resource_stack) REFERENCES stack(id);
 
 
 --
@@ -783,7 +697,7 @@ ALTER TABLE ONLY resource
 --
 
 ALTER TABLE ONLY stack_parameters
-    ADD CONSTRAINT fk_hqexgxamn3rb3rb1tqeieoabx FOREIGN KEY (stack_id) REFERENCES stack(id);
+    ADD CONSTRAINT fk_stack_parameters_stack_id FOREIGN KEY (stack_id) REFERENCES stack(id);
 
 
 --
@@ -791,7 +705,7 @@ ALTER TABLE ONLY stack_parameters
 --
 
 ALTER TABLE ONLY recipe_plugins
-    ADD CONSTRAINT fk_i1l3439ihtev4gi9fqkj2f8ko FOREIGN KEY (recipe_id) REFERENCES recipe(id);
+    ADD CONSTRAINT fk_recipe_plugins_recipe_id FOREIGN KEY (recipe_id) REFERENCES recipe(id);
 
 
 --
@@ -799,7 +713,7 @@ ALTER TABLE ONLY recipe_plugins
 --
 
 ALTER TABLE ONLY cluster
-    ADD CONSTRAINT fk_illyjalblhf0o1eilo7r65rdd FOREIGN KEY (blueprint_id) REFERENCES blueprint(id);
+    ADD CONSTRAINT fk_cluster_blueprint_id FOREIGN KEY (blueprint_id) REFERENCES blueprint(id);
 
 
 --
@@ -807,7 +721,7 @@ ALTER TABLE ONLY cluster
 --
 
 ALTER TABLE ONLY hostgroup_recipe
-    ADD CONSTRAINT fk_k6ykksyri55tik7p4njurovk2 FOREIGN KEY (recipes_id) REFERENCES recipe(id);
+    ADD CONSTRAINT fk_hostgroup_recipe_recipes_id FOREIGN KEY (recipes_id) REFERENCES recipe(id);
 
 
 --
@@ -815,7 +729,7 @@ ALTER TABLE ONLY hostgroup_recipe
 --
 
 ALTER TABLE ONLY instancemetadata
-    ADD CONSTRAINT fk_m9cnw9ixk8y44uvdaq41wxu91 FOREIGN KEY (instancegroup_id) REFERENCES instancegroup(id);
+    ADD CONSTRAINT fk_instancemetadata_instancegroup_id FOREIGN KEY (instancegroup_id) REFERENCES instancegroup(id);
 
 
 --
@@ -823,7 +737,7 @@ ALTER TABLE ONLY instancemetadata
 --
 
 ALTER TABLE ONLY hostgroup_recipe
-    ADD CONSTRAINT fk_ninuqigdnafac9fuwm5ia0np3 FOREIGN KEY (hostgroup_id) REFERENCES hostgroup(id);
+    ADD CONSTRAINT fk_hostgroup_recipe_hostgroup_id FOREIGN KEY (hostgroup_id) REFERENCES hostgroup(id);
 
 
 --
@@ -831,7 +745,7 @@ ALTER TABLE ONLY hostgroup_recipe
 --
 
 ALTER TABLE ONLY subnet
-    ADD CONSTRAINT fk_ofdfpdym6h4ri22dx5d41txe FOREIGN KEY (stack_id) REFERENCES stack(id);
+    ADD CONSTRAINT fk_subnet_stack_id FOREIGN KEY (stack_id) REFERENCES stack(id);
 
 
 --
@@ -839,7 +753,7 @@ ALTER TABLE ONLY subnet
 --
 
 ALTER TABLE ONLY instancegroup
-    ADD CONSTRAINT fk_r1jejvs5t9rcnr5grr0popkp7 FOREIGN KEY (template_id) REFERENCES template(id);
+    ADD CONSTRAINT fk_instancegroup_template_id FOREIGN KEY (template_id) REFERENCES template(id);
 
 
 --
@@ -847,7 +761,7 @@ ALTER TABLE ONLY instancegroup
 --
 
 ALTER TABLE ONLY hostgroup
-    ADD CONSTRAINT fk_skihiei13mu259om0q2ic83y1 FOREIGN KEY (cluster_id) REFERENCES cluster(id);
+    ADD CONSTRAINT fk_hostgroup_cluster_id FOREIGN KEY (cluster_id) REFERENCES cluster(id);
 
 
 --
@@ -855,22 +769,10 @@ ALTER TABLE ONLY hostgroup
 --
 
 ALTER TABLE ONLY hostgroup
-    ADD CONSTRAINT fk_sridmlmxkiqigk3p62kh52sdx FOREIGN KEY (instancegroup_id) REFERENCES instancegroup(id);
+    ADD CONSTRAINT fk_hostgroup_instancegroup_id FOREIGN KEY (instancegroup_id) REFERENCES instancegroup(id);
 
 
---
--- Name: public; Type: ACL; Schema: -; Owner: postgres
---
 
-REVOKE ALL ON SCHEMA public FROM PUBLIC;
-REVOKE ALL ON SCHEMA public FROM postgres;
-GRANT ALL ON SCHEMA public TO postgres;
-GRANT ALL ON SCHEMA public TO PUBLIC;
-
-
---
--- PostgreSQL database dump complete
---
 
 -- //@UNDO
 
