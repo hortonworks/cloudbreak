@@ -38,7 +38,7 @@ public class DatabaseConfig {
     @Value("${cb.db.port.5432.tcp.port}")
     private String dbPort;
 
-    @Value("${cb.hbm2ddl.strategy:update}")
+    @Value("${cb.hbm2ddl.strategy:validate}")
     private String hbm2ddlStrategy;
 
     @Bean
