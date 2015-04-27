@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.connector;
 
-import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateWay;
+import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateway;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -103,7 +103,7 @@ public class ParallelCloudResourceManager {
                                     .withStack(finalStack)
                                     .withStackUpdater(stackUpdater)
                                     .withStackRepository(stackRepository)
-                                    .withUserData(isGateWay(instanceGroupEntry.getInstanceGroupType()) ? gateWayUserData : hostGroupUserData)
+                                    .withUserData(isGateway(instanceGroupEntry.getInstanceGroupType()) ? gateWayUserData : hostGroupUserData)
                                     .withMdcContextMap(ctxMap)
                                     .build()
                     );

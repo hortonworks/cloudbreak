@@ -41,6 +41,7 @@ dependencies {
     }
     compile 'org.apache.commons:commons-lang3:3.3.2'
     compile 'com.sequenceiq:consul-api:1.08'
+    compile group: 'com.github.docker-java', name: 'docker-java', version: '1.0.0'
     compile 'org.codehaus.jettison:jettison:1.3.5'
     compile 'commons-io:commons-io:2.4'
     compile 'com.thoughtworks.xstream:xstream:1.4.7'

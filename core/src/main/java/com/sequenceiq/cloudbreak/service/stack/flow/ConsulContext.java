@@ -4,9 +4,9 @@ import java.util.List;
 
 import com.ecwid.consul.v1.ConsulClient;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.StackDependentPollerObject;
+import com.sequenceiq.cloudbreak.service.StackContext;
 
-public class ConsulContext extends StackDependentPollerObject {
+public class ConsulContext extends StackContext {
 
     private final List<ConsulClient> consulClients;
     private final List<String> targets;

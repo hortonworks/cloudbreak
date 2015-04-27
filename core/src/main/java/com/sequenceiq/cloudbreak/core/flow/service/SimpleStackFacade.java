@@ -275,7 +275,7 @@ public class SimpleStackFacade implements StackFacade {
             stack = stackService.getById(request.getStackId());
             MDCBuilder.buildMdcContext(stack);
             String hostGroupUserData = userDataBuilder.buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(),
-                    new HashMap<String, String>(), InstanceGroupType.HOSTGROUP);
+                    new HashMap<String, String>(), InstanceGroupType.CORE);
             String gateWayUserData = userDataBuilder.buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(),
                     new HashMap<String, String>(), InstanceGroupType.GATEWAY);
             stack.setAllowedSubnets(getNewSubnetList(stack, request.getAllowedSubnets()));

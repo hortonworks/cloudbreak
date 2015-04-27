@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
-import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateWay;
+import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateway;
 
 import java.util.Set;
 
@@ -59,7 +59,7 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
                 LOGGER.error("No instancegroup found! stackId: {}, instancegroup name: {}", stackId, instanceGroupName);
                 throw new BadRequestException(String.format("Cannot find instance group named '%s' in stack '%s'", instanceGroupName, stackId));
             }
-            if (isGateWay(instanceGroup.getInstanceGroupType())) {
+            if (isGateway(instanceGroup.getInstanceGroupType())) {
                 LOGGER.error("Cannot define hostgroup on gateway! stackId: {}, instancegroup name: {}", stackId, instanceGroupName);
                 throw new BadRequestException(String.format("Cannot define hostgroup on gateway in stack '%s'", instanceGroupName, stackId));
             }

@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.StackDependentPollerObject;
+import com.sequenceiq.cloudbreak.service.StackContext;
 
-public class AutoScalingGroupReady extends StackDependentPollerObject {
+public class AutoScalingGroupReady extends StackContext {
 
     private AmazonEC2Client amazonEC2Client;
     private AmazonAutoScalingClient amazonASClient;

@@ -35,7 +35,7 @@ public class InstanceGroupJson implements JsonEntity {
     @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
     private String group;
     @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_GROUP_TYPE)
-    private InstanceGroupType type = InstanceGroupType.HOSTGROUP;
+    private InstanceGroupType type = InstanceGroupType.CORE;
     private Set<InstanceMetaDataJson> metadata = new HashSet<>();
 
     public InstanceGroupJson() {

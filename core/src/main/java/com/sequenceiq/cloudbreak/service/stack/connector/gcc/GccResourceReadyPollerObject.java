@@ -4,9 +4,9 @@ import com.google.api.services.compute.Compute;
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.StackDependentPollerObject;
+import com.sequenceiq.cloudbreak.service.StackContext;
 
-public class GccResourceReadyPollerObject extends StackDependentPollerObject {
+public class GccResourceReadyPollerObject extends StackContext {
 
     private Optional<Compute.ZoneOperations.Get> zoneOperations;
     private Optional<Compute.RegionOperations.Get> regionOperations;

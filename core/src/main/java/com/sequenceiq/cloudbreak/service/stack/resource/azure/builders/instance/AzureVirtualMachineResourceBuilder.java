@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.azure.builders.instance;
 
-import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateWay;
+import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateway;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.PORTS;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.RESERVEDIPNAME;
@@ -124,7 +124,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             props.put(VIRTUALNETWORKNAME, provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
             props.put(PORTS, NetworkUtils.getPorts(stack));
             props.put(VMTYPE, azureTemplate.getVmType().vmType().replaceAll(" ", ""));
-            if (isGateWay(instanceGroup.orNull().getInstanceGroupType())) {
+            if (isGateway(instanceGroup.orNull().getInstanceGroupType())) {
                 props.put(RESERVEDIPNAME, stack.getResourceByType(ResourceType.AZURE_RESERVED_IP).getResourceName());
             }
             return new AzureVirtualMachineCreateRequest(props, resources, buildResources, stack, instanceGroup.orNull());

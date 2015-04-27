@@ -12,7 +12,7 @@ fix_hostname() {
   fi
 }
 
-fix_docker_port() {
+configure_docker() {
   rm -rf /etc/docker/key.json
   sed -i "/other_args=/d" /etc/sysconfig/docker
   sh -c ' echo DOCKER_TLS_VERIFY=0 >> /etc/sysconfig/docker'
@@ -41,7 +41,7 @@ main() {
     remove_run_init_scripts
     format_disks
     fix_hostname
-    fix_docker_port
+    configure_docker
   fi
 }
 

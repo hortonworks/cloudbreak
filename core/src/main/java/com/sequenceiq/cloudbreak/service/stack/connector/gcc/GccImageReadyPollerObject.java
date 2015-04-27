@@ -2,10 +2,10 @@ package com.sequenceiq.cloudbreak.service.stack.connector.gcc;
 
 import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.StackDependentPollerObject;
+import com.sequenceiq.cloudbreak.service.StackContext;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 
-public class GccImageReadyPollerObject extends StackDependentPollerObject {
+public class GccImageReadyPollerObject extends StackContext {
 
     private String name;
     private Compute compute;

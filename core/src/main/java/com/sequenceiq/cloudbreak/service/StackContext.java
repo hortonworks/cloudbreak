@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.service;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
 
-public abstract class StackDependentPollerObject {
+public abstract class StackContext {
 
     private Stack stack;
 
-    public StackDependentPollerObject(Stack stack) {
+    public StackContext(Stack stack) {
         this.stack = stack;
     }
 

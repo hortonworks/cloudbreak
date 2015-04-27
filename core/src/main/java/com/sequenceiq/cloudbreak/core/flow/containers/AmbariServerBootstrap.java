@@ -2,30 +2,35 @@ package com.sequenceiq.cloudbreak.core.flow.containers;
 
 import static com.sequenceiq.cloudbreak.service.cluster.flow.DockerContainer.AMBARI_SERVER;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.api.model.RestartPolicy;
+import com.sequenceiq.cloudbreak.core.flow.DockerClientUtil;
 
 public class AmbariServerBootstrap {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AmbariServerBootstrap.class);
 
     private static final int PORT = 8080;
     private final DockerClient docker;
     private final String privateIp;
     private final String databaseIp;
-    private final String ambariDockerTag;
+    private final String imageName;
 
-    public AmbariServerBootstrap(DockerClient docker, String privateIp, String databaseIp, String ambariDockerTag) {
+    public AmbariServerBootstrap(DockerClient docker, String privateIp, String databaseIp, String imageName) {
         this.docker = docker;
         this.privateIp = privateIp;
         this.databaseIp = databaseIp;
-        this.ambariDockerTag = ambariDockerTag;
+        this.imageName = imageName;
     }
 
-    public Boolean call() {
+    public Boolean call() throws Exception {
         HostConfig hostConfig = new HostConfig();
         hostConfig.setNetworkMode("host");
         hostConfig.setPrivileged(true);
@@ -34,22 +39,21 @@ public class AmbariServerBootstrap {
         ports.add(new PortBinding(new Ports.Binding(PORT), new ExposedPort(PORT)));
         hostConfig.setPortBindings(ports);
 
-        CreateContainerResponse response = docker.createContainerCmd(ambariDockerTag)
+        String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
                 .withHostConfig(hostConfig)
                 .withExposedPorts(new ExposedPort(PORT))
-                .withEnv(String.format("constraint:type==gateway"),
+                .withEnv("constraint:type==gateway",
                         String.format("BRIDGE_IP=%s", privateIp),
                         String.format("POSTGRES_DB=%s", databaseIp),
                         String.format("SERVICE_NAME=%s", "ambari-8080"))
                 .withName(AMBARI_SERVER.getName())
-                .withCmd("/start-server")
-                .exec();
-        docker.startContainerCmd(response.getId())
+                .withCmd("/start-server"));
+        DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
                 .withPortBindings(new PortBinding(new Ports.Binding("0.0.0.0", PORT), new ExposedPort(PORT)))
                 .withNetworkMode("host")
                 .withRestartPolicy(RestartPolicy.alwaysRestart())
-                .withPrivileged(true)
-                .exec();
+                .withPrivileged(true));
+        LOGGER.info("Ambari server started successfully");
         return true;
     }
 }

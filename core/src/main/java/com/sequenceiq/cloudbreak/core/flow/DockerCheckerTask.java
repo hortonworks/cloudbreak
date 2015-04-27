@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.github.dockerjava.api.model.Info;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.core.flow.context.DockerContext;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
@@ -15,9 +14,9 @@ public class DockerCheckerTask extends StackBasedStatusCheckerTask<DockerContext
 
     @Override
     public boolean checkStatus(DockerContext dockerContext) {
-        LOGGER.info("Checking docker if available.");
+        LOGGER.info("Checking if docker daemon is available.");
         try {
-            Info info = dockerContext.getDockerClient().infoCmd().exec();
+            dockerContext.getDockerClient().infoCmd().exec();
             return true;
         } catch (Exception ex) {
             return false;
@@ -31,6 +30,6 @@ public class DockerCheckerTask extends StackBasedStatusCheckerTask<DockerContext
 
     @Override
     public String successMessage(DockerContext t) {
-        return String.format("Docker available successfully ");
+        return String.format("Docker is available.");
     }
 }

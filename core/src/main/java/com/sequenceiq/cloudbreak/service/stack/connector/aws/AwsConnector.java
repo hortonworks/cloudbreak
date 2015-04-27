@@ -86,7 +86,6 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -194,7 +193,7 @@ public class AwsConnector implements CloudPlatformConnector {
             stackUpdater.updateStackStatus(stackId, Status.CREATE_FAILED, "Creation of cluster infrastructure failed: " + e.getMessage());
             throw new BuildStackFailureException(e);
         }
-        String gateWayGroupName = stack.getInstanceGroupByType(InstanceGroupType.GATEWAY).getGroupName();
+        String gateWayGroupName = stack.getGatewayInstanceGroup().getGroupName();
         List<String> instanceIds = cfStackUtil.getInstanceIds(stack, amazonASClient, client, gateWayGroupName);
         if (!instanceIds.isEmpty()) {
             AssociateAddressRequest associateAddressRequest = new AssociateAddressRequest()

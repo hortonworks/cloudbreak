@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -180,7 +179,7 @@ public class AmbariClusterConnector {
 
     public Cluster resetAmbariCluster(Long stackId) {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        InstanceGroup instanceGroupByType = stack.getInstanceGroupByType(InstanceGroupType.GATEWAY);
+        InstanceGroup instanceGroupByType = stack.getGatewayInstanceGroup();
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         List<String> hostNames = instanceMetadataRepository.findAliveInstancesHostNamesInInstanceGroup(instanceGroupByType.getId());
         eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), "Ambari database reset started.");

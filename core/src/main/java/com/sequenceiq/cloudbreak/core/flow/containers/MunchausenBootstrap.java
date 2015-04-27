@@ -5,37 +5,32 @@ import static com.sequenceiq.cloudbreak.service.cluster.flow.DockerContainer.MUN
 import java.util.Date;
 
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Volume;
+import com.sequenceiq.cloudbreak.core.flow.DockerClientUtil;
 
 public class MunchausenBootstrap {
 
     private final DockerClient docker;
-    private final String privateIp;
     private final String[] cmd;
     private final String containerName;
 
-    public MunchausenBootstrap(DockerClient docker, String containerName, String privateIp, String[] cmd) {
+    public MunchausenBootstrap(DockerClient docker, String containerName, String[] cmd) {
         this.docker = docker;
-        this.privateIp = privateIp;
         this.cmd = cmd;
         this.containerName = containerName;
     }
 
-    public Boolean call() {
+    public Boolean call() throws Exception {
         HostConfig hostConfig = new HostConfig();
         hostConfig.setPrivileged(true);
-        CreateContainerResponse response = docker.createContainerCmd(containerName)
-                .withEnv(String.format("BRIDGE_IP=%s", privateIp))
+        String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(containerName)
                 .withName(MUNCHAUSEN.getName() + new Date().getTime())
                 .withHostConfig(hostConfig)
-                .withCmd(cmd)
-                .exec();
-        docker.startContainerCmd(response.getId())
-                .withBinds(new Bind("/var/run/docker.sock", new Volume("/var/run/docker.sock")))
-                .exec();
+                .withCmd(cmd));
+        DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
+                .withBinds(new Bind("/var/run/docker.sock", new Volume("/var/run/docker.sock"))));
         return true;
     }
 }

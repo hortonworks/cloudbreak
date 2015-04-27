@@ -17,17 +17,18 @@ public class SwarmCheckerTask extends StackBasedStatusCheckerTask<SwarmContext> 
 
     @Override
     public boolean checkStatus(SwarmContext swarmContext) {
-        LOGGER.info("Checking swarm if available.");
+        LOGGER.info("Checking if Swarm manager is available and if the agents are registered.");
         try {
-            List<Object> driverStatuses = swarmContext.getDockerClient().infoCmd().exec().getDriverStatuses();
-            for (Object driverStatuse : driverStatuses) {
+            List<Object> driverStatus = swarmContext.getDockerClient().infoCmd().exec().getDriverStatuses();
+            LOGGER.debug("Swarm manager is available, checking registered agents.");
+            for (Object element : driverStatus) {
                 try {
-                    List objects = (ArrayList) driverStatuse;
+                    List objects = (ArrayList) element;
                     if (objects.get(0).toString().endsWith("Nodes") && Integer.valueOf(objects.get(1).toString()) == swarmContext.getNodeCount()) {
                         return true;
                     }
-                } catch (Exception ex) {
-                    LOGGER.info("Type cast was not success when try to reach the swarm api.");
+                } catch (Exception e) {
+                    LOGGER.error(String.format("Docker info returned an unexpected element: %s", element), e);
                 }
             }
         } catch (Exception ex) {
@@ -38,11 +39,11 @@ public class SwarmCheckerTask extends StackBasedStatusCheckerTask<SwarmContext> 
 
     @Override
     public void handleTimeout(SwarmContext t) {
-        throw new InternalServerException(String.format("Operation timed out. Could not reach swarm nodes in time."));
+        throw new InternalServerException("Operation timed out. Swarm manager couldn't start or the agents didn't join in time.");
     }
 
     @Override
     public String successMessage(SwarmContext t) {
-        return String.format("Swarm nodes available successfully ");
+        return String.format("Swarm is available and the agents are registered.");
     }
 }
