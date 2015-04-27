@@ -26,6 +26,8 @@ dependencies {
         exclude group: 'org.slf4j';
     }
     compile "org.testng:testng:6.8.21"
+    compile "org.uncommons:reportng:1.1.4"
+    runtime "com.google.inject:guice:3.0"
 }
 
 task buildInfo(type: BuildInfoTask) {

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,6 +24,8 @@ import org.springframework.util.CollectionUtils;
 import org.testng.TestNG;
 import org.testng.internal.Yaml;
 import org.testng.xml.XmlSuite;
+import org.uncommons.reportng.HTMLReporter;
+import org.uncommons.reportng.JUnitXMLReporter;
 
 import com.sequenceiq.it.cloudbreak.config.ITProps;
 
@@ -55,6 +58,8 @@ public class IntegrationTestApp implements CommandLineRunner {
         testng.setSuiteThreadPoolSize(suiteThreadPoolSize);
         testng.setVerbose(2);
         testng.addListener(new ThreadLocalTestListener());
+        testng.addListener(new HTMLReporter());
+        testng.addListener(new JUnitXMLReporter());
         setupSuites(testng);
         testng.run();
     }
@@ -95,16 +100,16 @@ public class IntegrationTestApp implements CommandLineRunner {
 
     private void setupFullTest(TestNG testng, int salt, int regionNum) throws IOException {
         List<Resource> suites = new ArrayList<>();
-        suites.addAll(getProviderSuites("classpath:/testsuites/aws/full/*.yaml", salt, regionNum));
-        suites.addAll(getProviderSuites("classpath:/testsuites/azure/full/*.yaml", salt, regionNum));
-        suites.addAll(getProviderSuites("classpath:/testsuites/gcp/full/*.yaml", salt, regionNum));
+        suites.addAll(getProviderSuites("classpath:/testsuites/aws/fullhdp/*.yaml", salt, regionNum));
+        suites.addAll(getProviderSuites("classpath:/testsuites/azure/fullhdp/*.yaml", salt, regionNum));
+        suites.addAll(getProviderSuites("classpath:/testsuites/gcp/fullhdp/*.yaml", salt, regionNum));
         LOG.info("The following suites will be executed: {}", suites);
         testng.setXmlSuites(loadSuiteResources(suites));
     }
 
-    private List<Resource> getProviderSuites(String providerDirPattern, int salt, int regionNum) throws IOException {
+    private Set<Resource> getProviderSuites(String providerDirPattern, int salt, int regionNum) throws IOException {
         Resource[] suites = applicationContext.getResources(providerDirPattern);
-        List<Resource> providerTests = new ArrayList<>();
+        Set<Resource> providerTests = new HashSet<>();
         regionNum = Math.min(regionNum, suites.length);
         int regionIndex = salt * regionNum % suites.length;
         for (int i = regionIndex; i < regionIndex + regionNum; i++) {
