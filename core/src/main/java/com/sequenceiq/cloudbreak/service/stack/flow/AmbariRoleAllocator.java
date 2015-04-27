@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,35 +65,38 @@ public class AmbariRoleAllocator {
     private ConsulServiceCheckerTask consulServiceCheckerTask;
 
     public AmbariRoleAllocationComplete allocateRoles(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData) {
-        AmbariRoleAllocationComplete allocationComplete = null;
-
         Stack stack = stackRepository.findById(stackId);
-        if (!stack.isMetadataReady()) {
-            if (coreInstanceMetaData.size() != stack.getFullNodeCount().intValue()) {
-                throw new WrongMetadataException(String.format(
-                        "Size of the collected metadata set does not equal the node count of the stack. [metadata size=%s] [nodecount=%s]",
-                        coreInstanceMetaData.size(), stack.getFullNodeCount()));
-            }
-            for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                Set<InstanceMetaData> instancesMetaData = prepareInstanceMetaData(coreInstanceMetaData, instanceGroup, InstanceStatus.UNREGISTERED);
-                stackUpdater.updateStackMetaData(stackId, instancesMetaData, instanceGroup.getGroupName());
-            }
-            stack = stackUpdater.updateMetadataReady(stackId, true);
-            Set<InstanceMetaData> allInstanceMetaData = stack.getRunningInstanceMetaData();
-            Optional<String> publicAmbariAddress = updateAmbariInstanceMetadata(stack, allInstanceMetaData);
-            if (publicAmbariAddress.isPresent()) {
-                PollingResult pollingResult = waitForConsulAgents(stack, allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
-                if (isSuccess(pollingResult)) {
-                    updateWithConsulData(allInstanceMetaData);
-                    instanceMetaDataRepository.save(allInstanceMetaData);
-                    allocationComplete = new AmbariRoleAllocationComplete(stack, publicAmbariAddress.orNull());
-                }
-            }
-        } else {
-            LOGGER.info("Metadata is already created, ignoring stack metadata update.");
-            allocationComplete = new AmbariRoleAllocationComplete(stack, stack.getAmbariIp());
+        if (stack.isMetadataReady()) {
+            return new AmbariRoleAllocationComplete(stack, stack.getAmbariIp());
         }
-        return allocationComplete;
+
+        if (coreInstanceMetaData.size() != stack.getFullNodeCount().intValue()) {
+            throw new WrongMetadataException(String.format(
+                    "Size of the collected metadata set does not equal the node count of the stack. [metadata size=%s] [nodecount=%s]",
+                    coreInstanceMetaData.size(), stack.getFullNodeCount()));
+        }
+
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            Set<InstanceMetaData> instancesMetaData = prepareInstanceMetaData(coreInstanceMetaData, instanceGroup, InstanceStatus.UNREGISTERED);
+            stackUpdater.updateStackMetaData(stackId, instancesMetaData, instanceGroup.getGroupName());
+        }
+
+        stack = stackUpdater.updateMetadataReady(stackId, true);
+        Set<InstanceMetaData> allInstanceMetaData = stack.getRunningInstanceMetaData();
+        Optional<String> publicAmbariAddress = updateAmbariInstanceMetadata(stack, allInstanceMetaData);
+
+        if (!publicAmbariAddress.isPresent()) {
+            throw new WrongMetadataException("Obtaining Public IP of Ambari server is interrupted.");
+        }
+
+        PollingResult pollingResult = waitForConsulAgents(stack, allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
+        if (!isSuccess(pollingResult)) {
+            throw new WrongMetadataException("Connecting to consul hosts is interrupted.");
+        }
+
+        updateWithConsulData(allInstanceMetaData);
+        instanceMetaDataRepository.save(allInstanceMetaData);
+        return new AmbariRoleAllocationComplete(stack, publicAmbariAddress.orNull());
     }
 
     public StackUpdateSuccess updateInstanceMetadata(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData, String instanceGroupName) {
@@ -146,12 +150,17 @@ public class AmbariRoleAllocator {
                 POLLING_INTERVAL,
                 MAX_POLLING_ATTEMPTS);
         if (isSuccess(pollingResult)) {
-            return successAmbariAddressReturnObject(getService(clients, AMBARI_SERVICE).get(0).getAddress());
+            return successAmbariAddressReturnObject(getAmbariAddress(clients));
         } else if (isExited(pollingResult)) {
             return exitedAmbariAddressReturnObject();
         } else {
             return failedAmbariAddressReturnObject();
         }
+    }
+
+    @VisibleForTesting
+    protected String getAmbariAddress(List<ConsulClient> clients) {
+        return getService(clients, AMBARI_SERVICE).get(0).getAddress();
     }
 
     private PollingResult waitForConsulAgents(Stack stack, Set<InstanceMetaData> originalMetaData, Set<InstanceMetaData> instancesMetaData) {
@@ -175,7 +184,8 @@ public class AmbariRoleAllocator {
                 MAX_POLLING_ATTEMPTS);
     }
 
-    private void updateWithConsulData(Set<InstanceMetaData> instancesMetaData) {
+    @VisibleForTesting
+    protected void updateWithConsulData(Set<InstanceMetaData> instancesMetaData) {
         List<ConsulClient> clients = createClients(instancesMetaData);
         Map<String, String> members = getAliveMembers(clients);
         Set<String> consulServers = getConsulServers(clients);
