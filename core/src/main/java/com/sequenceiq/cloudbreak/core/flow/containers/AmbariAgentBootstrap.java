@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.core.flow.containers;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.DockerContainer.AMBARI_AGENT;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -11,11 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.RestartPolicy;
 import com.github.dockerjava.api.model.Volume;
+import com.sequenceiq.cloudbreak.core.flow.DockerClientUtil;
 
 public class AmbariAgentBootstrap implements Callable<Boolean> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariAgentBootstrap.class);
@@ -24,15 +23,15 @@ public class AmbariAgentBootstrap implements Callable<Boolean> {
     private final DockerClient docker;
     private final String privateIp;
     private final String longName;
-    private final String ambariDockerTag;
+    private final String imageName;
     private final int volumeCount;
     private final Long id;
 
-    public AmbariAgentBootstrap(DockerClient docker, String privateIp, String longName, String ambariDockerTag, int volumeCount, Long id) {
+    public AmbariAgentBootstrap(DockerClient docker, String privateIp, String longName, String imageName, int volumeCount, Long id) {
         this.docker = docker;
         this.privateIp = privateIp;
         this.longName = longName;
-        this.ambariDockerTag = ambariDockerTag;
+        this.imageName = imageName;
         this.volumeCount = volumeCount;
         this.id = id;
     }
@@ -46,14 +45,13 @@ public class AmbariAgentBootstrap implements Callable<Boolean> {
             hostConfig.setPrivileged(true);
             hostConfig.setRestartPolicy(RestartPolicy.alwaysRestart());
 
-            CreateContainerResponse response = docker.createContainerCmd(ambariDockerTag)
+            String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
                     .withHostConfig(hostConfig)
                     .withName(String.format("%s-%s", AMBARI_AGENT.getName(), id))
                     .withEnv(String.format("constraint:node==%s", longName),
                             String.format("BRIDGE_IP=%s", privateIp),
                             "HADOOP_CLASSPATH=/data/jars/*:/usr/lib/hadoop/lib/*")
-                    .withCmd("/start-agent")
-                    .exec();
+                    .withCmd("/start-agent"));
             List<Bind> binds = new ArrayList<>();
             binds.add(new Bind("/usr/local/public_host_script.sh", new Volume("/etc/ambari-agent/conf/public-hostname.sh")));
             binds.add(new Bind("/data/jars", new Volume("/data/jars")));
@@ -62,16 +60,14 @@ public class AmbariAgentBootstrap implements Callable<Boolean> {
             }
             Bind[] array = new Bind[binds.size()];
             binds.toArray(array);
-            LOGGER.info(String.format("Bind array buildt on %s host %s", longName, Arrays.toString(array)));
-            docker.startContainerCmd(response.getId())
+            DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
                     .withNetworkMode("host")
                     .withRestartPolicy(RestartPolicy.alwaysRestart())
-                    .withBinds(array)
-                    .exec();
-            LOGGER.info(String.format("Ambari agent start was success on %s node with %s private ip", longName, privateIp));
+                    .withBinds(array));
+            LOGGER.info(String.format("Ambari agent started successfully on node %s.", longName));
             return true;
         } catch (Exception ex) {
-            LOGGER.error(String.format("Ambari agent start failed on %s node with %s private ip", longName, privateIp));
+            LOGGER.error(String.format("Ambari agent failed to start on node %s.", longName));
             throw ex;
         }
     }

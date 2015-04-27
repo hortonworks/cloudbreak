@@ -5,9 +5,9 @@ import java.util.List;
 import org.openstack4j.api.OSClient;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.StackDependentPollerObject;
+import com.sequenceiq.cloudbreak.service.StackContext;
 
-public final class OpenStackContext extends StackDependentPollerObject {
+public final class OpenStackContext extends StackContext {
 
     private final List<String> resources;
     private final OSClient osClient;

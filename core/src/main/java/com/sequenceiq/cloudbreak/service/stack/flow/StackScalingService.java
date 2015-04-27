@@ -77,7 +77,7 @@ public class StackScalingService {
         Stack stack = stackService.getById(stackId);
         InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
         String hostGroupUserData = userDataBuilder
-                .buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>(), InstanceGroupType.HOSTGROUP);
+                .buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>(), InstanceGroupType.CORE);
         String gateWayUserData = userDataBuilder
                 .buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>(), InstanceGroupType.GATEWAY);
         resources = cloudPlatformConnectors.get(stack.cloudPlatform())

@@ -5,9 +5,9 @@ import java.util.Map;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.StackDependentPollerObject;
+import com.sequenceiq.cloudbreak.service.StackContext;
 
-public class AzureMetadataSetupCheckerTaskContext extends StackDependentPollerObject {
+public class AzureMetadataSetupCheckerTaskContext extends StackContext {
 
     private AzureClient azureClient;
     private Map<String, Object> props = new HashMap<>();

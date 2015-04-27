@@ -137,7 +137,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
     public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
         try {
             String hostGroupUserDataScript = userDataBuilder.buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(),
-                    new HashMap<String, String>(), InstanceGroupType.HOSTGROUP);
+                    new HashMap<String, String>(), InstanceGroupType.CORE);
             String gateWayUserDataScript = userDataBuilder.buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(),
                     new HashMap<String, String>(), InstanceGroupType.GATEWAY);
             String heatTemplate = heatTemplateBuilder.remove(stack, gateWayUserDataScript, hostGroupUserDataScript,

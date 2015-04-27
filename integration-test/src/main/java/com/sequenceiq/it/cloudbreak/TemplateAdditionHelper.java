@@ -14,7 +14,7 @@ public class TemplateAdditionHelper {
         String[] additionsArray = additionString.split(";");
         for (String additionsString : additionsArray) {
             String[] additionArray = additionsString.split(",");
-            String type = additionArray.length == WITH_TYPE_LENGTH ? additionArray[WITH_TYPE_LENGTH - 1] : "HOSTGROUP";
+            String type = additionArray.length == WITH_TYPE_LENGTH ? additionArray[WITH_TYPE_LENGTH - 1] : "CORE";
             additions.add(new TemplateAddition(additionArray[0], Integer.valueOf(additionArray[1]), type));
         }
         return additions;
@@ -43,7 +43,7 @@ public class TemplateAdditionHelper {
         for (TemplateAddition addition : additions) {
             String groupName = addition.getGroupName();
             instanceGroups.add(new InstanceGroup(templateId, addition.getGroupName(), addition.getNodeCount(), addition.getType()));
-            if ("HOSTGROUP".equals(addition.getType())) {
+            if ("CORE".equals(addition.getType())) {
                 hostGroups.add(new HostGroup(groupName, groupName));
             }
         }

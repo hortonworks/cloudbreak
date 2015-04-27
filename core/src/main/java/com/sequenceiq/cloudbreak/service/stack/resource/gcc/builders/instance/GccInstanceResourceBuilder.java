@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.gcc.builders.instance;
 
-import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateWay;
+import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateway;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -211,7 +211,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         AccessConfig accessConfig = new AccessConfig();
         accessConfig.setName(networkName);
         accessConfig.setType("ONE_TO_ONE_NAT");
-        if (instanceGroup.isPresent() && isGateWay(instanceGroup.orNull().getInstanceGroupType())) {
+        if (instanceGroup.isPresent() && isGateway(instanceGroup.orNull().getInstanceGroupType())) {
             Compute.Addresses.Get getReservedIp = contextObject.getCompute().addresses().get(contextObject.getProjectId(), gccZone.getRegion(),
                     filterResourcesByType(resources, ResourceType.GCC_RESERVED_IP).get(0).getResourceName());
             accessConfig.setNatIP(getReservedIp.execute().getAddress());

@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.CreateSnapshotResult;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.StackDependentPollerObject;
+import com.sequenceiq.cloudbreak.service.StackContext;
 
-public class SnapshotReadyPollerObject extends StackDependentPollerObject {
+public class SnapshotReadyPollerObject extends StackContext {
 
     private CreateSnapshotResult snapshotResult;
     private String snapshotId;

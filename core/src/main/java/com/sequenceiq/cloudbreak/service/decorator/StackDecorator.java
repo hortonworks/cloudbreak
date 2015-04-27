@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
-import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.GATEWAY;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -94,7 +92,7 @@ public class StackDecorator implements Decorator<Stack> {
     }
 
     private void validate(Stack stack) {
-        if (stack.getInstanceGroupsByType(GATEWAY).isEmpty()) {
+        if (stack.getGatewayInstanceGroup() == null) {
             throw new BadRequestException("Gateway instance group not configured");
         }
         int minNodeCount = ConsulUtils.ConsulServers.NODE_COUNT_LOW.getMin();

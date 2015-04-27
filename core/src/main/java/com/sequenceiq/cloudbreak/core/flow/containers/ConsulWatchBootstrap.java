@@ -8,11 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.RestartPolicy;
 import com.github.dockerjava.api.model.Volume;
+import com.sequenceiq.cloudbreak.core.flow.DockerClientUtil;
 
 public class ConsulWatchBootstrap implements Callable<Boolean> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsulWatchBootstrap.class);
@@ -22,14 +22,14 @@ public class ConsulWatchBootstrap implements Callable<Boolean> {
     private final String longName;
     private final String privateIp;
     private final Long id;
-    private final String containerName;
+    private final String imageName;
 
-    public ConsulWatchBootstrap(DockerClient docker, String containerName, String longName, String privateIp, Long id) {
+    public ConsulWatchBootstrap(DockerClient docker, String imageName, String longName, String privateIp, Long id) {
         this.docker = docker;
         this.longName = longName;
         this.privateIp = privateIp;
         this.id = id;
-        this.containerName = containerName;
+        this.imageName = imageName;
     }
 
     @Override
@@ -39,20 +39,18 @@ public class ConsulWatchBootstrap implements Callable<Boolean> {
         hostConfig.setPrivileged(true);
         hostConfig.setRestartPolicy(RestartPolicy.alwaysRestart());
         try {
-            CreateContainerResponse response = docker.createContainerCmd(containerName)
+            String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
                     .withEnv(String.format("constraint:node==%s", longName), "TRACE=1")
                     .withHostConfig(hostConfig)
                     .withName(String.format("%s-%s", CONSUL_WATCH.getName(), id))
-                    .withCmd(String.format("consul://%s:8500", privateIp))
-                    .exec();
-            docker.startContainerCmd(response.getId())
+                    .withCmd(String.format("consul://%s:8500", privateIp)));
+            DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
                     .withRestartPolicy(RestartPolicy.alwaysRestart())
-                    .withBinds(new Bind("/var/run/docker.sock", new Volume("/var/run/docker.sock")))
-                    .exec();
-            LOGGER.info(String.format("Consul watch start was success on %s node with %s private ip", longName, privateIp));
+                    .withBinds(new Bind("/var/run/docker.sock", new Volume("/var/run/docker.sock"))));
+            LOGGER.info(String.format("Consul watch started successfully on node %s.", longName));
             return true;
         } catch (Exception ex) {
-            LOGGER.info(String.format("Consul watch start failed on %s node with %s private ip", longName, privateIp));
+            LOGGER.info(String.format("Consul watch failed to start on node %s.", longName));
             throw ex;
         }
     }

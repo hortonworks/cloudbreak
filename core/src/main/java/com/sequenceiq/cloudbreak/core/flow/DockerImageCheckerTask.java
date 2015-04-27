@@ -17,18 +17,17 @@ public class DockerImageCheckerTask extends StackBasedStatusCheckerTask<DockerCo
 
     @Override
     public boolean checkStatus(DockerContext dockerContext) {
-        LOGGER.info("Checking docker image if available.");
-        boolean contain = false;
+        LOGGER.info("Checking if docker images are available.");
         try {
-            List<Image> exec = dockerContext.getDockerClient().listImagesCmd().exec();
-            for (String containerName : dockerContext.getContainerNames()) {
-                contain = false;
-                for (Image image : exec) {
-                    if (image.getRepoTags()[0].equals(containerName)) {
-                        contain = true;
+            List<Image> images = dockerContext.getDockerClient().listImagesCmd().exec();
+            for (String imageName : dockerContext.getDockerImageNames()) {
+                boolean found = false;
+                for (Image image : images) {
+                    if (image.getRepoTags()[0].equals(imageName)) {
+                        found = true;
                     }
                 }
-                if (!contain) {
+                if (!found) {
                     return false;
                 }
             }
@@ -40,11 +39,11 @@ public class DockerImageCheckerTask extends StackBasedStatusCheckerTask<DockerCo
 
     @Override
     public void handleTimeout(DockerContext t) {
-        throw new InternalServerException(String.format("Operation timed out. Could not reach docker in time."));
+        throw new InternalServerException(String.format("Operation timed out. Docker images are not available.."));
     }
 
     @Override
     public String successMessage(DockerContext t) {
-        return String.format("Docker available successfully ");
+        return String.format("Docker images are available.");
     }
 }

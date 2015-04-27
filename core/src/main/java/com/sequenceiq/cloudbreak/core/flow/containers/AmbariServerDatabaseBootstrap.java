@@ -2,22 +2,26 @@ package com.sequenceiq.cloudbreak.core.flow.containers;
 
 import static com.sequenceiq.cloudbreak.service.cluster.flow.DockerContainer.AMBARI_DB;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.CreateContainerResponse;
-import com.github.dockerjava.api.command.InspectContainerCmd;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.RestartPolicy;
 import com.github.dockerjava.api.model.Volume;
+import com.sequenceiq.cloudbreak.core.flow.DockerClientUtil;
 
 public class AmbariServerDatabaseBootstrap {
 
-    private final DockerClient docker;
-    private final String containerName;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AmbariServerDatabaseBootstrap.class);
 
-    public AmbariServerDatabaseBootstrap(DockerClient docker, String containerName) {
+    private final DockerClient docker;
+    private final String imageName;
+
+    public AmbariServerDatabaseBootstrap(DockerClient docker, String imageName) {
         this.docker = docker;
-        this.containerName = containerName;
+        this.imageName = imageName;
     }
 
     public String call() throws Exception {
@@ -25,18 +29,16 @@ public class AmbariServerDatabaseBootstrap {
         hostConfig.setPrivileged(true);
         hostConfig.setRestartPolicy(RestartPolicy.alwaysRestart());
 
-        CreateContainerResponse response = docker.createContainerCmd(containerName)
+        String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
                 .withEnv(String.format("POSTGRES_PASSWORD=%s", "bigdata"),
                         String.format("POSTGRES_USER=%s", "ambari"),
                         String.format("constraint:type==gateway"))
                 .withHostConfig(hostConfig)
-                .withName(AMBARI_DB.getName())
-                .exec();
-        docker.startContainerCmd(response.getId())
-                .withBinds(new Bind("/data/ambari-server/pgsql/data", new Volume("/var/lib/postgresql/data")))
-                .exec();
+                .withName(AMBARI_DB.getName()));
+        DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
+                .withBinds(new Bind("/data/ambari-server/pgsql/data", new Volume("/var/lib/postgresql/data"))));
 
-        InspectContainerCmd inspectContainerCmd = docker.inspectContainerCmd(response.getId());
-        return inspectContainerCmd.exec().getNetworkSettings().getIpAddress();
+        LOGGER.info("Database container for Ambari server started successfully");
+        return DockerClientUtil.inspectContainer(docker.inspectContainerCmd(containerId)).getNetworkSettings().getIpAddress();
     }
 }

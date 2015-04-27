@@ -207,7 +207,7 @@ public class AmbariRoleAllocator {
 
     public Optional<CoreInstanceMetaData> getGateWayCoreInstanceMetaData(Set<CoreInstanceMetaData> coreInstanceMetaData) {
         for (CoreInstanceMetaData instanceMetaData : coreInstanceMetaData) {
-            if (InstanceGroupType.isGateWay(instanceMetaData.getInstanceGroup().getInstanceGroupType())) {
+            if (InstanceGroupType.isGateway(instanceMetaData.getInstanceGroup().getInstanceGroupType())) {
                 return Optional.of(instanceMetaData);
             }
         }

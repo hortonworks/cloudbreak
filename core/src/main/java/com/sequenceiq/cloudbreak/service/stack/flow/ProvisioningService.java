@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.GATEWAY;
-import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.HOSTGROUP;
+import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.CORE;
 
 import java.util.Map;
 import java.util.Set;
@@ -46,7 +46,7 @@ public class ProvisioningService {
             stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS, statusReason);
             stackUpdater.updateStackStatusReason(stack.getId(), stack.getStatus().name());
             String gateWayUserDataScript = userDataBuilder.buildUserData(cloudPlatform, stack.getHash(), stack.getConsulServers(), userDataParams, GATEWAY);
-            String hostGroupUserDataScript = userDataBuilder.buildUserData(cloudPlatform, stack.getHash(), stack.getConsulServers(), userDataParams, HOSTGROUP);
+            String hostGroupUserDataScript = userDataBuilder.buildUserData(cloudPlatform, stack.getHash(), stack.getConsulServers(), userDataParams, CORE);
             CloudPlatformConnector cloudPlatformConnector = cloudPlatformConnectors.get(cloudPlatform);
             Set<Resource> resources = cloudPlatformConnector.buildStack(stack, gateWayUserDataScript, hostGroupUserDataScript, setupProperties);
             provisionComplete = new ProvisionComplete(cloudPlatform, stack.getId(), resources);

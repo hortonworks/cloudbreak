@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
 public enum InstanceGroupType {
-    GATEWAY(1), HOSTGROUP(0);
+    GATEWAY(1), CORE(0);
 
     private Integer fixedNodeCount;
 
@@ -13,11 +13,11 @@ public enum InstanceGroupType {
         return fixedNodeCount;
     }
 
-    public static boolean isGateWay(InstanceGroupType type) {
+    public static boolean isGateway(InstanceGroupType type) {
         return GATEWAY.equals(type);
     }
 
-    public static boolean isHostGroup(InstanceGroupType type) {
-        return HOSTGROUP.equals(type);
+    public static boolean isCoreGroup(InstanceGroupType type) {
+        return CORE.equals(type);
     }
 }

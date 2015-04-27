@@ -1,10 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
-import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.GATEWAY;
-import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.HOSTGROUP;
-
 import java.util.Map;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +21,11 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 public class ClusterSetupRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterSetupRunner.class);
 
-    @Value("${cb.cluster.setup.tool:SWARM}")
-    private ClusterSetupTool clusterSetupTool;
+    @Value("${cb.container.orchestrator:SWARM}")
+    private ContainerOrchestratorTool containerOrchestratorTool;
 
     @javax.annotation.Resource
-    private Map<ClusterSetupTool, ClusterSetupService> clusterSetupServices;
+    private Map<ContainerOrchestratorTool, ContainerOrchestrator> clusterSetupServices;
 
     @Autowired
     private StackRepository stackRepository;
@@ -37,24 +33,27 @@ public class ClusterSetupRunner {
     public FlowContext setup(ProvisioningContext provisioningContext) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
-        Set<InstanceGroup> hostGroups = stack.getInstanceGroupsByType(HOSTGROUP);
-        InstanceGroup gateway = stack.getInstanceGroupsByType(GATEWAY).iterator().next();
 
-        ClusterSetupService clusterSetupService = clusterSetupServices.get(clusterSetupTool);
+        ContainerOrchestrator containerOrchestrator = clusterSetupServices.get(containerOrchestratorTool);
+        ContainerOrchestratorClient client = containerOrchestrator.bootstrap(provisioningContext.getStackId());
+        containerOrchestrator.startRegistrator(client, provisioningContext.getStackId());
+        containerOrchestrator.startAmbariServer(client, provisioningContext.getStackId());
+        containerOrchestrator.startAmbariAgents(client, provisioningContext.getStackId());
+        containerOrchestrator.startConsulWatches(client, provisioningContext.getStackId());
 
-        clusterSetupService.preSetup(provisioningContext.getStackId(), gateway, hostGroups);
-        clusterSetupService.gatewaySetup(provisioningContext.getStackId(), gateway);
-        clusterSetupService.hostgroupsSetup(provisioningContext.getStackId(), hostGroups);
-        return clusterSetupService.postSetup(provisioningContext.getStackId());
+        return new ProvisioningContext.Builder()
+                .setAmbariIp(stack.getAmbariIp())
+                .setDefaultParams(stack.getId(), stack.cloudPlatform())
+                .build();
     }
 
     public void setupNewNode(ClusterScalingContext clusterScalingContext) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(clusterScalingContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
-        InstanceGroup gateway = stack.getInstanceGroupsByType(GATEWAY).iterator().next();
-        ClusterSetupService clusterSetupService = clusterSetupServices.get(clusterSetupTool);
-        clusterSetupService.preSetupNewNode(clusterScalingContext.getStackId(), gateway, clusterScalingContext.getUpscaleIds());
-        clusterSetupService.newHostgroupNodesSetup(clusterScalingContext.getStackId(), clusterScalingContext.getUpscaleIds(),
+        InstanceGroup gateway = stack.getGatewayInstanceGroup();
+        ContainerOrchestrator containerOrchestrator = clusterSetupServices.get(containerOrchestratorTool);
+        containerOrchestrator.preSetupNewNode(clusterScalingContext.getStackId(), gateway, clusterScalingContext.getUpscaleIds());
+        containerOrchestrator.newHostgroupNodesSetup(clusterScalingContext.getStackId(), clusterScalingContext.getUpscaleIds(),
                 clusterScalingContext.getHostGroupAdjustment().getHostGroup());
     }
 

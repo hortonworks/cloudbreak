@@ -123,7 +123,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     private List<InstanceGroup> createInstanceGroups(CloudbreakClient client, List<String[]> instanceGroupStrings) throws Exception {
         List<InstanceGroup> instanceGroups = new ArrayList<>();
         for (String[] instanceGroupStr : instanceGroupStrings) {
-            String type = instanceGroupStr.length == WITH_TYPE_LENGTH ? instanceGroupStr[WITH_TYPE_LENGTH - 1] : "HOSTGROUP";
+            String type = instanceGroupStr.length == WITH_TYPE_LENGTH ? instanceGroupStr[WITH_TYPE_LENGTH - 1] : "CORE";
             instanceGroups.add(new InstanceGroup(getId(client.getTemplateByName(instanceGroupStr[0])), instanceGroupStr[1],
                     Integer.parseInt(instanceGroupStr[2]), type));
         }
