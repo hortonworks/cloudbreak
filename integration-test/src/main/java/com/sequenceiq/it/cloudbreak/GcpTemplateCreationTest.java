@@ -9,7 +9,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-public class GCCTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
+public class GcpTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
     @Autowired
     private TemplateAdditionHelper additionHelper;
 
@@ -22,13 +22,13 @@ public class GCCTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    @Parameters({ "gccName", "gccInstanceType", "volumeType", "volumeCount", "volumeSize" })
-    public void testGCCTemplateCreation(@Optional("it-gcc-template") String gccName, @Optional("N1_STANDARD_2") String gccInstanceType,
+    @Parameters({ "gcpName", "gcpInstanceType", "volumeType", "volumeCount", "volumeSize" })
+    public void testGcpTemplateCreation(@Optional("it-gcp-template") String gcpName, @Optional("N1_STANDARD_2") String gcpInstanceType,
             @Optional("HDD") String volumeType, @Optional("1") String volumeCount, @Optional("30") String volumeSize) throws Exception {
         // GIVEN
         // WHEN
         // TODO: publicInAccount
-        String id = getClient().postGccTemplate(gccName, "GCC template for integration testing", gccInstanceType, volumeType, volumeCount, volumeSize, false);
+        String id = getClient().postGccTemplate(gcpName, "GCP template for integration testing", gcpInstanceType, volumeType, volumeCount, volumeSize, false);
         // THEN
         Assert.assertNotNull(id);
         additionHelper.handleTemplateAdditions(getItContext(), id, additions);

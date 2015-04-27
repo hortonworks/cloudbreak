@@ -1,4 +1,4 @@
-# AZURE credential name must be specified
+# Aws credential name must be specified
 name: AWS_fullhdp_apnortheast1_test
 parameters: {
   cloudProvider: AWS,
@@ -23,14 +23,50 @@ tests:
     classes:
       - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
 
-  - name: create master template
+  - name: create master1 template
     parameters: {
       awsTemplateName: it-aws-fullhdp-master1,
       awsInstanceType: C3Large,
       awsVolumeType: Ephemeral,
       awsVolumeCount: 2,
       awsVolumeSize: 16,
-      templateAdditions: "master_1,1;master_2,1;master_3,1;master_4,1"
+      templateAdditions: "master_1,1"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
+
+  - name: create master2 template
+    parameters: {
+      awsTemplateName: it-aws-fullhdp-master2,
+      awsInstanceType: M3Large,
+      awsVolumeType: Gp2,
+      awsVolumeCount: 3,
+      awsVolumeSize: 160,
+      templateAdditions: "master_2,1"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
+
+  - name: create master3 template
+    parameters: {
+      awsTemplateName: it-aws-fullhdp-master3,
+      awsInstanceType: C32xlarge,
+      awsVolumeType: Ephemeral,
+      awsVolumeCount: 2,
+      awsVolumeSize: 80,
+      templateAdditions: "master_3,1"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
+
+  - name: create master4 template
+    parameters: {
+      awsTemplateName: it-aws-fullhdp-master4,
+      awsInstanceType: I2Xlarge,
+      awsVolumeType: Standard,
+      awsVolumeCount: 4,
+      awsVolumeSize: 160,
+      templateAdditions: "master_4,1"
     }
     classes:
       - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
@@ -38,7 +74,7 @@ tests:
   - name: create slave template
     parameters: {
       awsTemplateName: it-aws-fullhdp-slave1,
-      awsInstanceType: R3Large,
+      awsInstanceType: R32xlarge,
       awsVolumeType: Gp2,
       awsVolumeCount: 3,
       awsVolumeSize: 200,
@@ -57,6 +93,20 @@ tests:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterCreationTest
 
+  - name: stop cluster
+    parameters: {
+      newStatus: STOPPED
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+
+  - name: start cluster
+    parameters: {
+      newStatus: STARTED
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+
   - name: upscale
     parameters: {
       instanceGroup: slave_1,
@@ -72,17 +122,3 @@ tests:
     }
     classes:
       - com.sequenceiq.it.cloudbreak.ScalingTest
-
-  - name: stop cluster
-    parameters: {
-      newStatus: STOPPED
-    }
-    classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
-
-  - name: start cluster
-    parameters: {
-      newStatus: STARTED
-    }
-    classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest

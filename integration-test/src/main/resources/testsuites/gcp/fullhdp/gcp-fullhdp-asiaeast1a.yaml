@@ -13,39 +13,75 @@ tests:
 
   - name: create gateway template
     parameters: {
-      gccName: it-gcp-fullhdp-gateway1,
-      gccInstanceType: N1_STANDARD_4,
+      gcpName: it-gcp-fullhdp-gateway1,
+      gcpInstanceType: N1_STANDARD_4,
       volumeType: HDD,
       volumeCount: 1,
       volumeSize: 30,
       templateAdditions: "cbgateway,1,GATEWAY;gateway,1"
     }
     classes:
-      - com.sequenceiq.it.cloudbreak.GCCTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
 
-  - name: create master template
+  - name: create master1 template
     parameters: {
-      gccName: it-gcp-fullhdp-master1,
-      gccInstanceType: N1_HIGHMEM_8,
+      gcpName: it-gcp-fullhdp-master1,
+      gcpInstanceType: N1_HIGHMEM_8,
       volumeType: HDD,
       volumeCount: 2,
       volumeSize: 100,
-      templateAdditions: "master_1,1;master_2,1;master_3,1;master_4,1"
+      templateAdditions: "master_1,1"
     }
     classes:
-      - com.sequenceiq.it.cloudbreak.GCCTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
+
+  - name: create master2 template
+    parameters: {
+      gcpName: it-gcp-fullhdp-master2,
+      gcpInstanceType: N1_HIGHMEM_16,
+      volumeType: SSD,
+      volumeCount: 3,
+      volumeSize: 200,
+      templateAdditions: "master_2,1"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
+
+  - name: create master3 template
+    parameters: {
+      gcpName: it-gcp-fullhdp-master3,
+      gcpInstanceType: N1_STANDARD_8,
+      volumeType: SSD,
+      volumeCount: 4,
+      volumeSize: 50,
+      templateAdditions: "master_3,1"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
+
+  - name: create master4 template
+    parameters: {
+      gcpName: it-gcp-fullhdp-master4,
+      gcpInstanceType: N1_HIGHCPU_8,
+      volumeType: HDD,
+      volumeCount: 1,
+      volumeSize: 300,
+      templateAdditions: "master_4,1"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
 
   - name: create slave_1 template
     parameters: {
-      gccName: it-gcp-fullhdp-slave1,
-      gccInstanceType: N1_HIGHCPU_4,
+      gcpName: it-gcp-fullhdp-slave1,
+      gcpInstanceType: N1_HIGHCPU_4,
       volumeType: SSD,
       volumeCount: 3,
       volumeSize: 500,
       templateAdditions: "slave_1,3"
     }
     classes:
-      - com.sequenceiq.it.cloudbreak.GCCTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
 
   - name: create cluster
     parameters: {

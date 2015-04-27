@@ -12,39 +12,39 @@ tests:
 
   - name: create gateway template
     parameters: {
-      gccName: it-gcp-full-gateway6,
-      gccInstanceType: N1_STANDARD_4,
+      gcpName: it-gcp-full-gateway6,
+      gcpInstanceType: N1_STANDARD_4,
       volumeType: HDD,
       volumeCount: 1,
       volumeSize: 30,
       templateAdditions: "cbgateway,1,GATEWAY"
     }
     classes:
-      - com.sequenceiq.it.cloudbreak.GCCTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
 
   - name: create master template
     parameters: {
-      gccName: it-gcp-full-master6,
-      gccInstanceType: N1_HIGHMEM_8,
+      gcpName: it-gcp-full-master6,
+      gcpInstanceType: N1_HIGHMEM_8,
       volumeType: HDD,
       volumeCount: 2,
       volumeSize: 100,
       templateAdditions: "master,1"
     }
     classes:
-      - com.sequenceiq.it.cloudbreak.GCCTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
 
   - name: create slave template
     parameters: {
-      gccName: it-gcp-full-slave6,
-      gccInstanceType: N1_HIGHCPU_4,
+      gcpName: it-gcp-full-slave6,
+      gcpInstanceType: N1_HIGHCPU_4,
       volumeType: SSD,
       volumeCount: 3,
       volumeSize: 500,
       templateAdditions: "slave_1,3"
     }
     classes:
-      - com.sequenceiq.it.cloudbreak.GCCTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
 
   - name: create cluster
     parameters: {
