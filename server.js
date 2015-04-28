@@ -129,6 +129,15 @@ var cbRequestArgs = {
 
 // routes ======================================================================
 
+// info ========================================================================
+
+var pjson = require('./package.json');
+
+app.get('/info', function(req, res) {
+    res.json({name: pjson.name, version: pjson.version, sultansAddress: sultansAddress});
+});
+
+
 // oauth  ======================================================================
 
 app.get('/authorize', function(req, res, next){
