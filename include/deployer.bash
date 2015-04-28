@@ -179,6 +179,10 @@ main() {
         cmd-export compose-kill kill
         cmd-export compose-logs logs
         cmd-export compose-pull pull
+
+        cmd-export migrate-startdb startdb
+        cmd-export migrate-cmd migrate
+
     fi
 
     if [[ "$DEBUG" ]]; then

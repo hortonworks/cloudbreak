@@ -123,6 +123,7 @@ func main() {
 		"include/docker.bash",
 		"include/env.bash",
 		"include/fn.bash",
+		"include/migrate.bash",
 		"include/module.bash",
 	}, Asset, false)
 

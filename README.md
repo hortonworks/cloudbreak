@@ -32,6 +32,7 @@ First lets initialize your directory by creating a `Profile`
 cbd init
 ```
 
+
 ### Pull Docker images
 
 All Cloudbreak components and the backend database is running inside containers.
@@ -42,6 +43,25 @@ cbd pull
 ```
 
 It will take some time, depending on your network connection, so you can grab a cup of coffee.
+
+### Migrate the databases
+Create the database schema or migrate it to the latest version:
+
+```
+cbd startdb
+cbd migrate cbdb up
+```
+
+Verify that all scripts have been applied:
+```
+cbd migrate cbdb status
+```
+
+
+```
+cbd generate
+cbd migrate cbdb up
+```
 
 ### Deploy Cloudbreak
 
