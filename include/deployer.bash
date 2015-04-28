@@ -81,7 +81,7 @@ init-profile() {
 
     # if the profile exist
     if [ -f $CBD_PROFILE ]; then
-        info "$CBD_PROFILE already exist, now you are ready to run:"
+        info "$CBD_PROFILE already exists, now you are ready to run:"
         echo "cbd generate" | blue
     else
         # if cbd runs on boot2docker (ie osx)
@@ -122,7 +122,7 @@ load-profile() {
         CBD_PROFILE="Profile.$CBD_DEFAULT_PROFILE"
 
 		module-load $CBD_PROFILE
-		debug "Use profile $CBD_DEFAULT_PROFILE"
+		debug "Using profile $CBD_DEFAULT_PROFILE"
 	fi
 }
 
@@ -135,7 +135,7 @@ doctor() {
     fi
 
     docker-check-version
-    info "Everything is very-very first class !!!"
+    info "Cloudbreak deployer installed; no errors found."
 }
 
 cbd-find-root() {

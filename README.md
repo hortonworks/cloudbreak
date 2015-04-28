@@ -98,7 +98,7 @@ export OTHER_VAR=dunno
 
 If you check the output of `cbd env` you can see the default principal/credential combination:
 - user: **admin@example.com**
-- user: **cloudbreak**
+- password: **cloudbreak**
 
 These values are generated in the `uaa.yml` end section. To change these values, add 2 lines into your Profile:
 
