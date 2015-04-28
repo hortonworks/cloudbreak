@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
-import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
@@ -50,11 +49,10 @@ public class AzureMetadataSetup implements MetadataSetup {
     private AzureStackUtil azureStackUtil;
 
     @Override
-    public ProvisionEvent setupMetadata(Stack stack) {
+    public Set<CoreInstanceMetaData> setupMetadata(Stack stack) {
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential);
-        Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient);
-        return new MetadataSetupComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas);
+        return collectMetaData(stack, azureClient);
     }
 
     @Override

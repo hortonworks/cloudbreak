@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
-import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
@@ -31,9 +30,9 @@ public class GccMetadataSetup implements MetadataSetup {
     private GccStackUtil gccStackUtil;
 
     @Override
-    public ProvisionEvent setupMetadata(Stack stack) {
+    public Set<CoreInstanceMetaData> setupMetadata(Stack stack) {
         List<Resource> resourcesByType = stack.getResourcesByType(ResourceType.GCC_INSTANCE);
-        return new MetadataSetupComplete(CloudPlatform.GCC, stack.getId(), collectMetaData(stack, resourcesByType));
+        return collectMetaData(stack, resourcesByType);
     }
 
     private Set<CoreInstanceMetaData> collectMetaData(Stack stack, List<Resource> resources) {
