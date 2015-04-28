@@ -16,8 +16,6 @@ public interface FlowFacade {
 
     FlowContext allocateAmbariRoles(FlowContext flowContext) throws CloudbreakException;
 
-    FlowContext finalizeMetadata(FlowContext flowContext) throws CloudbreakException;
-
     FlowContext startAmbari(FlowContext flowContext) throws CloudbreakException;
 
     FlowContext buildAmbariCluster(FlowContext flowContext) throws CloudbreakException;

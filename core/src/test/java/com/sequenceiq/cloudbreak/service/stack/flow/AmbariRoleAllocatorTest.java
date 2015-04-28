@@ -4,34 +4,32 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anySet;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.service.PollingResult;
-import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import org.mockito.Spy;
+import com.sequenceiq.cloudbreak.service.PollingResult;
+import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
 
 
 public class AmbariRoleAllocatorTest {
@@ -81,7 +79,7 @@ public class AmbariRoleAllocatorTest {
         stack.setMetadataReady(true);
         given(stackRepository.findById(1L)).willReturn(stack);
         // WHEN
-        AmbariRoleAllocationComplete result = underTest.allocateRoles(1L, coreInstanceMetaData);
+        AmbariRoleAllocationComplete result = underTest.allocateRoles(1L);
         // THEN
         assertEquals(stack.getAmbariIp(), result.getAmbariIp());
     }
@@ -92,7 +90,7 @@ public class AmbariRoleAllocatorTest {
         given(stackRepository.findById(1L)).willReturn(stack);
         coreInstanceMetaData.clear();
         // WHEN
-        underTest.allocateRoles(1L, coreInstanceMetaData);
+        underTest.allocateRoles(1L);
     }
 
     @Test(expected = WrongMetadataException.class)
@@ -107,7 +105,6 @@ public class AmbariRoleAllocatorTest {
         given(stackUpdater.updateMetadataReady(1L, true)).willReturn(stack);
         given(consulPollingService.pollWithTimeout(any(ConsulServiceCheckerTask.class), any(ConsulContext.class),
                 anyInt(), anyInt())).willReturn(PollingResult.SUCCESS);
-        doReturn(DUMMY_AMBARI_ADDRESS).when(underTest).getAmbariAddress(anyList());
         // WHEN
         underTest.allocateRoles(1L);
         // THEN
@@ -126,7 +123,6 @@ public class AmbariRoleAllocatorTest {
         given(stackUpdater.updateMetadataReady(1L, true)).willReturn(stack);
         given(consulPollingService.pollWithTimeout(any(ConsulServiceCheckerTask.class), any(ConsulContext.class),
                 anyInt(), anyInt())).willReturn(PollingResult.SUCCESS).willReturn(PollingResult.EXIT);
-        doReturn(DUMMY_AMBARI_ADDRESS).when(underTest).getAmbariAddress(anyList());
         doNothing().when(underTest).updateWithConsulData(anySet());
         // WHEN
         underTest.allocateRoles(1L);
@@ -147,10 +143,9 @@ public class AmbariRoleAllocatorTest {
         given(stackUpdater.updateMetadataReady(1L, true)).willReturn(stack);
         given(consulPollingService.pollWithTimeout(any(ConsulServiceCheckerTask.class), any(ConsulContext.class),
                 anyInt(), anyInt())).willReturn(PollingResult.SUCCESS);
-        doReturn(DUMMY_AMBARI_ADDRESS).when(underTest).getAmbariAddress(anyList());
         doNothing().when(underTest).updateWithConsulData(anySet());
         // WHEN
-        AmbariRoleAllocationComplete result = underTest.allocateRoles(1L, coreInstanceMetaData);
+        AmbariRoleAllocationComplete result = underTest.allocateRoles(1L);
         // THEN
         assertEquals(DUMMY_AMBARI_ADDRESS, result.getAmbariIp());
     }

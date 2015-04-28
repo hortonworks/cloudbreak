@@ -26,7 +26,6 @@ import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.catalog.model.CatalogService;
 import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
@@ -35,7 +34,6 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.ScalingType;
@@ -60,7 +58,6 @@ public class AmbariRoleAllocator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariRoleAllocator.class);
     private static final int LAST = 3;
-    private static final String AMBARI_SERVICE = "ambari-8080";
     private static final String CONSUL_SERVICE = "consul";
     private static final int POLLING_INTERVAL = 5000;
     private static final int MAX_POLLING_ATTEMPTS = 100;
@@ -88,9 +85,6 @@ public class AmbariRoleAllocator {
     private ConsulHostCheckerTask consulHostCheckerTask;
 
     @Autowired
-    private ConsulServiceCheckerTask consulServiceCheckerTask;
-
-    @Autowired
     private PollingService<AmbariHosts> hostsPollingService;
 
     @Autowired
@@ -98,22 +92,6 @@ public class AmbariRoleAllocator {
 
     @Autowired
     private CloudbreakEventService eventService;
-
-
-    public AmbariRoleAllocationComplete allocateRoles(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData) {
-        AmbariRoleAllocationComplete allocationComplete = null;
-
-        Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
-        Set<InstanceMetaData> allInstanceMetaData = stack.getAllInstanceMetaData();
-        PollingResult pollingResult = waitForConsulAgents(stack, allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
-        if (isSuccess(pollingResult)) {
-            updateWithConsulData(allInstanceMetaData);
-            instanceMetaDataRepository.save(allInstanceMetaData);
-            allocationComplete = new AmbariRoleAllocationComplete(stack, stack.getAmbariIp());
-        }
-        return allocationComplete;
-    }
 
     public AmbariRoleAllocationComplete allocateRoles(Long stackId) {
         AmbariRoleAllocationComplete allocationComplete = null;
@@ -205,51 +183,6 @@ public class AmbariRoleAllocator {
         return hostMetadata;
     }
 
-    public Optional<CoreInstanceMetaData> getGateWayCoreInstanceMetaData(Set<CoreInstanceMetaData> coreInstanceMetaData) {
-        for (CoreInstanceMetaData instanceMetaData : coreInstanceMetaData) {
-            if (InstanceGroupType.isGateway(instanceMetaData.getInstanceGroup().getInstanceGroupType())) {
-                return Optional.of(instanceMetaData);
-            }
-        }
-        return Optional.absent();
-    }
-
-    private Optional<String> updateAmbariInstanceMetadata(Set<InstanceMetaData> instancesMetaData, Optional<CoreInstanceMetaData> gatewayMetadata) {
-        if (gatewayMetadata.isPresent()) {
-            for (InstanceMetaData instanceMetaData : instancesMetaData) {
-                if (instanceMetaData.getPrivateIp().equalsIgnoreCase(gatewayMetadata.get().getPrivateIp())) {
-                    instanceMetaData.setAmbariServer(true);
-                    instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
-                    return Optional.fromNullable(instanceMetaData.getPublicIp());
-                }
-            }
-        } else {
-            return Optional.absent();
-        }
-        throw new WrongMetadataException("Public IP of Ambari server cannot be null");
-    }
-
-    private AmbariAddressReturnObject getAmbariAddressFromConsul(Stack stack, Set<InstanceMetaData> instancesMetaData) {
-        List<ConsulClient> clients = createClients(instancesMetaData);
-        PollingResult pollingResult = consulPollingService.pollWithTimeout(
-                consulServiceCheckerTask,
-                new ConsulContext(stack, clients, Arrays.asList(AMBARI_SERVICE)),
-                POLLING_INTERVAL,
-                MAX_POLLING_ATTEMPTS);
-        if (isSuccess(pollingResult)) {
-            return successAmbariAddressReturnObject(getAmbariAddress(clients));
-        } else if (isExited(pollingResult)) {
-            return exitedAmbariAddressReturnObject();
-        } else {
-            return failedAmbariAddressReturnObject();
-        }
-    }
-
-    @VisibleForTesting
-    protected String getAmbariAddress(List<ConsulClient> clients) {
-        return getService(clients, AMBARI_SERVICE).get(0).getAddress();
-    }
-
     private PollingResult waitForConsulAgents(Stack stack, Set<InstanceMetaData> originalMetaData, Set<InstanceMetaData> instancesMetaData) {
         Set<InstanceMetaData> copy = new HashSet<>(originalMetaData);
         copy.removeAll(instancesMetaData);
@@ -332,36 +265,6 @@ public class AmbariRoleAllocator {
             }
         }
         return instanceMetaData;
-    }
-
-    public AmbariAddressReturnObject successAmbariAddressReturnObject(String address) {
-        return new AmbariAddressReturnObject(Optional.fromNullable(address), Optional.fromNullable(PollingResult.SUCCESS));
-    }
-
-    public AmbariAddressReturnObject exitedAmbariAddressReturnObject() {
-        return new AmbariAddressReturnObject(Optional.<String>absent(), Optional.fromNullable(PollingResult.EXIT));
-    }
-
-    public AmbariAddressReturnObject failedAmbariAddressReturnObject() {
-        return new AmbariAddressReturnObject(Optional.<String>absent(), Optional.<PollingResult>absent());
-    }
-
-    public class AmbariAddressReturnObject {
-        private final Optional<String> address;
-        private final Optional<PollingResult> pollingResult;
-
-        private AmbariAddressReturnObject(Optional<String> address, Optional<PollingResult> pollingResult) {
-            this.address = address;
-            this.pollingResult = pollingResult;
-        }
-
-        public Optional<String> getAddress() {
-            return address;
-        }
-
-        public Optional<PollingResult> getPollingResult() {
-            return pollingResult;
-        }
     }
 
 }

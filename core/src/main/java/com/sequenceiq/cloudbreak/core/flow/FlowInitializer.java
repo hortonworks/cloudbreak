@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStatusUpdateFailureHa
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStopHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterUpscaleHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterUpscaleSetupNodesHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.FinalizeMetadataHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.MetadataSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ProvisioningHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ProvisioningSetupHandler;
@@ -67,7 +66,6 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.PROVISIONING_SETUP.name()), getHandlerForClass(ProvisioningSetupHandler.class));
         reactor.on($(FlowPhases.PROVISIONING.name()), getHandlerForClass(ProvisioningHandler.class));
         reactor.on($(FlowPhases.METADATA_SETUP.name()), getHandlerForClass(MetadataSetupHandler.class));
-        reactor.on($(FlowPhases.METADATA_FINALIZE.name()), getHandlerForClass(FinalizeMetadataHandler.class));
         reactor.on($(FlowPhases.CLUSTER_SETUP.name()), getHandlerForClass(ClusterSetupHandler.class));
         reactor.on($(FlowPhases.AMBARI_ROLE_ALLOCATION.name()), getHandlerForClass(AmbariRoleAllocationHandler.class));
         reactor.on($(FlowPhases.AMBARI_START.name()), getHandlerForClass(AmbariStartHandler.class));
@@ -101,10 +99,7 @@ public class FlowInitializer implements InitializingBean {
                 .createTransition(FlowPhases.PROVISIONING.name(), FlowPhases.METADATA_SETUP.name(), FlowPhases.STACK_CREATION_FAILED.name()));
 
         transitionKeyService.registerTransition(MetadataSetupHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.METADATA_SETUP.name(), FlowPhases.METADATA_FINALIZE.name(), FlowPhases.STACK_CREATION_FAILED.name()));
-
-        transitionKeyService.registerTransition(FinalizeMetadataHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.METADATA_FINALIZE.name(), FlowPhases.CLUSTER_SETUP.name(), FlowPhases.STACK_CREATION_FAILED.name()));
+                .createTransition(FlowPhases.METADATA_SETUP.name(), FlowPhases.CLUSTER_SETUP.name(), FlowPhases.STACK_CREATION_FAILED.name()));
 
         transitionKeyService.registerTransition(ClusterSetupHandler.class, SimpleTransitionKeyService.TransitionFactory
                 .createTransition(FlowPhases.CLUSTER_SETUP.name(), FlowPhases.AMBARI_ROLE_ALLOCATION.name(), FlowPhases.STACK_CREATION_FAILED.name()));

@@ -16,11 +16,10 @@ import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
-import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
+import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisioningService;
 
 @Service
@@ -30,9 +29,6 @@ public class SimpleFlowFacade implements FlowFacade {
     @Resource
     private Map<CloudPlatform, ProvisionSetup> provisionSetups;
 
-    @Resource
-    private Map<CloudPlatform, MetadataSetup> metadataSetups;
-
     @Autowired
     private ClusterFacade clusterFacade;
 
@@ -41,6 +37,9 @@ public class SimpleFlowFacade implements FlowFacade {
 
     @Autowired
     private ProvisioningService provisioningService;
+
+    @Autowired
+    private MetadataSetupService metadataSetupService;
 
     @Autowired
     private StackService stackService;
@@ -89,14 +88,15 @@ public class SimpleFlowFacade implements FlowFacade {
         LOGGER.debug("Metadata setup. Context: {}", context);
         try {
             ProvisioningContext provisioningContext = (ProvisioningContext) context;
-            MetadataSetupComplete metadataSetupComplete = (MetadataSetupComplete) metadataSetups.get(provisioningContext.getCloudPlatform())
-                    .setupMetadata(stackService.getById(provisioningContext.getStackId()));
+            String ambariIP = metadataSetupService.setupMetadata(
+                    provisioningContext.getCloudPlatform(),
+                    provisioningContext.getStackId());
             cloudbreakEventService.fireCloudbreakEvent(provisioningContext.getStackId(), BillingStatus.BILLING_STARTED.name(),
                     "Provision of stack is successfully finished");
             LOGGER.debug("Metadata setup DONE.");
             return new ProvisioningContext.Builder()
                     .setDefaultParams(provisioningContext.getStackId(), provisioningContext.getCloudPlatform())
-                    .setCoreInstanceMetadata(metadataSetupComplete.getCoreInstanceMetaData())
+                    .setAmbariIp(ambariIP)
                     .build();
         } catch (Exception e) {
             LOGGER.error("Exception during metadata setup: {}", e.getMessage());
@@ -113,19 +113,6 @@ public class SimpleFlowFacade implements FlowFacade {
             return ambariRoleAllocationContext;
         } catch (Exception e) {
             LOGGER.error("Exception during Ambari role allocation.", e);
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext finalizeMetadata(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Finalize Metadata. Context: {}", context);
-        try {
-            ProvisioningContext ambariRoleAllocationContext = (ProvisioningContext) clusterFacade.finalizeMetadata(context);
-            LOGGER.debug("Finalize Metadata roles DONE.");
-            return ambariRoleAllocationContext;
-        } catch (Exception e) {
-            LOGGER.error("Exception during finalize metadata: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }

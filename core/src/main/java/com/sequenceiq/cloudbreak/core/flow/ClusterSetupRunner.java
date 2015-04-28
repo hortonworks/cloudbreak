@@ -25,7 +25,7 @@ public class ClusterSetupRunner {
     private ContainerOrchestratorTool containerOrchestratorTool;
 
     @javax.annotation.Resource
-    private Map<ContainerOrchestratorTool, ContainerOrchestrator> clusterSetupServices;
+    private Map<ContainerOrchestratorTool, ContainerOrchestrator> containerOrchestrators;
 
     @Autowired
     private StackRepository stackRepository;
@@ -34,7 +34,7 @@ public class ClusterSetupRunner {
         Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
 
-        ContainerOrchestrator containerOrchestrator = clusterSetupServices.get(containerOrchestratorTool);
+        ContainerOrchestrator containerOrchestrator = containerOrchestrators.get(containerOrchestratorTool);
         ContainerOrchestratorClient client = containerOrchestrator.bootstrap(provisioningContext.getStackId());
         containerOrchestrator.startRegistrator(client, provisioningContext.getStackId());
         containerOrchestrator.startAmbariServer(client, provisioningContext.getStackId());
@@ -42,7 +42,7 @@ public class ClusterSetupRunner {
         containerOrchestrator.startConsulWatches(client, provisioningContext.getStackId());
 
         return new ProvisioningContext.Builder()
-                .setAmbariIp(stack.getAmbariIp())
+                .setAmbariIp(provisioningContext.getAmbariIp())
                 .setDefaultParams(stack.getId(), stack.cloudPlatform())
                 .build();
     }
@@ -51,7 +51,7 @@ public class ClusterSetupRunner {
         Stack stack = stackRepository.findOneWithLists(clusterScalingContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
-        ContainerOrchestrator containerOrchestrator = clusterSetupServices.get(containerOrchestratorTool);
+        ContainerOrchestrator containerOrchestrator = containerOrchestrators.get(containerOrchestratorTool);
         containerOrchestrator.preSetupNewNode(clusterScalingContext.getStackId(), gateway, clusterScalingContext.getUpscaleIds());
         containerOrchestrator.newHostgroupNodesSetup(clusterScalingContext.getStackId(), clusterScalingContext.getUpscaleIds(),
                 clusterScalingContext.getHostGroupAdjustment().getHostGroup());

@@ -98,20 +98,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         Stack stack = ambariRoleAllocationComplete.getStack();
         return new ProvisioningContext.Builder()
                 .setDefaultParams(stack.getId(), stack.cloudPlatform())
-                .setAmbariIp(ambariRoleAllocationComplete.getAmbariIp())
-                .build();
-    }
-
-    @Override
-    public FlowContext finalizeMetadata(FlowContext context) throws Exception {
-        LOGGER.debug("Finalize Metadata. Context: {}", context);
-        ProvisioningContext provisioningContext = (ProvisioningContext) context;
-        AmbariRoleAllocationComplete ambariRoleAllocationComplete = ambariRoleAllocator
-                .finalize(provisioningContext.getStackId(), provisioningContext.getCoreInstanceMetaData());
-        Stack stack = ambariRoleAllocationComplete.getStack();
-        return new ProvisioningContext.Builder()
-                .setDefaultParams(stack.getId(), stack.cloudPlatform())
-                .setAmbariIp(ambariRoleAllocationComplete.getAmbariIp())
+                .setAmbariIp(provisioningContext.getAmbariIp())
                 .build();
     }
 
@@ -287,7 +274,7 @@ public class AmbariClusterFacade implements ClusterFacade {
             ProvisioningContext provisioningContext = (ProvisioningContext) context;
             return clusterSetupRunner.setup(provisioningContext);
         } catch (Exception e) {
-            LOGGER.error("Exception during the handling of munchausen setup: {}", e.getMessage());
+            LOGGER.error("Error occurred while setting up containers for the cluster: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }
