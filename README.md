@@ -114,7 +114,8 @@ cbd generate
 
 ### Env specific Profile
 
-Let’s say you want to use a different version of Cloudbreak `DOCKER_TAG_CLOUDBREAK` for **prod** and **qa** profile.
+Let’s say you want to use a different version of Cloudbreak for **prod** and **qa** profile.
+You can specify the Docker image tag via: `DOCKER_TAG_CLOUDBREAK`.
 `Profile` is always sourced, so you will have two env specific configurations:
 - `Profile.dev`
 - `Profile.qa`
@@ -251,7 +252,7 @@ Once the PR is merged, CircleCI will:
 - create a new release on [GitHub releases tab](https://github.com/sequenceiq/cloudbreak-deployer/releases), with the help of [gh-release](https://github.com/progrium/gh-release).
 - it will create the git tag with `v` prefix like: `v0.0.3`
 
-Sample release command(s) of version 0.0.3 release:
+Commands of the 0.0.3 release:
 
 ```
 export OLD_VER=$(cat VERSION)
@@ -271,8 +272,8 @@ hub pull-request -b release -m "release $VER"
 
 ## Caveats
 
-The **Cloudbreak Deployer** tool opens a clean bash subshell, without inheriting ENV vars.
-Actually the foolowing ENV vars _are_ inherited: 
+The **Cloudbreak Deployer** tool opens a clean bash subshell, without inheriting environment vars.
+Actually the foolowing environment vars _are_ inherited: 
 
 - `HOME`
 - `DEBUG`
