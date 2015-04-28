@@ -41,6 +41,12 @@ app.use(session({
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
+var pjson = require('./package.json');
+
+app.get('/info', function(req, res) {
+    res.json({name: pjson.name, version: pjson.version})
+});
+
 // login.html
 app.get('/', function(req, res) {
     var logout = req.query.logout
