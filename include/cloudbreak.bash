@@ -53,7 +53,7 @@ cloudbreak-conf-cbdb() {
 
 cloudbreak-conf-uaa() {
 
-    env-import UAA_DEFAULT_SECRET $(gen-password)
+    env-import UAA_DEFAULT_SECRET "cbsecret2015"
 
     env-import UAA_CLOUDBREAK_ID cloudbreak
     env-import UAA_CLOUDBREAK_SECRET $UAA_DEFAULT_SECRET
