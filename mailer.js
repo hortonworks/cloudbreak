@@ -5,7 +5,7 @@ var fs = require('fs');
 
 exports.sendMail = function(to, subject, templateFile, data) {
     var content = getEmailContent(templateFile, data)
-    console.log('sending email. content: ' + content)
+    console.log('sending email. content: ' + content.replace(/&amp;/g, "&"))
     if (process.env.SL_SMTP_SENDER_HOST != null && process.env.SL_SMTP_SENDER_FROM != null) {
         sendSimpleEmail(to, subject, content);
     } else {
