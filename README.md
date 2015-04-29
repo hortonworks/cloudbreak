@@ -25,13 +25,26 @@ mkdir cloudbreak-deployment
 cd cloudbreak-deployment
 ```
 
-### Initialize
+### Initialize Profile
 First lets initialize your directory by creating a `Profile`
 
 ```
 cbd init
 ```
-It will create a `Profile` in the correc
+It will create a `Profile` in the current directory. The only required 
+configuration is the `PUBLIC_IP`. In some case cbd can guess it,
+if not it will give you a hint.
+
+### Generate Configuration
+
+If you use cbd 0.1.0 release, you have to issue:
+```
+cbd generate
+```
+
+It will create:
+- **docker-compose.yml**: Full confirguration of containers needed for Cloudbreak deployment.
+- **uaa.yml**: Identity Server configuration. (For example default user/password in the last line)
 
 ### Deploy Cloudbreak
 
