@@ -17,8 +17,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
-import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
 @Component
@@ -30,7 +28,7 @@ public class GccMetadataSetup implements MetadataSetup {
     private GccStackUtil gccStackUtil;
 
     @Override
-    public Set<CoreInstanceMetaData> setupMetadata(Stack stack) {
+    public Set<CoreInstanceMetaData> collectMetadata(Stack stack) {
         List<Resource> resourcesByType = stack.getResourcesByType(ResourceType.GCC_INSTANCE);
         return collectMetaData(stack, resourcesByType);
     }
@@ -45,15 +43,14 @@ public class GccMetadataSetup implements MetadataSetup {
     }
 
     @Override
-    public ProvisionEvent addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup) {
+    public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup) {
         List<Resource> resources = new ArrayList<>();
         for (Resource resource : resourceList) {
             if (ResourceType.GCC_INSTANCE.equals(resource.getResourceType())) {
                 resources.add(resource);
             }
         }
-        Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, resources);
-        return new MetadataUpdateComplete(CloudPlatform.GCC, stack.getId(), instanceMetaDatas, instanceGroup);
+        return collectMetaData(stack, resources);
     }
 
     private CoreInstanceMetaData getMetadata(Stack stack, Compute compute, Resource resource) {
