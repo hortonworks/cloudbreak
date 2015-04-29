@@ -32,7 +32,6 @@ public class ClusterSetupRunner {
 
     public FlowContext setup(ProvisioningContext provisioningContext) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
-        MDCBuilder.buildMdcContext(stack);
 
         ContainerOrchestrator containerOrchestrator = containerOrchestrators.get(containerOrchestratorTool);
         ContainerOrchestratorClient client = containerOrchestrator.bootstrap(provisioningContext.getStackId());

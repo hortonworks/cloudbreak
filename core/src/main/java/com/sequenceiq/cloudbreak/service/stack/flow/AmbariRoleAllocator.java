@@ -1,13 +1,11 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.createClients;
 import static com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.getAliveMembers;
 import static com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.getService;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
@@ -100,12 +98,12 @@ public class AmbariRoleAllocator {
         MDCBuilder.buildMdcContext(stack);
         Set<InstanceMetaData> allInstanceMetaData = stack.getAllInstanceMetaData();
         PollingResult pollingResult = waitForConsulAgents(stack, allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
-        if (isSuccess(pollingResult)) {
-            updateWithConsulData(allInstanceMetaData);
-            instanceMetaDataRepository.save(allInstanceMetaData);
-            allocationComplete = new AmbariRoleAllocationComplete(stack, stack.getAmbariIp());
+        if (!isSuccess(pollingResult)) {
+            throw new WrongMetadataException("Connecting to consul hosts is interrupted.");
         }
-        return allocationComplete;
+        updateWithConsulData(allInstanceMetaData);
+        instanceMetaDataRepository.save(allInstanceMetaData);
+        return new AmbariRoleAllocationComplete(stack, stack.getAmbariIp());
     }
 
     public ClusterScalingContext updateNewInstanceMetadata(Long stackId, HostGroupAdjustmentJson adjustment, Set<String> instanceIds, ScalingType scalingType) {
