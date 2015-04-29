@@ -31,19 +31,7 @@ First lets initialize your directory by creating a `Profile`
 ```
 cbd init
 ```
-
-
-### Pull Docker images
-
-All Cloudbreak components and the backend database is running inside containers.
-To download all the needed Docker images, with the correct tag, run the command:
-
-```
-cbd pull
-```
-
-It will take some time, depending on your network connection, so you can grab a cup of coffee.
-
+It will create a `Profile` in the correc
 
 ### Deploy Cloudbreak
 
@@ -54,11 +42,25 @@ cbd start
 ```
 If one of the container is already running, it won’t be started again.
 
+
+### Pull Docker images
+
+All Cloudbreak components and the backend database is running inside containers.
+The **pull command is optional** but you can run it prior to `cbd start`
+
+```
+cbd pull
+```
+
+It will take some time, depending on your network connection, so you can grab a cup of coffee.
+
+
 ### Watch the logs
 
 ```
 cbd logs
 ```
+
 
 ## Default Credentials
 
