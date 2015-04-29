@@ -66,7 +66,5 @@ public interface FlowFacade {
 
     FlowContext setupCluster(FlowContext context) throws CloudbreakException;
 
-    FlowContext upscaleClusterPrepare(FlowContext context) throws CloudbreakException;
-
     FlowContext upscaleClusterNodes(FlowContext context) throws CloudbreakException;
 }

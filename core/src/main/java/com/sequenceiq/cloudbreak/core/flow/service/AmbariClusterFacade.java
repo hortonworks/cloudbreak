@@ -260,15 +260,6 @@ public class AmbariClusterFacade implements ClusterFacade {
     }
 
     @Override
-    public FlowContext upscaleClusterPrepare(FlowContext context) throws CloudbreakException {
-        ClusterScalingContext scalingContext = (ClusterScalingContext) context;
-        ClusterScalingContext clusterScalingContext =
-                ambariRoleAllocator.updateNewInstanceMetadata(scalingContext.getStackId(), scalingContext.getHostGroupAdjustment(),
-                        scalingContext.getUpscaleIds(), scalingContext.getScalingType());
-        return clusterScalingContext;
-    }
-
-    @Override
     public FlowContext handleClusterSetup(FlowContext context) throws CloudbreakException {
         try {
             ProvisioningContext provisioningContext = (ProvisioningContext) context;
