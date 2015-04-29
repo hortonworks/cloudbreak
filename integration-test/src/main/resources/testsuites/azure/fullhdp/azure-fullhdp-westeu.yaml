@@ -1,0 +1,123 @@
+# AZURE credential name must be specified
+name: Azure_fullhdp_westeurope_test
+parameters: {
+  cloudProvider: AZURE,
+  blueprintName: hdp-multinode-default
+}
+
+tests:
+  - name: init
+    classes:
+      - com.sequenceiq.it.TestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+
+  - name: create gateway template
+    parameters: {
+      azureTemplateName: it-azure-fullhdp-gateway,
+      azureVmType: A5,
+      azureVolumeCount: 1,
+      azureVolumeSize: 50,
+      templateAdditions: "cbgateway,1,GATEWAY;gateway,1"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+
+  - name: create master1 template
+    parameters: {
+      azureTemplateName: it-azure-fullhdp-master1,
+      azureVmType: STANDARD_D4,
+      azureVolumeCount: 2,
+      azureVolumeSize: 100,
+      templateAdditions: "master_1,1"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+
+  - name: create master2 template
+    parameters: {
+      azureTemplateName: it-azure-fullhdp-master2,
+      azureVmType: A7,
+      azureVolumeCount: 3,
+      azureVolumeSize: 200,
+      templateAdditions: "master_2,1"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+
+  - name: create master3 template
+    parameters: {
+      azureTemplateName: it-azure-fullhdp-master3,
+      azureVmType: STANDARD_D2,
+      azureVolumeCount: 4,
+      azureVolumeSize: 300,
+      templateAdditions: "master_3,1"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+
+  - name: create master4 template
+    parameters: {
+      azureTemplateName: it-azure-fullhdp-master4,
+      azureVmType: STANDARD_D13,
+      azureVolumeCount: 2,
+      azureVolumeSize: 100,
+      templateAdditions: "master_4,1"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+
+  - name: create slave template
+    parameters: {
+      azureTemplateName: it-azure-fullhdp-slave1,
+      azureVmType: STANDARD_D11,
+      azureVolumeCount: 3,
+      azureVolumeSize: 200,
+      templateAdditions: "slave_1,3"
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+
+  - name: create cluster
+    parameters: {
+      stackName: it-azure-fullhdp-stack,
+      region: WEST_EUROPE,
+      clusterName: it-azure-fullhdp-cluster,
+      sleepTime: 60000
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.StackCreationTest
+      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
+#  - name: stop cluster
+#    parameters: {
+#      newStatus: STOPPED,
+#      sleepTime: 60000
+#    }
+#    classes:
+#      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+
+#  - name: start cluster
+#    parameters: {
+#      newStatus: STARTED,
+#      sleepTime: 60000
+#    }
+#    classes:
+#      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+
+  - name: upscale
+    parameters: {
+      instanceGroup: slave_1,
+      scalingAdjustment: 3,
+      sleepTime: 60000
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.ScalingTest
+
+  - name: downscale
+    parameters: {
+      instanceGroup: slave_1,
+      scalingAdjustment: -2,
+      sleepTime: 60000
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.ScalingTest

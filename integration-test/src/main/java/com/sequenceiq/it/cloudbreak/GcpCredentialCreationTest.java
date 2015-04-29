@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.util.ResourceUtil;
 
-public class GccCredentialCreationTest extends AbstractCloudbreakIntegrationTest {
+public class GcpCredentialCreationTest extends AbstractCloudbreakIntegrationTest {
     @Value("${integrationtest.gcpcredential.name}")
     private String defaultName;
     @Value("${integrationtest.gcpcredential.projectId}")
@@ -23,7 +23,7 @@ public class GccCredentialCreationTest extends AbstractCloudbreakIntegrationTest
 
     @Test
     @Parameters({ "name", "projectId", "serviceAccountId", "serviceAccountPrivateKeyP12File", "publicKeyFile" })
-    public void testGCCCredentialCreation(@Optional("")String name, @Optional("")String projectId, @Optional("")String serviceAccountId,
+    public void testGCPCredentialCreation(@Optional("")String name, @Optional("")String projectId, @Optional("")String serviceAccountId,
             @Optional("")String serviceAccountPrivateKeyP12File, @Optional("")String publicKeyFile) throws Exception {
         // GIVEN
         name = StringUtils.hasLength(name) ? name : defaultName;
@@ -35,7 +35,7 @@ public class GccCredentialCreationTest extends AbstractCloudbreakIntegrationTest
         String publicKey = ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "");
         // WHEN
         // TODO publicInAccount
-        String id = getClient().postGccCredential(name, "GCC credential for integartiontest", publicKey, false, projectId, serviceAccountId,
+        String id = getClient().postGccCredential(name, "GCP credential for integartiontest", publicKey, false, projectId, serviceAccountId,
                 serviceAccountPrivateKey);
         // THEN
         Assert.assertNotNull(id);

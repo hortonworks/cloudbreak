@@ -19,7 +19,7 @@
         <parameter name="serviceAccountPrivateKeyP12File" value="MUST BE SPECIFIED" />
         <parameter name="publicKeyFile" value="MUST BE SPECIFIED" />
         <classes>
-            <class name="com.sequenceiq.it.cloudbreak.GccCredentialCreationTest" />
+            <class name="com.sequenceiq.it.cloudbreak.GcpCredentialCreationTest" />
         </classes>
     </test>
     <test name="create blueprint">
@@ -30,25 +30,25 @@
         </classes>
     </test>
     <test name="create master template">
-        <parameter name="gccName" value="it-gcp-master-created" />
-        <parameter name="gccInstanceType" value="N1_STANDARD_2" />
+        <parameter name="gcpName" value="it-gcp-master-created" />
+        <parameter name="gcpInstanceType" value="N1_STANDARD_2" />
         <parameter name="volumeType" value="HDD" />
         <parameter name="volumeCount" value="1" />
         <parameter name="volumeSize" value="30" />
         <parameter name="templateAdditions" value="master,1" />
         <classes>
-            <class name="com.sequenceiq.it.cloudbreak.GCCTemplateCreationTest" />
+            <class name="com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest" />
         </classes>
     </test>
     <test name="create slave template">
-        <parameter name="gccName" value="it-gcp-slave-created" />
-        <parameter name="gccInstanceType" value="N1_STANDARD_2" />
+        <parameter name="gcpName" value="it-gcp-slave-created" />
+        <parameter name="gcpInstanceType" value="N1_STANDARD_2" />
         <parameter name="volumeType" value="HDD" />
         <parameter name="volumeCount" value="2" />
         <parameter name="volumeSize" value="10" />
         <parameter name="templateAdditions" value="slave_1,3" />
         <classes>
-            <class name="com.sequenceiq.it.cloudbreak.GCCTemplateCreationTest" />
+            <class name="com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest" />
         </classes>
     </test>
     <test name="create cluster">
