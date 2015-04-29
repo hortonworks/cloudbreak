@@ -36,8 +36,6 @@ public interface ClusterFacade {
 
     FlowContext enableSecurity(FlowContext context) throws CloudbreakException;
 
-    FlowContext upscaleClusterPrepare(FlowContext context) throws CloudbreakException;
-
     FlowContext upscaleClusterNodes(FlowContext context) throws CloudbreakException;
 
     FlowContext handleClusterSetup(FlowContext context) throws CloudbreakException;

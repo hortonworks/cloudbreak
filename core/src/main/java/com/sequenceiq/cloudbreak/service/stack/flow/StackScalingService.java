@@ -114,7 +114,9 @@ public class StackScalingService {
         int nodeCount = instanceGroup.getNodeCount() + coreInstanceMetaData.size();
         stackUpdater.updateNodeCount(stack.getId(), nodeCount, instanceGroupName);
         eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(), "Billing changed due to upscaling of cluster infrastructure.");
-        setStackAvailable(scalingAdjustment, stack); // this should maybe go after the consul setup?
+
+        // maybe this should be set later?
+        setStackAvailable(scalingAdjustment, stack);
 
         Set<String> instanceIds = new HashSet<>();
         for (CoreInstanceMetaData metadataEntry : coreInstanceMetaData) {

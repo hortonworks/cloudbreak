@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariRoleAllocationHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterCreationHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterDownscaleHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterPrepareUpscaleHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterResetHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterSecurityHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterSetupHandler;
@@ -80,11 +79,9 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.CLUSTER_START.name()), getHandlerForClass(ClusterStartHandler.class));
         reactor.on($(FlowPhases.CLUSTER_STOP.name()), getHandlerForClass(ClusterStopHandler.class));
         reactor.on($(FlowPhases.CLUSTER_UPSCALE.name()), getHandlerForClass(ClusterUpscaleHandler.class));
-        reactor.on($(FlowPhases.CLUSTER_PREPARE_UPSCALE.name()), getHandlerForClass(ClusterPrepareUpscaleHandler.class));
         reactor.on($(FlowPhases.CLUSTER_UPSCALE_SETUP_NODES.name()), getHandlerForClass(ClusterUpscaleSetupNodesHandler.class));
         reactor.on($(FlowPhases.CLUSTER_DOWNSCALE.name()), getHandlerForClass(ClusterDownscaleHandler.class));
         reactor.on($(FlowPhases.UPDATE_ALLOWED_SUBNETS.name()), getHandlerForClass(UpdateAllowedSubnetsHandler.class));
-
         reactor.on($(FlowPhases.STACK_CREATION_FAILED.name()), getHandlerForClass(StackCreationFailureHandler.class));
         reactor.on($(FlowPhases.STACK_STATUS_UPDATE_FAILED.name()), getHandlerForClass(StackStatusUpdateFailureHandler.class));
         reactor.on($(FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name()), getHandlerForClass(ClusterStatusUpdateFailureHandler.class));
@@ -155,10 +152,7 @@ public class FlowInitializer implements InitializingBean {
 
     private void registerUpscaleFlows() {
         transitionKeyService.registerTransition(StackUpscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.STACK_UPSCALE.name(), FlowPhases.CLUSTER_PREPARE_UPSCALE.name(), FlowPhases.NONE.name()));
-
-        transitionKeyService.registerTransition(ClusterPrepareUpscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.CLUSTER_PREPARE_UPSCALE.name(), FlowPhases.CLUSTER_UPSCALE_SETUP_NODES.name(), FlowPhases.NONE.name()));
+                .createTransition(FlowPhases.STACK_UPSCALE.name(), FlowPhases.CLUSTER_UPSCALE_SETUP_NODES.name(), FlowPhases.NONE.name()));
 
         transitionKeyService.registerTransition(ClusterUpscaleSetupNodesHandler.class, SimpleTransitionKeyService.TransitionFactory
                 .createTransition(FlowPhases.CLUSTER_UPSCALE_SETUP_NODES.name(), FlowPhases.CLUSTER_UPSCALE.name(), FlowPhases.NONE.name()));
