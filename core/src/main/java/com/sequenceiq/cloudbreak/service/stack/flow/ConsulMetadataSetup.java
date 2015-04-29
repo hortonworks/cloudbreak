@@ -26,12 +26,12 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
+import com.sequenceiq.cloudbreak.service.stack.event.ConsulMetadataSetupComplete;
 
 @Service
-public class AmbariRoleAllocator {
+public class ConsulMetadataSetup {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AmbariRoleAllocator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsulMetadataSetup.class);
     private static final String CONSUL_SERVICE = "consul";
     private static final int POLLING_INTERVAL = 5000;
     private static final int MAX_POLLING_ATTEMPTS = 100;
@@ -49,7 +49,8 @@ public class AmbariRoleAllocator {
     private ConsulHostCheckerTask consulHostCheckerTask;
 
 
-    public AmbariRoleAllocationComplete allocateRoles(Long stackId) {
+    public ConsulMetadataSetupComplete setupConsulMetadata(Long stackId) {
+        LOGGER.info("Setting up Consul metadata for the cluster.");
         Stack stack = stackRepository.findById(stackId);
         Set<InstanceMetaData> allInstanceMetaData = stack.getAllInstanceMetaData();
         PollingResult pollingResult = waitForConsulAgents(stack, allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
@@ -58,7 +59,7 @@ public class AmbariRoleAllocator {
         }
         updateWithConsulData(allInstanceMetaData);
         instanceMetaDataRepository.save(allInstanceMetaData);
-        return new AmbariRoleAllocationComplete(stack, stack.getAmbariIp());
+        return new ConsulMetadataSetupComplete(stack, stack.getAmbariIp());
     }
 
     private PollingResult waitForConsulAgents(Stack stack, Set<InstanceMetaData> originalMetaData, Set<InstanceMetaData> instancesMetaData) {

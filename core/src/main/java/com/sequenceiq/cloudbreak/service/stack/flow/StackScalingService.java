@@ -66,9 +66,6 @@ public class StackScalingService {
     private CloudbreakEventService eventService;
 
     @Autowired
-    private AmbariRoleAllocator ambariRoleAllocator;
-
-    @Autowired
     private AmbariHostsRemover ambariHostsRemover;
 
     @javax.annotation.Resource

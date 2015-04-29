@@ -2,12 +2,12 @@ package com.sequenceiq.cloudbreak.service.stack.event;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
 
-public class AmbariRoleAllocationComplete {
+public class ConsulMetadataSetupComplete {
 
     private Stack stack;
     private String ambariIp;
 
-    public AmbariRoleAllocationComplete(Stack stack, String ambariIp) {
+    public ConsulMetadataSetupComplete(Stack stack, String ambariIp) {
         this.stack = stack;
         this.ambariIp = ambariIp;
     }

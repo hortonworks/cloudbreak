@@ -18,8 +18,8 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 @Component
-public class ClusterSetupRunner {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterSetupRunner.class);
+public class ClusterBootstrapper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterBootstrapper.class);
 
     @Value("${cb.container.orchestrator:SWARM}")
     private ContainerOrchestratorTool containerOrchestratorTool;
@@ -30,7 +30,7 @@ public class ClusterSetupRunner {
     @Autowired
     private StackRepository stackRepository;
 
-    public FlowContext setup(ProvisioningContext provisioningContext) throws CloudbreakException {
+    public FlowContext bootstrapCluster(ProvisioningContext provisioningContext) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
 
         ContainerOrchestrator containerOrchestrator = containerOrchestrators.get(containerOrchestratorTool);
@@ -46,7 +46,7 @@ public class ClusterSetupRunner {
                 .build();
     }
 
-    public void setupNewNode(ClusterScalingContext clusterScalingContext) throws CloudbreakException {
+    public void bootstrapNewNodes(ClusterScalingContext clusterScalingContext) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(clusterScalingContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
         InstanceGroup gateway = stack.getGatewayInstanceGroup();

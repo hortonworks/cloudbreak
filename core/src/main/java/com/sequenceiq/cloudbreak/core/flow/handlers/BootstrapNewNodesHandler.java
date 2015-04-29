@@ -13,14 +13,14 @@ import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import reactor.event.Event;
 
 @Component
-public class ClusterUpscaleSetupNodesHandler extends AbstractFlowHandler<ClusterScalingContext> implements FlowHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpscaleSetupNodesHandler.class);
+public class BootstrapNewNodesHandler extends AbstractFlowHandler<ClusterScalingContext> implements FlowHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BootstrapNewNodesHandler.class);
 
     @Override
     protected Object execute(Event<ClusterScalingContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
-        FlowContext context = getFlowFacade().upscaleClusterNodes(event.getData());
-        LOGGER.info("Upscale of cluster nodes is finished. Context: {}", context);
+        FlowContext context = getFlowFacade().bootstrapNewNodes(event.getData());
+        LOGGER.info("Bootstrap of new nodes is finished. Context: {}", context);
         return context;
     }
 

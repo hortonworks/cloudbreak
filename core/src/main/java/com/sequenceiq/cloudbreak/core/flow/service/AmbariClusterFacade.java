@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.flow.ClusterSetupRunner;
+import com.sequenceiq.cloudbreak.core.flow.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
@@ -35,8 +35,8 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
-import com.sequenceiq.cloudbreak.service.stack.flow.AmbariRoleAllocator;
+import com.sequenceiq.cloudbreak.service.stack.event.ConsulMetadataSetupComplete;
+import com.sequenceiq.cloudbreak.service.stack.flow.ConsulMetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListenerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
 
@@ -50,7 +50,7 @@ public class AmbariClusterFacade implements ClusterFacade {
     private static final String ADMIN = "admin";
 
     @Autowired
-    private AmbariRoleAllocator ambariRoleAllocator;
+    private ConsulMetadataSetup consulMetadataSetup;
 
     @Autowired
     private AmbariClientProvider ambariClientProvider;
@@ -86,16 +86,15 @@ public class AmbariClusterFacade implements ClusterFacade {
     private ClusterSecurityService securityService;
 
     @Autowired
-    private ClusterSetupRunner clusterSetupRunner;
+    private ClusterBootstrapper clusterBootstrapper;
 
     @Override
-    public FlowContext allocateAmbariRoles(FlowContext context) throws Exception {
+    public FlowContext setupConsulMetadata(FlowContext context) throws Exception {
         ProvisioningContext provisioningContext = (ProvisioningContext) context;
         MDCBuilder.buildMdcContext(stackService.getById(provisioningContext.getStackId()));
         LOGGER.debug("Allocating Ambari roles. Context: {}", context);
-        AmbariRoleAllocationComplete ambariRoleAllocationComplete = ambariRoleAllocator
-                .allocateRoles(provisioningContext.getStackId());
-        Stack stack = ambariRoleAllocationComplete.getStack();
+        ConsulMetadataSetupComplete consulMetadataSetupComplete = consulMetadataSetup.setupConsulMetadata(provisioningContext.getStackId());
+        Stack stack = consulMetadataSetupComplete.getStack();
         return new ProvisioningContext.Builder()
                 .setDefaultParams(stack.getId(), stack.cloudPlatform())
                 .setAmbariIp(provisioningContext.getAmbariIp())
@@ -260,10 +259,10 @@ public class AmbariClusterFacade implements ClusterFacade {
     }
 
     @Override
-    public FlowContext handleClusterSetup(FlowContext context) throws CloudbreakException {
+    public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
         try {
             ProvisioningContext provisioningContext = (ProvisioningContext) context;
-            return clusterSetupRunner.setup(provisioningContext);
+            return clusterBootstrapper.bootstrapCluster(provisioningContext);
         } catch (Exception e) {
             LOGGER.error("Error occurred while setting up containers for the cluster: {}", e.getMessage());
             throw new CloudbreakException(e);
@@ -271,10 +270,10 @@ public class AmbariClusterFacade implements ClusterFacade {
     }
 
     @Override
-    public FlowContext upscaleClusterNodes(FlowContext context) throws CloudbreakException {
+    public FlowContext bootstrapNewNodes(FlowContext context) throws CloudbreakException {
         ClusterScalingContext scalingContext = (ClusterScalingContext) context;
         try {
-            clusterSetupRunner.setupNewNode(scalingContext);
+            clusterBootstrapper.bootstrapNewNodes(scalingContext);
             stackUpdater.updateStackStatus(scalingContext.getStackId(), Status.AVAILABLE, "");
             return scalingContext;
         } catch (Exception e) {

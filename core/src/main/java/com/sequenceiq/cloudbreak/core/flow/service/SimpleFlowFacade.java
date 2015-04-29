@@ -105,12 +105,12 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
-    public FlowContext allocateAmbariRoles(FlowContext context) throws CloudbreakException {
+    public FlowContext setupConsulMetadata(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Allocating Ambari roles. Context: {}", context);
         try {
-            ProvisioningContext ambariRoleAllocationContext = (ProvisioningContext) clusterFacade.allocateAmbariRoles(context);
+            ProvisioningContext setupConsulMetadataContext = (ProvisioningContext) clusterFacade.setupConsulMetadata(context);
             LOGGER.debug("Allocating Ambari roles DONE.");
-            return ambariRoleAllocationContext;
+            return setupConsulMetadataContext;
         } catch (Exception e) {
             LOGGER.error("Exception during Ambari role allocation.", e);
             throw new CloudbreakException(e);
@@ -340,11 +340,11 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
-    public FlowContext upscaleClusterNodes(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Upscaling of cluster nodes prepare. Context: {}", context);
+    public FlowContext bootstrapNewNodes(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Bootstrapping new nodes. Context: {}", context);
         try {
-            context = clusterFacade.upscaleClusterNodes(context);
-            LOGGER.debug("Upscaling of cluster nodes prepare is DONE");
+            context = clusterFacade.bootstrapNewNodes(context);
+            LOGGER.debug("Bootstrap of new nodes is finished.");
             return context;
         } catch (CloudbreakException e) {
             throw e;
@@ -445,11 +445,11 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
-    public FlowContext setupCluster(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Handling cluster setup. Context: {}", context);
+    public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Handling cluster bootstrap. Context: {}", context);
         try {
-            context = clusterFacade.handleClusterSetup(context);
-            LOGGER.debug("Handling cluster setup is DONE");
+            context = clusterFacade.bootstrapCluster(context);
+            LOGGER.debug("Cluster bootstrap is DONE");
             return context;
         } catch (CloudbreakException e) {
             throw e;

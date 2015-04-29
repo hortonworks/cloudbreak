@@ -12,8 +12,8 @@ import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import reactor.event.Event;
 
 @Component
-public class ClusterCreationHandler extends AbstractFlowHandler<ProvisioningContext> implements FlowHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCreationHandler.class);
+public class ClusterInstallHandler extends AbstractFlowHandler<ProvisioningContext> implements FlowHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterInstallHandler.class);
 
     @Override
     protected Object execute(Event<ProvisioningContext> event) throws CloudbreakException {
