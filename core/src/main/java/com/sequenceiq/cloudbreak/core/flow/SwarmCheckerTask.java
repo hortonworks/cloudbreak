@@ -31,7 +31,7 @@ public class SwarmCheckerTask extends StackBasedStatusCheckerTask<SwarmContext> 
                     LOGGER.error(String.format("Docker info returned an unexpected element: %s", element), e);
                 }
             }
-        } catch (Exception ex) {
+        } catch (Throwable t) {
             return false;
         }
         return false;

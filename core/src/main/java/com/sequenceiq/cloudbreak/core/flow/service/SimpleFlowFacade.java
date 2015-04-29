@@ -461,10 +461,10 @@ public class SimpleFlowFacade implements FlowFacade {
 
     @Override
     public FlowContext setupCluster(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Handling 'munchausen setup' failure. Context: {}", context);
+        LOGGER.debug("Handling cluster setup. Context: {}", context);
         try {
             context = clusterFacade.handleClusterSetup(context);
-            LOGGER.debug("Handling of 'munchausen setup' failure is DONE");
+            LOGGER.debug("Handling cluster setup is DONE");
             return context;
         } catch (CloudbreakException e) {
             throw e;

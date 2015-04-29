@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
+import com.github.dockerjava.jaxrs.DockerCmdExecFactoryImpl;
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.containers.AmbariAgentBootstrap;
@@ -83,11 +84,15 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
         try {
             Stack stack = stackRepository.findOneWithLists(stackId);
             InstanceGroup gateway = stack.getGatewayInstanceGroup();
+            LOGGER.info(stackId + "; " + gateway.getId());
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+            LOGGER.info(stackId + "; " + gatewayInstance.getPublicIp());
             String consulServers = getConsulServers(gateway, stack.getCoreInstanceGroups(), stack.getConsulServers());
             String dockerAddresses = getDockerAddressInventory(stack.getInstanceGroups());
 
-            DockerClient dockerApiClient = DockerClientBuilder.getInstance(getDockerClientConfig(gatewayInstance.getPublicIp())).build();
+            DockerClient dockerApiClient = DockerClientBuilder.getInstance(getDockerClientConfig(gatewayInstance.getPublicIp()))
+                    .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
+                    .build();
             dockerInfoPollingService.pollWithTimeout(dockerCheckerTask, new DockerContext(stack, dockerApiClient, new ArrayList<String>()),
                     POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             dockerInfoPollingService.pollWithTimeout(dockerImageCheckerTask,
@@ -102,7 +107,9 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
                     ), POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             String[] cmd = {"--debug", "bootstrap", "--consulServers", consulServers, dockerAddresses};
             new MunchausenBootstrap(dockerApiClient, munchausenDockerImageName, cmd).call();
-            DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(gatewayInstance.getPublicIp())).build();
+            DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(gatewayInstance.getPublicIp()))
+                    .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
+                    .build();
             swarmInfoPollingService.pollWithTimeout(swarmCheckerTask, new SwarmContext(stack, swarmManagerClient, stack.getFullNodeCount()),
                     POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             return new SwarmContainerOrchestratorClient(swarmManagerClient);
@@ -238,7 +245,9 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
 
             ExecutorService executorService = Executors.newFixedThreadPool(TEN);
             List<Future<Boolean>> futures = new ArrayList<>();
-            DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(stack.getAmbariIp())).build();
+            DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(stack.getAmbariIp()))
+                    .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
+                    .build();
             swarmInfoPollingService.pollWithTimeout(swarmCheckerTask, new SwarmContext(stack, swarmManagerClient, stack.getFullNodeCount()),
                     POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             for (InstanceMetaData data : instanceMetaDatas) {

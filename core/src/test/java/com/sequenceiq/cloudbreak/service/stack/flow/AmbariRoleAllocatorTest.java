@@ -1,15 +1,10 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anySet;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,7 +24,6 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
 
 
 public class AmbariRoleAllocatorTest {
@@ -61,54 +55,13 @@ public class AmbariRoleAllocatorTest {
     @Mock
     private ConsulServiceCheckerTask consulServiceCheckerTask;
 
-    private Set<CoreInstanceMetaData> coreInstanceMetaData;
-
     private Stack stack;
 
     @Before
     public void setUp() {
         underTest = new AmbariRoleAllocator();
         MockitoAnnotations.initMocks(this);
-        coreInstanceMetaData = createCoreInstanceMetaData();
         stack = createStack();
-    }
-
-    @Test
-    public void testAllocateRolesWhenMetadataIsReady() {
-        // GIVEN
-        stack.setMetadataReady(true);
-        given(stackRepository.findById(1L)).willReturn(stack);
-        // WHEN
-        AmbariRoleAllocationComplete result = underTest.allocateRoles(1L);
-        // THEN
-        assertEquals(stack.getAmbariIp(), result.getAmbariIp());
-    }
-
-    @Test(expected = WrongMetadataException.class)
-    public void testAllocateRolesWhenCoreInstanceSizeIsWrong() {
-        // GIVEN
-        given(stackRepository.findById(1L)).willReturn(stack);
-        coreInstanceMetaData.clear();
-        // WHEN
-        underTest.allocateRoles(1L);
-    }
-
-    @Test(expected = WrongMetadataException.class)
-    public void testAllocateRolesWhenAmbariAddressIsNotPresent() {
-        // GIVEN
-        stack.getInstanceGroupByInstanceGroupName(INSTANCE_GROUP_1)
-                .setInstanceMetaData(createInstanceMetaDataWithAmbariAddress(null));
-        stack.getInstanceGroupByInstanceGroupName(INSTANCE_GROUP_2)
-                .setInstanceMetaData(createInstanceMetaDataWithAmbariAddress(null));
-        given(stackRepository.findById(1L)).willReturn(stack);
-        given(stackUpdater.updateStackMetaData(anyLong(), anySet(), anyString())).willReturn(stack);
-        given(stackUpdater.updateMetadataReady(1L, true)).willReturn(stack);
-        given(consulPollingService.pollWithTimeout(any(ConsulServiceCheckerTask.class), any(ConsulContext.class),
-                anyInt(), anyInt())).willReturn(PollingResult.SUCCESS);
-        // WHEN
-        underTest.allocateRoles(1L);
-        // THEN
-        verify(stackUpdater, times(1)).updateMetadataReady(1L, true);
     }
 
     @Test(expected = WrongMetadataException.class)
@@ -119,52 +72,11 @@ public class AmbariRoleAllocatorTest {
         stack.getInstanceGroupByInstanceGroupName(INSTANCE_GROUP_2)
                 .setInstanceMetaData(createInstanceMetaDataWithAmbariAddress(DUMMY_AMBARI_ADDRESS));
         given(stackRepository.findById(1L)).willReturn(stack);
-        given(stackUpdater.updateStackMetaData(anyLong(), anySet(), anyString())).willReturn(stack);
-        given(stackUpdater.updateMetadataReady(1L, true)).willReturn(stack);
         given(consulPollingService.pollWithTimeout(any(ConsulServiceCheckerTask.class), any(ConsulContext.class),
-                anyInt(), anyInt())).willReturn(PollingResult.SUCCESS).willReturn(PollingResult.EXIT);
+                anyInt(), anyInt())).willReturn(PollingResult.TIMEOUT).willReturn(PollingResult.EXIT);
         doNothing().when(underTest).updateWithConsulData(anySet());
         // WHEN
         underTest.allocateRoles(1L);
-        // THEN
-        verify(consulPollingService, times(2)).pollWithTimeout(any(ConsulServiceCheckerTask.class), any(ConsulContext.class),
-                anyInt(), anyInt());
-    }
-
-    @Test
-    public void testAllocateRoles() {
-        // GIVEN
-        stack.getInstanceGroupByInstanceGroupName(INSTANCE_GROUP_1)
-                .setInstanceMetaData(createInstanceMetaDataWithAmbariAddress(DUMMY_AMBARI_ADDRESS));
-        stack.getInstanceGroupByInstanceGroupName(INSTANCE_GROUP_2)
-                .setInstanceMetaData(createInstanceMetaDataWithAmbariAddress(DUMMY_AMBARI_ADDRESS));
-        given(stackRepository.findById(1L)).willReturn(stack);
-        given(stackUpdater.updateStackMetaData(anyLong(), anySet(), anyString())).willReturn(stack);
-        given(stackUpdater.updateMetadataReady(1L, true)).willReturn(stack);
-        given(consulPollingService.pollWithTimeout(any(ConsulServiceCheckerTask.class), any(ConsulContext.class),
-                anyInt(), anyInt())).willReturn(PollingResult.SUCCESS);
-        doNothing().when(underTest).updateWithConsulData(anySet());
-        // WHEN
-        AmbariRoleAllocationComplete result = underTest.allocateRoles(1L);
-        // THEN
-        assertEquals(DUMMY_AMBARI_ADDRESS, result.getAmbariIp());
-    }
-
-    private Set<CoreInstanceMetaData> createCoreInstanceMetaData() {
-        Set<CoreInstanceMetaData> metaData = new HashSet<>();
-        InstanceGroup ig1 = new InstanceGroup();
-        ig1.setGroupName(INSTANCE_GROUP_1);
-        InstanceGroup ig2 = new InstanceGroup();
-        ig2.setGroupName(INSTANCE_GROUP_2);
-        CoreInstanceMetaData data1 =
-                new CoreInstanceMetaData("instanceId1", "123.123.123.123", "dummyPublicIp1", 3, INSTANCE_GROUP_1,
-                        ig1);
-        CoreInstanceMetaData data2 =
-                new CoreInstanceMetaData("instanceId2", "123.123.123.124", "dummyPublicIp2", 3, INSTANCE_GROUP_2,
-                        ig2);
-        metaData.add(data1);
-        metaData.add(data2);
-        return metaData;
     }
 
     private Set<InstanceMetaData> createInstanceMetaDataWithAmbariAddress(String ambariPublicIp) {
