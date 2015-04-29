@@ -32,8 +32,8 @@ First lets initialize your directory by creating a `Profile`
 cbd init
 ```
 It will create a `Profile` in the current directory. The only required 
-configuration is the `PUBLIC_IP`. In some case cbd can guess it,
-if not it will give you a hint.
+configuration is the `PUBLIC_IP`. This ip will be used for Cloudbreak UI
+(called Uluwatu). In some case cbd can guess it, if not it will give you a hint.
 
 ### Generate Configuration
 
