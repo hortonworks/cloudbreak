@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
  */
 public interface ClusterFacade {
 
-    FlowContext allocateAmbariRoles(FlowContext context) throws Exception;
+    FlowContext setupConsulMetadata(FlowContext context) throws Exception;
 
     FlowContext startAmbari(FlowContext context) throws Exception;
 
@@ -36,7 +36,7 @@ public interface ClusterFacade {
 
     FlowContext enableSecurity(FlowContext context) throws CloudbreakException;
 
-    FlowContext upscaleClusterNodes(FlowContext context) throws CloudbreakException;
+    FlowContext bootstrapNewNodes(FlowContext context) throws CloudbreakException;
 
-    FlowContext handleClusterSetup(FlowContext context) throws CloudbreakException;
+    FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException;
 }

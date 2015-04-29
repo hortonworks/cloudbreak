@@ -12,14 +12,14 @@ import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import reactor.event.Event;
 
 @Component
-public class AmbariRoleAllocationHandler extends AbstractFlowHandler<ProvisioningContext> implements FlowHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AmbariRoleAllocationHandler.class);
+public class ConsulMetadataSetupHandler extends AbstractFlowHandler<ProvisioningContext> implements FlowHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsulMetadataSetupHandler.class);
 
     @Override
     protected Object execute(Event<ProvisioningContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
-        ProvisioningContext provisioningContext = (ProvisioningContext) getFlowFacade().allocateAmbariRoles(event.getData());
-        LOGGER.info("Role allocated. Context: {}", provisioningContext);
+        ProvisioningContext provisioningContext = (ProvisioningContext) getFlowFacade().setupConsulMetadata(event.getData());
+        LOGGER.info("Consul metadata setup complete. Context: {}", provisioningContext);
         return provisioningContext;
     }
 }

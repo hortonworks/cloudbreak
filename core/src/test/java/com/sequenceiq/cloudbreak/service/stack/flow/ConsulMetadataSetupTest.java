@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 
 
-public class AmbariRoleAllocatorTest {
+public class ConsulMetadataSetupTest {
 
     private static final String DUMMY_AMBARI_ADDRESS = "52.51.50.49";
     private static final String DUMMY_ADDRESS = "52.51.50.48";
@@ -35,7 +35,7 @@ public class AmbariRoleAllocatorTest {
 
     @Spy
     @InjectMocks
-    private AmbariRoleAllocator underTest;
+    private ConsulMetadataSetup underTest;
 
     @Mock
     private StackRepository stackRepository;
@@ -59,13 +59,13 @@ public class AmbariRoleAllocatorTest {
 
     @Before
     public void setUp() {
-        underTest = new AmbariRoleAllocator();
+        underTest = new ConsulMetadataSetup();
         MockitoAnnotations.initMocks(this);
         stack = createStack();
     }
 
     @Test(expected = WrongMetadataException.class)
-    public void testAllocateRolesWhenCannotConnectConsul() {
+    public void testSetupConsulMetadataWhenCannotConnectConsul() {
         // GIVEN
         stack.getInstanceGroupByInstanceGroupName(INSTANCE_GROUP_1)
                 .setInstanceMetaData(createInstanceMetaDataWithAmbariAddress(DUMMY_AMBARI_ADDRESS));
@@ -76,7 +76,7 @@ public class AmbariRoleAllocatorTest {
                 anyInt(), anyInt())).willReturn(PollingResult.TIMEOUT).willReturn(PollingResult.EXIT);
         doNothing().when(underTest).updateWithConsulData(anySet());
         // WHEN
-        underTest.allocateRoles(1L);
+        underTest.setupConsulMetadata(1L);
     }
 
     private Set<InstanceMetaData> createInstanceMetaDataWithAmbariAddress(String ambariPublicIp) {

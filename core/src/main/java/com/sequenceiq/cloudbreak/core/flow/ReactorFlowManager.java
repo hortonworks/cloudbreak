@@ -67,7 +67,7 @@ public class ReactorFlowManager implements FlowManager {
         ProvisionRequest provisionRequest = (ProvisionRequest) object;
         ProvisioningContext context = new ProvisioningContext.Builder().
                 setDefaultParams(provisionRequest.getStackId(), provisionRequest.getCloudPlatform()).build();
-        reactor.notify(FlowPhases.CLUSTER_CREATION.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_CREATION.name()));
+        reactor.notify(FlowPhases.CLUSTER_INSTALL.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_INSTALL.name()));
     }
 
     @Override
