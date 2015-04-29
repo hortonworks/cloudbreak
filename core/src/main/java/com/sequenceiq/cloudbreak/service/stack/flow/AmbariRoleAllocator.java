@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.getAliveM
 import static com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.getService;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -25,15 +24,12 @@ import com.ecwid.consul.v1.catalog.model.CatalogService;
 import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
-import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.ScalingType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -49,7 +45,6 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHosts;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHostsStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 
 @Service
 public class AmbariRoleAllocator {
@@ -117,36 +112,6 @@ public class AmbariRoleAllocator {
         ClusterScalingContext clusterScalingContext =
                 new ClusterScalingContext(stackId, stack.cloudPlatform(), adjustment, instanceIds, hostMetadata, scalingType);
         return clusterScalingContext;
-    }
-
-    public StackUpdateSuccess updateInstanceMetadata(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData, String instanceGroupName) {
-        Stack one = stackRepository.findOneWithLists(stackId);
-        InstanceGroup instanceGroup = one.getInstanceGroupByInstanceGroupName(instanceGroupName);
-        Set<InstanceMetaData> originalMetadata = instanceGroup.getAllInstanceMetaData();
-        Set<InstanceMetaData> instanceMetaData = prepareInstanceMetaData(
-                coreInstanceMetaData,
-                one.getInstanceGroupByInstanceGroupName(instanceGroupName),
-                InstanceStatus.UNREGISTERED);
-        originalMetadata.addAll(instanceMetaData);
-        Stack modifiedStack = stackUpdater.updateStackMetaData(stackId, originalMetadata, instanceGroupName);
-        stackUpdater.updateMetadataReady(stackId, true);
-        Set<InstanceMetaData> newInstanceMetadata = modifiedStack.getInstanceGroupByInstanceGroupName(instanceGroupName).getInstanceMetaData();
-        instanceMetaDataRepository.save(updateWithNewNodesConsulData(newInstanceMetadata));
-        Set<String> instanceIds = new HashSet<>();
-        for (InstanceMetaData metadataEntry : instanceMetaData) {
-            instanceIds.add(metadataEntry.getInstanceId());
-        }
-        return new StackUpdateSuccess(stackId, false, instanceIds, instanceGroupName);
-    }
-
-    private PollingResult waitForHosts(Stack stack, AmbariClient ambariClient) {
-        MDCBuilder.buildMdcContext(stack);
-        LOGGER.info("Waiting for hosts to connect.[Ambari server address: {}]", stack.getAmbariIp());
-        return hostsPollingService.pollWithTimeout(
-                ambariHostsStatusCheckerTask,
-                new AmbariHosts(stack, ambariClient, stack.getFullNodeCountWithoutDecommissionedNodes() - stack.getGateWayNodeCount()),
-                POLLING_INTERVAL,
-                MAX_ATTEMPTS_FOR_HOSTS);
     }
 
     private List<String> findFreeHosts(Long stackId, HostGroup hostGroup, int scalingAdjustment) {
@@ -221,17 +186,6 @@ public class AmbariRoleAllocator {
         }
     }
 
-    private Set<InstanceMetaData> updateWithNewNodesConsulData(Set<InstanceMetaData> instancesMetaData) {
-        for (InstanceMetaData instanceMetaData : instancesMetaData) {
-            if (!instanceMetaData.getLongName().endsWith(ConsulUtils.CONSUL_DOMAIN)
-                    && InstanceStatus.UNREGISTERED.equals(instanceMetaData.getInstanceStatus())) {
-                instanceMetaData.setConsulServer(false);
-                instanceMetaData.setLongName(instanceMetaData.getInstanceId() + ConsulUtils.CONSUL_DOMAIN);
-            }
-        }
-        return instancesMetaData;
-    }
-
     private Set<String> getConsulServers(List<ConsulClient> clients) {
         List<CatalogService> services = getService(clients, CONSUL_SERVICE);
         Set<String> privateIps = new HashSet<>();
@@ -239,30 +193,6 @@ public class AmbariRoleAllocator {
             privateIps.add(service.getAddress());
         }
         return privateIps;
-    }
-
-    private Set<InstanceMetaData> prepareInstanceMetaData(Set<CoreInstanceMetaData> coreInstanceMetaData, InstanceGroup instanceGroup, InstanceStatus
-            status) {
-        Set<InstanceMetaData> instanceMetaData = new HashSet<>();
-        for (CoreInstanceMetaData coreInstanceMetaDataEntry : coreInstanceMetaData) {
-            if (coreInstanceMetaDataEntry.getInstanceGroup().getGroupName().equals(instanceGroup.getGroupName())) {
-                long timeInMillis = Calendar.getInstance().getTimeInMillis();
-                InstanceMetaData instanceMetaDataEntry = new InstanceMetaData();
-                instanceMetaDataEntry.setPrivateIp(coreInstanceMetaDataEntry.getPrivateIp());
-                instanceMetaDataEntry.setInstanceGroup(coreInstanceMetaDataEntry.getInstanceGroup());
-                instanceMetaDataEntry.setPublicIp(coreInstanceMetaDataEntry.getPublicIp());
-                instanceMetaDataEntry.setInstanceId(coreInstanceMetaDataEntry.getInstanceId());
-                instanceMetaDataEntry.setVolumeCount(coreInstanceMetaDataEntry.getVolumeCount());
-                instanceMetaDataEntry.setLongName(coreInstanceMetaDataEntry.getLongName());
-                instanceMetaDataEntry.setDockerSubnet(String.format("172.18.%s.1", coreInstanceMetaDataEntry.getPrivateIp().split("\\.")[LAST]));
-                instanceMetaDataEntry.setContainerCount(coreInstanceMetaDataEntry.getContainerCount());
-                instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
-                instanceMetaDataEntry.setInstanceStatus(status);
-                instanceMetaDataEntry.setStartDate(timeInMillis);
-                instanceMetaData.add(instanceMetaDataEntry);
-            }
-        }
-        return instanceMetaData;
     }
 
 }

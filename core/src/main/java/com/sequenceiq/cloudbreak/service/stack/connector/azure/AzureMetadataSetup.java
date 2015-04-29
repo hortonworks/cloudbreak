@@ -29,8 +29,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
-import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
 @Component
@@ -49,14 +47,14 @@ public class AzureMetadataSetup implements MetadataSetup {
     private AzureStackUtil azureStackUtil;
 
     @Override
-    public Set<CoreInstanceMetaData> setupMetadata(Stack stack) {
+    public Set<CoreInstanceMetaData> collectMetadata(Stack stack) {
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential);
         return collectMetaData(stack, azureClient);
     }
 
     @Override
-    public ProvisionEvent addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup) {
+    public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup) {
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential);
         List<Resource> resources = new ArrayList<>();
@@ -65,8 +63,7 @@ public class AzureMetadataSetup implements MetadataSetup {
                 resources.add(resource);
             }
         }
-        Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient, resources);
-        return new MetadataUpdateComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas, instanceGroup);
+        return collectMetaData(stack, azureClient, resources);
     }
 
     private Set<CoreInstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient, List<Resource> resources) {

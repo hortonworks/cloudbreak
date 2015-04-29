@@ -28,8 +28,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
-import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
 @Component
@@ -54,7 +52,7 @@ public class AwsMetadataSetup implements MetadataSetup {
     private ASGroupStatusCheckerTask asGroupStatusCheckerTask;
 
     @Override
-    public Set<CoreInstanceMetaData> setupMetadata(Stack stack) {
+    public Set<CoreInstanceMetaData> collectMetadata(Stack stack) {
         Set<CoreInstanceMetaData> coreInstanceMetadata = new HashSet<>();
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
 
@@ -97,7 +95,7 @@ public class AwsMetadataSetup implements MetadataSetup {
     }
 
     @Override
-    public ProvisionEvent addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String instanceGroupName) {
+    public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroupName) {
         Set<CoreInstanceMetaData> coreInstanceMetadata = new HashSet<>();
         LOGGER.info("Adding new instances to metadata: [stack: '{}']", stack.getId());
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
@@ -130,7 +128,7 @@ public class AwsMetadataSetup implements MetadataSetup {
                 }
             }
         }
-        return new MetadataUpdateComplete(CloudPlatform.AWS, stack.getId(), coreInstanceMetadata, instanceGroupName);
+        return coreInstanceMetadata;
     }
 
     @Override

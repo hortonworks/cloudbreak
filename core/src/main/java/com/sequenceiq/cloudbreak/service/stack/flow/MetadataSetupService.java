@@ -43,7 +43,7 @@ public class MetadataSetupService {
 
     public String setupMetadata(final CloudPlatform cloudPlatform, Long stackId) throws Exception {
         Stack stack = stackService.getById(stackId);
-        Set<CoreInstanceMetaData> coreInstanceMetaData = metadataSetups.get(cloudPlatform).setupMetadata(stack);
+        Set<CoreInstanceMetaData> coreInstanceMetaData = metadataSetups.get(cloudPlatform).collectMetadata(stack);
         if (coreInstanceMetaData.size() != stack.getFullNodeCount()) {
             throw new WrongMetadataException(String.format(
                     "Size of the collected metadata set does not equal the node count of the stack. [metadata size=%s] [nodecount=%s]",
