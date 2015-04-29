@@ -13,7 +13,7 @@ tests:
 
   - name: create gateway template
     parameters: {
-      azureTemplateName: it-azure-fullhdp-gateway1,
+      azureTemplateName: it-azure-fullhdp-gateway,
       azureVmType: A5,
       azureVolumeCount: 1,
       azureVolumeSize: 50,
@@ -36,7 +36,7 @@ tests:
   - name: create master2 template
     parameters: {
       azureTemplateName: it-azure-fullhdp-master2,
-      azureVmType: A8,
+      azureVmType: A7,
       azureVolumeCount: 3,
       azureVolumeSize: 200,
       templateAdditions: "master_2,1"
@@ -79,9 +79,9 @@ tests:
 
   - name: create cluster
     parameters: {
-      stackName: it-azure-fullhdp-stack1,
+      stackName: it-azure-fullhdp-stack,
       region: WEST_EUROPE,
-      clusterName: it-azure-fullhdp-cluster1,
+      clusterName: it-azure-fullhdp-cluster,
       sleepTime: 60000
     }
     classes:

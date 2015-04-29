@@ -22,7 +22,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.io.Resource;
 import org.springframework.util.CollectionUtils;
 import org.testng.TestNG;
-import org.testng.internal.Yaml;
+import org.testng.internal.YamlParser;
+import org.testng.xml.IFileParser;
+import org.testng.xml.SuiteXmlParser;
 import org.testng.xml.XmlSuite;
 import org.uncommons.reportng.HTMLReporter;
 import org.uncommons.reportng.JUnitXMLReporter;
@@ -34,6 +36,9 @@ import com.sequenceiq.it.cloudbreak.config.ITProps;
 @EnableConfigurationProperties(ITProps.class)
 public class IntegrationTestApp implements CommandLineRunner {
     private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestApp.class);
+    private static final IFileParser<XmlSuite> XML_PARSER = new SuiteXmlParser();
+    private static final IFileParser<XmlSuite> YAML_PARSER = new YamlParser();
+    private static final IFileParser<XmlSuite> DEFAULT_FILE_PARSER = XML_PARSER;
 
     @Value("${integrationtest.testsuite.threadPoolSize}")
     private int suiteThreadPoolSize;
@@ -67,17 +72,7 @@ public class IntegrationTestApp implements CommandLineRunner {
     private void setupSuites(TestNG testng) throws Exception {
         switch (itCommand) {
         case "smoketest":
-            List<String> testTypes = itProps.getTestTypes();
-            if (!CollectionUtils.isEmpty(testTypes)) {
-                Set<String> suitePathes = new LinkedHashSet<>();
-                for (String testType : testTypes) {
-                    List<String> suites = itProps.getTestSuites(testType);
-                    if (suites != null) {
-                        suitePathes.addAll(suites);
-                    }
-                }
-                testng.setXmlSuites(loadSuites(suitePathes));
-            }
+            setupSmokeTest(testng, itProps.getTestTypes());
             break;
         case "fulltest":
             if (fullTestRegionIndex > -1 && fullTestRegionNumber > 0) {
@@ -92,17 +87,34 @@ public class IntegrationTestApp implements CommandLineRunner {
                 testng.setTestSuites(suiteFiles);
             }
             break;
+        case "suiteurls":
+            List<String> suitePathes = itProps.getSuiteFiles();
+            testng.setXmlSuites(loadSuites(suitePathes));
+            break;
         default:
             LOG.info("Unknown command: {}", itCommand);
             break;
         }
     }
 
+    private void setupSmokeTest(TestNG testng, List<String> testTypes) throws IOException {
+        if (!CollectionUtils.isEmpty(testTypes)) {
+            Set<String> suitePathes = new LinkedHashSet<>();
+            for (String testType : testTypes) {
+                List<String> suites = itProps.getTestSuites(testType);
+                if (suites != null) {
+                    suitePathes.addAll(suites);
+                }
+            }
+            testng.setXmlSuites(loadSuites(suitePathes));
+        }
+    }
+
     private void setupFullTest(TestNG testng, int salt, int regionNum) throws IOException {
         List<Resource> suites = new ArrayList<>();
-        suites.addAll(getProviderSuites("classpath:/testsuites/aws/fullhdp/*.yaml", salt, regionNum));
-        suites.addAll(getProviderSuites("classpath:/testsuites/azure/fullhdp/*.yaml", salt, regionNum));
-        suites.addAll(getProviderSuites("classpath:/testsuites/gcp/fullhdp/*.yaml", salt, regionNum));
+        suites.addAll(getProviderSuites("classpath:/testsuites/aws/full/*.yaml", salt, regionNum));
+        suites.addAll(getProviderSuites("classpath:/testsuites/azure/full/*.yaml", salt, regionNum));
+        suites.addAll(getProviderSuites("classpath:/testsuites/gcp/full/*.yaml", salt, regionNum));
         LOG.info("The following suites will be executed: {}", suites);
         testng.setXmlSuites(loadSuiteResources(suites));
     }
@@ -139,9 +151,20 @@ public class IntegrationTestApp implements CommandLineRunner {
     }
 
     private XmlSuite loadSuite(String suitePath, Resource resource) throws IOException {
+        IFileParser<XmlSuite> parser = getParser(suitePath);
         try (InputStream inputStream = resource.getInputStream()) {
-            return Yaml.parse(suitePath, inputStream);
+            return parser.parse(suitePath, inputStream, true);
         }
+    }
+
+    private IFileParser getParser(String fileName) {
+        IFileParser result = DEFAULT_FILE_PARSER;
+        if (fileName.endsWith("xml")) {
+            result = XML_PARSER;
+        } else if (fileName.endsWith("yaml") || fileName.endsWith("yml")) {
+            result = YAML_PARSER;
+        }
+        return result;
     }
 
     public static void main(String[] args) throws Exception {
