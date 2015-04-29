@@ -96,7 +96,7 @@ init-profile() {
         else
             # this is for linux
             warn "We can not guess your PUBLIC_IP, please run the following command: (replace 1.2.3.4 with a real IP)"
-            echo "echo export PUBLIC_IP=1.2.3.4 > $CBD_PROFILE"
+            echo "echo export PUBLIC_IP=1.2.3.4 > $CBD_PROFILE" | blue
         fi
         exit 2
     fi
