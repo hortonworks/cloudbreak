@@ -7,7 +7,8 @@
 ### Added
 
 - Mini Getting Started guide added into README
-
+- `make dev-debug` installs a special cbd on local OSX, which doesn’t includes *.bash scrips, only refers them
+   by path. No need to `make dev` to test small changes in bash scripts.
 ### Removed
 
 ### Changed

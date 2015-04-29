@@ -18,6 +18,10 @@ build: bindata
 dev: bindata
 	go build -ldflags $(FLAGS) -o /usr/local/bin/$(BINARYNAME)
 
+dev-debug:
+	go-bindata -debug=true include .deps/bin
+	go build -ldflags $(FLAGS) -o /usr/local/bin/$(BINARYNAME)
+
 bindata:
 	go-bindata include .deps/bin
 
