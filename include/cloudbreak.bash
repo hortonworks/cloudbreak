@@ -21,7 +21,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_CLOUDBREAK 0.5.20
     env-import DOCKER_TAG_ULUWATU 0.5.4
     env-import DOCKER_TAG_SULTANS 0.4.6
-    env-import DOCKER_TAG_PERISCOPE 0.4.2
+    env-import DOCKER_TAG_PERISCOPE 0.5.2
     env-import DOCKER_TAG_AMBASSADOR latest
 }
 
@@ -48,7 +48,7 @@ cloudbreak-conf-cbdb() {
     env-import CB_DB_ENV_DB "cloudbreak"
     env-import CB_DB_ENV_PASS ""
     env-import CB_HBM2DDL_STRATEGY "validate"
-    env-import PERISCOPE_DB_HBM2DDL_STRATEGY "update"
+    env-import PERISCOPE_DB_HBM2DDL_STRATEGY "validate"
 }
 
 cloudbreak-conf-uaa() {

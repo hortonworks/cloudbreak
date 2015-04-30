@@ -213,7 +213,7 @@ pcdb:
 
 periscope:
     environment:
-        - PERISCOPE_DB_HBM2DDL_STRATEGY=create
+        - PERISCOPE_DB_HBM2DDL_STRATEGY=$PERISCOPE_DB_HBM2DDL_STRATEGY
         - SERVICE_NAME=periscope
           #- SERVICE_CHECK_HTTP=/info
         - PERISCOPE_SMTP_HOST=$CLOUDBREAK_SMTP_SENDER_HOST
