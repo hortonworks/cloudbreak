@@ -3,21 +3,18 @@ package com.sequenceiq.cloudbreak.core.flow;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.Stack;
 
 public interface ContainerOrchestrator {
 
-    ContainerOrchestratorClient bootstrap(Long stackId) throws CloudbreakException;
+    ContainerOrchestratorCluster bootstrap(Stack stack, String gatewayAddress, Set<Node> nodes, int consulServerCount) throws CloudbreakException;
+    ContainerOrchestratorCluster bootstrapNewNodes(Stack stack, String gatewayAddress, Set<Node> instanceIds) throws CloudbreakException;
 
-    void startRegistrator(ContainerOrchestratorClient client, Long stackId) throws CloudbreakException;
-    void startAmbariServer(ContainerOrchestratorClient client, Long stackId) throws CloudbreakException;
-    void startAmbariAgents(ContainerOrchestratorClient client, Long stackId) throws CloudbreakException;
-    void startConsulWatches(ContainerOrchestratorClient client, Long stackId) throws CloudbreakException;
+    void startRegistrator(ContainerOrchestratorCluster cluster) throws CloudbreakException;
+    void startAmbariServer(ContainerOrchestratorCluster cluster) throws CloudbreakException;
+    void startAmbariAgents(ContainerOrchestratorCluster cluster, int count) throws CloudbreakException;
+    void startConsulWatches(ContainerOrchestratorCluster cluster, int count) throws CloudbreakException;
 
     ContainerOrchestratorTool type();
-
-    void preSetupNewNode(Long stackId, InstanceGroup gateway, Set<String> instanceIds) throws CloudbreakException;
-
-    void newHostgroupNodesSetup(Long stackId, Set<String> instanceIds, String hostGroup) throws CloudbreakException;
 
 }

@@ -91,8 +91,10 @@ public class StackScalingService {
         stack = stackService.getById(stackId);
         Set<CoreInstanceMetaData> coreInstanceMetaData = collectNewMetadata(stack, resources, instanceGroupName);
         InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceGroupName);
+        Set<String> upscaleCandidateAddresses = new HashSet<>();
         for (CoreInstanceMetaData coreInstanceMetadataEntry : coreInstanceMetaData) {
             long timeInMillis = Calendar.getInstance().getTimeInMillis();
+            upscaleCandidateAddresses.add(coreInstanceMetadataEntry.getPrivateIp());
             InstanceMetaData instanceMetaDataEntry = new InstanceMetaData();
             instanceMetaDataEntry.setPrivateIp(coreInstanceMetadataEntry.getPrivateIp());
             instanceMetaDataEntry.setInstanceGroup(coreInstanceMetadataEntry.getInstanceGroup());
@@ -114,11 +116,6 @@ public class StackScalingService {
 
         // maybe this should be set later?
         setStackAvailable(scalingAdjustment, stack);
-
-        Set<String> instanceIds = new HashSet<>();
-        for (CoreInstanceMetaData metadataEntry : coreInstanceMetaData) {
-            instanceIds.add(metadataEntry.getInstanceId());
-        }
         // MetadataSetup phase should end here
 
 
@@ -128,7 +125,7 @@ public class StackScalingService {
         instanceMetaDataRepository.save(updateWithNewNodesConsulData(newInstanceMetadata));
         // ConsulMetadataSetup should end here
 
-        return instanceIds;
+        return upscaleCandidateAddresses;
     }
 
     public void downscaleStack(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {

@@ -21,15 +21,22 @@ public class SwarmCheckerTask extends StackBasedStatusCheckerTask<SwarmContext> 
         try {
             List<Object> driverStatus = swarmContext.getDockerClient().infoCmd().exec().getDriverStatuses();
             LOGGER.debug("Swarm manager is available, checking registered agents.");
+            int found = 0;
             for (Object element : driverStatus) {
                 try {
                     List objects = (ArrayList) element;
-                    if (objects.get(0).toString().endsWith("Nodes") && Integer.valueOf(objects.get(1).toString()) == swarmContext.getNodeCount()) {
-                        return true;
+                    for (String address : swarmContext.getSwarmAgents()) {
+                        if (((String) objects.get(1)).split(":")[0].equals(address)) {
+                            found++;
+                            break;
+                        }
                     }
                 } catch (Exception e) {
                     LOGGER.error(String.format("Docker info returned an unexpected element: %s", element), e);
                 }
+            }
+            if (found == swarmContext.getSwarmAgents().size()) {
+                return true;
             }
         } catch (Throwable t) {
             return false;

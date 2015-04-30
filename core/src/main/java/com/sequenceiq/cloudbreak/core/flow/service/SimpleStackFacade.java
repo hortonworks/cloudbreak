@@ -185,7 +185,7 @@ public class SimpleStackFacade implements StackFacade {
             MDCBuilder.buildMdcContext(stackService.getById(updateContext.getStackId()));
             LOGGER.info("Upscale stack. Context: {}", updateContext);
 
-            Set<String> instanceIds = stackScalingService.upscaleStack(updateContext.getStackId(), updateContext.getInstanceGroup(),
+            Set<String> upscaleCandidateAddresses = stackScalingService.upscaleStack(updateContext.getStackId(), updateContext.getInstanceGroup(),
                     updateContext.getScalingAdjustment());
             Stack stack = stackService.getById(updateContext.getStackId());
             HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
@@ -197,7 +197,7 @@ public class SimpleStackFacade implements StackFacade {
             }
             UpdateAmbariHostsRequest updateAmbariHostsRequest = new UpdateAmbariHostsRequest(updateContext.getStackId(),
                     hostGroupAdjustmentJson,
-                    instanceIds,
+                    upscaleCandidateAddresses,
                     new ArrayList<HostMetadata>(),
                     false,
                     updateContext.getCloudPlatform(),

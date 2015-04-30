@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +15,8 @@ import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 @Component
@@ -32,13 +34,25 @@ public class ClusterBootstrapper {
 
     public FlowContext bootstrapCluster(ProvisioningContext provisioningContext) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
+        InstanceGroup gateway = stack.getGatewayInstanceGroup();
+        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+
+        Set<Node> nodes = new HashSet<>();
+        for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
+            int volumeCount = instanceMetaData.getInstanceGroup().getTemplate().getVolumeCount();
+            Set<String> dataVolumes = new HashSet<>();
+            for (int i = 1; i <= volumeCount; i++) {
+                dataVolumes.add("/hadoopfs/fs" + i);
+            }
+            nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp(), getHostname(instanceMetaData.getLongName()), dataVolumes));
+        }
 
         ContainerOrchestrator containerOrchestrator = containerOrchestrators.get(containerOrchestratorTool);
-        ContainerOrchestratorClient client = containerOrchestrator.bootstrap(provisioningContext.getStackId());
-        containerOrchestrator.startRegistrator(client, provisioningContext.getStackId());
-        containerOrchestrator.startAmbariServer(client, provisioningContext.getStackId());
-        containerOrchestrator.startAmbariAgents(client, provisioningContext.getStackId());
-        containerOrchestrator.startConsulWatches(client, provisioningContext.getStackId());
+        ContainerOrchestratorCluster cluster = containerOrchestrator.bootstrap(stack, gatewayInstance.getPublicIp(), nodes, stack.getConsulServers());
+        containerOrchestrator.startRegistrator(cluster);
+        containerOrchestrator.startAmbariServer(cluster);
+        containerOrchestrator.startAmbariAgents(cluster, cluster.getNodes().size() - 1);
+        containerOrchestrator.startConsulWatches(cluster, cluster.getNodes().size());
 
         return new ProvisioningContext.Builder()
                 .setAmbariIp(provisioningContext.getAmbariIp())
@@ -48,12 +62,29 @@ public class ClusterBootstrapper {
 
     public void bootstrapNewNodes(ClusterScalingContext clusterScalingContext) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(clusterScalingContext.getStackId());
-        MDCBuilder.buildMdcContext(stack);
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
+        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+
+        Set<Node> nodes = new HashSet<>();
+        for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
+            if (clusterScalingContext.getUpscaleCandidateAddresses().contains(instanceMetaData.getPrivateIp())) {
+                int volumeCount = instanceMetaData.getInstanceGroup().getTemplate().getVolumeCount();
+                Set<String> dataVolumes = new HashSet<>();
+                for (int i = 1; i <= volumeCount; i++) {
+                    dataVolumes.add("/hadoopfs/fs" + i);
+                }
+                nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp(), getHostname(instanceMetaData.getLongName()), dataVolumes));
+            }
+        }
+
         ContainerOrchestrator containerOrchestrator = containerOrchestrators.get(containerOrchestratorTool);
-        containerOrchestrator.preSetupNewNode(clusterScalingContext.getStackId(), gateway, clusterScalingContext.getUpscaleIds());
-        containerOrchestrator.newHostgroupNodesSetup(clusterScalingContext.getStackId(), clusterScalingContext.getUpscaleIds(),
-                clusterScalingContext.getHostGroupAdjustment().getHostGroup());
+        ContainerOrchestratorCluster cluster = containerOrchestrator.bootstrapNewNodes(stack, gatewayInstance.getPublicIp(), nodes);
+        containerOrchestrator.startAmbariAgents(cluster, cluster.getNodes().size());
+        containerOrchestrator.startConsulWatches(cluster, cluster.getNodes().size());
+    }
+
+    private String getHostname(String longName) {
+        return longName.split("\\.")[0];
     }
 
 }

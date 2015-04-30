@@ -13,16 +13,16 @@ public class ClusterScalingContext extends DefaultFlowContext implements FlowCon
 
     private HostGroupAdjustmentJson hostGroupAdjustment;
     private List<HostMetadata> candidates;
-    private Set<String> upscaleIds;
+    private Set<String> upscaleCandidateAddresses;
     private ScalingType scalingType;
 
-    public ClusterScalingContext(Long stackId, CloudPlatform cloudPlatform, HostGroupAdjustmentJson hostGroupAdjustment, Set<String> upscaleIds,
+    public ClusterScalingContext(Long stackId, CloudPlatform cloudPlatform, HostGroupAdjustmentJson hostGroupAdjustment, Set<String> upscaleCandidateAddresses,
             List<HostMetadata> candidates, ScalingType scalingType) {
         super(stackId, cloudPlatform);
         this.hostGroupAdjustment = hostGroupAdjustment;
         this.candidates = candidates;
         this.scalingType = scalingType;
-        this.upscaleIds = upscaleIds;
+        this.upscaleCandidateAddresses = upscaleCandidateAddresses;
     }
 
     public ClusterScalingContext(UpdateAmbariHostsRequest updateAmbariHostsRequest) {
@@ -30,7 +30,7 @@ public class ClusterScalingContext extends DefaultFlowContext implements FlowCon
         this.hostGroupAdjustment = updateAmbariHostsRequest.getHostGroupAdjustment();
         this.candidates = updateAmbariHostsRequest.getDecommissionCandidates();
         this.scalingType = updateAmbariHostsRequest.getScalingType();
-        this.upscaleIds = updateAmbariHostsRequest.getUpscaleCandidates();
+        this.upscaleCandidateAddresses = updateAmbariHostsRequest.getUpscaleCandidateAddresses();
     }
 
     public HostGroupAdjustmentJson getHostGroupAdjustment() {
@@ -45,7 +45,7 @@ public class ClusterScalingContext extends DefaultFlowContext implements FlowCon
         return scalingType;
     }
 
-    public Set<String> getUpscaleIds() {
-        return upscaleIds;
+    public Set<String> getUpscaleCandidateAddresses() {
+        return upscaleCandidateAddresses;
     }
 }
