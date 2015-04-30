@@ -1,11 +1,6 @@
 {
   "configurations": [
     {
-      "nagios-env": {
-        "nagios_contact": "admin@localhost"
-      }
-    },
-    {
       "hive-site": {
         "javax.jdo.option.ConnectionUserName": "hive",
         "javax.jdo.option.ConnectionPassword": "hive"
@@ -89,6 +84,9 @@
           "name": "RESOURCEMANAGER"
         },
         {
+          "name": "HDFS_CLIENT"
+        },
+        {
           "name": "APP_TIMELINE_SERVER"
         },
         {
@@ -138,9 +136,6 @@
       "components": [
         {
           "name": "AMBARI_SERVER"
-        },
-        {
-          "name": "NAGIOS_SERVER"
         },
         {
           "name": "ZOOKEEPER_CLIENT"

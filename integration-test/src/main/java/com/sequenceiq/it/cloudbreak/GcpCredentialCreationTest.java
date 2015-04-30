@@ -22,11 +22,11 @@ public class GcpCredentialCreationTest extends AbstractCloudbreakIntegrationTest
     private String defaultPublicKeyFile;
 
     @Test
-    @Parameters({ "name", "projectId", "serviceAccountId", "serviceAccountPrivateKeyP12File", "publicKeyFile" })
-    public void testGCPCredentialCreation(@Optional("")String name, @Optional("")String projectId, @Optional("")String serviceAccountId,
+    @Parameters({ "credentialName", "projectId", "serviceAccountId", "serviceAccountPrivateKeyP12File", "publicKeyFile" })
+    public void testGCPCredentialCreation(@Optional("")String credentialName, @Optional("")String projectId, @Optional("")String serviceAccountId,
             @Optional("")String serviceAccountPrivateKeyP12File, @Optional("")String publicKeyFile) throws Exception {
         // GIVEN
-        name = StringUtils.hasLength(name) ? name : defaultName;
+        credentialName = StringUtils.hasLength(credentialName) ? credentialName : defaultName;
         projectId = StringUtils.hasLength(projectId) ? projectId : defaultProjectId;
         serviceAccountId = StringUtils.hasLength(serviceAccountId) ? serviceAccountId : defaultServiceAccountId;
         serviceAccountPrivateKeyP12File = StringUtils.hasLength(serviceAccountPrivateKeyP12File) ? serviceAccountPrivateKeyP12File : defaultP12File;
@@ -35,7 +35,7 @@ public class GcpCredentialCreationTest extends AbstractCloudbreakIntegrationTest
         String publicKey = ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "");
         // WHEN
         // TODO publicInAccount
-        String id = getClient().postGccCredential(name, "GCP credential for integartiontest", publicKey, false, projectId, serviceAccountId,
+        String id = getClient().postGccCredential(credentialName, "GCP credential for integartiontest", publicKey, false, projectId, serviceAccountId,
                 serviceAccountPrivateKey);
         // THEN
         Assert.assertNotNull(id);
