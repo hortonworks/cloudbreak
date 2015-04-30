@@ -1,0 +1,71 @@
+name: Resource_tests
+parameters:
+  cleanUp: false
+
+tests:
+  - name: init
+    classes:
+      - com.sequenceiq.it.TestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+
+  - name: gcp_template_test
+    parameters:
+      gcpName: it-gcp-template-restest
+      templateName: it-gcp-template-restest
+      gcpInstanceType: N1_STANDARD_4
+      volumeType: HDD
+      volumeCount: 1
+      volumeSize: 30
+      templateAdditions: "gcp,1"
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.TemplateDeleteByNameTest
+
+  - name: azure_template_test
+    parameters:
+      azureTemplateName: it-azure-template-restest
+      templateName: it-azure-template-restest
+      azureVmType: A5
+      azureVolumeCount: 1
+      azureVolumeSize: 50
+      templateAdditions: "azure,1"
+    classes:
+      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.TemplateDeleteByNameTest
+
+  - name: aws_template_test
+    parameters:
+      awsTemplateName: it-aws-template-restest
+      templateName: it-aws-template-restest
+      awsInstanceType: M3Medium
+      awsVolumeType: Standard
+      awsVolumeCount: 1
+      awsVolumeSize: 30
+      templateAdditions: "aws,1"
+    classes:
+      - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.TemplateDeleteByNameTest
+
+  - name: blueprint_test
+    parameters:
+      blueprintName: it-blueprint-restest
+      blueprintFile: classpath:/blueprint/multi-node-hdfs-yarn.bp
+    classes:
+      - com.sequenceiq.it.cloudbreak.BlueprintCreationTest
+      - com.sequenceiq.it.cloudbreak.BlueprintDeleteByNameTest
+
+  # integratontest.gcpcredential params must be set in application.yml
+  - name: gcp_credential_test
+    parameters:
+      credentialName: it-gcp-credential-restest
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpCredentialCreationTest
+      - com.sequenceiq.it.cloudbreak.CredentialDeleteByNameTest
+
+  # integratontest.awscredential params must be set in application.yml
+  - name: aws_credential_test
+    parameters:
+      credentialName: it-aws-credential-restest
+    classes:
+      - com.sequenceiq.it.cloudbreak.AwsCredentialCreationTest
+      - com.sequenceiq.it.cloudbreak.CredentialDeleteByNameTest

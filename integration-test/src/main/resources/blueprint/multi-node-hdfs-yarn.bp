@@ -1,11 +1,4 @@
 {
-  "configurations": [
-    {
-      "nagios-env": {
-        "nagios_contact": "admin@localhost"
-      }
-    }
-  ],
   "host_groups": [
     {
       "name": "master",
@@ -24,9 +17,6 @@
         },
         {
           "name": "HISTORYSERVER"
-        },
-        {
-          "name": "NAGIOS_SERVER"
         },
         {
           "name": "ZOOKEEPER_SERVER"
