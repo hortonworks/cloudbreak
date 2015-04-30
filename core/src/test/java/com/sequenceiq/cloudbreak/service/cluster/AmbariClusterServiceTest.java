@@ -120,7 +120,7 @@ public class AmbariClusterServiceTest {
         given(stackRepository.findOne(anyLong())).willReturn(stack);
     }
 
-    @Test(expected = InternalServerException.class)
+    @Test(expected = BadRequestException.class)
     public void testRetrieveClusterJsonWhenClusterJsonIsNull() throws HttpResponseException {
         // GIVEN
         doReturn(ambariClient).when(ambariClientProvider).getAmbariClient(any(String.class), any(String.class), any(String.class));
@@ -429,6 +429,7 @@ public class AmbariClusterServiceTest {
         Stack stack = new Stack();
         stack.setId(1L);
         stack.setCluster(cluster);
+        stack.setAmbariIp("52.53.54.100");
         return stack;
     }
 

@@ -128,11 +128,14 @@ public class AmbariClusterService implements ClusterService {
     @Override
     public String getClusterJson(String ambariIp, Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
+        if (stack.getAmbariIp() == null) {
+            throw new NotFoundException(String.format("Ambari server could not be available for the stack.[id: %s]", stackId));
+        }
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword());
         try {
             String clusterJson = ambariClient.getClusterAsJson();
             if (clusterJson == null) {
-                throw new InternalServerException(String.format("Cluster response coming from Ambari server was null. [Ambari Server IP: '%s']", ambariIp));
+                throw new BadRequestException(String.format("Cluster response coming from Ambari server was null. [Ambari Server IP: '%s']", ambariIp));
             }
             return clusterJson;
         } catch (HttpResponseException e) {
@@ -148,6 +151,9 @@ public class AmbariClusterService implements ClusterService {
     public UpdateAmbariHostsRequest updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
+        if (cluster == null) {
+            throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stackId));
+        }
         boolean decommissionRequest = validateRequest(stack, hostGroupAdjustment);
         List<HostMetadata> downScaleCandidates = collectDownscaleCandidates(hostGroupAdjustment, stack, cluster, decommissionRequest);
         UpdateAmbariHostsRequest updateRequest;
