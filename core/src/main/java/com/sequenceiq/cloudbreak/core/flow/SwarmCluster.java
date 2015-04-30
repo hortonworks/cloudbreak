@@ -1,11 +1,14 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
+import java.util.Set;
+
 import com.github.dockerjava.api.DockerClient;
 
-public class SwarmContainerOrchestratorClient implements ContainerOrchestratorClient {
+public class SwarmCluster extends ContainerOrchestratorCluster {
     private DockerClient dockerClient;
-
-    public SwarmContainerOrchestratorClient(DockerClient dockerClient) {
+    
+    public SwarmCluster(String apiAddress, Set<Node> nodes, DockerClient dockerClient) {
+        super(apiAddress, nodes);
         this.dockerClient = dockerClient;
     }
 

@@ -25,11 +25,11 @@ public class DockerCheckerTask extends StackBasedStatusCheckerTask<DockerContext
 
     @Override
     public void handleTimeout(DockerContext t) {
-        throw new InternalServerException(String.format("Operation timed out. Could not reach docker in time."));
+        throw new InternalServerException("Operation timed out. Could not reach docker in time.");
     }
 
     @Override
     public String successMessage(DockerContext t) {
-        return String.format("Docker is available.");
+        return "Docker is available.";
     }
 }

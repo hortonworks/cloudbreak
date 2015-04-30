@@ -14,11 +14,11 @@ public class UpdateAmbariHostsRequest {
     private CloudPlatform cloudPlatform;
     private HostGroupAdjustmentJson hostGroupAdjustment;
     private List<HostMetadata> decommissionCandidates;
-    private Set<String> upscaleCandidates;
+    private Set<String> upscaleCandidateAddresses;
     private boolean decommission;
     private ScalingType scalingType;
 
-    public UpdateAmbariHostsRequest(Long stackId, HostGroupAdjustmentJson adjustmentJson, Set<String> upscaleCandidates,
+    public UpdateAmbariHostsRequest(Long stackId, HostGroupAdjustmentJson adjustmentJson, Set<String> upscaleCandidateAddresses,
             List<HostMetadata> decommissionCandidates, boolean decommission, CloudPlatform cloudPlatform, ScalingType scalingType) {
         this.stackId = stackId;
         this.decommissionCandidates = decommissionCandidates;
@@ -26,7 +26,7 @@ public class UpdateAmbariHostsRequest {
         this.decommission = decommission;
         this.cloudPlatform = cloudPlatform;
         this.scalingType = scalingType;
-        this.upscaleCandidates = upscaleCandidates;
+        this.upscaleCandidateAddresses = upscaleCandidateAddresses;
     }
 
     public Long getStackId() {
@@ -49,8 +49,8 @@ public class UpdateAmbariHostsRequest {
         return cloudPlatform;
     }
 
-    public Set<String> getUpscaleCandidates() {
-        return upscaleCandidates;
+    public Set<String> getUpscaleCandidateAddresses() {
+        return upscaleCandidateAddresses;
     }
 
     public ScalingType getScalingType() {
