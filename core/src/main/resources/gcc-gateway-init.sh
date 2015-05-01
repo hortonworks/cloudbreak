@@ -19,7 +19,7 @@ fix_docker_port() {
   sh -c ' echo other_args=\"--label type=gateway --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2376\" >> /etc/sysconfig/docker'
   service docker restart
   docker pull sequenceiq/docker-consul-watch-plugn:1.7.0-consul
-  docker pull sequenceiq/munchausen:0.1
+  docker pull sequenceiq/munchausen:0.2
   docker pull swarm:0.2.0-rc2
   docker pull sequenceiq/registrator:v5.1
 }

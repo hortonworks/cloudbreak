@@ -87,16 +87,6 @@ public class InstanceGroup implements ProvisionEntity, Comparable {
         return resultSet;
     }
 
-    public Set<InstanceMetaData> getInstanceMetaDataByStatus(InstanceStatus instanceStatus) {
-        Set<InstanceMetaData> resultSet = new HashSet<>();
-        for (InstanceMetaData metaData : instanceMetaData) {
-            if (metaData.getInstanceStatus().equals(instanceStatus)) {
-                resultSet.add(metaData);
-            }
-        }
-        return resultSet;
-    }
-
     public Set<InstanceMetaData> getAllInstanceMetaData() {
         return instanceMetaData;
     }
