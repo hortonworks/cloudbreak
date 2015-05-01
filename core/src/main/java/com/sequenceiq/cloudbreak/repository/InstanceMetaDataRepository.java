@@ -16,8 +16,6 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
 
     InstanceMetaData findHostInStack(@Param("stackId") Long stackId, @Param("hostName") String hostName);
 
-    InstanceMetaData findHostInStackByInstanceId(@Param("stackId") Long stackId, @Param("instanceId") String instanceId);
-
     Set<InstanceMetaData> findUnregisteredHostsInInstanceGroup(@Param("instanceGroupId") Long instanceGroupId);
 
     List<String> findAliveInstancesHostNamesInInstanceGroup(@Param("instanceGroupId") Long instanceGroupId);

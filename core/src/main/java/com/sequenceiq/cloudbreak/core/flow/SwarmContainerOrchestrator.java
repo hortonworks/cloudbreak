@@ -45,6 +45,7 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
     private static final int POLLING_INTERVAL = 5000;
     private static final int READ_TIMEOUT = 30000;
     private static final int MAX_POLLING_ATTEMPTS = 100;
+    private static final String MUNCHAUSEN_WAIT = "180";
 
     @Value("${cb.docker.container.ambari:sequenceiq/ambari:2.0.0-consul}")
     private String ambariDockerImageName;
@@ -52,7 +53,7 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
     @Value("${cb.docker.container.registrator:sequenceiq/registrator:v5.1}")
     private String registratorDockerImageName;
 
-    @Value("${cb.docker.container.munchausen:sequenceiq/munchausen:0.1}")
+    @Value("${cb.docker.container.munchausen:sequenceiq/munchausen:0.2}")
     private String munchausenDockerImageName;
 
     @Value("${cb.docker.container.docker.consul.watch.plugn:sequenceiq/docker-consul-watch-plugn:1.7.0-consul}")
@@ -84,7 +85,6 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
      * @param gatewayAddress    Public address of the gateway instance
      * @param nodes             Nodes that must be added to the Swarm cluster
      * @param consulServerCount Number of Consul servers in the cluster
-     * @throws CloudbreakException
      */
     @Override
     public ContainerOrchestratorCluster bootstrap(Stack stack, String gatewayAddress, Set<Node> nodes, int consulServerCount) throws CloudbreakException {
@@ -110,7 +110,7 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
                                     .add(postgresDockerImageName)
                                     .build()
                     ), POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-            String[] cmd = {"--debug", "bootstrap", "--consulServers", consulServers, dockerAddresses};
+            String[] cmd = {"--debug", "bootstrap", "--wait", MUNCHAUSEN_WAIT, "--consulServers", consulServers, dockerAddresses};
             new MunchausenBootstrap(dockerApiClient, munchausenDockerImageName, cmd).call();
             DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(gatewayAddress))
                     .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
@@ -166,7 +166,7 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
         try {
             DockerClient dockerApiClient = DockerClientBuilder.getInstance(getDockerClientConfig(gatewayAddress)).build();
             Set<String> privateAddresses = getPrivateAddresses(nodes);
-            String[] cmd = {"--debug", "add", "--join", getConsulJoinIp(gatewayAddress), prepareDockerAddressInventory(privateAddresses)};
+            String[] cmd = {"--debug", "add", "--wait", MUNCHAUSEN_WAIT, "--join", getConsulJoinIp(gatewayAddress), prepareDockerAddressInventory(privateAddresses)};
             new MunchausenBootstrap(dockerApiClient, munchausenDockerImageName, cmd).call();
             DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(gatewayAddress))
                     .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
