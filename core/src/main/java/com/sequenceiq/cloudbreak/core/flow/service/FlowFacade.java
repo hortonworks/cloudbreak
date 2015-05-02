@@ -14,6 +14,8 @@ public interface FlowFacade {
 
     FlowContext setupMetadata(FlowContext flowContext) throws CloudbreakException;
 
+    FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException;
+
     FlowContext setupConsulMetadata(FlowContext flowContext) throws CloudbreakException;
 
     FlowContext startAmbari(FlowContext flowContext) throws CloudbreakException;
@@ -42,7 +44,13 @@ public interface FlowFacade {
 
     FlowContext handleClusterStopFailure(FlowContext flowContext) throws CloudbreakException;
 
-    FlowContext upscaleStack(FlowContext context) throws CloudbreakException;
+    FlowContext addInstances(FlowContext context) throws CloudbreakException;
+
+    FlowContext extendMetadata(FlowContext data) throws CloudbreakException;
+
+    FlowContext bootstrapNewNodes(FlowContext context) throws CloudbreakException;
+
+    FlowContext extendConsulMetadata(FlowContext data) throws CloudbreakException;
 
     FlowContext downscaleStack(FlowContext context) throws CloudbreakException;
 
@@ -64,7 +72,4 @@ public interface FlowFacade {
 
     FlowContext enableSecurity(FlowContext context) throws CloudbreakException;
 
-    FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException;
-
-    FlowContext bootstrapNewNodes(FlowContext context) throws CloudbreakException;
 }

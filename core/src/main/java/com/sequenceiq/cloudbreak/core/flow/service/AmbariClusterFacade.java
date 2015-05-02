@@ -35,10 +35,9 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.event.ConsulMetadataSetupComplete;
-import com.sequenceiq.cloudbreak.service.stack.flow.ConsulMetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListenerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
+import com.sequenceiq.cloudbreak.service.stack.flow.ConsulMetadataSetup;
 
 @Service
 public class AmbariClusterFacade implements ClusterFacade {
@@ -93,12 +92,8 @@ public class AmbariClusterFacade implements ClusterFacade {
         ProvisioningContext provisioningContext = (ProvisioningContext) context;
         MDCBuilder.buildMdcContext(stackService.getById(provisioningContext.getStackId()));
         LOGGER.debug("Allocating Ambari roles. Context: {}", context);
-        ConsulMetadataSetupComplete consulMetadataSetupComplete = consulMetadataSetup.setupConsulMetadata(provisioningContext.getStackId());
-        Stack stack = consulMetadataSetupComplete.getStack();
-        return new ProvisioningContext.Builder()
-                .setDefaultParams(stack.getId(), stack.cloudPlatform())
-                .setAmbariIp(provisioningContext.getAmbariIp())
-                .build();
+        consulMetadataSetup.setupConsulMetadata(provisioningContext.getStackId());
+        return provisioningContext;
     }
 
     @Override
@@ -246,6 +241,14 @@ public class AmbariClusterFacade implements ClusterFacade {
     }
 
     @Override
+    public FlowContext extendConsulMetadata(FlowContext context) throws CloudbreakException {
+        ClusterScalingContext clusterScalingContext = (ClusterScalingContext) context;
+        MDCBuilder.buildMdcContext(stackService.getById(clusterScalingContext.getStackId()));
+        consulMetadataSetup.setupNewConsulMetadata(clusterScalingContext);
+        return clusterScalingContext;
+    }
+
+    @Override
     public FlowContext upscaleCluster(FlowContext context) throws CloudbreakException {
         ClusterScalingContext scalingContext = (ClusterScalingContext) context;
         Stack stack = stackService.getById(scalingContext.getStackId());
@@ -296,8 +299,9 @@ public class AmbariClusterFacade implements ClusterFacade {
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), scalingContext.getHostGroupAdjustment().getHostGroup());
         StackScalingContext stackScalingContext = new StackScalingContext(scalingContext.getStackId(),
                 scalingContext.getCloudPlatform(),
-                hostGroup.getInstanceGroup().getGroupName(),
                 scalingContext.getCandidates().size() * (-1),
+                hostGroup.getInstanceGroup().getGroupName(),
+                null,
                 scalingContext.getScalingType());
         return stackScalingContext;
     }

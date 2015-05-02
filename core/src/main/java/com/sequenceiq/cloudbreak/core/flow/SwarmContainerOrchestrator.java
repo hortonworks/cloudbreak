@@ -110,7 +110,11 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
                                     .add(postgresDockerImageName)
                                     .build()
                     ), POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-            String[] cmd = {"--debug", "bootstrap", "--wait", MUNCHAUSEN_WAIT, "--consulServers", consulServers, dockerAddresses};
+            String[] cmd = {
+                    "--debug", "bootstrap",
+                    "--wait", MUNCHAUSEN_WAIT,
+                    "--consulServers", consulServers,
+                    dockerAddresses};
             new MunchausenBootstrap(dockerApiClient, munchausenDockerImageName, cmd).call();
             DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(gatewayAddress))
                     .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
@@ -166,7 +170,11 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
         try {
             DockerClient dockerApiClient = DockerClientBuilder.getInstance(getDockerClientConfig(gatewayAddress)).build();
             Set<String> privateAddresses = getPrivateAddresses(nodes);
-            String[] cmd = {"--debug", "add", "--wait", MUNCHAUSEN_WAIT, "--join", getConsulJoinIp(gatewayAddress), prepareDockerAddressInventory(privateAddresses)};
+            String[] cmd = {
+                    "--debug", "add",
+                    "--wait", MUNCHAUSEN_WAIT,
+                    "--join", getConsulJoinIp(gatewayAddress),
+                    prepareDockerAddressInventory(privateAddresses)};
             new MunchausenBootstrap(dockerApiClient, munchausenDockerImageName, cmd).call();
             DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(gatewayAddress))
                     .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
