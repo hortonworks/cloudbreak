@@ -30,8 +30,6 @@ public class StackDownscaleHandler extends AbstractFlowHandler<StackScalingConte
         return stackScalingContext;
     }
 
-
-
     @Override
     protected Object handleErrorFlow(Throwable throwable, StackScalingContext handlerContext) throws Exception {
         LOGGER.info("Stack downscaling failure is handled. Context: {}", handlerContext);

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
-import static com.sequenceiq.cloudbreak.service.cluster.flow.DockerContainer.AMBARI_AGENT;
+import static com.sequenceiq.cloudbreak.orcestrator.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
 
 import java.util.Map;
