@@ -13,13 +13,13 @@ import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import reactor.event.Event;
 
 @Component
-public class StackUpscaleHandler extends AbstractFlowHandler<StackScalingContext> implements FlowHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackUpscaleHandler.class);
+public class ExtendMetadataHandler extends AbstractFlowHandler<StackScalingContext> implements FlowHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExtendMetadataHandler.class);
 
     @Override
     protected Object execute(Event<StackScalingContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
-        FlowContext context = getFlowFacade().upscaleStack(event.getData());
+        FlowContext context = getFlowFacade().extendMetadata(event.getData());
         LOGGER.info("Upscale of stack is finished. Context: {}", context);
         return context;
     }

@@ -17,7 +17,9 @@ public interface StackFacade {
 
     FlowContext handleTerminationFailure(FlowContext context) throws CloudbreakException;
 
-    FlowContext upscaleStack(FlowContext context) throws CloudbreakException;
+    FlowContext addInstances(FlowContext context) throws CloudbreakException;
+
+    FlowContext extendMetadata(FlowContext context) throws CloudbreakException;
 
     FlowContext downscaleStack(FlowContext context) throws CloudbreakException;
 
@@ -26,4 +28,5 @@ public interface StackFacade {
     FlowContext updateAllowedSubnets(FlowContext context) throws CloudbreakException;
 
     FlowContext handleUpdateAllowedSubnetsFailure(FlowContext context) throws CloudbreakException;
+
 }

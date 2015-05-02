@@ -297,11 +297,26 @@ public class SimpleFlowFacade implements FlowFacade {
         }
     }
 
-    public FlowContext upscaleStack(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Upscaling of stack. Context: {}", context);
+    public FlowContext addInstances(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Adding new instances to the stack. Context: {}", context);
         try {
-            context = stackFacade.upscaleStack(context);
-            LOGGER.debug("Upscaling of stack is DONE");
+            context = stackFacade.addInstances(context);
+            LOGGER.debug("Adding new instances to the stack is DONE");
+            return context;
+        } catch (CloudbreakException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the upscaling of stack: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext extendMetadata(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Extending metadata with new instances. Context: {}", context);
+        try {
+            context = stackFacade.extendMetadata(context);
+            LOGGER.debug("Extending metadata with new instances is DONE");
             return context;
         } catch (CloudbreakException e) {
             throw e;
@@ -345,6 +360,21 @@ public class SimpleFlowFacade implements FlowFacade {
         try {
             context = clusterFacade.bootstrapNewNodes(context);
             LOGGER.debug("Bootstrap of new nodes is finished.");
+            return context;
+        } catch (CloudbreakException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the upscaling of cluster nodes prepare: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext extendConsulMetadata(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Extending Consul metadata. Context: {}", context);
+        try {
+            context = clusterFacade.extendConsulMetadata(context);
+            LOGGER.debug("Extending Consul metadata is finished.");
             return context;
         } catch (CloudbreakException e) {
             throw e;
