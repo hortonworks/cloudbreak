@@ -25,14 +25,11 @@ import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
-import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 
 @Service
@@ -46,12 +43,6 @@ public class StackScalingService {
 
     @Autowired
     private RetryingStackUpdater stackUpdater;
-
-    @Autowired
-    private InstanceGroupRepository instanceGroupRepository;
-
-    @Autowired
-    private InstanceMetaDataRepository instanceMetaDataRepository;
 
     @Autowired
     private UserDataBuilder userDataBuilder;
@@ -69,13 +60,9 @@ public class StackScalingService {
     private AmbariHostsRemover ambariHostsRemover;
 
     @javax.annotation.Resource
-    private Map<CloudPlatform, MetadataSetup> metadataSetups;
-
-    @javax.annotation.Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
-    public Set<String> upscaleStack(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
-        // this should be a separate phase (UpscaleStack)
+    public Set<Resource> addInstances(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
         Set<Resource> resources;
         Stack stack = stackService.getById(stackId);
         String hostGroupUserData = userDataBuilder
@@ -84,48 +71,7 @@ public class StackScalingService {
                 .buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>(), InstanceGroupType.GATEWAY);
         resources = cloudPlatformConnectors.get(stack.cloudPlatform())
                 .addInstances(stack, gateWayUserData, hostGroupUserData, scalingAdjustment, instanceGroupName);
-        // end of UpscaleStack
-
-
-        //this should be a new phase from now on (like MetadataSetup for the stack creation flow)
-        stack = stackService.getById(stackId);
-        Set<CoreInstanceMetaData> coreInstanceMetaData = collectNewMetadata(stack, resources, instanceGroupName);
-        InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceGroupName);
-        Set<String> upscaleCandidateAddresses = new HashSet<>();
-        for (CoreInstanceMetaData coreInstanceMetadataEntry : coreInstanceMetaData) {
-            long timeInMillis = Calendar.getInstance().getTimeInMillis();
-            upscaleCandidateAddresses.add(coreInstanceMetadataEntry.getPrivateIp());
-            InstanceMetaData instanceMetaDataEntry = new InstanceMetaData();
-            instanceMetaDataEntry.setPrivateIp(coreInstanceMetadataEntry.getPrivateIp());
-            instanceMetaDataEntry.setInstanceGroup(coreInstanceMetadataEntry.getInstanceGroup());
-            instanceMetaDataEntry.setPublicIp(coreInstanceMetadataEntry.getPublicIp());
-            instanceMetaDataEntry.setInstanceId(coreInstanceMetadataEntry.getInstanceId());
-            instanceMetaDataEntry.setVolumeCount(coreInstanceMetadataEntry.getVolumeCount());
-            instanceMetaDataEntry.setLongName(coreInstanceMetadataEntry.getLongName());
-            instanceMetaDataEntry.setDockerSubnet(null);
-            instanceMetaDataEntry.setContainerCount(coreInstanceMetadataEntry.getContainerCount());
-            instanceMetaDataEntry.setStartDate(timeInMillis);
-            instanceMetaDataEntry.setInstanceGroup(instanceGroup);
-            instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
-            instanceMetaDataEntry.setInstanceStatus(InstanceStatus.UNREGISTERED);
-            instanceMetaDataRepository.save(instanceMetaDataEntry);
-        }
-        int nodeCount = instanceGroup.getNodeCount() + coreInstanceMetaData.size();
-        stackUpdater.updateNodeCount(stack.getId(), nodeCount, instanceGroupName);
-        eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(), "Billing changed due to upscaling of cluster infrastructure.");
-
-        // maybe this should be set later?
-        setStackAvailable(scalingAdjustment, stack);
-        // MetadataSetup phase should end here
-
-
-        // this phase is ConsulMetadataSetup, but this should only happen after
-        stack = stackService.getById(stackId);
-        Set<InstanceMetaData> newInstanceMetadata = stack.getInstanceGroupByInstanceGroupName(instanceGroupName).getInstanceMetaData();
-        instanceMetaDataRepository.save(updateWithNewNodesConsulData(newInstanceMetadata));
-        // ConsulMetadataSetup should end here
-
-        return upscaleCandidateAddresses;
+        return resources;
     }
 
     public void downscaleStack(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
@@ -135,28 +81,7 @@ public class StackScalingService {
         deleteHostsFromAmbari(stack, unregisteredHostNamesByInstanceId);
         instanceIds = cloudPlatformConnectors.get(stack.cloudPlatform()).removeInstances(stack, instanceIds, instanceGroupName);
         updateRemovedResourcesState(stack, instanceIds, stack.getInstanceGroupByInstanceGroupName(instanceGroupName));
-        setStackAvailable(scalingAdjustment, stack);
-    }
-
-    private Set<InstanceMetaData> updateWithNewNodesConsulData(Set<InstanceMetaData> instancesMetaData) {
-        for (InstanceMetaData instanceMetaData : instancesMetaData) {
-            if (!instanceMetaData.getLongName().endsWith(ConsulUtils.CONSUL_DOMAIN)
-                    && InstanceStatus.UNREGISTERED.equals(instanceMetaData.getInstanceStatus())) {
-                instanceMetaData.setConsulServer(false);
-                instanceMetaData.setLongName(instanceMetaData.getInstanceId() + ConsulUtils.CONSUL_DOMAIN);
-            }
-        }
-        return instancesMetaData;
-    }
-
-    private Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resources, String instanceGroup) {
-        try {
-            return metadataSetups.get(stack.cloudPlatform()).collectNewMetadata(stack, resources, instanceGroup);
-        } catch (Exception e) {
-            LOGGER.error("Unhandled exception occurred while updating stack metadata.", e);
-            throw e;
-        }
-
+        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "Downscaling of cluster infrastructure was successful.");
     }
 
     private Map<String, String> getUnregisteredInstanceIds(String instanceGroupName, Integer scalingAdjustment, Stack stack) {
@@ -219,10 +144,5 @@ public class StackScalingService {
                 new ConsulContext(stack, clients, Collections.singletonList(nodeName)),
                 POLLING_INTERVAL,
                 MAX_POLLING_ATTEMPTS);
-    }
-
-    private void setStackAvailable(Integer scalingAdjustment, Stack stack) {
-        String statusCause = String.format("%sscaling of cluster infrastructure was successful.", scalingAdjustment < 0 ? "Down" : "Up");
-        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, statusCause);
     }
 }

@@ -20,10 +20,9 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 
 public class ConsulMetadataSetupTest {
@@ -38,22 +37,16 @@ public class ConsulMetadataSetupTest {
     private ConsulMetadataSetup underTest;
 
     @Mock
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Mock
     private InstanceMetaDataRepository instanceMetaDataRepository;
-
-    @Mock
-    private RetryingStackUpdater stackUpdater;
 
     @Mock
     private PollingService<ConsulContext> consulPollingService;
 
     @Mock
     private ConsulHostCheckerTask consulHostCheckerTask;
-
-    @Mock
-    private ConsulServiceCheckerTask consulServiceCheckerTask;
 
     private Stack stack;
 
@@ -71,10 +64,10 @@ public class ConsulMetadataSetupTest {
                 .setInstanceMetaData(createInstanceMetaDataWithAmbariAddress(DUMMY_AMBARI_ADDRESS));
         stack.getInstanceGroupByInstanceGroupName(INSTANCE_GROUP_2)
                 .setInstanceMetaData(createInstanceMetaDataWithAmbariAddress(DUMMY_AMBARI_ADDRESS));
-        given(stackRepository.findById(1L)).willReturn(stack);
+        given(stackService.getById(1L)).willReturn(stack);
         given(consulPollingService.pollWithTimeout(any(ConsulServiceCheckerTask.class), any(ConsulContext.class),
                 anyInt(), anyInt())).willReturn(PollingResult.TIMEOUT).willReturn(PollingResult.EXIT);
-        doNothing().when(underTest).updateWithConsulData(anySet());
+        doNothing().when(underTest).updateWithConsulData(anySet(), anySet());
         // WHEN
         underTest.setupConsulMetadata(1L);
     }

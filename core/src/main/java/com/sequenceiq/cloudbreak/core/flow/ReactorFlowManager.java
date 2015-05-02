@@ -117,7 +117,7 @@ public class ReactorFlowManager implements FlowManager {
     public void triggerStackUpscale(Object object) {
         UpdateInstancesRequest updateRequest = (UpdateInstancesRequest) object;
         StackScalingContext context = new StackScalingContext(updateRequest);
-        reactor.notify(FlowPhases.STACK_UPSCALE.name(), eventFactory.createEvent(context, FlowPhases.STACK_UPSCALE.name()));
+        reactor.notify(FlowPhases.ADD_INSTANCES.name(), eventFactory.createEvent(context, FlowPhases.ADD_INSTANCES.name()));
     }
 
     @Override
