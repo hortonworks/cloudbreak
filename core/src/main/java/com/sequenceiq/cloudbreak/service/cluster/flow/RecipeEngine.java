@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static com.sequenceiq.cloudbreak.service.cluster.flow.DockerContainer.AMBARI_AGENT;
+import static com.sequenceiq.cloudbreak.orcestrator.DockerContainer.AMBARI_AGENT;
 
 import java.util.HashMap;
 import java.util.Map;

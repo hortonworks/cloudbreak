@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import static com.sequenceiq.cloudbreak.orcestrator.ContainerOrchestratorTool.SWARM;
+
 import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -27,10 +29,11 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptorMapFactory;
-import com.sequenceiq.cloudbreak.core.flow.ContainerOrchestrator;
-import com.sequenceiq.cloudbreak.core.flow.ContainerOrchestratorTool;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.orcestrator.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.orcestrator.ContainerOrchestratorTool;
+import com.sequenceiq.cloudbreak.orcestrator.swarm.SwarmContainerOrchestrator;
 import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
@@ -77,9 +80,7 @@ public class AppConfig {
     @Bean
     public Map<ContainerOrchestratorTool, ContainerOrchestrator> containerOrchestrators() {
         Map<ContainerOrchestratorTool, ContainerOrchestrator> map = new HashMap<>();
-        for (ContainerOrchestrator containerOrchestrator : containerOrchestratorList) {
-            map.put(containerOrchestrator.type(), containerOrchestrator);
-        }
+        map.put(SWARM, new SwarmContainerOrchestrator());
         return map;
     }
 
