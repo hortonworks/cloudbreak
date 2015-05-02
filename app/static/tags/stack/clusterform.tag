@@ -91,9 +91,7 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for="selectBlueprint">Blueprint</label>
                         <div class="col-sm-9">
-                            <select class="form-control" id="selectBlueprint" ng-model="cluster.blueprintId"  required ng-change="selectedBlueprintChange()">
-                                <option ng-repeat="blueprint in $root.blueprints | orderBy:'name'" data-value="{{blueprint.id}}" value="{{blueprint.id}}" id="{{blueprint.id}}">{{blueprint.name}}
-                                </option>
+                            <select class="form-control" id="selectBlueprint" ng-model="cluster.blueprintId" required ng-change="selectedBlueprintChange()" ng-options="blueprint.id as blueprint.name for blueprint in $root.blueprints | orderBy:'name'">
                             </select>
                         </div>
                     </div>
