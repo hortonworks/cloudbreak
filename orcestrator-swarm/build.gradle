@@ -13,6 +13,5 @@ jar {
 
 dependencies {
     compile project(':orcestrator-api')
-    compile 'com.sequenceiq:consul-api:1.08'
     compile group: 'com.github.docker-java', name: 'docker-java', version: '1.0.0'
 }
