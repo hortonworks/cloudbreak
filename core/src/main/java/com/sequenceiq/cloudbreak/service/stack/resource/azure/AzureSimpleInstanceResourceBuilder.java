@@ -45,7 +45,6 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
     protected static final String SSHPUBLICKEYPATH = "sshPublicKeyPath";
     protected static final String DISKS = "disks";
     protected static final String DATA = "data";
-    protected static final String DEFAULT_USER_NAME = "ubuntu";
     protected static final String PRODUCTION = "production";
 
     public CloudPlatform cloudPlatform() {

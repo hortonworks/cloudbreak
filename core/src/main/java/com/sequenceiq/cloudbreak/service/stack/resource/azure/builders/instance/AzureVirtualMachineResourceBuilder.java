@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.azure.builders.instance;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_GCP_AND_AZURE_USER_NAME;
 import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateway;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.PORTS;
@@ -110,9 +111,9 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             props.put(IMAGENAME, azureStackUtil.getOsImageName(stack.getCredential(), AzureLocation.valueOf(stack.getRegion()), stack.getImage()));
             props.put(IMAGESTOREURI, buildImageStoreUri(provisionContextObject.getCommonName(), buildResources.get(0).getResourceName()));
             props.put(HOSTNAME, buildResources.get(0).getResourceName());
-            props.put(USERNAME, DEFAULT_USER_NAME);
+            props.put(USERNAME, CB_GCP_AND_AZURE_USER_NAME);
             props.put(SSHPUBLICKEYFINGERPRINT, azureStackUtil.createX509Certificate(azureCredential).getSha1Fingerprint().toUpperCase());
-            props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", DEFAULT_USER_NAME));
+            props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", CB_GCP_AND_AZURE_USER_NAME));
             props.put(AFFINITYGROUP, provisionContextObject.getCommonName());
             if (azureTemplate.getVolumeCount() > 0) {
                 props.put(DISKS, generateDisksProperty(azureTemplate));
