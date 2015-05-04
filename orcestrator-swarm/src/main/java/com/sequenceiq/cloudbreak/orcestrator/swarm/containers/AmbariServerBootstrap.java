@@ -19,14 +19,10 @@ public class AmbariServerBootstrap {
 
     private static final int PORT = 8080;
     private final DockerClient docker;
-    private final String privateIp;
-    private final String databaseIp;
     private final String imageName;
 
-    public AmbariServerBootstrap(DockerClient docker, String privateIp, String databaseIp, String imageName) {
+    public AmbariServerBootstrap(DockerClient docker, String imageName) {
         this.docker = docker;
-        this.privateIp = privateIp;
-        this.databaseIp = databaseIp;
         this.imageName = imageName;
     }
 
@@ -43,7 +39,7 @@ public class AmbariServerBootstrap {
                 .withHostConfig(hostConfig)
                 .withExposedPorts(new ExposedPort(PORT))
                 .withEnv("constraint:type==gateway",
-                        String.format("POSTGRES_DB=%s", databaseIp),
+                        String.format("POSTGRES_DB=localhost"),
                         String.format("SERVICE_NAME=%s", "ambari-8080"))
                 .withName(AMBARI_SERVER.getName())
                 .withCmd("/start-server"));

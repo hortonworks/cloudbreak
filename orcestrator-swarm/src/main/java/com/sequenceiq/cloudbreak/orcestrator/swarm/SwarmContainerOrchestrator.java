@@ -99,10 +99,9 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
     @Override
     public void startAmbariServer(ContainerOrchestratorCluster cluster, String dbImageName, String serverImageName) throws CloudbreakOrchestratorException {
         try {
-            Node gateway = getGatewayNode(cluster.getApiAddress(), cluster.getNodes());
             DockerClient swarmManagerClient = ((SwarmCluster) cluster).getDockerClient();
-            String databaseIp = new AmbariServerDatabaseBootstrap(swarmManagerClient, dbImageName).call();
-            new AmbariServerBootstrap(swarmManagerClient, gateway.getPrivateIp(), databaseIp, serverImageName).call();
+            new AmbariServerDatabaseBootstrap(swarmManagerClient, dbImageName).call();
+            new AmbariServerBootstrap(swarmManagerClient, serverImageName).call();
         } catch (Exception e) {
             throw new CloudbreakOrchestratorException(e);
         }
