@@ -177,6 +177,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             $rootScope.activeCluster.cloudPlatform =  $rootScope.activeClusterCredential.cloudPlatform;
             $rootScope.activeCluster.metadata = [];
             $rootScope.reinstallClusterObject = {
+              validateBlueprint: true,
               blueprintId: $rootScope.activeClusterBlueprint.id,
               hostgroups: $rootScope.activeCluster.cluster.hostGroups,
               fullBp: $rootScope.activeClusterBlueprint,
@@ -259,7 +260,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.reinstallCluster = function (activeCluster) {
-            var newInstall = {"blueprintId": $rootScope.reinstallClusterObject.blueprintId, "hostgroups": $rootScope.reinstallClusterObject.hostgroups};
+            var newInstall = {
+                "blueprintId": $rootScope.reinstallClusterObject.blueprintId,
+                "hostgroups": $rootScope.reinstallClusterObject.hostgroups,
+                "validateBlueprint": $rootScope.reinstallClusterObject.validateBlueprint
+            };
             Cluster.update({id: activeCluster.id}, newInstall, function(success){
                   $rootScope.activeCluster.blueprintId = $rootScope.reinstallClusterObject.blueprintId;
                   $rootScope.activeCluster.cluster.status = 'REQUESTED';
@@ -311,6 +316,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 userName: "admin",
                 onFailureAction: "ROLLBACK",
                 bestEffort: "BEST_EFFORT",
+                validateBlueprint: true,
                 parameters: {},
                 failurePolicy: {
                   adjustmentType: "BEST_EFFORT",
