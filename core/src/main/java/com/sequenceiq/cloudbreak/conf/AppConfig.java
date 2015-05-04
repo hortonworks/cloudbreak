@@ -69,9 +69,6 @@ public class AppConfig {
     @Autowired
     private List<CredentialHandler<? extends Credential>> credentialHandlers;
 
-    @Autowired
-    private List<ContainerOrchestrator> containerOrchestratorList;
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
