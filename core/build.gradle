@@ -53,9 +53,9 @@ dependencies {
     compile group: 'com.wordnik',                   name: 'swagger-core',                   version: '1.5.2-M1'
     compile group: 'com.mangofactory',              name: 'swagger-springmvc',              version: '1.0.2'
     compile group: 'com.google.http-client',        name: 'google-http-client-jackson2',    version: '1.17.0-rc'
-    compile (group: 'com.google.oauth-client',      name: 'google-oauth-client-jetty',      version: '1.17.0-rc') { exclude module: 'servlet-api' }
-    compile ("com.sequenceiq:azure-rest-client:${azureRestClientVersion}") { exclude group: 'log4j' }
-    compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: '1.9.23') { exclude group: 'commons-logging' }
+    compile (group: 'com.google.oauth-client',      name: 'google-oauth-client-jetty',      version: '1.17.0-rc')   { exclude module: 'servlet-api' }
+    compile ("com.sequenceiq:azure-rest-client:${azureRestClientVersion}")                                          { exclude group: 'log4j' }
+    compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: '1.9.23')      { exclude group: 'commons-logging' }
 
     compile project(':orcestrator-swarm')
     compile project(':orcestrator-api')
