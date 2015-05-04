@@ -27,6 +27,7 @@ public class AmbariServerDatabaseBootstrap {
     public String call() throws Exception {
         HostConfig hostConfig = new HostConfig();
         hostConfig.setPrivileged(true);
+        hostConfig.setNetworkMode("host");
         hostConfig.setRestartPolicy(RestartPolicy.alwaysRestart());
 
         String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
@@ -37,6 +38,7 @@ public class AmbariServerDatabaseBootstrap {
                 .withName(AMBARI_DB.getName()));
         DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
                 .withRestartPolicy(RestartPolicy.alwaysRestart())
+                .withNetworkMode("host")
                 .withBinds(new Bind("/data/ambari-server/pgsql/data", new Volume("/var/lib/postgresql/data"))));
 
         LOGGER.info("Database container for Ambari server started successfully");
