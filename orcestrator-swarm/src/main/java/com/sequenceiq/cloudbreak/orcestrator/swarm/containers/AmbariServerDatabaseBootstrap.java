@@ -36,6 +36,7 @@ public class AmbariServerDatabaseBootstrap {
                 .withHostConfig(hostConfig)
                 .withName(AMBARI_DB.getName()));
         DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
+                .withRestartPolicy(RestartPolicy.alwaysRestart())
                 .withBinds(new Bind("/data/ambari-server/pgsql/data", new Volume("/var/lib/postgresql/data"))));
 
         LOGGER.info("Database container for Ambari server started successfully");
