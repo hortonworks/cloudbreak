@@ -21,7 +21,8 @@ public class ClusterDecorator implements Decorator<Cluster> {
     private enum DecorationData {
         STACK_ID,
         BLUEPRINT_ID,
-        HOSTGROUP_JSONS
+        HOSTGROUP_JSONS,
+        VALIDATE_BLUEPRINT
     }
 
     @Autowired
@@ -47,12 +48,13 @@ public class ClusterDecorator implements Decorator<Cluster> {
         Long stackId = (Long) data[DecorationData.STACK_ID.ordinal()];
         Long blueprintId = (Long) data[DecorationData.BLUEPRINT_ID.ordinal()];
         Set<HostGroupJson> hostGroupsJsons = (Set<HostGroupJson>) data[DecorationData.HOSTGROUP_JSONS.ordinal()];
-        Blueprint blueprint = blueprintRepository.findOne(blueprintId);
         subject.setBlueprint(blueprintRepository.findOne(blueprintId));
-
         subject.setHostGroups(convertHostGroupsFromJson(stackId, subject, hostGroupsJsons));
-        blueprintValidator.validateBlueprintForStack(blueprint, subject.getHostGroups(), stackRepository.findOne(stackId).getInstanceGroups());
-
+        boolean validate = (boolean) data[DecorationData.VALIDATE_BLUEPRINT.ordinal()];
+        if (validate) {
+            Blueprint blueprint = blueprintRepository.findOne(blueprintId);
+            blueprintValidator.validateBlueprintForStack(blueprint, subject.getHostGroups(), stackRepository.findOne(stackId).getInstanceGroups());
+        }
         return subject;
     }
 

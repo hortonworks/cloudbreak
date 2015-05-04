@@ -29,5 +29,5 @@ public interface ClusterService {
 
     Cluster updateCluster(Cluster cluster);
 
-    Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostgroups);
+    Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint);
 }

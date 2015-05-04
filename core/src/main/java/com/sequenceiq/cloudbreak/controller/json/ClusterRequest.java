@@ -35,6 +35,7 @@ public class ClusterRequest {
     private String kerberosMasterKey;
     private String kerberosAdmin;
     private String kerberosPassword;
+    private Boolean validateBlueprint = true;
 
     public String getDescription() {
         return description;
@@ -106,5 +107,13 @@ public class ClusterRequest {
 
     public void setKerberosPassword(String kerberosPassword) {
         this.kerberosPassword = kerberosPassword;
+    }
+
+    public boolean getValidateBlueprint() {
+        return validateBlueprint == null ? false : validateBlueprint;
+    }
+
+    public void setValidateBlueprint(Boolean validateBlueprint) {
+        this.validateBlueprint = validateBlueprint;
     }
 }
