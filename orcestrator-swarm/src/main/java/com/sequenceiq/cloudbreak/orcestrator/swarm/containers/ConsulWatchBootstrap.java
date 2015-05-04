@@ -50,6 +50,7 @@ public class ConsulWatchBootstrap implements Callable<Boolean> {
                     .withCmd("consul://127.0.0.1:8500"));
             DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
                     .withPortBindings(new PortBinding(new Ports.Binding("0.0.0.0", PORT), new ExposedPort(PORT)))
+                    .withNetworkMode("host")
                     .withRestartPolicy(RestartPolicy.alwaysRestart())
                     .withBinds(new Bind("/var/run/docker.sock", new Volume("/var/run/docker.sock"))));
             LOGGER.info("Consul watch container started successfully");
