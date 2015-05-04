@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date{ISO8601} [%thread] %method:%line %highlight(%-5level) %logger{5} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.sequenceiq" level="INFO" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="org.hibernate.type" level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="org.hibernate" level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="org.hibernate.SQL" level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="sql-log" level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder">
+        <level value="INFO"/>
+    </logger>
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+</configuration>
