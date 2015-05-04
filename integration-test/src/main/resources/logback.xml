@@ -1,7 +1,7 @@
 <configuration>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} [suite:%X{suite:-nosuite}] - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{suite:-nosuite}] - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -18,7 +18,7 @@
                 <append>true</append>
                 <layout class="ch.qos.logback.classic.PatternLayout">
                     <encoder>
-                        <pattern>%date{ISO8601} [%thread] %-5level [suite:%X{suite:-nosuite}] - %msg%n</pattern>
+                        <pattern>%date{ISO8601} [%thread] %-5level %logger{36} [%X{suite:-nosuite}] - %msg%n</pattern>
                     </encoder>
                 </layout>
             </appender>
@@ -29,4 +29,17 @@
         <appender-ref ref="STDOUT" />
         <appender-ref ref="SUITE_BASED" />
     </root>
+
+    <logger name="groovyx.net.http" level="DEBUG" additivity="false">
+        <appender-ref ref="SUITE_BASED" />
+    </logger>
+    <logger name="org.apache.http" level="DEBUG" additivity="false">
+        <appender-ref ref="SUITE_BASED" />
+    </logger>
+    <logger name="org.apache.http.headers" level="DEBUG" additivity="false">
+        <appender-ref ref="SUITE_BASED" />
+    </logger>
+    <logger name="org.apache.http.wire" level="DEBUG" additivity="false">
+        <appender-ref ref="SUITE_BASED" />
+    </logger>
 </configuration>
