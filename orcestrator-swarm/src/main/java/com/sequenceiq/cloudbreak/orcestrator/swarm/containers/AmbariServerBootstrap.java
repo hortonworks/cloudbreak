@@ -43,7 +43,6 @@ public class AmbariServerBootstrap {
                 .withHostConfig(hostConfig)
                 .withExposedPorts(new ExposedPort(PORT))
                 .withEnv("constraint:type==gateway",
-//                        String.format("BRIDGE_IP=%s", privateIp),
                         String.format("POSTGRES_DB=%s", databaseIp),
                         String.format("SERVICE_NAME=%s", "ambari-8080"))
                 .withName(AMBARI_SERVER.getName())

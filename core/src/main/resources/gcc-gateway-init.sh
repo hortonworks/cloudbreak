@@ -16,12 +16,8 @@ fix_docker_port() {
   rm -rf /etc/docker/key.json
   sed -i "/other_args=/d" /etc/sysconfig/docker
   sh -c ' echo DOCKER_TLS_VERIFY=0 >> /etc/sysconfig/docker'
-  sh -c ' echo other_args=\"--label type=gateway --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2376\" >> /etc/sysconfig/docker'
+  sh -c ' echo other_args=\"--storage-opt dm.basesize=30G --label type=gateway --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2376\" >> /etc/sysconfig/docker'
   service docker restart
-  docker pull sequenceiq/docker-consul-watch-plugn:1.7.0-consul
-  docker pull sequenceiq/munchausen:0.2
-  docker pull swarm:0.2.0-rc2
-  docker pull sequenceiq/registrator:v5.1
 }
 
 format_disks() {

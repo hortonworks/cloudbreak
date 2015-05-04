@@ -36,6 +36,7 @@ public class ConsulWatchBootstrap implements Callable<Boolean> {
         LOGGER.info("Creating Consul watch container.");
         HostConfig hostConfig = new HostConfig();
         hostConfig.setPrivileged(true);
+        hostConfig.setNetworkMode("host");
         hostConfig.setRestartPolicy(RestartPolicy.alwaysRestart());
 
         Ports ports = new Ports();
