@@ -18,6 +18,7 @@ public class UpdateClusterJson implements JsonEntity {
     private StatusRequest status;
     @ApiModelProperty(StackModelDescription.BLUEPRINT_ID)
     private Long blueprintId;
+    private Boolean validateBlueprint = true;
     private Set<HostGroupJson> hostgroups;
 
     public UpdateClusterJson() {
@@ -53,5 +54,13 @@ public class UpdateClusterJson implements JsonEntity {
 
     public void setHostgroups(Set<HostGroupJson> hostgroups) {
         this.hostgroups = hostgroups;
+    }
+
+    public boolean getValidateBlueprint() {
+        return validateBlueprint == null ? false : validateBlueprint;
+    }
+
+    public void setValidateBlueprint(Boolean validateBlueprint) {
+        this.validateBlueprint = validateBlueprint;
     }
 }

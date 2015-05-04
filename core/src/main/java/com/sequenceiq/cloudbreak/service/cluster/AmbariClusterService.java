@@ -243,7 +243,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups) {
+    public Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint) {
         if (blueprintId == null || hostGroups == null) {
             throw new BadRequestException("Blueprint id and hostGroup assignments can not be null.");
         }
@@ -253,7 +253,9 @@ public class AmbariClusterService implements ClusterService {
             throw new BadRequestException(String.format("Blueprint not exist with '%s' id.", blueprintId));
         }
         Cluster cluster = stack.getCluster();
-        blueprintValidator.validateBlueprintForStack(blueprint, hostGroups, stackRepository.findOne(stackId).getInstanceGroups());
+        if (validateBlueprint) {
+            blueprintValidator.validateBlueprintForStack(blueprint, hostGroups, stackRepository.findOne(stackId).getInstanceGroups());
+        }
         cluster.setBlueprint(blueprint);
         cluster.getHostGroups().removeAll(cluster.getHostGroups());
         cluster.getHostGroups().addAll(hostGroups);

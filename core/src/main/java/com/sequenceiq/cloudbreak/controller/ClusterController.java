@@ -72,10 +72,10 @@ public class ClusterController {
     @ApiOperation(value = ClusterOpDescription.POST_FOR_STACK, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES)
     @RequestMapping(value = "/stacks/{stackId}/cluster", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<String> create(@ModelAttribute("user") CbUser user, @PathVariable Long stackId, @RequestBody @Valid ClusterRequest clusterRequest) {
+    public ResponseEntity<String> create(@ModelAttribute("user") CbUser user, @PathVariable Long stackId, @RequestBody @Valid ClusterRequest request) {
         MDCBuilder.buildMdcContext(user);
-        Cluster cluster = conversionService.convert(clusterRequest, Cluster.class);
-        cluster = clusterDecorator.decorate(cluster, stackId, clusterRequest.getBlueprintId(), clusterRequest.getHostGroups());
+        Cluster cluster = conversionService.convert(request, Cluster.class);
+        cluster = clusterDecorator.decorate(cluster, stackId, request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint());
         clusterService.create(user, stackId, cluster);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -136,7 +136,7 @@ public class ClusterController {
                 hostGroup = hostGroupDecorator.decorate(hostGroup, stackId, json.getInstanceGroupName(), json.getRecipeIds(), false);
                 hostGroups.add(hostGroupService.save(hostGroup));
             }
-            clusterService.recreate(stackId, updateJson.getBlueprintId(), hostGroups);
+            clusterService.recreate(stackId, updateJson.getBlueprintId(), hostGroups, updateJson.getValidateBlueprint());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
