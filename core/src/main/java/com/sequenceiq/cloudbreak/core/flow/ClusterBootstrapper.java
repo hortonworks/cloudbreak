@@ -42,7 +42,7 @@ public class ClusterBootstrapper {
     @Value("${cb.docker.container.registrator:sequenceiq/registrator:v5.1}")
     private String registratorDockerImageName;
 
-    @Value("${cb.docker.container.docker.consul.watch.plugn:sequenceiq/docker-consul-watch-plugn:1.7.0-consul}")
+    @Value("${cb.docker.container.docker.consul.watch.plugn:sequenceiq/docker-consul-watch-plugn:2.0.0-consul}")
     private String consulWatchPlugnDockerImageName;
 
     @Value("${cb.docker.container.ambari.db:postgres:9.4.1}")
