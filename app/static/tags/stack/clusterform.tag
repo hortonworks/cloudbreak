@@ -57,6 +57,14 @@
                             </select>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="selectClusterNetwork">Network</label>
+                        <div class="col-sm-9">
+                            <select class="form-control" id="selectClusterNetwork" ng-model="cluster.networkId" required>
+                                <option ng-repeat="network in $root.networks | filter:{cloudPlatform: activeCredential.cloudPlatform} | orderBy:'name'" value="{{network.id}}">{{network.name}}</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="form-group" ng-show="showAdvancedOptionForm">
                       <label class="col-sm-3 control-label" for="consulServerCount">Consul server count</label>
                       <div class="col-sm-3">
@@ -147,51 +155,6 @@
                               </div>
                             </div>
                           </div>
-                      </div>
-                    </div>
-                    <div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AWS'">
-                      <label class="col-sm-3 control-label" for="iparams">Parameters</label>
-                      <div class="col-sm-8 col-sm-offset-1">
-                        <div id="paramsArrays">
-                          <div class="row" ng-show="activeCredential.cloudPlatform == 'AWS'">
-                            <div>
-                              <div class="panel panel-default" style="border-top-left-radius: 0.5em; border-top-right-radius: 0.5em;">
-                                <div class="panel-heading" style="border-top-left-radius: 0.5em; border-top-right-radius: 0.5em;">
-                                  <h3 class="panel-title">Custom Vpc Configuration</h3>
-                                </div>
-                                <div class="panel-body">
-                                  <div class="form-group">
-                                      <label class="col-sm-3 control-label" for="vpcId">Vpc Id</label>
-                                      <div class="col-sm-9">
-                                        <input type="text" name="vpcId" class="form-control" id="vpcId" ng-model="cluster.parameters.vpcId" placeholder="vpc-abcd1234" ng-pattern="/vpc-[a-z0-9]{8}/" ng-minlength="12" ng-maxlength="12">
-                                        <div class="help-block" ng-show="clusterCreationForm.vpcId.$dirty && clusterCreationForm.vpcId.$invalid">
-                                          <i class="fa fa-warning"></i>Invalid Vpc id (It has to match for this pattern vpc-abcd1234)
-                                        </div>
-                                      </div>
-                                  </div>
-                                  <div class="form-group">
-                                      <label class="col-sm-3 control-label" for="internetGatewayId">Internet Gateway Id</label>
-                                      <div class="col-sm-9">
-                                        <input type="text" name="internetGatewayId" class="form-control" id="internetGatewayId" ng-model="cluster.parameters.internetGatewayId" placeholder="igw-abcd1234" ng-pattern="/igw-[a-z0-9]{8}/" ng-minlength="12" ng-maxlength="12">
-                                        <div class="help-block" ng-show="clusterCreationForm.internetGatewayId.$dirty && clusterCreationForm.internetGatewayId.$invalid">
-                                          <i class="fa fa-warning"></i>Invalid Internet grateway id (It has to match for this pattern igw-abcd1234)
-                                        </div>
-                                      </div>
-                                  </div>
-                                  <div class="form-group">
-                                      <label class="col-sm-3 control-label" for="subnetCIDR">subnetCIDR</label>
-                                      <div class="col-sm-9">
-                                        <input type="text" name="subnetCIDR" class="form-control" id="subnetCIDR" ng-model="cluster.parameters.subnetCIDR" placeholder="10.0.128.0/19" ng-pattern="/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/[0-9]{1,2}$/">
-                                        <div class="help-block" ng-show="clusterCreationForm.subnetCIDR.$dirty && clusterCreationForm.subnetCIDR.$invalid">
-                                          <i class="fa fa-warning"></i>Invalid Subnet CIDR (It has to match for this pattern 10.0.128.0/19)
-                                        </div>
-                                      </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
                       </div>
                     </div>
 

@@ -25,23 +25,6 @@
     </div>
 
     <div class="form-group">
-      <label class="col-sm-3 control-label" for="openstack_tpublicNetId">Public Net Id</label>
-
-      <div class="col-sm-9">
-        <input type="text" name="openstack_tpublicNetId" class="form-control" ng-model="openstackTemp.parameters.publicNetId" id="openstack_tpublicNetId"
-          placeholder="public inet id" required>
-
-          <div class="help-block"
-            ng-show="openstackTemplateForm.openstack_tpublicNetId.$dirty && openstackTemplateForm.openstack_tpublicNetId.$invalid"><i class="fa fa-warning"></i>
-            {{error_msg.openstack_template_inet_invalid}}
-          </div>
-          <!-- .col-sm-9 -->
-        </div>
-        <!-- .col-sm-9 -->
-    </div>
-
-
-    <div class="form-group">
         <label class="col-sm-3 control-label" for="openstack_tinstanceType">Instance type</label>
 
         <div class="col-sm-9">

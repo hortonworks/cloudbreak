@@ -146,6 +146,9 @@
 <section class="management-panels" ng-show="showManagement" >
     <div class="container-fluid">
         <div class="row">
+            <div ng-include onload="addPanelJQueryEventListeners('network')" src="'tags/networkpanel.tag'"></div>
+        </div>
+        <div class="row">
             <div ng-include onload="addPanelJQueryEventListeners('templates')" src="'tags/templatepanel.tag'"></div>
         </div>
         <div class="row">
