@@ -55,6 +55,19 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
             });
         }
 
+        $scope.jsonBp = true;
+        $scope.serviceBp = false;
+
+        $scope.changeViewJsonBp = function () {
+            $scope.jsonBp = true;
+            $scope.serviceBp = false;
+        }
+
+        $scope.changeViewServiceBp = function () {
+            $scope.jsonBp = false;
+            $scope.serviceBp = true;
+        }
+
         function initializeBlueprint() {
             $scope.blueprint = {}
         }
