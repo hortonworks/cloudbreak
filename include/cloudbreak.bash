@@ -79,7 +79,7 @@ cloudbreak-conf-defaults() {
     env-import PRIVATE_IP
     env-import PUBLIC_IP
 
-    env-import CB_BLUEPRINT_DEFAULTS "multi-node-hdfs-yarn,lambda-architecture,hdp-multinode-default"
+    env-import CB_BLUEPRINT_DEFAULTS "multi-node-hdfs-yarn,hdp-multinode-default"
 }
 
 gen-password() {
