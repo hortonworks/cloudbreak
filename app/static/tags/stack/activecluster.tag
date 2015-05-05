@@ -280,39 +280,45 @@
                 <div class="modal-body">
                     <p>Reinstall cluster <strong>{{activeCluster.name}}</strong> with the selected blueprint?</p>
                     <div class="form">
-                      <div class="row">
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label" for="selectBlueprintreinstall">Blueprint</label>
-                            <div class="col-sm-10">
-                                <select class="form-control" id="selectBlueprintreinstall" ng-model="reinstallClusterObject.blueprintId" required ng-change="selectBlueprintreinstallChange()" >
-                                    <option ng-repeat="blueprint in $root.blueprints | orderBy:'name'" data-value="{{blueprint.id}}" value="{{blueprint.id}}" id="{{blueprint.id}}" ng-show="blueprint.ambariBlueprint.host_groups.length === $root.activeClusterBlueprint.ambariBlueprint.host_groups.length">{{blueprint.name}}
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div style="padding: 1em;padding-bottom: 0px;">
-
-                          <div ng-repeat="newhostgroup in $root.reinstallClusterObject.hostgroups | orderBy:'instanceGroupName'" id="newhostgroups" ng-show="$root.reinstallClusterObject.hostgroups">
-                            <div class="panel panel-default" style="border-top-left-radius: 0.5em; border-top-right-radius: 0.5em;">
-                              <div class="panel-heading" style="border-top-left-radius: 0.5em; border-top-right-radius: 0.5em;">
-                                <h3 class="panel-title">Please select a hostgroup for <kbd>{{newhostgroup.instanceGroupName}}</kbd> instancegroup</h3>
-                              </div>
-                              <div class="panel-body">
-                                <div class="form-group" name="templateNodeform{{$index}}" >
-                                  <label class="col-sm-3 control-label" for="templateNodeCount{{$index}}">Host group</label>
-                                  <div class="col-sm-9">
-                                    <select class="form-control" id="newhostgroupsdiv" ng-model="newhostgroup.name" required ng-options="hgvalue.name as hgvalue.name for hgvalue in $root.reinstallClusterObject.fullBp.ambariBlueprint.host_groups">
-                                    </select>
-                                  </div>
+                          <div class="row">
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label" for="selectBlueprintreinstall">Blueprint</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" id="selectBlueprintreinstall" ng-model="reinstallClusterObject.blueprintId" required ng-change="selectBlueprintreinstallChange()" >
+                                            <option ng-repeat="blueprint in $root.blueprints | orderBy:'name'" data-value="{{blueprint.id}}" value="{{blueprint.id}}" id="{{blueprint.id}}" ng-show="blueprint.ambariBlueprint.host_groups.length === $root.activeClusterBlueprint.ambariBlueprint.host_groups.length">{{blueprint.name}}
+                                            </option>
+                                        </select>
+                                    </div>
                                 </div>
-                              </div>
+                          </div>
+                          <div class="row" style="margin-top: 8px">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="validateBlueprintreinstall">Validate blueprint</label>
+                                <div class="col-sm-6">
+                                    <input type="checkbox" name="validateBlueprintreinstall" id="validateBlueprintreinstall" ng-model="reinstallClusterObject.validateBlueprint">
+                                </div>
                             </div>
                           </div>
-                        </div>
-
-                      </div>
+                          <div class="row">
+                            <div style="padding: 1em;padding-bottom: 0px;">
+                                <div ng-repeat="newhostgroup in $root.reinstallClusterObject.hostgroups | orderBy:'instanceGroupName'" id="newhostgroups" ng-show="$root.reinstallClusterObject.hostgroups">
+                                    <div class="panel panel-default" style="border-top-left-radius: 0.5em; border-top-right-radius: 0.5em;">
+                                        <div class="panel-heading" style="border-top-left-radius: 0.5em; border-top-right-radius: 0.5em;">
+                                            <h3 class="panel-title">Please select a hostgroup for <kbd>{{newhostgroup.instanceGroupName}}</kbd> instancegroup</h3>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="form-group" name="templateNodeform{{$index}}" >
+                                                <label class="col-sm-3 control-label" for="templateNodeCount{{$index}}">Host group</label>
+                                                <div class="col-sm-9">
+                                                    <select class="form-control" id="newhostgroupsdiv" ng-model="newhostgroup.name" required ng-options="hgvalue.name as hgvalue.name for hgvalue in $root.reinstallClusterObject.fullBp.ambariBlueprint.host_groups">
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                          </div>
                     </div>
                 </div>
                 <div class="modal-footer">

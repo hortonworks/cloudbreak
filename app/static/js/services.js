@@ -166,12 +166,15 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                   hostGroups: cluster.hostGroups,
                   blueprintId: cluster.blueprintId
                 }
-                StackValidation.save(stackValidation, function (result) {
-                  stackValidationSuccessHandler(result)
-                }, function (failure) {
-                  failureHandler(failure);
-                });
-
+                if (cluster.validateBlueprint === true) {
+                    StackValidation.save(stackValidation, function (result) {
+                      stackValidationSuccessHandler(result)
+                    }, function (failure) {
+                      failureHandler(failure);
+                    });
+                } else {
+                    stackValidationSuccessHandler(null)
+                }
                 function stackValidationSuccessHandler(result) {
                     var stack = {
                         name: cluster.name,
@@ -206,7 +209,8 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         name: cluster.name,
                         blueprintId: cluster.blueprintId,
                         emailNeeded: cluster.email,
-                        hostGroups: cluster.hostGroups
+                        hostGroups: cluster.hostGroups,
+                        validateBlueprint: cluster.validateBlueprint
                     }
                     successHandler(cluster);
                     Cluster.save({ id: result.id }, cbCluster, function (result) {

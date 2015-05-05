@@ -102,6 +102,12 @@
                          </div>
                     </div>
                     <div class="form-group" ng-show="showAdvancedOptionForm">
+                        <label class="col-sm-3 control-label" for="cluster_validateBlueprint">Validate blueprint</label>
+                        <div class="col-sm-9">
+                            <input type="checkbox" name="cluster_validateBlueprint" id="cluster_validateBlueprint" ng-model="cluster.validateBlueprint">
+                        </div>
+                    </div>
+                    <div class="form-group" ng-show="showAdvancedOptionForm">
                       <label class="col-sm-3 control-label" for="emailneeded">Email notification when cluster is provisioned</label>
                       <div class="col-sm-9">
                         <input type="checkbox" id="emailneeded" ng-model="cluster.email" name="emailneeded">
