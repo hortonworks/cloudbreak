@@ -41,6 +41,7 @@ cloudbreak-conf-smtp() {
     env-import CLOUDBREAK_SMTP_SENDER_PORT 25
     env-import CLOUDBREAK_SMTP_SENDER_FROM " "
 }
+
 cloudbreak-conf-cbdb() {
     declare desc="Declares cloudbreak DB config"
 
@@ -79,6 +80,7 @@ cloudbreak-conf-defaults() {
     env-import PRIVATE_IP
     env-import PUBLIC_IP
 
+    env-import CB_HOST_ADDR $PUBLIC_IP
     env-import CB_BLUEPRINT_DEFAULTS "multi-node-hdfs-yarn,hdp-multinode-default"
 }
 
