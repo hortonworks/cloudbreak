@@ -13,6 +13,7 @@
 
 ### Changed
 
+- docker-compose uses `cbreak_` prefix for container naming instead of the directory name
 - Command `generate` prints out some more usefull info
 - uaa.yml generation wont overwrite, just instruct to move existing file (like docker-compose.yml generation)
 - Command `init` hint fixed on linux.

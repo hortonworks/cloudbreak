@@ -1,18 +1,24 @@
 compose-init() {
     deps-require docker-compose
+    env-import CB_COMPOSE_PROJECT cbreak
+}
+
+dockerCompose() {
+    debug "docker-compose -p ${CB_COMPOSE_PROJECT} $@"
+    docker-compose -p ${CB_COMPOSE_PROJECT} "$@"
 }
 
 compose-ps() {
     declare desc="docker-compose: List containers"
 
-    docker-compose ps
+    dockerCompose ps
 }
 
 compose-pull() {
     declare desc="Pulls service images"
 
     [ -f docker-compose.yml ] || deployer-generate
-    docker-compose pull
+    dockerCompose pull
 }
 
 compose-up() {
@@ -20,20 +26,20 @@ compose-up() {
     declare services="$@"
 
     deployer-generate
-    docker-compose up -d $services
+    dockerCompose up -d $services
 }
 
 compose-kill() {
     declare desc="Kills and removes all cloudbreak related container"
 
-    docker-compose kill
-    docker-compose rm -f
+    dockerCompose kill
+    dockerCompose rm -f
 }
 
 compose-logs() {
     declare desc="Whach all container logs in colored version"
 
-    docker-compose logs
+    dockerCompose logs
 }
 
 compose-generate-yaml() {
