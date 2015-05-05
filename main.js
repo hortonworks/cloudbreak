@@ -204,7 +204,7 @@ app.get('/confirm', function(req, res){
   } else {
      res.statusCode = 500
      console.log('Invalid state at confirm.')
-     res.send('Invalid state');
+     res.render('login',{ errorMessage: "" });
   }
 });
 
