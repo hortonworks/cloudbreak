@@ -24,10 +24,10 @@
 
         <div class="col-sm-9">
             <ul class="nav nav-tabs" role="tablist" id="myTab">
-                <li role="presentation" class="active">
+                <li role="presentation" ng-class="{ 'active': jsonBp }">
                     <a id="original-tab" role="tab" data-toggle="tab" aria-controls="original" aria-expanded="true" ng-click="changeViewJsonBp()">raw view</a>
                 </li>
-                <li role="presentation">
+                <li role="presentation" ng-class="{ 'active': serviceBp }">
                     <a id="format-tab" role="tab" data-toggle="tab" aria-controls="format" aria-expanded="true" ng-click="changeViewServiceBp()">list view</a>
                 </li>
             </ul>
