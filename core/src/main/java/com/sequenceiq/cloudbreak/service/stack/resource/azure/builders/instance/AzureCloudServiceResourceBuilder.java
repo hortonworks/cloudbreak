@@ -85,7 +85,11 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
             Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String vmName = getVmName(provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName(), index);
-        return Arrays.asList(new Resource(resourceType(), vmName + String.valueOf(new Date().getTime()), stack, instanceGroup.orNull().getGroupName()));
+        String newVmName = vmName + String.valueOf(new Date().getTime());
+        if (newVmName.length() > MAX_NAME_LENGTH) {
+            newVmName = newVmName.substring(newVmName.length() - MAX_NAME_LENGTH, newVmName.length());
+        }
+        return Arrays.asList(new Resource(resourceType(), newVmName, stack, instanceGroup.orNull().getGroupName()));
     }
 
     @Override
@@ -94,9 +98,6 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         AzureTemplate azureTemplate = (AzureTemplate) instanceGroup.orNull().getTemplate();
         String vmName = buildResources.get(0).getResourceName();
-        if (vmName.length() > MAX_NAME_LENGTH) {
-            vmName = vmName.substring(vmName.length() - MAX_NAME_LENGTH, vmName.length());
-        }
         Map<String, String> props = new HashMap<>();
         props.put(NAME, vmName);
         props.put(DESCRIPTION, azureTemplate.getDescription());
