@@ -29,13 +29,15 @@ public class AmbariAgentBootstrap implements Callable<Boolean> {
     private final String node;
     private final Set<String> dataVolumes;
     private final String id;
+    private final String cloudPlatform;
 
-    public AmbariAgentBootstrap(DockerClient docker, String imageName, String node, Set<String> dataVolumes, String id) {
+    public AmbariAgentBootstrap(DockerClient docker, String imageName, String node, Set<String> dataVolumes, String id, String cloudPlatform) {
         this.docker = docker;
         this.imageName = imageName;
         this.node = node;
         this.dataVolumes = dataVolumes;
         this.id = id;
+        this.cloudPlatform = cloudPlatform;
     }
 
     @Override
@@ -55,6 +57,7 @@ public class AmbariAgentBootstrap implements Callable<Boolean> {
                     .withHostConfig(hostConfig)
                     .withName(String.format("%s-%s", AMBARI_AGENT.getName(), id))
                     .withEnv(String.format("constraint:node==%s", node),
+                            String.format("CLOUD_PLATFORM=%s", cloudPlatform),
                             "HADOOP_CLASSPATH=/data/jars/*:/usr/lib/hadoop/lib/*")
                     .withCmd("/start-agent"));
             List<Bind> binds = new ArrayList<>();

@@ -20,10 +20,12 @@ public class AmbariServerBootstrap {
     private static final int PORT = 8080;
     private final DockerClient docker;
     private final String imageName;
+    private final String cloudPlatform;
 
-    public AmbariServerBootstrap(DockerClient docker, String imageName) {
+    public AmbariServerBootstrap(DockerClient docker, String imageName, String cloudPlatform) {
         this.docker = docker;
         this.imageName = imageName;
+        this.cloudPlatform = cloudPlatform;
     }
 
     public Boolean call() throws Exception {
@@ -40,6 +42,7 @@ public class AmbariServerBootstrap {
                 .withExposedPorts(new ExposedPort(PORT))
                 .withEnv("constraint:type==gateway",
                         String.format("POSTGRES_DB=localhost"),
+                        String.format("CLOUD_PLATFORM=%s", cloudPlatform),
                         String.format("SERVICE_NAME=%s", "ambari-8080"))
                 .withName(AMBARI_SERVER.getName())
                 .withCmd("/start-server"));
