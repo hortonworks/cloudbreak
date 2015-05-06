@@ -120,7 +120,7 @@ cbdb:
         #- SERVICE_CHECK_CMD=bash -c 'psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
     volumes:
         - "/var/lib/cloudbreak/cbdb:/var/lib/postgresql/data"
-    image: postgres:$DOCKER_TAG_POSTGRES
+    image: sequenceiq/cbdb:$DOCKER_TAG_CBDB
 
 cloudbreak:
     environment:
@@ -216,7 +216,7 @@ pcdb:
         - 5432
     volumes:
         - /var/lib/cloudbreak/periscopedb:/var/lib/postgresql/data
-    image: postgres:$DOCKER_TAG_POSTGRES
+    image: sequenceiq/pcdb:$DOCKER_TAG_PCDB
 
 periscope:
     environment:
