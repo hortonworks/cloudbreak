@@ -8,7 +8,7 @@ The deployment itself needs only **Docker 1.5.0** or later.
 
 ## Installation
 
-To install Cloudbreak Deployer, you just have to unzip theexp platform specific
+To install Cloudbreak Deployer, you just have to unzip the platform specific
 single binary to your PATH. The one-liner way is:
 
 ```
