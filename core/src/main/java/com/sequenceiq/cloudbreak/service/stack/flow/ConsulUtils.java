@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -155,21 +157,20 @@ public final class ConsulUtils {
         }
     }
 
-    public static List<ConsulClient> createClients(Collection<InstanceMetaData> instancesMetaData) {
-        return createClients(instancesMetaData, DEFAULT_TIMEOUT_MS);
+    public static List<ConsulClient> createClients(InstanceMetaData gatewayInstanceMetadata) {
+        Set<InstanceMetaData> instanceMetadata = new HashSet<>();
+        instanceMetadata.add(gatewayInstanceMetadata);
+        return createClients(instanceMetadata, DEFAULT_TIMEOUT_MS);
     }
 
-    public static List<ConsulClient> createClients(Collection<InstanceMetaData> instancesMetaData, int timeout) {
-        return createClients(instancesMetaData, CONSUL_CLIENTS, timeout);
+    public static List<ConsulClient> createClients(Collection<InstanceMetaData> gatewayInstanceMetadata) {
+        return createClients(gatewayInstanceMetadata, DEFAULT_TIMEOUT_MS);
     }
 
-    public static List<ConsulClient> createClients(Collection<InstanceMetaData> instancesMetaData, int numClients, int timeout) {
+    public static List<ConsulClient> createClients(Collection<InstanceMetaData> gatewayInstanceMetadata, int timeout) {
         List<ConsulClient> clients = new ArrayList<>();
-        List<InstanceMetaData> instanceList = new ArrayList<>(instancesMetaData);
-        int size = instancesMetaData.size();
-        List<InstanceMetaData> subList = size < numClients ? instanceList : instanceList.subList(0, numClients);
-        for (InstanceMetaData metaData : subList) {
-            clients.add(new ConsulClient(metaData.getPublicIp(), timeout));
+        for (InstanceMetaData instanceMetaData : gatewayInstanceMetadata) {
+            clients.add(new ConsulClient(instanceMetaData.getPublicIp(), timeout));
         }
         return clients;
     }

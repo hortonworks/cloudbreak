@@ -127,14 +127,7 @@ public class StackScalingService {
     }
 
     private List<ConsulClient> createConsulClients(Stack stack, String instanceGroupName) {
-        List<InstanceGroup> instanceGroups = stack.getInstanceGroupsAsList();
-        List<ConsulClient> clients = Collections.emptyList();
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            if (!instanceGroup.getGroupName().equalsIgnoreCase(instanceGroupName)) {
-                clients = ConsulUtils.createClients(instanceGroup.getInstanceMetaData());
-            }
-        }
-        return clients;
+        return ConsulUtils.createClients(stack.getGatewayInstanceGroup().getInstanceMetaData());
     }
 
     private void removeAgentFromConsul(Stack stack, List<ConsulClient> clients, InstanceMetaData metaData) {
