@@ -8,7 +8,7 @@ The deployment itself needs only **Docker 1.5.0** or later.
 
 ## Installation
 
-To install Cloudbreak Deployer, you just have to unzip the platform specific
+To install Cloudbreak Deployer, you just have to unzip theexp platform specific
 single binary to your PATH. The one-liner way is:
 
 ```
@@ -33,7 +33,9 @@ cbd init
 ```
 It will create a `Profile` in the current directory. The only required 
 configuration is the `PUBLIC_IP`. This ip will be used for Cloudbreak UI
-(called Uluwatu). In some case cbd can guess it, if not it will give you a hint.
+(called Uluwatu). In some case cbd can guess it, if not it will give you a hint as 
+   echo export PUBLIC_IP=1.2.3.4 > Profile 
+Replace '1.2.3.4' with your IP address.
 
 ### Generate Configuration
 
