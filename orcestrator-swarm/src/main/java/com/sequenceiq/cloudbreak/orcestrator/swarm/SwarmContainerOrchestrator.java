@@ -97,18 +97,19 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
-    public void startAmbariServer(ContainerOrchestratorCluster cluster, String dbImageName, String serverImageName) throws CloudbreakOrchestratorException {
+    public void startAmbariServer(ContainerOrchestratorCluster cluster, String dbImageName,
+            String serverImageName, String platform) throws CloudbreakOrchestratorException {
         try {
             DockerClient swarmManagerClient = ((SwarmCluster) cluster).getDockerClient();
             new AmbariServerDatabaseBootstrap(swarmManagerClient, dbImageName).call();
-            new AmbariServerBootstrap(swarmManagerClient, serverImageName).call();
+            new AmbariServerBootstrap(swarmManagerClient, serverImageName, platform).call();
         } catch (Exception e) {
             throw new CloudbreakOrchestratorException(e);
         }
     }
 
     @Override
-    public void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, int count) throws CloudbreakOrchestratorException {
+    public void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, int count, String platform) throws CloudbreakOrchestratorException {
         if (count > cluster.getNodes().size()) {
             throw new CloudbreakOrchestratorException("Cannot orchestrate more Ambari agent containers than the available nodes.");
         }
@@ -126,7 +127,8 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
                                 imageName,
                                 node.getHostname(),
                                 node.getDataVolumes(),
-                                String.valueOf(new Date().getTime()) + i)));
+                                String.valueOf(new Date().getTime()) + i,
+                                platform)));
             }
             for (Future<Boolean> future : futures) {
                 future.get();

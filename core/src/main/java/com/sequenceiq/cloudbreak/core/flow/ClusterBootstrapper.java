@@ -94,9 +94,10 @@ public class ClusterBootstrapper {
                     new ContainerOrchestratorClusterContext(stack, containerOrchestrator, cluster),
                     POLLING_INTERVAL,
                     MAX_POLLING_ATTEMPTS);
+            String cloudPlatform = provisioningContext.getCloudPlatform().name();
             containerOrchestrator.startRegistrator(cluster, registratorDockerImageName);
-            containerOrchestrator.startAmbariServer(cluster, postgresDockerImageName, ambariDockerImageName);
-            containerOrchestrator.startAmbariAgents(cluster, ambariDockerImageName, cluster.getNodes().size() - 1);
+            containerOrchestrator.startAmbariServer(cluster, postgresDockerImageName, ambariDockerImageName, cloudPlatform);
+            containerOrchestrator.startAmbariAgents(cluster, ambariDockerImageName, cluster.getNodes().size() - 1, cloudPlatform);
             containerOrchestrator.startConsulWatches(cluster, consulWatchPlugnDockerImageName, cluster.getNodes().size());
         } catch (CloudbreakOrchestratorException e) {
             throw new CloudbreakException(e);
@@ -133,7 +134,7 @@ public class ClusterBootstrapper {
                     new ContainerOrchestratorClusterContext(stack, containerOrchestrator, cluster),
                     POLLING_INTERVAL,
                     MAX_POLLING_ATTEMPTS);
-            containerOrchestrator.startAmbariAgents(cluster, ambariDockerImageName, cluster.getNodes().size());
+            containerOrchestrator.startAmbariAgents(cluster, ambariDockerImageName, cluster.getNodes().size(), clusterScalingContext.getCloudPlatform().name());
             containerOrchestrator.startConsulWatches(cluster, consulWatchPlugnDockerImageName, cluster.getNodes().size());
         } catch (CloudbreakOrchestratorException e) {
             throw new CloudbreakException(e);
