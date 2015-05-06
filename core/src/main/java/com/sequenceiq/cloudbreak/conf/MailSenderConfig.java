@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SMTP_SENDER_FROM;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SMTP_SENDER_HOST;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SMTP_SENDER_PASSWORD;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SMTP_SENDER_PORT;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SMTP_SENDER_USERNAME;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -25,19 +31,19 @@ import freemarker.template.TemplateException;
 
 @Configuration
 public class MailSenderConfig {
-    @Value("${cb.smtp.sender.host:}")
+    @Value("${cb.smtp.sender.host:" + CB_SMTP_SENDER_HOST + "}")
     private String host;
 
-    @Value("${cb.smtp.sender.port:25}")
+    @Value("${cb.smtp.sender.port:" + CB_SMTP_SENDER_PORT + "}")
     private int port;
 
-    @Value("${cb.smtp.sender.username:}")
+    @Value("${cb.smtp.sender.username:" + CB_SMTP_SENDER_USERNAME + "}")
     private String userName;
 
-    @Value("${cb.smtp.sender.password:}")
+    @Value("${cb.smtp.sender.password:" + CB_SMTP_SENDER_PASSWORD + "}")
     private String password;
 
-    @Value("${cb.smtp.sender.from:}")
+    @Value("${cb.smtp.sender.from:" + CB_SMTP_SENDER_FROM + "}")
     private String msgFrom;
 
     @Bean

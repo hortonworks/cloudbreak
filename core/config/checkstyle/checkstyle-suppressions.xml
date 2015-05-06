@@ -25,6 +25,7 @@
     <suppress checks="AbstractClassName" files="test"/>
     <suppress checks="EmptyBlock" files="test"/>
     <suppress checks="HideUtilityClassConstructor" files=".*Application.java"/>
+    <suppress checks="LineLength" files=".*VariableConfig.java"/>
 
     <!-- -->
 

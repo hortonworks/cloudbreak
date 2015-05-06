@@ -30,8 +30,6 @@ public class UserDataBuilderTest {
         }
         userDataBuilder = new UserDataBuilder();
         userDataBuilder.setUserDataScripts(userDataScripts);
-        userDataBuilder.setHostAddress("http://cloudbreak.sequenceiq.com");
-        userDataBuilder.setAmbariDockerTag("1.7.0-consul");
     }
 
     @Test

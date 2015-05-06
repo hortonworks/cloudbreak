@@ -11,9 +11,10 @@ import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.api.model.RestartPolicy;
+import com.sequenceiq.cloudbreak.orcestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orcestrator.swarm.DockerClientUtil;
 
-public class AmbariServerBootstrap {
+public class AmbariServerBootstrap implements ContainerBootstrap {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariServerBootstrap.class);
 
@@ -28,6 +29,7 @@ public class AmbariServerBootstrap {
         this.cloudPlatform = cloudPlatform;
     }
 
+    @Override
     public Boolean call() throws Exception {
         HostConfig hostConfig = new HostConfig();
         hostConfig.setNetworkMode("host");

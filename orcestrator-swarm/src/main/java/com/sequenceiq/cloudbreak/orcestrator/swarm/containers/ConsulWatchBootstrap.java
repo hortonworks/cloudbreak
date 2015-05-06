@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.orcestrator.swarm.containers;
 
 import static com.sequenceiq.cloudbreak.orcestrator.DockerContainer.CONSUL_WATCH;
 
-import java.util.concurrent.Callable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,9 +13,10 @@ import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.api.model.RestartPolicy;
 import com.github.dockerjava.api.model.Volume;
+import com.sequenceiq.cloudbreak.orcestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orcestrator.swarm.DockerClientUtil;
 
-public class ConsulWatchBootstrap implements Callable<Boolean> {
+public class ConsulWatchBootstrap implements ContainerBootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsulWatchBootstrap.class);
 
     private static final int PORT = 49990;

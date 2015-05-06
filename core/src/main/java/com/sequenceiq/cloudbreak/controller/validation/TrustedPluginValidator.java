@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_PLUGINS_TRUSTED_SOURCES;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -19,7 +21,7 @@ public class TrustedPluginValidator implements ConstraintValidator<TrustedPlugin
 
     private static final String TRUST_ALL = "all-accounts";
 
-    @Value("${cb.plugins.trusted.sources:all-accounts}")
+    @Value("${cb.plugins.trusted.sources:" + CB_PLUGINS_TRUSTED_SOURCES + "}")
     private String trustedSources;
 
     @Override

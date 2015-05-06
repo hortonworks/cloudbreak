@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.openstack;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_OPENSTACK_HEAT_TEMPLATE_PATH;
 import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processTemplateIntoString;
 
 import java.io.IOException;
@@ -36,7 +37,7 @@ public class HeatTemplateBuilder {
     private static final String DEVICE_PREFIX = "/dev/vd";
     private static final char[] DEVICE_CHAR = {'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'};
 
-    @Value("${cb.openstack.heat.template.path:templates/openstack-heat.ftl}")
+    @Value("${cb.openstack.heat.template.path:" + CB_OPENSTACK_HEAT_TEMPLATE_PATH + "}")
     private String openStackHeatTemplatePath;
 
     @Autowired

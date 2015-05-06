@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_CONTAINER_ORCHESTRATOR;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_AMBARI;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_AMBARI_DB;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_DOCKER_CONSUL_WATCH_PLUGN;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_REGISTRATOR;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -11,10 +17,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.BootstrapApiContext;
-import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
+import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ContainerOrchestratorClusterContext;
+import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -33,19 +39,19 @@ public class ClusterBootstrapper {
     private static final int POLLING_INTERVAL = 5000;
     private static final int MAX_POLLING_ATTEMPTS = 100;
 
-    @Value("${cb.container.orchestrator:SWARM}")
+    @Value("${cb.container.orchestrator:" + CB_CONTAINER_ORCHESTRATOR + "}")
     private ContainerOrchestratorTool containerOrchestratorTool;
 
-    @Value("${cb.docker.container.ambari:sequenceiq/ambari:2.0.0-consul}")
+    @Value("${cb.docker.container.ambari:" + CB_DOCKER_CONTAINER_AMBARI + "}")
     private String ambariDockerImageName;
 
-    @Value("${cb.docker.container.registrator:sequenceiq/registrator:v5.1}")
+    @Value("${cb.docker.container.registrator:" + CB_DOCKER_CONTAINER_REGISTRATOR + "}")
     private String registratorDockerImageName;
 
-    @Value("${cb.docker.container.docker.consul.watch.plugn:sequenceiq/docker-consul-watch-plugn:2.0.0-consul}")
+    @Value("${cb.docker.container.docker.consul.watch.plugn:" + CB_DOCKER_CONTAINER_DOCKER_CONSUL_WATCH_PLUGN + "}")
     private String consulWatchPlugnDockerImageName;
 
-    @Value("${cb.docker.container.ambari.db:postgres:9.4.1}")
+    @Value("${cb.docker.container.ambari.db:" + CB_DOCKER_CONTAINER_AMBARI_DB + "}")
     private String postgresDockerImageName;
 
     @javax.annotation.Resource

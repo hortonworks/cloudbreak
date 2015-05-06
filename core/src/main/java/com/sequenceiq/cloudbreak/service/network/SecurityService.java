@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.network;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_PUBLIC_IP;
 import static java.util.Collections.unmodifiableSet;
 
 import java.util.HashSet;
@@ -16,7 +17,7 @@ import com.sequenceiq.cloudbreak.domain.Subnet;
 @Service
 public class SecurityService {
 
-    @Value("${cb.public.ip:0.0.0.0/0}")
+    @Value("${cb.public.ip:" + CB_PUBLIC_IP + "}")
     private String publicIp;
     private Set<String> cbAddresses;
 
