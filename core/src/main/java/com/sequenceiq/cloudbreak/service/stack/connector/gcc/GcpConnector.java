@@ -49,7 +49,7 @@ public class GcpConnector implements CloudPlatformConnector {
 
     @Override
     public void rollback(final Stack stack, Set<Resource> resourceSet) {
-            cloudResourceManager.rollbackResources(stack, gcpResourceBuilderInit);
+        cloudResourceManager.rollbackResources(stack, gcpResourceBuilderInit);
     }
 
     @Override

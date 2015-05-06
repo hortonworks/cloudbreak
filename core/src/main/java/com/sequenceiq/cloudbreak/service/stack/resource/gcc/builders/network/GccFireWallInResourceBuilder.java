@@ -14,7 +14,6 @@ import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Firewall;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -28,6 +27,7 @@ import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GcpResourceException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleNetworkResourceBuilder;
@@ -71,7 +71,7 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
         } catch (GoogleJsonResponseException ex) {
             exceptionHandler(ex, resource.getResourceName(), stack);
         } catch (IOException e) {
-            throw new InternalServerException(e.getMessage());
+            throw new GcpResourceException("Error during deletion", e);
         }
         return true;
     }
