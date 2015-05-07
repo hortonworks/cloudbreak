@@ -102,10 +102,27 @@ generate_uaa_config() {
     cloudbreak-config
 
     if [ -f uaa.yml ]; then
-        warn "uaa.yml already exists, if you want to regenerate, move it away"
+        
+        generate_uaa_config_force /tmp/uaa-delme.yml
+        if diff /tmp/uaa-delme.yml uaa.yml &> /dev/null; then
+            debug "uaa.yml exists and generate wouldn't change it"
+        else
+            warn "uaa.yml already exists, BUT generate would create a MODIFIED one."
+            warn "if you want to regenerate, move it away ..., expected change:"
+            diff /tmp/uaa-delme.yml uaa.yml | cyan
+        fi
     else
-    info "Generating Identity server config: uaa.yml ..."
-        cat > uaa.yml << EOF
+        generate_uaa_config_force uaa.yml
+    fi
+}
+
+
+generate_uaa_config_force() {
+    declare uaaFile=${1:? required: uaa config file path}
+
+    info "Generating Identity server config: ${uaaFile} ..."
+
+    cat > ${uaaFile} << EOF
 spring_profiles: postgresql
 
 database:
@@ -158,7 +175,6 @@ scim:
     - ${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_PW}|${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_FIRSTNAME}|${UAA_DEFAULT_USER_LASTNAME}|openid,cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,sequenceiq.cloudbreak.admin,sequenceiq.cloudbreak.user,sequenceiq.account.seq1234567.SequenceIQ,cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,periscope.cluster,cloudbreak.recipes
 
 EOF
-    fi
 }
 
 token() {

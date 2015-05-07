@@ -41,17 +41,30 @@ compose-logs() {
 
     dockerCompose logs
 }
-
 compose-generate-yaml() {
     declare desc="Generating docker-compose.yml based on Profile settings"
 
     cloudbreak-config
 
     if [ -f docker-compose.yml ]; then
-        warn "docker-compose.yml already exists, if you want to regenerate, move it away"
+         compose-generate-yaml-force /tmp/docker-compose-delme.yml
+         if diff /tmp/docker-compose-delme.yml docker-compose.yml &>/dev/null; then
+             debug "docker-compose.yml already exist, and generate wouldn't change it."
+        else
+            warn "docker-compose.yml already exists, BUT generate would create a DIFFERENT one!"
+            warn "if you want to regenerate, move it away ..., expected change:"
+            diff /tmp/docker-compose-delme.yml docker-compose.yml | cyan
+         fi
     else
-        info "Generating docker-compose.yml ..."
-    cat > docker-compose.yml <<EOF
+        compose-generate-yaml-force docker-compose.yml
+    fi
+}
+
+compose-generate-yaml-force() {
+
+    declare comoseFile=${1:? required: compose file path}
+    info "Generating docker-compose yaml: ${comoseFile} ..."
+    cat > ${comoseFile} <<EOF
 consul:
     privileged: true
     volumes:
@@ -253,5 +266,4 @@ periscope:
     image: sequenceiq/periscope:$DOCKER_TAG_PERISCOPE
 
 EOF
-  fi
 }

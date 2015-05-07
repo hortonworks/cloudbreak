@@ -31,6 +31,7 @@
 
 ### Added
 
+- Command `generate` checks and shows if Profile change would result in yaml change.
 - Command `init` creates Profile
 - Install cbd to a directory which is available on $PATH
 - Docker based test for the one-liner install from README.md: `make install-test`
