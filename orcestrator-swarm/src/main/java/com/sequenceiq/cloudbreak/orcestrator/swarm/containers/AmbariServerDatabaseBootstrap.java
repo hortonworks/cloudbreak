@@ -10,9 +10,10 @@ import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.RestartPolicy;
 import com.github.dockerjava.api.model.Volume;
+import com.sequenceiq.cloudbreak.orcestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orcestrator.swarm.DockerClientUtil;
 
-public class AmbariServerDatabaseBootstrap {
+public class AmbariServerDatabaseBootstrap implements ContainerBootstrap {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariServerDatabaseBootstrap.class);
 
@@ -24,7 +25,8 @@ public class AmbariServerDatabaseBootstrap {
         this.imageName = imageName;
     }
 
-    public String call() throws Exception {
+    @Override
+    public Boolean call() throws Exception {
         HostConfig hostConfig = new HostConfig();
         hostConfig.setPrivileged(true);
         hostConfig.setNetworkMode("host");
@@ -42,6 +44,6 @@ public class AmbariServerDatabaseBootstrap {
                 .withBinds(new Bind("/data/ambari-server/pgsql/data", new Volume("/var/lib/postgresql/data"))));
 
         LOGGER.info("Database container for Ambari server started successfully");
-        return DockerClientUtil.inspectContainer(docker.inspectContainerCmd(containerId)).getNetworkSettings().getIpAddress();
+        return true;
     }
 }

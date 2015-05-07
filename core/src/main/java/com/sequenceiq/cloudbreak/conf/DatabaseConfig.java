@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DB_ENV_DB;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DB_ENV_PASS;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DB_ENV_USER;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_HBM2DDL_STRATEGY;
+
 import java.util.Properties;
 
 import javax.persistence.EntityManager;
@@ -23,13 +28,13 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class DatabaseConfig {
 
-    @Value("${cb.db.env.user:postgres}")
+    @Value("${cb.db.env.user:" + CB_DB_ENV_USER + "}")
     private String dbUser;
 
-    @Value("${cb.db.env.pass:}")
+    @Value("${cb.db.env.pass:" + CB_DB_ENV_PASS + "}")
     private String dbPassword;
 
-    @Value("${cb.db.env.db:postgres}")
+    @Value("${cb.db.env.db:" + CB_DB_ENV_DB + "}")
     private String dbName;
 
     @Value("${cb.db.port.5432.tcp.addr}")
@@ -38,7 +43,7 @@ public class DatabaseConfig {
     @Value("${cb.db.port.5432.tcp.port}")
     private String dbPort;
 
-    @Value("${cb.hbm2ddl.strategy:update}")
+    @Value("${cb.hbm2ddl.strategy:" + CB_HBM2DDL_STRATEGY + "}")
     private String hbm2ddlStrategy;
 
     @Bean

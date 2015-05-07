@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_FAILED_CLUSTER_INSTALLER_MAIL_TEMPLATE_PATH;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SMTP_SENDER_FROM;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SUCCESS_CLUSTER_INSTALLER_MAIL_TEMPLATE_PATH;
 import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processTemplateIntoString;
 
 import java.util.HashMap;
@@ -28,13 +31,13 @@ import freemarker.template.Configuration;
 public class EmailSenderService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailSenderService.class);
 
-    @Value("${cb.smtp.sender.from: no-reply@sequenceiq.com}")
+    @Value("${cb.smtp.sender.from:" + CB_SMTP_SENDER_FROM + "}")
     private String msgFrom;
 
-    @Value("${cb.success.cluster.installer.mail.template.path:templates/cluster-installer-mail-success.ftl}")
+    @Value("${cb.success.cluster.installer.mail.template.path:" + CB_SUCCESS_CLUSTER_INSTALLER_MAIL_TEMPLATE_PATH + "}")
     private String successClusterInstallerMailTemplatePath;
 
-    @Value("${cb.failed.cluster.installer.mail.template.path:templates/cluster-installer-mail-fail.ftl}")
+    @Value("${cb.failed.cluster.installer.mail.template.path:" + CB_FAILED_CLUSTER_INSTALLER_MAIL_TEMPLATE_PATH + "}")
     private String failedClusterInstallerMailTemplatePath;
 
     @Autowired

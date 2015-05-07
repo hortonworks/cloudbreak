@@ -13,9 +13,10 @@ import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.api.model.RestartPolicy;
 import com.github.dockerjava.api.model.Volume;
+import com.sequenceiq.cloudbreak.orcestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orcestrator.swarm.DockerClientUtil;
 
-public class RegistratorBootstrap {
+public class RegistratorBootstrap implements ContainerBootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(RegistratorBootstrap.class);
 
     private static final int PORT = 9999;
@@ -31,6 +32,7 @@ public class RegistratorBootstrap {
         this.imageName = imageName;
     }
 
+    @Override
     public Boolean call() throws Exception {
         LOGGER.info(String.format("Registrator starting on %s node with %s private ip", longName, privateIp));
         HostConfig hostConfig = new HostConfig();

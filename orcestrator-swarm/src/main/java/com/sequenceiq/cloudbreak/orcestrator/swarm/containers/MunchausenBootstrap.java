@@ -11,9 +11,10 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Volume;
+import com.sequenceiq.cloudbreak.orcestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orcestrator.swarm.DockerClientUtil;
 
-public class MunchausenBootstrap {
+public class MunchausenBootstrap implements ContainerBootstrap {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MunchausenBootstrap.class);
 
@@ -27,6 +28,7 @@ public class MunchausenBootstrap {
         this.containerName = containerName;
     }
 
+    @Override
     public Boolean call() throws Exception {
         HostConfig hostConfig = new HostConfig();
         hostConfig.setPrivileged(true);

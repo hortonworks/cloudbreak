@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.orcestrator.swarm;
 
 import static com.sequenceiq.cloudbreak.orcestrator.ContainerOrchestratorTool.SWARM;
+import static com.sequenceiq.cloudbreak.orcestrator.SimpleContainerBootstrapRunner.simpleContainerBootstrapRunner;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -90,7 +91,7 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
         try {
             Node gateway = getGatewayNode(cluster.getApiAddress(), cluster.getNodes());
             DockerClient swarmManagerClient = ((SwarmCluster) cluster).getDockerClient();
-            new RegistratorBootstrap(swarmManagerClient, imageName, gateway.getHostname(), gateway.getPrivateIp()).call();
+            simpleContainerBootstrapRunner(new RegistratorBootstrap(swarmManagerClient, imageName, gateway.getHostname(), gateway.getPrivateIp())).call();
         } catch (Exception e) {
             throw new CloudbreakOrchestratorException(e);
         }
@@ -101,8 +102,8 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
             String serverImageName, String platform) throws CloudbreakOrchestratorException {
         try {
             DockerClient swarmManagerClient = ((SwarmCluster) cluster).getDockerClient();
-            new AmbariServerDatabaseBootstrap(swarmManagerClient, dbImageName).call();
-            new AmbariServerBootstrap(swarmManagerClient, serverImageName, platform).call();
+            simpleContainerBootstrapRunner(new AmbariServerDatabaseBootstrap(swarmManagerClient, dbImageName)).call();
+            simpleContainerBootstrapRunner(new AmbariServerBootstrap(swarmManagerClient, serverImageName, platform)).call();
         } catch (Exception e) {
             throw new CloudbreakOrchestratorException(e);
         }
@@ -114,21 +115,17 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
             throw new CloudbreakOrchestratorException("Cannot orchestrate more Ambari agent containers than the available nodes.");
         }
         try {
-            ExecutorService executorService = Executors.newFixedThreadPool(TEN);
+            ExecutorService executor = Executors.newFixedThreadPool(TEN);
             List<Future<Boolean>> futures = new ArrayList<>();
-            DockerClient swarmManagerClient = ((SwarmCluster) cluster).getDockerClient();
+            DockerClient manager = ((SwarmCluster) cluster).getDockerClient();
             Set<Node> nodes = getNodesWithoutGateway(cluster.getApiAddress(), cluster.getNodes());
             Iterator<Node> nodeIterator = nodes.iterator();
             for (int i = 0; i < count; i++) {
                 Node node = nodeIterator.next();
-                futures.add(executorService.submit(
-                        new AmbariAgentBootstrap(
-                                swarmManagerClient,
-                                imageName,
-                                node.getHostname(),
-                                node.getDataVolumes(),
-                                String.valueOf(new Date().getTime()) + i,
-                                platform)));
+                String time = String.valueOf(new Date().getTime()) + i;
+                AmbariAgentBootstrap ambariAgentBootstrap =
+                        new AmbariAgentBootstrap(manager, imageName, node.getHostname(), node.getDataVolumes(), time, platform);
+                futures.add(executor.submit(simpleContainerBootstrapRunner(ambariAgentBootstrap)));
             }
             for (Future<Boolean> future : futures) {
                 future.get();
@@ -148,12 +145,8 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
             List<Future<Boolean>> futures = new ArrayList<>();
             DockerClient swarmManagerClient = ((SwarmCluster) cluster).getDockerClient();
             for (int i = 0; i < count; i++) {
-                futures.add(executorService.submit(
-                        new ConsulWatchBootstrap(
-                                swarmManagerClient,
-                                imageName,
-                                String.valueOf(new Date().getTime()) + i
-                        )));
+                String time = String.valueOf(new Date().getTime()) + i;
+                futures.add(executorService.submit(simpleContainerBootstrapRunner(new ConsulWatchBootstrap(swarmManagerClient, imageName, time))));
             }
             for (Future<Boolean> future : futures) {
                 future.get();

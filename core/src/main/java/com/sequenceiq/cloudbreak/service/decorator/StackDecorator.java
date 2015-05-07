@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AWS_AMI_MAP;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AZURE_IMAGE_URI;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_GCP_SOURCE_IMAGE_PATH;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_OPENSTACK_IMAGE;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,18 +36,16 @@ public class StackDecorator implements Decorator<Stack> {
     @Autowired
     private SecurityService securityService;
 
-    @Value("${cb.azure.image.uri:https://102589fae040d8westeurope.blob.core.windows.net/images/"
-            + "packer-cloudbreak-2015-05-06-centos6-mun06_2015-May-6_15-4-os-2015-05-06.vhd}")
+    @Value("${cb.azure.image.uri:" + CB_AZURE_IMAGE_URI + "}")
     private String azureImage;
 
-    @Value("${cb.aws.ami.map:eu-west-1:ami-892c44fe,us-west-1:ami-b3dd32f7,ap-northeast-1:ami-b06ca0b0,sa-east-1:ami-59800744,ap-southeast-2:ami-d11867eb,"
-            + "us-west-2:ami-43b18073,ap-southeast-1:ami-70083722,us-east-1:ami-7670651e}")
+    @Value("${cb.aws.ami.map:" + CB_AWS_AMI_MAP + "}")
     private String awsImage;
 
-    @Value("${cb.openstack.image:cb-centos66-amb200-2015-04-19}")
+    @Value("${cb.openstack.image:" + CB_OPENSTACK_IMAGE + "}")
     private String openStackImage;
 
-    @Value("${cb.gcp.source.image.path:sequenceiqimage/cb-centos66-amb200-2015-05-06-1534.image.tar.gz}")
+    @Value("${cb.gcp.source.image.path:" + CB_GCP_SOURCE_IMAGE_PATH + "}")
     private String gcpImage;
 
     private enum DecorationData {
