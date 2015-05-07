@@ -47,7 +47,7 @@ public class CloudFormationStackStatusChecker implements StatusCheckerTask<Cloud
                 StackStatus cfStackStatus = StackStatus.valueOf(cfStack.getStackStatus());
                 if (context.getStackErrorStatuses().contains(cfStackStatus)) {
                     String errorStatusReason = getErrorCauseStatusReason(stackEvents, errorStatus);
-                    throw new CloudFormationStackException(String.format("AWS CloudFormation stack reached an error state: %s reason: %s"
+                    throw new AwsResourceException(String.format("AWS CloudFormation stack reached an error state: %s reason: %s"
                             , errorStatus.toString(), errorStatusReason));
                 } else if (cfStackStatus.equals(successStatus)) {
                     result = true;
@@ -63,7 +63,7 @@ public class CloudFormationStackStatusChecker implements StatusCheckerTask<Cloud
     @Override
     public void handleTimeout(CloudFormationStackPollerObject context) {
         Stack stack = context.getStack();
-        throw new CloudFormationStackException(String.format(
+        throw new AwsResourceException(String.format(
                 "AWS CloudFormation stack didn't reach the desired state in the given time frame, stack id: %s, name %s", stack.getId(), stack.getName()));
     }
 

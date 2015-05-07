@@ -22,9 +22,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -78,8 +79,6 @@ import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
-import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsNetwork;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
@@ -100,13 +99,10 @@ import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
-import com.sequenceiq.cloudbreak.service.stack.connector.CloudResourceOperationFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstances;
-
-import reactor.core.Reactor;
 
 @Service
 public class AwsConnector implements CloudPlatformConnector {
@@ -120,43 +116,41 @@ public class AwsConnector implements CloudPlatformConnector {
     @Value("${cb.aws.cf.template.path:" + CB_AWS_CF_TEMPLATE_PATH + "}")
     private String awsCloudformationTemplatePath;
 
-    @Autowired
+    @Inject
     private AwsStackUtil awsStackUtil;
-    @Autowired
-    private Reactor reactor;
-    @Autowired
+    @Inject
     private ASGroupStatusCheckerTask asGroupStatusCheckerTask;
-    @Autowired
+    @Inject
     private CloudFormationTemplateBuilder cfTemplateBuilder;
-    @Autowired
+    @Inject
     private RetryingStackUpdater stackUpdater;
-    @Autowired
+    @Inject
     private CloudFormationStackUtil cfStackUtil;
-    @Autowired
+    @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
-    @Autowired
+    @Inject
     private PollingService<AwsInstances> awsPollingService;
-    @Autowired
+    @Inject
     private PollingService<AutoScalingGroupReady> autoScalingGroupReadyPollingService;
-    @Autowired
+    @Inject
     private PollingService<CloudFormationStackPollerObject> cloudFormationPollingService;
-    @Autowired
+    @Inject
     private PollingService<EbsVolumeStatePollerObject> ebsVolumeStatePollingService;
-    @Autowired
+    @Inject
     private PollingService<SnapshotReadyPollerObject> snapshotReadyPollingService;
-    @Autowired
+    @Inject
     private ClusterRepository clusterRepository;
-    @Autowired
+    @Inject
     private UserDataBuilder userDataBuilder;
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
-    @Autowired
+    @Inject
     private AwsInstanceStatusCheckerTask awsInstanceStatusCheckerTask;
-    @Autowired
+    @Inject
     private CloudFormationStackStatusChecker cloudFormationStackStatusChecker;
-    @Autowired
+    @Inject
     private EbsVolumeStateCheckerTask ebsVolumeStateCheckerTask;
-    @Autowired
+    @Inject
     private SnapshotReadyCheckerTask snapshotReadyCheckerTask;
 
     @Override
@@ -188,12 +182,12 @@ public class AwsConnector implements CloudPlatformConnector {
             PollingResult pollingResult = cloudFormationPollingService
                     .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
             if (!isSuccess(pollingResult)) {
-                throw new CloudResourceOperationFailedException("Failed to create CloudFormation stack, because polling reached an invalid end state.");
+                throw new AwsResourceException("Failed to create CloudFormation stack, because polling reached an invalid end state.");
             }
-        } catch (CloudFormationStackException e) {
+        } catch (AwsResourceException e) {
             LOGGER.error(String.format("Failed to create CloudFormation stack: %s", stackId), e);
             stackUpdater.updateStackStatus(stackId, Status.CREATE_FAILED, "Creation of cluster infrastructure failed: " + e.getMessage());
-            throw new BuildStackFailureException(e);
+            throw e;
         }
         String gateWayGroupName = stack.getGatewayInstanceGroup().getGroupName();
         List<String> instanceIds = cfStackUtil.getInstanceIds(stack, amazonASClient, client, gateWayGroupName);
@@ -212,7 +206,7 @@ public class AwsConnector implements CloudPlatformConnector {
             if (snapshot.isPresent()) {
                 return snapshot.orNull();
             } else {
-                throw new CloudFormationStackException(String.format("Failed to create Ebs encrypted volume on stack: %s", stack.getId()));
+                throw new AwsResourceException(String.format("Failed to create Ebs encrypted volume on stack: %s", stack.getId()));
             }
         } else {
             return null;
@@ -286,7 +280,7 @@ public class AwsConnector implements CloudPlatformConnector {
         PollingResult pollingResult = autoScalingGroupReadyPollingService
                 .pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         if (!isSuccess(pollingResult)) {
-            throw new CloudResourceOperationFailedException("Failed to create CloudFormation stack, because polling reached an invalid end state.");
+            throw new AwsResourceException("Failed to create CloudFormation stack, because polling reached an invalid end state.");
         }
         return Collections.emptySet();
     }
@@ -332,7 +326,7 @@ public class AwsConnector implements CloudPlatformConnector {
             if (!isSuccess(pollingResult)) {
                 throw new UpdateFailedException("Failed to update Heat stack, because polling reached an invalid end state.");
             }
-        } catch (CloudFormationStackException e) {
+        } catch (AwsResourceException e) {
             throw new UpdateFailedException(e);
         }
     }
@@ -382,11 +376,11 @@ public class AwsConnector implements CloudPlatformConnector {
                 PollingResult pollingResult = cloudFormationPollingService
                         .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
                 if (!isSuccess(pollingResult)) {
-                    throw new CloudResourceOperationFailedException("Failed to delete CloudFormation stack, because polling reached an invalid end state.");
+                    throw new AwsResourceException("Failed to delete CloudFormation stack, because polling reached an invalid end state.");
                 }
                 AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
                 releaseReservedIp(stack, amazonEC2Client);
-            } catch (CloudFormationStackException e) {
+            } catch (AwsResourceException e) {
                 LOGGER.error(String.format("Failed to delete CloudFormation stack: %s, id:%s", cFStackName, stack.getId()), e);
                 throw e;
             }
@@ -447,7 +441,7 @@ public class AwsConnector implements CloudPlatformConnector {
         if (image != null) {
             return image.getRootDeviceName();
         } else {
-            throw new StackCreationFailureException(String.format("Couldn't describe AMI '%s'.", stack.getImage()));
+            throw new AwsResourceException(String.format("Couldn't describe AMI '%s'.", stack.getImage()));
         }
     }
 
@@ -535,7 +529,7 @@ public class AwsConnector implements CloudPlatformConnector {
                 }
             } catch (AmazonServiceException e) {
                 if (e.getErrorMessage().matches("Resource.*does not exist for stack.*")) {
-                    LOGGER.info(e.getErrorMessage());
+                    LOGGER.info("Resource doesn't exist for stack: ", e);
                 } else {
                     throw e;
                 }

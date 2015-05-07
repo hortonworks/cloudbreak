@@ -20,7 +20,7 @@ public class EbsVolumeStateCheckerTask extends StackBasedStatusCheckerTask<EbsVo
 
     @Override
     public void handleTimeout(EbsVolumeStatePollerObject ebsVolumeStatePollerObject) {
-        throw new CloudFormationStackException(String.format(
+        throw new AwsResourceException(String.format(
                 "AWS Ebs volume creation didn't reach the desired state in the given time frame, stack id: %s, name %s",
                 ebsVolumeStatePollerObject.getStack().getId(), ebsVolumeStatePollerObject.getStack().getName()));
     }

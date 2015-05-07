@@ -20,7 +20,7 @@ public class SnapshotReadyCheckerTask extends StackBasedStatusCheckerTask<Snapsh
 
     @Override
     public void handleTimeout(SnapshotReadyPollerObject object) {
-        throw new CloudFormationStackException(String.format(
+        throw new AwsResourceException(String.format(
                 "AWS Ebs disk snapshot creation didn't reach the desired state in the given time frame, stack id: %s, name %s",
                 object.getStack().getId(), object.getStack().getName()));
     }

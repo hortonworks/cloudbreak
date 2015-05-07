@@ -11,7 +11,6 @@ import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
-import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
 @Component
 public class GccImageCheckerStatus extends StackBasedStatusCheckerTask<GccImageReadyPollerObject> {
@@ -39,8 +38,8 @@ public class GccImageCheckerStatus extends StackBasedStatusCheckerTask<GccImageR
 
     @Override
     public void handleTimeout(GccImageReadyPollerObject gccImageReadyPollerObject) {
-        throw new AddInstancesFailedException(String.format(
-                "Something went wrong. Gcc image '%s' did not set up in a reasonable timeframe",
+        throw new GcpResourceException(String.format(
+                "Could not set up Gcp image '%s'; operation timed out.",
                 gccImageReadyPollerObject.getName()));
     }
 
