@@ -3,7 +3,7 @@ cloudbreak-config() {
   env-import PRIVATE_IP $(docker run alpine sh -c 'ip ro | grep default | cut -d" " -f 3')
   cloudbreak-conf-tags
   cloudbreak-conf-images
-  cloudbreak-conf-cbdb
+  cloudbreak-conf-db
   cloudbreak-conf-defaults
   cloudbreak-conf-uaa
   cloudbreak-conf-smtp
@@ -44,8 +44,16 @@ cloudbreak-conf-smtp() {
     env-import CLOUDBREAK_SMTP_SENDER_FROM " "
 }
 
-cloudbreak-conf-cbdb() {
+cloudbreak-conf-db() {
     declare desc="Declares cloudbreak DB config"
+
+    if boot2docker version &> /dev/null; then
+        # this is for OSX
+        env-import CB_DB_ROOT_PATH "/var/lib/boot2docker/cloudbreak"
+    else
+        # this is for linux
+        env-import CB_DB_ROOT_PATH "/var/lib/cloudbreak"
+    fi
 
     env-import CB_DB_ENV_USER "postgres"
     env-import CB_DB_ENV_DB "cloudbreak"

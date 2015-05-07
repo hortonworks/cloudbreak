@@ -20,6 +20,7 @@
 - Command `init` advise to run `generate` if it finds a Profile
 - Command `migrate` is introduced for db migration see `Migrate the databases` section of README
 - Command `startdb` starts the cbdb and pcdb database containers only
+- Databases are not deleted after boot2docker restart
 
 ## [v0.1.0] - 2015-04-16
 
