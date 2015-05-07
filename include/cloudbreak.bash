@@ -109,7 +109,7 @@ generate_uaa_config() {
         else
             warn "uaa.yml already exists, BUT generate would create a MODIFIED one."
             warn "if you want to regenerate, move it away ..., expected change:"
-            diff /tmp/uaa-delme.yml uaa.yml | cyan
+            (diff /tmp/uaa-delme.yml uaa.yml || true) | cyan
         fi
     else
         generate_uaa_config_force uaa.yml

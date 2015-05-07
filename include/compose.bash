@@ -53,7 +53,7 @@ compose-generate-yaml() {
         else
             warn "docker-compose.yml already exists, BUT generate would create a DIFFERENT one!"
             warn "if you want to regenerate, move it away ..., expected change:"
-            diff /tmp/docker-compose-delme.yml docker-compose.yml | cyan
+            (diff /tmp/docker-compose-delme.yml docker-compose.yml || true) | cyan
          fi
     else
         compose-generate-yaml-force docker-compose.yml
