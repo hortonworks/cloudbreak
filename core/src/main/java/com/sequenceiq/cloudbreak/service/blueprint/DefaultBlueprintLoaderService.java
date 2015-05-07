@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_BLUEPRINT_DEFAULTS;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.controller.json.BlueprintRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.controller.json.BlueprintRequest;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -22,7 +24,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 public class DefaultBlueprintLoaderService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBlueprintLoaderService.class);
 
-    @Value("#{'${cb.blueprint.defaults:multi-node-hdfs-yarn,hdp-multinode-default}'.split(',')}")
+    @Value("#{'${cb.blueprint.defaults:" + CB_BLUEPRINT_DEFAULTS + "}'.split(',')}")
     private List<String> blueprintArray;
 
     @Autowired

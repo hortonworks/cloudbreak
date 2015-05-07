@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.StackDependentPollerObject;
+import com.sequenceiq.cloudbreak.service.StackContext;
 
-public abstract class AbstractInstances extends StackDependentPollerObject {
+public abstract class AbstractInstances extends StackContext {
 
     private List<String> instances;
     private String status;

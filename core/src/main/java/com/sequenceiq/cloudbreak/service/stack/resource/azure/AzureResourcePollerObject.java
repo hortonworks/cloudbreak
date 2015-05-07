@@ -6,11 +6,11 @@ import java.util.List;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.StackDependentPollerObject;
+import com.sequenceiq.cloudbreak.service.StackContext;
 
 import groovyx.net.http.HttpResponseDecorator;
 
-public class AzureResourcePollerObject extends StackDependentPollerObject {
+public class AzureResourcePollerObject extends StackContext {
 
     private AzureClient azureClient;
     private List<HttpResponseDecorator> responses;

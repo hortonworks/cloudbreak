@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.StackDependentPollerObject;
+import com.sequenceiq.cloudbreak.service.StackContext;
 
-public class AzureCloudServiceDeleteTaskContext extends StackDependentPollerObject {
+public class AzureCloudServiceDeleteTaskContext extends StackContext {
 
     private String commonName;
     private String name;

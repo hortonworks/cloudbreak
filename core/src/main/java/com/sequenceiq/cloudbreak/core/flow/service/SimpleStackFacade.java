@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Resource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.OnFailureAction;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.Subnet;
@@ -43,6 +42,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
+import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 
@@ -56,7 +56,7 @@ public class SimpleStackFacade implements StackFacade {
     @Autowired
     private StackService stackService;
 
-    @Resource
+    @javax.annotation.Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
     @Autowired
@@ -73,6 +73,9 @@ public class SimpleStackFacade implements StackFacade {
 
     @Autowired
     private StackScalingService stackScalingService;
+
+    @Autowired
+    private MetadataSetupService metadataSetupService;
 
     @Autowired
     private UserDataBuilder userDataBuilder;
@@ -179,32 +182,50 @@ public class SimpleStackFacade implements StackFacade {
     }
 
     @Override
-    public FlowContext upscaleStack(FlowContext context) throws CloudbreakException {
+    public FlowContext addInstances(FlowContext context) throws CloudbreakException {
         try {
             StackScalingContext updateContext = (StackScalingContext) context;
             MDCBuilder.buildMdcContext(stackService.getById(updateContext.getStackId()));
-            LOGGER.info("Upscale stack. Context: {}", updateContext);
-
-            stackScalingService.upscaleStack(updateContext.getStackId(), updateContext.getInstanceGroup(), updateContext.getScalingAdjustment());
-            Stack stack = stackService.getById(updateContext.getStackId());
-            HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
-            hostGroupAdjustmentJson.setWithStackUpdate(false);
-            hostGroupAdjustmentJson.setScalingAdjustment(updateContext.getScalingAdjustment());
-            if (stack.getCluster() != null) {
-                HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(stack.getCluster().getId(), updateContext.getInstanceGroup());
-                hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
-            }
-            UpdateAmbariHostsRequest updateAmbariHostsRequest = new UpdateAmbariHostsRequest(updateContext.getStackId(),
-                    hostGroupAdjustmentJson,
-                    new ArrayList<HostMetadata>(),
-                    false,
+            Set<Resource> resources = stackScalingService.addInstances(updateContext.getStackId(), updateContext.getInstanceGroup(),
+                    updateContext.getScalingAdjustment());
+            return new StackScalingContext(updateContext.getStackId(),
                     updateContext.getCloudPlatform(),
+                    updateContext.getScalingAdjustment(),
+                    updateContext.getInstanceGroup(),
+                    resources,
                     updateContext.getScalingType());
-            return new ClusterScalingContext(updateAmbariHostsRequest);
+
         } catch (Exception e) {
             LOGGER.error("Exception during the upscaling of stack: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
+    }
+
+    @Override
+    public FlowContext extendMetadata(FlowContext context) throws CloudbreakException {
+        StackScalingContext updateContext = (StackScalingContext) context;
+        MDCBuilder.buildMdcContext(stackService.getById(updateContext.getStackId()));
+        Set<String> upscaleCandidateAddresses = metadataSetupService.setupNewMetadata(
+                updateContext.getStackId(),
+                updateContext.getResources(),
+                updateContext.getInstanceGroup());
+
+        Stack stack = stackService.getById(updateContext.getStackId());
+        HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
+        hostGroupAdjustmentJson.setWithStackUpdate(false);
+        hostGroupAdjustmentJson.setScalingAdjustment(updateContext.getScalingAdjustment());
+        if (stack.getCluster() != null) {
+            HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(stack.getCluster().getId(), updateContext.getInstanceGroup());
+            hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
+        }
+        UpdateAmbariHostsRequest updateAmbariHostsRequest = new UpdateAmbariHostsRequest(updateContext.getStackId(),
+                hostGroupAdjustmentJson,
+                upscaleCandidateAddresses,
+                new ArrayList<HostMetadata>(),
+                false,
+                updateContext.getCloudPlatform(),
+                updateContext.getScalingType());
+        return new ClusterScalingContext(updateAmbariHostsRequest);
     }
 
     @Override
@@ -224,12 +245,24 @@ public class SimpleStackFacade implements StackFacade {
     @Override
     public FlowContext handleScalingFailure(FlowContext context) throws CloudbreakException {
         try {
-            StackScalingContext updateContext = (StackScalingContext) context;
-            MDCBuilder.buildMdcContext(stackService.getById(updateContext.getStackId()));
-            LOGGER.info("Scaling failure. Context: {}", updateContext);
-            stackUpdater.updateMetadataReady(updateContext.getStackId(), true);
-            stackUpdater.updateStackStatus(updateContext.getStackId(), Status.AVAILABLE, "Stack update failed. " + updateContext.getErrorReason());
-            return updateContext;
+            Long id = null;
+            String errorReason = null;
+            if (context instanceof StackScalingContext) {
+                StackScalingContext stackScalingContext =  (StackScalingContext) context;
+                id = stackScalingContext.getStackId();
+                errorReason = stackScalingContext.getErrorReason();
+            } else if (context instanceof ClusterScalingContext) {
+                ClusterScalingContext clusterScalingContext =  (ClusterScalingContext) context;
+                id = clusterScalingContext.getStackId();
+                errorReason = clusterScalingContext.getErrorReason();
+            }
+            if (id != null) {
+                MDCBuilder.buildMdcContext(stackService.getById(id));
+                LOGGER.info("Scaling failure. Context: {}", context);
+                stackUpdater.updateMetadataReady(id, true);
+                stackUpdater.updateStackStatus(id, Status.AVAILABLE, "Stack update failed. " + errorReason);
+            }
+            return context;
         } catch (Exception e) {
             LOGGER.error("Exception during the handling of stack scaling failure: {}", e.getMessage());
             throw new CloudbreakException(e);
@@ -253,13 +286,15 @@ public class SimpleStackFacade implements StackFacade {
 
     @Override
     public FlowContext updateAllowedSubnets(FlowContext context) throws CloudbreakException {
-        Stack stack = null;
+        UpdateAllowedSubnetsContext request = (UpdateAllowedSubnetsContext) context;
+        Long stackId = request.getStackId();
+        Stack stack = stackService.getById(stackId);
+        MDCBuilder.buildMdcContext(stack);
         try {
-            UpdateAllowedSubnetsContext request = (UpdateAllowedSubnetsContext) context;
             stack = stackService.getById(request.getStackId());
             MDCBuilder.buildMdcContext(stack);
             String hostGroupUserData = userDataBuilder.buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(),
-                    new HashMap<String, String>(), InstanceGroupType.HOSTGROUP);
+                    new HashMap<String, String>(), InstanceGroupType.CORE);
             String gateWayUserData = userDataBuilder.buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(),
                     new HashMap<String, String>(), InstanceGroupType.GATEWAY);
             stack.setAllowedSubnets(getNewSubnetList(stack, request.getAllowedSubnets()));

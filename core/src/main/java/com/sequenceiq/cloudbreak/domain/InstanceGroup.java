@@ -31,7 +31,7 @@ public class InstanceGroup implements ProvisionEntity, Comparable {
     private Integer nodeCount;
     private String groupName;
     @Enumerated(EnumType.STRING)
-    private InstanceGroupType instanceGroupType = InstanceGroupType.HOSTGROUP;
+    private InstanceGroupType instanceGroupType = InstanceGroupType.CORE;
     @ManyToOne
     private Stack stack;
     @OneToMany(mappedBy = "instanceGroup", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE suppressions PUBLIC
+        "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+        "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+
+<suppressions>
+    <!-- suppressing checks in real classes -->
+    <suppress checks="Javadoc.*" files="test|Dummy|Mock"/>
+    <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="test|Dummy|Mock"/>
+
+    <!-- suppress everything in generated code -->
+    <suppress checks=".*" files="generated"/>
+    <!-- -->
+
+    <!-- suppress everything in package level JavaDoc files -->
+    <suppress checks=".*" files="package-info.java"/>
+
+</suppressions>

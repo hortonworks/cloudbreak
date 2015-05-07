@@ -67,7 +67,7 @@ public class ReactorFlowManager implements FlowManager {
         ProvisionRequest provisionRequest = (ProvisionRequest) object;
         ProvisioningContext context = new ProvisioningContext.Builder().
                 setDefaultParams(provisionRequest.getStackId(), provisionRequest.getCloudPlatform()).build();
-        reactor.notify(FlowPhases.CLUSTER_CREATION.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_CREATION.name()));
+        reactor.notify(FlowPhases.CLUSTER_INSTALL.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_INSTALL.name()));
     }
 
     @Override
@@ -117,7 +117,7 @@ public class ReactorFlowManager implements FlowManager {
     public void triggerStackUpscale(Object object) {
         UpdateInstancesRequest updateRequest = (UpdateInstancesRequest) object;
         StackScalingContext context = new StackScalingContext(updateRequest);
-        reactor.notify(FlowPhases.STACK_UPSCALE.name(), eventFactory.createEvent(context, FlowPhases.STACK_UPSCALE.name()));
+        reactor.notify(FlowPhases.ADD_INSTANCES.name(), eventFactory.createEvent(context, FlowPhases.ADD_INSTANCES.name()));
     }
 
     @Override

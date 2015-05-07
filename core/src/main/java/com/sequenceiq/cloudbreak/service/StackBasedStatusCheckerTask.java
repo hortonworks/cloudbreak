@@ -6,15 +6,15 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
-public abstract class StackBasedStatusCheckerTask<T extends StackDependentPollerObject> implements StatusCheckerTask<T> {
+public abstract class StackBasedStatusCheckerTask<T extends StackContext> implements StatusCheckerTask<T> {
 
     @Autowired
     private StackRepository stackRepository;
 
     public boolean exitPolling(T t) {
         try {
-            Stack byId = stackRepository.findById(t.getStack().getId());
-            if (byId == null || byId.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
+            Stack stack = stackRepository.findById(t.getStack().getId());
+            if (stack == null || stack.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
                 return true;
             }
             return false;

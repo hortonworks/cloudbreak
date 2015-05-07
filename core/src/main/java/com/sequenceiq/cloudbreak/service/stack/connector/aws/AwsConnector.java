@@ -11,6 +11,7 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.UPDATE_COM
 import static com.amazonaws.services.cloudformation.model.StackStatus.UPDATE_ROLLBACK_COMPLETE;
 import static com.amazonaws.services.cloudformation.model.StackStatus.UPDATE_ROLLBACK_FAILED;
 import static com.amazonaws.services.cloudformation.model.StackStatus.UPDATE_ROLLBACK_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AWS_CF_TEMPLATE_PATH;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
 import java.util.ArrayList;
@@ -86,7 +87,6 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -117,7 +117,7 @@ public class AwsConnector implements CloudPlatformConnector {
     private static final String CLOUDBREAK_EBS_SNAPSHOT = "cloudbreak-ebs-snapshot";
     private static final int SNAPSHOT_VOLUME_SIZE = 10;
 
-    @Value("${cb.aws.cf.template.path:templates/aws-cf-stack.ftl}")
+    @Value("${cb.aws.cf.template.path:" + CB_AWS_CF_TEMPLATE_PATH + "}")
     private String awsCloudformationTemplatePath;
 
     @Autowired
@@ -194,7 +194,7 @@ public class AwsConnector implements CloudPlatformConnector {
             stackUpdater.updateStackStatus(stackId, Status.CREATE_FAILED, "Creation of cluster infrastructure failed: " + e.getMessage());
             throw new BuildStackFailureException(e);
         }
-        String gateWayGroupName = stack.getInstanceGroupByType(InstanceGroupType.GATEWAY).getGroupName();
+        String gateWayGroupName = stack.getGatewayInstanceGroup().getGroupName();
         List<String> instanceIds = cfStackUtil.getInstanceIds(stack, amazonASClient, client, gateWayGroupName);
         if (!instanceIds.isEmpty()) {
             AssociateAddressRequest associateAddressRequest = new AssociateAddressRequest()

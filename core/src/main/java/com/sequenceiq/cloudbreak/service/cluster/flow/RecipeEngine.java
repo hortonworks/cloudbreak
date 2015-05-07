@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static com.sequenceiq.cloudbreak.service.cluster.flow.DockerContainer.AMBARI_AGENT;
+import static com.sequenceiq.cloudbreak.orcestrator.DockerContainer.AMBARI_AGENT;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +37,7 @@ public class RecipeEngine {
 
     public void setupRecipes(Stack stack, Set<HostGroup> hostGroups) {
         Set<InstanceMetaData> instances = instanceMetadataRepository.findAllInStack(stack.getId());
-        setupProperties(hostGroups, instances);
+        setupProperties(hostGroups, stack.getGatewayInstanceGroup().getInstanceMetaData());
         installPlugins(stack, hostGroups, instances);
     }
 
@@ -69,7 +69,8 @@ public class RecipeEngine {
     private void installPluginsOnHosts(Stack stack, Set<Recipe> recipes, Set<HostMetadata> hostMetadata, Set<InstanceMetaData> instances) {
         for (Recipe recipe : recipes) {
             Map<String, PluginExecutionType> plugins = recipe.getPlugins();
-            Map<String, Set<String>> eventIdMap = pluginManager.installPlugins(instances, plugins, getHostnames(hostMetadata));
+            Map<String, Set<String>> eventIdMap =
+                    pluginManager.installPlugins(stack.getGatewayInstanceGroup().getInstanceMetaData(), plugins, getHostnames(hostMetadata));
             pluginManager.waitForEventFinish(stack, instances, eventIdMap, recipe.getTimeout());
         }
     }

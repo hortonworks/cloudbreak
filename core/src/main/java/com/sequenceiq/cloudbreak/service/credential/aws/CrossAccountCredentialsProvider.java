@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.credential.aws;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AWS_EXTERNAL_ID;
+
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +33,7 @@ public class CrossAccountCredentialsProvider {
     private static final int MILLISECONDS = 1000;
     private static final int FIVE_MINUTES = 300000;
 
-    @Value("${cb.aws.external.id:provision-ambari}")
+    @Value("${cb.aws.external.id:" + CB_AWS_EXTERNAL_ID + "}")
     private String externalId;
 
     @Autowired

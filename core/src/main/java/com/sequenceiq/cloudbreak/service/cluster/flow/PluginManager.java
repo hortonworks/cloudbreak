@@ -8,6 +8,7 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.orcestrator.DockerContainer;
 
 public interface PluginManager {
 

@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static com.sequenceiq.cloudbreak.service.PollingResult.SUCCESS;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
-import static com.sequenceiq.cloudbreak.service.cluster.flow.DockerContainer.AMBARI_DB;
-import static com.sequenceiq.cloudbreak.service.cluster.flow.DockerContainer.AMBARI_SERVER;
+import static com.sequenceiq.cloudbreak.orcestrator.DockerContainer.AMBARI_DB;
+import static com.sequenceiq.cloudbreak.orcestrator.DockerContainer.AMBARI_SERVER;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
 import static java.util.Collections.singletonMap;
 
@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -153,23 +152,25 @@ public class AmbariClusterConnector {
         }
     }
 
-    public Set<String> installAmbariNode(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
+    public Set<String> installAmbariNode(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment, List<HostMetadata> hostMetadataNotUsed) {
         Set<String> result = new HashSet<>();
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Adding new host(s) to the cluster.");
+
         AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(stack);
         if (PollingResult.SUCCESS.equals(waitForHosts(stack, ambariClient))) {
+
             HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
             List<String> hosts = findFreeHosts(stack.getId(), hostGroup, hostGroupAdjustment.getScalingAdjustment());
             Set<HostGroup> hostGroupAsSet = Sets.newHashSet(hostGroup);
             Set<HostMetadata> hostMetadata = addHostMetadata(cluster, hosts, hostGroupAdjustment);
             if (recipesFound(hostGroupAsSet)) {
-                recipeEngine.setupRecipesOnHosts(stack, hostGroup.getRecipes(), hostMetadata);
+                recipeEngine.setupRecipesOnHosts(stack, hostGroup.getRecipes(), new HashSet<>(hostMetadata));
             }
             PollingResult pollingResult = waitForAmbariOperations(stack, ambariClient, installServices(hosts, stack, ambariClient, hostGroupAdjustment));
             if (isSuccess(pollingResult)) {
-                pollingResult = startComponents(stack, cluster, ambariClient, hostGroup);
+                pollingResult = waitForAmbariOperations(stack, ambariClient, singletonMap("START_SERVICES", ambariClient.startAllServices()));
                 if (isSuccess(pollingResult)) {
                     pollingResult = restartHadoopServices(stack, ambariClient, false);
                     if (isSuccess(pollingResult)) {
@@ -183,7 +184,7 @@ public class AmbariClusterConnector {
 
     public Cluster resetAmbariCluster(Long stackId) {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        InstanceGroup instanceGroupByType = stack.getInstanceGroupByType(InstanceGroupType.GATEWAY);
+        InstanceGroup instanceGroupByType = stack.getGatewayInstanceGroup();
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         List<String> hostNames = instanceMetadataRepository.findAliveInstancesHostNamesInInstanceGroup(instanceGroupByType.getId());
         eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), "Ambari database reset started.");
@@ -421,6 +422,20 @@ public class AmbariClusterConnector {
         return hostGroups;
     }
 
+    private Set<HostMetadata> addHostMetadata(Cluster cluster, List<String> hosts, HostGroupAdjustmentJson hostGroupAdjustment) {
+        Set<HostMetadata> hostMetadata = new HashSet<>();
+        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
+        for (String host : hosts) {
+            HostMetadata hostMetadataEntry = new HostMetadata();
+            hostMetadataEntry.setHostName(host);
+            hostMetadataEntry.setHostGroup(hostGroup);
+            hostMetadata.add(hostMetadataEntry);
+        }
+        hostGroup.getHostMetadata().addAll(hostMetadata);
+        hostGroupRepository.save(hostGroup);
+        return hostMetadata;
+    }
+
     private void addBlueprint(Stack stack, AmbariClient ambariClient, Blueprint blueprint) {
         try {
             ambariClient.addBlueprintWithHostgroupConfiguration(blueprint.getBlueprintText(), hadoopConfigurationService.getConfiguration(stack));
@@ -454,20 +469,6 @@ public class AmbariClusterConnector {
         }
         LOGGER.info("Computed host-hostGroup associations: {}", hostGroupMappings);
         return hostGroupMappings;
-    }
-
-    private Set<HostMetadata> addHostMetadata(Cluster cluster, List<String> hosts, HostGroupAdjustmentJson hostGroupAdjustment) {
-        Set<HostMetadata> hostMetadata = new HashSet<>();
-        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
-        for (String host : hosts) {
-            HostMetadata hostMetadataEntry = new HostMetadata();
-            hostMetadataEntry.setHostName(host);
-            hostMetadataEntry.setHostGroup(hostGroup);
-            hostMetadata.add(hostMetadataEntry);
-        }
-        hostGroup.getHostMetadata().addAll(hostMetadata);
-        hostGroupRepository.save(hostGroup);
-        return hostMetadata;
     }
 
     private PollingResult waitForClusterInstall(Stack stack, AmbariClient ambariClient) {

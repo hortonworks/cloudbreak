@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.orcestrator.DockerContainer;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.PluginFailureException;
@@ -107,7 +108,7 @@ public class ConsulPluginManager implements PluginManager {
 
     @Override
     public void waitForEventFinish(Stack stack, Collection<InstanceMetaData> instanceMetaData, Map<String, Set<String>> eventIds, Integer timeout) {
-        List<ConsulClient> clients = ConsulUtils.createClients(instanceMetaData);
+        List<ConsulClient> clients = ConsulUtils.createClients(stack.getGatewayInstanceGroup().getInstanceMetaData());
         List<String> keys = generateKeys(eventIds);
         int calculatedMaxAttempt = (timeout * ONE_THOUSAND * SECONDS_IN_MINUTE) / POLLING_INTERVAL;
         keyValuePollingService.pollWithTimeout(
@@ -130,7 +131,8 @@ public class ConsulPluginManager implements PluginManager {
         if (hosts == null || hosts.isEmpty()) {
             targetHosts = getHostnames(hostMetadataRepository.findHostsInCluster(stack.getCluster().getId()));
         }
-        Map<String, Set<String>> triggerEventIds = triggerPlugins(instances, event, container, payload, targetHosts);
+        Map<String, Set<String>> triggerEventIds =
+                triggerPlugins(stack.getGatewayInstanceGroup().getInstanceMetaData(), event, container, payload, targetHosts);
         Map<String, Set<String>> eventIdMap = new HashMap<>();
         for (String eventId : triggerEventIds.keySet()) {
             Set<String> eventHosts = triggerEventIds.get(eventId);

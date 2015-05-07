@@ -1,3 +1,4 @@
+<#setting number_format="computer">
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
 
@@ -257,7 +258,7 @@
         <#if useSpot>
         "SpotPrice"      : ${instanceGroup.template.spotPrice},
         </#if>
-        <#if instanceGroup.instanceGroupType == "HOSTGROUP">
+        <#if instanceGroup.instanceGroupType == "CORE">
         "UserData"       : { "Fn::Base64" : { "Ref" : "CBUserData"}}
         </#if>
         <#if instanceGroup.instanceGroupType == "GATEWAY">

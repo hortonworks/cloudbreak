@@ -429,19 +429,19 @@ public class Stack implements ProvisionEntity {
     }
 
     public Set<InstanceMetaData> getRunningInstanceMetaData() {
-        Set<InstanceMetaData> instanceMetaDatas = new HashSet<>();
+        Set<InstanceMetaData> instanceMetadata = new HashSet<>();
         for (InstanceGroup instanceGroup : instanceGroups) {
-            instanceMetaDatas.addAll(instanceGroup.getInstanceMetaData());
+            instanceMetadata.addAll(instanceGroup.getInstanceMetaData());
         }
-        return instanceMetaDatas;
+        return instanceMetadata;
     }
 
     public Set<InstanceMetaData> getAllInstanceMetaData() {
-        Set<InstanceMetaData> instanceMetaDatas = new HashSet<>();
+        Set<InstanceMetaData> instanceMetadata = new HashSet<>();
         for (InstanceGroup instanceGroup : instanceGroups) {
-            instanceMetaDatas.addAll(instanceGroup.getAllInstanceMetaData());
+            instanceMetadata.addAll(instanceGroup.getAllInstanceMetaData());
         }
-        return instanceMetaDatas;
+        return instanceMetadata;
     }
 
     public List<InstanceGroup> getInstanceGroupsAsList() {
@@ -492,19 +492,19 @@ public class Stack implements ProvisionEntity {
                 && parameters.get(StackParam.IGW_ID.getName()) != null;
     }
 
-    public Set<InstanceGroup> getInstanceGroupsByType(InstanceGroupType instanceGroupType) {
+    public Set<InstanceGroup> getCoreInstanceGroups() {
         Set<InstanceGroup> instanceGroupsList = new HashSet<>();
         for (InstanceGroup instanceGroup : instanceGroups) {
-            if (instanceGroupType.equals(instanceGroup.getInstanceGroupType())) {
+            if (InstanceGroupType.CORE.equals(instanceGroup.getInstanceGroupType())) {
                 instanceGroupsList.add(instanceGroup);
             }
         }
         return instanceGroupsList;
     }
 
-    public InstanceGroup getInstanceGroupByType(InstanceGroupType instanceGroupType) {
+    public InstanceGroup getGatewayInstanceGroup() {
         for (InstanceGroup instanceGroup : instanceGroups) {
-            if (instanceGroupType.equals(instanceGroup.getInstanceGroupType())) {
+            if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
                 return instanceGroup;
             }
         }
@@ -512,12 +512,7 @@ public class Stack implements ProvisionEntity {
     }
 
     public int getGateWayNodeCount() {
-        Set<InstanceGroup> instanceGroupsByType = getInstanceGroupsByType(InstanceGroupType.GATEWAY);
-        int gateWaySize = 0;
-        for (InstanceGroup instanceGroup : instanceGroupsByType) {
-            gateWaySize += instanceGroup.getNodeCount();
-        }
-        return gateWaySize;
+        return getGatewayInstanceGroup().getNodeCount();
     }
 
 }

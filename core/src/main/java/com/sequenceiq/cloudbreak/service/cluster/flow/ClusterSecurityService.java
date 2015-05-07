@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
-import static com.sequenceiq.cloudbreak.service.cluster.flow.DockerContainer.KERBEROS;
+import static com.sequenceiq.cloudbreak.orcestrator.DockerContainer.KERBEROS;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
@@ -22,7 +22,6 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -60,7 +59,7 @@ public class ClusterSecurityService {
             ambariClient.addService(KERBEROS_SERVICE);
             ambariClient.addServiceComponent(KERBEROS_SERVICE, KERBEROS_CLIENT);
             ambariClient.addComponentsToHosts(ambariClient.getClusterHosts(), asList(KERBEROS_CLIENT));
-            InstanceGroup gateway = new ArrayList<>(stack.getInstanceGroupsByType(InstanceGroupType.GATEWAY)).get(0);
+            InstanceGroup gateway = stack.getGatewayInstanceGroup();
             InstanceMetaData metaData = new ArrayList<>(gateway.getInstanceMetaData()).get(0);
             String kdcHost = metaData.getLongName();
             ambariClient.createKerberosConfig(kdcHost, REALM, DOMAIN);
@@ -87,7 +86,7 @@ public class ClusterSecurityService {
 
     private void createAndStartKDC(Stack stack) {
         Cluster cluster = stack.getCluster();
-        InstanceGroup gateway = stack.getInstanceGroupByType(InstanceGroupType.GATEWAY);
+        InstanceGroup gateway = stack.getGatewayInstanceGroup();
         Set<String> gatewayHosts = new HashSet<>();
         for (InstanceMetaData gwNode : gateway.getInstanceMetaData()) {
             gatewayHosts.add(gwNode.getLongName());

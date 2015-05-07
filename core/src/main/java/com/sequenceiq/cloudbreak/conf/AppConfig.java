@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_INTERMEDIATE_THREADPOOL_CAPACITY_SIZE;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_INTERMEDIATE_THREADPOOL_CORE_SIZE;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_THREADPOOL_CAPACITY_SIZE;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_THREADPOOL_CORE_SIZE;
+import static com.sequenceiq.cloudbreak.orcestrator.ContainerOrchestratorTool.SWARM;
+
 import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -29,6 +35,9 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptorMapFactory;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.orcestrator.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.orcestrator.ContainerOrchestratorTool;
+import com.sequenceiq.cloudbreak.orcestrator.swarm.SwarmContainerOrchestrator;
 import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
@@ -39,14 +48,14 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 @Configuration
 public class AppConfig {
 
-    @Value("${cb.threadpool.core.size:40}")
+    @Value("${cb.threadpool.core.size:" + CB_THREADPOOL_CORE_SIZE + "}")
     private int corePoolSize;
-    @Value("${cb.threadpool.capacity.size:4000}")
+    @Value("${cb.threadpool.capacity.size:" + CB_THREADPOOL_CAPACITY_SIZE + "}")
     private int queueCapacity;
 
-    @Value("${cb.intermediate.threadpool.core.size:40}")
+    @Value("${cb.intermediate.threadpool.core.size:" + CB_INTERMEDIATE_THREADPOOL_CORE_SIZE + "}")
     private int intermediateCorePoolSize;
-    @Value("${cb.intermediate.threadpool.capacity.size:4000}")
+    @Value("${cb.intermediate.threadpool.capacity.size:" + CB_INTERMEDIATE_THREADPOOL_CAPACITY_SIZE + "}")
     private int intermediateQueueCapacity;
 
     @Autowired
@@ -67,6 +76,13 @@ public class AppConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public Map<ContainerOrchestratorTool, ContainerOrchestrator> containerOrchestrators() {
+        Map<ContainerOrchestratorTool, ContainerOrchestrator> map = new HashMap<>();
+        map.put(SWARM, new SwarmContainerOrchestrator());
+        return map;
     }
 
     @Bean

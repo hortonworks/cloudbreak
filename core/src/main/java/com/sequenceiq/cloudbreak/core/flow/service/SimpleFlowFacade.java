@@ -16,11 +16,10 @@ import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
-import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
+import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisioningService;
 
 @Service
@@ -30,9 +29,6 @@ public class SimpleFlowFacade implements FlowFacade {
     @Resource
     private Map<CloudPlatform, ProvisionSetup> provisionSetups;
 
-    @Resource
-    private Map<CloudPlatform, MetadataSetup> metadataSetups;
-
     @Autowired
     private ClusterFacade clusterFacade;
 
@@ -41,6 +37,9 @@ public class SimpleFlowFacade implements FlowFacade {
 
     @Autowired
     private ProvisioningService provisioningService;
+
+    @Autowired
+    private MetadataSetupService metadataSetupService;
 
     @Autowired
     private StackService stackService;
@@ -89,14 +88,15 @@ public class SimpleFlowFacade implements FlowFacade {
         LOGGER.debug("Metadata setup. Context: {}", context);
         try {
             ProvisioningContext provisioningContext = (ProvisioningContext) context;
-            MetadataSetupComplete metadataSetupComplete = (MetadataSetupComplete) metadataSetups.get(provisioningContext.getCloudPlatform())
-                    .setupMetadata(stackService.getById(provisioningContext.getStackId()));
+            String ambariIP = metadataSetupService.setupMetadata(
+                    provisioningContext.getCloudPlatform(),
+                    provisioningContext.getStackId());
             cloudbreakEventService.fireCloudbreakEvent(provisioningContext.getStackId(), BillingStatus.BILLING_STARTED.name(),
                     "Provision of stack is successfully finished");
             LOGGER.debug("Metadata setup DONE.");
             return new ProvisioningContext.Builder()
                     .setDefaultParams(provisioningContext.getStackId(), provisioningContext.getCloudPlatform())
-                    .setCoreInstanceMetadata(metadataSetupComplete.getCoreInstanceMetaData())
+                    .setAmbariIp(ambariIP)
                     .build();
         } catch (Exception e) {
             LOGGER.error("Exception during metadata setup: {}", e.getMessage());
@@ -105,12 +105,12 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
-    public FlowContext allocateAmbariRoles(FlowContext context) throws CloudbreakException {
+    public FlowContext setupConsulMetadata(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Allocating Ambari roles. Context: {}", context);
         try {
-            ProvisioningContext ambariRoleAllocationContext = (ProvisioningContext) clusterFacade.allocateAmbariRoles(context);
+            ProvisioningContext setupConsulMetadataContext = (ProvisioningContext) clusterFacade.setupConsulMetadata(context);
             LOGGER.debug("Allocating Ambari roles DONE.");
-            return ambariRoleAllocationContext;
+            return setupConsulMetadataContext;
         } catch (Exception e) {
             LOGGER.error("Exception during Ambari role allocation.", e);
             throw new CloudbreakException(e);
@@ -297,11 +297,26 @@ public class SimpleFlowFacade implements FlowFacade {
         }
     }
 
-    public FlowContext upscaleStack(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Upscaling of stack. Context: {}", context);
+    public FlowContext addInstances(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Adding new instances to the stack. Context: {}", context);
         try {
-            context = stackFacade.upscaleStack(context);
-            LOGGER.debug("Upscaling of stack is DONE");
+            context = stackFacade.addInstances(context);
+            LOGGER.debug("Adding new instances to the stack is DONE");
+            return context;
+        } catch (CloudbreakException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the upscaling of stack: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext extendMetadata(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Extending metadata with new instances. Context: {}", context);
+        try {
+            context = stackFacade.extendMetadata(context);
+            LOGGER.debug("Extending metadata with new instances is DONE");
             return context;
         } catch (CloudbreakException e) {
             throw e;
@@ -335,6 +350,36 @@ public class SimpleFlowFacade implements FlowFacade {
             throw e;
         } catch (Exception e) {
             LOGGER.error("Exception during the upscaling of cluster: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext bootstrapNewNodes(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Bootstrapping new nodes. Context: {}", context);
+        try {
+            context = clusterFacade.bootstrapNewNodes(context);
+            LOGGER.debug("Bootstrap of new nodes is finished.");
+            return context;
+        } catch (CloudbreakException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the upscaling of cluster nodes prepare: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext extendConsulMetadata(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Extending Consul metadata. Context: {}", context);
+        try {
+            context = clusterFacade.extendConsulMetadata(context);
+            LOGGER.debug("Extending Consul metadata is finished.");
+            return context;
+        } catch (CloudbreakException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the upscaling of cluster nodes prepare: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }
@@ -425,6 +470,21 @@ public class SimpleFlowFacade implements FlowFacade {
             throw e;
         } catch (Exception e) {
             LOGGER.error("Exception during the handling of update allowed subnet failure: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Handling cluster bootstrap. Context: {}", context);
+        try {
+            context = clusterFacade.bootstrapCluster(context);
+            LOGGER.debug("Cluster bootstrap is DONE");
+            return context;
+        } catch (CloudbreakException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the handling of munchausen setup failure: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }

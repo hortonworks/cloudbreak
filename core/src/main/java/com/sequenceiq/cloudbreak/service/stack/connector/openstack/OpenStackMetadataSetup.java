@@ -21,9 +21,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
-import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
 @Component
@@ -35,7 +32,7 @@ public class OpenStackMetadataSetup implements MetadataSetup {
     private OpenStackUtil openStackUtil;
 
     @Override
-    public ProvisionEvent setupMetadata(Stack stack) {
+    public Set<CoreInstanceMetaData> collectMetadata(Stack stack) {
         OSClient osClient = openStackUtil.createOSClient(stack);
         Resource heatResource = stack.getResourceByType(ResourceType.HEAT_STACK);
         String heatStackId = heatResource.getResourceName();
@@ -49,11 +46,11 @@ public class OpenStackMetadataSetup implements MetadataSetup {
             String instanceGroupName = metadata.get(HeatTemplateBuilder.CB_INSTANCE_GROUP_NAME);
             instancesCoreMetadata.add(createCoreMetaData(stack, server, instanceGroupName, openStackUtil.getInstanceId(instanceUUID, metadata)));
         }
-        return new MetadataSetupComplete(CloudPlatform.OPENSTACK, stack.getId(), instancesCoreMetadata);
+        return instancesCoreMetadata;
     }
 
     @Override
-    public ProvisionEvent addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, final String instanceGroupName) {
+    public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, final String instanceGroupName) {
         OSClient osClient = openStackUtil.createOSClient(stack);
         Resource heatResource = stack.getResourceByType(ResourceType.HEAT_STACK);
         String heatStackId = heatResource.getResourceName();
@@ -81,7 +78,7 @@ public class OpenStackMetadataSetup implements MetadataSetup {
                 }
             }
         }
-        return new MetadataUpdateComplete(CloudPlatform.OPENSTACK, stack.getId(), instancesCoreMetadata, instanceGroupName);
+        return instancesCoreMetadata;
     }
 
     @Override
