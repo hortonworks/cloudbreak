@@ -1,3 +1,4 @@
+<#setting number_format="computer">
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
 
