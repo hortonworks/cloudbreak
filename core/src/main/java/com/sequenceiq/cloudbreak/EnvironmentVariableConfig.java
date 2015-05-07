@@ -41,10 +41,10 @@ public class EnvironmentVariableConfig {
     public static final String CB_DOCKER_CONTAINER_DOCKER_CONSUL_WATCH_PLUGN = "sequenceiq/docker-consul-watch-plugn:2.0.0-consul";
     public static final String CB_DOCKER_CONTAINER_AMBARI_DB = "postgres:9.4.1";
 
-    public static final String CB_AZURE_IMAGE_URI = "https://102589fae040d8westeurope.blob.core.windows.net/images/packer-cloudbreak-2015-05-07-centos6-bs_2015-May-7_13-50-os-2015-05-07.vhd";
-    public static final String CB_AWS_AMI_MAP = "us-east-1:ami-3c706454,us-west-2:ami-11754521,eu-west-1:ami-7f422a08,ap-southeast-1:ami-4ae8d718,us-west-1:ami-f9739cbd,sa-east-1:ami-8fa52292,ap-northeast-1:ami-56d21d56,ap-southeast-2:ami-697b0453";
+    public static final String CB_AZURE_IMAGE_URI = "https://102589fae040d8westeurope.blob.core.windows.net/images/packer-cloudbreak-2015-05-07-centos6-mun10_2015-May-7_16-3-os-2015-05-07.vhd";
+    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-4ee7284e,ap-southeast-1:ami-b0e5dae2,ap-southeast-2:ami-1d780727,eu-west-1:ami-33593144,sa-east-1:ami-eba423f6,us-east-1:ami-606c7808,us-west-1:ami-9d709fd9,us-west-2:ami-c37848f3";
     public static final String CB_OPENSTACK_IMAGE = "cb-centos66-amb200-2015-04-19";
-    public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos66-amb200-2015-05-07-1422.image.tar.gz";
+    public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos66-amb200-2015-05-07-1639.image.tar.gz";
 
     private EnvironmentVariableConfig() {
 
