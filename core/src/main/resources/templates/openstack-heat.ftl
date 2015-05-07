@@ -75,7 +75,7 @@ resources:
   <#assign instance_id = metadata.cb_instance_group_name?replace('_', '') + "_" + metadata.cb_instance_private_id>
   <#if agent.type == "GATEWAY">
      <#assign userdata = gatewayuserdata>
-  <#elseif agent.type == "HOSTGROUP">
+  <#elseif agent.type == "CORE">
      <#assign userdata = hostgroupuserdata>
   </#if>
 
