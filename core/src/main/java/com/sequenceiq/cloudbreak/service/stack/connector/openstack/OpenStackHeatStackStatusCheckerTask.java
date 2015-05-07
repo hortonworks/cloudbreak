@@ -25,14 +25,14 @@ public class OpenStackHeatStackStatusCheckerTask extends StackBasedStatusChecker
         org.openstack4j.model.heat.Stack heatStack = osClient.heat().stacks().getDetails(stackName, heatStackId);
         String status = heatStack.getStatus();
         if (status.endsWith(FAILED_STATE)) {
-            throw new HeatStackFailedException(heatStack.getStackStatusReason());
+            throw new OpenStackResourceException(heatStack.getStackStatusReason());
         }
         return status.equalsIgnoreCase(desiredState);
     }
 
     @Override
     public void handleTimeout(OpenStackContext context) {
-        throw new HeatStackFailedException(
+        throw new OpenStackResourceException(
                 String.format("Heat stack didn't reach the desired state in the given time frame, heat id: %s", context.getSingleResource()));
     }
 

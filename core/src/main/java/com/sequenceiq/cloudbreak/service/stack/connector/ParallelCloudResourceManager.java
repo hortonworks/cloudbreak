@@ -23,6 +23,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.google.common.primitives.Ints;
+import com.sequenceiq.cloudbreak.cloud.connector.CloudConnectorException;
 import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -126,7 +127,7 @@ public class ParallelCloudResourceManager {
         } catch (Exception e) {
             String errorReason = "Error occurred when building stack resources:";
             LOGGER.error(errorReason, e);
-            throw new CloudResourceOperationFailedException(errorReason, e);
+            throw new CloudConnectorException(errorReason, e);
         }
     }
 
@@ -175,7 +176,7 @@ public class ParallelCloudResourceManager {
         } catch (Exception e) {
             String errorReason = "Error occurred when adding new resources to stack:";
             LOGGER.error(errorReason, e);
-            throw new CloudResourceOperationFailedException(errorReason, e);
+            throw new CloudConnectorException(errorReason, e);
         }
     }
 
@@ -220,7 +221,7 @@ public class ParallelCloudResourceManager {
         } catch (Exception e) {
             String errorReason = "Error occurred when removing existing resources from stack:";
             LOGGER.error(errorReason, e);
-            throw new CloudResourceOperationFailedException(errorReason, e);
+            throw new CloudConnectorException(errorReason, e);
         }
     }
 
@@ -272,7 +273,7 @@ public class ParallelCloudResourceManager {
         } catch (Exception e) {
             String errorReason = "Error occurred when terminating stack resources:";
             LOGGER.error(errorReason, e);
-            throw new CloudResourceOperationFailedException(errorReason, e);
+            throw new CloudConnectorException(errorReason, e);
         }
     }
 
@@ -311,7 +312,7 @@ public class ParallelCloudResourceManager {
         } catch (Exception e) {
             String errorReason = "Error occurred when rolling back stack resources:";
             LOGGER.error(errorReason, e);
-            throw new CloudResourceOperationFailedException(errorReason, e);
+            throw new CloudConnectorException(errorReason, e);
         }
     }
 
