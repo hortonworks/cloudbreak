@@ -183,6 +183,7 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
                 return true;
             }
         } catch (Throwable t) {
+            LOGGER.error(String.format("Exception occurred under the swarm-manager request: %s", t.getMessage()));
             return false;
         }
         return false;
@@ -197,6 +198,7 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
             dockerApiClient.infoCmd().exec();
             return true;
         } catch (Exception ex) {
+            LOGGER.error(String.format("Docker api not available: %s", ex.getMessage()));
             return false;
         }
     }

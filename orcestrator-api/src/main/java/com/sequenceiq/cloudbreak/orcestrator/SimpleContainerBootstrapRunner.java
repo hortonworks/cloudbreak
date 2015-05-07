@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.orcestrator.containers.ContainerBootstrap;
 public class SimpleContainerBootstrapRunner implements Callable<Boolean> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleContainerBootstrapRunner.class);
     private static final int MAX_RETRY_COUNT = 5;
+    private static final int SLEEP_TIME = 3000;
 
     private final ContainerBootstrap containerBootstrap;
 
@@ -32,6 +33,7 @@ public class SimpleContainerBootstrapRunner implements Callable<Boolean> {
                 actualException = ex;
                 retryCount++;
                 LOGGER.error(String.format("Container failed to start, retrying [%s/%s]: %s", MAX_RETRY_COUNT, retryCount, ex.getMessage()));
+                Thread.sleep(SLEEP_TIME);
             }
         }
         if (!success) {
