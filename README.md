@@ -31,7 +31,7 @@ First lets initialize your directory by creating a `Profile`
 ```
 cbd init
 ```
-It will create a `Profile` in the current directory. The only required 
+It will create a `Profile` in the current directory. The only required
 configuration is the `PUBLIC_IP`. This ip will be used for Cloudbreak UI
 (called Uluwatu). In some case cbd can guess it, if not it will give you a hint.
 
@@ -92,6 +92,17 @@ and than you need to recreate configs:
 rm *.yml
 cbd generate
 ```
+
+## Cloud Provider configuration
+In order to be able to assume roles on AWS you need to set up your AWS keys in the Profile file:
+```
+export AWS_ACCESS_KEY_ID=AKIA**************W7SA
+export AWS_SECRET_KEY=RWCT4Cs8******************/*skiOkWD
+```
+If you do not have plan to launch clusters in AWS, then you can safely skip these settings.
+
+For more details regarding accounts please check [Cloudbreak documentation](http://sequenceiq.com/cloudbreak/#accounts).
+
 
 ## Debug
 
