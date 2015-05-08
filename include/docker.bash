@@ -9,6 +9,24 @@ docker-check-boot2docker() {
 
     debug "TODO: check for version and instruction for update ..."
 
+    local b2dDate=$(boot2docker ssh 'date -u +%Y-%m-%d\ %H:%M')
+    local localDate=$(date -u +%Y-%m-%d\ %H:%M)
+    if [[ "$localDate" != "$b2dDate" ]];then
+        warn "Your time in boot2docker [$b2dDate] isn't the same as local time: [$localDate] "
+        warn 'Fixing it ...'
+        boot2docker ssh sudo date --set \'$(date -u +%Y-%m-%d\ %H:%M)\' | gray
+        b2dDate=$(boot2docker ssh 'date -u +%Y-%m-%d\ %H:%M')
+        localDate=$(date -u +%Y-%m-%d\ %H:%M)
+        if [[ "$localDate" != "$b2dDate" ]];then
+            echo "Couldnt correct date in boot2docker, giving up" |red
+            exit 2
+        else
+             info "boot2docker date settings: OK" | green
+        fi
+    else
+        info "boot2docker date settings: OK" | green
+    fi
+
     info "boot2docker: OK" | green
 }
 
