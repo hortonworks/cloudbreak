@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow.context;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.orcestrator.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.service.StackContext;
 
 public class BootstrapApiContext extends StackContext {

@@ -1,0 +1,17 @@
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+jar {
+    baseName = 'orchestrator-swarm'
+}
+
+dependencies {
+    compile project(':orchestrator-api')
+    compile group: 'com.github.docker-java', name: 'docker-java', version: '1.0.0'
+}

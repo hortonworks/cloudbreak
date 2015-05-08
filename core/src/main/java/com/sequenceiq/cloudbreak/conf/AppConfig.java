@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_INTERMEDIAT
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_INTERMEDIATE_THREADPOOL_CORE_SIZE;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_THREADPOOL_CAPACITY_SIZE;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_THREADPOOL_CORE_SIZE;
-import static com.sequenceiq.cloudbreak.orcestrator.ContainerOrchestratorTool.SWARM;
+import static com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorTool.SWARM;
 
 import java.io.IOException;
 import java.security.cert.CertificateException;
@@ -35,9 +35,9 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptorMapFactory;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.orcestrator.ContainerOrchestrator;
-import com.sequenceiq.cloudbreak.orcestrator.ContainerOrchestratorTool;
-import com.sequenceiq.cloudbreak.orcestrator.swarm.SwarmContainerOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorTool;
+import com.sequenceiq.cloudbreak.orchestrator.swarm.SwarmContainerOrchestrator;
 import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;

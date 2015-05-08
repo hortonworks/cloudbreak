@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static com.sequenceiq.cloudbreak.service.PollingResult.SUCCESS;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
-import static com.sequenceiq.cloudbreak.orcestrator.DockerContainer.AMBARI_DB;
-import static com.sequenceiq.cloudbreak.orcestrator.DockerContainer.AMBARI_SERVER;
+import static com.sequenceiq.cloudbreak.orchestrator.DockerContainer.AMBARI_DB;
+import static com.sequenceiq.cloudbreak.orchestrator.DockerContainer.AMBARI_SERVER;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
 import static java.util.Collections.singletonMap;
 
