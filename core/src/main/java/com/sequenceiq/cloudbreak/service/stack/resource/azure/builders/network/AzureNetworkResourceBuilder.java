@@ -12,7 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +32,7 @@ import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 import com.sequenceiq.cloudbreak.service.network.Port;
-import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureResourceException;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureCreateResourceStatusCheckerTask;
@@ -48,15 +49,15 @@ import groovyx.net.http.HttpResponseException;
 @Order(3)
 public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuilder {
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
-    @Autowired
+    @Inject
     private AzureStackUtil azureStackUtil;
-    @Autowired
+    @Inject
     private AzureCreateResourceStatusCheckerTask azureCreateResourceStatusCheckerTask;
-    @Autowired
+    @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
-    @Autowired
+    @Inject
     private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
 
     @Override
@@ -73,7 +74,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     }
 
     @Override
-    public void update(AzureUpdateContextObject updateContextObject) throws UpdateFailedException {
+    public void update(AzureUpdateContextObject updateContextObject) {
         Stack stack = updateContextObject.getStack();
         AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
         List<Port> ports = NetworkUtils.getPorts(stack);
@@ -94,10 +95,13 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
                     azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                             POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             if (isExited(pollingResult)) {
-                throw new UpdateFailedException(new IllegalStateException());
+                LOGGER.warn("Polling result: {}. Failed to update azure network resource.");
+                throw new AzureResourceException(String.format("Failed to update azure network resource; polling result: '%s', stack id", pollingResult,
+                        stack.getId()));
             }
         } catch (Exception e) {
-            throw new UpdateFailedException(e);
+            LOGGER.warn("Exception during azure network resource update.");
+            throw new AzureResourceException(String.format("Failed to update azure network resource; stack id:", stack.getId()));
         }
     }
 

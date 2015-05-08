@@ -362,7 +362,7 @@ public class ParallelCloudResourceManager {
         return finished;
     }
 
-    public void updateAllowedSubnets(Stack stack, ResourceBuilderInit resourceBuilderInit) throws UpdateFailedException {
+    public void updateAllowedSubnets(Stack stack, ResourceBuilderInit resourceBuilderInit) {
         UpdateContextObject updateContext = resourceBuilderInit.updateInit(stack);
         for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(stack.cloudPlatform())) {
             resourceBuilder.update(updateContext);

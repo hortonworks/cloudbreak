@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.ParallelCloudResourceManager;
-import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.builders.AzureResourceBuilderInit;
 
 @Service
@@ -68,7 +67,7 @@ public class AzureConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public void updateAllowedSubnets(Stack stack, String gateWayUserData, String hostGroupUserData) throws UpdateFailedException {
+    public void updateAllowedSubnets(Stack stack, String gateWayUserData, String hostGroupUserData) {
         cloudResourceManager.updateAllowedSubnets(stack, azureResourceBuilderInit);
     }
 }

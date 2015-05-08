@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyStartStopContextObject;
@@ -29,7 +28,7 @@ public class DummyExVirtualMachineResourceBuilder
     }
 
     @Override
-    public void update(UpdateContextObject updateContextObject) throws UpdateFailedException {
+    public void update(UpdateContextObject updateContextObject) {
     }
 
     @Override

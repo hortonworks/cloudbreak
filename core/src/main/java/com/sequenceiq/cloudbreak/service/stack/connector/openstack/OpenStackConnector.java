@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
-import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 
 import jersey.repackaged.com.google.common.collect.Maps;
@@ -182,12 +181,13 @@ public class OpenStackConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public void updateAllowedSubnets(Stack stack, String gateWayUserData, String hostGroupUserData) throws UpdateFailedException {
+    public void updateAllowedSubnets(Stack stack, String gateWayUserData, String hostGroupUserData) {
         Set<InstanceMetaData> metadata = instanceMetaDataRepository.findAllInStack(stack.getId());
         String heatTemplate = heatTemplateBuilder.update(stack, gateWayUserData, hostGroupUserData, metadata);
         PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
         if (isExited(pollingResult)) {
-            throw new UpdateFailedException(new IllegalStateException());
+            LOGGER.debug("polling exited during updating subnets. Failing the process; stack: {}", stack.getId());
+            throw new OpenStackResourceException(String.format("Polling exited. Failed to update subnets. stackId '%s'", stack.getId()));
         }
     }
 

@@ -99,7 +99,6 @@ import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
-import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstances;
@@ -178,18 +177,17 @@ public class AwsConnector implements CloudPlatformConnector {
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, stackId);
         List<StackStatus> errorStatuses = Arrays.asList(CREATE_FAILED, ROLLBACK_IN_PROGRESS, ROLLBACK_FAILED, ROLLBACK_COMPLETE);
         CloudFormationStackPollerObject stackPollerContext = new CloudFormationStackPollerObject(client, CREATE_COMPLETE, CREATE_FAILED, errorStatuses, stack);
-        try {
-            PollingResult pollingResult = cloudFormationPollingService
-                    .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
-            if (!isSuccess(pollingResult)) {
-                throw new AwsResourceException("Failed to create CloudFormation stack, because polling reached an invalid end state.");
-            }
-        } catch (AwsResourceException e) {
-            LOGGER.error(String.format("Failed to create CloudFormation stack: %s", stackId), e);
-            stackUpdater.updateStackStatus(stackId, Status.CREATE_FAILED, "Creation of cluster infrastructure failed: " + e.getMessage());
-            throw e;
+
+        PollingResult pollingResult = cloudFormationPollingService
+                .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
+        if (!isSuccess(pollingResult)) {
+            LOGGER.error(String.format("Failed to create CloudFormation stack: %s", stackId));
+            stackUpdater.updateStackStatus(stackId, Status.CREATE_FAILED, "Creation of cluster infrastructure failed");
+            throw new AwsResourceException(String.format("Failed to create CloudFormation stack: %s, polling result '%s'",
+                    stackId, pollingResult));
         }
         String gateWayGroupName = stack.getGatewayInstanceGroup().getGroupName();
+
         List<String> instanceIds = cfStackUtil.getInstanceIds(stack, amazonASClient, client, gateWayGroupName);
         if (!instanceIds.isEmpty()) {
             AssociateAddressRequest associateAddressRequest = new AssociateAddressRequest()
@@ -306,7 +304,7 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public void updateAllowedSubnets(Stack stack, String gateWayUserData, String hostGroupUserData) throws UpdateFailedException {
+    public void updateAllowedSubnets(Stack stack, String gateWayUserData, String hostGroupUserData) {
         String cFStackName = cfStackUtil.getCfStackName(stack);
         String snapshotId = getEbsSnapshotIdIfNeeded(stack);
         AwsNetwork awsNetwork = (AwsNetwork) stack.getNetwork();
@@ -320,14 +318,12 @@ public class AwsConnector implements CloudPlatformConnector {
         List<StackStatus> errorStatuses = Arrays.asList(UPDATE_ROLLBACK_COMPLETE, UPDATE_ROLLBACK_FAILED);
         CloudFormationStackPollerObject stackPollerContext = new CloudFormationStackPollerObject(cloudFormationClient, UPDATE_COMPLETE,
                 UPDATE_ROLLBACK_IN_PROGRESS, errorStatuses, stack);
-        try {
-            PollingResult pollingResult = cloudFormationPollingService
-                    .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
-            if (!isSuccess(pollingResult)) {
-                throw new UpdateFailedException("Failed to update Heat stack, because polling reached an invalid end state.");
-            }
-        } catch (AwsResourceException e) {
-            throw new UpdateFailedException(e);
+        PollingResult pollingResult = cloudFormationPollingService
+                .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
+        if (!isSuccess(pollingResult)) {
+            LOGGER.info("Cloud Formation Stack status check result: {} . ", pollingResult);
+            throw new AwsResourceException(String.format("Cloud Formation update failed. polling result: '%s', stack id: '%' ",
+                    pollingResult, stack.getId()));
         }
     }
 
@@ -372,18 +368,14 @@ public class AwsConnector implements CloudPlatformConnector {
             List<StackStatus> errorStatuses = Arrays.asList(DELETE_FAILED);
             CloudFormationStackPollerObject stackPollerContext = new CloudFormationStackPollerObject(client, DELETE_COMPLETE,
                     DELETE_FAILED, errorStatuses, stack);
-            try {
-                PollingResult pollingResult = cloudFormationPollingService
-                        .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
-                if (!isSuccess(pollingResult)) {
-                    throw new AwsResourceException("Failed to delete CloudFormation stack, because polling reached an invalid end state.");
-                }
-                AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
-                releaseReservedIp(stack, amazonEC2Client);
-            } catch (AwsResourceException e) {
-                LOGGER.error(String.format("Failed to delete CloudFormation stack: %s, id:%s", cFStackName, stack.getId()), e);
-                throw e;
+            PollingResult pollingResult = cloudFormationPollingService
+                    .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
+            if (!isSuccess(pollingResult)) {
+                LOGGER.error(String.format("Failed to delete CloudFormation stack: %s, id:%s", cFStackName, stack.getId()));
+                throw new AwsResourceException(String.format("Failed to delete CloudFormation stack; polling result: '%s'.", pollingResult));
             }
+            AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
+            releaseReservedIp(stack, amazonEC2Client);
         } else {
             AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
             releaseReservedIp(stack, amazonEC2Client);
@@ -438,11 +430,10 @@ public class AwsConnector implements CloudPlatformConnector {
         AmazonEC2Client ec2Client = awsStackUtil.createEC2Client(Regions.valueOf(stack.getRegion()), awsCredential);
         DescribeImagesResult images = ec2Client.describeImages(new DescribeImagesRequest().withImageIds(stack.getImage()));
         Image image = images.getImages().get(0);
-        if (image != null) {
-            return image.getRootDeviceName();
-        } else {
+        if (image == null) {
             throw new AwsResourceException(String.format("Couldn't describe AMI '%s'.", stack.getImage()));
         }
+        return image.getRootDeviceName();
     }
 
     private boolean setStackState(Stack stack, boolean stopped) {
@@ -476,7 +467,8 @@ public class AwsConnector implements CloudPlatformConnector {
                             AmbariOperationService.AMBARI_POLLING_INTERVAL,
                             AmbariOperationService.MAX_ATTEMPTS_FOR_AMBARI_OPS);
                     if (!isSuccess(pollingResult)) {
-                        throw new UpdateFailedException("Failed to update Heat stack, because polling reached an invalid end state.");
+                        LOGGER.warn("Instances are not in Running state; polling result: {} ", pollingResult);
+                        throw new AwsResourceException("Instances are not in running state!");
                     }
                     amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
                     updateInstanceMetadata(stack, amazonEC2Client, stack.getRunningInstanceMetaData(), instances);

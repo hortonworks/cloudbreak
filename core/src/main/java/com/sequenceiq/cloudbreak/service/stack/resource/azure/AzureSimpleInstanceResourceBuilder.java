@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.UpdateContextObject;
@@ -79,7 +78,7 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
     }
 
     @Override
-    public void update(UpdateContextObject updateContextObject) throws UpdateFailedException {
+    public void update(UpdateContextObject updateContextObject) {
     }
 
     @Override

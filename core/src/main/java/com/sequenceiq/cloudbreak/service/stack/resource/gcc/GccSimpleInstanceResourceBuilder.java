@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GcpResourceException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
@@ -66,7 +65,7 @@ public abstract class GccSimpleInstanceResourceBuilder implements
     }
 
     @Override
-    public void update(UpdateContextObject updateContextObject) throws UpdateFailedException {
+    public void update(UpdateContextObject updateContextObject) {
     }
 
     @Override
