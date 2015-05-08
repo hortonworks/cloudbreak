@@ -19,7 +19,7 @@ make tests
 If you want to test the binary CircleCI build from your branch named `fix-something`, to validate the PR binary `cbd` tool will be tested. It is built by CircleCI for each branch.
 
 ```
-cbdl update-snap fix-something
+cbd update fix-something
 ```
 
 ## Testing
