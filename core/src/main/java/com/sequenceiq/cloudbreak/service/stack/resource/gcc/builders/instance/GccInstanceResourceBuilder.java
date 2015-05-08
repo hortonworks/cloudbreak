@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.gcc.builders.instance;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_GCP_AND_AZURE_USER_NAME;
 import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateway;
 
 import java.io.IOException;
@@ -183,7 +184,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
 
         Metadata.Items sshMetaData = new Metadata.Items();
         sshMetaData.setKey("sshKeys");
-        sshMetaData.setValue("ubuntu:" + gccCredential.getPublicKey());
+        sshMetaData.setValue(CB_GCP_AND_AZURE_USER_NAME + ":" + gccCredential.getPublicKey());
 
         Metadata.Items startupScript = new Metadata.Items();
         startupScript.setKey("startup-script");

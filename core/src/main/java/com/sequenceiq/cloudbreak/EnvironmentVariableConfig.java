@@ -46,6 +46,8 @@ public class EnvironmentVariableConfig {
     public static final String CB_OPENSTACK_IMAGE = "cb-centos66-amb200-2015-05-08";
     public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos66-amb200-2015-05-07-1639.image.tar.gz";
 
+    public static final String CB_GCP_AND_AZURE_USER_NAME = "cloudbreak";
+
     private EnvironmentVariableConfig() {
 
     }

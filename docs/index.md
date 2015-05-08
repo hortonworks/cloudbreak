@@ -386,6 +386,7 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 
 `Public in account:` share it with others in the account
 
+The ssh username is ec2-user
 
 **Azure**
 
@@ -399,6 +400,7 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 
 `SSH certificate:` the SSH public certificate in OpenSSH format that's private keypair can be used to log into the launched instances later (The key generation process is described in the Configuring the Microsoft Azure account section)
 
+The ssh username is cloudbreak
 
 **Google Cloud Platform**
 
@@ -416,6 +418,7 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 
 `Public in account:` share it with others in the account
 
+The ssh username is cloudbreak.
 
 **OpenStack**
 
