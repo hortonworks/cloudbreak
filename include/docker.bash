@@ -12,7 +12,7 @@ docker-check-boot2docker() {
     local b2dDate=$(boot2docker ssh 'date -u +%Y-%m-%d\ %H:%M')
     local localDate=$(date -u +%Y-%m-%d\ %H:%M)
     if [[ "$localDate" != "$b2dDate" ]];then
-        warn "Your time in boot2docker [$b2dDate] isn't the same as local time: [$localDate] "
+        warn "Your UTC time in boot2docker [$b2dDate] isn't the same as local time: [$localDate] "
         warn 'Fixing it ...'
         boot2docker ssh sudo date --set \'$(date -u +%Y-%m-%d\ %H:%M)\' | gray
         b2dDate=$(boot2docker ssh 'date -u +%Y-%m-%d\ %H:%M')
