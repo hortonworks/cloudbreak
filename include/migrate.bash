@@ -18,7 +18,7 @@ migrate-execute-mybatis-migrations() {
 
     local docker_image_name=$1 && shift
     local service_name=$1 && shift
-    local container_name=$(docker-get-name $service_name)
+    local container_name=$(compose-get-container $service_name)
     info "Migration command will be executed on container: $container_name"
     if [ -z "$container_name" ]
     then

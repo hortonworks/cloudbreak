@@ -12,13 +12,6 @@ docker-check-boot2docker() {
     info "boot2docker: OK" | green
 }
 
-docker-get-name() {
-    declare desc="Get the name of the container based on a pattern"
-    local container_name=$(docker ps  | grep $1 | awk '{print $NF}')
-
-    echo $container_name
-}
-
 docker-getversion() {
     declare desc="Gets the numeric version from version string"
 

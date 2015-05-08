@@ -36,6 +36,12 @@ compose-kill() {
     dockerCompose rm -f
 }
 
+compose-get-container() {
+    declare desc=""
+    declare service="${1:? required: service name}"
+    dockerCompose ps -q "${service}"
+}
+
 compose-logs() {
     declare desc="Whach all container logs in colored version"
 
