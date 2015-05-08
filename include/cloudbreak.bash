@@ -17,24 +17,25 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_CONSUL v0.5.0-v3
     env-import DOCKER_TAG_REGISTRATOR v5
     env-import DOCKER_TAG_POSTGRES 9.4.1
-    env-import DOCKER_TAG_CBDB 0.5.20
+    env-import DOCKER_TAG_CLOUDBREAK 0.5.32
+    env-import DOCKER_TAG_CBDB 0.5.32
+    env-import DOCKER_TAG_PERISCOPE 0.5.3
     env-import DOCKER_TAG_PCDB 0.5.2
     env-import DOCKER_TAG_UAA 1.8.1-v1
     env-import DOCKER_TAG_CBSHELL 0.2.47
-    env-import DOCKER_TAG_CLOUDBREAK 0.5.20
-    env-import DOCKER_TAG_ULUWATU 0.5.4
-    env-import DOCKER_TAG_SULTANS 0.4.6
-    env-import DOCKER_TAG_PERISCOPE 0.5.2
+    env-import DOCKER_TAG_ULUWATU 0.5.10
+    env-import DOCKER_TAG_SULTANS 0.5.1
     env-import DOCKER_TAG_AMBASSADOR latest
 }
 
 cloudbreak-conf-images() {
     declare desc="Defines base images for each provider"
 
-    env-import CB_AZURE_IMAGE_URI "https://102589fae040d8westeurope.blob.core.windows.net/images/packer-cloudbreak-2015-03-10-centos6_2015-March-10_17-15-os-2015-03-10.vhd"
-    env-import CB_GCP_SOURCE_IMAGE_PATH "sequenceiqimage/sequenceiq-ambari17-consul-centos-2015-03-10-1449.image.tar.gz"
-    env-import CB_AWS_AMI_MAP "ap-northeast-1:ami-c528c3c5,ap-southeast-2:ami-e7c3b2dd,sa-east-1:ami-c5e55dd8,ap-southeast-1:ami-42c3f510,eu-west-1:ami-bb35a7cc,us-west-1:ami-4b20c70f,us-west-2:ami-eb1f3ddb,us-east-1:ami-00391e68"
-    env-import CB_OPENSTACK_IMAGE "cloudbreak-centos-amb17-2015-04-02"
+    env-import CB_AZURE_IMAGE_URI "https://102589fae040d8westeurope.blob.core.windows.net/images/packer-cloudbreak-2015-05-07-centos6-mun10_2015-May-7_16-3-os-2015-05-07.vhd"
+    env-import CB_AWS_AMI_MAP "ap-northeast-1:ami-4ee7284e,ap-southeast-1:ami-b0e5dae2,ap-southeast-2:ami-1d780727,eu-west-1:ami-33593144,sa-east-1:ami-eba423f6,us-east-1:ami-606c7808,us-west-1:ami-9d709fd9,us-west-2:ami-c37848f3"
+    env-import CB_OPENSTACK_IMAGE "cb-centos66-amb200-2015-05-08"
+    env-import CB_GCP_SOURCE_IMAGE_PATH "sequenceiqimage/cb-centos66-amb200-2015-05-07-1639.image.tar.gz"
+
 }
 
 cloudbreak-conf-smtp() {
