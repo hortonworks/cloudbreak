@@ -149,8 +149,8 @@ cbdb:
 
 cloudbreak:
     environment:
-        #- AWS_ACCESS_KEY_ID=
-        #- AWS_SECRET_KEY=
+        - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+        - AWS_SECRET_KEY=$AWS_SECRET_KEY
         - SERVICE_NAME=cloudbreak
           #- SERVICE_CHECK_HTTP=/info
         - CB_CLIENT_ID=$UAA_CLOUDBREAK_ID

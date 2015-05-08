@@ -17,13 +17,15 @@
 ### Added
 
 - Command `generate` checks and shows if Profile change would result in yaml change.
-- Command `start`: prints uluwatu url and credential hint 
+- Command `start`: prints uluwatu url and credential hint
 - Command `doctor`: fixes boot2docker date/time if not the same as on the host
 - Internal command: `browse` added to be able to automatically open a browser to a specified url.
 - Mini Getting Started guide added into README
 - `make dev-debug` installs a special cbd on local OSX, which doesn’t includes *.bash scrips, only refers them
    by path. No need to `make dev` to test small changes in bash scripts.
-   
+- Load AWS key and AWS id from Profile
+
+
 ### Removed
 
 ### Changed

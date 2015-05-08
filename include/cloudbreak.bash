@@ -7,6 +7,7 @@ cloudbreak-config() {
   cloudbreak-conf-defaults
   cloudbreak-conf-uaa
   cloudbreak-conf-smtp
+  cloudbreak-conf-cloud-provider
 }
 
 cloudbreak-conf-tags() {
@@ -94,6 +95,14 @@ cloudbreak-conf-defaults() {
     env-import CB_BLUEPRINT_DEFAULTS "multi-node-hdfs-yarn,hdp-multinode-default"
 }
 
+cloudbreak-conf-cloud-provider() {
+    declare desc="Defines cloud provider related parameters"
+
+    env-import AWS_ACCESS_KEY_ID ""
+    env-import AWS_SECRET_KEY ""
+
+}
+
 gen-password() {
     date +%s | checksum sha1 | head -c 10
 }
@@ -102,7 +111,7 @@ generate_uaa_config() {
     cloudbreak-config
 
     if [ -f uaa.yml ]; then
-        
+
         generate_uaa_config_force /tmp/uaa-delme.yml
         if diff /tmp/uaa-delme.yml uaa.yml &> /dev/null; then
             debug "uaa.yml exists and generate wouldn't change it"
