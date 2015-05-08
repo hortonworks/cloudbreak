@@ -33,6 +33,7 @@
 - uaa.yml generation wont overwrite, just instruct to move existing file (like docker-compose.yml generation)
 - Command `init` hint fixed on linux.
 - Command `init` advise to run `generate` if it finds a Profile
+- Command `init` set PRIVATE_IP the same as PUBLIC_IP for boot2docker
 - Command `migrate` is introduced for db migration see `Migrate the databases` section of README
 - Command `startdb` starts the cbdb and pcdb database containers only
 - Databases are not deleted after boot2docker restart
