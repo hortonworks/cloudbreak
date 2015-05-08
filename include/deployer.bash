@@ -100,7 +100,8 @@ init-profile() {
         fi
         exit 2
     fi
-
+    
+    doctor
 }
 
 load-profile() {
@@ -127,15 +128,16 @@ load-profile() {
 }
 
 doctor() {
-    declare desc="Checks everything, and reports a diagnose"
+    declare desc="===> Deployer doctor: Checks your environment, and reports a diagnose."
 
+    info "$desc"
+    cbd-version
     if [[ "$(uname)" == "Darwin" ]]; then
         debug "checking boot2docker on OSX only ..."
         docker-check-boot2docker
     fi
 
     docker-check-version
-    info "Cloudbreak deployer installed; no errors found."
 }
 
 cbd-find-root() {
