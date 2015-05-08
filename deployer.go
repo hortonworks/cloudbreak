@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/progrium/go-basher"
+	"github.com/skratchdot/open-golang/open"
 )
 
 var Version string
@@ -84,6 +85,13 @@ func application(
 	os.Exit(status)
 }
 
+func OpenBrowser(args []string) {
+	err := open.Start(args[0])
+	if err != nil {
+		fatal("Can't open browser: '" + err.Error())
+	}
+}
+
 func Checksum(args []string) {
 	if len(args) < 1 {
 		fatal("No algorithm specified")
@@ -112,6 +120,7 @@ func main() {
 	application(map[string]func([]string){
 		"checksum":    Checksum,
 		"bin-version": BinVersion,
+		"browse":      OpenBrowser,
 	}, []string{
 		"include/circle.bash",
 		"include/cloudbreak.bash",

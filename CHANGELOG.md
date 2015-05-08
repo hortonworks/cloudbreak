@@ -31,6 +31,7 @@
 
 ### Added
 
+- Internal command: `browse` added to be able to automatically open a browser to a specified url.
 - Command `generate` checks and shows if Profile change would result in yaml change.
 - Command `init` creates Profile
 - Install cbd to a directory which is available on $PATH
