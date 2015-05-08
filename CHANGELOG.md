@@ -2,6 +2,16 @@
 
 ### Fixed
 
+### Added
+
+### Removed
+
+### Changed
+
+## [v0.5.0] - 2015-05-08
+
+### Fixed
+
 - Command `pull` generates yaml files in case they are missing #31
 
 ### Added
