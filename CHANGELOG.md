@@ -31,6 +31,7 @@
 
 ### Added
 
+- Command `start`: prints uluwatu url and credential hint 
 - Command `doctor`: fixes boot2docker date/time if not the same as on the host
 - Internal command: `browse` added to be able to automatically open a browser to a specified url.
 - Command `generate` checks and shows if Profile change would result in yaml change.

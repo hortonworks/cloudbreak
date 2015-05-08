@@ -27,6 +27,12 @@ compose-up() {
 
     deployer-generate
     dockerCompose up -d $services
+
+    info "CloudBreak containers are started ..."
+    info "In a couple of minutes you can reach the UI (called Uluwatu)"
+    echo "  http://$PUBLIC_IP:3000" | blue
+    warn "Credentials are not printed here. You can get them by:"
+    echo '  cbd env show|grep "UAA_DEFAULT_SECRET\|UAA_DEFAULT_USER_EMAIL"' | blue
 }
 
 compose-kill() {
