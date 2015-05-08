@@ -43,7 +43,7 @@ public class EnvironmentVariableConfig {
 
     public static final String CB_AZURE_IMAGE_URI = "https://102589fae040d8westeurope.blob.core.windows.net/images/packer-cloudbreak-2015-05-07-centos6-mun10_2015-May-7_16-3-os-2015-05-07.vhd";
     public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-4ee7284e,ap-southeast-1:ami-b0e5dae2,ap-southeast-2:ami-1d780727,eu-west-1:ami-33593144,sa-east-1:ami-eba423f6,us-east-1:ami-606c7808,us-west-1:ami-9d709fd9,us-west-2:ami-c37848f3";
-    public static final String CB_OPENSTACK_IMAGE = "cb-centos66-amb200-2015-04-19";
+    public static final String CB_OPENSTACK_IMAGE = "cb-centos66-amb200-2015-05-08";
     public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos66-amb200-2015-05-07-1639.image.tar.gz";
 
     private EnvironmentVariableConfig() {
