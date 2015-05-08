@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow;
+package com.sequenceiq.cloudbreak.orchestrator.swarm;
 
 import java.util.Set;
 

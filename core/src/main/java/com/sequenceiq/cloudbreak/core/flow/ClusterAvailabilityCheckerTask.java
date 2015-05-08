@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.core.flow.context.ContainerOrchestratorClusterContext;
-import com.sequenceiq.cloudbreak.orcestrator.ContainerOrchestratorCluster;
+import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
