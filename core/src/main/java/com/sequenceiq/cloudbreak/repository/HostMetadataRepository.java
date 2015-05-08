@@ -10,5 +10,4 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 public interface HostMetadataRepository extends CrudRepository<HostMetadata, Long> {
 
     Set<HostMetadata> findHostsInCluster(@Param("clusterId") Long clusterId);
-
 }

@@ -54,7 +54,7 @@ public class ScalingFailureHandlerService implements FailureHandlerService {
             List<Resource> resourceList = new ArrayList<>();
             LOGGER.error("Error: {}", exception.getException().orNull().getMessage());
             for (Resource resource : exception.getResources()) {
-                Resource newResource = resourceRepository.findByStackIdAndName(stack.getId(), resource.getResourceName(), resource.getResourceType());
+                Resource newResource = resourceRepository.findByStackIdAndNameAndType(stack.getId(), resource.getResourceName(), resource.getResourceType());
                 if (newResource != null) {
                     LOGGER.info("Resource will be rolled back. name: {}, id: {}, type: {}", newResource.getResourceName(), newResource.getId(),
                             newResource.getResourceType());

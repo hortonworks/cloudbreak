@@ -51,7 +51,7 @@ public class ConsulMetadataSetup {
     public void setupConsulMetadata(Long stackId) {
         LOGGER.info("Setting up Consul metadata for the cluster.");
         Stack stack = stackService.getById(stackId);
-        Set<InstanceMetaData> allInstanceMetaData = stack.getAllInstanceMetaData();
+        Set<InstanceMetaData> allInstanceMetaData = stack.getRunningInstanceMetaData();
         PollingResult pollingResult = waitForConsulAgents(stack, allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
         if (!isSuccess(pollingResult)) {
             throw new WrongMetadataException("Connecting to consul hosts is interrupted.");

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator;
 
+import java.util.List;
 import java.util.Set;
 
 public interface ContainerOrchestrator {
@@ -13,6 +14,7 @@ public interface ContainerOrchestrator {
     void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, int count) throws CloudbreakOrchestratorException;
 
     boolean areAllNodesAvailable(String gatewayAddress, Set<Node> nodes);
+    List<String> getAvailableNodes(String gatewayAddress, Set<Node> nodes);
     boolean isBootstrapApiAvailable(String gatewayAddress);
 
     int getMaxBootstrapNodes();

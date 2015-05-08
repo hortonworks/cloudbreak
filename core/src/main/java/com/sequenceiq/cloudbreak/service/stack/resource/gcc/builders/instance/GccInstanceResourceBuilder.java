@@ -277,8 +277,8 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     private void updateInstanceMetadata(GccStartStopContextObject startStopContextObject, Resource resource) {
         Instance instance = gccStackUtil.getInstance(startStopContextObject.getStack(), startStopContextObject.getCompute(), resource);
         if (instance != null) {
-            InstanceMetaData metaData = instanceMetaDataRepository.findByInstanceId(resource.getResourceName());
             Stack stack = startStopContextObject.getStack();
+            InstanceMetaData metaData = instanceMetaDataRepository.findByInstanceId(stack.getId(), resource.getResourceName());
             String publicIP = instance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP();
             if (metaData.getAmbariServer()) {
                 stack.setAmbariIp(publicIP);

@@ -57,6 +57,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     @Override
     public void bootstrap(String gatewayAddress, Set<Node> nodes, int consulServerCount) throws CloudbreakOrchestratorException {
         try {
+
             String privateGatewayIp = getPrivateGatewayIp(gatewayAddress, nodes);
             Set<String> privateAddresses = getPrivateAddresses(nodes);
             Set<String> privateAddressesWithoutGateway = getPrivateAddresses(getNodesWithoutGateway(gatewayAddress, nodes));
@@ -173,33 +174,45 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     public boolean areAllNodesAvailable(String gatewayAddress, Set<Node> nodes) {
         LOGGER.info("Checking if Swarm manager is available and if the agents are registered.");
         try {
+            List<String> allAvailableNode = getAvailableNodes(gatewayAddress, nodes);
+            if (allAvailableNode.size() == getPrivateAddresses(nodes).size()) {
+                return true;
+            }
+        } catch (Throwable t) {
+            LOGGER.info(String.format("Cannot connect to Swarm manager, maybe it hasn't started yet: %s", t.getMessage()));
+            return false;
+        }
+        return false;
+    }
+
+    @Override
+    public List<String> getAvailableNodes(String gatewayAddress, Set<Node> nodes) {
+        LOGGER.info("Checking if Swarm manager is available and if the agents are registered.");
+        List<String> privateAddresses = new ArrayList<>();
+        try {
             DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(gatewayAddress))
                     .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
                     .build();
             List<Object> driverStatus = swarmManagerClient.infoCmd().exec().getDriverStatuses();
             LOGGER.debug("Swarm manager is available, checking registered agents.");
-            int found = 0;
             for (Object element : driverStatus) {
                 try {
                     List objects = (ArrayList) element;
-                    for (String address : getPrivateAddresses(nodes)) {
-                        if (((String) objects.get(1)).split(":")[0].equals(address)) {
-                            found++;
+                    for (Node node : nodes) {
+                        if (((String) objects.get(1)).split(":")[0].equals(node.getPrivateIp())) {
+                            privateAddresses.add(node.getPrivateIp());
                             break;
                         }
                     }
                 } catch (Exception e) {
-                    LOGGER.error(String.format("Docker info returned an unexpected element: %s", element), e);
+                    LOGGER.warn(String.format("Docker info returned an unexpected element: %s", element), e);
                 }
             }
-            if (found == getPrivateAddresses(nodes).size()) {
-                return true;
-            }
+            return privateAddresses;
         } catch (Throwable t) {
-            LOGGER.error(String.format("Exception occurred under the swarm-manager request: %s", t.getMessage()));
-            return false;
+            LOGGER.warn(String.format("Cannot connect to Swarm manager, maybe it hasn't started yet: %s", t.getMessage()));
+            return privateAddresses;
         }
-        return false;
     }
 
     @Override
@@ -211,7 +224,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             dockerApiClient.infoCmd().exec();
             return true;
         } catch (Exception ex) {
-            LOGGER.error(String.format("Docker api not available: %s", ex.getMessage()));
+            LOGGER.warn(String.format("Docker api not available: %s", ex.getMessage()));
             return false;
         }
     }
@@ -245,7 +258,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         return sb.toString().substring(0, sb.toString().length() - 1);
     }
 
-    private Set<String> getPrivateAddresses(Set<Node> nodes) {
+    private Set<String> getPrivateAddresses(Collection<Node> nodes) {
         Set<String> privateAddresses = new HashSet<>();
         for (Node node : nodes) {
             privateAddresses.add(node.getPrivateIp());
@@ -253,7 +266,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         return privateAddresses;
     }
 
-    private String getPrivateGatewayIp(String gatewayAddress, Set<Node> nodes) {
+    private String getPrivateGatewayIp(String gatewayAddress, Collection<Node> nodes) {
         for (Node node : nodes) {
             if (node.getPublicIp() != null && node.getPublicIp().equals(gatewayAddress)) {
                 return node.getPrivateIp();
@@ -262,7 +275,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         return null;
     }
 
-    private Node getGatewayNode(String gatewayAddress, Set<Node> nodes) {
+    private Node getGatewayNode(String gatewayAddress, Collection<Node> nodes) {
         for (Node node : nodes) {
             if (node.getPublicIp() != null && node.getPublicIp().equals(gatewayAddress)) {
                 return node;
@@ -271,7 +284,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         throw new RuntimeException("Gateway not found in cluster");
     }
 
-    private Set<Node> getNodesWithoutGateway(String gatewayAddress, Set<Node> nodes) {
+    private Set<Node> getNodesWithoutGateway(String gatewayAddress, Collection<Node> nodes) {
         Set<Node> coreNodes = new HashSet<>();
         for (Node node : nodes) {
             if (node.getPublicIp() == null || !node.getPublicIp().equals(gatewayAddress)) {
@@ -282,7 +295,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @VisibleForTesting
-    Set<String> prepareDockerAddressInventory(Set<String> nodeAddresses) {
+    Set<String> prepareDockerAddressInventory(Collection<String> nodeAddresses) {
         Set<String> nodeResult = new HashSet<>();
         for (String nodeAddress : nodeAddresses) {
             nodeResult.add(String.format("%s:2376", nodeAddress));
