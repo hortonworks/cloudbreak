@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.flow.ClusterBootstrapper;
+import com.sequenceiq.cloudbreak.core.flow.ClusterContainerRunner;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListenerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
-import com.sequenceiq.cloudbreak.service.stack.flow.ConsulMetadataSetup;
 
 @Service
 public class AmbariClusterFacade implements ClusterFacade {
@@ -47,9 +46,6 @@ public class AmbariClusterFacade implements ClusterFacade {
     private static final int SEC_PER_MIN = 60;
     private static final int MAX_POLLING_ATTEMPTS = SEC_PER_MIN / (POLLING_INTERVAL / MS_PER_SEC) * 10;
     private static final String ADMIN = "admin";
-
-    @Autowired
-    private ConsulMetadataSetup consulMetadataSetup;
 
     @Autowired
     private AmbariClientProvider ambariClientProvider;
@@ -85,16 +81,7 @@ public class AmbariClusterFacade implements ClusterFacade {
     private ClusterSecurityService securityService;
 
     @Autowired
-    private ClusterBootstrapper clusterBootstrapper;
-
-    @Override
-    public FlowContext setupConsulMetadata(FlowContext context) throws Exception {
-        ProvisioningContext provisioningContext = (ProvisioningContext) context;
-        MDCBuilder.buildMdcContext(stackService.getById(provisioningContext.getStackId()));
-        LOGGER.debug("Allocating Ambari roles. Context: {}", context);
-        consulMetadataSetup.setupConsulMetadata(provisioningContext.getStackId());
-        return provisioningContext;
-    }
+    private ClusterContainerRunner containerRunner;
 
     @Override
     public FlowContext startAmbari(FlowContext context) throws Exception {
@@ -241,11 +228,14 @@ public class AmbariClusterFacade implements ClusterFacade {
     }
 
     @Override
-    public FlowContext extendConsulMetadata(FlowContext context) throws CloudbreakException {
-        ClusterScalingContext clusterScalingContext = (ClusterScalingContext) context;
-        MDCBuilder.buildMdcContext(stackService.getById(clusterScalingContext.getStackId()));
-        consulMetadataSetup.setupNewConsulMetadata(clusterScalingContext);
-        return clusterScalingContext;
+    public FlowContext addClusterContainers(FlowContext context) throws CloudbreakException {
+        try {
+            containerRunner.addClusterContainers((ClusterScalingContext) context);
+            return context;
+        } catch (Exception e) {
+            LOGGER.error("Error occurred while setting up containers for the cluster: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
     }
 
     @Override
@@ -262,25 +252,12 @@ public class AmbariClusterFacade implements ClusterFacade {
     }
 
     @Override
-    public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
+    public FlowContext runClusterContainers(FlowContext context) throws CloudbreakException {
         try {
-            ProvisioningContext provisioningContext = (ProvisioningContext) context;
-            return clusterBootstrapper.bootstrapCluster(provisioningContext);
+            containerRunner.runClusterContainers((ProvisioningContext) context);
+            return context;
         } catch (Exception e) {
             LOGGER.error("Error occurred while setting up containers for the cluster: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext bootstrapNewNodes(FlowContext context) throws CloudbreakException {
-        ClusterScalingContext scalingContext = (ClusterScalingContext) context;
-        try {
-            clusterBootstrapper.bootstrapNewNodes(scalingContext);
-            stackUpdater.updateStackStatus(scalingContext.getStackId(), Status.AVAILABLE, "");
-            return scalingContext;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the handling of munchausen setup: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }
@@ -302,7 +279,8 @@ public class AmbariClusterFacade implements ClusterFacade {
                 scalingContext.getCandidates().size() * (-1),
                 hostGroup.getInstanceGroup().getGroupName(),
                 null,
-                scalingContext.getScalingType());
+                scalingContext.getScalingType(),
+                null);
         return stackScalingContext;
     }
 

@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.catalog.model.CatalogService;
 import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -61,12 +60,12 @@ public class ConsulMetadataSetup {
         instanceMetaDataRepository.save(allInstanceMetaData);
     }
 
-    public void setupNewConsulMetadata(ClusterScalingContext context) {
+    public void setupNewConsulMetadata(Long stackId, Set<String> newAddresses) {
         LOGGER.info("Extending Consul metadata.");
-        Stack stack = stackService.getById(context.getStackId());
+        Stack stack = stackService.getById(stackId);
         Set<InstanceMetaData> newInstanceMetadata = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
-            if (context.getUpscaleCandidateAddresses().contains(instanceMetaData.getPrivateIp())) {
+            if (newAddresses.contains(instanceMetaData.getPrivateIp())) {
                 newInstanceMetadata.add(instanceMetaData);
             }
         }
@@ -116,14 +115,12 @@ public class ConsulMetadataSetup {
         for (InstanceMetaData instanceMetaData : metadataToUpdate) {
             String privateIp = instanceMetaData.getPrivateIp();
             String address = members.get(privateIp);
-            if (!instanceMetaData.getLongName().endsWith(ConsulUtils.CONSUL_DOMAIN)) {
-                if (consulServers.contains(privateIp)) {
-                    instanceMetaData.setConsulServer(true);
-                } else {
-                    instanceMetaData.setConsulServer(false);
-                }
-                instanceMetaData.setLongName(address + ConsulUtils.CONSUL_DOMAIN);
+            if (consulServers.contains(privateIp)) {
+                instanceMetaData.setConsulServer(true);
+            } else {
+                instanceMetaData.setConsulServer(false);
             }
+            instanceMetaData.setDiscoveryFQDN(address + ConsulUtils.CONSUL_DOMAIN);
         }
     }
 

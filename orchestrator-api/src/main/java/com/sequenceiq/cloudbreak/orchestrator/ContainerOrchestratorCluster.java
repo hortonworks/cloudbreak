@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.orchestrator;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class ContainerOrchestratorCluster {
+public class ContainerOrchestratorCluster {
     private String apiAddress;
     private Set<Node> nodes = new HashSet<>();
 

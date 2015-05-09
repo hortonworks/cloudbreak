@@ -45,10 +45,10 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
      * @param gatewayAddress    Public address of the gateway instance
      * @param nodes             Nodes that must be added to the Swarm cluster
      * @param consulServerCount Number of Consul servers in the cluster
+     * @return The API address of the container orchestrator
      */
     @Override
-    public ContainerOrchestratorCluster bootstrap(String gatewayAddress, Set<Node> nodes, int consulServerCount)
-            throws CloudbreakOrchestratorException {
+    public void bootstrap(String gatewayAddress, Set<Node> nodes, int consulServerCount) throws CloudbreakOrchestratorException {
         try {
             String privateGatewayIp = getPrivateGatewayIp(gatewayAddress, nodes);
             Set<String> privateAddresses = getPrivateAddresses(nodes);
@@ -60,27 +60,19 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
                     .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl()).build();
             String[] cmd = {"--debug", "bootstrap", "--wait", MUNCHAUSEN_WAIT, "--consulServers", consulServers, dockerAddresses};
             new MunchausenBootstrap(dockerApiClient, MUNCHAUSEN_DOCKER_IMAGE, cmd).call();
-            DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(gatewayAddress))
-                    .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
-                    .build();
-            return new SwarmCluster(gatewayAddress, nodes, swarmManagerClient);
         } catch (Exception e) {
             throw new CloudbreakOrchestratorException(e);
         }
     }
 
     @Override
-    public ContainerOrchestratorCluster bootstrapNewNodes(String gatewayAddress, Set<Node> nodes) throws CloudbreakOrchestratorException {
+    public void bootstrapNewNodes(String gatewayAddress, Set<Node> nodes) throws CloudbreakOrchestratorException {
         try {
             DockerClient dockerApiClient = DockerClientBuilder.getInstance(getDockerClientConfig(gatewayAddress)).build();
             Set<String> privateAddresses = getPrivateAddresses(nodes);
             String[] cmd = {"--debug", "add", "--wait", MUNCHAUSEN_WAIT, "--join", getConsulJoinIp(gatewayAddress),
                     prepareDockerAddressInventory(privateAddresses)};
             new MunchausenBootstrap(dockerApiClient, MUNCHAUSEN_DOCKER_IMAGE, cmd).call();
-            DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(gatewayAddress))
-                    .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
-                    .build();
-            return new SwarmCluster(gatewayAddress, nodes, swarmManagerClient);
         } catch (Exception e) {
             throw new CloudbreakOrchestratorException(e);
         }
@@ -90,7 +82,9 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
     public void startRegistrator(ContainerOrchestratorCluster cluster, String imageName) throws CloudbreakOrchestratorException {
         try {
             Node gateway = getGatewayNode(cluster.getApiAddress(), cluster.getNodes());
-            DockerClient swarmManagerClient = ((SwarmCluster) cluster).getDockerClient();
+            DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(cluster.getApiAddress()))
+                    .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
+                    .build();
             simpleContainerBootstrapRunner(new RegistratorBootstrap(swarmManagerClient, imageName, gateway.getHostname(), gateway.getPrivateIp())).call();
         } catch (Exception e) {
             throw new CloudbreakOrchestratorException(e);
@@ -101,7 +95,9 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
     public void startAmbariServer(ContainerOrchestratorCluster cluster, String dbImageName,
             String serverImageName, String platform) throws CloudbreakOrchestratorException {
         try {
-            DockerClient swarmManagerClient = ((SwarmCluster) cluster).getDockerClient();
+            DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(cluster.getApiAddress()))
+                    .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
+                    .build();
             simpleContainerBootstrapRunner(new AmbariServerDatabaseBootstrap(swarmManagerClient, dbImageName)).call();
             simpleContainerBootstrapRunner(new AmbariServerBootstrap(swarmManagerClient, serverImageName, platform)).call();
         } catch (Exception e) {
@@ -117,14 +113,16 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
         try {
             ExecutorService executor = Executors.newFixedThreadPool(TEN);
             List<Future<Boolean>> futures = new ArrayList<>();
-            DockerClient manager = ((SwarmCluster) cluster).getDockerClient();
+            DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(cluster.getApiAddress()))
+                    .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
+                    .build();
             Set<Node> nodes = getNodesWithoutGateway(cluster.getApiAddress(), cluster.getNodes());
             Iterator<Node> nodeIterator = nodes.iterator();
             for (int i = 0; i < count; i++) {
                 Node node = nodeIterator.next();
                 String time = String.valueOf(new Date().getTime()) + i;
                 AmbariAgentBootstrap ambariAgentBootstrap =
-                        new AmbariAgentBootstrap(manager, imageName, node.getHostname(), node.getDataVolumes(), time, platform);
+                        new AmbariAgentBootstrap(swarmManagerClient, imageName, node.getHostname(), node.getDataVolumes(), time, platform);
                 futures.add(executor.submit(simpleContainerBootstrapRunner(ambariAgentBootstrap)));
             }
             for (Future<Boolean> future : futures) {
@@ -143,7 +141,9 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
         try {
             ExecutorService executorService = Executors.newFixedThreadPool(TEN);
             List<Future<Boolean>> futures = new ArrayList<>();
-            DockerClient swarmManagerClient = ((SwarmCluster) cluster).getDockerClient();
+            DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(cluster.getApiAddress()))
+                    .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
+                    .build();
             for (int i = 0; i < count; i++) {
                 String time = String.valueOf(new Date().getTime()) + i;
                 futures.add(executorService.submit(simpleContainerBootstrapRunner(new ConsulWatchBootstrap(swarmManagerClient, imageName, time))));

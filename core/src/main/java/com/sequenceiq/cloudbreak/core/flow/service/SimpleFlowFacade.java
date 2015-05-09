@@ -106,11 +106,24 @@ public class SimpleFlowFacade implements FlowFacade {
 
     @Override
     public FlowContext setupConsulMetadata(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Allocating Ambari roles. Context: {}", context);
+        LOGGER.debug("Setting up Consul metadata. Context: {}", context);
         try {
-            ProvisioningContext setupConsulMetadataContext = (ProvisioningContext) clusterFacade.setupConsulMetadata(context);
-            LOGGER.debug("Allocating Ambari roles DONE.");
+            ProvisioningContext setupConsulMetadataContext = (ProvisioningContext) stackFacade.setupConsulMetadata(context);
+            LOGGER.debug("Setting up Consul metadata is DONE.");
             return setupConsulMetadataContext;
+        } catch (Exception e) {
+            LOGGER.error("Exception during Consul metadata setup.", e);
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext runClusterContainers(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Running cluster containers. Context: {}", context);
+        try {
+            clusterFacade.runClusterContainers(context);
+            LOGGER.debug("Allocating Ambari roles DONE.");
+            return context;
         } catch (Exception e) {
             LOGGER.error("Exception during Ambari role allocation.", e);
             throw new CloudbreakException(e);
@@ -358,7 +371,7 @@ public class SimpleFlowFacade implements FlowFacade {
     public FlowContext bootstrapNewNodes(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Bootstrapping new nodes. Context: {}", context);
         try {
-            context = clusterFacade.bootstrapNewNodes(context);
+            context = stackFacade.bootstrapNewNodes(context);
             LOGGER.debug("Bootstrap of new nodes is finished.");
             return context;
         } catch (CloudbreakException e) {
@@ -373,8 +386,23 @@ public class SimpleFlowFacade implements FlowFacade {
     public FlowContext extendConsulMetadata(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Extending Consul metadata. Context: {}", context);
         try {
-            context = clusterFacade.extendConsulMetadata(context);
+            context = stackFacade.extendConsulMetadata(context);
             LOGGER.debug("Extending Consul metadata is finished.");
+            return context;
+        } catch (CloudbreakException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the upscaling of cluster nodes prepare: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext addClusterContainers(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Adding cluster containers. Context: {}", context);
+        try {
+            context = clusterFacade.addClusterContainers(context);
+            LOGGER.debug("'Adding cluster containers' phase is finished.");
             return context;
         } catch (CloudbreakException e) {
             throw e;
@@ -478,7 +506,7 @@ public class SimpleFlowFacade implements FlowFacade {
     public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Handling cluster bootstrap. Context: {}", context);
         try {
-            context = clusterFacade.bootstrapCluster(context);
+            context = stackFacade.bootstrapCluster(context);
             LOGGER.debug("Cluster bootstrap is DONE");
             return context;
         } catch (CloudbreakException e) {

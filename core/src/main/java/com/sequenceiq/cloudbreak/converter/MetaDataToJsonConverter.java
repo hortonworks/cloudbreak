@@ -17,7 +17,7 @@ public class MetaDataToJsonConverter extends AbstractConversionServiceAwareConve
         metaDataJson.setAmbariServer(entity.getAmbariServer());
         metaDataJson.setInstanceId(entity.getInstanceId());
         metaDataJson.setDockerSubnet(entity.getDockerSubnet());
-        metaDataJson.setLongName(entity.getLongName());
+        metaDataJson.setDiscoveryFQDN(entity.getDiscoveryFQDN());
         metaDataJson.setContainerCount(entity.getContainerCount());
         metaDataJson.setInstanceGroup(entity.getInstanceGroup().getGroupName());
         return metaDataJson;

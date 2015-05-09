@@ -85,7 +85,6 @@ public class AwsMetadataSetup implements MetadataSetup {
                             instance.getPrivateIpAddress(),
                             instance.getPublicIpAddress(),
                             instance.getBlockDeviceMappings().size() - 1,
-                            instance.getPrivateDnsName(),
                             instanceGroup
                     ));
                 }
@@ -120,7 +119,6 @@ public class AwsMetadataSetup implements MetadataSetup {
                                 instance.getPrivateIpAddress(),
                                 instance.getPublicIpAddress(),
                                 instance.getBlockDeviceMappings().size() - 1,
-                                instance.getPrivateDnsName(),
                                 instanceGroup
                         ));
                         LOGGER.info("New instance added to metadata: [stack: '{}', instanceId: '{}']", stack.getId(), instance.getInstanceId());

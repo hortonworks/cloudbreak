@@ -5,6 +5,10 @@ import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 
 public interface StackFacade {
 
+    FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException;
+
+    FlowContext setupConsulMetadata(FlowContext context) throws CloudbreakException;
+
     FlowContext start(FlowContext context) throws CloudbreakException;
 
     FlowContext stop(FlowContext context) throws CloudbreakException;
@@ -20,6 +24,10 @@ public interface StackFacade {
     FlowContext addInstances(FlowContext context) throws CloudbreakException;
 
     FlowContext extendMetadata(FlowContext context) throws CloudbreakException;
+
+    FlowContext bootstrapNewNodes(FlowContext context) throws CloudbreakException;
+
+    FlowContext extendConsulMetadata(FlowContext context) throws CloudbreakException;
 
     FlowContext downscaleStack(FlowContext context) throws CloudbreakException;
 

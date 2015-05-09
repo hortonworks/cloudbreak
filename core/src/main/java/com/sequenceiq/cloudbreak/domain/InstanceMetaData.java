@@ -15,7 +15,7 @@ import javax.persistence.NamedQuery;
                 name = "InstanceMetaData.findHostInStack",
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.stack.id= :stackId "
-                        + "AND i.longName= :hostName "
+                        + "AND i.discoveryFQDN= :hostName "
                         + "AND i.instanceStatus <> 'TERMINATED' "),
         @NamedQuery(
                 name = "InstanceMetaData.findUnregisteredHostsInInstanceGroup",
@@ -33,7 +33,7 @@ import javax.persistence.NamedQuery;
                         + "WHERE i.instanceId= :instanceId"),
         @NamedQuery(
                 name = "InstanceMetaData.findAliveInstancesHostNamesInInstanceGroup",
-                query = "SELECT i.longName FROM InstanceMetaData i "
+                query = "SELECT i.discoveryFQDN FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.id = :instanceGroupId "
                         + "AND i.instanceStatus <> 'TERMINATED' "),
         @NamedQuery(
@@ -55,7 +55,7 @@ public class InstanceMetaData implements ProvisionEntity {
     private Boolean ambariServer;
     private Boolean consulServer;
     private String dockerSubnet;
-    private String longName;
+    private String discoveryFQDN;
     @Enumerated(EnumType.STRING)
     private InstanceStatus instanceStatus;
     private Integer containerCount = 0;
@@ -132,12 +132,16 @@ public class InstanceMetaData implements ProvisionEntity {
         this.dockerSubnet = dockerSubnet;
     }
 
-    public String getLongName() {
-        return longName;
+    public String getDiscoveryFQDN() {
+        return discoveryFQDN;
     }
 
-    public void setLongName(String longName) {
-        this.longName = longName;
+    public String getDiscoveryName() {
+        return discoveryFQDN.split("\\.")[0];
+    }
+
+    public void setDiscoveryFQDN(String discoveryFQDN) {
+        this.discoveryFQDN = discoveryFQDN;
     }
 
     public InstanceStatus getInstanceStatus() {

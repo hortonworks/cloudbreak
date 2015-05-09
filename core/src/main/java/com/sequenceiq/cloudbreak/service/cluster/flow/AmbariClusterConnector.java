@@ -283,7 +283,7 @@ public class AmbariClusterConnector {
             @Nullable
             @Override
             public String apply(@Nullable InstanceMetaData input) {
-                return input.getLongName();
+                return input.getDiscoveryFQDN();
             }
         }).toList();
     }

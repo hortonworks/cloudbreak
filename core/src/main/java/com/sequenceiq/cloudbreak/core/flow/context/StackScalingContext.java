@@ -14,13 +14,15 @@ public class StackScalingContext extends DefaultFlowContext implements FlowConte
     private String instanceGroup;
     private Set<Resource> resources;
     private ScalingType scalingType;
+    private Set<String> upscaleCandidateAddresses;
 
-    public StackScalingContext(Long stackId, CloudPlatform cp, Integer sa, String ig, Set<Resource> resources, ScalingType st) {
+    public StackScalingContext(Long stackId, CloudPlatform cp, Integer sa, String ig, Set<Resource> resources, ScalingType st, Set<String> uca) {
         super(stackId, cp);
         this.scalingAdjustment = sa;
         this.instanceGroup = ig;
         this.resources = resources;
         this.scalingType = st;
+        this.upscaleCandidateAddresses = uca;
     }
 
     public StackScalingContext(UpdateInstancesRequest updateInstancesRequest) {
@@ -49,5 +51,9 @@ public class StackScalingContext extends DefaultFlowContext implements FlowConte
 
     public Set<Resource> getResources() {
         return resources;
+    }
+
+    public Set<String> getUpscaleCandidateAddresses() {
+        return upscaleCandidateAddresses;
     }
 }
