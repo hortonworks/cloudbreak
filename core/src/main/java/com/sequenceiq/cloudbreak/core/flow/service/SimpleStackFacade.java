@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.flow.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.flow.StackStartService;
 import com.sequenceiq.cloudbreak.core.flow.StackStopService;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
@@ -36,12 +37,12 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.Subnet;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
+import com.sequenceiq.cloudbreak.service.stack.flow.ConsulMetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
@@ -83,6 +84,37 @@ public class SimpleStackFacade implements StackFacade {
     @Autowired
     private HostGroupService hostGroupService;
 
+    @Autowired
+    private ClusterBootstrapper clusterBootstrapper;
+
+    @Autowired
+    private ConsulMetadataSetup consulMetadataSetup;
+
+    @Override
+    public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
+        try {
+            clusterBootstrapper.bootstrapCluster((ProvisioningContext) context);
+            return context;
+        } catch (Exception e) {
+            LOGGER.error("Error occurred while bootstrapping container orchestrator: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext setupConsulMetadata(FlowContext context) throws CloudbreakException {
+        try {
+            ProvisioningContext provisioningContext = (ProvisioningContext) context;
+            MDCBuilder.buildMdcContext(stackService.getById(provisioningContext.getStackId()));
+            LOGGER.debug("Setting up consul metadata. Context: {}", context);
+            consulMetadataSetup.setupConsulMetadata(provisioningContext.getStackId());
+            return provisioningContext;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the consul metadata setup process.", e);
+            throw new CloudbreakException(e.getMessage(), e);
+        }
+    }
+
     @Override
     public FlowContext handleCreationFailure(FlowContext context) throws CloudbreakException {
         ProvisioningContext provisioningContext = (ProvisioningContext) context;
@@ -123,7 +155,7 @@ public class SimpleStackFacade implements StackFacade {
             LOGGER.debug("Starting stack is DONE.");
             return context;
         } catch (Exception e) {
-            LOGGER.error("Exception during the stack start process. Exception", e);
+            LOGGER.error("Exception during the stack start process.", e);
             throw new CloudbreakException(e.getMessage(), e);
         }
     }
@@ -193,7 +225,8 @@ public class SimpleStackFacade implements StackFacade {
                     updateContext.getScalingAdjustment(),
                     updateContext.getInstanceGroup(),
                     resources,
-                    updateContext.getScalingType());
+                    updateContext.getScalingType(),
+                    null);
 
         } catch (Exception e) {
             LOGGER.error("Exception during the upscaling of stack: {}", e.getMessage());
@@ -218,14 +251,55 @@ public class SimpleStackFacade implements StackFacade {
             HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(stack.getCluster().getId(), updateContext.getInstanceGroup());
             hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
         }
-        UpdateAmbariHostsRequest updateAmbariHostsRequest = new UpdateAmbariHostsRequest(updateContext.getStackId(),
-                hostGroupAdjustmentJson,
-                upscaleCandidateAddresses,
-                new ArrayList<HostMetadata>(),
-                false,
+        return new StackScalingContext(
+                updateContext.getStackId(),
                 updateContext.getCloudPlatform(),
-                updateContext.getScalingType());
-        return new ClusterScalingContext(updateAmbariHostsRequest);
+                updateContext.getScalingAdjustment(),
+                updateContext.getInstanceGroup(),
+                updateContext.getResources(),
+                updateContext.getScalingType(),
+                upscaleCandidateAddresses);
+    }
+
+    @Override
+    public FlowContext bootstrapNewNodes(FlowContext context) throws CloudbreakException {
+        StackScalingContext scalingContext = (StackScalingContext) context;
+        try {
+            clusterBootstrapper.bootstrapNewNodes(scalingContext);
+            stackUpdater.updateStackStatus(scalingContext.getStackId(), Status.AVAILABLE, "");
+            return scalingContext;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the handling of munchausen setup: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext extendConsulMetadata(FlowContext context) throws CloudbreakException {
+        try {
+            StackScalingContext stackContext = (StackScalingContext) context;
+            MDCBuilder.buildMdcContext(stackService.getById(stackContext.getStackId()));
+            consulMetadataSetup.setupNewConsulMetadata(stackContext.getStackId(), stackContext.getUpscaleCandidateAddresses());
+
+            Stack stack = stackService.getById(stackContext.getStackId());
+            HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
+            hostGroupAdjustmentJson.setWithStackUpdate(false);
+            hostGroupAdjustmentJson.setScalingAdjustment(stackContext.getScalingAdjustment());
+            if (stack.getCluster() != null) {
+                HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(stack.getCluster().getId(), stackContext.getInstanceGroup());
+                hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
+            }
+            return new ClusterScalingContext(
+                    stackContext.getStackId(),
+                    stackContext.getCloudPlatform(),
+                    hostGroupAdjustmentJson,
+                    stackContext.getUpscaleCandidateAddresses(),
+                    new ArrayList<HostMetadata>(),
+                    stackContext.getScalingType());
+        } catch (Exception e) {
+            LOGGER.error("Exception during the extend consul metadata phase: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
     }
 
     @Override
@@ -248,11 +322,11 @@ public class SimpleStackFacade implements StackFacade {
             Long id = null;
             String errorReason = null;
             if (context instanceof StackScalingContext) {
-                StackScalingContext stackScalingContext =  (StackScalingContext) context;
+                StackScalingContext stackScalingContext = (StackScalingContext) context;
                 id = stackScalingContext.getStackId();
                 errorReason = stackScalingContext.getErrorReason();
             } else if (context instanceof ClusterScalingContext) {
-                ClusterScalingContext clusterScalingContext =  (ClusterScalingContext) context;
+                ClusterScalingContext clusterScalingContext = (ClusterScalingContext) context;
                 id = clusterScalingContext.getStackId();
                 errorReason = clusterScalingContext.getErrorReason();
             }

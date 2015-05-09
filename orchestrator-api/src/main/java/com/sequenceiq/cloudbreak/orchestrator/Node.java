@@ -8,6 +8,11 @@ public class Node {
     private String hostname;
     private Set<String> dataVolumes;
 
+    public Node(String privateIp, String publicIp) {
+        this.privateIp = privateIp;
+        this.publicIp = publicIp;
+    }
+
     public Node(String privateIp, String publicIp, String hostname, Set<String> dataVolumes) {
         this.privateIp = privateIp;
         this.publicIp = publicIp;

@@ -106,15 +106,15 @@ ${userdata}
           - subnet_id: { get_resource: app_subnet }
         security_groups: [ { get_resource: server_security_group } ]
         
-  <#list agent.volumes as volume>
-  
+<#list agent.volumes as volume>
+
   ambari_volume_${instance_id}_${volume_index}:
     type: OS::Cinder::Volume
     properties:
       name: hdfs-volume
       size: ${volume.size}
-      volume_type: lvmdriver-1    
-  
+      volume_type: lvmdriver-1
+
   ambari_volume_attach_${instance_id}_${volume_index}:
     type: OS::Cinder::VolumeAttachment
     properties:

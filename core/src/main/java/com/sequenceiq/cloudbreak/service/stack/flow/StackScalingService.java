@@ -90,7 +90,7 @@ public class StackScalingService {
         int i = 0;
         for (InstanceMetaData metaData : stack.getInstanceGroupByInstanceGroupName(instanceGroupName).getInstanceMetaData()) {
             if (!metaData.getAmbariServer() && !metaData.getConsulServer() && (metaData.isDecommissioned() || metaData.isUnRegistered())) {
-                instanceIds.put(metaData.getInstanceId(), metaData.getLongName());
+                instanceIds.put(metaData.getInstanceId(), metaData.getDiscoveryFQDN());
                 if (++i >= scalingAdjustment * -1) {
                     break;
                 }
@@ -131,7 +131,7 @@ public class StackScalingService {
     }
 
     private void removeAgentFromConsul(Stack stack, List<ConsulClient> clients, InstanceMetaData metaData) {
-        String nodeName = metaData.getLongName().replace(ConsulUtils.CONSUL_DOMAIN, "");
+        String nodeName = metaData.getDiscoveryFQDN().replace(ConsulUtils.CONSUL_DOMAIN, "");
         consulPollingService.pollWithTimeout(
                 consulAgentLeaveCheckerTask,
                 new ConsulContext(stack, clients, Collections.singletonList(nodeName)),

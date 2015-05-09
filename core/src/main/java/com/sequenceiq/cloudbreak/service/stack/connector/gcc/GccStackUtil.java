@@ -91,7 +91,6 @@ public class GccStackUtil {
                     executeInstance.getNetworkInterfaces().get(0).getNetworkIP(),
                     executeInstance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP(),
                     stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup()).getTemplate().getVolumeCount(),
-                    longName(resource.getResourceName(), credential.getProjectId()),
                     stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup())
             );
             return coreInstanceMetaData;
@@ -170,10 +169,6 @@ public class GccStackUtil {
 
     public String getAmbariUbuntu(String projectId, String image) {
         return String.format(GCC_IMAGE_TYPE_PREFIX + getImageName(image), projectId);
-    }
-
-    private String longName(String resourceName, String projectId) {
-        return String.format("%s.c.%s.internal", resourceName, projectId);
     }
 
     private String[] createParts(String splittable) {

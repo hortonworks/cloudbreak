@@ -4,8 +4,8 @@ import java.util.Set;
 
 public interface ContainerOrchestrator {
 
-    ContainerOrchestratorCluster bootstrap(String gatewayAddress, Set<Node> nodes, int consulServerCount) throws CloudbreakOrchestratorException;
-    ContainerOrchestratorCluster bootstrapNewNodes(String gatewayAddress, Set<Node> nodes) throws CloudbreakOrchestratorException;
+    void bootstrap(String gatewayAddress, Set<Node> nodes, int consulServerCount) throws CloudbreakOrchestratorException;
+    void bootstrapNewNodes(String gatewayAddress, Set<Node> nodes) throws CloudbreakOrchestratorException;
 
     void startRegistrator(ContainerOrchestratorCluster cluster, String imageName) throws CloudbreakOrchestratorException;
     void startAmbariServer(ContainerOrchestratorCluster cluster, String dbImageName,

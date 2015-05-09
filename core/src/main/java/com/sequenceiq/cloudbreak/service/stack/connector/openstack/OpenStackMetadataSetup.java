@@ -92,8 +92,8 @@ public class OpenStackMetadataSetup implements MetadataSetup {
                 server.getAddresses().getAddresses("app_network").get(0).getAddr(),
                 server.getAddresses().getAddresses("app_network").get(1).getAddr(),
                 server.getOsExtendedVolumesAttached().size(),
-                server.getName(),
                 stack.getInstanceGroupByInstanceGroupName(instanceGroupName)
         );
     }
 }
+

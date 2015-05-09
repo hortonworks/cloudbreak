@@ -10,10 +10,12 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow.handlers.AddClusterContainersHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.AddInstancesHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.BootstrapClusterHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.BootstrapNewNodesHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterContainersHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterDownscaleHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterInstallHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterResetHandler;
@@ -69,6 +71,7 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.METADATA_SETUP.name()), getHandlerForClass(MetadataSetupHandler.class));
         reactor.on($(FlowPhases.BOOTSTRAP_CLUSTER.name()), getHandlerForClass(BootstrapClusterHandler.class));
         reactor.on($(FlowPhases.CONSUL_METADATA_SETUP.name()), getHandlerForClass(ConsulMetadataSetupHandler.class));
+        reactor.on($(FlowPhases.RUN_CLUSTER_CONTAINERS.name()), getHandlerForClass(ClusterContainersHandler.class));
         reactor.on($(FlowPhases.AMBARI_START.name()), getHandlerForClass(AmbariStartHandler.class));
         reactor.on($(FlowPhases.CLUSTER_INSTALL.name()), getHandlerForClass(ClusterInstallHandler.class));
         reactor.on($(FlowPhases.CLUSTER_RESET.name()), getHandlerForClass(ClusterResetHandler.class));
@@ -80,6 +83,7 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.EXTEND_METADATA.name()), getHandlerForClass(ExtendMetadataHandler.class));
         reactor.on($(FlowPhases.BOOTSTRAP_NEW_NODES.name()), getHandlerForClass(BootstrapNewNodesHandler.class));
         reactor.on($(FlowPhases.EXTEND_CONSUL_METADATA.name()), getHandlerForClass(ExtendConsulMetadataHandler.class));
+        reactor.on($(FlowPhases.ADD_CLUSTER_CONTAINERS.name()), getHandlerForClass(AddClusterContainersHandler.class));
         reactor.on($(FlowPhases.STACK_DOWNSCALE.name()), getHandlerForClass(StackDownscaleHandler.class));
         reactor.on($(FlowPhases.CLUSTER_START.name()), getHandlerForClass(ClusterStartHandler.class));
         reactor.on($(FlowPhases.CLUSTER_STOP.name()), getHandlerForClass(ClusterStopHandler.class));
@@ -106,7 +110,10 @@ public class FlowInitializer implements InitializingBean {
                 .createTransition(FlowPhases.BOOTSTRAP_CLUSTER.name(), FlowPhases.CONSUL_METADATA_SETUP.name(), FlowPhases.STACK_CREATION_FAILED.name()));
 
         transitionKeyService.registerTransition(ConsulMetadataSetupHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.CONSUL_METADATA_SETUP.name(), FlowPhases.AMBARI_START.name(), FlowPhases.STACK_CREATION_FAILED.name()));
+                .createTransition(FlowPhases.CONSUL_METADATA_SETUP.name(), FlowPhases.RUN_CLUSTER_CONTAINERS.name(), FlowPhases.STACK_CREATION_FAILED.name()));
+
+        transitionKeyService.registerTransition(ClusterContainersHandler.class, SimpleTransitionKeyService.TransitionFactory
+                .createTransition(FlowPhases.RUN_CLUSTER_CONTAINERS.name(), FlowPhases.AMBARI_START.name(), FlowPhases.STACK_CREATION_FAILED.name()));
 
         transitionKeyService.registerTransition(AmbariStartHandler.class, SimpleTransitionKeyService.TransitionFactory
                 .createTransition(FlowPhases.AMBARI_START.name(), FlowPhases.CLUSTER_INSTALL.name(), FlowPhases.STACK_CREATION_FAILED.name()));
@@ -165,7 +172,10 @@ public class FlowInitializer implements InitializingBean {
                 .createTransition(FlowPhases.BOOTSTRAP_NEW_NODES.name(), FlowPhases.EXTEND_CONSUL_METADATA.name(), FlowPhases.NONE.name()));
 
         transitionKeyService.registerTransition(ExtendConsulMetadataHandler.class, SimpleTransitionKeyService.TransitionFactory
-                .createTransition(FlowPhases.EXTEND_CONSUL_METADATA.name(), FlowPhases.CLUSTER_UPSCALE.name(), FlowPhases.NONE.name()));
+                .createTransition(FlowPhases.EXTEND_CONSUL_METADATA.name(), FlowPhases.ADD_CLUSTER_CONTAINERS.name(), FlowPhases.NONE.name()));
+
+        transitionKeyService.registerTransition(AddClusterContainersHandler.class, SimpleTransitionKeyService.TransitionFactory
+                .createTransition(FlowPhases.ADD_CLUSTER_CONTAINERS.name(), FlowPhases.CLUSTER_UPSCALE.name(), FlowPhases.NONE.name()));
 
         transitionKeyService.registerTransition(ClusterUpscaleHandler.class, SimpleTransitionKeyService.TransitionFactory
                 .createTransition(FlowPhases.CLUSTER_UPSCALE.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
@@ -191,7 +201,7 @@ public class FlowInitializer implements InitializingBean {
 
 
     private Consumer<Event<?>> getHandlerForClass(Class handlerClass) {
-        FlowHandler handler = null;
+        FlowHandler handler;
         if (flowHandlersMap.containsKey(handlerClass)) {
             handler = flowHandlersMap.get(handlerClass);
         } else {

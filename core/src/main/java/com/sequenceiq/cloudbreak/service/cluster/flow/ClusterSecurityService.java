@@ -61,7 +61,7 @@ public class ClusterSecurityService {
             ambariClient.addComponentsToHosts(ambariClient.getClusterHosts(), asList(KERBEROS_CLIENT));
             InstanceGroup gateway = stack.getGatewayInstanceGroup();
             InstanceMetaData metaData = new ArrayList<>(gateway.getInstanceMetaData()).get(0);
-            String kdcHost = metaData.getLongName();
+            String kdcHost = metaData.getDiscoveryFQDN();
             ambariClient.createKerberosConfig(kdcHost, REALM, DOMAIN);
             int installReqId = ambariClient.setServiceState(KERBEROS_SERVICE, INSTALLED_STATE);
             PollingResult pollingResult = waitForOperation(stack, ambariClient, singletonMap("INSTALL_KERBEROS", installReqId));
@@ -89,7 +89,7 @@ public class ClusterSecurityService {
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         Set<String> gatewayHosts = new HashSet<>();
         for (InstanceMetaData gwNode : gateway.getInstanceMetaData()) {
-            gatewayHosts.add(gwNode.getLongName());
+            gatewayHosts.add(gwNode.getDiscoveryFQDN());
         }
         List<String> payload = Arrays.asList(cluster.getKerberosAdmin(), cluster.getKerberosPassword(), cluster.getKerberosMasterKey(), REALM);
         pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.CREATE_KERBEROS_KDC, DEFAULT_RECIPE_TIMEOUT, KERBEROS, payload, gatewayHosts);

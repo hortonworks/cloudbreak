@@ -97,7 +97,7 @@ public class ModelDescriptions {
         public static final String VOLUME_COUNT = "number of volumes";
         public static final String AMBARI_SERVER = "ambari server address";
         public static final String DOCKER_SUBNET = "docker subnet";
-        public static final String LONG_NAME = "long name of the instance";
+        public static final String DISCOVERY_FQDN = "the fully qualified domain name of the node in the service discovery cluster";
         public static final String CONTAINER_COUNT = "number of the containers";
     }
 
