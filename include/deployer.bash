@@ -96,8 +96,23 @@ init-profile() {
             fi
         else
             # this is for linux
-            warn "We can not guess your PUBLIC_IP, please run the following command: (replace 1.2.3.4 with a real IP)"
-            echo "echo export PUBLIC_IP=1.2.3.4 > $CBD_PROFILE" | blue
+
+            # on amazon
+            if curl -f 169.254.169.254/latest/ &>/dev/null ; then
+                echo "export PUBLIC_IP=$(curl 169.254.169.254/latest/meta-data/public-hostname)" > $CBD_PROFILE
+                #echo "export PRIVATE_IP=$(curl 169.254.169.254/latest/meta-data/local-ipv4)" >> $CBD_PROFILE
+            fi
+
+            # on gce
+            if curl -f -H "Metadata-Flavor: Google" 169.254.169.254/computeMetadata/v1/ &>/dev/null ; then
+                echo "export PUBLIC_IP=$(curl -f -H "Metadata-Flavor: Google" 169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)" > $CBD_PROFILE
+            fi
+
+            # if Profile is still not created, give some hint:
+            if ! [ -f $CBD_PROFILE ]; then
+                warn "We can not guess your PUBLIC_IP, please run the following command: (replace 1.2.3.4 with a real IP)"
+                echo "echo export PUBLIC_IP=1.2.3.4 > $CBD_PROFILE" | blue
+            fi
         fi
         exit 2
     fi

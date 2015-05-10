@@ -24,7 +24,7 @@
 - `make dev-debug` installs a special cbd on local OSX, which doesn’t includes *.bash scrips, only refers them
    by path. No need to `make dev` to test small changes in bash scripts.
 - Load AWS key and AWS id from Profile
-
+- Command `init` helps to guess the PUBLIC_IP in public clouds: google, amazon
 
 ### Removed
 
