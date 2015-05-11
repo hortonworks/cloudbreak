@@ -45,7 +45,7 @@ public abstract class AbstractFlowHandler<T extends DefaultFlowContext> implemen
         try {
             result = execute(event);
             success = true;
-        } catch (Throwable t) {
+        } catch (Exception t) {
             consumeError(event, t);
             try {
                 result = handleErrorFlow(t, event.getData());
