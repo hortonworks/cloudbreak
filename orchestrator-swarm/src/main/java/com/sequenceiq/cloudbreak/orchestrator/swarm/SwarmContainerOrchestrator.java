@@ -37,7 +37,7 @@ public class SwarmContainerOrchestrator implements ContainerOrchestrator {
     private static final int TEN = 100;
     private static final int READ_TIMEOUT = 30000;
     private static final String MUNCHAUSEN_WAIT = "180";
-    private static final String MUNCHAUSEN_DOCKER_IMAGE = "sequenceiq/munchausen:0.2";
+    private static final String MUNCHAUSEN_DOCKER_IMAGE = "sequenceiq/munchausen:0.3";
 
     /**
      * Bootstraps a Swarm based container orchestration cluster with a Consul discovery backend with the Munchausen tool.
