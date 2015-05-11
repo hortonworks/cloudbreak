@@ -51,7 +51,7 @@ compose-get-container() {
 compose-logs() {
     declare desc="Whach all container logs in colored version"
 
-    dockerCompose logs
+    dockerCompose logs "$@"
 }
 compose-generate-yaml() {
     declare desc="Generating docker-compose.yml based on Profile settings"
