@@ -33,7 +33,7 @@ compose-up() {
 
     info "CloudBreak containers are started ..."
     info "In a couple of minutes you can reach the UI (called Uluwatu)"
-    echo "  http://$PUBLIC_IP:3000" | blue
+    echo "  $ULU_HOST_ADDRESS" | blue
     warn "Credentials are not printed here. You can get them by:"
     echo '  cbd env show|grep "UAA_DEFAULT_USER_PW\|UAA_DEFAULT_USER_EMAIL"' | blue
 }
@@ -202,8 +202,8 @@ sultans:
         - SL_SMTP_SENDER_USERNAME=$CLOUDBREAK_SMTP_SENDER_USERNAME
         - SL_SMTP_SENDER_PASSWORD=$CLOUDBREAK_SMTP_SENDER_PASSWORD
         - SL_SMTP_SENDER_FROM=$CLOUDBREAK_SMTP_SENDER_FROM
-        - SL_CB_ADDRESS=http://$PUBLIC_IP:3000
-        - SL_ADDRESS=http://$PUBLIC_IP:3001
+        - SL_CB_ADDRESS=$ULU_HOST_ADDRESS
+        - SL_ADDRESS=$ULU_SULTANS_ADDRESS
         - SL_UAA_ADDRESS=http://backend:8089
         - BACKEND_8089=identity.service.consul
     links:
@@ -214,14 +214,13 @@ sultans:
 
 uluwatu:
     environment:
-        - ULU_PRODUCTION=false
         - SERVICE_NAME=uluwatu
           #- SERVICE_CHECK_HTTP=/
-        - ULU_OAUTH_REDIRECT_URI=http://$PUBLIC_IP:3000/authorize
-        - ULU_SULTANS_ADDRESS=http://$PUBLIC_IP:3001
+        - ULU_OAUTH_REDIRECT_URI=$ULU_OAUTH_REDIRECT_URI
+        - ULU_SULTANS_ADDRESS=$ULU_SULTANS_ADDRESS
         - ULU_OAUTH_CLIENT_ID=$UAA_ULUWATU_ID
         - ULU_OAUTH_CLIENT_SECRET=$UAA_ULUWATU_SECRET
-        - ULU_HOST_ADDRESS=http://$PUBLIC_IP:3000
+        - ULU_HOST_ADDRESS=$ULU_HOST_ADDRESS
         - NODE_TLS_REJECT_UNAUTHORIZED=0
 
         - ULU_IDENTITY_ADDRESS=http://backend:8089/

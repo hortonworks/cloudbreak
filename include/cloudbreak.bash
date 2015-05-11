@@ -8,6 +8,7 @@ cloudbreak-config() {
   cloudbreak-conf-uaa
   cloudbreak-conf-smtp
   cloudbreak-conf-cloud-provider
+  cloudbreak-conf-ui
 }
 
 cloudbreak-conf-tags() {
@@ -104,6 +105,16 @@ cloudbreak-conf-cloud-provider() {
 
 }
 
+cloudbreak-conf-ui() {
+    declare desc="Defines Uluwatu and Sultans related parameters"
+
+    env-import ULU_HOST_ADDRESS  "http://$PUBLIC_IP:3000"
+    env-import ULU_OAUTH_REDIRECT_URI  "$ULU_HOST_ADDRESS/authorize"
+    env-import ULU_SULTANS_ADDRESS  "http://$PUBLIC_IP:3001"
+
+}
+
+
 gen-password() {
     date +%s | checksum sha1 | head -c 10
 }
@@ -159,7 +170,7 @@ oauth:
       authorized-grant-types: authorization_code,client_credentials
       scope: cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,cloudbreak.templates,openid,password.write,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,cloudbreak.events,periscope.cluster,cloudbreak.recipes
       authorities: cloudbreak.subscribe
-      redirect-uri: http://${PUBLIC_IP}:3000/authorize
+      redirect-uri: ${ULU_OAUTH_REDIRECT_URI}
     ${UAA_CLOUDBREAK_ID}:
       id: ${UAA_CLOUDBREAK_ID}
       secret: ${UAA_CLOUDBREAK_SECRET}
