@@ -21,8 +21,7 @@ public class AwsProvisionSetup implements ProvisionSetup {
     @Override
     public ProvisionEvent setupProvisioning(Stack stack) {
         return new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
-                .withSetupProperties(new HashMap<String, Object>())
-                .withUserDataParams(getUserDataProperties(stack));
+                .withSetupProperties(new HashMap<String, Object>());
     }
 
     @Override
@@ -31,10 +30,6 @@ public class AwsProvisionSetup implements ProvisionSetup {
     }
 
     public Map<String, Object> getSetupProperties(Stack stack) {
-        return new HashMap<>();
-    }
-
-    public Map<String, String> getUserDataProperties(Stack stack) {
         return new HashMap<>();
     }
 

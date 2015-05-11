@@ -41,37 +41,37 @@ public class HeatTemplateBuilder {
     @Autowired
     private Configuration freemarkerConfiguration;
 
-    public String build(Stack stack, String gateWayUserData, String hostGroupUserData) {
+    public String build(Stack stack, String gateWayUserData, String coreUserData) {
         List<OpenStackInstance> agents = generateAgents(stack.getInstanceGroups());
-        return build(stack, agents, gateWayUserData, hostGroupUserData);
+        return build(stack, agents, gateWayUserData, coreUserData);
     }
 
-    public String update(Stack stack, String gateWayUserData, String hostGroupUserData, Set<InstanceMetaData> instanceMetadata) {
+    public String update(Stack stack, String gateWayUserData, String coreUserData, Set<InstanceMetaData> instanceMetadata) {
         List<OpenStackInstance> agents = regenerateAgents(instanceMetadata);
-        return build(stack, agents, gateWayUserData, hostGroupUserData);
+        return build(stack, agents, gateWayUserData, coreUserData);
     }
 
-    public String remove(Stack stack, String gateWayUserData, String hostGroupUserData, Set<InstanceMetaData> instanceMetadata,
+    public String remove(Stack stack, String gateWayUserData, String coreUserData, Set<InstanceMetaData> instanceMetadata,
             Set<String> removeInstances, String instanceGroup) {
         Set<Integer> privateIds = new HashSet<>();
         for (String instanceId : removeInstances) {
             privateIds.add(getPrivateId(instanceId));
         }
         List<OpenStackInstance> agents = generateAgentsWithFilter(instanceMetadata, privateIds, instanceGroup);
-        return build(stack, agents, gateWayUserData, hostGroupUserData);
+        return build(stack, agents, gateWayUserData, coreUserData);
     }
 
-    public String add(Stack stack, String gateWayUserData, String hostGroupUserData, Set<InstanceMetaData> instanceMetadata,
+    public String add(Stack stack, String gateWayUserData, String coreUserData, Set<InstanceMetaData> instanceMetadata,
             String instanceGroup, int adjustment, InstanceGroup group) {
         List<OpenStackInstance> agents = generateNewAgents(instanceMetadata, instanceGroup, adjustment, group);
-        return build(stack, agents, gateWayUserData, hostGroupUserData);
+        return build(stack, agents, gateWayUserData, coreUserData);
     }
 
-    private String build(Stack stack, List<OpenStackInstance> agents, String gateWayUserData, String hostGroupUserData) {
+    private String build(Stack stack, List<OpenStackInstance> agents, String gateWayUserData, String coreUserData) {
         try {
             Map<String, Object> model = new HashMap<>();
             model.put("agents", agents);
-            model.put("hostgroupuserdata", formatUserData(hostGroupUserData));
+            model.put("coreuserdata", formatUserData(coreUserData));
             model.put("gatewayuserdata", formatUserData(gateWayUserData));
             model.put("subnets", stack.getAllowedSubnets());
             model.put("ports", NetworkUtils.getPorts(stack));

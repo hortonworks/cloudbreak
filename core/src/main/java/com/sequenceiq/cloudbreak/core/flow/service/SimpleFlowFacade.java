@@ -57,7 +57,7 @@ public class SimpleFlowFacade implements FlowFacade {
             LOGGER.debug("Provisioning setup DONE.");
             return new ProvisioningContext.Builder()
                     .setDefaultParams(setupComplete.getStackId(), setupComplete.getCloudPlatform())
-                    .setProvisionSetupProperties(setupComplete.getSetupProperties(), setupComplete.getUserDataParams())
+                    .setProvisionSetupProperties(setupComplete.getSetupProperties())
                     .build();
         } catch (Exception e) {
             LOGGER.error("Exception during provisioning setup: {}", e.getMessage());
@@ -71,7 +71,7 @@ public class SimpleFlowFacade implements FlowFacade {
         try {
             ProvisioningContext provisioningContext = (ProvisioningContext) context;
             ProvisionComplete provisionResult = provisioningService.buildStack(provisioningContext.getCloudPlatform(), provisioningContext.getStackId(),
-                    provisioningContext.getSetupProperties(), provisioningContext.getUserDataParams());
+                    provisioningContext.getSetupProperties());
             LOGGER.debug("Provisioning DONE.");
             return new ProvisioningContext.Builder()
                     .setDefaultParams(provisionResult.getStackId(), provisionResult.getCloudPlatform())

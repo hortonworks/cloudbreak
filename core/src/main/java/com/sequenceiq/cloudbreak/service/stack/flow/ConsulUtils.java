@@ -32,6 +32,7 @@ public final class ConsulUtils {
     private static final int DEFAULT_TIMEOUT_MS = 5000;
     private static final int ALIVE_STATUS = 1;
     private static final int LEFT_STATUS = 3;
+    private static final int GATEWAY_PORT = 80;
 
     private ConsulUtils() {
         throw new IllegalStateException();
@@ -169,7 +170,7 @@ public final class ConsulUtils {
     public static List<ConsulClient> createClients(Collection<InstanceMetaData> gatewayInstanceMetadata, int timeout) {
         List<ConsulClient> clients = new ArrayList<>();
         for (InstanceMetaData instanceMetaData : gatewayInstanceMetadata) {
-            clients.add(new ConsulClient(instanceMetaData.getPublicIp(), timeout));
+            clients.add(new ConsulClient(instanceMetaData.getPublicIp(), GATEWAY_PORT, timeout));
         }
         return clients;
     }

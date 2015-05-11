@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
 import com.sequenceiq.cloudbreak.domain.OpenStackNetwork;
@@ -81,11 +82,10 @@ public class OpenStackConnector implements CloudPlatformConnector {
     private OpenStackInstanceStatusCheckerTask openStackInstanceStatusCheckerTask;
 
     @Override
-    public Set<Resource> buildStack(Stack stack, String gateWayUserData, String hostGroupUserData, Map<String, Object> setupProperties) {
+    public Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties) {
         String stackName = stack.getName();
         OpenStackCredential credential = (OpenStackCredential) stack.getCredential();
-        List<InstanceGroup> instanceGroups = stack.getInstanceGroupsAsList();
-        String heatTemplate = heatTemplateBuilder.build(stack, gateWayUserData, hostGroupUserData);
+        String heatTemplate = heatTemplateBuilder.build(stack, gateWayUserData, coreUserData);
         OSClient osClient = openStackUtil.createOSClient(credential);
         org.openstack4j.model.heat.Stack openStackStack = osClient
                 .heat()
@@ -109,10 +109,10 @@ public class OpenStackConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public Set<Resource> addInstances(Stack stack, String gateWayUserData, String hostGroupUserData, Integer adjustment, String instanceGroup) {
+    public Set<Resource> addInstances(Stack stack, String gateWayUserData, String coreUserData, Integer adjustment, String instanceGroup) {
         InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         group.setNodeCount(group.getNodeCount() + adjustment);
-        String heatTemplate = heatTemplateBuilder.add(stack, gateWayUserData, hostGroupUserData,
+        String heatTemplate = heatTemplateBuilder.add(stack, gateWayUserData, coreUserData,
                 instanceMetaDataRepository.findAllInStack(stack.getId()), instanceGroup, adjustment, group);
         PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
         if (!isSuccess(pollingResult)) {
@@ -124,8 +124,8 @@ public class OpenStackConnector implements CloudPlatformConnector {
 
     @Override
     public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
-        String userData = userDataBuilder.buildUserData(stack.cloudPlatform());
-        String heatTemplate = heatTemplateBuilder.remove(stack, userData, userData,
+        Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(stack.cloudPlatform());
+        String heatTemplate = heatTemplateBuilder.remove(stack, userData.get(InstanceGroupType.GATEWAY), userData.get(InstanceGroupType.CORE),
                 instanceMetaDataRepository.findAllInStack(stack.getId()), instanceIds, instanceGroup);
         PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
         if (!isSuccess(pollingResult)) {
@@ -176,9 +176,9 @@ public class OpenStackConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public void updateAllowedSubnets(Stack stack, String gateWayUserData, String hostGroupUserData) {
+    public void updateAllowedSubnets(Stack stack, String gateWayUserData, String coreUserData) {
         Set<InstanceMetaData> metadata = instanceMetaDataRepository.findAllInStack(stack.getId());
-        String heatTemplate = heatTemplateBuilder.update(stack, gateWayUserData, hostGroupUserData, metadata);
+        String heatTemplate = heatTemplateBuilder.update(stack, gateWayUserData, coreUserData, metadata);
         PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
         if (isExited(pollingResult)) {
             LOGGER.debug("polling exited during updating subnets. Failing the process; stack: {}", stack.getId());

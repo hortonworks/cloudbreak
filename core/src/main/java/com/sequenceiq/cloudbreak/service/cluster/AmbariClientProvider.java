@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 @Service
 public class AmbariClientProvider {
 
-    private static final String PORT = "8080";
+    private static final String PORT = "80";
     private static final String ADMIN_PRINCIPAL = "/admin";
 
     /**
@@ -33,7 +33,7 @@ public class AmbariClientProvider {
      * @return client
      */
     public AmbariClient getDefaultAmbariClient(String ambariAddress) {
-        return new AmbariClient(ambariAddress);
+        return new AmbariClient(ambariAddress, PORT);
     }
 
     /**

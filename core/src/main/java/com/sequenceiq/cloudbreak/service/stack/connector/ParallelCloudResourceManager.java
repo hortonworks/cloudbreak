@@ -71,7 +71,7 @@ public class ParallelCloudResourceManager {
     @javax.annotation.Resource
     private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
 
-    public Set<Resource> buildStackResources(Stack stack, String gateWayUserData, String hostGroupUserData, ResourceBuilderInit resourceBuilderInit) {
+    public Set<Resource> buildStackResources(Stack stack, String gateWayUserData, String coreUserData, ResourceBuilderInit resourceBuilderInit) {
         try {
             Map<String, String> ctxMap = MDC.getCopyOfContextMap();
             Set<Resource> resourceSet = new HashSet<>();
@@ -103,7 +103,7 @@ public class ParallelCloudResourceManager {
                                     .withStack(finalStack)
                                     .withStackUpdater(stackUpdater)
                                     .withStackRepository(stackRepository)
-                                    .withUserData(isGateway(instanceGroupEntry.getInstanceGroupType()) ? gateWayUserData : hostGroupUserData)
+                                    .withUserData(isGateway(instanceGroupEntry.getInstanceGroupType()) ? gateWayUserData : coreUserData)
                                     .withMdcContextMap(ctxMap)
                                     .build()
                     );

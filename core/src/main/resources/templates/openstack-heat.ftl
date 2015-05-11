@@ -61,7 +61,7 @@ resources:
   <#if agent.type == "GATEWAY">
      <#assign userdata = gatewayuserdata>
   <#elseif agent.type == "CORE">
-     <#assign userdata = hostgroupuserdata>
+     <#assign userdata = coreuserdata>
   </#if>
 
   ambari_${instance_id}:

@@ -4,35 +4,50 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.cloud.connector.CloudConnectorException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
+
+import freemarker.template.Configuration;
+import freemarker.template.TemplateException;
 
 @Component
 public class UserDataBuilder {
 
-    private String userDataScripts;
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserDataBuilder.class);
 
-    public void setUserDataScripts(String userDataScripts) {
-        this.userDataScripts = userDataScripts;
-    }
+    @Autowired
+    private Configuration freemarkerConfiguration;
 
-    @PostConstruct
-    public void readUserDataScript() throws IOException {
-        userDataScripts = FileReaderUtils.readFileFromClasspath("init/init.sh");
-    }
-
-    public String buildUserData(CloudPlatform cloudPlatform) {
-        Map<String, Object> model = new HashMap<>();
-        model.put("platform_disk_prefix", cloudPlatform.getDiskPrefix());
-        model.put("platform_disk_start_label", cloudPlatform.startLabel());
-        String result = userDataScripts;
-        for (Map.Entry<String, Object> param : model.entrySet()) {
-            result = result.replaceAll(param.getKey(), param.getValue().toString());
-        }
+    public Map<InstanceGroupType, String> buildUserData(CloudPlatform cloudPlatform) {
+        Map<InstanceGroupType, String> result = new HashMap<>();
+        result.put(InstanceGroupType.GATEWAY, build(cloudPlatform, true));
+        result.put(InstanceGroupType.CORE, build(cloudPlatform, false));
         return result;
+    }
+
+    private String build(CloudPlatform cloudPlatform, boolean gateway) {
+        Map<String, Object> model = new HashMap<>();
+        model.put("platformDiskPrefix", cloudPlatform.getDiskPrefix());
+        model.put("platformDiskStartLabel", cloudPlatform.startLabel());
+        model.put("gateway", gateway);
+        try {
+            return FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate("init/init.ftl", "UTF-8"), model);
+        } catch (IOException | TemplateException e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new CloudConnectorException("Failed to process init script freemarker template", e);
+        }
+    }
+
+    @VisibleForTesting
+    void setFreemarkerConfiguration(Configuration freemarkerConfiguration) {
+        this.freemarkerConfiguration = freemarkerConfiguration;
     }
 }

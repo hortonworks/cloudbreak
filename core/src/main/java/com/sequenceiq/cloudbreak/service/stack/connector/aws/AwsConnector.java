@@ -153,7 +153,7 @@ public class AwsConnector implements CloudPlatformConnector {
     private SnapshotReadyCheckerTask snapshotReadyCheckerTask;
 
     @Override
-    public Set<Resource> buildStack(Stack stack, String gateWayUserData, String hostGroupUserData, Map<String, Object> setupProperties) {
+    public Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties) {
         Long stackId = stack.getId();
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
         AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(Regions.valueOf(stack.getRegion()), awsCredential);
@@ -170,7 +170,7 @@ public class AwsConnector implements CloudPlatformConnector {
                 .withStackName(cFStackName)
                 .withOnFailure(OnFailure.valueOf(stack.getOnFailureActionAction().name()))
                 .withTemplateBody(cfTemplateBuilder.build(stack, snapshotId, network.isExistingVPC(), awsCloudformationTemplatePath))
-                .withParameters(getStackParameters(stack, hostGroupUserData, gateWayUserData, awsCredential, cFStackName, network.isExistingVPC()));
+                .withParameters(getStackParameters(stack, coreUserData, gateWayUserData, awsCredential, cFStackName, network.isExistingVPC()));
         client.createStack(createStackRequest);
         Resource cloudFormationStackResource = new Resource(ResourceType.CLOUDFORMATION_STACK, cFStackName, stack, null);
         stack = stackUpdater.addStackResources(stackId, Arrays.asList(cloudFormationStackResource));
@@ -258,7 +258,7 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public Set<Resource> addInstances(Stack stack, String gateWayUserData, String hostGroupUserData, Integer instanceCount, String instanceGroup) {
+    public Set<Resource> addInstances(Stack stack, String gateWayUserData, String coreUserData, Integer instanceCount, String instanceGroup) {
         InstanceGroup instanceGroupByInstanceGroupName = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         Integer requiredInstances = instanceGroupByInstanceGroupName.getNodeCount() + instanceCount;
         Regions region = Regions.valueOf(stack.getRegion());
@@ -304,14 +304,14 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public void updateAllowedSubnets(Stack stack, String gateWayUserData, String hostGroupUserData) {
+    public void updateAllowedSubnets(Stack stack, String gateWayUserData, String coreUserData) {
         String cFStackName = cfStackUtil.getCfStackName(stack);
         String snapshotId = getEbsSnapshotIdIfNeeded(stack);
         AwsNetwork awsNetwork = (AwsNetwork) stack.getNetwork();
         UpdateStackRequest updateStackRequest = new UpdateStackRequest()
                 .withStackName(cFStackName)
                 .withTemplateBody(cfTemplateBuilder.build(stack, snapshotId, awsNetwork.isExistingVPC(), awsCloudformationTemplatePath))
-                .withParameters(getStackParameters(stack, hostGroupUserData, gateWayUserData,
+                .withParameters(getStackParameters(stack, coreUserData, gateWayUserData,
                         (AwsCredential) stack.getCredential(), stack.getName(), awsNetwork.isExistingVPC()));
         AmazonCloudFormationClient cloudFormationClient = awsStackUtil.createCloudFormationClient(stack);
         cloudFormationClient.updateStack(updateStackRequest);
@@ -354,7 +354,7 @@ public class AwsConnector implements CloudPlatformConnector {
             try {
                 client.describeStacks(describeStacksRequest);
             } catch (AmazonServiceException e) {
-                if (e.getErrorMessage().equals("Stack:" + cFStackName + " does not exist")) {
+                if (e.getErrorMessage().equals("Stack with id " + cFStackName + " does not exist")) {
                     AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
                     releaseReservedIp(stack, amazonEC2Client);
                     return;
@@ -406,10 +406,10 @@ public class AwsConnector implements CloudPlatformConnector {
         }
     }
 
-    private List<Parameter> getStackParameters(Stack stack, String hostGroupUserData, String gateWayUserData, AwsCredential awsCredential, String stackName,
+    private List<Parameter> getStackParameters(Stack stack, String coreGroupUserData, String gateWayUserData, AwsCredential awsCredential, String stackName,
             boolean existingVPC) {
         List<Parameter> parameters = new ArrayList<>(Arrays.asList(
-                new Parameter().withParameterKey("CBUserData").withParameterValue(hostGroupUserData),
+                new Parameter().withParameterKey("CBUserData").withParameterValue(coreGroupUserData),
                 new Parameter().withParameterKey("CBGateWayUserData").withParameterValue(gateWayUserData),
                 new Parameter().withParameterKey("StackName").withParameterValue(stackName),
                 new Parameter().withParameterKey("StackOwner").withParameterValue(awsCredential.getRoleArn()),

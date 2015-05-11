@@ -19,6 +19,7 @@ public final class NetworkUtils {
         List<EndpointRule> aclRules = createACLRules(stack);
         List<Port> ports = new ArrayList<>();
         ports.add(new Port("SSH", "22", "22", "tcp", aclRules));
+        ports.add(new Port("Gateway", "80", "80", "tcp", aclRules));
         ports.add(new Port("Ambari", "8080", "8080", "tcp", aclRules));
         ports.add(new Port("Consul", "8500", "8500", "tcp", aclRules));
         ports.add(new Port("NameNode", "50070", "50070", "tcp", aclRules));
@@ -33,8 +34,6 @@ public final class NetworkUtils {
         ports.add(new Port("Container logs", "8042", "8042", "tcp", aclRules));
         ports.add(new Port("Zeppelin web socket", "9999", "9999", "tcp", aclRules));
         ports.add(new Port("Zeppelin ui", "9998", "9998", "tcp", aclRules));
-        ports.add(new Port("Docker api", "2376", "2376", "tcp", aclRules));
-        ports.add(new Port("Swarm api", "3376", "3376", "tcp", aclRules));
         return ports;
     }
 
