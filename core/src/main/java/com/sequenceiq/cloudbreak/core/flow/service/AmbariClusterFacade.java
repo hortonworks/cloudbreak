@@ -160,7 +160,7 @@ public class AmbariClusterFacade implements ClusterFacade {
             return context;
         } catch (Exception e) {
             LOGGER.error("Exception during cluster start: {}", e.getMessage());
-            throw new CloudbreakException(e.getMessage(), e);
+            throw new CloudbreakException(e);
         }
     }
 
