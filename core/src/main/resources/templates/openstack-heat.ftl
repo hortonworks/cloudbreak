@@ -20,18 +20,6 @@ parameters:
     type: string
     description: app network address (CIDR notation)
     default: ${cbSubnet}
-  app_net_gateway:
-    type: string
-    description: app network gateway address
-    default: ${gatewayIP}
-  app_net_pool_start:
-    type: string
-    description: Start of app network IP address allocation pool
-    default: ${startIP}
-  app_net_pool_end:
-    type: string
-    description: End of app network IP address allocation pool
-    default: ${endIP}
   public_net_id:
     type: string
     description: The ID of the public network. You will need to replace it with your DevStack public network ID
@@ -51,10 +39,6 @@ resources:
       properties:
         network_id: { get_resource: app_network }
         cidr: { get_param: app_net_cidr } 
-        gateway_ip: { get_param: app_net_gateway }
-        allocation_pools:
-          - start: { get_param: app_net_pool_start }
-            end: { get_param: app_net_pool_end }
 
   router:
       type: OS::Neutron::Router

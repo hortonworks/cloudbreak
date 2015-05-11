@@ -134,7 +134,10 @@ public class SecurityConfig {
                     .antMatchers("/subscription").access("#oauth2.hasScope('cloudbreak.subscribe')")
                     .antMatchers("/user/recipes").access("#oauth2.hasScope('cloudbreak.recipes')")
                     .antMatchers("/account/recipes").access("#oauth2.hasScope('cloudbreak.recipes')")
-                    .antMatchers("/recipes").access("#oauth2.hasScope('cloudbreak.recipes')");
+                    .antMatchers("/recipes").access("#oauth2.hasScope('cloudbreak.recipes')")
+                    .antMatchers("/user/networks").access("#oauth2.hasScope('cloudbreak.templates')")
+                    .antMatchers("/account/networks").access("#oauth2.hasScope('cloudbreak.templates')")
+                    .antMatchers("/networks/**").access("#oauth2.hasScope('cloudbreak.templates')");
         }
 
         private RestTemplate createRestTemplate() {

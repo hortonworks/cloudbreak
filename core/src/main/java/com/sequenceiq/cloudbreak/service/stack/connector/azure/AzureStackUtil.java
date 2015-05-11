@@ -16,6 +16,7 @@ import java.util.Date;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.net.util.SubnetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -198,6 +199,21 @@ public class AzureStackUtil {
         } catch (Exception ex) {
             LOGGER.error("Unsuccessful credential migration.", ex);
         }
+    }
+
+    public String getFirstAssignableIPOfSubnet(String cIDRNotation) {
+        SubnetUtils subnetUtils = new SubnetUtils(cIDRNotation);
+        String startIP = subnetUtils.getInfo().getLowAddress();
+        //the first 4 IPs could not be assigned in Azure subnets
+        startIP = getNextIPAddress(startIP);
+        startIP = getNextIPAddress(startIP);
+        startIP = getNextIPAddress(startIP);
+        return startIP;
+    }
+
+    public String getLastAssignableIPOfSubnet(String cIDRNotation) {
+        SubnetUtils subnetUtils = new SubnetUtils(cIDRNotation);
+        return subnetUtils.getInfo().getHighAddress();
     }
 
     public String getNextIPAddress(String ip) {

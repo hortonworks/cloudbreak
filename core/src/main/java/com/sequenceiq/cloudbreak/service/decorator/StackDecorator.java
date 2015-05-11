@@ -16,9 +16,11 @@ import com.amazonaws.regions.Regions;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AdjustmentType;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
+import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
+import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.network.SecurityService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
 
@@ -36,6 +38,9 @@ public class StackDecorator implements Decorator<Stack> {
     @Autowired
     private SecurityService securityService;
 
+    @Autowired
+    private NetworkService networkService;
+
     @Value("${cb.azure.image.uri:" + CB_AZURE_IMAGE_URI + "}")
     private String azureImage;
 
@@ -50,7 +55,8 @@ public class StackDecorator implements Decorator<Stack> {
 
     private enum DecorationData {
         CREDENTIAL_ID,
-        USR_CONSUL_SERVER_COUNT
+        USR_CONSUL_SERVER_COUNT,
+        NETWORK_ID
     }
 
     @Override
@@ -59,6 +65,11 @@ public class StackDecorator implements Decorator<Stack> {
         subject.setCredential(credentialRepository.findOne((Long) data[DecorationData.CREDENTIAL_ID.ordinal()]));
         int consulServers = getConsulServerCount((Integer) data[DecorationData.USR_CONSUL_SERVER_COUNT.ordinal()], subject.getFullNodeCount());
         subject.setConsulServers(consulServers);
+        Network network = networkService.getById((Long) data[DecorationData.NETWORK_ID.ordinal()]);
+        if (!subject.cloudPlatform().equals(network.cloudPlatform())) {
+            throw new BadRequestException("The selected credential and network must relate to the same cloud platform!");
+        }
+        subject.setNetwork(network);
 
         if (subject.getFailurePolicy() != null) {
             validatFailurePolicy(subject, consulServers, subject.getFailurePolicy());

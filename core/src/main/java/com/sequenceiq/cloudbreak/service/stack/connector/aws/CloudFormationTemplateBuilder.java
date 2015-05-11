@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.network.NetworkConfig;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 
 import freemarker.template.Configuration;
@@ -33,7 +32,7 @@ public class CloudFormationTemplateBuilder {
         model.put("existingVPC", existingVPC);
         model.put("subnets", stack.getAllowedSubnets());
         model.put("ports", NetworkUtils.getPorts(stack));
-        model.put("cbSubnet", NetworkConfig.SUBNET_16);
+        model.put("cbSubnet", stack.getNetwork().getSubnetCIDR());
         if (snapshotId != null) {
             model.put("snapshotId", snapshotId);
         }

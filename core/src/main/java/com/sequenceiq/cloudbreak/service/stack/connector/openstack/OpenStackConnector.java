@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
-import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
+import com.sequenceiq.cloudbreak.domain.OpenStackNetwork;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -95,7 +95,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
                 .heat()
                 .stacks()
                 .create(Builders.stack().name(stackName).template(heatTemplate).disableRollback(false)
-                        .parameters(buildParameters(getPublicNetId(instanceGroups), credential, stack.getImage())).timeoutMins(OPERATION_TIMEOUT).build());
+                        .parameters(buildParameters(getPublicNetId(stack), credential, stack.getImage())).timeoutMins(OPERATION_TIMEOUT).build());
         List<Resource> resources = new ArrayList<>();
         resources.add(new Resource(ResourceType.HEAT_STACK, openStackStack.getId(), stack));
         Stack updatedStack = stackUpdater.addStackResources(stack.getId(), resources);
@@ -226,11 +226,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
     }
 
     private String getPublicNetId(Stack stack) {
-        return getPublicNetId(stack.getInstanceGroupsAsList());
-    }
-
-    private String getPublicNetId(List<InstanceGroup> instanceGroups) {
-        return ((OpenStackTemplate) instanceGroups.get(0).getTemplate()).getPublicNetId();
+        return ((OpenStackNetwork) stack.getNetwork()).getPublicNetId();
     }
 
     private Map<String, String> buildParameters(String publicNetId, OpenStackCredential credential, String image) {

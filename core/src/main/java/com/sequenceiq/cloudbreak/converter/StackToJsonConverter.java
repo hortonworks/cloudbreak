@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.controller.json.StackResponse;
-import com.sequenceiq.cloudbreak.controller.json.SubnetJson;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.FailurePolicyJson;
 import com.sequenceiq.cloudbreak.controller.json.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.controller.json.StackResponse;
+import com.sequenceiq.cloudbreak.controller.json.SubnetJson;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Subnet;
@@ -56,7 +56,11 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
             stackJson.setFailurePolicy(getConversionService().convert(source.getFailurePolicy(), FailurePolicyJson.class));
         }
         stackJson.setImage(source.getImage());
-        stackJson.setParameters(source.getParameters());
+        if (source.getNetwork() == null) {
+            stackJson.setNetworkId(null);
+        } else {
+            stackJson.setNetworkId(source.getNetwork().getId());
+        }
         return stackJson;
     }
 

@@ -1,14 +1,12 @@
 package com.sequenceiq.cloudbreak.conf;
 
-import com.google.api.client.util.Charsets;
-import com.google.common.io.Resources;
-import com.mangofactory.swagger.configuration.SpringSwaggerConfig;
-import com.mangofactory.swagger.models.dto.ApiInfo;
-import com.mangofactory.swagger.models.dto.ResponseMessage;
-import com.mangofactory.swagger.ordering.ResourceListingPositionalOrdering;
-import com.mangofactory.swagger.plugin.EnableSwagger;
-import com.mangofactory.swagger.plugin.SwaggerSpringMvcPlugin;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,12 +16,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import com.google.api.client.util.Charsets;
+import com.google.common.io.Resources;
+import com.mangofactory.swagger.configuration.SpringSwaggerConfig;
+import com.mangofactory.swagger.models.dto.ApiInfo;
+import com.mangofactory.swagger.models.dto.ResponseMessage;
+import com.mangofactory.swagger.ordering.ResourceListingPositionalOrdering;
+import com.mangofactory.swagger.plugin.EnableSwagger;
+import com.mangofactory.swagger.plugin.SwaggerSpringMvcPlugin;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 
 @Configuration
 @EnableSwagger
@@ -38,7 +39,7 @@ public class ApiDocConfig {
         return new SwaggerSpringMvcPlugin(this.springSwaggerConfig)
                 .apiInfo(apiInfo())
                 .includePatterns(".*stack.*", ".*cluster.*", ".*blueprint.*", ".*template.*",
-                        ".*credential.*", ".*recipe.*", ".*usage.*", ".*event.*")
+                        ".*credential.*", ".*recipe.*", ".*usage.*", ".*event.*", ".*network.*")
                 .ignoredParameterTypes(CbUser.class, ModelMap.class, View.class, ModelAndView.class)
                 .apiListingReferenceOrdering(new ResourceListingPositionalOrdering())
                 .directModelSubstitute(ModelAndView.class, OutputStream.class)

@@ -20,6 +20,7 @@ import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.AzureNetwork;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -28,7 +29,6 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.network.NetworkConfig;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 import com.sequenceiq.cloudbreak.service.network.Port;
 import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
@@ -133,13 +133,14 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
             List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup, Optional<String> userData) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
+        AzureNetwork network = (AzureNetwork) stack.getNetwork();
         AzureCredential credential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();
         props.put(NAME, buildResources.get(0).getResourceName());
         props.put(AFFINITYGROUP, filterResourcesByType(resources, ResourceType.AZURE_AFFINITY_GROUP).get(0).getResourceName());
         props.put(SUBNETNAME, buildResources.get(0).getResourceName());
-        props.put(ADDRESSPREFIX, NetworkConfig.SUBNET_8);
-        props.put(SUBNETADDRESSPREFIX, NetworkConfig.SUBNET_16);
+        props.put(ADDRESSPREFIX, network.getAddressPrefixCIDR());
+        props.put(SUBNETADDRESSPREFIX, network.getSubnetCIDR());
         AzureClient azureClient = azureStackUtil.createAzureClient(credential);
         return new AzureNetworkCreateRequest(buildResources.get(0).getResourceName(), provisionContextObject.getStackId(), props, azureClient,
                 resources, buildResources);

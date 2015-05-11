@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.AwsInstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AwsVolumeType;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
 import freemarker.template.Configuration;
@@ -33,6 +34,9 @@ public class CloudFormationTemplateBuilderTest {
     @Mock
     private Stack stack;
 
+    @Mock
+    private Network network;
+
     @Before
     public void setUp() throws Exception {
         underTest = new CloudFormationTemplateBuilder();
@@ -43,6 +47,8 @@ public class CloudFormationTemplateBuilderTest {
         factoryBean.afterPropertiesSet();
         Configuration freemarkerConfiguration = factoryBean.getObject();
         underTest.setFreemarkerConfiguration(freemarkerConfiguration);
+        when(stack.getNetwork()).thenReturn(network);
+        when(network.getSubnetCIDR()).thenReturn("10.0.0.0/16");
     }
 
     @Test

@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.network.NetworkConfig;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstanceStatusCheckerTask;
@@ -143,9 +142,13 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     }
 
     private String findNextValidIp(AzureProvisionContextObject provisionContextObject) {
-        String ip = NetworkConfig.START_IP;
+        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
+        String subnetCIDR = stack.getNetwork().getSubnetCIDR();
+        String ip = azureStackUtil.getFirstAssignableIPOfSubnet(subnetCIDR);
+        String lastAssignableIP = azureStackUtil.getLastAssignableIPOfSubnet(subnetCIDR);
+
         boolean found = false;
-        while (!found && !ip.equals(NetworkConfig.END_IP)) {
+        while (!found && !ip.equals(lastAssignableIP)) {
             ip = azureStackUtil.getNextIPAddress(ip);
             found = provisionContextObject.putIfAbsent(ip);
         }

@@ -85,6 +85,7 @@ public class TerminationService {
             }
         }
         stack.setCredential(null);
+        stack.setNetwork(null);
         stack.setName(terminatedName);
         stack.setStatus(Status.DELETE_COMPLETED);
         stack.setStatusReason(DELETE_COMPLETED_MSG);

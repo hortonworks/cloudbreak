@@ -1,5 +1,13 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,15 +16,6 @@ import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.StackModelDesc
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.OnFailureAction;
 import com.wordnik.swagger.annotations.ApiModelProperty;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class StackBase implements JsonEntity {
@@ -57,8 +56,9 @@ public abstract class StackBase implements JsonEntity {
     private List<InstanceGroupJson> instanceGroups = new ArrayList<>();
     @ApiModelProperty(StackModelDescription.ALLOWED_SUBNETS)
     private List<SubnetJson> allowedSubnets = new ArrayList<>();
-    @ApiModelProperty(StackModelDescription.PARAMETERS)
-    private Map<String, String> parameters = new HashMap<>();
+    @NotNull
+    @ApiModelProperty(value = StackModelDescription.NETWORK_ID, required = true)
+    private Long networkId;
 
     public FailurePolicyJson getFailurePolicy() {
         return failurePolicy;
@@ -150,11 +150,11 @@ public abstract class StackBase implements JsonEntity {
         this.image = image;
     }
 
-    public Map<String, String> getParameters() {
-        return parameters;
+    public Long getNetworkId() {
+        return networkId;
     }
 
-    public void setParameters(Map<String, String> parameters) {
-        this.parameters = parameters;
+    public void setNetworkId(Long networkId) {
+        this.networkId = networkId;
     }
 }
