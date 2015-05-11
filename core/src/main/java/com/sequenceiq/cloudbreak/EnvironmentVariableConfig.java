@@ -6,6 +6,8 @@ public class EnvironmentVariableConfig {
     public static final String CB_THREADPOOL_CAPACITY_SIZE = "4000";
     public static final String CB_INTERMEDIATE_THREADPOOL_CORE_SIZE = "40";
     public static final String CB_INTERMEDIATE_THREADPOOL_CAPACITY_SIZE = "4000";
+    public static final String CB_CONTAINER_THREADPOOL_CORE_SIZE = "40";
+    public static final String CB_CONTAINER_THREADPOOL_CAPACITY_SIZE = "4000";
 
     public static final String CB_REACTOR_THREADPOOL_CORE_SIZE = "100";
 

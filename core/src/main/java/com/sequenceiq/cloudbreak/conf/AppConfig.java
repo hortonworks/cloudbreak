@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_CONTAINER_THREADPOOL_CAPACITY_SIZE;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_CONTAINER_THREADPOOL_CORE_SIZE;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_INTERMEDIATE_THREADPOOL_CAPACITY_SIZE;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_INTERMEDIATE_THREADPOOL_CORE_SIZE;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_THREADPOOL_CAPACITY_SIZE;
@@ -33,10 +35,12 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptorMapFactory;
+import com.sequenceiq.cloudbreak.core.flow.ExecutorBasedParallelContainerRunner;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorTool;
+import com.sequenceiq.cloudbreak.orchestrator.ParallelContainerRunner;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.SwarmContainerOrchestrator;
 import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
@@ -57,6 +61,11 @@ public class AppConfig {
     private int intermediateCorePoolSize;
     @Value("${cb.intermediate.threadpool.capacity.size:" + CB_INTERMEDIATE_THREADPOOL_CAPACITY_SIZE + "}")
     private int intermediateQueueCapacity;
+
+    @Value("${cb.container.threadpool.core.size:" + CB_CONTAINER_THREADPOOL_CORE_SIZE + "}")
+    private int containerCorePoolSize;
+    @Value("${cb.container.threadpool.capacity.size:" + CB_CONTAINER_THREADPOOL_CAPACITY_SIZE + "}")
+    private int containerteQueueCapacity;
 
     @Autowired
     private TemplateReader templateReader;
@@ -81,8 +90,13 @@ public class AppConfig {
     @Bean
     public Map<ContainerOrchestratorTool, ContainerOrchestrator> containerOrchestrators() {
         Map<ContainerOrchestratorTool, ContainerOrchestrator> map = new HashMap<>();
-        map.put(SWARM, new SwarmContainerOrchestrator());
+        map.put(SWARM, new SwarmContainerOrchestrator(simpleParalellContainerRunnerExecutor()));
         return map;
+    }
+
+    @Bean
+    public ParallelContainerRunner simpleParalellContainerRunnerExecutor() {
+        return new ExecutorBasedParallelContainerRunner(containerBootstrapBuilderExecutor());
     }
 
     @Bean
@@ -137,6 +151,16 @@ public class AppConfig {
         executor.setCorePoolSize(corePoolSize);
         executor.setQueueCapacity(queueCapacity);
         executor.setThreadNamePrefix("resourceBuilderExecutor-");
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean
+    public AsyncTaskExecutor containerBootstrapBuilderExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(containerCorePoolSize);
+        executor.setQueueCapacity(containerteQueueCapacity);
+        executor.setThreadNamePrefix("containerBootstrapBuilderExecutor-");
         executor.initialize();
         return executor;
     }
