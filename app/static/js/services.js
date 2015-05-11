@@ -186,7 +186,8 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         onFailure: cluster.onFailure,
                         instanceGroups: cluster.instanceGroups,
                         parameters: cluster.parameters,
-                        consulServerCount: cluster.consulServerCount
+                        consulServerCount: cluster.consulServerCount,
+                        networkId: cluster.networkId
                     }
                     if (cluster.public) {
                         AccountStack.save(stack, function (result) {
@@ -291,3 +292,15 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
             }
         }
     });
+    uluwatuServices.factory('UserNetwork', ['$resource',
+    function ($resource) {
+        return $resource('user/networks');
+    }]);
+    uluwatuServices.factory('AccountNetwork', ['$resource',
+    function ($resource) {
+        return $resource('account/networks');
+    }]);
+    uluwatuServices.factory('GlobalNetwork', ['$resource',
+    function ($resource) {
+        return $resource('networks/:id');
+    }]);

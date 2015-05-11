@@ -16,14 +16,6 @@
         <!-- .col-sm-9 -->
     </div>
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="openstackpublicNetId">Public Net Id</label>
-
-        <div class="col-sm-9">
-            <p id="openstackpublicNetId" class="form-control-static">{{template.parameters.publicNetId}}</p>
-        </div>
-        <!-- .col-sm-9 -->
-    </div>
-    <div class="form-group">
       <label class="col-sm-3 control-label" for="openstackinstanceType">Instance type</label>
 
       <div class="col-sm-9">

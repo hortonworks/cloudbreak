@@ -43,7 +43,7 @@
                             <div class="form-group">
                                 <label class="col-sm-3 control-label" for="sl_cloudPlatform">Platform</label>
                                 <div class="col-sm-9">
-                                    <p id="sl_cloudPlatform" class="form-control-static">{{activeCluster.cloudPlatform}}</p>
+                                    <p id="sl_cloudPlatform" class="form-control-static">{{activeCluster.cloudPlatform == "GCC" ? "GCP" : activeCluster.cloudPlatform}}</p>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -65,6 +65,12 @@
                                 </div>
                                 <div class="col-sm-9" ng-if="activeCluster.cloudPlatform == 'OPENSTACK' ">
                                   <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.OPENSTACK.regions | filter:{key: activeCluster.region}:true">{{item.value}}</p>
+                                </div>
+                            </div>
+                             <div class="form-group" ng-if="activeCluster.networkId">
+                                <label class="col-sm-3 control-label" for="activeCluster_network">Network</label>
+                                <div class="col-sm-9">
+                                    <p id="activeCluster_network" class="form-control-static" ng-repeat="network in $root.networks | filter:{id: activeCluster.networkId}">{{network.name}}</p>
                                 </div>
                             </div>
                             <div class="form-group" ng-if="activeCluster.cluster.statusReason === null && (activeCluster.statusReason != null && activeCluster.statusReason != '')">
