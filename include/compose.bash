@@ -18,6 +18,9 @@ compose-pull() {
     declare desc="Pulls service images"
 
     [ -f docker-compose.yml ] || deployer-generate
+
+    # parallell pull 
+    # sed -n "s/.*image: //p" docker-compose.yml | sort -u | xargs -I@ -n1 bash -c "docker pull @ &"
     dockerCompose pull
 }
 
