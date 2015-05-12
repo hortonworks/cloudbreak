@@ -37,7 +37,7 @@ migrate-execute-mybatis-migrations() {
     fi
 
     info "Scripts location:  $scripts_location"
-    docker run --link $container_name:db -v $scripts_location:/migrate/scripts sequenceiq/mybatis-migrations:$DOCKER_TAG_MIGRATION $@
+    docker run --rm --link $container_name:db -v $scripts_location:/migrate/scripts sequenceiq/mybatis-migrations:$DOCKER_TAG_MIGRATION $@
 }
 
 migrate-one-db() {
