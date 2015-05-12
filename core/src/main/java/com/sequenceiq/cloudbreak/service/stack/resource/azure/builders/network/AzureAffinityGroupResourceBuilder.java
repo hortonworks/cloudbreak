@@ -13,8 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
+import com.sequenceiq.cloudbreak.cloud.connector.CloudConnectorException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -51,19 +50,24 @@ public class AzureAffinityGroupResourceBuilder extends AzureSimpleNetworkResourc
         AzureAffinityGroupCreateRequest aCSCR = (AzureAffinityGroupCreateRequest) createResourceRequest;
         Stack stack = stackRepository.findById(aCSCR.stackId);
         try {
+            LOGGER.debug("Checking for affinity group: {}", aCSCR.getName());
             aCSCR.getAzureClient().getAffinityGroup(aCSCR.getName());
         } catch (Exception ex) {
-            if (((HttpResponseException) ex).getStatusCode() == NOT_FOUND) {
-                HttpResponseDecorator affinityResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createAffinityGroup(aCSCR.getProps());
-                AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), stack, affinityResponse);
-                azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
-                        POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-            } else if (ex instanceof HttpResponseException) {
-                LOGGER.error(String.format("Error occurs on %s stack under the affinity group creation", aCSCR.getStackId()), ex);
-                throw new InternalServerException(((HttpResponseException) ex).getResponse().toString());
+            if (ex instanceof HttpResponseException) {
+                HttpResponseException httpResponseException = (HttpResponseException) ex;
+                if (httpResponseException.getStatusCode() == NOT_FOUND) {
+                    LOGGER.debug("Affinity group not found; creating new  affinity group: {}", aCSCR.getName());
+                    HttpResponseDecorator affinityResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createAffinityGroup(aCSCR.getProps());
+                    AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), stack, affinityResponse);
+                    azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
+                            POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+                } else {
+                    LOGGER.error("Error creating affinity group: {}", aCSCR.getName(), httpResponseException);
+                    throw new CloudConnectorException(httpResponseException.getResponse().toString());
+                }
             } else {
-                LOGGER.error(String.format("Error occurs on %s stack under the affinity group creation", aCSCR.getStackId()), ex);
-                throw new StackCreationFailureException(ex);
+                LOGGER.error("Error creating affinity group: {} for stack: {}", aCSCR.getName(), aCSCR.getStackId(), ex);
+                throw new CloudConnectorException(ex);
             }
         }
         return true;

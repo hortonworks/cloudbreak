@@ -13,8 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
+import com.sequenceiq.cloudbreak.cloud.connector.CloudConnectorException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -53,17 +52,20 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
         try {
             aCSCR.getAzureClient().getStorageAccount(aCSCR.getName());
         } catch (Exception ex) {
-            if (((HttpResponseException) ex).getStatusCode() == NOT_FOUND) {
-                HttpResponseDecorator storageResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createStorageAccount(aCSCR.getProps());
-                AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), stack, storageResponse);
-                azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
-                        POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-            } else if (ex instanceof HttpResponseException) {
-                LOGGER.error(String.format("Error occurs on %s stack under the storage creation", aCSCR.getStackId()), ex);
-                throw new InternalServerException(((HttpResponseException) ex).getResponse().toString());
+            if (ex instanceof HttpResponseException) {
+                HttpResponseException httpResponseException = (HttpResponseException) ex;
+                if (httpResponseException.getStatusCode() == NOT_FOUND) {
+                    HttpResponseDecorator storageResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createStorageAccount(aCSCR.getProps());
+                    AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), stack, storageResponse);
+                    azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
+                            POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+                } else {
+                    LOGGER.error("Error creating storage: {}", aCSCR.getName(), httpResponseException);
+                    throw new CloudConnectorException(httpResponseException.getResponse().toString());
+                }
             } else {
-                LOGGER.error(String.format("Error occurs on %s stack under the storage creation", aCSCR.getStackId()), ex);
-                throw new StackCreationFailureException(ex);
+                LOGGER.error("Error creating storage: {} for stack: {}", aCSCR.getName(), aCSCR.getStackId(), ex);
+                throw new CloudConnectorException(ex);
             }
         }
         return true;

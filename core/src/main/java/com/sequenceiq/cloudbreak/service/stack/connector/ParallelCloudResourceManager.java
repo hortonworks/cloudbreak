@@ -24,7 +24,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.google.common.primitives.Ints;
 import com.sequenceiq.cloudbreak.cloud.connector.CloudConnectorException;
-import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -122,12 +121,12 @@ public class ParallelCloudResourceManager {
             if (!stackRepository.findById(stack.getId()).isStackInDeletionPhase()) {
                 return resourceSet;
             } else {
-                throw new StackCreationFailureException("Failed to create stack resources, because polling reached an invalid end state.");
+                throw new CloudConnectorException("Failed to create stack resources, because polling reached an invalid end state.");
             }
         } catch (Exception e) {
             String errorReason = "Error occurred when building stack resources:";
             LOGGER.error(errorReason, e);
-            throw new CloudConnectorException(errorReason, e);
+            throw new CloudConnectorException(e);
         }
     }
 
