@@ -27,6 +27,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_ULUWATU 0.5.10
     env-import DOCKER_TAG_SULTANS 0.5.1
     env-import DOCKER_TAG_AMBASSADOR latest
+    env-import DOCKER_TAG_CLOUDBREAK_SHELL 0.4.4
 }
 
 cloudbreak-conf-images() {
@@ -114,6 +115,17 @@ cloudbreak-conf-ui() {
 
 }
 
+cloudbreak-shell() {
+    docker run -ti \
+        --rm \
+        --link cbreak_ambassador_1:backend \
+        -e BACKEND_9000=cloudbreak.service.consul \
+        -e BACKEND_9001=identity.service.consul \
+        -e CLOUDBREAK_ADDRESS=http://backend:9000 \
+        -e IDENTITY_ADDRESS=http://backend:9001 \
+        -e SEQUENCEIQ_USER=admin@example.com \
+        -e SEQUENCEIQ_PASSWORD=cloudbreak -v $PWD:/data sequenceiq/cb-shell:0.4.4
+}
 
 gen-password() {
     date +%s | checksum sha1 | head -c 10
