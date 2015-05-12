@@ -74,14 +74,10 @@ migrate-cmd() {
     if [ -z "$params" ]
     then
         migrate-one-db cbdb up
+        migrate-one-db cbdb pending
         migrate-one-db pcdb up
+        migrate-one-db pcdb pending
     else
         migrate-one-db $params
     fi
 }
-
-
-
-
-
-
