@@ -18,10 +18,21 @@ error() {
 
 cbd-version() {
     declare desc="Displays the version of Cloudbrek Deployer"
-    bin-version | green
+    echo -n "local version:"
+    local localVer=$(bin-version)
+    echo "$localVer" | green
 
-    echo latest version: | green
-    latest-version | yellow
+    echo -n "latest release:"
+    local releaseVer=$(latest-version)
+    echo "$releaseVer" | green
+
+    if [ $(version-compare $localVer $releaseVer) -lt 0 ]; then
+        warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        warn "Your version is outdated"
+        warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        warn "Please update it by:"
+        echo "  cbd update" | blue
+    fi
 }
 
 cbd-update() {

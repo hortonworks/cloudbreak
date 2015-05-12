@@ -16,6 +16,7 @@
 
 ### Added
 
+- Command `version` does correct [Semantic Versioning](http://semver.org) check to advise an upgrade
 - Command `generate` checks and shows if Profile change would result in yaml change.
 - Command `start`: prints uluwatu url and credential hint
 - Command `doctor`: fixes boot2docker date/time if not the same as on the host

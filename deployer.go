@@ -12,6 +12,7 @@ import (
 	"runtime"
 	"strings"
 
+	v "github.com/hashicorp/go-version"
 	"github.com/progrium/go-basher"
 	"github.com/skratchdot/open-golang/open"
 )
@@ -92,6 +93,19 @@ func OpenBrowser(args []string) {
 	}
 }
 
+func VersionCompare(args []string) {
+	v0, err := v.NewVersion(args[0])
+	if err != nil {
+		fatal("Can't parse version string" + err.Error())
+	}
+
+	v1, err := v.NewVersion(args[1])
+	if err != nil {
+		fatal("Can't parse version string" + err.Error())
+	}
+	fmt.Println(v0.Compare(v1))
+}
+
 func Checksum(args []string) {
 	if len(args) < 1 {
 		fatal("No algorithm specified")
@@ -118,9 +132,10 @@ func main() {
 	}
 
 	application(map[string]func([]string){
-		"checksum":    Checksum,
-		"bin-version": BinVersion,
-		"browse":      OpenBrowser,
+		"checksum":        Checksum,
+		"bin-version":     BinVersion,
+		"browse":          OpenBrowser,
+		"version-compare": VersionCompare,
 	}, []string{
 		"include/circle.bash",
 		"include/cloudbreak.bash",
