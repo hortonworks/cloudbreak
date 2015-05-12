@@ -521,7 +521,7 @@ public class AwsConnector implements CloudPlatformConnector {
                 }
             } catch (AmazonServiceException e) {
                 if (e.getErrorMessage().matches("Resource.*does not exist for stack.*")) {
-                    LOGGER.info("Resource doesn't exist for stack: ", e);
+                    LOGGER.info(e.getMessage());
                 } else {
                     throw e;
                 }
