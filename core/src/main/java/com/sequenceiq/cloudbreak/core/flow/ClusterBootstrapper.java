@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.core.flow;
 
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_CONTAINER_ORCHESTRATOR;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -70,7 +72,20 @@ public class ClusterBootstrapper {
                     new BootstrapApiContext(stack, gatewayInstance.getPublicIp(), containerOrchestrator),
                     POLLING_INTERVAL,
                     MAX_POLLING_ATTEMPTS);
-            containerOrchestrator.bootstrap(gatewayInstance.getPublicIp(), nodes, stack.getConsulServers());
+
+            List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIp());
+            containerOrchestrator.bootstrap(gatewayInstance.getPublicIp(), nodeMap.get(0), stack.getConsulServers());
+            clusterAvailabilityPollingService.pollWithTimeout(clusterAvailabilityCheckerTask,
+                    new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayInstance.getPublicIp(), nodeMap.get(0)),
+                    POLLING_INTERVAL,
+                    MAX_POLLING_ATTEMPTS);
+            for (int i = 1; i < nodeMap.size(); i++) {
+                containerOrchestrator.bootstrapNewNodes(gatewayInstance.getPublicIp(), nodeMap.get(i));
+                clusterAvailabilityPollingService.pollWithTimeout(clusterAvailabilityCheckerTask,
+                        new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayInstance.getPublicIp(), nodeMap.get(i)),
+                        POLLING_INTERVAL,
+                        MAX_POLLING_ATTEMPTS);
+            }
             clusterAvailabilityPollingService.pollWithTimeout(
                     clusterAvailabilityCheckerTask,
                     new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayInstance.getPublicIp(), nodes),
@@ -94,7 +109,14 @@ public class ClusterBootstrapper {
         }
         try {
             ContainerOrchestrator containerOrchestrator = containerOrchestrators.get(containerOrchestratorTool);
-            containerOrchestrator.bootstrapNewNodes(gatewayInstance.getPublicIp(), nodes);
+            List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIp());
+            for (int i = 0; i < nodeMap.size(); i++) {
+                containerOrchestrator.bootstrapNewNodes(gatewayInstance.getPublicIp(), nodeMap.get(i));
+                clusterAvailabilityPollingService.pollWithTimeout(clusterAvailabilityCheckerTask,
+                        new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayInstance.getPublicIp(), nodeMap.get(i)),
+                        POLLING_INTERVAL,
+                        MAX_POLLING_ATTEMPTS);
+            }
             clusterAvailabilityPollingService.pollWithTimeout(
                     clusterAvailabilityCheckerTask,
                     new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayInstance.getPublicIp(), nodes),
@@ -104,4 +126,36 @@ public class ClusterBootstrapper {
             throw new CloudbreakException(e);
         }
     }
+
+    private List<Set<Node>> prepareBootstrapSegments(Set<Node> nodes, ContainerOrchestrator containerOrchestrator, String gatewayIp) {
+        List<Set<Node>> result = new ArrayList<>();
+        Set<Node> newNodes = new HashSet<>();
+        Node gatewayNode = getGateWayNode(nodes, gatewayIp);
+        if (gatewayNode != null) {
+            newNodes.add(gatewayNode);
+        }
+        for (Node node : nodes) {
+            if (!node.getPublicIp().equals(gatewayIp)) {
+                newNodes.add(node);
+                if (newNodes.size() >= containerOrchestrator.getMaxBootstrapNodes()) {
+                    result.add(newNodes);
+                    newNodes = new HashSet<>();
+                }
+            }
+        }
+        if (!newNodes.isEmpty()) {
+            result.add(newNodes);
+        }
+        return result;
+    }
+
+    private Node getGateWayNode(Set<Node> nodes, String gatewayIp) {
+        for (Node node : nodes) {
+            if (node.getPublicIp().equals(gatewayIp)) {
+                return node;
+            }
+        }
+        return null;
+    }
+
 }
