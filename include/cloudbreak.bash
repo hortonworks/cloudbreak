@@ -33,10 +33,10 @@ cloudbreak-conf-tags() {
 cloudbreak-conf-images() {
     declare desc="Defines base images for each provider"
 
-    env-import CB_AZURE_IMAGE_URI "https://102589fae040d8westeurope.blob.core.windows.net/images/packer-cloudbreak-2015-05-07-centos6-mun10_2015-May-7_16-3-os-2015-05-07.vhd"
-    env-import CB_AWS_AMI_MAP "ap-northeast-1:ami-4ee7284e,ap-southeast-1:ami-b0e5dae2,ap-southeast-2:ami-1d780727,eu-west-1:ami-33593144,sa-east-1:ami-eba423f6,us-east-1:ami-606c7808,us-west-1:ami-9d709fd9,us-west-2:ami-c37848f3"
-    env-import CB_OPENSTACK_IMAGE "cb-centos66-amb200-2015-05-08"
-    env-import CB_GCP_SOURCE_IMAGE_PATH "sequenceiqimage/cb-centos66-amb200-2015-05-07-1639.image.tar.gz"
+    env-import CB_AZURE_IMAGE_URI "https://102589fae040d8westeurope.blob.core.windows.net/images/packer-cloudbreak-2015-05-11-centos6_2015-May-11_14-57-os-2015-05-11.vhd"
+    env-import CB_AWS_AMI_MAP "ap-northeast-1:ami-9adc159a,ap-southeast-1:ami-ba6856e8,ap-southeast-2:ami-5592ed6f,eu-west-1:ami-71d0bb06,sa-east-1:ami-ef0186f2,us-east-1:ami-3499885c,us-west-1:ami-87ce20c3,us-west-2:ami-5b794a6b"
+    env-import CB_OPENSTACK_IMAGE "cb-centos66-amb200-2015-05-11"
+    env-import CB_GCP_SOURCE_IMAGE_PATH "sequenceiqimage/cb-centos66-amb200-2015-05-11-1550.image.tar.gz"
 
 }
 
@@ -158,7 +158,7 @@ generate_uaa_config() {
             warn "if you want to regenerate, remove it first:"
             echo "  cbd regenerate" | blue
             warn "expected change:"
-            
+
             (diff /tmp/uaa-delme.yml uaa.yml || true) | cyan
         fi
     else
