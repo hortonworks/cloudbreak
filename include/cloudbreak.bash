@@ -124,7 +124,9 @@ cloudbreak-shell() {
         -e CLOUDBREAK_ADDRESS=http://backend:9000 \
         -e IDENTITY_ADDRESS=http://backend:9001 \
         -e SEQUENCEIQ_USER=admin@example.com \
-        -e SEQUENCEIQ_PASSWORD=cloudbreak -v $PWD:/data sequenceiq/cb-shell:0.4.4
+        -e SEQUENCEIQ_PASSWORD=cloudbreak \
+        -v $PWD:/data \
+        sequenceiq/cb-shell:0.4.4
 }
 
 gen-password() {
