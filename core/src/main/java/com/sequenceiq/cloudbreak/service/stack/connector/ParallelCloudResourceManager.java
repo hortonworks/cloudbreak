@@ -23,7 +23,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.google.common.primitives.Ints;
-import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
+import com.sequenceiq.cloudbreak.cloud.connector.CloudConnectorException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -121,12 +121,12 @@ public class ParallelCloudResourceManager {
             if (!stackRepository.findById(stack.getId()).isStackInDeletionPhase()) {
                 return resourceSet;
             } else {
-                throw new StackCreationFailureException("Failed to create stack resources, because polling reached an invalid end state.");
+                throw new CloudConnectorException("Failed to create stack resources, because polling reached an invalid end state.");
             }
         } catch (Exception e) {
             String errorReason = "Error occurred when building stack resources:";
             LOGGER.error(errorReason, e);
-            throw new CloudResourceOperationFailedException(errorReason, e);
+            throw new CloudConnectorException(e);
         }
     }
 
@@ -175,7 +175,7 @@ public class ParallelCloudResourceManager {
         } catch (Exception e) {
             String errorReason = "Error occurred when adding new resources to stack:";
             LOGGER.error(errorReason, e);
-            throw new CloudResourceOperationFailedException(errorReason, e);
+            throw new CloudConnectorException(errorReason, e);
         }
     }
 
@@ -220,7 +220,7 @@ public class ParallelCloudResourceManager {
         } catch (Exception e) {
             String errorReason = "Error occurred when removing existing resources from stack:";
             LOGGER.error(errorReason, e);
-            throw new CloudResourceOperationFailedException(errorReason, e);
+            throw new CloudConnectorException(errorReason, e);
         }
     }
 
@@ -272,7 +272,7 @@ public class ParallelCloudResourceManager {
         } catch (Exception e) {
             String errorReason = "Error occurred when terminating stack resources:";
             LOGGER.error(errorReason, e);
-            throw new CloudResourceOperationFailedException(errorReason, e);
+            throw new CloudConnectorException(errorReason, e);
         }
     }
 
@@ -311,7 +311,7 @@ public class ParallelCloudResourceManager {
         } catch (Exception e) {
             String errorReason = "Error occurred when rolling back stack resources:";
             LOGGER.error(errorReason, e);
-            throw new CloudResourceOperationFailedException(errorReason, e);
+            throw new CloudConnectorException(errorReason, e);
         }
     }
 
@@ -361,7 +361,7 @@ public class ParallelCloudResourceManager {
         return finished;
     }
 
-    public void updateAllowedSubnets(Stack stack, ResourceBuilderInit resourceBuilderInit) throws UpdateFailedException {
+    public void updateAllowedSubnets(Stack stack, ResourceBuilderInit resourceBuilderInit) {
         UpdateContextObject updateContext = resourceBuilderInit.updateInit(stack);
         for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(stack.cloudPlatform())) {
             resourceBuilder.update(updateContext);

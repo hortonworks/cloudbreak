@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.ParallelCloudResourceManager;
-import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.builders.GccResourceBuilderInit;
 
 @Service
@@ -49,7 +48,7 @@ public class GcpConnector implements CloudPlatformConnector {
 
     @Override
     public void rollback(final Stack stack, Set<Resource> resourceSet) {
-            cloudResourceManager.rollbackResources(stack, gcpResourceBuilderInit);
+        cloudResourceManager.rollbackResources(stack, gcpResourceBuilderInit);
     }
 
     @Override
@@ -68,7 +67,7 @@ public class GcpConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public void updateAllowedSubnets(Stack stack, String gateWayUserData, String hostGroupUserData) throws UpdateFailedException {
+    public void updateAllowedSubnets(Stack stack, String gateWayUserData, String hostGroupUserData) {
         cloudResourceManager.updateAllowedSubnets(stack, gcpResourceBuilderInit);
     }
 }

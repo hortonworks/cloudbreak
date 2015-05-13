@@ -35,7 +35,7 @@ public class OpenStackInstanceStatusCheckerTask extends StackBasedStatusCheckerT
 
     @Override
     public void handleTimeout(OpenStackContext context) {
-        throw new OpenStackOperationTimeoutException("OpenStack instances didn't reach the desired state in the given time frame");
+        throw new OpenStackResourceException(String.format("OpenStack instances didn't reach the '%s' state.; operation timed out", context.getStatus()));
     }
 
     @Override

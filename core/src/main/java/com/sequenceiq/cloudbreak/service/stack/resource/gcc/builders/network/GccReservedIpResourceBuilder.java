@@ -13,7 +13,6 @@ import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Address;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -24,8 +23,8 @@ import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCheckerStatus;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCreationException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceReadyPollerObject;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GcpResourceException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleNetworkResourceBuilder;
@@ -36,11 +35,16 @@ import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccProvisionCo
 @Order(4)
 public class GccReservedIpResourceBuilder extends GccSimpleNetworkResourceBuilder {
 
-    @Autowired private StackRepository stackRepository;
-    @Autowired private GccResourceCheckerStatus gccResourceCheckerStatus;
-    @Autowired private PollingService<GccResourceReadyPollerObject> gccReservedIpReadyPollerObjectPollingService;
-    @Autowired private GccRemoveCheckerStatus gccRemoveCheckerStatus;
-    @Autowired private PollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
+    @Autowired
+    private StackRepository stackRepository;
+    @Autowired
+    private GccResourceCheckerStatus gccResourceCheckerStatus;
+    @Autowired
+    private PollingService<GccResourceReadyPollerObject> gccReservedIpReadyPollerObjectPollingService;
+    @Autowired
+    private GccRemoveCheckerStatus gccRemoveCheckerStatus;
+    @Autowired
+    private PollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
 
     @Override
     public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
@@ -65,7 +69,7 @@ public class GccReservedIpResourceBuilder extends GccSimpleNetworkResourceBuilde
                             ResourceType.GCC_RESERVED_IP);
             gccReservedIpReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, instReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         } else {
-            throw new GccResourceCreationException(execute.getHttpErrorMessage(), resourceType(), reservedIpCreateRequest.getAddress().getName());
+            throw new GcpResourceException(execute.getHttpErrorMessage(), resourceType(), reservedIpCreateRequest.getAddress().getName());
         }
         return true;
     }
@@ -103,7 +107,7 @@ public class GccReservedIpResourceBuilder extends GccSimpleNetworkResourceBuilde
         } catch (GoogleJsonResponseException ex) {
             exceptionHandler(ex, resource.getResourceName(), stack);
         } catch (IOException e) {
-            throw new InternalServerException(e.getMessage());
+            throw new GcpResourceException(e);
         }
         return true;
     }

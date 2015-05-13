@@ -96,11 +96,12 @@ public class AmbariClusterFacade implements ClusterFacade {
                 POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
 
         if (isSuccess(pollingResult)) {
-            LOGGER.info("Stack has been successfully created!");
+            LOGGER.info("Ambari has successfully started! Polling result: {}", pollingResult);
             assert provisioningContext.getAmbariIp() != null;
 
         } else {
-            throw new CloudbreakException("Stack creation failed. Context:" + context);
+            LOGGER.info("Could not start Ambari. polling result: {},  Context: {}", pollingResult, context);
+            throw new CloudbreakException(String.format("Could not start Ambari. polling result: '%s',  Context: '%s'", pollingResult, context));
         }
         stack = stackUpdater.updateAmbariIp(stack.getId(), provisioningContext.getAmbariIp());
         String statusReason = "Cluster infrastructure and ambari are available on the cloud. AMBARI_IP:" + stack.getAmbariIp();
@@ -159,7 +160,7 @@ public class AmbariClusterFacade implements ClusterFacade {
             return context;
         } catch (Exception e) {
             LOGGER.error("Exception during cluster start: {}", e.getMessage());
-            throw new CloudbreakException(e.getMessage(), e);
+            throw new CloudbreakException(e);
         }
     }
 

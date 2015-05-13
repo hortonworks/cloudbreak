@@ -23,10 +23,10 @@ public class AzureMetadataSetupCheckerTask extends StackBasedStatusCheckerTask<A
 
     @Override
     public void handleTimeout(AzureMetadataSetupCheckerTaskContext azureMetadataSetupCheckerTaskContext) {
-        String message = String.format("Azure Virtualmachine with name: %s not available in the timeframe.",
+        String message = String.format("Azure Virtualmachine with name: %s is not available; operation timed out.",
                 azureMetadataSetupCheckerTaskContext.getProps().get(AzureStackUtil.NAME));
         LOGGER.error(message);
-        throw new AzureMetadataSetupException(message);
+        throw new AzureResourceException(message);
     }
 
     @Override

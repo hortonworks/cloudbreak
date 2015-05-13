@@ -45,13 +45,13 @@ public abstract class AbstractFlowHandler<T extends DefaultFlowContext> implemen
         try {
             result = execute(event);
             success = true;
-        } catch (Throwable t) {
+        } catch (Exception t) {
             consumeError(event, t);
             try {
                 result = handleErrorFlow(t, event.getData());
             } catch (Exception e) {
                 LOGGER.error("Error during error handling flow");
-                throw new CloudbreakRuntimeException("Error during error handling flow", e);
+                throw new CloudbreakFlowException(e);
             }
         }
         Object payload = assemblePayload(result);

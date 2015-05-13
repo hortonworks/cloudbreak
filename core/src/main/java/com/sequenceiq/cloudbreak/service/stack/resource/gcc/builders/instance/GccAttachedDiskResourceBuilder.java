@@ -29,8 +29,8 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCheckerStatus;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCreationException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceReadyPollerObject;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GcpResourceException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleInstanceResourceBuilder;
@@ -77,7 +77,7 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
                         gccDiskReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, gccDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
                         return true;
                     } else {
-                        throw new GccResourceCreationException(execute.getHttpErrorMessage(), resourceType(), disk.getName());
+                        throw new GcpResourceException(execute.getHttpErrorMessage(), resourceType(), disk.getName());
                     }
                 }
             });

@@ -2,9 +2,6 @@ package com.sequenceiq.cloudbreak.service.stack.resource.azure.builders.instance
 
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
 
-import java.io.FileNotFoundException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
+import com.sequenceiq.cloudbreak.cloud.connector.CloudConnectorException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -78,15 +75,9 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
         X509Certificate sshCert = null;
         try {
             sshCert = azureStackUtil.createX509Certificate(azureCredential);
-        } catch (FileNotFoundException e) {
-            throw new StackCreationFailureException(e);
-        } catch (CertificateException e) {
-            throw new StackCreationFailureException(e);
-        }
-        try {
             props.put(DATA, new String(sshCert.getPem()));
-        } catch (CertificateEncodingException e) {
-            throw new StackCreationFailureException(e);
+        } catch (Exception e) {
+            throw new CloudConnectorException(e);
         }
         return new AzureServiceCertificateCreateRequest(props,
                 azureStackUtil.createAzureClient(azureCredential), resources, buildResources, stack, instanceGroup.orNull());

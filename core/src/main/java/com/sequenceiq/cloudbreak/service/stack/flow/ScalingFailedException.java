@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
-public class ScalingFailedException extends InternalServerException {
+public class ScalingFailedException extends CloudbreakServiceException {
 
     public ScalingFailedException(String message) {
         super(message);

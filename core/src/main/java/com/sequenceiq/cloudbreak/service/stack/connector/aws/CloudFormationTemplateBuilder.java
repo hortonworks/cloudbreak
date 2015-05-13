@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -39,7 +38,7 @@ public class CloudFormationTemplateBuilder {
         try {
             return FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(templatePath, "UTF-8"), model);
         } catch (IOException | TemplateException e) {
-            throw new InternalServerException("Failed to process CloudFormation freemarker template", e);
+            throw new AwsResourceException("Failed to process CloudFormation freemarker template", e);
         }
     }
 

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -22,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureResourceException;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureCreateResourceStatusCheckerTask;
@@ -38,11 +38,16 @@ import groovyx.net.http.HttpResponseException;
 @Order(4)
 public class AzureReservedIpResourceBuilder extends AzureSimpleNetworkResourceBuilder {
 
-    @Autowired private StackRepository stackRepository;
-    @Autowired private AzureStackUtil azureStackUtil;
-    @Autowired private AzureCreateResourceStatusCheckerTask azureCreateResourceStatusCheckerTask;
-    @Autowired private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
-    @Autowired private AzureDeleteResourceStatusCheckerTask azureDeleteResourceStatusCheckerTask;
+    @Autowired
+    private StackRepository stackRepository;
+    @Autowired
+    private AzureStackUtil azureStackUtil;
+    @Autowired
+    private AzureCreateResourceStatusCheckerTask azureCreateResourceStatusCheckerTask;
+    @Autowired
+    private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
+    @Autowired
+    private AzureDeleteResourceStatusCheckerTask azureDeleteResourceStatusCheckerTask;
 
     @Override
     public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
@@ -71,7 +76,7 @@ public class AzureReservedIpResourceBuilder extends AzureSimpleNetworkResourceBu
         } catch (HttpResponseException ex) {
             httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner(), stack);
         } catch (Exception ex) {
-            throw new InternalServerException(ex.getMessage());
+            throw new AzureResourceException(ex);
         }
         return true;
     }

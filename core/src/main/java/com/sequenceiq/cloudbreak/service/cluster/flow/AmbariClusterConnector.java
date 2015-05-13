@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static com.sequenceiq.cloudbreak.service.PollingResult.SUCCESS;
-import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.orchestrator.DockerContainer.AMBARI_DB;
 import static com.sequenceiq.cloudbreak.orchestrator.DockerContainer.AMBARI_SERVER;
+import static com.sequenceiq.cloudbreak.service.PollingResult.SUCCESS;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
 import static java.util.Collections.singletonMap;
 
@@ -32,7 +32,6 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.ClusterException;
 import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
@@ -50,6 +49,7 @@ import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
@@ -446,7 +446,7 @@ public class AmbariClusterConnector {
             } else if ("Bad Request".equals(e.getMessage())) {
                 throw new BadRequestException("Failed to validate Ambari blueprint.", e);
             } else {
-                throw new InternalServerException("Something went wrong", e);
+                throw new CloudbreakServiceException(e);
             }
         }
     }
@@ -508,7 +508,7 @@ public class AmbariClusterConnector {
             } else if ("Bad Request".equals(e.getMessage())) {
                 throw new BadRequestException("Failed to validate host.", e);
             } else {
-                throw new InternalServerException("Something went wrong", e);
+                throw new CloudbreakServiceException(e);
             }
         }
     }

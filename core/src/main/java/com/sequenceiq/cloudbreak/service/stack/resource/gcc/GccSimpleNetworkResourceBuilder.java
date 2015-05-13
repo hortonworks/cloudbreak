@@ -8,12 +8,11 @@ import org.slf4j.LoggerFactory;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Operation;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GcpResourceException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
@@ -50,14 +49,14 @@ public abstract class GccSimpleNetworkResourceBuilder implements
 
     protected void exceptionHandler(GoogleJsonResponseException ex, String name, Stack stack) {
         if (ex.getDetails().get("code").equals(NOT_FOUND)) {
-            LOGGER.info(String.format("Resource was delete with name: %s", name));
+            LOGGER.info(String.format("Resource not found. Resource name: %s ", name));
         } else {
-            throw new InternalServerException(ex.getMessage());
+            throw new GcpResourceException(ex.getMessage(), ex);
         }
     }
 
     @Override
-    public void update(GccUpdateContextObject updateContextObject) throws UpdateFailedException {
+    public void update(GccUpdateContextObject updateContextObject) {
     }
 
     @Override

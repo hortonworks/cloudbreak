@@ -11,9 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
-import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
@@ -48,20 +46,20 @@ public class AzureCloudServiceDeleteTask implements StatusCheckerTask<AzureCloud
     private void waitForFinishing(AzureClient azureClient, String requestId) {
         boolean finished = azureClient.waitUntilComplete(requestId);
         if (!finished) {
-            throw new InternalServerException("Azure resource timeout");
+            throw new AzureResourceException(String.format("Azure resource deletion timed out. Request id: '%s'", requestId));
         }
     }
 
     @Override
     public void handleTimeout(AzureCloudServiceDeleteTaskContext azureDiskRemoveReadyPollerObject) {
-        throw new AddInstancesFailedException(String.format(
-                "Something went wrong. Remove of '%s' resource unsuccess in a reasonable timeframe on '%s' stack.",
+        throw new AzureResourceException(String.format(
+                "Could not remove azure resource '%s', stackId '%s'; operation timed out.",
                 azureDiskRemoveReadyPollerObject.getName(), azureDiskRemoveReadyPollerObject.getStack().getId()));
     }
 
     @Override
     public String successMessage(AzureCloudServiceDeleteTaskContext azureDiskRemoveReadyPollerObject) {
-        return String.format("Azure resource '%s' is removed success on '%s' stack",
+        return String.format("Azure resource '%s' is successfully removed. Stack id: '%s'",
                 azureDiskRemoveReadyPollerObject.getName(), azureDiskRemoveReadyPollerObject.getStack().getId());
     }
 

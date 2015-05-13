@@ -29,7 +29,6 @@ import com.google.api.services.compute.model.DiskList;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -159,7 +158,7 @@ public class GccStackUtil {
             String[] parts = createParts(image);
             return parts[parts.length - 1];
         } else {
-            throw new InternalServerException("Source image path environment variable is not well formed");
+            throw new GcpResourceException("Source image path environment variable is not well formed");
         }
     }
 

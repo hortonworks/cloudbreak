@@ -6,15 +6,4 @@ public class ClusterException extends CloudbreakException {
         super(message);
     }
 
-    public ClusterException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ClusterException(Throwable cause) {
-        super(cause);
-    }
-
-    protected ClusterException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

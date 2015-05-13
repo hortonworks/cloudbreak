@@ -16,7 +16,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloud.azure.client.AzureClientUtil;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -93,7 +92,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
                 actualObj = MAPPER.readValue(keyJson, JsonNode.class);
             } catch (IOException e) {
                 LOGGER.info("Can not read Json node: ", e);
-                throw new InternalServerException("Can not read Json node: ", e);
+                throw new AzureResourceException(e);
             }
             String storageAccountKey = actualObj.get("StorageService").get("StorageServiceKeys").get("Primary").asText();
 
@@ -138,7 +137,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
             }
         }
         if (!SUCCESS.equals(copyStatus)) {
-            throw new InternalServerException("Copy OS image failed with status: " + copyStatus);
+            throw new AzureResourceException("Copy OS image failed with status: " + copyStatus);
         }
     }
 
@@ -187,8 +186,8 @@ public class AzureProvisionSetup implements ProvisionSetup {
                 azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                         POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             } else {
-                LOGGER.error(String.format("Error occurs on %s stack under the storage creation", stack.getId()), ex);
-                throw new InternalServerException(ex.getMessage());
+                LOGGER.error(String.format("Failure during storage creation: {}", stack.getId()), ex);
+                throw new AzureResourceException(ex);
             }
         }
     }
@@ -204,8 +203,8 @@ public class AzureProvisionSetup implements ProvisionSetup {
                 params.put(LOCATION, AzureLocation.valueOf(stack.getRegion()).region());
                 azureClient.createAffinityGroup(params);
             } else {
-                LOGGER.error(String.format("Error occurs on %s stack under the affinity group creation", stack.getId()), ex);
-                throw new InternalServerException(ex.getMessage());
+                LOGGER.error(String.format("Error creating affinity group: {}, stack Id: {}", affinityGroupName, stack.getId()), ex);
+                throw new AzureResourceException(ex);
             }
         }
     }

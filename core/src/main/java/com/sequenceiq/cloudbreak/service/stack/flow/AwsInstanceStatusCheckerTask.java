@@ -8,7 +8,7 @@ import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.Reservation;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
@@ -34,7 +34,7 @@ public class AwsInstanceStatusCheckerTask extends StackBasedStatusCheckerTask<Aw
 
     @Override
     public void handleTimeout(AwsInstances t) {
-        throw new InternalServerException(String.format("AWS instances could not reach the desired status: %s on stack: %s", t, t.getStack().getId()));
+        throw new CloudbreakServiceException(String.format("AWS instances could not reach the desired status: %s on stack: %s", t, t.getStack().getId()));
     }
 
     @Override

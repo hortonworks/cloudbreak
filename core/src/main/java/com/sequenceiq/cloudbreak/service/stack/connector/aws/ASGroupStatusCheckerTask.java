@@ -12,7 +12,7 @@ import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
-import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
+
 
 @Component
 public class ASGroupStatusCheckerTask extends StackBasedStatusCheckerTask<AutoScalingGroupReady> {
@@ -49,8 +49,7 @@ public class ASGroupStatusCheckerTask extends StackBasedStatusCheckerTask<AutoSc
 
     @Override
     public void handleTimeout(AutoScalingGroupReady t) {
-        throw new AddInstancesFailedException(String.format(
-                "Something went wrong. Instances in Auto Scaling group '%s' not started in a reasonable timeframe.",
+        throw new AwsResourceException(String.format("Could not start Instances in Auto Scaling group '%s'; operation timed out.",
                 t.getAutoScalingGroupName()));
     }
 

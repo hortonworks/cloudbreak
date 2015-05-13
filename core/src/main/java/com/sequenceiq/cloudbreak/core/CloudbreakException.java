@@ -13,8 +13,4 @@ public class CloudbreakException extends Exception {
     public CloudbreakException(Throwable cause) {
         super(cause);
     }
-
-    protected CloudbreakException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

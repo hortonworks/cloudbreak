@@ -20,7 +20,7 @@ import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.core.flow.CloudbreakRuntimeException;
+import com.sequenceiq.cloudbreak.core.flow.CloudbreakFlowException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
@@ -67,8 +67,8 @@ public class EmailSenderService {
             LOGGER.debug("Sending email. Content: {}", emailBody);
             mailSender.send(prepareMessage(user, "Cloudbreak - stack installation", emailBody));
         } catch (Exception e) {
-            LOGGER.error("Could not send email");
-            throw new CloudbreakRuntimeException("Exception during cluster install failure email sending.", e);
+            LOGGER.error("Could not send email. User: {}", user.getUserId());
+            throw new CloudbreakFlowException(e);
         }
     }
 

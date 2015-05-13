@@ -8,9 +8,6 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.VIRTUAL_NETWORK_IP_ADDRESS;
 
-import java.io.FileNotFoundException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,8 +21,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
+import com.sequenceiq.cloudbreak.cloud.connector.CloudConnectorException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
@@ -36,6 +32,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureResourceException;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstances;
@@ -128,8 +125,8 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
                 props.put(RESERVEDIPNAME, stack.getResourceByType(ResourceType.AZURE_RESERVED_IP).getResourceName());
             }
             return new AzureVirtualMachineCreateRequest(props, resources, buildResources, stack, instanceGroup.orNull());
-        } catch (FileNotFoundException | CertificateException | NoSuchAlgorithmException e) {
-            throw new StackCreationFailureException(e);
+        } catch (Exception e) {
+            throw new CloudConnectorException(e);
         }
     }
 
@@ -175,7 +172,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         } catch (HttpResponseException ex) {
             httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner(), stack);
         } catch (Exception ex) {
-            throw new InternalServerException(ex.getMessage());
+            throw new AzureResourceException(ex);
         }
         return true;
     }
