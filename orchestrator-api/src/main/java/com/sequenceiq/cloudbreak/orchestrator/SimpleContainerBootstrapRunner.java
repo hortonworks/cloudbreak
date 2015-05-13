@@ -9,8 +9,8 @@ import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 
 public class SimpleContainerBootstrapRunner implements Callable<Boolean> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleContainerBootstrapRunner.class);
-    private static final int MAX_RETRY_COUNT = 5;
-    private static final int SLEEP_TIME = 3000;
+    private static final int MAX_RETRY_COUNT = 7;
+    private static final int SLEEP_TIME = 10000;
 
     private final ContainerBootstrap containerBootstrap;
 
