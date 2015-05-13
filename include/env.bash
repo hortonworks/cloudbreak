@@ -38,7 +38,7 @@ env-export() {
     cloudbreak-config
     migrate-config
 	for var in "${_env[@]}"; do
-		printf '%s=%s\n' "$var" "${!var}"
+		printf 'export %s=%s\n' "$var" "${!var}"
 	done
 }
 

@@ -32,6 +32,7 @@
 
 ### Changed
 
+- Command `cbd env export` adds export to the begining of each line
 - cbd logs accepts optional [services] parameter
 - docker-compose uses `cbreak_` prefix for container naming instead of the directory name
 - Command `generate` prints out some more usefull info
