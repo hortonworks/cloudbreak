@@ -16,6 +16,7 @@
 
 ### Added
 
+- Command `delete` added: deletes yamls and dbs
 - Command `cloudbreak-shell` added, right now it internale use DEBUG=1 fn fn-call
 - Command `version` does correct [Semantic Versioning](http://semver.org) check to advise an upgrade
 - Command `generate` checks and shows if Profile change would result in yaml change.

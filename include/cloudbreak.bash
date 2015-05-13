@@ -66,6 +66,18 @@ cloudbreak-conf-db() {
     env-import PERISCOPE_DB_HBM2DDL_STRATEGY "validate"
 }
 
+cloudbreak-delete-dbs() {
+    declare desc="deletes all cloudbreak related dbs: cbdb,pcdb,uaadb"
+
+    if boot2docker version &> /dev/null; then
+        # this is for OSX
+        boot2docker ssh 'sudo rm -rf /var/lib/boot2docker/cloudbreak/*'
+    else
+        # this is for linux
+        rm -rf /var/lib/cloudbreak/*
+    fi
+}
+
 cloudbreak-conf-uaa() {
 
     env-import UAA_DEFAULT_SECRET "cbsecret2015"

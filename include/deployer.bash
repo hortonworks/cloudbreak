@@ -171,6 +171,16 @@ cbd-find-root() {
     CBD_ROOT=$PWD
 }
 
+deployer-delete() {
+    declare desc="Deletes yaml files, and all dbs"
+    cloudbreak-delete-dbs
+    deployer-delete-yamls
+}
+
+deployer-delete-yamls() {
+    rm uaa.yml docker-compose.yml
+}
+
 deployer-generate() {
     declare desc="Generates docker-compose.yml and uaa.yml"
 
@@ -203,6 +213,7 @@ main() {
 
     if [[ "$PROFILE_LOADED" ]] ; then
         cmd-export deployer-generate generate
+        cmd-export deployer-delete delete
         cmd-export compose-ps ps
         cmd-export compose-up start
         cmd-export compose-kill kill
