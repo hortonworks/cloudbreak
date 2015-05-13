@@ -189,6 +189,15 @@ deployer-generate() {
     generate_uaa_config
 }
 
+deployer-regenerate() {
+    declare desc="Deletes and generates docker-compose.yml and uaa.yml"
+
+    deployer-delete-yamls
+    compose-generate-yaml
+    generate_uaa_config
+}
+
+
 main() {
 	set -eo pipefail; [[ "$TRACE" ]] && set -x
 
@@ -214,6 +223,7 @@ main() {
 
     if [[ "$PROFILE_LOADED" ]] ; then
         cmd-export deployer-generate generate
+        cmd-export deployer-regenerate regenerate
         cmd-export deployer-delete delete
         cmd-export compose-ps ps
         cmd-export compose-up start

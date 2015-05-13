@@ -16,6 +16,7 @@
 
 ### Added
 
+- Command `regenerate` deletes and generates docker-compose.yml and uaa.yml
 - Command `delete` added: deletes yamls and dbs
 - Command `cloudbreak-shell` added, right now it internale use DEBUG=1 fn fn-call
 - Command `version` does correct [Semantic Versioning](http://semver.org) check to advise an upgrade
