@@ -155,9 +155,9 @@ load-profile() {
 }
 
 doctor() {
-    declare desc="===> Deployer doctor: Checks your environment, and reports a diagnose."
+    declare desc="Deployer doctor: Checks your environment, and reports a diagnose."
 
-    info "$desc"
+    info "===> $desc"
     cbd-version
     if [[ "$(uname)" == "Darwin" ]]; then
         debug "checking boot2docker on OSX only ..."
@@ -165,6 +165,7 @@ doctor() {
     fi
 
     docker-check-version
+    deployer-generate
 }
 
 cbd-find-root() {
