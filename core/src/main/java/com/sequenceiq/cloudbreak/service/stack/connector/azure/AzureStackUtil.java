@@ -23,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -74,7 +73,7 @@ public class AzureStackUtil {
             return new AzureClient(credential.getSubscriptionId(), jksFile.getAbsolutePath(), DEFAULT_JKS_PASS);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
-            throw new InternalServerException(e.getMessage());
+            throw new AzureResourceException(e.getMessage());
         }
     }
 
@@ -108,8 +107,8 @@ public class AzureStackUtil {
             azureCredential.setCerFile(FileReaderUtils.readFileFromPath(serviceFilesPathWithoutExtension + ".cer"));
             azureCredential.setJksFile(FileReaderUtils.readBinaryFileFromPath(serviceFilesPathWithoutExtension + ".jks"));
         } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-            throw new InternalServerException("There was a problem with the certificate generation", e);
+            LOGGER.error("Failure during azure certificate generation. Error message: {}", e.getMessage(), e);
+            throw new AzureResourceException(e);
         }
         return azureCredential;
     }
@@ -143,7 +142,7 @@ public class AzureStackUtil {
             azureCredential.setSshCerFile(FileReaderUtils.readBinaryFileFromPath(sshPemPathWithoutExtension + ".cer"));
         } catch (InterruptedException e) {
             LOGGER.error(format("An error occurred during ssh generation for %s template. The error was: %s", azureCredential.getId(), e.getMessage()), e);
-            throw new InternalServerException(e.getMessage());
+            throw new AzureResourceException(e);
         }
 
         return azureCredential;

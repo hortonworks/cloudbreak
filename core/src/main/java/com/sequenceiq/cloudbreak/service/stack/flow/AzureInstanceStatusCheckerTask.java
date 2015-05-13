@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
@@ -42,7 +42,7 @@ public class AzureInstanceStatusCheckerTask extends StackBasedStatusCheckerTask<
 
     @Override
     public void handleTimeout(AzureInstances t) {
-        throw new InternalServerException(String.format("Azure instances could not reach the desired status: %s on stack.", t));
+        throw new CloudbreakServiceException(String.format("Azure instances could not reach the desired status: %s on stack.", t));
     }
 
     @Override

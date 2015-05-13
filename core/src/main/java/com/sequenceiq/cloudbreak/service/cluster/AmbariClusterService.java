@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
@@ -44,6 +43,7 @@ import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
@@ -143,7 +143,7 @@ public class AmbariClusterService implements ClusterService {
             if ("Not Found".equals(e.getMessage())) {
                 throw new NotFoundException("Ambari blueprint not found.", e);
             } else {
-                throw new InternalServerException("Something went wrong", e);
+                throw new CloudbreakServiceException(e);
             }
         }
     }

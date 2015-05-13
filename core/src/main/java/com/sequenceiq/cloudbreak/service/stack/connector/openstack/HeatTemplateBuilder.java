@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
@@ -79,7 +78,7 @@ public class HeatTemplateBuilder {
             model.put("cbSubnet", stack.getNetwork().getSubnetCIDR());
             return processTemplateIntoString(freemarkerConfiguration.getTemplate(openStackHeatTemplatePath, "UTF-8"), model);
         } catch (IOException | TemplateException e) {
-            throw new InternalServerException("Failed to process the OpenStack HeatTemplate", e);
+            throw new OpenStackResourceException("Failed to process the OpenStack HeatTemplate", e);
         }
     }
 

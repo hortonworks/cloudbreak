@@ -6,4 +6,8 @@ public class OpenStackResourceException extends CloudConnectorException {
     public OpenStackResourceException(String message) {
         super(message);
     }
+
+    public OpenStackResourceException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

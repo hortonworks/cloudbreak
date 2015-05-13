@@ -6,4 +6,8 @@ public class AzureResourceException extends CloudConnectorException {
     public AzureResourceException(String message) {
         super(message);
     }
+
+    public AzureResourceException(Throwable cause) {
+        super(cause);
+    }
 }

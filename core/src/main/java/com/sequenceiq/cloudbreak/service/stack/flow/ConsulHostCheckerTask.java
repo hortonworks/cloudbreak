@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.ecwid.consul.v1.ConsulClient;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
@@ -33,7 +33,7 @@ public class ConsulHostCheckerTask extends StackBasedStatusCheckerTask<ConsulCon
 
     @Override
     public void handleTimeout(ConsulContext t) {
-        throw new InternalServerException(String.format("Operation timed out. Consul agents didn't join in time %s", t.getTargets()));
+        throw new CloudbreakServiceException(String.format("Operation timed out. Consul agents didn't join in time %s", t.getTargets()));
     }
 
     @Override

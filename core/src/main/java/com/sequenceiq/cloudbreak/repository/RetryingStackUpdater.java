@@ -12,12 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 
 @Component
@@ -27,8 +27,10 @@ public class RetryingStackUpdater {
     private static final int MAX_RETRIES = 5;
     private static final Logger LOGGER = LoggerFactory.getLogger(RetryingStackUpdater.class);
 
-    @Autowired private StackRepository stackRepository;
-    @Autowired private CloudbreakEventService cloudbreakEventService;
+    @Autowired
+    private StackRepository stackRepository;
+    @Autowired
+    private CloudbreakEventService cloudbreakEventService;
 
     public Stack updateStackStatus(Long stackId, Status status, String statusReason) {
         return doUpdateStackStatus(stackId, status, statusReason, INITIAL_ATTEMPT);
@@ -82,7 +84,7 @@ public class RetryingStackUpdater {
                 LOGGER.info("Failed to update stack. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt, e.getClass().getSimpleName());
                 return doUpdateStack(stack, attempt + 1);
             } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts.", stack.getId(), MAX_RETRIES), e);
+                throw new CloudbreakServiceException(String.format("Failed to update stack '%s' in %d attempts.", stack.getId(), MAX_RETRIES), e);
             }
         }
     }
@@ -107,7 +109,7 @@ public class RetryingStackUpdater {
                 LOGGER.info("Failed to update stack status. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt, e.getClass().getSimpleName());
                 return doUpdateStackStatus(stackId, status, statusReason, attempt + 1);
             } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update status)",
+                throw new CloudbreakServiceException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update status)",
                         stackId, MAX_RETRIES), e);
             }
         }
@@ -127,7 +129,7 @@ public class RetryingStackUpdater {
                 LOGGER.info("Failed to update stack status. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt, e.getClass().getSimpleName());
                 return doUpdateStackStatusReason(stackId, statusReason, attempt + 1);
             } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update status)",
+                throw new CloudbreakServiceException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update status)",
                         stackId, MAX_RETRIES), e);
             }
         }
@@ -145,7 +147,7 @@ public class RetryingStackUpdater {
                 LOGGER.info("Failed to update stack status. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt, e.getClass().getSimpleName());
                 return doUpdateMetaData(stackId, instanceMetaData, groupName, attempt + 1);
             } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update metadata)",
+                throw new CloudbreakServiceException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update metadata)",
                         stackId, MAX_RETRIES), e);
             }
         }
@@ -163,7 +165,7 @@ public class RetryingStackUpdater {
                 LOGGER.info("Failed to update stack's Ambari IP. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt, e.getClass().getSimpleName());
                 return doUpdateAmbariIp(stackId, ambariIp, attempt + 1);
             } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update ambariIp)",
+                throw new CloudbreakServiceException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update ambariIp)",
                         stackId, MAX_RETRIES), e);
             }
         }
@@ -182,7 +184,7 @@ public class RetryingStackUpdater {
                         attempt, e.getClass().getSimpleName());
                 return doUpdateNodeCount(stackId, nodeCount, instanceGroup, attempt + 1);
             } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts. (while trying to set 'nodecount')",
+                throw new CloudbreakServiceException(String.format("Failed to update stack '%s' in %d attempts. (while trying to set 'nodecount')",
                         stackId, MAX_RETRIES), e);
             }
         }
@@ -201,7 +203,7 @@ public class RetryingStackUpdater {
                         attempt, e.getClass().getSimpleName());
                 return doUpdateStackCluster(stackId, cluster, attempt + 1);
             } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts. (while trying to add cluster)",
+                throw new CloudbreakServiceException(String.format("Failed to update stack '%s' in %d attempts. (while trying to add cluster)",
                         stackId, MAX_RETRIES), e);
             }
         }
@@ -220,7 +222,7 @@ public class RetryingStackUpdater {
                         attempt, e.getClass().getSimpleName());
                 return doUpdateMetadataReady(stackId, ready, attempt + 1);
             } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts.(while trying to set 'metadataReady')",
+                throw new CloudbreakServiceException(String.format("Failed to update stack '%s' in %d attempts.(while trying to set 'metadataReady')",
                         stackId, MAX_RETRIES), e);
             }
         }
@@ -238,7 +240,7 @@ public class RetryingStackUpdater {
                 LOGGER.info("Failed to update stack resources. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt, e.getClass().getSimpleName());
                 return doUpdateResources(stackId, resources, attempt + 1);
             } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update resources)",
+                throw new CloudbreakServiceException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update resources)",
                         stackId, MAX_RETRIES), e);
             }
         }
@@ -256,7 +258,7 @@ public class RetryingStackUpdater {
                 LOGGER.info("Failed to update stack resources. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt, e.getClass().getSimpleName());
                 return doAddResources(stackId, resources, attempt + 1);
             } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update resources)",
+                throw new CloudbreakServiceException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update resources)",
                         stackId, MAX_RETRIES), e);
             }
         }
@@ -288,7 +290,7 @@ public class RetryingStackUpdater {
                 LOGGER.info("Failed to update stack resources. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt, e.getClass().getSimpleName());
                 return doRemoveResources(stackId, resources, attempt + 1);
             } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update resources)",
+                throw new CloudbreakServiceException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update resources)",
                         stackId, MAX_RETRIES), e);
             }
         }

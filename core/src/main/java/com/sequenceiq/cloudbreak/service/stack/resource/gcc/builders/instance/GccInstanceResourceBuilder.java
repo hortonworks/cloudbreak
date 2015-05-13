@@ -26,7 +26,6 @@ import com.google.api.services.compute.model.Tags;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
@@ -143,7 +142,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         } catch (GoogleJsonResponseException ex) {
             exceptionHandler(ex, resource.getResourceName(), stack);
         } catch (IOException e) {
-            throw new InternalServerException(e.getMessage());
+            throw new GcpResourceException(e);
         }
         return true;
     }

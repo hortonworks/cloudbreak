@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureNetwork;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -120,7 +119,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
         } catch (HttpResponseException ex) {
             httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner(), stack);
         } catch (Exception ex) {
-            throw new InternalServerException(ex.getMessage());
+            throw new AzureResourceException(ex.getMessage());
         }
         return true;
     }

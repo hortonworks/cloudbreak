@@ -2,12 +2,22 @@ package com.sequenceiq.cloudbreak.repository;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.verify;
 import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
+
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.OptimisticLockException;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Sets;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -15,16 +25,8 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import javax.persistence.OptimisticLockException;
-import java.util.List;
-import java.util.Set;
 
 public class RetryingStackUpdaterTest {
 
@@ -75,7 +77,7 @@ public class RetryingStackUpdaterTest {
         assertEquals(result, dummyStack);
     }
 
-    @Test(expected = InternalServerException.class)
+    @Test(expected = CloudbreakServiceException.class)
     public void testUpdateStackFail() {
         // GIVEN
         Stack dummyStack = createDummyStack();
@@ -108,7 +110,7 @@ public class RetryingStackUpdaterTest {
         assertEquals(result.getStatusReason(), dummyStack.getStatusReason());
     }
 
-    @Test(expected = InternalServerException.class)
+    @Test(expected = CloudbreakServiceException.class)
     public void testUpdateStackStatusFail() {
         // GIVEN
         Stack dummyStack = createDummyStack();
@@ -141,7 +143,7 @@ public class RetryingStackUpdaterTest {
         assertEquals(result.getStatusReason(), newStatusReason);
     }
 
-    @Test(expected = InternalServerException.class)
+    @Test(expected = CloudbreakServiceException.class)
     public void testUpdateStackStatusReasonFail() {
         // GIVEN
         String newStatusReason = "newReason";
@@ -177,7 +179,7 @@ public class RetryingStackUpdaterTest {
         assertEquals(result, dummyStack);
     }
 
-    @Test(expected = InternalServerException.class)
+    @Test(expected = CloudbreakServiceException.class)
     public void testUpdateStackMetaDataFail() {
         // GIVEN
         Stack dummyStack = createDummyStack();
@@ -214,7 +216,7 @@ public class RetryingStackUpdaterTest {
         verify(stackRepository, times(4)).save(dummyStack);
     }
 
-    @Test(expected = InternalServerException.class)
+    @Test(expected = CloudbreakServiceException.class)
     public void testUpdateStackResourcesFail() {
         // GIVEN
         Stack dummyStack = createDummyStack();
@@ -252,7 +254,7 @@ public class RetryingStackUpdaterTest {
         verify(stackRepository, times(4)).save(dummyStack);
     }
 
-    @Test(expected = InternalServerException.class)
+    @Test(expected = CloudbreakServiceException.class)
     public void testAddStackResourcesFail() {
         // GIVEN
         Stack dummyStack = createDummyStack();
@@ -288,7 +290,7 @@ public class RetryingStackUpdaterTest {
         verify(stackRepository, times(4)).save(dummyStack);
     }
 
-    @Test(expected = InternalServerException.class)
+    @Test(expected = CloudbreakServiceException.class)
     public void testRemoveStackResourcesFail() {
         // GIVEN
         Stack dummyStack = createDummyStack();
@@ -321,7 +323,7 @@ public class RetryingStackUpdaterTest {
         assertEquals(result.getAmbariIp(), DUMMY_AMBARI_IP);
     }
 
-    @Test(expected = InternalServerException.class)
+    @Test(expected = CloudbreakServiceException.class)
     public void testUpdateAmbariIpFail() {
         // GIVEN
         Stack dummyStack = createDummyStack();
@@ -353,7 +355,7 @@ public class RetryingStackUpdaterTest {
         assertEquals(result.isMetadataReady(), true);
     }
 
-    @Test(expected = InternalServerException.class)
+    @Test(expected = CloudbreakServiceException.class)
     public void testUpdateMetadataReadyFail() {
         // GIVEN
         Stack dummyStack = createDummyStack();
@@ -387,7 +389,7 @@ public class RetryingStackUpdaterTest {
                 DUMMY_NODE_COUNT);
     }
 
-    @Test(expected = InternalServerException.class)
+    @Test(expected = CloudbreakServiceException.class)
     public void testUpdateNodeCountFail() {
         // GIVEN
         Stack dummyStack = createDummyStack();
@@ -421,7 +423,7 @@ public class RetryingStackUpdaterTest {
         assertEquals(result.getCluster(), cluster);
     }
 
-    @Test(expected = InternalServerException.class)
+    @Test(expected = CloudbreakServiceException.class)
     public void testUpdateStackClusterFail() {
         // GIVEN
         Stack dummyStack = createDummyStack();

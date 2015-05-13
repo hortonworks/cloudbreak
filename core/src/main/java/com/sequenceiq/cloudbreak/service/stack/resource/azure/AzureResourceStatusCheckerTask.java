@@ -7,9 +7,9 @@ import org.apache.http.Header;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureResourceException;
 
 import groovyx.net.http.HttpResponseDecorator;
 
@@ -32,7 +32,7 @@ public abstract class AzureResourceStatusCheckerTask implements StatusCheckerTas
                 result = false;
                 break;
             } else if ("Failed".equals(status)) {
-                throw new InternalServerException(jsonFromString.get("Operation").get("Error").get("Message").asText());
+                throw new AzureResourceException(jsonFromString.get("Operation").get("Error").get("Message").asText());
             } else {
                 iterator.remove();
             }
@@ -42,7 +42,7 @@ public abstract class AzureResourceStatusCheckerTask implements StatusCheckerTas
 
     @Override
     public void handleTimeout(AzureResourcePollerObject t) {
-        throw new InternalServerException(String.format("Operation timed out. Azure resource could not reach the desired status: %s on stack.",
+        throw new AzureResourceException(String.format("Operation timed out. Azure resource could not reach the desired status: %s on stack.",
                 t.getStack().getId()));
     }
 

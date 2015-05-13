@@ -6,11 +6,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureResourceException;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
@@ -45,7 +45,7 @@ public abstract class AzureSimpleNetworkResourceBuilder implements
 
     protected void httpResponseExceptionHandler(HttpResponseException ex, String resourceName, String user, Stack stack) {
         if (ex.getStatusCode() != NOT_FOUND && ex.getStatusCode() != NOT_EXIST) {
-            throw new InternalServerException(ex.getResponse().getData().toString());
+            throw new AzureResourceException(ex.getResponse().getData().toString());
         } else {
             LOGGER.error(String.format("Azure resource not found with %s name for %s user.", resourceName, user));
         }

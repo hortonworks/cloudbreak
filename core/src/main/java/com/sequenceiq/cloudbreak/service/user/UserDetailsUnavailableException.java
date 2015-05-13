@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.user;
 
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
-public class UserDetailsUnavailableException extends InternalServerException {
+public class UserDetailsUnavailableException extends CloudbreakServiceException {
 
     public UserDetailsUnavailableException(String message) {
         super(message);

@@ -13,7 +13,6 @@ import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Address;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -108,7 +107,7 @@ public class GccReservedIpResourceBuilder extends GccSimpleNetworkResourceBuilde
         } catch (GoogleJsonResponseException ex) {
             exceptionHandler(ex, resource.getResourceName(), stack);
         } catch (IOException e) {
-            throw new InternalServerException(e.getMessage());
+            throw new GcpResourceException(e);
         }
         return true;
     }

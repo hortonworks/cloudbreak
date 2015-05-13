@@ -4,6 +4,10 @@ import com.sequenceiq.cloudbreak.cloud.connector.CloudConnectorException;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 
 public class GcpResourceException extends CloudConnectorException {
+    public GcpResourceException(Throwable cause) {
+        super(cause);
+    }
+
     public GcpResourceException(String message) {
         super(message);
     }

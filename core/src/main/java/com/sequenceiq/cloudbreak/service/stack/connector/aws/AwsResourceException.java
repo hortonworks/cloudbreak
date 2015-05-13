@@ -7,4 +7,8 @@ public class AwsResourceException extends CloudConnectorException {
     public AwsResourceException(String message) {
         super(message);
     }
+
+    public AwsResourceException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

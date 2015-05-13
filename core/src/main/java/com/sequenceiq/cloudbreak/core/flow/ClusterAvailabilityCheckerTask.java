@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.core.flow.context.ContainerOrchestratorClusterContext;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
@@ -16,7 +16,7 @@ public class ClusterAvailabilityCheckerTask extends StackBasedStatusCheckerTask<
 
     @Override
     public void handleTimeout(ContainerOrchestratorClusterContext t) {
-        throw new InternalServerException("Operation timed out. Container orchestration API couldn't start or the agents didn't join in time.");
+        throw new CloudbreakServiceException("Operation timed out. Container orchestration API couldn't start or the agents didn't join in time.");
     }
 
     @Override

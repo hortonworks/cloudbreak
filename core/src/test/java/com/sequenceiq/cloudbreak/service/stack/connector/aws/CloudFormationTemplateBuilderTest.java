@@ -16,13 +16,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AwsInstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AwsVolumeType;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
 import freemarker.template.Configuration;
 
@@ -124,7 +124,7 @@ public class CloudFormationTemplateBuilderTest {
         assertFalse(result.contains("\"SpotPrice\""));
     }
 
-    @Test(expected = InternalServerException.class)
+    @Test(expected = CloudbreakServiceException.class)
     public void testBuildTemplateShouldThrowInternalServerExceptionWhenTemplateDoesNotExist() {
         // WHEN
         underTest.build(stack, null, false, "templates/non-existent.ftl");
