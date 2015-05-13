@@ -141,7 +141,10 @@ generate_uaa_config() {
             debug "uaa.yml exists and generate wouldn't change it"
         else
             warn "uaa.yml already exists, BUT generate would create a MODIFIED one."
-            warn "if you want to regenerate, move it away ..., expected change:"
+            warn "if you want to regenerate, remove it first:"
+            echo "  rm uaa.yml" | blue
+            warn "expected change:"
+            
             (diff /tmp/uaa-delme.yml uaa.yml || true) | cyan
         fi
     else
@@ -153,7 +156,7 @@ generate_uaa_config() {
 generate_uaa_config_force() {
     declare uaaFile=${1:? required: uaa config file path}
 
-    info "Generating Identity server config: ${uaaFile} ..."
+    debug "Generating Identity server config: ${uaaFile} ..."
 
     cat > ${uaaFile} << EOF
 spring_profiles: postgresql

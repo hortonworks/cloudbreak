@@ -67,7 +67,9 @@ compose-generate-yaml() {
              debug "docker-compose.yml already exist, and generate wouldn't change it."
         else
             warn "docker-compose.yml already exists, BUT generate would create a DIFFERENT one!"
-            warn "if you want to regenerate, move it away ..., expected change:"
+            warn "if you want to regenerate, remove it first:"
+            echo "  rm docker-compose.yml" | blue
+            warn "expected change:"
             (diff /tmp/docker-compose-delme.yml docker-compose.yml || true) | cyan
          fi
     else
@@ -78,7 +80,7 @@ compose-generate-yaml() {
 compose-generate-yaml-force() {
 
     declare comoseFile=${1:? required: compose file path}
-    info "Generating docker-compose yaml: ${comoseFile} ..."
+    debug "Generating docker-compose yaml: ${comoseFile} ..."
     cat > ${comoseFile} <<EOF
 consul:
     privileged: true
