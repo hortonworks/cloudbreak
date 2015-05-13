@@ -16,6 +16,7 @@
 
 ### Added
 
+- Command `login` Shows Uluwatu login url and credentials
 - Command `regenerate` deletes and generates docker-compose.yml and uaa.yml
 - Command `delete` added: deletes yamls and dbs
 - Command `cloudbreak-shell` added, right now it internale use DEBUG=1 fn fn-call

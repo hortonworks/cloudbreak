@@ -198,6 +198,20 @@ deployer-regenerate() {
 }
 
 
+deployer-login() {
+    declare desc="Shows Uluwatu (Cloudbreak UI) login url and credentials"
+
+    # TODO it shoudn't be called multiple times ...
+    cloudbreak-config
+    info "Uluwatu (Cloudbreak UI) url:"
+    echo "  $ULU_HOST_ADDRESS" | blue
+    info "login email:"
+    echo "  $UAA_DEFAULT_USER_EMAIL" | blue
+    info "password:"
+    echo "  $UAA_DEFAULT_USER_PW" | blue
+}
+
+
 main() {
 	set -eo pipefail; [[ "$TRACE" ]] && set -x
 
@@ -230,6 +244,7 @@ main() {
         cmd-export compose-kill kill
         cmd-export compose-logs logs
         cmd-export compose-pull pull
+        cmd-export deployer-login login
 
         cmd-export migrate-startdb startdb
         cmd-export migrate-cmd migrate
