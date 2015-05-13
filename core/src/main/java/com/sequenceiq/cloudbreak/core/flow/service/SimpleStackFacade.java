@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -29,7 +28,6 @@ import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.OnFailureAction;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -333,7 +331,6 @@ public class SimpleStackFacade implements StackFacade {
             if (id != null) {
                 MDCBuilder.buildMdcContext(stackService.getById(id));
                 LOGGER.info("Scaling failure. Context: {}", context);
-                stackUpdater.updateMetadataReady(id, true);
                 stackUpdater.updateStackStatus(id, Status.AVAILABLE, "Stack update failed. " + errorReason);
             }
             return context;
@@ -349,7 +346,6 @@ public class SimpleStackFacade implements StackFacade {
             UpdateAllowedSubnetsContext updateContext = (UpdateAllowedSubnetsContext) context;
             MDCBuilder.buildMdcContext(stackService.getById(updateContext.getStackId()));
             LOGGER.info("Update allowed subnets failure. Context {}", updateContext);
-            stackUpdater.updateMetadataReady(updateContext.getStackId(), true);
             stackUpdater.updateStackStatus(updateContext.getStackId(), Status.AVAILABLE, "Stack update failed. " + updateContext.getErrorReason());
             return updateContext;
         } catch (Exception e) {
@@ -367,12 +363,9 @@ public class SimpleStackFacade implements StackFacade {
         try {
             stack = stackService.getById(request.getStackId());
             MDCBuilder.buildMdcContext(stack);
-            String hostGroupUserData = userDataBuilder.buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(),
-                    new HashMap<String, String>(), InstanceGroupType.CORE);
-            String gateWayUserData = userDataBuilder.buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(),
-                    new HashMap<String, String>(), InstanceGroupType.GATEWAY);
+            String userData = userDataBuilder.buildUserData(stack.cloudPlatform());
             stack.setAllowedSubnets(getNewSubnetList(stack, request.getAllowedSubnets()));
-            cloudPlatformConnectors.get(stack.cloudPlatform()).updateAllowedSubnets(stack, gateWayUserData, hostGroupUserData);
+            cloudPlatformConnectors.get(stack.cloudPlatform()).updateAllowedSubnets(stack, userData, userData);
             stackUpdater.updateStack(stack);
             stackUpdater.updateStackStatus(request.getStackId(), Status.AVAILABLE, "Security update successfully finished");
             return context;

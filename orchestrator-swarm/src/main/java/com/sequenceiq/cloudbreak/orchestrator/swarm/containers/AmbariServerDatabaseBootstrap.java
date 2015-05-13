@@ -19,10 +19,12 @@ public class AmbariServerDatabaseBootstrap implements ContainerBootstrap {
 
     private final DockerClient docker;
     private final String imageName;
+    private final String node;
 
-    public AmbariServerDatabaseBootstrap(DockerClient docker, String imageName) {
+    public AmbariServerDatabaseBootstrap(DockerClient docker, String imageName, String node) {
         this.docker = docker;
         this.imageName = imageName;
+        this.node = node;
     }
 
     @Override
@@ -35,7 +37,7 @@ public class AmbariServerDatabaseBootstrap implements ContainerBootstrap {
         String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
                 .withEnv(String.format("POSTGRES_PASSWORD=%s", "bigdata"),
                         String.format("POSTGRES_USER=%s", "ambari"),
-                        String.format("constraint:type==gateway"))
+                        String.format("constraint:node==%s", node))
                 .withHostConfig(hostConfig)
                 .withName(AMBARI_DB.getName()));
         DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)

@@ -125,7 +125,6 @@ public final class ServiceTestUtils {
         Stack stack = new Stack();
         stack.setAmbariIp("168.192.12.13");
         stack.setCredential(credential);
-        stack.setMetadataReady(true);
         stack.setRegion("EU_WEST_1");
         stack.setOwner(owner);
         stack.setAccount(account);

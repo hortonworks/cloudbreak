@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.domain.AwsVolumeType;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
 import freemarker.template.Configuration;
 
@@ -124,7 +123,7 @@ public class CloudFormationTemplateBuilderTest {
         assertFalse(result.contains("\"SpotPrice\""));
     }
 
-    @Test(expected = CloudbreakServiceException.class)
+    @Test(expected = AwsResourceException.class)
     public void testBuildTemplateShouldThrowInternalServerExceptionWhenTemplateDoesNotExist() {
         // WHEN
         underTest.build(stack, null, false, "templates/non-existent.ftl");

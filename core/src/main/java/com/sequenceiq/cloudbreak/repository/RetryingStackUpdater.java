@@ -64,10 +64,6 @@ public class RetryingStackUpdater {
         return doUpdateStackCluster(stackId, cluster, INITIAL_ATTEMPT);
     }
 
-    public Stack updateMetadataReady(Long stackId, boolean ready) {
-        return doUpdateMetadataReady(stackId, ready, INITIAL_ATTEMPT);
-    }
-
     public Stack updateNodeCount(Long stackId, Integer nodeCount, String instanceGroup) {
         return doUpdateNodeCount(stackId, nodeCount, instanceGroup, INITIAL_ATTEMPT);
     }
@@ -204,25 +200,6 @@ public class RetryingStackUpdater {
                 return doUpdateStackCluster(stackId, cluster, attempt + 1);
             } else {
                 throw new CloudbreakServiceException(String.format("Failed to update stack '%s' in %d attempts. (while trying to add cluster)",
-                        stackId, MAX_RETRIES), e);
-            }
-        }
-    }
-
-    private Stack doUpdateMetadataReady(Long stackId, boolean ready, int attempt) {
-        try {
-            Stack stack = stackRepository.findById(stackId);
-            stack.setMetadataReady(ready);
-            stack = stackRepository.save(stack);
-            LOGGER.info("Updated stack: [metadataReady: 'true'].");
-            return stack;
-        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            if (attempt <= MAX_RETRIES) {
-                LOGGER.info("Failed to update stack while trying to set 'metadataReady'. [attempt: '{}', Cause: {}]. Trying to save it again.",
-                        attempt, e.getClass().getSimpleName());
-                return doUpdateMetadataReady(stackId, ready, attempt + 1);
-            } else {
-                throw new CloudbreakServiceException(String.format("Failed to update stack '%s' in %d attempts.(while trying to set 'metadataReady')",
                         stackId, MAX_RETRIES), e);
             }
         }

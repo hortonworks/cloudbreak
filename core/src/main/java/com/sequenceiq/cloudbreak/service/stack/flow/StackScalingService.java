@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -65,12 +64,9 @@ public class StackScalingService {
     public Set<Resource> addInstances(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
         Set<Resource> resources;
         Stack stack = stackService.getById(stackId);
-        String hostGroupUserData = userDataBuilder
-                .buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>(), InstanceGroupType.CORE);
-        String gateWayUserData = userDataBuilder
-                .buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(), new HashMap<String, String>(), InstanceGroupType.GATEWAY);
+        String userData = userDataBuilder.buildUserData(stack.cloudPlatform());
         resources = cloudPlatformConnectors.get(stack.cloudPlatform())
-                .addInstances(stack, gateWayUserData, hostGroupUserData, scalingAdjustment, instanceGroupName);
+                .addInstances(stack, userData, userData, scalingAdjustment, instanceGroupName);
         return resources;
     }
 

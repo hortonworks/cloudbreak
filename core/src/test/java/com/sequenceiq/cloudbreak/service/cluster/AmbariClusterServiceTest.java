@@ -32,7 +32,6 @@ import org.mockito.Spy;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
@@ -127,16 +126,6 @@ public class AmbariClusterServiceTest {
         given(ambariClient.getClusterAsJson()).willReturn(null);
         // WHEN
         underTest.getClusterJson("123.12.3.4", 1L);
-    }
-
-    @Test(expected = InternalServerException.class)
-    public void testRetrieveClusterJsonThrowsHttpResponseException() throws HttpResponseException {
-        // GIVEN
-        doReturn(ambariClient).when(ambariClientProvider).getAmbariClient(any(String.class), any(String.class), any(String.class));
-        given(ambariClient.getClusterAsJson()).willThrow(mockedException);
-        given(mockedException.getMessage()).willReturn(null);
-        // WHEN
-        underTest.getClusterJson("127.0.0.1", 1L);
     }
 
     @Test(expected = BadRequestException.class)

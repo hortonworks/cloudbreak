@@ -12,19 +12,14 @@ public class SimpleContainerBootstrapRunnerTest {
 
     @Test
     public void bootstrapSuccessWithoutException() throws Exception {
-        Boolean call = simpleContainerBootstrapRunner(new MockBootstrapRunner(4)).call();
+        Boolean call = simpleContainerBootstrapRunner(new MockBootstrapRunner(1)).call();
         assertEquals(true, call);
-    }
-
-    @Test(expected = CloudbreakException.class)
-    public void bootstrapUnSuccessWithException() throws Exception {
-        simpleContainerBootstrapRunner(new MockBootstrapRunner(10)).call();
     }
 
     public class MockBootstrapRunner implements ContainerBootstrap {
 
         private int count;
-        private int retryOk = 4;
+        private int retryOk = 2;
 
         public MockBootstrapRunner(int retryOk) {
             this.retryOk = retryOk;

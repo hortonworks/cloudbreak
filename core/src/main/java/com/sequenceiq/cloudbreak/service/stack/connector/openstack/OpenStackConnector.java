@@ -6,7 +6,6 @@ import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +25,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
 import com.sequenceiq.cloudbreak.domain.OpenStackNetwork;
@@ -126,16 +124,13 @@ public class OpenStackConnector implements CloudPlatformConnector {
 
     @Override
     public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
-        String hostGroupUserDataScript = userDataBuilder.buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(),
-                new HashMap<String, String>(), InstanceGroupType.CORE);
-        String gateWayUserDataScript = userDataBuilder.buildUserData(stack.cloudPlatform(), stack.getHash(), stack.getConsulServers(),
-                new HashMap<String, String>(), InstanceGroupType.GATEWAY);
-        String heatTemplate = heatTemplateBuilder.remove(stack, gateWayUserDataScript, hostGroupUserDataScript,
+        String userData = userDataBuilder.buildUserData(stack.cloudPlatform());
+        String heatTemplate = heatTemplateBuilder.remove(stack, userData, userData,
                 instanceMetaDataRepository.findAllInStack(stack.getId()), instanceIds, instanceGroup);
         PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
         if (!isSuccess(pollingResult)) {
-            throw new OpenStackResourceException(String.format("Failed to update Heat stack while removing instances; polling reached an invalid end state: "
-                    + "'%s'", pollingResult.name()));
+            throw new OpenStackResourceException(
+                    String.format("Failed to update Heat stack while removing instances; polling reached an invalid end state: '%s'", pollingResult.name()));
         }
         return instanceIds;
     }

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.domain;
 
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -36,6 +37,7 @@ public class CloudbreakEvent implements ProvisionEntity {
 
     private String eventType;
     private Date eventTimestamp;
+    @Column(length = 1000000, columnDefinition = "TEXT")
     private String eventMessage;
     private String owner;
     private String account;

@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.GATEWAY;
-import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.CORE;
-
 import java.util.Map;
 import java.util.Set;
 
@@ -45,10 +42,9 @@ public class ProvisioningService {
             String statusReason = "Creation of cluster infrastructure has started on the cloud provider.";
             stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS, statusReason);
             stackUpdater.updateStackStatusReason(stack.getId(), stack.getStatus().name());
-            String gateWayUserDataScript = userDataBuilder.buildUserData(cloudPlatform, stack.getHash(), stack.getConsulServers(), userDataParams, GATEWAY);
-            String hostGroupUserDataScript = userDataBuilder.buildUserData(cloudPlatform, stack.getHash(), stack.getConsulServers(), userDataParams, CORE);
+            String userDataScript = userDataBuilder.buildUserData(cloudPlatform);
             CloudPlatformConnector cloudPlatformConnector = cloudPlatformConnectors.get(cloudPlatform);
-            Set<Resource> resources = cloudPlatformConnector.buildStack(stack, gateWayUserDataScript, hostGroupUserDataScript, setupProperties);
+            Set<Resource> resources = cloudPlatformConnector.buildStack(stack, userDataScript, userDataScript, setupProperties);
             provisionComplete = new ProvisionComplete(cloudPlatform, stack.getId(), resources);
         } else {
             LOGGER.info("CloudFormation stack creation was requested for a stack, that is not in REQUESTED status anymore. [stackId: '{}', status: '{}']",

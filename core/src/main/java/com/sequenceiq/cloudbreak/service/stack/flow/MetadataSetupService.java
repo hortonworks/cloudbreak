@@ -56,9 +56,7 @@ public class MetadataSetupService {
                     "Size of the collected metadata set does not equal the node count of the stack. [metadata size=%s] [nodecount=%s]",
                     coreInstanceMetaData.size(), stack.getFullNodeCount()));
         }
-        String ambariIp = saveInstanceMetaData(stack, coreInstanceMetaData);
-        stackUpdater.updateMetadataReady(stackId, true);
-        return ambariIp;
+        return saveInstanceMetaData(stack, coreInstanceMetaData);
     }
 
     public Set<String> setupNewMetadata(Long stackId, Set<Resource> resources, String instanceGroupName) {
@@ -82,7 +80,6 @@ public class MetadataSetupService {
             long timeInMillis = Calendar.getInstance().getTimeInMillis();
             InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(
                     stack.getId(), coreInstanceMetadataEntry.getInstanceGroup().getGroupName());
-
             InstanceMetaData instanceMetaDataEntry = new InstanceMetaData();
             instanceMetaDataEntry.setPrivateIp(coreInstanceMetadataEntry.getPrivateIp());
             instanceMetaDataEntry.setInstanceGroup(coreInstanceMetadataEntry.getInstanceGroup());

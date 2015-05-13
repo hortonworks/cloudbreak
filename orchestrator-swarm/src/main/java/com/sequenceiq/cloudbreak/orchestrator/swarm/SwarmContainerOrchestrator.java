@@ -99,14 +99,15 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void startAmbariServer(ContainerOrchestratorCluster cluster, String dbImageName,
-            String serverImageName, String platform) throws CloudbreakOrchestratorException {
+    public void startAmbariServer(ContainerOrchestratorCluster cluster, String dbImageName, String serverImageName, String platform)
+            throws CloudbreakOrchestratorException {
         try {
+            Node gateway = getGatewayNode(cluster.getApiAddress(), cluster.getNodes());
             DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(cluster.getApiAddress()))
                     .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
                     .build();
-            simpleContainerBootstrapRunner(new AmbariServerDatabaseBootstrap(swarmManagerClient, dbImageName)).call();
-            simpleContainerBootstrapRunner(new AmbariServerBootstrap(swarmManagerClient, serverImageName, platform)).call();
+            simpleContainerBootstrapRunner(new AmbariServerDatabaseBootstrap(swarmManagerClient, dbImageName, gateway.getHostname())).call();
+            simpleContainerBootstrapRunner(new AmbariServerBootstrap(swarmManagerClient, serverImageName, gateway.getHostname(), platform)).call();
         } catch (Exception e) {
             throw new CloudbreakOrchestratorException(e);
         }

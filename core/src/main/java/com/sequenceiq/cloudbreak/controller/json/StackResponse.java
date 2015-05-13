@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.validation.Valid;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
@@ -7,10 +12,6 @@ import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.StackModelDesc
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
-
-import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -27,8 +28,6 @@ public class StackResponse extends StackBase {
     private Status status;
     @ApiModelProperty(StackModelDescription.AMBARI_IP)
     private String ambariServerIp;
-    @ApiModelProperty(StackModelDescription.HASH)
-    private String hash;
     private ClusterResponse cluster;
     @ApiModelProperty(StackModelDescription.STATUS_REASON)
     private String statusReason;
@@ -68,14 +67,6 @@ public class StackResponse extends StackBase {
 
     public void setConsulServerCount(Integer consulServerCount) {
         this.consulServerCount = consulServerCount;
-    }
-
-    public String getHash() {
-        return hash;
-    }
-
-    public void setHash(String hash) {
-        this.hash = hash;
     }
 
     public Long getId() {

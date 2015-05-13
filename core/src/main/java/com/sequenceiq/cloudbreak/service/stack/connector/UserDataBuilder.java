@@ -1,72 +1,38 @@
 package com.sequenceiq.cloudbreak.service.stack.connector;
 
-import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.CORE;
-import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.GATEWAY;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Component
 public class UserDataBuilder {
 
-    private Map<CloudPlatform, Map<InstanceGroupType, String>> userDataScripts = new HashMap<>();
+    private String userDataScripts;
 
-    public void setUserDataScripts(Map<CloudPlatform, Map<InstanceGroupType, String>> userDataScripts) {
+    public void setUserDataScripts(String userDataScripts) {
         this.userDataScripts = userDataScripts;
     }
 
     @PostConstruct
     public void readUserDataScript() throws IOException {
-        for (CloudPlatform cloudPlatform : CloudPlatform.values()) {
-            Map<InstanceGroupType, String> temp = new HashMap<>();
-            for (InstanceGroupType instanceGroupType : InstanceGroupType.values()) {
-                temp.put(instanceGroupType, FileReaderUtils.readFileFromClasspath(String.format("%s-%s-init.sh",
-                        cloudPlatform.getInitScriptPrefix(), instanceGroupType.name().toLowerCase())));
-            }
-            userDataScripts.put(cloudPlatform, temp);
-        }
+        userDataScripts = FileReaderUtils.readFileFromClasspath("init/init.sh");
     }
 
-    public String buildUserData(CloudPlatform cloudPlatform, String metadataHash, int consulServers, Map<String, String> parameters, InstanceGroupType type) {
-        switch (type) {
-            case GATEWAY:
-                return buildGatewayTypeUserData(cloudPlatform, metadataHash, consulServers, parameters);
-            case CORE:
-                return buildHostGroupTypeUserData(cloudPlatform, metadataHash, consulServers, parameters);
-            default:
-                return "";
+    public String buildUserData(CloudPlatform cloudPlatform) {
+        Map<String, Object> model = new HashMap<>();
+        model.put("platform_disk_prefix", cloudPlatform.getDiskPrefix());
+        model.put("platform_disk_start_label", cloudPlatform.startLabel());
+        String result = userDataScripts;
+        for (Map.Entry<String, Object> param : model.entrySet()) {
+            result = result.replaceAll(param.getKey(), param.getValue().toString());
         }
-    }
-
-    private String buildHostGroupTypeUserData(CloudPlatform cloudPlatform, String metadataHash, int consulServers, Map<String, String> parameters) {
-        parameters.put("METADATA_HASH", metadataHash);
-        String userDataScript = userDataScripts.get(cloudPlatform).get(CORE);
-        StringBuilder stringBuilder = new StringBuilder("#!/bin/bash\n");
-        for (Entry<String, String> parameter : parameters.entrySet()) {
-            stringBuilder.append(parameter.getKey()).append("=").append(parameter.getValue()).append("\n");
-        }
-        stringBuilder.append("\n").append(userDataScript);
-        return stringBuilder.toString();
-    }
-
-    private String buildGatewayTypeUserData(CloudPlatform cloudPlatform, String metadataHash, int consulServers, Map<String, String> parameters) {
-        parameters.put("METADATA_HASH", metadataHash);
-        String userDataScript = userDataScripts.get(cloudPlatform).get(GATEWAY);
-        StringBuilder stringBuilder = new StringBuilder("#!/bin/bash\n");
-        for (Entry<String, String> parameter : parameters.entrySet()) {
-            stringBuilder.append(parameter.getKey()).append("=").append(parameter.getValue()).append("\n");
-        }
-        stringBuilder.append("\n").append(userDataScript);
-        return stringBuilder.toString();
+        return result;
     }
 }
