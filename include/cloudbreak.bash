@@ -156,7 +156,7 @@ generate_uaa_config() {
         else
             warn "uaa.yml already exists, BUT generate would create a MODIFIED one."
             warn "if you want to regenerate, remove it first:"
-            echo "  rm uaa.yml" | blue
+            echo "  cbd regenerate" | blue
             warn "expected change:"
             
             (diff /tmp/uaa-delme.yml uaa.yml || true) | cyan
