@@ -73,6 +73,7 @@ compose-generate-yaml() {
             (diff /tmp/docker-compose-delme.yml docker-compose.yml || true) | cyan
          fi
     else
+        info "generating docker-compose.yml"
         compose-generate-yaml-force docker-compose.yml
     fi
 }

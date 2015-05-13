@@ -150,6 +150,7 @@ generate_uaa_config() {
             (diff /tmp/uaa-delme.yml uaa.yml || true) | cyan
         fi
     else
+        info "generating uaa.yml"
         generate_uaa_config_force uaa.yml
     fi
 }
