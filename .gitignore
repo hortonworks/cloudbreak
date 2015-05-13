@@ -3,3 +3,7 @@ release
 cbd
 bindata.go
 Profile*
+
+*.iml
+.idea
+.deps

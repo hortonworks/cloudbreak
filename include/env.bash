@@ -19,6 +19,7 @@ env-show() {
     
     # TODO cloudbreak config shouldnt be called here ...
     cloudbreak-config
+    migrate-config
 	local longest=0
 	for var in "${_env[@]}"; do
 		if [[ "${#var}" -gt "$longest" ]]; then
@@ -35,8 +36,9 @@ env-export() {
     
     # TODO cloudbreak config shouldnt be called here ...
     cloudbreak-config
+    migrate-config
 	for var in "${_env[@]}"; do
-		printf '%s=%s\n' "$var" "${!var}"
+		printf 'export %s=%s\n' "$var" "${!var}"
 	done
 }
 

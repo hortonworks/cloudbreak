@@ -1,10 +1,10 @@
-Cloudbreak Deployer helps to deploy a cloudbreak environment into docker containers.
-For recent changes please check [CHANGELOG.md](https://github.com/sequenceiq/cloudbreak-deployer/blob/master/CHANGELOG.md).
+Cloudbreak Deployer helps to deploy a Cloudbreak environment into Docker containers.
+For recent changes please check the [CHANGELOG.md](https://github.com/sequenceiq/cloudbreak-deployer/blob/master/CHANGELOG.md).
 
 ## Requirements
 
-Right now **Linux** and **OSX** 64 bit binaries are released from Cloudbreak Deployer. For anything else we will create a special docker container.
-The deployment itself needs only **Dcoker 1.5.0** or later.
+Currently only **Linux** and **OSX** 64 bit binaries are released for Cloudbreak Deployer. For anything else we will create a special Docker container.
+The deployment itself needs only **Docker 1.5.0** or later.
 
 ## Installation
 
@@ -12,205 +12,122 @@ To install Cloudbreak Deployer, you just have to unzip the platform specific
 single binary to your PATH. The one-liner way is:
 
 ```
-curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install | sh
+curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install | sh && cbd --version
 ```
+
 ## Usage
 
-You can always get a list of command by issuing without parameters: `cbd`
+**cbd** will generate some config files, and will download supporting binaries. It is
+advised that you create a dedicated directory for it:
 
-### Deployment
+```
+mkdir cloudbreak-deployment
+cd cloudbreak-deployment
+```
 
-To start the containers run:
+### Initialize Profile
+First lets initialize your directory by creating a `Profile`
+
+```
+cbd init
+```
+It will create a `Profile` in the current directory. The only required
+configuration is the `PUBLIC_IP`. This ip will be used for Cloudbreak UI
+(called Uluwatu). In some case cbd can guess it, if not it will give you a hint.
+
+### Generate Configuration
+
+If you use cbd 0.1.0 release, you have to issue:
+```
+cbd generate
+```
+
+It will create:
+- **docker-compose.yml**: Full confirguration of containers needed for Cloudbreak deployment.
+- **uaa.yml**: Identity Server configuration. (For example default user/password in the last line)
+
+### Deploy Cloudbreak
+
+To start all the containers run:
 
 ```
 cbd start
 ```
-If one of the containers are already running, it won’t be started again.
+If one of the container is already running, it won’t be started again.
 
-## Configuration
 
-Configuration is based on environment variables. Cloudbreak Deployer always forks a new
-bash subprocess **without inheriting env vars**. The only way to set env vars relevant to 
-Cloudbreak Deployer is to set them in a file called `Profile`.
+### Pull Docker images
 
-The `Profile` will be simple **sourced** by bash terms, so you can use the usual syntax
-to set config values:
+All Cloudbreak components and the backend database is running inside containers.
+The **pull command is optional** but you can run it prior to `cbd start`
 
 ```
-export MY_VAR=some_value
-export OTHER_VAR=dunno
+cbd pull
 ```
 
-### Env specific Profile
+It will take some time, depending on your network connection, so you can grab a cup of coffee.
 
-Let’s say you want to use a different `DOCKER_TAG_CLOUDBREAK` for **prod** and **qa** profile.
-`Profile` is always sourced, so you will have two env specific configurations:
-- `Profile.dev`
-- `Profile.qa`
 
-For prod you need:
+### Watch the logs
 
-- create a file called `Profile.prod`
-- wirte the env specific `export DOCKER_TAG_CLOUDBREAK=0.3.99` into `Profile.prod`
-- set the env variable: `CBD_DEFAULT_PROFILE=prod`
-
-To use the `prod` specific profile once:
 ```
-CBD_DEFAULT_PROFILE=prod cbd some_commands
+cbd logs
 ```
 
-For permanent setting you can `export CBD_DEFAULT_PROFILE=prod` in your `.bash_profile`.
+
+## Default Credentials
+
+If you check the output of `cbd env` you can see the default principal/credential combination:
+- user: **admin@example.com**
+- password: **cloudbreak**
+
+These values are generated in the `uaa.yml` end section. To change these values, add 2 lines into your Profile:
+
+```
+export UAA_DEFAULT_USER_EMAIL=myself@example.com
+export UAA_DEFAULT_USER_PW=demo123
+```
+and than you need to recreate configs:
+```
+rm *.yml
+cbd generate
+```
+
+## Cloud Provider configuration
+In order to be able to assume roles on AWS you need to set up your AWS keys in the Profile file:
+```
+export AWS_ACCESS_KEY_ID=AKIA**************W7SA
+export AWS_SECRET_KEY=RWCT4Cs8******************/*skiOkWD
+```
+If you do not have plan to launch clusters in AWS, then you can safely skip these settings.
+
+For more details regarding accounts please check [Cloudbreak documentation](http://sequenceiq.com/cloudbreak/#accounts).
+
 
 ## Debug
 
 If you want to have more detailed output set the `DEBUG` env variable to non-zero:
+
 ```
 DEBUG=1 cbd some_command
 ```
 
 You can also use the `doctor` command to diagnose your environment:
+
 ```
 cbd doctor
 ```
 
 ## Update
 
-The tool is capable of upgrade itself:
+The tool is capable to upgrade itself to a newer version.
+
 ```
 cbd update
 ```
 
-## Core Containers
-
-- **uaa**: OAuth Identity Server
-- cloudbreak
-- persicope
-- uluwatu
-- sultans
-
-## System Level Containers
-
-- consul: Service Registry
-- registrator: automatically registers/deregisters containers into consul
-
-## Contribution
-
-Development process should happen on separate branches. Then a pull-request should be opened as usual.
-
-To build the project
-```
-# make deps needed only once
-make deps
-
-make instal
-```
-
-To run the unit tests:
-```
-make tests
-```
-
-If you want to test the binary CircleCI built from your branch named `fix-something`, 
-To validate the PR the binary `cbd` tool will be tested. Its built by CircleCI for each branch.
-
-```
-cbdl update-snap fix-something
-```
-
-## Testing
-
-Shell scripts shouldn’t be exceptions when it comes to unit testing. [basht](https://github.com/progrium/basht)
-is used for testing. See the reasoning about: [why not bats or shunit2](https://github.com/progrium/basht#why-not-bats-or-shunit2)
-
-Please cover your bahs functions with unit tests.
-
-running test performed by:
-```
-make tests
-```
-
-# Configuration
-
-## SMTP
-
-Put these lines into your `Profile`
-```
-export CLOUDBREAK_SMTP_SENDER_USERNAME=
-export CLOUDBREAK_SMTP_SENDER_PASSWORD=
-export CLOUDBREAK_SMTP_SENDER_HOST=
-export CLOUDBREAK_SMTP_SENDER_PORT=
-export CLOUDBREAK_SMTP_SENDER_FROM=
-```
-
-### List of configurations
-
-- **CB_AWS_AMI_MAP** : tbd 
-- **CB_AZURE_IMAGE_URI** : tbd 
-- **CB_BLUEPRINT_DEFAULTS** : tbd 
-- **CB_DB_ENV_DB** : tbd 
-- **CB_DB_ENV_PASS** : tbd 
-- **CB_DB_ENV_USER** : tbd 
-- **CB_GCP_SOURCE_IMAGE_PATH** : tbd 
-- **CB_HBM2DDL_STRATEGY** : tbd 
-- **CB_OPENSTACK_IMAGE** : tbd 
-- **DOCKER_TAG_ALPINE** : tbd 
-- **DOCKER_TAG_CBSHELL** : tbd 
-- **DOCKER_TAG_CLOUDBREAK** : tbd 
-- **DOCKER_TAG_CONSUL** : tbd 
-- **DOCKER_TAG_PERISCOPE** : tbd 
-- **DOCKER_TAG_POSTGRES** : tbd 
-- **DOCKER_TAG_REGISTRATOR** : tbd 
-- **DOCKER_TAG_SULTANS** : tbd 
-- **DOCKER_TAG_UAA** : tbd 
-- **DOCKER_TAG_ULUWATU** : tbd 
-- **PERISCOPE_DB_HBM2DDL_STRATEGY** : tbd 
-
-
-## Release Process of Clodbreak Deployer tool
-
-the master branch is always built on [CircleCI](https://circleci.com/gh/sequenceiq/cloudbreak-deployer).
-When you wan’t a new release, all you have to do:
-
-- create a PullRequest for the release branch:
-  - make sure you change the `VERSION` file
-  - update `CHANGELOG.md` with the release date
-  - create a new **Unreleased** section in top of `CHANGELOG.md`
-
-Once the PR is merged, CircleCI will:
-- create a new release on [github releases tab](https://github.com/sequenceiq/cloudbreak-deployer/releases), with the help of the [gh-release](https://github.com/progrium/gh-release).
-- it will create the git tag with `v` prefix like: `v0.0.3`
-
-Sample command when version 0.0.3 was released:
-
-```
-export OLD_VER=$(cat VERSION)
-export VER="${OLD_VER%.*}.$((${OLD_VER##*.}+1))"
-export REL_DATE="[v${VER}] - $(date +%Y-%m-%d)"
-git fetch && git checkout -b release-${VER}
-echo $VER > VERSION
-
-# edit CHANGELOG.md
-sed -i "s/## Unreleased/## $REL_DATE/" CHANGELOG.md
-echo -e '## Unreleased\n\n### Fixed\n\n### Added\n\n### Removed\n\n### Changed\n'| cat - CHANGELOG.md | tee CHANGELOG.md
-
-git commit -m "release $VER" VERSION CHANGELOG.md
-git push origin release-$VER
-hub pull-request -b release -m "release $VER"
-```
-
-## Ceveats
-
-The **Cloudbreak Deployer** tool opens a clean bash subshell, without inheriting env vars.
-Actually the foolowing env vars _are_ inherited: 
-
-- `HOME`
-- `DEBUG`
-- `TRACE`
-- `CBD_DEFAULT_PROFILE`
-- all `DOCKER_XXX`
-
 ## Credits
 
-This tool, and the PR driven release, is very much inspired by [glidergun](https://github.com/gliderlabs/glidergun). Actually it
+This tool, and the PR driven release, is inspired from [glidergun](https://github.com/gliderlabs/glidergun). Actually it
 could be a fork of it. The reason it’s not a fork, because we wanted to have our own binary with all modules
 built in, so only a single binary is needed.

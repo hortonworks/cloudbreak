@@ -1,49 +1,88 @@
 compose-init() {
     deps-require docker-compose
+    env-import CB_COMPOSE_PROJECT cbreak
+}
+
+dockerCompose() {
+    debug "docker-compose -p ${CB_COMPOSE_PROJECT} $@"
+    docker-compose -p ${CB_COMPOSE_PROJECT} "$@"
 }
 
 compose-ps() {
     declare desc="docker-compose: List containers"
 
-    docker-compose ps
+    dockerCompose ps
 }
 
 compose-pull() {
     declare desc="Pulls service images"
 
-    docker-compose pull
+    [ -f docker-compose.yml ] || deployer-generate
+
+    # parallell pull 
+    # sed -n "s/.*image: //p" docker-compose.yml | sort -u | xargs -I@ -n1 bash -c "docker pull @ &"
+    dockerCompose pull
 }
 
 compose-up() {
     declare desc="Starts containers with docker-compose"
+    declare services="$@"
 
-    compose-generate-yaml
-    docker-compose up -d
+    deployer-generate
+    dockerCompose up -d $services
+
+    info "CloudBreak containers are started ..."
+    info "In a couple of minutes you can reach the UI (called Uluwatu)"
+    echo "  $ULU_HOST_ADDRESS" | blue
+    warn "Credentials are not printed here. You can get them by:"
+    echo '  cbd env show|grep "UAA_DEFAULT_USER_PW\|UAA_DEFAULT_USER_EMAIL"' | blue
 }
 
 compose-kill() {
     declare desc="Kills and removes all cloudbreak related container"
 
-    docker-compose kill
-    docker-compose rm -f
+    dockerCompose kill
+    dockerCompose rm -f
+}
+
+compose-get-container() {
+    declare desc=""
+    declare service="${1:? required: service name}"
+    dockerCompose ps -q "${service}"
 }
 
 compose-logs() {
     declare desc="Whach all container logs in colored version"
 
-    docker-compose logs
+    dockerCompose logs "$@"
 }
-
 compose-generate-yaml() {
-    declare desc="Generates docker-compose.yml using config values from Profile"
+    declare desc="Generating docker-compose.yml based on Profile settings"
 
     cloudbreak-config
 
     if [ -f docker-compose.yml ]; then
-        warn "docker-compose.yml already exists, if you want to regenerate, move it away"
+         compose-generate-yaml-force /tmp/docker-compose-delme.yml
+         if diff /tmp/docker-compose-delme.yml docker-compose.yml &>/dev/null; then
+             debug "docker-compose.yml already exist, and generate wouldn't change it."
+        else
+            warn "docker-compose.yml already exists, BUT generate would create a DIFFERENT one!"
+            warn "if you want to regenerate, remove it first:"
+            echo "  cbd regenerate" | blue
+            warn "expected change:"
+            (diff /tmp/docker-compose-delme.yml docker-compose.yml || true) | cyan
+         fi
     else
-        warn "Generating docker-compose.yml ..."
-    cat > docker-compose.yml <<EOF
+        info "generating docker-compose.yml"
+        compose-generate-yaml-force docker-compose.yml
+    fi
+}
+
+compose-generate-yaml-force() {
+
+    declare comoseFile=${1:? required: compose file path}
+    debug "Generating docker-compose yaml: ${comoseFile} ..."
+    cat > ${comoseFile} <<EOF
 consul:
     privileged: true
     volumes:
@@ -87,7 +126,7 @@ uaadb:
       - SERVICE_NAME=uaadb
         #- SERVICE_CHECK_CMD=bash -c 'psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
     volumes:
-        - "/var/lib/cloudbreak/uaadb:/var/lib/postgresql/data"
+        - "$CB_DB_ROOT_PATH/uaadb:/var/lib/postgresql/data"
     image: postgres:$DOCKER_TAG_POSTGRES
 
 identity:
@@ -111,13 +150,13 @@ cbdb:
       - SERVICE_NAME=cbdb
         #- SERVICE_CHECK_CMD=bash -c 'psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
     volumes:
-        - "/var/lib/cloudbreak/cbdb:/var/lib/postgresql/data"
-    image: postgres:$DOCKER_TAG_POSTGRES
+        - "$CB_DB_ROOT_PATH/cbdb:/var/lib/postgresql/data"
+    image: sequenceiq/cbdb:$DOCKER_TAG_CBDB
 
 cloudbreak:
     environment:
-        #- AWS_ACCESS_KEY_ID=
-        #- AWS_SECRET_KEY=
+        - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+        - AWS_SECRET_KEY=$AWS_SECRET_KEY
         - SERVICE_NAME=cloudbreak
           #- SERVICE_CHECK_HTTP=/info
         - CB_CLIENT_ID=$UAA_CLOUDBREAK_ID
@@ -127,7 +166,8 @@ cloudbreak:
         - CB_GCP_SOURCE_IMAGE_PATH=$CB_GCP_SOURCE_IMAGE_PATH
         - CB_AWS_AMI_MAP=$CB_AWS_AMI_MAP
         - CB_OPENSTACK_IMAGE=$CB_OPENSTACK_IMAGE
-          #- CB_HBM2DDL_STRATEGY=create
+        - CB_HBM2DDL_STRATEGY=$CB_HBM2DDL_STRATEGY
+        - CB_HOST_ADDR=$CB_HOST_ADDR
         - CB_SMTP_SENDER_USERNAME=$CLOUDBREAK_SMTP_SENDER_USERNAME
         - CB_SMTP_SENDER_PASSWORD=$CLOUDBREAK_SMTP_SENDER_PASSWORD
         - CB_SMTP_SENDER_HOST=$CLOUDBREAK_SMTP_SENDER_HOST
@@ -160,13 +200,13 @@ sultans:
         - SERVICE_NAME=sultans
           #- SERVICE_CHECK_HTTP=/
         - SL_PORT=3000
-        #- SL_SMTP_SENDER_HOST=
-        #- SL_SMTP_SENDER_PORT=
-        #- SL_SMTP_SENDER_USERNAME=
-        #- SL_SMTP_SENDER_PASSWORD=
-        #- SL_SMTP_SENDER_FROM=
-        - SL_CB_ADDRESS=http://$PUBLIC_IP:3000
-        - SL_ADDRESS=http://$PUBLIC_IP:3001
+        - SL_SMTP_SENDER_HOST=$CLOUDBREAK_SMTP_SENDER_HOST
+        - SL_SMTP_SENDER_PORT=$CLOUDBREAK_SMTP_SENDER_PORT
+        - SL_SMTP_SENDER_USERNAME=$CLOUDBREAK_SMTP_SENDER_USERNAME
+        - SL_SMTP_SENDER_PASSWORD=$CLOUDBREAK_SMTP_SENDER_PASSWORD
+        - SL_SMTP_SENDER_FROM=$CLOUDBREAK_SMTP_SENDER_FROM
+        - SL_CB_ADDRESS=$ULU_HOST_ADDRESS
+        - SL_ADDRESS=$ULU_SULTANS_ADDRESS
         - SL_UAA_ADDRESS=http://backend:8089
         - BACKEND_8089=identity.service.consul
     links:
@@ -177,14 +217,13 @@ sultans:
 
 uluwatu:
     environment:
-        - ULU_PRODUCTION=false
         - SERVICE_NAME=uluwatu
           #- SERVICE_CHECK_HTTP=/
-        - ULU_OAUTH_REDIRECT_URI=http://$PUBLIC_IP:3000/authorize
-        - ULU_SULTANS_ADDRESS=http://$PUBLIC_IP:3001
+        - ULU_OAUTH_REDIRECT_URI=$ULU_OAUTH_REDIRECT_URI
+        - ULU_SULTANS_ADDRESS=$ULU_SULTANS_ADDRESS
         - ULU_OAUTH_CLIENT_ID=$UAA_ULUWATU_ID
         - ULU_OAUTH_CLIENT_SECRET=$UAA_ULUWATU_SECRET
-        - ULU_HOST_ADDRESS=http://$PUBLIC_IP:3000
+        - ULU_HOST_ADDRESS=$ULU_HOST_ADDRESS
         - NODE_TLS_REJECT_UNAUTHORIZED=0
 
         - ULU_IDENTITY_ADDRESS=http://backend:8089/
@@ -206,12 +245,12 @@ pcdb:
     ports:
         - 5432
     volumes:
-        - /var/lib/cloudbreak/periscopedb:/var/lib/postgresql/data
-    image: postgres:$DOCKER_TAG_POSTGRES
+        - "$CB_DB_ROOT_PATH/periscopedb:/var/lib/postgresql/data"
+    image: sequenceiq/pcdb:$DOCKER_TAG_PCDB
 
 periscope:
     environment:
-        - PERISCOPE_DB_HBM2DDL_STRATEGY=create
+        - PERISCOPE_DB_HBM2DDL_STRATEGY=$PERISCOPE_DB_HBM2DDL_STRATEGY
         - SERVICE_NAME=periscope
           #- SERVICE_CHECK_HTTP=/info
         - PERISCOPE_SMTP_HOST=$CLOUDBREAK_SMTP_SENDER_HOST
@@ -244,5 +283,4 @@ periscope:
     image: sequenceiq/periscope:$DOCKER_TAG_PERISCOPE
 
 EOF
-  fi
 }

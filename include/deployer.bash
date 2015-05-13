@@ -18,10 +18,21 @@ error() {
 
 cbd-version() {
     declare desc="Displays the version of Cloudbrek Deployer"
-    bin-version | green
+    echo -n "local version:"
+    local localVer=$(bin-version)
+    echo "$localVer" | green
 
-    echo latest version: | green
-    latest-version | yellow
+    echo -n "latest release:"
+    local releaseVer=$(latest-version)
+    echo "$releaseVer" | green
+
+    if [ $(version-compare $localVer $releaseVer) -lt 0 ]; then
+        warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        warn "Your version is outdated"
+        warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        warn "Please update it by:"
+        echo "  cbd update" | blue
+    fi
 }
 
 cbd-update() {
@@ -81,12 +92,14 @@ init-profile() {
 
     # if the profile exist
     if [ -f $CBD_PROFILE ]; then
-        warn "$CBD_PROFILE already exist, move away if you want to regenerate"
+        info "$CBD_PROFILE already exists, now you are ready to run:"
+        echo "cbd generate" | blue
     else
         # if cbd runs on boot2docker (ie osx)
         if boot2docker version &> /dev/null; then
             if [[ "$(boot2docker status)" == "running" ]]; then
                 echo "export PUBLIC_IP=$(boot2docker ip)" > $CBD_PROFILE
+                echo "export PRIVATE_IP=$(boot2docker ip)" >> $CBD_PROFILE
             else
                 echo "boot2docker isn't running, please start it, with the following 2 commands:" | red
                 echo "boot2docker start" | blue
@@ -94,12 +107,28 @@ init-profile() {
             fi
         else
             # this is for linux
-            warn "We can not guess your PUBLIC_IP, please run the following command: (replace 1.2.3.4 with a real IP)"
-            echo "echo '1.2.3.4' > $CBD_PROFILE"
+
+            # on amazon
+            if curl -f 169.254.169.254/latest/ &>/dev/null ; then
+                echo "export PUBLIC_IP=$(curl 169.254.169.254/latest/meta-data/public-hostname)" > $CBD_PROFILE
+                #echo "export PRIVATE_IP=$(curl 169.254.169.254/latest/meta-data/local-ipv4)" >> $CBD_PROFILE
+            fi
+
+            # on gce
+            if curl -f -H "Metadata-Flavor: Google" 169.254.169.254/computeMetadata/v1/ &>/dev/null ; then
+                echo "export PUBLIC_IP=$(curl -f -H "Metadata-Flavor: Google" 169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)" > $CBD_PROFILE
+            fi
+
+            # if Profile is still not created, give some hint:
+            if ! [ -f $CBD_PROFILE ]; then
+                warn "We can not guess your PUBLIC_IP, please run the following command: (replace 1.2.3.4 with a real IP)"
+                echo "echo export PUBLIC_IP=1.2.3.4 > $CBD_PROFILE" | blue
+            fi
         fi
         exit 2
     fi
-
+    
+    doctor
 }
 
 load-profile() {
@@ -121,24 +150,36 @@ load-profile() {
         CBD_PROFILE="Profile.$CBD_DEFAULT_PROFILE"
 
 		module-load $CBD_PROFILE
-		debug "Use profile $CBD_DEFAULT_PROFILE"
+		debug "Using profile $CBD_DEFAULT_PROFILE"
 	fi
 }
 
 doctor() {
-    declare desc="Checks everything, and reports a diagnose"
+    declare desc="Deployer doctor: Checks your environment, and reports a diagnose."
 
+    info "===> $desc"
+    cbd-version
     if [[ "$(uname)" == "Darwin" ]]; then
         debug "checking boot2docker on OSX only ..."
         docker-check-boot2docker
     fi
 
     docker-check-version
-    info "Everything is very-very first class !!!"
+    deployer-generate
 }
 
 cbd-find-root() {
     CBD_ROOT=$PWD
+}
+
+deployer-delete() {
+    declare desc="Deletes yaml files, and all dbs"
+    cloudbreak-delete-dbs
+    deployer-delete-yamls
+}
+
+deployer-delete-yamls() {
+    rm uaa.yml docker-compose.yml
 }
 
 deployer-generate() {
@@ -147,6 +188,29 @@ deployer-generate() {
     compose-generate-yaml
     generate_uaa_config
 }
+
+deployer-regenerate() {
+    declare desc="Deletes and generates docker-compose.yml and uaa.yml"
+
+    deployer-delete-yamls
+    compose-generate-yaml
+    generate_uaa_config
+}
+
+
+deployer-login() {
+    declare desc="Shows Uluwatu (Cloudbreak UI) login url and credentials"
+
+    # TODO it shoudn't be called multiple times ...
+    cloudbreak-config
+    info "Uluwatu (Cloudbreak UI) url:"
+    echo "  $ULU_HOST_ADDRESS" | blue
+    info "login email:"
+    echo "  $UAA_DEFAULT_USER_EMAIL" | blue
+    info "password:"
+    echo "  $UAA_DEFAULT_USER_PW" | blue
+}
+
 
 main() {
 	set -eo pipefail; [[ "$TRACE" ]] && set -x
@@ -173,11 +237,18 @@ main() {
 
     if [[ "$PROFILE_LOADED" ]] ; then
         cmd-export deployer-generate generate
+        cmd-export deployer-regenerate regenerate
+        cmd-export deployer-delete delete
         cmd-export compose-ps ps
         cmd-export compose-up start
         cmd-export compose-kill kill
         cmd-export compose-logs logs
         cmd-export compose-pull pull
+        cmd-export deployer-login login
+
+        cmd-export migrate-startdb startdb
+        cmd-export migrate-cmd migrate
+
     fi
 
     if [[ "$DEBUG" ]]; then

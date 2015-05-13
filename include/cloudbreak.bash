@@ -1,12 +1,14 @@
 
 cloudbreak-config() {
-  env-import PRIVATE_IP $(docker run alpine sh -c 'ip ro | grep default | cut -d" " -f 3')
+  env-import PRIVATE_IP $(docker run --rm alpine sh -c 'ip ro | grep default | cut -d" " -f 3')
   cloudbreak-conf-tags
   cloudbreak-conf-images
-  cloudbreak-conf-cbdb
+  cloudbreak-conf-db
   cloudbreak-conf-defaults
   cloudbreak-conf-uaa
   cloudbreak-conf-smtp
+  cloudbreak-conf-cloud-provider
+  cloudbreak-conf-ui
 }
 
 cloudbreak-conf-tags() {
@@ -15,23 +17,27 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_ALPINE 3.1
     env-import DOCKER_TAG_CONSUL v0.5.0-v3
     env-import DOCKER_TAG_REGISTRATOR v5
-    env-import DOCKER_TAG_POSTGRES 9.4.0
-    env-import DOCKER_TAG_UAA 1.8.1-v1
+    env-import DOCKER_TAG_POSTGRES 9.4.1
+    env-import DOCKER_TAG_CLOUDBREAK 0.5.34
+    env-import DOCKER_TAG_CBDB 0.5.34
+    env-import DOCKER_TAG_PERISCOPE 0.5.3
+    env-import DOCKER_TAG_PCDB 0.5.2
+    env-import DOCKER_TAG_UAA 1.8.1-v2
     env-import DOCKER_TAG_CBSHELL 0.2.47
-    env-import DOCKER_TAG_CLOUDBREAK 0.4.7
-    env-import DOCKER_TAG_ULUWATU 0.4.7
-    env-import DOCKER_TAG_SULTANS 0.4.6
-    env-import DOCKER_TAG_PERISCOPE 0.4.2
+    env-import DOCKER_TAG_ULUWATU 0.5.10
+    env-import DOCKER_TAG_SULTANS 0.5.1
     env-import DOCKER_TAG_AMBASSADOR latest
+    env-import DOCKER_TAG_CLOUDBREAK_SHELL 0.4.4
 }
 
 cloudbreak-conf-images() {
     declare desc="Defines base images for each provider"
 
-    env-import CB_AZURE_IMAGE_URI "https://102589fae040d8westeurope.blob.core.windows.net/images/packer-cloudbreak-2015-03-10-centos6_2015-March-10_17-15-os-2015-03-10.vhd"
-    env-import CB_GCP_SOURCE_IMAGE_PATH "sequenceiqimage/sequenceiq-ambari17-consul-centos-2015-03-10-1449.image.tar.gz"
-    env-import CB_AWS_AMI_MAP "ap-northeast-1:ami-c528c3c5,ap-southeast-2:ami-e7c3b2dd,sa-east-1:ami-c5e55dd8,ap-southeast-1:ami-42c3f510,eu-west-1:ami-bb35a7cc,us-west-1:ami-4b20c70f,us-west-2:ami-eb1f3ddb,us-east-1:ami-00391e68"
-    env-import CB_OPENSTACK_IMAGE "packer-cloudbreak-centos-2015-03-11"
+    env-import CB_AZURE_IMAGE_URI "https://102589fae040d8westeurope.blob.core.windows.net/images/packer-cloudbreak-2015-05-07-centos6-mun10_2015-May-7_16-3-os-2015-05-07.vhd"
+    env-import CB_AWS_AMI_MAP "ap-northeast-1:ami-4ee7284e,ap-southeast-1:ami-b0e5dae2,ap-southeast-2:ami-1d780727,eu-west-1:ami-33593144,sa-east-1:ami-eba423f6,us-east-1:ami-606c7808,us-west-1:ami-9d709fd9,us-west-2:ami-c37848f3"
+    env-import CB_OPENSTACK_IMAGE "cb-centos66-amb200-2015-05-08"
+    env-import CB_GCP_SOURCE_IMAGE_PATH "sequenceiqimage/cb-centos66-amb200-2015-05-07-1639.image.tar.gz"
+
 }
 
 cloudbreak-conf-smtp() {
@@ -41,19 +47,40 @@ cloudbreak-conf-smtp() {
     env-import CLOUDBREAK_SMTP_SENDER_PORT 25
     env-import CLOUDBREAK_SMTP_SENDER_FROM " "
 }
-cloudbreak-conf-cbdb() {
+
+cloudbreak-conf-db() {
     declare desc="Declares cloudbreak DB config"
+
+    if boot2docker version &> /dev/null; then
+        # this is for OSX
+        env-import CB_DB_ROOT_PATH "/var/lib/boot2docker/cloudbreak"
+    else
+        # this is for linux
+        env-import CB_DB_ROOT_PATH "/var/lib/cloudbreak"
+    fi
 
     env-import CB_DB_ENV_USER "postgres"
     env-import CB_DB_ENV_DB "cloudbreak"
     env-import CB_DB_ENV_PASS ""
-    env-import CB_HBM2DDL_STRATEGY "update"
-    env-import PERISCOPE_DB_HBM2DDL_STRATEGY "update"
+    env-import CB_HBM2DDL_STRATEGY "validate"
+    env-import PERISCOPE_DB_HBM2DDL_STRATEGY "validate"
+}
+
+cloudbreak-delete-dbs() {
+    declare desc="deletes all cloudbreak related dbs: cbdb,pcdb,uaadb"
+
+    if boot2docker version &> /dev/null; then
+        # this is for OSX
+        boot2docker ssh 'sudo rm -rf /var/lib/boot2docker/cloudbreak/*'
+    else
+        # this is for linux
+        rm -rf /var/lib/cloudbreak/*
+    fi
 }
 
 cloudbreak-conf-uaa() {
 
-    env-import UAA_DEFAULT_SECRET $(gen-password)
+    env-import UAA_DEFAULT_SECRET "cbsecret2015"
 
     env-import UAA_CLOUDBREAK_ID cloudbreak
     env-import UAA_CLOUDBREAK_SECRET $UAA_DEFAULT_SECRET
@@ -79,7 +106,39 @@ cloudbreak-conf-defaults() {
     env-import PRIVATE_IP
     env-import PUBLIC_IP
 
-    env-import CB_BLUEPRINT_DEFAULTS "multi-node-hdfs-yarn,lambda-architecture,hdp-multinode-default"
+    env-import CB_HOST_ADDR $PUBLIC_IP
+    env-import CB_BLUEPRINT_DEFAULTS "multi-node-hdfs-yarn,hdp-multinode-default"
+}
+
+cloudbreak-conf-cloud-provider() {
+    declare desc="Defines cloud provider related parameters"
+
+    env-import AWS_ACCESS_KEY_ID ""
+    env-import AWS_SECRET_KEY ""
+
+}
+
+cloudbreak-conf-ui() {
+    declare desc="Defines Uluwatu and Sultans related parameters"
+
+    env-import ULU_HOST_ADDRESS  "http://$PUBLIC_IP:3000"
+    env-import ULU_OAUTH_REDIRECT_URI  "$ULU_HOST_ADDRESS/authorize"
+    env-import ULU_SULTANS_ADDRESS  "http://$PUBLIC_IP:3001"
+
+}
+
+cloudbreak-shell() {
+    docker run -ti \
+        --rm \
+        --link cbreak_ambassador_1:backend \
+        -e BACKEND_9000=cloudbreak.service.consul \
+        -e BACKEND_9001=identity.service.consul \
+        -e CLOUDBREAK_ADDRESS=http://backend:9000 \
+        -e IDENTITY_ADDRESS=http://backend:9001 \
+        -e SEQUENCEIQ_USER=admin@example.com \
+        -e SEQUENCEIQ_PASSWORD=cloudbreak \
+        -v $PWD:/data \
+        sequenceiq/cb-shell:0.4.4
 }
 
 gen-password() {
@@ -88,7 +147,33 @@ gen-password() {
 
 generate_uaa_config() {
     cloudbreak-config
-    cat > uaa.yml << EOF
+
+    if [ -f uaa.yml ]; then
+
+        generate_uaa_config_force /tmp/uaa-delme.yml
+        if diff /tmp/uaa-delme.yml uaa.yml &> /dev/null; then
+            debug "uaa.yml exists and generate wouldn't change it"
+        else
+            warn "uaa.yml already exists, BUT generate would create a MODIFIED one."
+            warn "if you want to regenerate, remove it first:"
+            echo "  cbd regenerate" | blue
+            warn "expected change:"
+            
+            (diff /tmp/uaa-delme.yml uaa.yml || true) | cyan
+        fi
+    else
+        info "generating uaa.yml"
+        generate_uaa_config_force uaa.yml
+    fi
+}
+
+
+generate_uaa_config_force() {
+    declare uaaFile=${1:? required: uaa config file path}
+
+    debug "Generating Identity server config: ${uaaFile} ..."
+
+    cat > ${uaaFile} << EOF
 spring_profiles: postgresql
 
 database:
@@ -115,7 +200,7 @@ oauth:
       authorized-grant-types: authorization_code,client_credentials
       scope: cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,cloudbreak.templates,openid,password.write,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,cloudbreak.events,periscope.cluster,cloudbreak.recipes
       authorities: cloudbreak.subscribe
-      redirect-uri: http://${PUBLIC_IP}:3000/authorize
+      redirect-uri: ${ULU_OAUTH_REDIRECT_URI}
     ${UAA_CLOUDBREAK_ID}:
       id: ${UAA_CLOUDBREAK_ID}
       secret: ${UAA_CLOUDBREAK_SECRET}
@@ -141,7 +226,6 @@ scim:
     - ${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_PW}|${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_FIRSTNAME}|${UAA_DEFAULT_USER_LASTNAME}|openid,cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,sequenceiq.cloudbreak.admin,sequenceiq.cloudbreak.user,sequenceiq.account.seq1234567.SequenceIQ,cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,periscope.cluster,cloudbreak.recipes
 
 EOF
-
 }
 
 token() {

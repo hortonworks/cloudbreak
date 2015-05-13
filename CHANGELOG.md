@@ -8,6 +8,46 @@
 
 ### Changed
 
+## [v0.5.0] - 2015-05-08
+
+### Fixed
+
+- Command `pull` generates yaml files in case they are missing #31
+
+### Added
+
+- Command `login` Shows Uluwatu login url and credentials
+- Command `regenerate` deletes and generates docker-compose.yml and uaa.yml
+- Command `delete` added: deletes yamls and dbs
+- Command `cloudbreak-shell` added, right now it internale use DEBUG=1 fn fn-call
+- Command `version` does correct [Semantic Versioning](http://semver.org) check to advise an upgrade
+- Command `generate` checks and shows if Profile change would result in yaml change.
+- Command `start`: prints uluwatu url and credential hint
+- Command `doctor`: fixes boot2docker date/time if not the same as on the host
+- Internal command: `browse` added to be able to automatically open a browser to a specified url.
+- Mini Getting Started guide added into README
+- `make dev-debug` installs a special cbd on local OSX, which doesn’t includes *.bash scrips, only refers them
+   by path. No need to `make dev` to test small changes in bash scripts.
+- Load AWS key and AWS id from Profile
+- Command `init` helps to guess the PUBLIC_IP in public clouds: google, amazon
+
+### Removed
+
+### Changed
+
+- Command `cbd env export` adds export to the begining of each line
+- cbd logs accepts optional [services] parameter
+- docker-compose uses `cbreak_` prefix for container naming instead of the directory name
+- Command `generate` prints out some more usefull info
+- uaa.yml generation wont overwrite, just instruct to move existing file (like docker-compose.yml generation)
+- Command `init` hint fixed on linux.
+- Command `init` advise to run `generate` if it finds a Profile
+- Command `init` set PRIVATE_IP the same as PUBLIC_IP for boot2docker
+- Command `migrate` is introduced for db migration see `Migrate the databases` section of README
+- Command `startdb` starts the cbdb and pcdb database containers only
+- Databases are not deleted after boot2docker restart
+- Import ULU_HOST_ADDRESS and ULU_SULTANS_ADDRESS from Profile
+
 ## [v0.1.0] - 2015-04-16
 
 ### Fixed
