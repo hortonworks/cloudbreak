@@ -299,7 +299,7 @@ public class AmbariClusterService implements ClusterService {
                 instanceMetadataRepository.findUnregisteredHostsInInstanceGroup(hostGroup.getInstanceGroup().getId());
         Set<String> instanceIds = new HashSet<>();
         for (InstanceMetaData instanceMetaData : unregisteredHostsInInstanceGroup) {
-            instanceIds.add(instanceMetaData.getInstanceId());
+            instanceIds.add(instanceMetaData.getPrivateIp());
             if (instanceIds.size() >= adjustmentJson.getScalingAdjustment()) {
                 break;
             }
