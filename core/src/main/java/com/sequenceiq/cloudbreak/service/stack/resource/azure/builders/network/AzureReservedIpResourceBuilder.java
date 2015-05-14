@@ -52,12 +52,16 @@ public class AzureReservedIpResourceBuilder extends AzureSimpleNetworkResourceBu
     @Override
     public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
         AzureReservedIpCreateRequest azureReservedIpCreateRequest = (AzureReservedIpCreateRequest) createResourceRequest;
-        HttpResponseDecorator serviceCertificate = (HttpResponseDecorator) azureReservedIpCreateRequest.getAzureClient()
-                .createReservedIP(azureReservedIpCreateRequest.getProps());
-        AzureResourcePollerObject azureResourcePollerObject =
-                new AzureResourcePollerObject(azureReservedIpCreateRequest.getAzureClient(), azureReservedIpCreateRequest.getStack(), serviceCertificate);
-        azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
-                POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+        try {
+            HttpResponseDecorator serviceCertificate = (HttpResponseDecorator) azureReservedIpCreateRequest.getAzureClient()
+                    .createReservedIP(azureReservedIpCreateRequest.getProps());
+            AzureResourcePollerObject azureResourcePollerObject =
+                    new AzureResourcePollerObject(azureReservedIpCreateRequest.getAzureClient(), azureReservedIpCreateRequest.getStack(), serviceCertificate);
+            azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
+                    POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+        } catch (Exception ex) {
+            throw checkException(ex);
+        }
         return true;
     }
 

@@ -76,10 +76,15 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     @Override
     public Boolean create(final CreateResourceRequest createResourceRequest, final String region) throws Exception {
         AzureVirtualMachineCreateRequest aCSCR = (AzureVirtualMachineCreateRequest) createResourceRequest;
-        HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createVirtualMachine(aCSCR.getProps());
-        AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), aCSCR.getStack(), virtualMachineResponse);
-        azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
-                POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+        try {
+            HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createVirtualMachine(aCSCR.getProps());
+            AzureResourcePollerObject azureResourcePollerObject =
+                    new AzureResourcePollerObject(aCSCR.getAzureClient(), aCSCR.getStack(), virtualMachineResponse);
+            azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
+                    POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+        } catch (Exception ex) {
+            throw checkException(ex);
+        }
         return true;
     }
 

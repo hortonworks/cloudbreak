@@ -24,7 +24,7 @@ public class KeyGeneratorService {
                 "-keysize", "2048",
                 "-keypass", AzureStackUtil.DEFAULT_JKS_PASS,
                 "-storepass", AzureStackUtil.DEFAULT_JKS_PASS,
-                "-dname", "cn=" + user + azureCredential.getPostFix() + ",ou=engineering,o=company,c=US"
+                "-dname", "cn=" + user + ",ou=engineering,o=company,c=US"
         }, " ");
         Process p = Runtime.getRuntime().exec(command);
         p.waitFor();

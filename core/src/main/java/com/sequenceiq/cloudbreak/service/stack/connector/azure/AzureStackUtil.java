@@ -114,7 +114,8 @@ public class AzureStackUtil {
     }
 
     private Certificate getCertificate(AzureCredential azureCredential, String serviceFilesPathWithoutExtension) throws Exception {
-        keyGeneratorService.generateKey("cloudbreak", azureCredential, "mydomain", serviceFilesPathWithoutExtension + ".jks");
+        String email = userDetailsService.getDetails(azureCredential.getOwner(), UserFilterField.USERID).getUsername();
+        keyGeneratorService.generateKey(email, azureCredential, "mydomain", serviceFilesPathWithoutExtension + ".jks");
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] pass = azureCredential.getJks().toCharArray();
         FileInputStream fis = null;

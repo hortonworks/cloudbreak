@@ -22,7 +22,7 @@ import groovyx.net.http.HttpResponseException;
 
 public abstract class AzureSimpleNetworkResourceBuilder implements
         ResourceBuilder<AzureProvisionContextObject, AzureDeleteContextObject, AzureStartStopContextObject, AzureUpdateContextObject> {
-    protected static final Logger LOGGER = LoggerFactory.getLogger(AzureSimpleInstanceResourceBuilder.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(AzureSimpleNetworkResourceBuilder.class);
     protected static final int POLLING_INTERVAL = 5000;
     protected static final int MAX_POLLING_ATTEMPTS = 60;
     protected static final int NOT_FOUND = 404;
@@ -59,6 +59,14 @@ public abstract class AzureSimpleNetworkResourceBuilder implements
             }
         }
         return resourcesTemp;
+    }
+
+    protected Exception checkException(Exception ex) {
+        if (ex instanceof HttpResponseException) {
+            return new AzureResourceException(((HttpResponseException) ex).getResponse().getData().toString());
+        } else {
+            return ex;
+        }
     }
 
     @Override

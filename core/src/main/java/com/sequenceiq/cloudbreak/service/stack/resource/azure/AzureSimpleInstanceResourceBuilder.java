@@ -65,6 +65,14 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
         return resourcesTemp;
     }
 
+    protected Exception checkException(Exception ex) {
+        if (ex instanceof HttpResponseException) {
+            return new AzureResourceException(((HttpResponseException) ex).getResponse().getData().toString());
+        } else {
+            return ex;
+        }
+    }
+
     protected String getVmName(String azureTemplate, int i) {
         return String.format("%s-%s", azureTemplate, i);
     }
