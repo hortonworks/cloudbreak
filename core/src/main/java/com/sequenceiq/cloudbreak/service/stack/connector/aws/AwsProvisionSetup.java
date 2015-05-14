@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -15,8 +13,6 @@ import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 
 @Component
 public class AwsProvisionSetup implements ProvisionSetup {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsProvisionSetup.class);
 
     @Override
     public ProvisionEvent setupProvisioning(Stack stack) {

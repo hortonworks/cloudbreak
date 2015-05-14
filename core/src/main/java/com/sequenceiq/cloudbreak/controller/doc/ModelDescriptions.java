@@ -62,6 +62,15 @@ public class ModelDescriptions {
         public static final String EMAIL_NEEDED = "send email about the result of the cluster installation";
     }
 
+    public static class AmbariStackDetailsDescription {
+        public static final String STACK = "name of the stack, like HDP";
+        public static final String VERSION = "version of the stack";
+        public static final String OS = "operating system for the stack, like redhat6";
+        public static final String REPO_ID = "id of the repository";
+        public static final String BASE_URL = "url of the repository";
+        public static final String VERIFY = "whether to verify or not the repo url";
+    }
+
     public static class RecipeModelDescription {
         public static final String TIMEOUT = "recipe timeout in minutes";
         public static final String PLUGINS = "list of consul plugins with execution types";

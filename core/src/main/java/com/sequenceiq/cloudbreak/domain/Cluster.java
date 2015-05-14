@@ -14,6 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -70,6 +71,9 @@ public class Cluster implements ProvisionEntity {
 
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<HostGroup> hostGroups = new HashSet<>();
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private AmbariStackDetails ambariStackDetails;
 
     public String getDescription() {
         return description;
@@ -209,5 +213,13 @@ public class Cluster implements ProvisionEntity {
 
     public void setKerberosPassword(String kerberosPassword) {
         this.kerberosPassword = kerberosPassword;
+    }
+
+    public AmbariStackDetails getAmbariStackDetails() {
+        return ambariStackDetails;
+    }
+
+    public void setAmbariStackDetails(AmbariStackDetails ambariStackDetails) {
+        this.ambariStackDetails = ambariStackDetails;
     }
 }

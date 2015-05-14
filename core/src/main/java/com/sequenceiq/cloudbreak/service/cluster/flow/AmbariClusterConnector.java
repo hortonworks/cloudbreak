@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.ClusterException;
 import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
+import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -114,6 +115,7 @@ public class AmbariClusterConnector {
             cluster = clusterRepository.save(cluster);
 
             AmbariClient ambariClient = ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword());
+            setBaseRepoURL(cluster, ambariClient);
             addBlueprint(stack, ambariClient, cluster.getBlueprint());
             PollingResult waitForHostsResult = waitForHosts(stack, ambariClient);
 
@@ -434,6 +436,21 @@ public class AmbariClusterConnector {
         hostGroup.getHostMetadata().addAll(hostMetadata);
         hostGroupRepository.save(hostGroup);
         return hostMetadata;
+    }
+
+    private void setBaseRepoURL(Cluster cluster, AmbariClient ambariClient) {
+        AmbariStackDetails ambStack = cluster.getAmbariStackDetails();
+        if (ambStack != null) {
+            LOGGER.info("Use specific Ambari repository: {}", ambStack);
+            try {
+                ambariClient.addStackRepository(ambStack.getStack(), ambStack.getVersion(), ambStack.getOs(),
+                        ambStack.getRepoId(), ambStack.getBaseURL(), ambStack.isVerify());
+            } catch (HttpResponseException e) {
+                throw new BadRequestException("Cannot use the specified Ambari stack: " + ambStack.toString(), e);
+            }
+        } else {
+            LOGGER.info("Using latest HDP repository");
+        }
     }
 
     private void addBlueprint(Stack stack, AmbariClient ambariClient, Blueprint blueprint) {

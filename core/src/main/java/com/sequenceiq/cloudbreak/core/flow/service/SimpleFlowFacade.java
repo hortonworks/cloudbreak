@@ -88,15 +88,12 @@ public class SimpleFlowFacade implements FlowFacade {
         LOGGER.debug("Metadata setup. Context: {}", context);
         try {
             ProvisioningContext provisioningContext = (ProvisioningContext) context;
-            String ambariIP = metadataSetupService.setupMetadata(
-                    provisioningContext.getCloudPlatform(),
-                    provisioningContext.getStackId());
+            metadataSetupService.setupMetadata(provisioningContext.getCloudPlatform(), provisioningContext.getStackId());
             cloudbreakEventService.fireCloudbreakEvent(provisioningContext.getStackId(), BillingStatus.BILLING_STARTED.name(),
                     "Provision of stack is successfully finished");
             LOGGER.debug("Metadata setup DONE.");
             return new ProvisioningContext.Builder()
                     .setDefaultParams(provisioningContext.getStackId(), provisioningContext.getCloudPlatform())
-                    .setAmbariIp(ambariIP)
                     .build();
         } catch (Exception e) {
             LOGGER.error("Exception during metadata setup: {}", e.getMessage());
@@ -121,9 +118,7 @@ public class SimpleFlowFacade implements FlowFacade {
     public FlowContext runClusterContainers(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Running cluster containers. Context: {}", context);
         try {
-            clusterFacade.runClusterContainers(context);
-            LOGGER.debug("Allocating Ambari roles DONE.");
-            return context;
+            return clusterFacade.runClusterContainers(context);
         } catch (Exception e) {
             LOGGER.error("Exception during Ambari role allocation.", e);
             throw new CloudbreakException(e);
@@ -135,7 +130,6 @@ public class SimpleFlowFacade implements FlowFacade {
         LOGGER.debug("Starting Ambari. Context: {}", context);
         try {
             FlowContext ambariStartContext = clusterFacade.startAmbari(context);
-            LOGGER.debug("Ambari start DONE.");
             return ambariStartContext;
         } catch (Exception e) {
             LOGGER.error("Exception while starting Ambari :", e);

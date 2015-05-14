@@ -22,7 +22,9 @@ import com.ecwid.consul.v1.catalog.model.CatalogService;
 import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -47,6 +49,8 @@ public class ConsulMetadataSetup {
     @Autowired
     private ConsulHostCheckerTask consulHostCheckerTask;
 
+    @Autowired
+    private RetryingStackUpdater stackUpdater;
 
     public void setupConsulMetadata(Long stackId) {
         LOGGER.info("Setting up Consul metadata for the cluster.");
@@ -58,6 +62,7 @@ public class ConsulMetadataSetup {
         }
         updateWithConsulData(allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
         instanceMetaDataRepository.save(allInstanceMetaData);
+        stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Stack is ready");
     }
 
     public void setupNewConsulMetadata(Long stackId, Set<String> newAddresses) {

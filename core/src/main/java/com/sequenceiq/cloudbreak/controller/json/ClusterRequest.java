@@ -36,6 +36,8 @@ public class ClusterRequest {
     private String kerberosAdmin;
     private String kerberosPassword;
     private Boolean validateBlueprint = true;
+    @Valid
+    private AmbariStackDetailsJson ambariStackDetails;
 
     public String getDescription() {
         return description;
@@ -115,5 +117,13 @@ public class ClusterRequest {
 
     public void setValidateBlueprint(Boolean validateBlueprint) {
         this.validateBlueprint = validateBlueprint;
+    }
+
+    public AmbariStackDetailsJson getAmbariStackDetails() {
+        return ambariStackDetails;
+    }
+
+    public void setAmbariStackDetails(AmbariStackDetailsJson ambariStackDetails) {
+        this.ambariStackDetails = ambariStackDetails;
     }
 }
