@@ -32,7 +32,8 @@ public abstract class AzureResourceStatusCheckerTask implements StatusCheckerTas
                 result = false;
                 break;
             } else if ("Failed".equals(status)) {
-                throw new AzureResourceException(jsonFromString.get("Operation").get("Error").get("Message").asText());
+                String error = jsonFromString.get("Operation").get("Error").get("Message").asText();
+                throw new AzureResourceException(error);
             } else {
                 iterator.remove();
             }
