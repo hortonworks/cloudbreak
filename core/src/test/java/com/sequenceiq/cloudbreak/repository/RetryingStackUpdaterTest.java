@@ -333,38 +333,6 @@ public class RetryingStackUpdaterTest {
     }
 
     @Test
-    public void testUpdateMetadataReadySuccessFirst() {
-        // GIVEN
-        Stack dummyStack = createDummyStack();
-        defaultMocks(dummyStack);
-        // WHEN
-        Stack result = underTest.updateMetadataReady(DUMMY_ID, true);
-        // THEN
-        assertEquals(result.isMetadataReady(), true);
-    }
-
-    @Test
-    public void testUpdateMetadataReadyFailThreeTimes() {
-        // GIVEN
-        Stack dummyStack = createDummyStack();
-        failThreeTimesMocks(dummyStack);
-        // WHEN
-        Stack result = underTest.updateMetadataReady(DUMMY_ID, true);
-        // THEN
-        verify(stackRepository, times(4)).save(dummyStack);
-        assertEquals(result.isMetadataReady(), true);
-    }
-
-    @Test(expected = CloudbreakServiceException.class)
-    public void testUpdateMetadataReadyFail() {
-        // GIVEN
-        Stack dummyStack = createDummyStack();
-        failMocks(dummyStack);
-        // WHEN
-        underTest.updateMetadataReady(DUMMY_ID, true);
-    }
-
-    @Test
     public void testUpdateNodeCountSuccessFirst() {
         // GIVEN
         Stack dummyStack = createDummyStack();

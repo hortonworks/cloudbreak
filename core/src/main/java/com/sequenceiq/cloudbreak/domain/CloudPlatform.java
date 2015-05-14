@@ -1,23 +1,31 @@
 package com.sequenceiq.cloudbreak.domain;
 
 public enum CloudPlatform {
-    AWS("ec2", true, 0),
-    AZURE("azure", false, 6),
-    GCC("gcc", false, 30),
-    OPENSTACK("openstack", true, 0);
+    AWS("ec2", true, 0, "xvd", 65),
+    AZURE("azure", false, 6, "sd", 62),
+    GCC("gcc", false, 30, "sd", 61),
+    OPENSTACK("openstack", true, 0, "vd", 61);
 
     private final String initScriptPrefix;
     private final boolean withTemplate;
     private final Integer parallelNumber;
+    private final String diskPrefix;
+    private final Integer startLabel;
 
-    private CloudPlatform(String initScriptPrefix, boolean withTemplate, Integer parallelNumber) {
+    private CloudPlatform(String initScriptPrefix, boolean withTemplate, Integer parallelNumber, String diskPrefix, Integer startLabel) {
         this.initScriptPrefix = initScriptPrefix;
         this.withTemplate = withTemplate;
         this.parallelNumber = parallelNumber;
+        this.diskPrefix = diskPrefix;
+        this.startLabel = startLabel;
     }
 
     public String getInitScriptPrefix() {
         return initScriptPrefix;
+    }
+
+    public String getDiskPrefix() {
+        return diskPrefix;
     }
 
     public boolean isWithTemplate() {
@@ -26,5 +34,9 @@ public enum CloudPlatform {
 
     public Integer parallelNumber() {
         return parallelNumber;
+    }
+
+    public Integer startLabel() {
+        return startLabel;
     }
 }

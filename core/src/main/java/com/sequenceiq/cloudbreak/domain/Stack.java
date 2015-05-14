@@ -168,9 +168,7 @@ public class Stack implements ProvisionEntity {
     private String ambariIp;
     private String userName;
     private String password;
-    private String hash;
     private int consulServers;
-    private boolean metadataReady;
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
     @Column(columnDefinition = "TEXT")
@@ -314,22 +312,6 @@ public class Stack implements ProvisionEntity {
 
     public void setVersion(Long version) {
         this.version = version;
-    }
-
-    public String getHash() {
-        return hash;
-    }
-
-    public void setHash(String hash) {
-        this.hash = hash;
-    }
-
-    public boolean isMetadataReady() {
-        return metadataReady;
-    }
-
-    public void setMetadataReady(boolean metadataReady) {
-        this.metadataReady = metadataReady;
     }
 
     public String getRegion() {

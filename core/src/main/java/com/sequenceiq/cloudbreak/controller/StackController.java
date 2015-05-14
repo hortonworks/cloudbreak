@@ -26,21 +26,18 @@ import com.sequenceiq.cloudbreak.controller.doc.Notes;
 import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions.StackOpDescription;
 import com.sequenceiq.cloudbreak.controller.json.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
-import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.controller.json.StackRequest;
 import com.sequenceiq.cloudbreak.controller.json.StackResponse;
 import com.sequenceiq.cloudbreak.controller.json.StackValidationRequest;
 import com.sequenceiq.cloudbreak.controller.json.TemplateResponse;
 import com.sequenceiq.cloudbreak.controller.json.UpdateStackJson;
 import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.domain.Subnet;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -190,21 +187,6 @@ public class StackController {
     private void decorateSubnetEntities(List<Subnet> subnetList, Stack stack) {
         for (Subnet subnet : subnetList) {
             subnet.setStack(stack);
-        }
-    }
-
-    @ApiOperation(value = StackOpDescription.GET_METADATA, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
-    @RequestMapping(value = "stacks/metadata/{hash}", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity<Set<InstanceMetaDataJson>> getStackMetadata(@ModelAttribute("user") CbUser user, @PathVariable String hash) {
-        MDCBuilder.buildMdcContext(user);
-        try {
-            Set<InstanceMetaData> metaData = stackService.getMetaData(hash);
-            Set<InstanceMetaDataJson> metaDataJsons = (Set<InstanceMetaDataJson>) conversionService.convert(metaData, TypeDescriptor.forObject(metaData),
-                    TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(InstanceMetaDataJson.class)));
-            return new ResponseEntity<>(metaDataJsons, HttpStatus.OK);
-        } catch (MetadataIncompleteException e) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 

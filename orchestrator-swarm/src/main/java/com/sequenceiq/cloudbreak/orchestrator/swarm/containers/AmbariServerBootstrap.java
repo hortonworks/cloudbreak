@@ -22,11 +22,13 @@ public class AmbariServerBootstrap implements ContainerBootstrap {
     private final DockerClient docker;
     private final String imageName;
     private final String cloudPlatform;
+    private final String node;
 
-    public AmbariServerBootstrap(DockerClient docker, String imageName, String cloudPlatform) {
+    public AmbariServerBootstrap(DockerClient docker, String imageName, String node, String cloudPlatform) {
         this.docker = docker;
         this.imageName = imageName;
         this.cloudPlatform = cloudPlatform;
+        this.node = node;
     }
 
     @Override
@@ -42,7 +44,7 @@ public class AmbariServerBootstrap implements ContainerBootstrap {
         String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
                 .withHostConfig(hostConfig)
                 .withExposedPorts(new ExposedPort(PORT))
-                .withEnv("constraint:type==gateway",
+                .withEnv(String.format("constraint:node==%s", node),
                         String.format("POSTGRES_DB=localhost"),
                         String.format("CLOUD_PLATFORM=%s", cloudPlatform),
                         String.format("SERVICE_NAME=%s", "ambari-8080"))

@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateway;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,7 +47,6 @@ import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateAllowedSubnetsRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
-import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 
 @Service
 public class DefaultStackService implements StackService {
@@ -153,7 +151,6 @@ public class DefaultStackService implements StackService {
         Stack savedStack = null;
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
-        stack.setHash(generateHash(stack));
         String result = provisionSetups.get(stack.cloudPlatform()).preProvisionCheck(stack);
         if (null != result) {
             throw new BadRequestException(result);
@@ -243,26 +240,6 @@ public class DefaultStackService implements StackService {
         }
         stackUpdater.updateStackStatus(stackId, Status.UPDATE_IN_PROGRESS, "Updating allowed subnets");
         flowManager.triggerUpdateAllowedSubnets(new UpdateAllowedSubnetsRequest(stack.cloudPlatform(), stackId, subnetList));
-    }
-
-    @Override
-    public Set<InstanceMetaData> getMetaData(String hash) {
-        Stack stack = stackRepository.findStackByHash(hash);
-        if (stack != null) {
-            if (!stack.isMetadataReady()) {
-                throw new MetadataIncompleteException("Instance metadata is incomplete.");
-            }
-            Set<InstanceMetaData> instanceMetaData = new HashSet<>();
-            for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                if (!instanceGroup.getInstanceMetaData().isEmpty()) {
-                    instanceMetaData.addAll(instanceGroup.getInstanceMetaData());
-                }
-            }
-            if (!instanceMetaData.isEmpty()) {
-                return instanceMetaData;
-            }
-        }
-        throw new NotFoundException("Metadata not found on stack.");
     }
 
     @Override

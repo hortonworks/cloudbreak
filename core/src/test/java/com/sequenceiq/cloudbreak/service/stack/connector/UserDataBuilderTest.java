@@ -1,62 +1,38 @@
 package com.sequenceiq.cloudbreak.service.stack.connector;
 
-import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.GATEWAY;
-import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.CORE;
-
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+
+import freemarker.template.TemplateException;
 
 public class UserDataBuilderTest {
 
-    private static UserDataBuilder userDataBuilder;
-
-    @BeforeClass
-    public static void before() throws IOException {
-        Map<CloudPlatform, Map<InstanceGroupType, String>> userDataScripts = new HashMap<>();
-        for (CloudPlatform cloudPlatform : CloudPlatform.values()) {
-            Map<InstanceGroupType, String> tmpMap = new HashMap<>();
-            tmpMap.put(CORE, FileReaderUtils.readFileFromClasspath(String.format("%s-init-test.sh", cloudPlatform.getInitScriptPrefix())));
-            tmpMap.put(GATEWAY, FileReaderUtils.readFileFromClasspath(String.format("%s-init-test.sh", cloudPlatform.getInitScriptPrefix())));
-            userDataScripts.put(cloudPlatform, tmpMap);
-        }
-        userDataBuilder = new UserDataBuilder();
-        userDataBuilder.setUserDataScripts(userDataScripts);
-    }
+    private static UserDataBuilder userDataBuilder = new UserDataBuilder();
 
     @Test
-    public void testBuildUserDataEc2() throws IOException {
+    public void testBuildUserDataEc2() throws IOException, TemplateException {
+        userDataBuilder.setUserDataScripts(FileReaderUtils.readFileFromClasspath(String.format("ec2-init-test.sh")));
         String expectedScript = FileReaderUtils.readFileFromClasspath("ec2-init-test-expected.sh");
-        Map<String, String> map = new HashMap<>();
-        map.put("NODE_PREFIX", "testamb");
-        map.put("MYDOMAIN", "test.kom");
-        Assert.assertEquals(expectedScript, userDataBuilder.buildUserData(CloudPlatform.AWS, "hash123", 3, map, InstanceGroupType.CORE));
+        Assert.assertEquals(expectedScript, userDataBuilder.buildUserData(CloudPlatform.AWS));
     }
 
     @Test
-    public void testBuildUserDataAzure() throws IOException {
+    public void testBuildUserDataAzure() throws IOException, TemplateException {
+        userDataBuilder.setUserDataScripts(FileReaderUtils.readFileFromClasspath(String.format("azure-init-test.sh")));
         String expectedScript = FileReaderUtils.readFileFromClasspath("azure-init-test-expected.sh");
-        Map<String, String> map = new HashMap<>();
-        map.put("NODE_PREFIX", "testamb");
-        map.put("MYDOMAIN", "test.kom");
-        Assert.assertEquals(expectedScript, userDataBuilder.buildUserData(CloudPlatform.AZURE, "hash123", 3, map, InstanceGroupType.CORE));
+        Assert.assertEquals(expectedScript, userDataBuilder.buildUserData(CloudPlatform.AZURE));
     }
 
     @Test
-    public void testBuildUserDataGcc() throws IOException {
+    public void testBuildUserDataGcc() throws IOException, TemplateException {
+        userDataBuilder.setUserDataScripts(FileReaderUtils.readFileFromClasspath(String.format("gcc-init-test.sh")));
         String expectedScript = FileReaderUtils.readFileFromClasspath("gcc-init-test-expected.sh");
-        Map<String, String> map = new HashMap<>();
-        map.put("NODE_PREFIX", "testamb");
-        map.put("MYDOMAIN", "test.kom");
-        Assert.assertEquals(expectedScript, userDataBuilder.buildUserData(CloudPlatform.GCC, "hash123", 3, map, InstanceGroupType.CORE));
+        Assert.assertEquals(expectedScript, userDataBuilder.buildUserData(CloudPlatform.GCC));
     }
 
 }
