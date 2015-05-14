@@ -40,7 +40,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 
 import jersey.repackaged.com.google.common.collect.Maps;
-import reactor.core.Reactor;
 
 @Service
 public class OpenStackConnector implements CloudPlatformConnector {
@@ -58,9 +57,6 @@ public class OpenStackConnector implements CloudPlatformConnector {
 
     @Inject
     private RetryingStackUpdater stackUpdater;
-
-    @Inject
-    private Reactor reactor;
 
     @Inject
     private UserDataBuilder userDataBuilder;

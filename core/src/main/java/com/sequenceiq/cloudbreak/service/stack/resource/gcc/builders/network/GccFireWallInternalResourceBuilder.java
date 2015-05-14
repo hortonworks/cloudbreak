@@ -14,7 +14,6 @@ import com.google.api.services.compute.model.Firewall;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -41,8 +40,6 @@ public class GccFireWallInternalResourceBuilder extends GccSimpleNetworkResource
     private GccRemoveCheckerStatus gccRemoveCheckerStatus;
     @Autowired
     private PollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
-    @Autowired
-    private JsonHelper jsonHelper;
 
     @Override
     public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {

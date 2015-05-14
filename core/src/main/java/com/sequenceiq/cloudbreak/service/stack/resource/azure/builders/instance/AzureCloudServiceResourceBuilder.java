@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
@@ -29,7 +28,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureCloudService
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureCreateResourceStatusCheckerTask;
-import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureDeleteResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourcePollerObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
@@ -40,8 +38,6 @@ import groovyx.net.http.HttpResponseDecorator;
 @Component
 @Order(1)
 public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourceBuilder {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final int DISK_MAX_ATTEMPTS = 100;
 
     @Autowired
     private StackRepository stackRepository;
@@ -53,8 +49,6 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
     private AzureStackUtil azureStackUtil;
     @Autowired
     private AzureCreateResourceStatusCheckerTask azureCreateResourceStatusCheckerTask;
-    @Autowired
-    private AzureDeleteResourceStatusCheckerTask azureDeleteResourceStatusCheckerTask;
     @Autowired
     private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
     @Autowired

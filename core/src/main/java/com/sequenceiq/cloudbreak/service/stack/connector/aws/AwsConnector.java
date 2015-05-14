@@ -99,7 +99,6 @@ import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
-import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstances;
 
@@ -139,8 +138,6 @@ public class AwsConnector implements CloudPlatformConnector {
     private PollingService<SnapshotReadyPollerObject> snapshotReadyPollingService;
     @Inject
     private ClusterRepository clusterRepository;
-    @Inject
-    private UserDataBuilder userDataBuilder;
     @Inject
     private StackRepository stackRepository;
     @Inject

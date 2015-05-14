@@ -23,14 +23,9 @@ import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 
-import reactor.core.Reactor;
-
 @Component
 public class OpenStackProvisionSetup implements ProvisionSetup {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackProvisionSetup.class);
-
-    @Autowired
-    private Reactor reactor;
 
     @Autowired
     private OpenStackUtil openStackUtil;

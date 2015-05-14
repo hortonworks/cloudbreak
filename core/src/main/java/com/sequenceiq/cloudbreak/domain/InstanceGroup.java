@@ -15,6 +15,10 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+
 @Entity
 @NamedQueries({
         @NamedQuery(name = "InstanceGroup.findOneByGroupNameInStack",
@@ -106,5 +110,41 @@ public class InstanceGroup implements ProvisionEntity, Comparable {
     @Override
     public int compareTo(Object o) {
         return Integer.compare(getNodeCount(), ((InstanceGroup) o).getNodeCount());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        InstanceGroup that = (InstanceGroup) o;
+
+        return new EqualsBuilder()
+                .append(id, that.id)
+                .append(template, that.template)
+                .append(nodeCount, that.nodeCount)
+                .append(groupName, that.groupName)
+                .append(instanceGroupType, that.instanceGroupType)
+                .append(stack, that.stack)
+                .append(instanceMetaData, that.instanceMetaData)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(id)
+                .append(template)
+                .append(nodeCount)
+                .append(groupName)
+                .append(instanceGroupType)
+                .append(stack)
+                .append(instanceMetaData)
+                .toHashCode();
     }
 }
