@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.orchestrator;
 
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 
@@ -13,13 +15,16 @@ public class SimpleContainerBootstrapRunner implements Callable<Boolean> {
     private static final int SLEEP_TIME = 10000;
 
     private final ContainerBootstrap containerBootstrap;
+    private final Map<String, String> mdcMap;
 
-    private SimpleContainerBootstrapRunner(ContainerBootstrap containerBootstrap) {
+    private SimpleContainerBootstrapRunner(ContainerBootstrap containerBootstrap, Map<String, String> mdcReplica) {
         this.containerBootstrap = containerBootstrap;
+        this.mdcMap = mdcReplica;
     }
 
     @Override
     public Boolean call() throws Exception {
+        MDC.setContextMap(mdcMap);
         boolean success = false;
         int retryCount = 0;
         Exception actualException = null;
@@ -43,7 +48,7 @@ public class SimpleContainerBootstrapRunner implements Callable<Boolean> {
         return Boolean.TRUE;
     }
 
-    public static SimpleContainerBootstrapRunner simpleContainerBootstrapRunner(ContainerBootstrap containerBootstrap) {
-        return new SimpleContainerBootstrapRunner(containerBootstrap);
+    public static SimpleContainerBootstrapRunner simpleContainerBootstrapRunner(ContainerBootstrap containerBootstrap, Map<String, String> mdcMap) {
+        return new SimpleContainerBootstrapRunner(containerBootstrap, mdcMap);
     }
 }
