@@ -3,7 +3,10 @@ package com.sequenceiq.cloudbreak.orchestrator;
 import static com.sequenceiq.cloudbreak.orchestrator.SimpleContainerBootstrapRunner.simpleContainerBootstrapRunner;
 import static org.junit.Assert.assertEquals;
 
+import java.util.Map;
+
 import org.junit.Test;
+import org.slf4j.MDC;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
@@ -12,7 +15,8 @@ public class SimpleContainerBootstrapRunnerTest {
 
     @Test
     public void bootstrapSuccessWithoutException() throws Exception {
-        Boolean call = simpleContainerBootstrapRunner(new MockBootstrapRunner(1)).call();
+        MDC.put("test", "test");
+        Boolean call = simpleContainerBootstrapRunner(new MockBootstrapRunner(1, MDC.getCopyOfContextMap()), MDC.getCopyOfContextMap()).call();
         assertEquals(true, call);
     }
 
@@ -20,8 +24,10 @@ public class SimpleContainerBootstrapRunnerTest {
 
         private int count;
         private int retryOk = 2;
+        private final Map<String, String> mdcMap;
 
-        public MockBootstrapRunner(int retryOk) {
+        public MockBootstrapRunner(int retryOk, Map<String, String> mdcMap) {
+            this.mdcMap = mdcMap;
             this.retryOk = retryOk;
         }
 

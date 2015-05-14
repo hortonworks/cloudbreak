@@ -14,6 +14,7 @@ import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.core.DockerClientBuilder;
@@ -92,7 +93,8 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(cluster.getApiAddress()))
                     .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
                     .build();
-            simpleContainerBootstrapRunner(new RegistratorBootstrap(swarmManagerClient, imageName, gateway.getHostname(), gateway.getPrivateIp())).call();
+            simpleContainerBootstrapRunner(new RegistratorBootstrap(swarmManagerClient, imageName, gateway.getHostname(), gateway.getPrivateIp()),
+                    MDC.getCopyOfContextMap()).call();
         } catch (Exception e) {
             throw new CloudbreakOrchestratorException(e);
         }
@@ -106,8 +108,10 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(cluster.getApiAddress()))
                     .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
                     .build();
-            simpleContainerBootstrapRunner(new AmbariServerDatabaseBootstrap(swarmManagerClient, dbImageName, gateway.getHostname())).call();
-            simpleContainerBootstrapRunner(new AmbariServerBootstrap(swarmManagerClient, serverImageName, gateway.getHostname(), platform)).call();
+            simpleContainerBootstrapRunner(new AmbariServerDatabaseBootstrap(swarmManagerClient, dbImageName, gateway.getHostname()),
+                    MDC.getCopyOfContextMap()).call();
+            simpleContainerBootstrapRunner(new AmbariServerBootstrap(swarmManagerClient, serverImageName, gateway.getHostname(), platform),
+                    MDC.getCopyOfContextMap()).call();
         } catch (Exception e) {
             throw new CloudbreakOrchestratorException(e);
         }
@@ -130,7 +134,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
                 Node node = nodeIterator.next();
                 String time = String.valueOf(new Date().getTime()) + i;
                 AmbariAgentBootstrap runner = new AmbariAgentBootstrap(swarmManagerClient, imageName, node.getHostname(), node.getDataVolumes(), time, platform);
-                futures.add(getParallelContainerRunner().submit(simpleContainerBootstrapRunner(runner)));
+                futures.add(getParallelContainerRunner().submit(simpleContainerBootstrapRunner(runner, MDC.getCopyOfContextMap())));
             }
             for (Future<Boolean> future : futures) {
                 future.get();
@@ -153,7 +157,8 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
                     .build();
             for (int i = 0; i < count; i++) {
                 String time = String.valueOf(new Date().getTime()) + i;
-                SimpleContainerBootstrapRunner runner = simpleContainerBootstrapRunner(new ConsulWatchBootstrap(swarmManagerClient, imageName, time));
+                SimpleContainerBootstrapRunner runner = simpleContainerBootstrapRunner(new ConsulWatchBootstrap(swarmManagerClient, imageName, time),
+                        MDC.getCopyOfContextMap());
                 futures.add(getParallelContainerRunner().submit(runner));
             }
             for (Future<Boolean> future : futures) {
