@@ -41,7 +41,7 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
                 LOGGER.error("No operations found for execution!");
             }
         } catch (GoogleJsonResponseException e) {
-            LOGGER.debug("Checking the GCP exception", e);
+            LOGGER.debug("Checking the GCP exception: {}", e.getStatusMessage());
             if (e.getDetails().get("code").equals(NOT_FOUND)) {
                 LOGGER.debug("Executing global operations: {}", gcpRemoveReadyPollerObject.getGlobalOperations().keySet());
                 operation = gcpRemoveReadyPollerObject.getGlobalOperations().execute();
