@@ -145,7 +145,7 @@
                                             </thead>
                                             <tbody>
                                             <tr ng-repeat="instance in filteredActiveClusterData">
-                                                <td data-title="'name'" class="col-md-4">{{instance.longName}}</td>
+                                                <td data-title="'name'" class="col-md-4">{{instance.discoveryFQDN}}</td>
                                                 <td data-title="'public IP'" class="col-md-3">{{instance.publicIp}}</td>
                                                 <td data-title="'private IP'" class="col-md-3">{{instance.privateIp}}</td>
                                                 <td data-title="'host group'" class="col-md-2"><span class="label label-default">{{instance.instanceGroup}}</span></td>
