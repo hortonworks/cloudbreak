@@ -174,6 +174,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             $rootScope.activeCluster = $filter('filter')($rootScope.clusters, { id: clusterId })[0];
             $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, { id: $rootScope.activeCluster.blueprintId})[0];
             $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {id: $rootScope.activeCluster.credentialId}, true)[0];
+            $rootScope.activeClusterNetwork = $filter('filter')($rootScope.networks, {id: $rootScope.activeCluster.networkId})[0];
             $rootScope.activeCluster.cloudPlatform =  $rootScope.activeClusterCredential.cloudPlatform;
             $rootScope.activeCluster.metadata = [];
             $rootScope.reinstallClusterObject = {
@@ -317,6 +318,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 onFailureAction: "ROLLBACK",
                 bestEffort: "BEST_EFFORT",
                 validateBlueprint: true,
+                consulServerCount: 3,
                 parameters: {},
                 failurePolicy: {
                   adjustmentType: "BEST_EFFORT",
@@ -342,6 +344,18 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             $scope.metricsShow = true;
         }
 
+         $scope.jsonBp = true;
+         $scope.serviceBp = false;
+
+         $scope.changeViewJsonBp = function () {
+            $scope.jsonBp = true;
+            $scope.serviceBp = false;
+         }
+
+         $scope.changeViewServiceBp = function () {
+            $scope.jsonBp = false;
+            $scope.serviceBp = true;
+         }
 
         $scope.logFilterFunction = function(element) {
             try {
