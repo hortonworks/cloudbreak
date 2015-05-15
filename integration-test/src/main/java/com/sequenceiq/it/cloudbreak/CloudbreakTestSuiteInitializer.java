@@ -62,16 +62,17 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     }
 
     @BeforeSuite(dependsOnMethods = "initContext")
-    @Parameters({ "cloudbreakServer", "cloudProvider", "credentialName", "instanceGroups", "hostGroups", "blueprintName", "stackName" })
+    @Parameters({ "cloudbreakServer", "cloudProvider", "credentialName", "instanceGroups", "hostGroups", "blueprintName", "stackName", "networkName" })
     public void initCloudbreakSuite(@Optional("") String cloudbreakServer, @Optional("") String cloudProvider, @Optional("") String credentialName,
-            @Optional("") String instanceGroups, @Optional("") String hostGroups, @Optional("") String blueprintName, @Optional("") String stackName)
-            throws Exception {
+            @Optional("") String instanceGroups, @Optional("") String hostGroups, @Optional("") String blueprintName, @Optional("") String stackName,
+            @Optional("") String networkName) throws Exception {
         cloudbreakServer = StringUtils.hasLength(cloudbreakServer) ? cloudbreakServer : defaultCloudbreakServer;
         itContext.putContextParam(CloudbreakITContextConstants.SKIP_REMAINING_SUITETEST_AFTER_ONE_FAILED, skipRemainingSuiteTestsAfterOneFailed);
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER, cloudbreakServer);
         CloudbreakClient client = new CloudbreakClient(cloudbreakServer, itContext.getContextParam(IntegrationTestContext.AUTH_TOKEN));
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, client);
         putBlueprintToContextIfExist(client, blueprintName);
+        putNetworkToContext(client, cloudProvider, networkName);
         putCredentialToContext(client, cloudProvider, credentialName);
         putStackToContextIfExist(client, stackName);
         if (StringUtils.hasLength(instanceGroups)) {
@@ -85,6 +86,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     }
 
     private void putBlueprintToContextIfExist(CloudbreakClient client, String blueprintName) throws Exception {
+        client.getAccountBlueprints();
         if (StringUtils.isEmpty(blueprintName)) {
             blueprintName = defaultBlueprintName;
         }
@@ -92,6 +94,20 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             String resourceId = getId(client.getBlueprintByName(blueprintName));
             if (resourceId != null) {
                 itContext.putContextParam(CloudbreakITContextConstants.BLUEPRINT_ID, resourceId);
+            }
+        }
+    }
+
+    private void putNetworkToContext(CloudbreakClient client, String cloudProvider, String networkName) throws Exception {
+        client.getAccountNetworks();
+        if (StringUtils.isEmpty(networkName)) {
+            String defaultNetworkName =  itProps.getDefaultNetwork(cloudProvider);
+            networkName = defaultNetworkName;
+        }
+        if (StringUtils.hasLength(networkName)) {
+            String resourceId = getId(client.getNetworkByName(networkName));
+            if (resourceId != null) {
+                itContext.putContextParam(CloudbreakITContextConstants.NETWORK_ID, resourceId);
             }
         }
     }
