@@ -102,7 +102,7 @@ app.post('/', function(req, res){
     var userCredentials = {username: username, password: password}
     needle.post(uaaAddress + '/login.do', userCredentials,
        function(err, tokenResp) {
-        if (err == null){
+        if (err == null) {
         var splittedLocation = tokenResp.headers.location.split('?')
         if (splittedLocation.length == 1 || splittedLocation[1] != 'error=true'){
             var cookies = tokenResp.headers['set-cookie'][0].split(';')
@@ -129,7 +129,7 @@ app.post('/', function(req, res){
             res.render('login',{ errorMessage: "Incorrect email/password or account is disabled." });
         }
         } else {
-            console.log("Client cannot access resource server. Check UAA address.");
+            console.log("POST login.do - Client cannot access resource server. Check UAA address.");
             res.render('login',{ errorMessage: "Client cannot access resource server." });
         }
     });
@@ -185,6 +185,11 @@ app.get('/confirm', function(req, res){
                          }
                   }
      needle.post(uaaAddress + '/oauth/authorize', confirmData, confirmOptions, function (err, confirmResp){
+              if (err != null) {
+                console.log("POST /oauth/authorize - Client cannot access resource server. Check that UAA server is running.");
+                res.statusCode = 500
+                res.end("Client cannot access resource server. Check that UAA server is running. code: 500")
+              } else {
                     if (confirmResp.statusCode == 200){
                         req.session.userScopes = confirmResp.body.auth_request.scope
                         res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
@@ -200,6 +205,7 @@ app.get('/confirm', function(req, res){
                         console.log('Confirm error - code: ' + confirmResp.statusCode +', message: ' + confirmResp.message)
                         res.end('Login/confirm: Error from token server, code: ' + confirmResp.statusCode)
                     }
+              }
      })
   } else {
      res.statusCode = 500
@@ -230,6 +236,10 @@ app.post('/confirm', function(req, res){
     formData = formData + 'user_oauth_approval=true'
     needle.post(uaaAddress + '/oauth/authorize', formData, confirmOptions,
            function(err, confirmResp){
+           if (err != null) {
+               console.log("POST /oauth/authorize - Client cannot access resource server. Check UAA server is running.");
+               res.render('login',{ errorMessage: "Client cannot access resource server. Check UAA server is running." });
+           } else {
                if (confirmResp.statusCode == 302){
                    res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
                    res.redirect(confirmResp.headers.location)
@@ -237,6 +247,7 @@ app.post('/confirm', function(req, res){
                    console.log('Authorization failed - ' + confirmResp.message)
                    res.render('login',{ errorMessage: "" });
                }
+           }
     });
 });
 
@@ -724,6 +735,11 @@ getToken = function(req, res, callback) {
     }
     needle.post(uaaAddress + '/oauth/token', 'grant_type=client_credentials',
         options, function(err, tokenResp) {
+        if (err != null){
+            console.log("POST /oauth/token - Client cannot access resource server. Check that UAA server is running");
+            res.statusCode = 500
+            res.json({message: 'Cannot retrieve token'})
+        } else {
             if (tokenResp.statusCode == 200){
                 var token = tokenResp.body.access_token;
                 callback(token)
@@ -731,6 +747,7 @@ getToken = function(req, res, callback) {
                 res.statusCode = tokenResp.statusCode
                 res.json({message: 'Cannot retrieve token'})
             }
+        }
     });
 }
 
