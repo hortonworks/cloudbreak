@@ -310,6 +310,7 @@ function proxySultansRequest(req, res, method){
     }
     cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
     var req_url = req.url.replace("/sultans/", "");
+    console.log("Sultans request to: "+ sultansAddress + req_url);
     method(sultansAddress + req_url, cbRequestArgs, function(data, response){
         res.status(response.statusCode).send(data);
     }).on('error', function(err){
