@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.azure;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.http.Header;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -14,6 +17,8 @@ import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureResourceExce
 import groovyx.net.http.HttpResponseDecorator;
 
 public abstract class AzureResourceStatusCheckerTask implements StatusCheckerTask<AzureResourcePollerObject> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureResourceStatusCheckerTask.class);
+
     @Autowired
     private JsonHelper jsonHelper;
 
@@ -23,19 +28,27 @@ public abstract class AzureResourceStatusCheckerTask implements StatusCheckerTas
         boolean result = true;
         Iterator<HttpResponseDecorator> iterator = responses.iterator();
         while (iterator.hasNext()) {
-            HttpResponseDecorator response = iterator.next();
-            String requestId = getRequestId(response);
-            String requestStatus = String.valueOf(t.getAzureClient().getRequestStatus(requestId));
-            JsonNode jsonFromString = jsonHelper.createJsonFromString(requestStatus);
-            String status = jsonFromString.get("Operation").get("Status").asText();
-            if ("InProgress".equals(status)) {
-                result = false;
-                break;
-            } else if ("Failed".equals(status)) {
-                String error = jsonFromString.get("Operation").get("Error").get("Message").asText();
-                throw new AzureResourceException(error);
-            } else {
-                iterator.remove();
+            try {
+                HttpResponseDecorator response = iterator.next();
+                String requestId = getRequestId(response);
+                String requestStatus = String.valueOf(t.getAzureClient().getRequestStatus(requestId));
+                JsonNode jsonFromString = jsonHelper.createJsonFromString(requestStatus);
+                String status = jsonFromString.get("Operation").get("Status").asText();
+                if ("InProgress".equals(status)) {
+                    result = false;
+                    break;
+                } else if ("Failed".equals(status)) {
+                    String error = jsonFromString.get("Operation").get("Error").get("Message").asText();
+                    throw new AzureResourceException(error);
+                } else {
+                    iterator.remove();
+                }
+            } catch (Exception ex) {
+                if (ex instanceof IOException) {
+                    LOGGER.warn("{}: {} happened during operation status check, the polling result will be false.", ex.getClass(), ex.getMessage());
+                    result = false;
+                    break;
+                }
             }
         }
         return result;
