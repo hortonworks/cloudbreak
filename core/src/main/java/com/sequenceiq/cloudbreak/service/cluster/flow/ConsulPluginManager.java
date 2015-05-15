@@ -93,7 +93,7 @@ public class ConsulPluginManager implements PluginManager {
         StringBuilder nodeFilter = new StringBuilder("");
         Set<String> hostsForNodeFilter = new HashSet<>();
         for (String host : hosts) {
-            String shortHost = host.replace(".node.consul", "");
+            String shortHost = host.replace(ConsulUtils.CONSUL_DOMAIN, "");
             if (nodeFilter.length() >= MAX_NODE_FILTER_LENGTH - shortHost.length()) {
                 nodeFilters.put(nodeFilter.deleteCharAt(nodeFilter.length() - 1).toString(), Sets.newHashSet(hostsForNodeFilter));
                 nodeFilter.setLength(0);
