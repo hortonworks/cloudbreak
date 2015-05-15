@@ -67,12 +67,6 @@
                                   <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.OPENSTACK.regions | filter:{key: activeCluster.region}:true">{{item.value}}</p>
                                 </div>
                             </div>
-                             <div class="form-group" ng-if="activeCluster.networkId">
-                                <label class="col-sm-3 control-label" for="activeCluster_network">Network</label>
-                                <div class="col-sm-9">
-                                    <p id="activeCluster_network" class="form-control-static" ng-repeat="network in $root.networks | filter:{id: activeCluster.networkId}">{{network.name}}</p>
-                                </div>
-                            </div>
                             <div class="form-group" ng-if="activeCluster.cluster.statusReason === null && (activeCluster.statusReason != null && activeCluster.statusReason != '')">
                                 <label class="col-sm-3 control-label" for="sl_cloudStatus">Cluster status</label>
                                 <div class="col-sm-9">
@@ -145,7 +139,7 @@
                                             </thead>
                                             <tbody>
                                             <tr ng-repeat="instance in filteredActiveClusterData">
-                                                <td data-title="'name'" class="col-md-4">{{instance.discoveryFQDN}}</td>
+                                                <td data-title="'name'" class="col-md-4">{{instance.instanceId}}</td>
                                                 <td data-title="'public IP'" class="col-md-3">{{instance.publicIp}}</td>
                                                 <td data-title="'private IP'" class="col-md-3">{{instance.privateIp}}</td>
                                                 <td data-title="'host group'" class="col-md-2"><span class="label label-default">{{instance.instanceGroup}}</span></td>
@@ -163,16 +157,36 @@
                             </div>
                             <div id="panel-collapsetmp-{{$index}}-{{group.templateId}}" class="panel-collapse collapse">
                                 <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'AWS' ">
-                                    <div ng-include="'tags/template/awslist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}"></div>
+                                    <div ng-include="'tags/template/awslist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}:true"></div>
                                 </div>
                                 <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'AZURE' ">
-                                    <div ng-include="'tags/template/azurelist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}"></div>
+                                    <div ng-include="'tags/template/azurelist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}:true"></div>
                                 </div>
                                 <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'GCC' ">
-                                    <div ng-include="'tags/template/gcclist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}"></div>
+                                    <div ng-include="'tags/template/gcclist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}:true"></div>
                                 </div>
                                 <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'OPENSTACK' ">
-                                  <div ng-include="'tags/template/openstacklist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}"></div>
+                                  <div ng-include="'tags/template/openstacklist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}:true"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h5><a href="" data-toggle="collapse" data-target='#panel-collapsetmp-network-{{$root.activeCluster.networkId}}'><i class="fa fa-sitemap fa-fw"></i>Network: {{activeClusterNetwork.name}}</a></h5>
+                            </div>
+                                <div id="panel-collapsetmp-network-{{$root.activeCluster.networkId}}" class="panel-collapse collapse">
+                                    <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'AWS' ">
+                                        <div ng-include="'tags/network/awsnetworklist.tag'" ng-repeat="network in [activeClusterNetwork]"></div>
+                                    </div>
+                                    <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'AZURE' ">
+                                        <div ng-include="'tags/network/azurenetworklist.tag'" ng-repeat="network in [activeClusterNetwork]"></div>
+                                    </div>
+                                    <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'GCC' ">
+                                        <div ng-include="'tags/network/gcpnetworklist.tag'" ng-repeat="network in [activeClusterNetwork]"></div>
+                                    </div>
+                                    <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'OPENSTACK' ">
+                                        <div ng-include="'tags/network/openstacknetworklist.tag'" ng-repeat="network in [activeClusterNetwork]"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
