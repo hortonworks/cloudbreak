@@ -176,7 +176,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         instance.setNetworkInterfaces(getNetworkInterface(provisionContextObject, stack.getResources(), GccZone.valueOf(stack.getRegion()), instanceGroup));
         instance.setDisks(listOfDisks);
         Tags tags = new Tags();
-        tags.setItems(Arrays.asList(instanceGroup.orNull().getGroupName().toString().replaceAll("[^A-Za-z0-9 ]", "")));
+        tags.setItems(Arrays.asList(instanceGroup.orNull().getGroupName().toLowerCase().toString().replaceAll("[^A-Za-z0-9 ]", "")));
         instance.setTags(tags);
         Metadata metadata = new Metadata();
         metadata.setItems(Lists.<Metadata.Items>newArrayList());
