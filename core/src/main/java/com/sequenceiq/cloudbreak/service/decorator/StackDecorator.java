@@ -8,13 +8,17 @@ import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_OPENSTACK_I
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.regions.Regions;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AdjustmentType;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -26,6 +30,8 @@ import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
 
 @Service
 public class StackDecorator implements Decorator<Stack> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackDecorator.class);
 
     private static final double ONE_HUNDRED = 100.0;
 
@@ -41,16 +47,16 @@ public class StackDecorator implements Decorator<Stack> {
     @Autowired
     private NetworkService networkService;
 
-    @Value("${cb.azure.image.uri:" + CB_AZURE_IMAGE_URI + "}")
+    @Value("${cb.azure.image.uri:}")
     private String azureImage;
 
-    @Value("${cb.aws.ami.map:" + CB_AWS_AMI_MAP + "}")
+    @Value("${cb.aws.ami.map:}")
     private String awsImage;
 
-    @Value("${cb.openstack.image:" + CB_OPENSTACK_IMAGE + "}")
+    @Value("${cb.openstack.image:}")
     private String openStackImage;
 
-    @Value("${cb.gcp.source.image.path:" + CB_GCP_SOURCE_IMAGE_PATH + "}")
+    @Value("${cb.gcp.source.image.path:}")
     private String gcpImage;
 
     private enum DecorationData {
@@ -83,26 +89,43 @@ public class StackDecorator implements Decorator<Stack> {
     }
 
     private String prepareImage(Stack stack) {
-        switch (stack.cloudPlatform()) {
+        CloudPlatform cloudPlatform = stack.cloudPlatform();
+        String selectedImage;
+        switch (cloudPlatform) {
             case AWS:
-                return prepareAmis().get(Regions.valueOf(stack.getRegion()).getName());
+                selectedImage = prepareAmis().get(Regions.valueOf(stack.getRegion()).getName());
+                break;
             case AZURE:
-                return azureImage;
+                selectedImage = determineImageName(azureImage, CB_AZURE_IMAGE_URI);
+                break;
             case GCC:
-                return gcpImage;
+                selectedImage = determineImageName(gcpImage, CB_GCP_SOURCE_IMAGE_PATH);
+                break;
             case OPENSTACK:
-                return openStackImage;
+                selectedImage = determineImageName(openStackImage, CB_OPENSTACK_IMAGE);
+                break;
             default:
                 throw new BadRequestException(String.format("Not supported cloud platform: %s", stack.cloudPlatform()));
         }
+
+        LOGGER.info("Selected VM image for CloudPlatform '{}' is: {}", cloudPlatform, selectedImage);
+        return selectedImage;
     }
 
     private Map<String, String> prepareAmis() {
         Map<String, String> amisMap = new HashMap<>();
-        for (String s : awsImage.split(",")) {
+        String awsImageNames = determineImageName(awsImage, CB_AWS_AMI_MAP);
+        for (String s : awsImageNames.split(",")) {
             amisMap.put(s.split(":")[0], s.split(":")[1]);
         }
         return amisMap;
+    }
+
+    private String determineImageName(String imageName, String defaultImageName) {
+        if (Strings.isNullOrEmpty(imageName)) {
+            return defaultImageName;
+        }
+        return imageName;
     }
 
     private void validate(Stack stack) {
