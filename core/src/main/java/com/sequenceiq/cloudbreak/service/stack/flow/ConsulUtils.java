@@ -26,11 +26,10 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 
 public final class ConsulUtils {
 
-    public static final String CONSUL_DOMAIN = ".node.consul";
+    public static final String CONSUL_DOMAIN = ".node.dc1.consul";
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsulUtils.class);
 
     private static final int DEFAULT_TIMEOUT_MS = 5000;
-    private static final int CONSUL_CLIENTS = 3;
     private static final int ALIVE_STATUS = 1;
     private static final int LEFT_STATUS = 3;
 
