@@ -1,17 +1,15 @@
 package com.sequenceiq.it.cloudbreak;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.sequenceiq.it.IntegrationTestContext;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.IntegrationTestContext;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
     @BeforeMethod
@@ -19,6 +17,7 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         IntegrationTestContext itContext = getItContext();
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class), "Template id is mandatory.");
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID), "Credential id is mandatory.");
+        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID), "Network id is mandatory.");
     }
 
     @Test
@@ -34,9 +33,10 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
             igMap.put(ig.getName(), ig);
         }
         String credentialId = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID);
+        String networkId = itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID);
         // WHEN
         String stackId = getClient().postStack(stackName, ambariUser, ambariPassword, credentialId, region, false, igMap, onFailureAction, threshold,
-                adjustmentType, null, Collections.<String, String>emptyMap());
+                adjustmentType, null, networkId);
         // THEN
         Assert.assertNotNull(stackId);
         itContext.putCleanUpParam(CloudbreakITContextConstants.STACK_ID, stackId);

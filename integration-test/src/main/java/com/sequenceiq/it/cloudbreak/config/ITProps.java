@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "integrationtest")
 public class ITProps {
     private Map<String, String> credentialNames;
+    private Map<String, String> defaultNetworks;
     private Map<String, List<String>> testSuites;
     private List<String> testTypes;
     private List<String> suiteFiles;
@@ -22,6 +23,18 @@ public class ITProps {
 
     public String getCredentialName(String cloudProvider) {
         return credentialNames.get(cloudProvider);
+    }
+
+    public void setDefaultNetworks(Map<String, String> defaultNetworks) {
+        this.defaultNetworks = defaultNetworks;
+    }
+
+    public Map<String, String> getDefaultNetworks() {
+        return defaultNetworks;
+    }
+
+    public String getDefaultNetwork(String cloudProvider) {
+        return defaultNetworks.get(cloudProvider);
     }
 
     public void setTestSuites(Map<String, List<String>> testSuites) {

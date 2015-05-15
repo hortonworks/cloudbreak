@@ -40,6 +40,10 @@ integrationtest:
         GCP: it-gcp-credential
         AWS: it-aws-credential
         AZURE: itazurecredential
+    defaultNetworks:
+       GCP: default-gcp-network
+       AWS: default-aws-network
+       AZURE: default-azure-network
     testSuites:
         # Full smoke tests with cluster creation, stop-start, upscale-downscale
         FULL_SMOKE_TEST:
