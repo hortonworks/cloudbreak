@@ -18,14 +18,13 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_CONSUL v0.5.0-v3
     env-import DOCKER_TAG_REGISTRATOR v5
     env-import DOCKER_TAG_POSTGRES 9.4.1
-    env-import DOCKER_TAG_CLOUDBREAK 0.5.39
-    env-import DOCKER_TAG_CBDB 0.5.39
+    env-import DOCKER_TAG_CLOUDBREAK 0.5.49
+    env-import DOCKER_TAG_CBDB 0.5.49
     env-import DOCKER_TAG_PERISCOPE 0.5.3
     env-import DOCKER_TAG_PCDB 0.5.3
     env-import DOCKER_TAG_UAA 1.8.1-v2
-    env-import DOCKER_TAG_CBSHELL 0.2.47
-    env-import DOCKER_TAG_ULUWATU 0.5.11
-    env-import DOCKER_TAG_SULTANS 0.5.1
+    env-import DOCKER_TAG_ULUWATU 0.5.16
+    env-import DOCKER_TAG_SULTANS 0.5.2
     env-import DOCKER_TAG_AMBASSADOR latest
     env-import DOCKER_TAG_CLOUDBREAK_SHELL 0.4.4
 }
@@ -33,10 +32,10 @@ cloudbreak-conf-tags() {
 cloudbreak-conf-images() {
     declare desc="Defines base images for each provider"
 
-    env-import CB_AZURE_IMAGE_URI "https://102589fae040d8westeurope.blob.core.windows.net/images/packer-cloudbreak-2015-05-11-centos6_2015-May-11_14-57-os-2015-05-11.vhd"
-    env-import CB_AWS_AMI_MAP "ap-northeast-1:ami-9adc159a,ap-southeast-1:ami-ba6856e8,ap-southeast-2:ami-5592ed6f,eu-west-1:ami-71d0bb06,sa-east-1:ami-ef0186f2,us-east-1:ami-3499885c,us-west-1:ami-87ce20c3,us-west-2:ami-5b794a6b"
-    env-import CB_OPENSTACK_IMAGE "cb-centos66-amb200-2015-05-11"
-    env-import CB_GCP_SOURCE_IMAGE_PATH "sequenceiqimage/cb-centos66-amb200-2015-05-11-1550.image.tar.gz"
+    env-import CB_AZURE_IMAGE_URI ""
+    env-import CB_AWS_AMI_MAP ""
+    env-import CB_OPENSTACK_IMAGE ""
+    env-import CB_GCP_SOURCE_IMAGE_PATH ""
 
 }
 
