@@ -107,7 +107,7 @@ import javax.persistence.Version;
                         + "LEFT JOIN FETCH s.resources "
                         + "LEFT JOIN FETCH s.instanceGroups ig "
                         + "LEFT JOIN FETCH ig.instanceMetaData "
-                        + "WHERE s.ambariIp= :ambariIp "
+                        + "WHERE s.cluster.ambariIp= :ambariIp "
                         + "AND s.status <> 'DELETE_COMPLETED' "),
         @NamedQuery(
                 name = "Stack.findOneByName",
@@ -165,9 +165,6 @@ public class Stack implements ProvisionEntity {
     private boolean publicInAccount;
     private String region;
     private String image;
-    private String ambariIp;
-    private String userName;
-    private String password;
     private int consulServers;
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
@@ -272,30 +269,6 @@ public class Stack implements ProvisionEntity {
 
     public void setStatus(Status status) {
         this.status = status;
-    }
-
-    public String getAmbariIp() {
-        return ambariIp;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setAmbariIp(String ambariIp) {
-        this.ambariIp = ambariIp;
     }
 
     public String getStatusReason() {
@@ -471,5 +444,9 @@ public class Stack implements ProvisionEntity {
 
     public void setNetwork(Network network) {
         this.network = network;
+    }
+
+    public String getAmbariIp() {
+        return cluster == null ? null : cluster.getAmbariIp();
     }
 }

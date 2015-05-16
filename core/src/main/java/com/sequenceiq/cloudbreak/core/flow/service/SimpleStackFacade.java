@@ -107,6 +107,7 @@ public class SimpleStackFacade implements StackFacade {
             MDCBuilder.buildMdcContext(stackService.getById(provisioningContext.getStackId()));
             LOGGER.debug("Setting up consul metadata. Context: {}", context);
             consulMetadataSetup.setupConsulMetadata(provisioningContext.getStackId());
+            stackUpdater.updateStackStatus(provisioningContext.getStackId(), Status.AVAILABLE, "Stack is ready");
             return provisioningContext;
         } catch (Exception e) {
             LOGGER.error("Exception during the consul metadata setup process.", e);

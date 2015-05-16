@@ -127,16 +127,18 @@ public class StackStartService {
     }
 
     private PollingResult waitForAmbariToStart(Stack stack) {
+        Cluster cluster = stack.getCluster();
         return ambariHealthChecker.pollWithTimeout(
                 ambariHealthCheckerTask,
-                new AmbariClientPollerObject(stack, ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword())),
+                new AmbariClientPollerObject(stack, ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword())),
                 AmbariOperationService.AMBARI_POLLING_INTERVAL,
                 AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS);
     }
 
     private PollingResult waitForHostsToJoin(Stack stack) {
-        AmbariHosts ambariHosts = new AmbariHosts(stack, ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(),
-                stack.getPassword()), stack.getFullNodeCount());
+        Cluster cluster = stack.getCluster();
+        AmbariHosts ambariHosts = new AmbariHosts(stack,  ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(),
+                cluster.getPassword()), stack.getFullNodeCount());
         try {
             return ambariHostJoin.pollWithTimeout(
                     ambariHostsJoinStatusCheckerTask,

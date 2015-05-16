@@ -16,8 +16,10 @@ public class AmbariStackDetails {
     private String stack;
     private String version;
     private String os;
-    private String repoId;
-    private String baseURL;
+    private String stackRepoId;
+    private String stackBaseURL;
+    private String utilsRepoId;
+    private String utilsBaseURL;
     private boolean verify = true;
 
     public String getStack() {
@@ -44,20 +46,20 @@ public class AmbariStackDetails {
         this.os = os;
     }
 
-    public String getRepoId() {
-        return repoId;
+    public String getStackRepoId() {
+        return stackRepoId;
     }
 
-    public void setRepoId(String repoId) {
-        this.repoId = repoId;
+    public void setStackRepoId(String stackRepoId) {
+        this.stackRepoId = stackRepoId;
     }
 
-    public String getBaseURL() {
-        return baseURL;
+    public String getStackBaseURL() {
+        return stackBaseURL;
     }
 
-    public void setBaseURL(String baseURL) {
-        this.baseURL = baseURL;
+    public void setStackBaseURL(String stackBaseURL) {
+        this.stackBaseURL = stackBaseURL;
     }
 
     public boolean isVerify() {
@@ -68,14 +70,33 @@ public class AmbariStackDetails {
         this.verify = verify;
     }
 
+    public String getUtilsRepoId() {
+        return utilsRepoId;
+    }
+
+    public void setUtilsRepoId(String utilsRepoId) {
+        this.utilsRepoId = utilsRepoId;
+    }
+
+    public String getUtilsBaseURL() {
+        return utilsBaseURL;
+    }
+
+    public void setUtilsBaseURL(String utilsBaseURL) {
+        this.utilsBaseURL = utilsBaseURL;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("AmbariStackDetails{");
-        sb.append("stack='").append(stack).append('\'');
+        sb.append("id=").append(id);
+        sb.append(", stack='").append(stack).append('\'');
         sb.append(", version='").append(version).append('\'');
         sb.append(", os='").append(os).append('\'');
-        sb.append(", repoId='").append(repoId).append('\'');
-        sb.append(", baseURL='").append(baseURL).append('\'');
+        sb.append(", stackRepoId='").append(stackRepoId).append('\'');
+        sb.append(", utilsRepoId='").append(utilsRepoId).append('\'');
+        sb.append(", stackBaseURL='").append(stackBaseURL).append('\'');
+        sb.append(", utilsBaseURL='").append(utilsBaseURL).append('\'');
         sb.append(", verify=").append(verify);
         sb.append('}');
         return sb.toString();

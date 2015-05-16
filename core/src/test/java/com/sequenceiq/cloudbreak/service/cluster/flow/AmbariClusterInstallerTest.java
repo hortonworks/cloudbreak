@@ -128,7 +128,6 @@ public class AmbariClusterInstallerTest {
     private Stack createStack(Cluster cluster) {
         Stack stack = new Stack();
         stack.setId(1L);
-        stack.setAmbariIp("172.17.0.2");
         //stack.setNodeCount(2);
         stack.setCluster(cluster);
         return stack;
@@ -137,6 +136,7 @@ public class AmbariClusterInstallerTest {
     private Cluster createCluster(Blueprint blueprint) {
         Cluster cluster = new Cluster();
         cluster.setId(1L);
+        cluster.setAmbariIp("172.17.0.2");
         cluster.setName("dummyCluster");
         cluster.setBlueprint(blueprint);
         return cluster;

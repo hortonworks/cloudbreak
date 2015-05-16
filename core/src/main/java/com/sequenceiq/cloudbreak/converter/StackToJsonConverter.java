@@ -36,9 +36,6 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         }
         stackJson.setStatus(source.getStatus());
         stackJson.setStatusReason(source.getStatusReason());
-        stackJson.setAmbariServerIp(source.getAmbariIp());
-        stackJson.setUserName(source.getUserName());
-        stackJson.setPassword(source.getPassword());
         stackJson.setConsulServerCount(source.getConsulServers());
         stackJson.setRegion(source.getRegion());
         stackJson.setOnFailureAction(source.getOnFailureActionAction());

@@ -19,6 +19,8 @@ public interface ClusterService {
 
     Cluster retrieveClusterForCurrentUser(Long stackId);
 
+    Cluster updateAmbariIp(Long clusterId, String ambariIp);
+
     String getClusterJson(String ambariIp, Long stackId);
 
     UpdateAmbariHostsRequest updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment);

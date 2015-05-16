@@ -66,8 +66,10 @@ public class ModelDescriptions {
         public static final String STACK = "name of the stack, like HDP";
         public static final String VERSION = "version of the stack";
         public static final String OS = "operating system for the stack, like redhat6";
-        public static final String REPO_ID = "id of the repository";
-        public static final String BASE_URL = "url of the repository";
+        public static final String STACK_REPO_ID = "id of the stack repository";
+        public static final String UTILS_REPO_ID = "id of the stack utils repository";
+        public static final String STACK_BASE_URL = "url of the stack repository";
+        public static final String UTILS_BASE_URL = "url of the stack utils repository";
         public static final String VERIFY = "whether to verify or not the repo url";
     }
 

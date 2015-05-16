@@ -62,6 +62,11 @@ public class Cluster implements ProvisionEntity {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String statusReason;
 
+    private String ambariIp;
+
+    private String userName;
+    private String password;
+
     private Boolean secure;
     private String kerberosMasterKey;
     private String kerberosAdmin;
@@ -221,5 +226,29 @@ public class Cluster implements ProvisionEntity {
 
     public void setAmbariStackDetails(AmbariStackDetails ambariStackDetails) {
         this.ambariStackDetails = ambariStackDetails;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getAmbariIp() {
+        return ambariIp;
+    }
+
+    public void setAmbariIp(String ambariIp) {
+        this.ambariIp = ambariIp;
     }
 }

@@ -21,11 +21,17 @@ public class AmbariStackDetailsJson {
     @ApiModelProperty(value = AmbariStackDetailsDescription.OS, required = true)
     private String os;
     @NotNull
-    @ApiModelProperty(value = AmbariStackDetailsDescription.REPO_ID, required = true)
-    private String repoId;
+    @ApiModelProperty(value = AmbariStackDetailsDescription.STACK_REPO_ID, required = true)
+    private String stackRepoId;
     @NotNull
-    @ApiModelProperty(value = AmbariStackDetailsDescription.BASE_URL, required = true)
-    private String baseURL;
+    @ApiModelProperty(value = AmbariStackDetailsDescription.STACK_BASE_URL, required = true)
+    private String stackBaseURL;
+    @NotNull
+    @ApiModelProperty(value = AmbariStackDetailsDescription.UTILS_REPO_ID, required = true)
+    private String utilsRepoId;
+    @NotNull
+    @ApiModelProperty(value = AmbariStackDetailsDescription.UTILS_BASE_URL, required = true)
+    private String utilsBaseURL;
     @NotNull
     @ApiModelProperty(value = AmbariStackDetailsDescription.VERIFY, required = true)
     private Boolean verify;
@@ -54,20 +60,20 @@ public class AmbariStackDetailsJson {
         this.os = os;
     }
 
-    public String getRepoId() {
-        return repoId;
+    public String getStackRepoId() {
+        return stackRepoId;
     }
 
-    public void setRepoId(String repoId) {
-        this.repoId = repoId;
+    public void setStackRepoId(String stackRepoId) {
+        this.stackRepoId = stackRepoId;
     }
 
-    public String getBaseURL() {
-        return baseURL;
+    public String getStackBaseURL() {
+        return stackBaseURL;
     }
 
-    public void setBaseURL(String baseURL) {
-        this.baseURL = baseURL;
+    public void setStackBaseURL(String stackBaseURL) {
+        this.stackBaseURL = stackBaseURL;
     }
 
     public void setVerify(Boolean verify) {
@@ -76,5 +82,21 @@ public class AmbariStackDetailsJson {
 
     public Boolean getVerify() {
         return verify;
+    }
+
+    public String getUtilsRepoId() {
+        return utilsRepoId;
+    }
+
+    public void setUtilsRepoId(String utilsRepoId) {
+        this.utilsRepoId = utilsRepoId;
+    }
+
+    public String getUtilsBaseURL() {
+        return utilsBaseURL;
+    }
+
+    public void setUtilsBaseURL(String utilsBaseURL) {
+        this.utilsBaseURL = utilsBaseURL;
     }
 }

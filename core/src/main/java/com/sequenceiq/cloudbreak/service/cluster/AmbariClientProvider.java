@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.Stack;
 
 @Service
 public class AmbariClientProvider {
@@ -41,13 +40,13 @@ public class AmbariClientProvider {
      * automatically set the kerberos session. Clusters with kerberos security requires to
      * set this session otherwise the client cannot modify any resources.
      *
-     * @param stack Cloudbreak Stack
+     * @param cluster Cloudbreak cluster
      * @return client
      */
-    public AmbariClient getSecureAmbariClient(Stack stack) {
-        AmbariClient ambariClient = getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword());
-        if (stack.getCluster().isSecure()) {
-            setKerberosSession(ambariClient, stack.getCluster());
+    public AmbariClient getSecureAmbariClient(Cluster cluster) {
+        AmbariClient ambariClient = getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
+        if (cluster.isSecure()) {
+            setKerberosSession(ambariClient, cluster);
         }
         return ambariClient;
     }

@@ -40,8 +40,8 @@ public class AmbariClusterStatusUpdater {
         if (isClusterStatusCheckNecessary(stack)) {
             Cluster cluster = stack.getCluster();
             String blueprintName = cluster != null ? cluster.getBlueprint().getBlueprintName() : null;
-            AmbariClusterStatus clusterStatus = clusterStatusFactory
-                    .createClusterStatus(ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword()), blueprintName);
+            AmbariClusterStatus clusterStatus = clusterStatusFactory.createClusterStatus(ambariClientProvider.getAmbariClient(
+                    cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword()), blueprintName);
             updateClusterStatus(stack, clusterStatus);
         }
     }

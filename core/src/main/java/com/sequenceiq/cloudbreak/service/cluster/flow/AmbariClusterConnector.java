@@ -113,8 +113,7 @@ public class AmbariClusterConnector {
             stack = stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Building the Ambari cluster.");
             cluster.setCreationStarted(new Date().getTime());
             cluster = clusterRepository.save(cluster);
-
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword());
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
             setBaseRepoURL(cluster, ambariClient);
             addBlueprint(stack, ambariClient, cluster.getBlueprint());
             PollingResult waitForHostsResult = waitForHosts(stack, ambariClient);
@@ -160,7 +159,7 @@ public class AmbariClusterConnector {
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Adding new host(s) to the cluster.");
 
-        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(stack);
+        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(cluster);
         if (PollingResult.SUCCESS.equals(waitForHosts(stack, ambariClient))) {
 
             HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
@@ -212,7 +211,7 @@ public class AmbariClusterConnector {
         stackUpdater.updateStackStatus(stackId, Status.UPDATE_IN_PROGRESS, statusReason);
         String eventMsg = String.format("Removing '%s' node(s) from the '%s' hostgroup.", adjustment, hostGroupName);
         eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), eventMsg, hostGroupName);
-        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(stack);
+        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(cluster);
         String blueprintName = stack.getCluster().getBlueprint().getBlueprintName();
         Set<String> components = getHadoopComponents(cluster, ambariClient, hostGroupName, blueprintName);
         Map<String, HostMetadata> hostsToRemove = selectHostsToRemove(decommissionCandidates, stack, adjustment);
@@ -367,7 +366,8 @@ public class AmbariClusterConnector {
 
     private boolean setClusterState(Stack stack, boolean stopped) {
         boolean result = true;
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword());
+        Cluster cluster = stack.getCluster();
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
         String action = stopped ? "stop" : "start";
         int requestId = -1;
         try {
@@ -443,14 +443,23 @@ public class AmbariClusterConnector {
         if (ambStack != null) {
             LOGGER.info("Use specific Ambari repository: {}", ambStack);
             try {
-                ambariClient.addStackRepository(ambStack.getStack(), ambStack.getVersion(), ambStack.getOs(),
-                        ambStack.getRepoId(), ambStack.getBaseURL(), ambStack.isVerify());
+                String stack = ambStack.getStack();
+                String version = ambStack.getVersion();
+                String os = ambStack.getOs();
+                boolean verify = ambStack.isVerify();
+                addRepository(ambariClient, stack, version, os, ambStack.getStackRepoId(), ambStack.getStackBaseURL(), verify);
+                addRepository(ambariClient, stack, version, os, ambStack.getUtilsRepoId(), ambStack.getUtilsBaseURL(), verify);
             } catch (HttpResponseException e) {
                 throw new BadRequestException("Cannot use the specified Ambari stack: " + ambStack.toString(), e);
             }
         } else {
             LOGGER.info("Using latest HDP repository");
         }
+    }
+
+    private void addRepository(AmbariClient client, String stack, String version, String os,
+            String repoId, String repoUrl, boolean verify) throws HttpResponseException {
+        client.addStackRepository(stack, version, os, repoId, repoUrl, verify);
     }
 
     private void addBlueprint(Stack stack, AmbariClient ambariClient, Blueprint blueprint) {

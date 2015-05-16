@@ -129,8 +129,7 @@ public class SimpleFlowFacade implements FlowFacade {
     public FlowContext startAmbari(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Starting Ambari. Context: {}", context);
         try {
-            FlowContext ambariStartContext = clusterFacade.startAmbari(context);
-            return ambariStartContext;
+            return clusterFacade.startAmbari(context);
         } catch (Exception e) {
             LOGGER.error("Exception while starting Ambari :", e);
             throw new CloudbreakException(e);
@@ -218,8 +217,7 @@ public class SimpleFlowFacade implements FlowFacade {
     public FlowContext stopStack(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Stopping stack. Context: {}", context);
         try {
-            context = stackFacade.stop(context);
-            return context;
+            return stackFacade.stop(context);
         } catch (Exception e) {
             LOGGER.error("Exception during stack stop!: {}", e.getMessage());
             throw new CloudbreakException(e);
@@ -243,8 +241,7 @@ public class SimpleFlowFacade implements FlowFacade {
     public FlowContext startCluster(FlowContext flowContext) throws CloudbreakException {
         LOGGER.debug("Starting cluster. Context: {}", flowContext);
         try {
-            flowContext = clusterFacade.startCluster(flowContext);
-            return flowContext;
+            return clusterFacade.startCluster(flowContext);
         } catch (Exception e) {
             LOGGER.error("Exception during cluster start!: {}", e.getMessage());
             throw new CloudbreakException(e);
@@ -515,8 +512,7 @@ public class SimpleFlowFacade implements FlowFacade {
     public FlowContext enableSecurity(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Enable kerberos security. Context: {}", context);
         try {
-            context = clusterFacade.enableSecurity(context);
-            return context;
+            return clusterFacade.enableSecurity(context);
         } catch (CloudbreakException e) {
             throw e;
         } catch (Exception e) {

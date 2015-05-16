@@ -22,8 +22,6 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
     public Stack convert(StackRequest source) {
         Stack stack = new Stack();
         stack.setName(source.getName());
-        stack.setUserName(source.getUserName());
-        stack.setPassword(source.getPassword());
         stack.setRegion(source.getRegion());
         stack.setOnFailureActionAction(source.getOnFailureAction());
         if (source.getAllowedSubnets() != null) {

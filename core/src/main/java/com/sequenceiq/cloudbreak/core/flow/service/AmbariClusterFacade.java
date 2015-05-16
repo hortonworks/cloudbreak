@@ -90,10 +90,11 @@ public class AmbariClusterFacade implements ClusterFacade {
         ProvisioningContext provisioningContext = (ProvisioningContext) context;
         Stack stack = stackService.getById(provisioningContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
-        if (stack.getCluster() == null) {
+        Cluster cluster = stack.getCluster();
+        if (cluster == null) {
             LOGGER.debug("There is no cluster installed on the stack, skipping start Ambari step");
         } else {
-            MDCBuilder.buildMdcContext(stack.getCluster());
+            MDCBuilder.buildMdcContext(cluster);
             LOGGER.debug("Starting Ambari. Context: {}", context);
             AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, provisioningContext.getAmbariIp(),
                     ambariClientProvider.getDefaultAmbariClient(provisioningContext.getAmbariIp()));
@@ -109,8 +110,8 @@ public class AmbariClusterFacade implements ClusterFacade {
                 LOGGER.info("Could not start Ambari. polling result: {},  Context: {}", pollingResult, context);
                 throw new CloudbreakException(String.format("Could not start Ambari. polling result: '%s',  Context: '%s'", pollingResult, context));
             }
-            stack = stackUpdater.updateAmbariIp(stack.getId(), provisioningContext.getAmbariIp());
-            changeAmbariCredentials(provisioningContext.getAmbariIp(), stack);
+            clusterService.updateAmbariIp(cluster.getId(), provisioningContext.getAmbariIp());
+            changeAmbariCredentials(provisioningContext.getAmbariIp(), cluster);
         }
         return provisioningContext;
     }
@@ -351,9 +352,9 @@ public class AmbariClusterFacade implements ClusterFacade {
         return provisioningContext;
     }
 
-    private void changeAmbariCredentials(String ambariIp, Stack stack) {
-        String userName = stack.getUserName();
-        String password = stack.getPassword();
+    private void changeAmbariCredentials(String ambariIp, Cluster cluster) {
+        String userName = cluster.getUserName();
+        String password = cluster.getPassword();
         AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(ambariIp);
         if (ADMIN.equals(userName)) {
             if (!ADMIN.equals(password)) {
