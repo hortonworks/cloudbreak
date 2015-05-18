@@ -2,6 +2,16 @@
 
 ### Fixed
 
+### Added
+
+### Removed
+
+### Changed
+
+## Unreleased
+
+### Fixed
+
 - Issue #55: Sed handles more robust the issue with: curl includes an extra CR char in header fields.
 
 ### Added
