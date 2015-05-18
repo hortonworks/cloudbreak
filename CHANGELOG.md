@@ -2,11 +2,26 @@
 
 ### Fixed
 
+- Issue #55: Sed handles more robust the issue with: curl includes an extra CR char in header fields.
+
 ### Added
 
 ### Removed
 
+- deployer doesn’t specify cloud specific image defaults. If left empty, they fall back 
+  to defaults specified in [java code](https://github.com/sequenceiq/cloudbreak/blob/master/core/src/main/java/com/sequenceiq/cloudbreak/EnvironmentVariableConfig.java#L46-L49)
+    - CB_AZURE_IMAGE_URI
+    - CB_AWS_AMI_MAP
+    - CB_OPENSTACK_IMAGE
+    - CB_GCP_SOURCE_IMAGE_PATH
+
 ### Changed
+
+- Command `logs` got usage example for specifying servies as filter
+- Default docker images are updated to: 
+    - sequenceiq/cloudbreak:0.5.49
+    - sequenceiq/uluwatu:0.5.16
+    - sequenceiq/sutans:0.5.2
 
 ## [v0.5.0] - 2015-05-08
 
