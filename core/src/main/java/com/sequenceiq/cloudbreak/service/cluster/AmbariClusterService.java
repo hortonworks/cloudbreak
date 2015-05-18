@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.core.flow.FlowManager;
 import com.sequenceiq.cloudbreak.domain.APIResourceType;
+import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -262,7 +263,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint) {
+    public Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, AmbariStackDetails ambariStackDetails) {
         if (blueprintId == null || hostGroups == null) {
             throw new BadRequestException("Blueprint id and hostGroup assignments can not be null.");
         }
@@ -278,6 +279,9 @@ public class AmbariClusterService implements ClusterService {
         cluster.setBlueprint(blueprint);
         cluster.getHostGroups().removeAll(cluster.getHostGroups());
         cluster.getHostGroups().addAll(hostGroups);
+        if (ambariStackDetails != null) {
+            cluster.setAmbariStackDetails(ambariStackDetails);
+        }
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         stack = stackUpdater.updateStackCluster(stack.getId(), cluster);
         flowManager.triggerClusterReInstall(new ProvisionRequest(stack.cloudPlatform(), stack.getId()));

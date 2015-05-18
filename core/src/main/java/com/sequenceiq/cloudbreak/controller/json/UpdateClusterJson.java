@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.controller.json;
 
 import java.util.Set;
 
+import javax.validation.Valid;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
@@ -20,6 +22,8 @@ public class UpdateClusterJson implements JsonEntity {
     private Long blueprintId;
     private Boolean validateBlueprint = true;
     private Set<HostGroupJson> hostgroups;
+    @Valid
+    private AmbariStackDetailsJson ambariStackDetails;
 
     public UpdateClusterJson() {
     }
@@ -62,5 +66,13 @@ public class UpdateClusterJson implements JsonEntity {
 
     public void setValidateBlueprint(Boolean validateBlueprint) {
         this.validateBlueprint = validateBlueprint;
+    }
+
+    public AmbariStackDetailsJson getAmbariStackDetails() {
+        return ambariStackDetails;
+    }
+
+    public void setAmbariStackDetails(AmbariStackDetailsJson ambariStackDetails) {
+        this.ambariStackDetails = ambariStackDetails;
     }
 }
