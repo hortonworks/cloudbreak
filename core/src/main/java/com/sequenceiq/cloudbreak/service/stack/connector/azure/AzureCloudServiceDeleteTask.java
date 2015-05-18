@@ -11,13 +11,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.SimpleStatusCheckerTask;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
 
 @Component
-public class AzureCloudServiceDeleteTask implements StatusCheckerTask<AzureCloudServiceDeleteTaskContext> {
+public class AzureCloudServiceDeleteTask extends SimpleStatusCheckerTask<AzureCloudServiceDeleteTaskContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureCloudServiceDeleteTask.class);
     private static final int NOT_FOUND = 404;
@@ -67,4 +67,5 @@ public class AzureCloudServiceDeleteTask implements StatusCheckerTask<AzureCloud
     public boolean exitPolling(AzureCloudServiceDeleteTaskContext azureCloudServiceDeleteTaskContext) {
         return false;
     }
+
 }

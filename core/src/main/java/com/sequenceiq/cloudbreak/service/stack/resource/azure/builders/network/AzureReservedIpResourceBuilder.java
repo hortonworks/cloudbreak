@@ -58,7 +58,7 @@ public class AzureReservedIpResourceBuilder extends AzureSimpleNetworkResourceBu
             AzureResourcePollerObject azureResourcePollerObject =
                     new AzureResourcePollerObject(azureReservedIpCreateRequest.getAzureClient(), azureReservedIpCreateRequest.getStack(), serviceCertificate);
             azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
-                    POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+                    POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
         } catch (Exception ex) {
             throw checkException(ex);
         }
@@ -76,7 +76,7 @@ public class AzureReservedIpResourceBuilder extends AzureSimpleNetworkResourceBu
             HttpResponseDecorator deleteVirtualMachineResult = (HttpResponseDecorator) azureClient.deleteReservedIP(props);
             AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(azureClient, stack, deleteVirtualMachineResult);
             azureResourcePollerObjectPollingService.pollWithTimeout(azureDeleteResourceStatusCheckerTask, azureResourcePollerObject,
-                    POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+                    POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
         } catch (HttpResponseException ex) {
             httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner(), stack);
         } catch (Exception ex) {

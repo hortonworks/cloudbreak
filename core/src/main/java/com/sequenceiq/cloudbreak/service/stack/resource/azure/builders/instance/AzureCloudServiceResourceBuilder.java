@@ -61,7 +61,7 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
             HttpResponseDecorator cloudServiceResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createCloudService(aCSCR.getProps());
             AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), aCSCR.getStack(), cloudServiceResponse);
             azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
-                    POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+                    POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
         } catch (Exception ex) {
             throw checkException(ex);
         }
@@ -76,7 +76,7 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
                 new AzureCloudServiceDeleteTaskContext(deleteContextObject.getCommonName(), resource.getResourceName(),
                         stack, azureStackUtil.createAzureClient(credential));
         azureCloudServiceRemoveReadyPollerObjectPollingService
-                .pollWithTimeout(azureCloudServiceDeleteTask, azureCloudServiceDeleteTaskContext, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+                .pollWithTimeout(azureCloudServiceDeleteTask, azureCloudServiceDeleteTaskContext, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
         return true;
     }
 

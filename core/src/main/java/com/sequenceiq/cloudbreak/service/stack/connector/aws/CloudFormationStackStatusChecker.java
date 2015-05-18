@@ -19,10 +19,10 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.SimpleStatusCheckerTask;
 
 @Component
-public class CloudFormationStackStatusChecker implements StatusCheckerTask<CloudFormationStackPollerObject> {
+public class CloudFormationStackStatusChecker extends SimpleStatusCheckerTask<CloudFormationStackPollerObject> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudFormationStackStatusChecker.class);
 
     @Autowired

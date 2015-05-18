@@ -38,6 +38,7 @@ public class AzureMetadataSetup implements MetadataSetup {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final int POLLING_INTERVAL = 5000;
     private static final int MAX_POLLING_ATTEMPTS = 100;
+    private static final int MAX_FAILURE_COUNT = 3;
 
     @Autowired
     private AzureMetadataSetupCheckerTask azureMetadataSetupCheckerTask;
@@ -87,7 +88,8 @@ public class AzureMetadataSetup implements MetadataSetup {
                 .pollWithTimeout(azureMetadataSetupCheckerTask,
                         azureMetadataSetupCheckerTaskContext,
                         POLLING_INTERVAL,
-                        MAX_POLLING_ATTEMPTS);
+                        MAX_POLLING_ATTEMPTS,
+                        MAX_FAILURE_COUNT);
         if (isSuccess(pollingResult)) {
             Object virtualMachine = azureClient.getVirtualMachine(props);
             try {

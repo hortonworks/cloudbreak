@@ -54,7 +54,7 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
             HttpResponseDecorator serviceCertificate = (HttpResponseDecorator) aCSCR.getAzureClient().createServiceCertificate(aCSCR.getProps());
             AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), aCSCR.getStack(), serviceCertificate);
             azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
-                    POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+                    POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
         } catch (Exception ex) {
             throw checkException(ex);
         }

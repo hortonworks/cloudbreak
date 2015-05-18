@@ -68,7 +68,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
                 HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) request.getAzureClient().createVirtualNetwork(request.getProps());
                 AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(request.getAzureClient(), stack, virtualNetworkResponse);
                 azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
-                        POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+                        POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
             }
         } catch (Exception ex) {
             throw checkException(ex);

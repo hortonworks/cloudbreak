@@ -60,7 +60,7 @@ public class AzureAffinityGroupResourceBuilder extends AzureSimpleNetworkResourc
                     HttpResponseDecorator affinityResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createAffinityGroup(aCSCR.getProps());
                     AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), stack, affinityResponse);
                     azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
-                            POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+                            POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
                 } else {
                     LOGGER.error("Error creating affinity group: {}", aCSCR.getName(), httpResponseException);
                     throw new CloudConnectorException(httpResponseException.getResponse().toString());

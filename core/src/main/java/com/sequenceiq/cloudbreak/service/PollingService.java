@@ -19,14 +19,26 @@ public class PollingService<T> {
      * @param interval    sleeps this many milliseconds between status checking attempts
      * @param maxAttempts signals how many times will the status check be executed before timeout
      */
-    public PollingResult pollWithTimeout(StatusCheckerTask<T> statusCheckerTask, T t, int interval, int maxAttempts) {
+    public PollingResult pollWithTimeout(StatusCheckerTask<T> statusCheckerTask, T t, int interval, int maxAttempts, int maxFailure) {
         boolean success = false;
         boolean timeout = false;
         int attempts = 0;
+        int failures = 0;
+        Exception actual = null;
         boolean exit = statusCheckerTask.exitPolling(t);
         while (!success && !timeout && !exit) {
             LOGGER.info("Polling attempt {}.", attempts);
-            success = statusCheckerTask.checkStatus(t);
+            try {
+                success = statusCheckerTask.checkStatus(t);
+            } catch (Exception ex) {
+                LOGGER.warn("Exception occurred in the polling: {}", ex.getMessage(), ex);
+                failures++;
+                actual = ex;
+            }
+            if (failures >= maxFailure) {
+                LOGGER.info("Polling failure reached the limit which was {}, poller will drop the last exception.", maxFailure);
+                statusCheckerTask.handleException(actual);
+            }
             if (success) {
                 LOGGER.info(statusCheckerTask.successMessage(t));
                 return PollingResult.SUCCESS;
@@ -48,6 +60,10 @@ public class PollingService<T> {
             return PollingResult.EXIT;
         }
         return PollingResult.SUCCESS;
+    }
+
+    public PollingResult pollWithTimeout(StatusCheckerTask<T> statusCheckerTask, T t, int interval, int maxAttempts) {
+        return pollWithTimeout(statusCheckerTask, t, interval, maxAttempts, 1);
     }
 
     private void sleep(int duration) {

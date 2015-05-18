@@ -25,6 +25,7 @@ public abstract class AzureSimpleNetworkResourceBuilder implements
     protected static final Logger LOGGER = LoggerFactory.getLogger(AzureSimpleNetworkResourceBuilder.class);
     protected static final int POLLING_INTERVAL = 5000;
     protected static final int MAX_POLLING_ATTEMPTS = 60;
+    protected static final int MAX_FAILURE_COUNT = 3;
     protected static final int NOT_FOUND = 404;
     protected static final int NOT_EXIST = 400;
     protected static final String LOCATION = "location";
