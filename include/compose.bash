@@ -52,7 +52,7 @@ compose-get-container() {
 }
 
 compose-logs() {
-    declare desc="Whach all container logs in colored version"
+    declare desc='Follow all logs in color. Separate service names by space to filter, e.g. "cbd logs cloudbreak uluwatu"'
 
     dockerCompose logs "$@"
 }
