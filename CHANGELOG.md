@@ -8,6 +8,8 @@
 
 ### Changed
 
+- Command `doctor` hints to run boot2docker shellinit if env is unset
+
 ## [v0.5.1] - 2015-05-18
 
 ### Fixed
