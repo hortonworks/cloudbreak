@@ -28,6 +28,13 @@ public interface ContainerOrchestrator {
     void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, int count, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
+    void startBaywatchServer(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
+
+    void startBaywatchClients(ContainerOrchestratorCluster cluster, String imageName,
+            int count, String consulDomain, String externServerLocation, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
+
     boolean areAllNodesAvailable(String gatewayAddress, Set<Node> nodes);
 
     List<String> getAvailableNodes(String gatewayAddress, Set<Node> nodes);

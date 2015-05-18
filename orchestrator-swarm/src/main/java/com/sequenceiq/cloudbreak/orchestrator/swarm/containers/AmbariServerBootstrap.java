@@ -6,11 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.api.model.RestartPolicy;
+import com.github.dockerjava.api.model.Volume;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil;
 
@@ -54,7 +56,9 @@ public class AmbariServerBootstrap implements ContainerBootstrap {
                 .withPortBindings(new PortBinding(new Ports.Binding("0.0.0.0", PORT), new ExposedPort(PORT)))
                 .withNetworkMode("host")
                 .withRestartPolicy(RestartPolicy.alwaysRestart())
-                .withPrivileged(true));
+                .withPrivileged(true)
+                .withBinds(new Bind("/var/log/containers/ambari-server", new Volume("/var/log/ambari-server")),
+                    new Bind("/var/log/containers/consul-watch", new Volume("/var/log/consul-watch"))));
         LOGGER.info("Ambari server started successfully");
         return true;
     }
