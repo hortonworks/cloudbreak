@@ -81,8 +81,7 @@ cbd-update-snap() {
 latest-version() {
   #curl -Ls https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/VERSION
   curl -I https://github.com/sequenceiq/cloudbreak-deployer/releases/latest 2>&1 \
-      |sed -n "s/^Location:.*tag.v//p" \
-      | sed "s/\r//"
+      |sed -n "s/^Location:.*tag.v\([0-9\.]*\).*/\1/p"
 }
 
 init-profile() {
