@@ -82,7 +82,7 @@ public abstract class AbstractFlowHandler<T extends DefaultFlowContext> implemen
      * @throws Exception if the error handling fails
      */
     protected Object handleErrorFlow(Throwable throwable, T data) throws Exception {
-        LOGGER.info("Default error flow handling for {}", getClass());
+        LOGGER.debug("Default error flow handling for {}", getClass());
         data.setErrorReason(throwable.getMessage());
         return data;
     }

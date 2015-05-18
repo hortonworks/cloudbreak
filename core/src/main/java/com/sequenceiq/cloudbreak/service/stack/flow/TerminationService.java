@@ -46,20 +46,19 @@ public class TerminationService {
     private CloudbreakEventService cloudbreakEventService;
 
     public void handleTerminationFailure(Long stackId, String errorReason) {
-        LOGGER.info("Stack delete failed on stack {} and set its status to {}.", stackId, Status.DELETE_FAILED);
+        LOGGER.info("Failed to delete stack {}. Setting it's status to {}.", stackId, Status.DELETE_FAILED);
         retryingStackUpdater.updateStackStatus(stackId, Status.DELETE_FAILED, errorReason);
     }
 
     public void terminateStack(Long stackId, CloudPlatform cloudPlatform) {
-        retryingStackUpdater.updateStackStatus(stackId, Status.DELETE_IN_PROGRESS, "Termination of cluster infrastructure has started.");
+        retryingStackUpdater.updateStackStatus(stackId, Status.DELETE_IN_PROGRESS, "Started to terminate cluster infrastructure.");
         final Stack stack = stackRepository.findOneWithLists(stackId);
         try {
             cloudPlatformConnectors.get(cloudPlatform).deleteStack(stack, stack.getCredential());
             finalizeTermination(stackId);
         } catch (Exception ex) {
-            LOGGER.error(String.format("Stack delete failed on '%s' stack: ", stack.getId()), ex);
-            String statusReason = "Termination of cluster infrastructure failed: " + ex.getMessage();
-            throw new TerminationFailedException(statusReason, ex);
+            LOGGER.error("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
+            throw new TerminationFailedException(ex);
         }
     }
 

@@ -62,7 +62,7 @@ public class GccStackUtil {
                     .setHttpRequestInitializer(credential)
                     .build();
         } catch (Exception e) {
-            LOGGER.error("Something unexpected happened while building Google Storage access.", e);
+            LOGGER.error("Error occurred while building Google Storage access.", e);
         }
         return null;
     }
@@ -105,7 +105,7 @@ public class GccStackUtil {
                     GccZone.valueOf(stack.getRegion()).getValue(), resource.getResourceName());
             return instanceGet.execute();
         } catch (IOException e) {
-            LOGGER.error(String.format("Instance %s is not reachable: %s", resource, e.getMessage()), e);
+            LOGGER.error("Instance {} is not reachable: {}", resource, e.getMessage(), e);
         }
         return null;
     }
@@ -119,7 +119,7 @@ public class GccStackUtil {
                     .setHttpRequestInitializer(credential)
                     .build();
         } catch (Exception e) {
-            LOGGER.error("Something unexpected happened while building Google Compute access.", e);
+            LOGGER.error("Error occurred while building Google Compute access.", e);
         }
         return null;
     }
