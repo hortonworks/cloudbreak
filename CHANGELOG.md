@@ -8,7 +8,7 @@
 
 ### Changed
 
-## Unreleased
+## [v0.5.1] - 2015-05-18
 
 ### Fixed
 
