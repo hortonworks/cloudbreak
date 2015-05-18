@@ -9,6 +9,7 @@
 ### Changed
 
 - Command `doctor` hints to run boot2docker shellinit if env is unset
+- Command `init` in case of OSX, DOCKER_XXX envs are initialized in local profile (Profile)
 
 ## [v0.5.1] - 2015-05-18
 
