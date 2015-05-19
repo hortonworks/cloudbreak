@@ -26,8 +26,8 @@ import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 @Service
 public class TerminationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TerminationService.class);
-    private static final String DELETE_COMPLETED_MSG = "Cluster and its infrastructure were successfully terminated.";
-    private static final String BILLING_STOPPED_MSG = "Billing stopped because of the termination of the cluster and its infrastructure.";
+    private static final String DELETE_COMPLETED_MSG = "The cluster and its infrastructure have been successfully terminated.";
+    private static final String BILLING_STOPPED_MSG = "Billing stopped; the cluster and its infrastructure have been terminated.";
     private static final String DELIMITER = "_";
 
     @javax.annotation.Resource
@@ -51,7 +51,7 @@ public class TerminationService {
     }
 
     public void terminateStack(Long stackId, CloudPlatform cloudPlatform) {
-        retryingStackUpdater.updateStackStatus(stackId, Status.DELETE_IN_PROGRESS, "Started to terminate cluster infrastructure.");
+        retryingStackUpdater.updateStackStatus(stackId, Status.DELETE_IN_PROGRESS, "Terminating cluster infrastructure.");
         final Stack stack = stackRepository.findOneWithLists(stackId);
         try {
             cloudPlatformConnectors.get(cloudPlatform).deleteStack(stack, stack.getCredential());
