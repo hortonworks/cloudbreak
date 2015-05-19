@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 @Service
 public class TerminationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TerminationService.class);
-    private static final String DELETE_COMPLETED_MSG = "The cluster and its infrastructure have been successfully terminated.";
+    private static final String DELETE_COMPLETED_MSG = "The cluster and its infrastructure have successfully been terminated.";
     private static final String BILLING_STOPPED_MSG = "Billing stopped; the cluster and its infrastructure have been terminated.";
     private static final String DELIMITER = "_";
 
