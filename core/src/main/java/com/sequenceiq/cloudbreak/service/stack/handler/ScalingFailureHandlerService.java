@@ -14,9 +14,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.FailureHandlerService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ResourceRequestResult;
 import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
@@ -28,14 +26,9 @@ import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 public class ScalingFailureHandlerService implements FailureHandlerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ScalingFailureHandlerService.class);
-    private static final double ONE_HUNDRED = 100.0;
 
     @Autowired
-    private StackRepository stackRepository;
-    @Autowired
     private ResourceRepository resourceRepository;
-    @Autowired
-    private InstanceGroupRepository instanceGroupRepository;
 
     @javax.annotation.Resource
     private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;

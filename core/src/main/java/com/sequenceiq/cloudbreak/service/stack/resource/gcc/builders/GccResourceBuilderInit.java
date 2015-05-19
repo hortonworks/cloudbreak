@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
-import com.sequenceiq.cloudbreak.service.stack.resource.gcc.builders.instance.GccInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccStartStopContextObject;
@@ -39,9 +38,6 @@ public class GccResourceBuilderInit implements
 
     @Autowired
     private GccStackUtil gccStackUtil;
-
-    @Autowired
-    private GccInstanceResourceBuilder gccInstanceResourceBuilder;
 
     @Autowired
     private JsonHelper jsonHelper;

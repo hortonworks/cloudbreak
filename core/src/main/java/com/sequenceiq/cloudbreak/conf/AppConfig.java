@@ -46,7 +46,6 @@ import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
-import com.sequenceiq.cloudbreak.service.stack.connector.aws.TemplateReader;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Configuration
@@ -66,9 +65,6 @@ public class AppConfig {
     private int containerCorePoolSize;
     @Value("${cb.container.threadpool.capacity.size:" + CB_CONTAINER_THREADPOOL_CAPACITY_SIZE + "}")
     private int containerteQueueCapacity;
-
-    @Autowired
-    private TemplateReader templateReader;
 
     @Autowired
     private List<CloudPlatformConnector> cloudPlatformConnectorList;

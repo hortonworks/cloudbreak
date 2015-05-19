@@ -38,9 +38,7 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
@@ -57,16 +55,10 @@ public class DefaultStackService implements StackService {
     private StackRepository stackRepository;
 
     @Autowired
-    private TemplateRepository templateRepository;
-
-    @Autowired
     private RetryingStackUpdater stackUpdater;
 
     @Autowired
     private ClusterRepository clusterRepository;
-
-    @Autowired
-    private AmbariClusterConnector ambariClusterConnector;
 
     @Autowired
     private InstanceMetaDataRepository instanceMetaDataRepository;

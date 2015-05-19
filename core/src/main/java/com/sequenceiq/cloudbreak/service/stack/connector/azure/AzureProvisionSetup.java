@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
@@ -33,7 +32,6 @@ import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourcePolle
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
 import groovyx.net.http.ResponseParseException;
-import reactor.core.Reactor;
 
 @Component
 public class AzureProvisionSetup implements ProvisionSetup {
@@ -54,17 +52,12 @@ public class AzureProvisionSetup implements ProvisionSetup {
     private static final int POLLING_INTERVAL = 5000;
     private static final int MAX_POLLING_ATTEMPTS = 60;
 
-    @Autowired
-    private Reactor reactor;
 
     @Autowired
     private AzureStackUtil azureStackUtil;
 
     @Autowired
     private RetryingStackUpdater retryingStackUpdater;
-
-    @Autowired
-    private CredentialRepository credentialRepository;
 
     @Autowired
     private AzureCreateResourceStatusCheckerTask azureCreateResourceStatusCheckerTask;

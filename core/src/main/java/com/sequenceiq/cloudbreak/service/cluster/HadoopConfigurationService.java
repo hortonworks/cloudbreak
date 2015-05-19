@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 
 @Service
 public class HadoopConfigurationService {
@@ -26,9 +25,6 @@ public class HadoopConfigurationService {
 
     @Autowired
     private HostGroupRepository hostGroupRepository;
-
-    @Autowired
-    private InstanceGroupRepository instanceGroupRepository;
 
     public Map<String, Map<String, Map<String, String>>> getConfiguration(Stack stack) {
         Set<HostGroup> hostGroups = hostGroupRepository.findHostGroupsInCluster(stack.getCluster().getId());

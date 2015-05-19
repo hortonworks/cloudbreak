@@ -15,6 +15,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+
 @Entity
 @NamedQueries({
         @NamedQuery(name = "InstanceGroup.findOneByGroupNameInStack",
@@ -22,7 +23,7 @@ import javax.persistence.OneToOne;
                         + "WHERE i.stack.id = :stackId "
                         + "AND i.groupName = :groupName")
 })
-public class InstanceGroup implements ProvisionEntity, Comparable {
+public class InstanceGroup implements ProvisionEntity {
     @Id
     @GeneratedValue
     private Long id;
@@ -103,8 +104,4 @@ public class InstanceGroup implements ProvisionEntity, Comparable {
         this.instanceGroupType = instanceGroupType;
     }
 
-    @Override
-    public int compareTo(Object o) {
-        return Integer.compare(getNodeCount(), ((InstanceGroup) o).getNodeCount());
-    }
 }

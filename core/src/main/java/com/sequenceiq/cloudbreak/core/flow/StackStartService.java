@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
+import static com.sequenceiq.cloudbreak.orchestrator.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
-import static com.sequenceiq.cloudbreak.orchestrator.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
 
 import java.util.Map;
@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHostsJoinStatusCheck
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ConsulPluginEvent;
 import com.sequenceiq.cloudbreak.service.cluster.flow.PluginManager;
-import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 
 @Service
@@ -67,9 +66,6 @@ public class StackStartService {
 
     @Autowired
     private AmbariClientProvider ambariClientProvider;
-
-    @Autowired
-    private CloudbreakEventService cloudbreakEventService;
 
     @javax.annotation.Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
@@ -139,7 +135,7 @@ public class StackStartService {
     }
 
     private PollingResult waitForHostsToJoin(Stack stack) {
-        AmbariHosts ambariHosts = new AmbariHosts(stack,  ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(),
+        AmbariHosts ambariHosts = new AmbariHosts(stack, ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(),
                 stack.getPassword()), stack.getFullNodeCount());
         try {
             return ambariHostJoin.pollWithTimeout(

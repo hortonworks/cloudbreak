@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
-import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.network.SecurityService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
@@ -34,9 +33,6 @@ public class StackDecorator implements Decorator<Stack> {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDecorator.class);
 
     private static final double ONE_HUNDRED = 100.0;
-
-    @Autowired
-    private TemplateRepository templateRepository;
 
     @Autowired
     private CredentialRepository credentialRepository;

@@ -18,7 +18,6 @@ import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -27,7 +26,6 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GcpResourceException;
@@ -43,14 +41,13 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
 
     @Autowired
     private StackRepository stackRepository;
+
     @Autowired
     private GccResourceCheckerStatus gccResourceCheckerStatus;
+
     @Autowired
     private PollingService<GccResourceReadyPollerObject> gccDiskReadyPollerObjectPollingService;
-    @Autowired
-    private PollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
-    @Autowired
-    private JsonHelper jsonHelper;
+
     @Autowired
     @Qualifier("intermediateBuilderExecutor")
     private AsyncTaskExecutor intermediateBuilderExecutor;
