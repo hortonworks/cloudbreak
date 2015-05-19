@@ -19,7 +19,6 @@ public class ProvisioningContext extends DefaultFlowContext implements FlowConte
     private ProvisioningContext(Builder builder) {
         super(builder.stackId, builder.cloudPlatform, builder.errorReason);
         this.setupProperties = builder.setupProperties;
-        this.userDataParams = builder.userDataParams;
         this.resources = builder.resources;
         this.coreInstanceMetaData = builder.coreInstanceMetaData;
         this.ambariIp = builder.ambariIp;
@@ -61,7 +60,6 @@ public class ProvisioningContext extends DefaultFlowContext implements FlowConte
         private CloudPlatform cloudPlatform;
         private String errorReason = "";
         private Map<String, Object> setupProperties = new HashMap<>();
-        private Map<String, String> userDataParams = new HashMap<>();
         private Set<Resource> resources = new HashSet<>();
         private Set<CoreInstanceMetaData> coreInstanceMetaData = new HashSet<>();
         private String ambariIp;
@@ -79,9 +77,8 @@ public class ProvisioningContext extends DefaultFlowContext implements FlowConte
             return this;
         }
 
-        public Builder setProvisionSetupProperties(Map<String, Object> setupProperties, Map<String, String> userDataParams) {
+        public Builder setProvisionSetupProperties(Map<String, Object> setupProperties) {
             this.setupProperties.putAll(setupProperties);
-            this.userDataParams.putAll(userDataParams);
             return this;
         }
 
@@ -105,7 +102,6 @@ public class ProvisioningContext extends DefaultFlowContext implements FlowConte
             this.cloudPlatform = provisioningContext.getCloudPlatform();
             this.errorReason = provisioningContext.getErrorReason();
             this.setupProperties = provisioningContext.getSetupProperties();
-            this.userDataParams = provisioningContext.getUserDataParams();
             this.resources = provisioningContext.getResources();
             this.coreInstanceMetaData = provisioningContext.getCoreInstanceMetaData();
             this.ambariIp = provisioningContext.getAmbariIp();

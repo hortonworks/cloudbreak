@@ -27,13 +27,13 @@ public class AzureConnector implements CloudPlatformConnector {
     private ParallelCloudResourceManager cloudResourceManager;
 
     @Override
-    public Set<Resource> buildStack(Stack stack, String gateWayUserData, String hostGroupUserData, Map<String, Object> setupProperties) {
-        return cloudResourceManager.buildStackResources(stack, gateWayUserData, hostGroupUserData, azureResourceBuilderInit);
+    public Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties) {
+        return cloudResourceManager.buildStackResources(stack, gateWayUserData, coreUserData, azureResourceBuilderInit);
     }
 
     @Override
-    public Set<Resource> addInstances(Stack stack, String gateWayUserData, String hostGroupUserData, Integer instanceCount, String instanceGroup) {
-        return cloudResourceManager.addNewResources(stack, hostGroupUserData, instanceCount, instanceGroup, azureResourceBuilderInit);
+    public Set<Resource> addInstances(Stack stack, String gateWayUserData, String coreUserData, Integer instanceCount, String instanceGroup) {
+        return cloudResourceManager.addNewResources(stack, coreUserData, instanceCount, instanceGroup, azureResourceBuilderInit);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class AzureConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public void updateAllowedSubnets(Stack stack, String gateWayUserData, String hostGroupUserData) {
+    public void updateAllowedSubnets(Stack stack, String gateWayUserData, String coreUserData) {
         cloudResourceManager.updateAllowedSubnets(stack, azureResourceBuilderInit);
     }
 }

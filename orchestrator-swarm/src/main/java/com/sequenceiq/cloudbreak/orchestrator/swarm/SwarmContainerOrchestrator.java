@@ -209,8 +209,8 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
                 }
             }
             return privateAddresses;
-        } catch (Throwable t) {
-            LOGGER.warn(String.format("Cannot connect to Swarm manager, maybe it hasn't started yet: %s", t.getMessage()));
+        } catch (Exception e) {
+            LOGGER.warn(String.format("Cannot connect to Swarm manager, maybe it hasn't started yet: %s", e.getMessage()));
             return privateAddresses;
         }
     }
@@ -307,7 +307,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         return DockerClientConfig.createDefaultConfigBuilder()
                 .withReadTimeout(READ_TIMEOUT)
                 .withVersion("1.16")
-                .withUri("http://" + ip + ":3376")
+                .withUri("http://" + ip + "/swarm")
                 .build();
     }
 
@@ -315,7 +315,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         return DockerClientConfig.createDefaultConfigBuilder()
                 .withReadTimeout(READ_TIMEOUT)
                 .withVersion("1.16")
-                .withUri("http://" + ip + ":2376")
+                .withUri("http://" + ip + "/docker")
                 .build();
     }
 

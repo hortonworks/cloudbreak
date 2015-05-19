@@ -1,6 +1,16 @@
 #!/bin/bash
 set -x
 
+START_LABEL=${platformDiskStartLabel}
+PLATFORM_DISK_PREFIX=${platformDiskPrefix}
+
+<#if gateway>
+start_proxy() {
+  docker run --name gateway -d --net=host --restart=always sequenceiq/cb-gateway-nginx:0.1
+}
+</#if>
+
+<#noparse>
 get_ip() {
   ifconfig eth0 | awk '/inet addr/{print substr($2,6)}'
 }
@@ -22,19 +32,18 @@ configure_docker() {
 }
 
 format_disks() {
-  START_LABEL=platform_disk_start_label
   mkdir /hadoopfs
   for (( i=1; i<=15; i++ )); do
     LABEL=$(printf "\x$((START_LABEL+i))")
-    if [ -e /dev/platform_disk_prefix"$LABEL" ]; then
-      mkfs -E lazy_itable_init=1 -O uninit_bg -F -t ext4 /dev/platform_disk_prefix${LABEL}
+    if [ -e /dev/${PLATFORM_DISK_PREFIX}"$LABEL" ]; then
+      mkfs -E lazy_itable_init=1 -O uninit_bg -F -t ext4 /dev/${PLATFORM_DISK_PREFIX}${LABEL}
       mkdir /hadoopfs/fs${i}
-      echo /dev/platform_disk_prefix${LABEL} /hadoopfs/fs${i} ext4  defaults 0 2 >> /etc/fstab
+      echo /dev/${PLATFORM_DISK_PREFIX}${LABEL} /hadoopfs/fs${i} ext4  defaults 0 2 >> /etc/fstab
       mount /hadoopfs/fs${i}
-      DOCKER_VOLUME_PARAMS="${DOCKER_VOLUME_PARAMS} -v /hadoopfs/fs${i}:/hadoopfs/fs${i}"
     fi
   done
 }
+</#noparse>
 
 main() {
   if [[ "$1" == "::" ]]; then
@@ -44,6 +53,12 @@ main() {
     format_disks
     fix_hostname
     configure_docker
+    <#if gateway>
+    MAX_RETRIES=60
+    retries=0
+    while ((retries++ < MAX_RETRIES)) && ! docker info &> /dev/null; do echo "Docker is not running yet."; sleep 5; done
+    start_proxy
+    </#if>
     touch /var/cb-init-executed
     echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/cb-init-executed
   fi
