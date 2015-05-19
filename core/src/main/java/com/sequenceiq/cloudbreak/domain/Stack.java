@@ -418,14 +418,6 @@ public class Stack implements ProvisionEntity {
         return instanceMetadata;
     }
 
-    public Set<InstanceMetaData> getAllInstanceMetaData() {
-        Set<InstanceMetaData> instanceMetadata = new HashSet<>();
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            instanceMetadata.addAll(instanceGroup.getAllInstanceMetaData());
-        }
-        return instanceMetadata;
-    }
-
     public List<InstanceGroup> getInstanceGroupsAsList() {
         return new ArrayList<>(instanceGroups);
     }
@@ -458,16 +450,6 @@ public class Stack implements ProvisionEntity {
 
     public void addAllowedSubnet(Subnet subnet) {
         allowedSubnets.add(subnet);
-    }
-
-    public Set<InstanceGroup> getCoreInstanceGroups() {
-        Set<InstanceGroup> instanceGroupsList = new HashSet<>();
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            if (InstanceGroupType.CORE.equals(instanceGroup.getInstanceGroupType())) {
-                instanceGroupsList.add(instanceGroup);
-            }
-        }
-        return instanceGroupsList;
     }
 
     public InstanceGroup getGatewayInstanceGroup() {

@@ -11,5 +11,7 @@ public interface ResourceRepository extends CrudRepository<Resource, Long> {
 
     Resource findOne(@Param("id") Long id);
 
-    Resource findByStackIdAndName(@Param("stackId") Long stackId, @Param("name") String name, @Param("type") ResourceType type);
+    Resource findByStackIdAndNameAndType(@Param("stackId") Long stackId, @Param("name") String name, @Param("type") ResourceType type);
+
+    Resource findByStackIdAndName(@Param("stackId") Long stackId, @Param("name") String name);
 }

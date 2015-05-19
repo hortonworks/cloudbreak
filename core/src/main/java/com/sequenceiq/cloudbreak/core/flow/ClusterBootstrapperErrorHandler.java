@@ -1,0 +1,111 @@
+package com.sequenceiq.cloudbreak.core.flow;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.InstanceStatus;
+import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.Node;
+import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.repository.ResourceRepository;
+import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
+
+@Component
+public class ClusterBootstrapperErrorHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterBootstrapperErrorHandler.class);
+
+    @Autowired
+    private ResourceRepository resourceRepository;
+
+    @Autowired
+    private InstanceMetaDataRepository instanceMetaDataRepository;
+
+    @Autowired
+    private InstanceGroupRepository instanceGroupRepository;
+
+    @Autowired
+    private HostMetadataRepository hostMetadataRepository;
+
+    @javax.annotation.Resource
+    private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
+
+    @javax.annotation.Resource
+    private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
+
+    @javax.annotation.Resource
+    private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
+
+    public void terminateFailedNodes(ContainerOrchestrator orchestrator, Stack stack, Set<Node> nodes) throws CloudbreakOrchestratorException {
+        InstanceGroup gateway = stack.getGatewayInstanceGroup();
+        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+        List<String> allAvailableNode = orchestrator.getAvailableNodes(gatewayInstance.getPublicIp(), nodes);
+        List<Node> missingNodes = selectMissingNodes(nodes, allAvailableNode);
+        if (missingNodes.size() > 0) {
+            LOGGER.info(String.format("Bootstrap failed on %s nodes. These nodes will be terminated.", missingNodes.size()));
+            for (Node missingNode : missingNodes) {
+                InstanceMetaData instanceMetaData =
+                        instanceMetaDataRepository.findByPrivateAddress(stack.getId(), missingNode.getPrivateIp());
+                LOGGER.info(String.format("InstanceMetadata deleted with %s id and %s name.", instanceMetaData.getId(), instanceMetaData.getInstanceId()));
+                Resource resource = resourceRepository.findByStackIdAndName(stack.getId(), instanceMetaData.getInstanceId());
+                InstanceGroup ig = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceMetaData.getInstanceGroup().getGroupName());
+                ig.setNodeCount(ig.getNodeCount() - 1);
+                if (ig.getNodeCount() < 1) {
+                    throw new CloudbreakOrchestratorException(String.format("%s instancegroup nodecount was lower than 1 cluster creation failed.",
+                            ig.getGroupName()));
+                }
+                instanceGroupRepository.save(ig);
+                LOGGER.info(String.format("Decreased nodecount on %s instancegroup.", ig.getGroupName()));
+                deleteResourceAndDependencies(stack, instanceMetaData);
+                if (resourceRepository.findOne(resource.getId()) != null) {
+                    resourceRepository.delete(resource.getId());
+                }
+                instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
+                instanceMetaDataRepository.save(instanceMetaData);
+            }
+        }
+    }
+
+    private List<Node> selectMissingNodes(Set<Node> clusterNodes, List<String> availableNodes) {
+        List<Node> missingNodes = new ArrayList<>();
+        for (Node node : clusterNodes) {
+            boolean contains = false;
+            for (String nodeAddress : availableNodes) {
+                if (nodeAddress.equals(node.getPrivateIp())) {
+                    contains = true;
+                    break;
+                }
+            }
+            if (!contains) {
+                missingNodes.add(node);
+            }
+        }
+        return missingNodes;
+    }
+
+    private void deleteResourceAndDependencies(Stack stack, InstanceMetaData instanceMetaData) {
+        LOGGER.info(String.format("Instance %s rollback started.", instanceMetaData.getInstanceId()));
+        CloudPlatformConnector cloudPlatformConnector = cloudPlatformConnectors.get(stack.cloudPlatform());
+        Set<String> instanceIds = new HashSet<>();
+        instanceIds.add(instanceMetaData.getInstanceId());
+        cloudPlatformConnector.removeInstances(stack, instanceIds, instanceMetaData.getInstanceGroup().getGroupName());
+        LOGGER.info(String.format("Instance deleted with %s id and %s name.", instanceMetaData.getId(), instanceMetaData.getInstanceId()));
+    }
+}

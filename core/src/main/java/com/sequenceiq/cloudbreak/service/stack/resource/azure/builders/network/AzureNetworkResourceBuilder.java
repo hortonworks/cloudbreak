@@ -88,7 +88,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
                 Map<String, Object> props = new HashMap<>();
                 props.put(NAME, resource.getResourceName());
                 props.put(SUBNETNAME, network.getResourceName());
-                props.put(VIRTUAL_NETWORK_IP_ADDRESS, instanceMetaDataRepository.findByInstanceId(resource.getResourceName()).getPrivateIp());
+                props.put(VIRTUAL_NETWORK_IP_ADDRESS, instanceMetaDataRepository.findByInstanceId(stack.getId(), resource.getResourceName()).getPrivateIp());
                 props.put(PORTS, ports);
                 HttpResponseDecorator response = (HttpResponseDecorator) azureClient.updateEndpoints(props);
                 responses.add(response);

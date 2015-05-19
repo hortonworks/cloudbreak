@@ -30,7 +30,7 @@ import javax.persistence.NamedQuery;
         @NamedQuery(
                 name = "InstanceMetaData.findByInstanceId",
                 query = "SELECT i FROM InstanceMetaData i "
-                        + "WHERE i.instanceId= :instanceId"),
+                        + "WHERE i.instanceId= :instanceId AND i.instanceGroup.stack.id= :stackId "),
         @NamedQuery(
                 name = "InstanceMetaData.findAliveInstancesHostNamesInInstanceGroup",
                 query = "SELECT i.discoveryFQDN FROM InstanceMetaData i "
@@ -41,7 +41,13 @@ import javax.persistence.NamedQuery;
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.stack.id= :stackId "
                         + "AND i.instanceGroup.groupName= :groupName "
-                        + "AND (i.instanceStatus= 'DECOMMISSIONED' OR i.instanceStatus= 'UNREGISTERED')")
+                        + "AND (i.instanceStatus= 'DECOMMISSIONED' OR i.instanceStatus= 'UNREGISTERED')"),
+        @NamedQuery(
+                name = "InstanceMetaData.findByPrivateAddress",
+                query = "SELECT i FROM InstanceMetaData i "
+                        + "WHERE i.instanceGroup.stack.id= :stackId "
+                        + "AND i.privateIp= :privateAddress "
+                        + "AND i.instanceStatus <> 'TERMINATED' ")
 })
 public class InstanceMetaData implements ProvisionEntity {
 

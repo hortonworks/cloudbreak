@@ -95,7 +95,7 @@ public class StackFailureHandlerService implements FailureHandlerService {
             List<Resource> resourceList = new ArrayList<>();
             LOGGER.error("Error was occurred which is: " + exception.getException().orNull().getMessage());
             for (Resource resource : exception.getResources()) {
-                Resource newResource = resourceRepository.findByStackIdAndName(stack.getId(), resource.getResourceName(), resource.getResourceType());
+                Resource newResource = resourceRepository.findByStackIdAndNameAndType(stack.getId(), resource.getResourceName(), resource.getResourceType());
                 if (newResource != null) {
                     LOGGER.info(String.format("Resource %s with id %s and type %s was not deleted so added to rollback list.",
                             newResource.getResourceName(), newResource.getId(), newResource.getResourceType()));

@@ -12,7 +12,7 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
 
     Set<InstanceMetaData> findAllInStack(@Param("stackId") Long stackId);
 
-    InstanceMetaData findByInstanceId(@Param("instanceId") String instanceId);
+    InstanceMetaData findByInstanceId(@Param("stackId") Long stackId, @Param("instanceId") String instanceId);
 
     InstanceMetaData findHostInStack(@Param("stackId") Long stackId, @Param("hostName") String hostName);
 
@@ -21,5 +21,7 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
     List<String> findAliveInstancesHostNamesInInstanceGroup(@Param("instanceGroupId") Long instanceGroupId);
 
     Set<InstanceMetaData> findRemovableInstances(@Param("stackId") Long stackId, @Param("groupName") String groupName);
+
+    InstanceMetaData findByPrivateAddress(@Param("stackId") Long stackId, @Param("privateAddress") String privateAddress);
 
 }

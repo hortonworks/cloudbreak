@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_CONTAINER_ORCHESTRATOR;
+import static com.sequenceiq.cloudbreak.service.PollingResult.TIMEOUT;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorTool;
 import com.sequenceiq.cloudbreak.orchestrator.Node;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 
 @Component
@@ -56,6 +58,9 @@ public class ClusterBootstrapper {
     @Autowired
     private ClusterAvailabilityCheckerTask clusterAvailabilityCheckerTask;
 
+    @Autowired
+    private ClusterBootstrapperErrorHandler clusterBootstrapperErrorHandler;
+
     public void bootstrapCluster(ProvisioningContext provisioningContext) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
@@ -72,25 +77,29 @@ public class ClusterBootstrapper {
                     new BootstrapApiContext(stack, gatewayInstance.getPublicIp(), containerOrchestrator),
                     POLLING_INTERVAL,
                     MAX_POLLING_ATTEMPTS);
-
             List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIp());
             containerOrchestrator.bootstrap(gatewayInstance.getPublicIp(), nodeMap.get(0), stack.getConsulServers());
-            clusterAvailabilityPollingService.pollWithTimeout(clusterAvailabilityCheckerTask,
-                    new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayInstance.getPublicIp(), nodeMap.get(0)),
-                    POLLING_INTERVAL,
-                    MAX_POLLING_ATTEMPTS);
-            for (int i = 1; i < nodeMap.size(); i++) {
-                containerOrchestrator.bootstrapNewNodes(gatewayInstance.getPublicIp(), nodeMap.get(i));
+            if (nodeMap.size() > 1) {
                 clusterAvailabilityPollingService.pollWithTimeout(clusterAvailabilityCheckerTask,
-                        new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayInstance.getPublicIp(), nodeMap.get(i)),
+                        new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayInstance.getPublicIp(), nodeMap.get(0)),
                         POLLING_INTERVAL,
                         MAX_POLLING_ATTEMPTS);
+                for (int i = 1; i < nodeMap.size(); i++) {
+                    containerOrchestrator.bootstrapNewNodes(gatewayInstance.getPublicIp(), nodeMap.get(i));
+                    clusterAvailabilityPollingService.pollWithTimeout(clusterAvailabilityCheckerTask,
+                            new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayInstance.getPublicIp(), nodeMap.get(i)),
+                            POLLING_INTERVAL,
+                            MAX_POLLING_ATTEMPTS);
+                }
             }
-            clusterAvailabilityPollingService.pollWithTimeout(
+            PollingResult pollingResult = clusterAvailabilityPollingService.pollWithTimeout(
                     clusterAvailabilityCheckerTask,
                     new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayInstance.getPublicIp(), nodes),
                     POLLING_INTERVAL,
                     MAX_POLLING_ATTEMPTS);
+            if (TIMEOUT.equals(pollingResult)) {
+                clusterBootstrapperErrorHandler.terminateFailedNodes(containerOrchestrator, stack, nodes);
+            }
         } catch (CloudbreakOrchestratorException e) {
             throw new CloudbreakException(e);
         }
@@ -117,11 +126,14 @@ public class ClusterBootstrapper {
                         POLLING_INTERVAL,
                         MAX_POLLING_ATTEMPTS);
             }
-            clusterAvailabilityPollingService.pollWithTimeout(
+            PollingResult pollingResult = clusterAvailabilityPollingService.pollWithTimeout(
                     clusterAvailabilityCheckerTask,
                     new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayInstance.getPublicIp(), nodes),
                     POLLING_INTERVAL,
                     MAX_POLLING_ATTEMPTS);
+            if (TIMEOUT.equals(pollingResult)) {
+                clusterBootstrapperErrorHandler.terminateFailedNodes(containerOrchestrator, stack, nodes);
+            }
         } catch (CloudbreakOrchestratorException e) {
             throw new CloudbreakException(e);
         }
