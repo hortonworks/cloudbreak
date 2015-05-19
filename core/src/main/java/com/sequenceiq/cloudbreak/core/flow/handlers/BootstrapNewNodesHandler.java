@@ -7,17 +7,17 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
-import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
+import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 
 import reactor.event.Event;
 
 @Component
-public class BootstrapNewNodesHandler extends AbstractFlowHandler<ClusterScalingContext> implements FlowHandler {
+public class BootstrapNewNodesHandler extends AbstractFlowHandler<StackScalingContext> implements FlowHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(BootstrapNewNodesHandler.class);
 
     @Override
-    protected Object execute(Event<ClusterScalingContext> event) throws CloudbreakException {
+    protected Object execute(Event<StackScalingContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
         FlowContext context = getFlowFacade().bootstrapNewNodes(event.getData());
         LOGGER.info("Bootstrap of new nodes is finished. Context: {}", context);
@@ -25,7 +25,7 @@ public class BootstrapNewNodesHandler extends AbstractFlowHandler<ClusterScaling
     }
 
     @Override
-    protected Object handleErrorFlow(Throwable throwable, ClusterScalingContext data) throws Exception {
+    protected Object handleErrorFlow(Throwable throwable, StackScalingContext data) throws Exception {
         LOGGER.info("handleErrorFlow() for phase: {}", getClass());
         data.setErrorReason(throwable.getMessage());
         return getFlowFacade().handleStackScalingFailure(data);
