@@ -1,10 +1,14 @@
-package com.sequenceiq.cloudbreak.core.flow;
+package com.sequenceiq.cloudbreak.core.flow.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.core.flow.ErrorHandlerAwareFlowEventFactory;
+import com.sequenceiq.cloudbreak.core.flow.FlowManager;
+import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
+import com.sequenceiq.cloudbreak.core.flow.TransitionKeyService;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;

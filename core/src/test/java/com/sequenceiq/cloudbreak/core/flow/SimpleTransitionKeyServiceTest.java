@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.core.flow.service.SimpleTransitionKeyService;
+
 public class SimpleTransitionKeyServiceTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleTransitionKeyService.class);
     private TransitionKeyService transitionKeyService;
@@ -13,8 +15,8 @@ public class SimpleTransitionKeyServiceTest {
     @Before
     public void setUp() {
         transitionKeyService = new SimpleTransitionKeyService();
-        transitionKeyService.registerTransition(String.class, SimpleTransitionKeyService.TransitionFactory.createTransition("CURRENT", "SUCCESS", "FAILURE"));
-        transitionKeyService.registerTransition(Integer.class, SimpleTransitionKeyService.TransitionFactory.createTransition("CURRENT_NULL", "", ""));
+        transitionKeyService.registerTransition(String.class, TransitionFactory.createTransition("CURRENT", "SUCCESS", "FAILURE"));
+        transitionKeyService.registerTransition(Integer.class, TransitionFactory.createTransition("CURRENT_NULL", "", ""));
     }
 
     @Test

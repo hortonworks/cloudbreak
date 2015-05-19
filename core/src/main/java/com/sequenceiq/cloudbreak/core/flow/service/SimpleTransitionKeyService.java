@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow;
+package com.sequenceiq.cloudbreak.core.flow.service;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,6 +6,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.core.flow.Transition;
+import com.sequenceiq.cloudbreak.core.flow.TransitionKeyService;
 
 @Service
 public class SimpleTransitionKeyService implements TransitionKeyService {
@@ -42,15 +45,6 @@ public class SimpleTransitionKeyService implements TransitionKeyService {
             throw new IllegalStateException("There's no registered transition for handler class" + handlerClass);
         }
         return transition;
-    }
-
-    public static class TransitionFactory {
-        public static Transition createTransition(String current, String next, String failure) {
-            if (current == null || next == null || failure == null) {
-                throw new IllegalStateException("Invalid transition definition");
-            }
-            return new Transition(current, next, failure);
-        }
     }
 
 }

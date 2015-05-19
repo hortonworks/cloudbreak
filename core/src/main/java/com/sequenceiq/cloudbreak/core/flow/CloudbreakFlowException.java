@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
 public class CloudbreakFlowException extends RuntimeException {
-    public CloudbreakFlowException() {
-    }
 
     public CloudbreakFlowException(String message) {
         super(message);
