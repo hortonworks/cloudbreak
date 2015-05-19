@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-public class TerminationFailedException extends RuntimeException {
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
-    public TerminationFailedException() { }
+public class TerminationFailedException extends CloudbreakServiceException {
+
 
     public TerminationFailedException(String message) {
         super(message);
@@ -16,7 +17,5 @@ public class TerminationFailedException extends RuntimeException {
         super(cause);
     }
 
-    protected TerminationFailedException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
+
 }

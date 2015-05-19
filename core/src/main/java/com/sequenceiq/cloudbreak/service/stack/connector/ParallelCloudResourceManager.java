@@ -121,11 +121,10 @@ public class ParallelCloudResourceManager {
             if (!stackRepository.findById(stack.getId()).isStackInDeletionPhase()) {
                 return resourceSet;
             } else {
-                throw new CloudConnectorException("Failed to create stack resources, because polling reached an invalid end state.");
+                throw new CloudConnectorException("Failed to create stack resources; polling reached an invalid end state.");
             }
         } catch (Exception e) {
-            String errorReason = "Error occurred when building stack resources:";
-            LOGGER.error(errorReason, e);
+            LOGGER.error("Error occurred while building stack resources. Error message: {}", e.getMessage());
             throw new CloudConnectorException(e);
         }
     }
@@ -173,9 +172,8 @@ public class ParallelCloudResourceManager {
             }
             return collectResources(successResourceRequestResults);
         } catch (Exception e) {
-            String errorReason = "Error occurred when adding new resources to stack:";
-            LOGGER.error(errorReason, e);
-            throw new CloudConnectorException(errorReason, e);
+            LOGGER.error("Error occurred when adding new resources to stack. Error message: {}", e.getMessage());
+            throw new CloudConnectorException(e);
         }
     }
 
@@ -218,9 +216,8 @@ public class ParallelCloudResourceManager {
             }
             return instanceIds;
         } catch (Exception e) {
-            String errorReason = "Error occurred when removing existing resources from stack:";
-            LOGGER.error(errorReason, e);
-            throw new CloudConnectorException(errorReason, e);
+            LOGGER.error("Error occurred when removing existing resources from stack. Error message: {}", e.getMessage());
+            throw new CloudConnectorException(e);
         }
     }
 
@@ -270,9 +267,8 @@ public class ParallelCloudResourceManager {
                 }
             }
         } catch (Exception e) {
-            String errorReason = "Error occurred when terminating stack resources:";
-            LOGGER.error(errorReason, e);
-            throw new CloudConnectorException(errorReason, e);
+            LOGGER.error("Error occurred while terminating stack resources. Error message: {}", e.getMessage());
+            throw new CloudConnectorException(e);
         }
     }
 
@@ -309,9 +305,8 @@ public class ParallelCloudResourceManager {
                 }
             }
         } catch (Exception e) {
-            String errorReason = "Error occurred when rolling back stack resources:";
-            LOGGER.error(errorReason, e);
-            throw new CloudConnectorException(errorReason, e);
+            LOGGER.error("Error occurred when rolling back stack resources. Error message: {}", e.getMessage());
+            throw new CloudConnectorException(e);
         }
     }
 
