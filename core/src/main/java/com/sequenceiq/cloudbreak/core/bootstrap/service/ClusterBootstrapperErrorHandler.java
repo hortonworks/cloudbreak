@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow;
+package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
 import java.util.ArrayList;
 import java.util.HashSet;
