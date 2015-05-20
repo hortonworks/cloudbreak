@@ -2,7 +2,7 @@
 heat_template_version: 2014-10-16
 
 description: >
-  Heat OpenStack-native for Ambari
+  Heat template for Cloudbreak
 
 parameters:
 
@@ -15,11 +15,9 @@ parameters:
   image_id:
     type: string
     description: ID of the image
-    default: Ubuntu 14.04 LTS amd64
   app_net_cidr:
     type: string
     description: app network address (CIDR notation)
-    default: ${cbSubnet}
   public_net_id:
     type: string
     description: The ID of the public network. You will need to replace it with your DevStack public network ID
@@ -119,7 +117,7 @@ ${userdata}
     type: OS::Neutron::SecurityGroup
     properties:
       description: Cloudbreak security group
-      name: cb-sec-group
+      name: cb-sec-group_${cb_stack_name}
       rules: [
         <#list subnets as s>
         <#list ports as p>
@@ -129,15 +127,15 @@ ${userdata}
         port_range_max: ${p.localPort}},
         </#list>
         </#list>
-        {remote_ip_prefix: ${cbSubnet},
+        {remote_ip_prefix: { get_param: app_net_cidr },
         protocol: tcp,
         port_range_min: 1,
         port_range_max: 65535},
-        {remote_ip_prefix: ${cbSubnet},
+        {remote_ip_prefix: { get_param: app_net_cidr },
         protocol: udp,
         port_range_min: 1,
         port_range_max: 65535},
-        {remote_ip_prefix: ${cbSubnet},
+        {remote_ip_prefix: { get_param: app_net_cidr },
         protocol: icmp}]
         
 outputs:

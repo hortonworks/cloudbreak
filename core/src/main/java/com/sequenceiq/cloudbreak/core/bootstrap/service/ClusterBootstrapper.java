@@ -144,7 +144,7 @@ public class ClusterBootstrapper {
             newNodes.add(gatewayNode);
         }
         for (Node node : nodes) {
-            if (!node.getPublicIp().equals(gatewayIp)) {
+            if (!gatewayIp.equals(node.getPublicIp())) {
                 newNodes.add(node);
                 if (newNodes.size() >= containerOrchestrator.getMaxBootstrapNodes()) {
                     result.add(newNodes);
@@ -160,7 +160,7 @@ public class ClusterBootstrapper {
 
     private Node getGateWayNode(Set<Node> nodes, String gatewayIp) {
         for (Node node : nodes) {
-            if (node.getPublicIp().equals(gatewayIp)) {
+            if (gatewayIp.equals(node.getPublicIp())) {
                 return node;
             }
         }

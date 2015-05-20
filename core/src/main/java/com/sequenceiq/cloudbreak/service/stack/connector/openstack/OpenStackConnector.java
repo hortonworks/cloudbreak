@@ -40,15 +40,14 @@ import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 
-import jersey.repackaged.com.google.common.collect.Maps;
-
 @Service
 public class OpenStackConnector implements CloudPlatformConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackConnector.class);
-    private static final int POLLING_INTERVAL = 5000;
-    private static final int MAX_POLLING_ATTEMPTS = 100;
-    private static final long OPERATION_TIMEOUT = 5L;
+
+    private static final int POLLING_INTERVAL = 10000;
+    private static final int MAX_POLLING_ATTEMPTS = 1000;
+    private static final long OPERATION_TIMEOUT = 60L;
 
     @Inject
     private OpenStackUtil openStackUtil;
@@ -83,11 +82,12 @@ public class OpenStackConnector implements CloudPlatformConnector {
         OpenStackCredential credential = (OpenStackCredential) stack.getCredential();
         String heatTemplate = heatTemplateBuilder.build(stack, gateWayUserData, coreUserData);
         OSClient osClient = openStackUtil.createOSClient(credential);
+        Map<String, String> parameters = heatTemplateBuilder.buildParameters(getPublicNetId(stack), credential, stack.getImage(), stack.getNetwork());
         org.openstack4j.model.heat.Stack openStackStack = osClient
                 .heat()
                 .stacks()
                 .create(Builders.stack().name(stackName).template(heatTemplate).disableRollback(false)
-                        .parameters(buildParameters(getPublicNetId(stack), credential, stack.getImage())).timeoutMins(OPERATION_TIMEOUT).build());
+                        .parameters(parameters).timeoutMins(OPERATION_TIMEOUT).build());
         List<Resource> resources = new ArrayList<>();
         resources.add(new Resource(ResourceType.HEAT_STACK, openStackStack.getId(), stack));
         Stack updatedStack = stackUpdater.addStackResources(stack.getId(), resources);
@@ -187,8 +187,9 @@ public class OpenStackConnector implements CloudPlatformConnector {
         Resource heatStack = stack.getResourceByType(ResourceType.HEAT_STACK);
         String heatStackId = heatStack.getResourceName();
         OSClient osClient = openStackUtil.createOSClient(credential);
+        Map<String, String> parameters = heatTemplateBuilder.buildParameters(getPublicNetId(stack), credential, stack.getImage(), stack.getNetwork());
         StackUpdate updateRequest = Builders.stackUpdate().template(heatTemplate)
-                .parameters(buildParameters(getPublicNetId(stack), credential, stack.getImage())).timeoutMins(OPERATION_TIMEOUT).build();
+                .parameters(parameters).timeoutMins(OPERATION_TIMEOUT).build();
         String stackName = stack.getName();
         osClient.heat().stacks().update(stackName, heatStackId, updateRequest);
         LOGGER.info("Heat stack update request sent with stack name: '{}' for Heat stack: '{}'", stackName, heatStackId);
@@ -201,14 +202,6 @@ public class OpenStackConnector implements CloudPlatformConnector {
         return ((OpenStackNetwork) stack.getNetwork()).getPublicNetId();
     }
 
-    private Map<String, String> buildParameters(String publicNetId, OpenStackCredential credential, String image) {
-        Map<String, String> parameters = Maps.newHashMap();
-        parameters.put("public_net_id", publicNetId);
-        parameters.put("image_id", image);
-        parameters.put("key_name", openStackUtil.getKeyPairName(credential));
-        parameters.put("tenant_id", credential.getTenantName());
-        return parameters;
-    }
 
     private boolean setStackState(Stack stack, boolean stopped) {
         boolean result = true;

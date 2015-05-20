@@ -11,25 +11,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
 import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
+import jersey.repackaged.com.google.common.collect.Maps;
 
 @Service
 public class HeatTemplateBuilder {
 
     public static final String CB_INSTANCE_GROUP_NAME = "cb_instance_group_name";
     public static final String CB_INSTANCE_PRIVATE_ID = "cb_instance_private_id";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HeatTemplateBuilder.class);
+
     private static final int PRIVATE_ID_PART = 2;
     private static final String MOUNT_PREFIX = "/hadoopfs/fs";
     private static final String DEVICE_PREFIX = "/dev/vd";
@@ -38,7 +47,10 @@ public class HeatTemplateBuilder {
     @Value("${cb.openstack.heat.template.path:" + CB_OPENSTACK_HEAT_TEMPLATE_PATH + "}")
     private String openStackHeatTemplatePath;
 
-    @Autowired
+    @Inject
+    private OpenStackUtil openStackUtil;
+
+    @Inject
     private Configuration freemarkerConfiguration;
 
     public String build(Stack stack, String gateWayUserData, String coreUserData) {
@@ -70,16 +82,28 @@ public class HeatTemplateBuilder {
     private String build(Stack stack, List<OpenStackInstance> agents, String gateWayUserData, String coreUserData) {
         try {
             Map<String, Object> model = new HashMap<>();
+            model.put("cb_stack_name", stack.getName());
             model.put("agents", agents);
             model.put("coreuserdata", formatUserData(coreUserData));
             model.put("gatewayuserdata", formatUserData(gateWayUserData));
             model.put("subnets", stack.getAllowedSubnets());
             model.put("ports", NetworkUtils.getPorts(stack));
-            model.put("cbSubnet", stack.getNetwork().getSubnetCIDR());
-            return processTemplateIntoString(freemarkerConfiguration.getTemplate(openStackHeatTemplatePath, "UTF-8"), model);
+            String generatedTemplate = processTemplateIntoString(freemarkerConfiguration.getTemplate(openStackHeatTemplatePath, "UTF-8"), model);
+            LOGGER.debug("Generated Heat template: {}",  generatedTemplate);
+            return generatedTemplate;
         } catch (IOException | TemplateException e) {
             throw new OpenStackResourceException("Failed to process the OpenStack HeatTemplate", e);
         }
+    }
+
+    public Map<String, String> buildParameters(String publicNetId, OpenStackCredential credential, String image, Network network) {
+        Map<String, String> parameters = Maps.newHashMap();
+        parameters.put("public_net_id", publicNetId);
+        parameters.put("image_id", image);
+        parameters.put("key_name", openStackUtil.getKeyPairName(credential));
+        parameters.put("tenant_id", credential.getTenantName());
+        parameters.put("app_net_cidr", network.getSubnetCIDR());
+        return parameters;
     }
 
     private List<OpenStackInstance> generateAgents(Set<InstanceGroup> instanceGroups) {

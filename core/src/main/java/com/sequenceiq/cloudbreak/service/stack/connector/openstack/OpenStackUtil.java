@@ -4,10 +4,14 @@ import static org.apache.commons.lang3.StringUtils.deleteWhitespace;
 
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
 import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
 import org.openstack4j.api.OSClient;
+import org.openstack4j.core.transport.internal.HttpLoggingFilter;
 import org.openstack4j.openstack.OSFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -20,8 +24,16 @@ public class OpenStackUtil {
 
     private static final String CB_KEYPAIR_NAME = "cb-keypair-";
 
-    @Autowired
+    @Inject
     private PBEStringCleanablePasswordEncryptor encryptor;
+
+    @Value("${cb.openstack.api.debug:false}")
+    private boolean debug;
+
+    @PostConstruct
+    public void init() {
+        System.getProperties().setProperty(HttpLoggingFilter.class.getName(), Boolean.toString(debug));
+    }
 
     public OSClient createOSClient(Stack stack) {
         return createOSClient((OpenStackCredential) stack.getCredential());
