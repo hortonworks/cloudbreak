@@ -179,8 +179,6 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                     var stack = {
                         name: cluster.name,
                         credentialId: cluster.credentialId,
-                        password: cluster.password,
-                        userName: cluster.userName,
                         region: cluster.region,
                         failurePolicy: cluster.failurePolicy,
                         onFailure: cluster.onFailure,
@@ -211,7 +209,10 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         blueprintId: cluster.blueprintId,
                         emailNeeded: cluster.email,
                         hostGroups: cluster.hostGroups,
-                        validateBlueprint: cluster.validateBlueprint
+                        password: cluster.password,
+                        userName: cluster.userName,
+                        validateBlueprint: cluster.validateBlueprint,
+                        ambariStackDetails: cluster.ambariStackDetails === 'undefined' ? null : cluster.ambariStackDetails
                     }
                     successHandler(cluster);
                     Cluster.save({ id: result.id }, cbCluster, function (result) {
