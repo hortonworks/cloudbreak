@@ -10,6 +10,7 @@ public class GccResourceReadyPollerObject extends StackContext {
 
     private Optional<Compute.ZoneOperations.Get> zoneOperations;
     private Optional<Compute.RegionOperations.Get> regionOperations;
+    private Optional<Compute.GlobalOperations.Get> globalOperations;
     private String name;
     private String operationName;
     private ResourceType resourceType;
@@ -18,6 +19,7 @@ public class GccResourceReadyPollerObject extends StackContext {
         super(stack);
         this.zoneOperations = Optional.fromNullable(zoneOperations);
         this.regionOperations = Optional.absent();
+        this.globalOperations = Optional.absent();
         this.name = name;
         this.operationName = operationName;
         this.resourceType = resourceType;
@@ -28,6 +30,18 @@ public class GccResourceReadyPollerObject extends StackContext {
         super(stack);
         this.regionOperations = Optional.fromNullable(regionOperations);
         this.zoneOperations = Optional.absent();
+        this.globalOperations = Optional.absent();
+        this.name = name;
+        this.operationName = operationName;
+        this.resourceType = resourceType;
+    }
+
+    public GccResourceReadyPollerObject(Compute.GlobalOperations.Get globalOperations, Stack stack, String name, String operationName,
+            ResourceType resourceType) {
+        super(stack);
+        this.globalOperations = Optional.fromNullable(globalOperations);
+        this.zoneOperations = Optional.absent();
+        this.regionOperations = Optional.absent();
         this.name = name;
         this.operationName = operationName;
         this.resourceType = resourceType;
@@ -39,6 +53,10 @@ public class GccResourceReadyPollerObject extends StackContext {
 
     public Optional<Compute.ZoneOperations.Get> getZoneOperations() {
         return zoneOperations;
+    }
+
+    public Optional<Compute.GlobalOperations.Get> getGlobalOperations() {
+        return globalOperations;
     }
 
     public String getName() {
