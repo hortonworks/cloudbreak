@@ -10,7 +10,7 @@
               <i></i>Hide Advanced Options
             </a>
         </div>
-        <div id="create-cluster-panel-collapse" class="panel panel-default">
+        <div id="create-cluster-panel-collapse" class="panel panel-default" style="margin-bottom: 0px;">
             <div class="panel-body">
                 <form class="form-horizontal" role="form" name="$parent.clusterCreationForm">
                     <div class="form-group" ng-class="{ 'has-error': clusterCreationForm.cl_clusterName.$dirty && clusterCreationForm.cl_clusterName.$invalid }">
@@ -120,6 +120,72 @@
                       <div class="col-sm-9">
                         <input type="checkbox" id="emailneeded" ng-model="cluster.email" name="emailneeded">
                       </div>
+                    </div>
+                    <div id="ambariconfig" class="form-group" ng-show="showAdvancedOptionForm">
+                       <label class="col-sm-3 control-label" for="ambarirepoconfig1">Ambari Repository config</label>
+                       <div class="col-sm-9" id="ambarirepoconfig1" style="padding: 0px;padding-left: 10px;">
+                             <div class="panel panel-default" style="border-top-left-radius: 0.5em; border-top-right-radius: 0.5em;">
+                                <div class="panel-heading" style="border-top-left-radius: 0.5em; border-top-right-radius: 0.5em;">
+                                   <h3 class="panel-title">configurations</h3>
+                                </div>
+                                <div class="panel-body">
+                                   <div class="form-group" name="ambari_stack1" >
+                                      <label class="col-sm-3 control-label" for="ambari_stack">Stack</label>
+                                      <div class="col-sm-9">
+                                         <input type="string" name="ambari_stack" class="form-control" ng-model="cluster.ambariStackDetails.stack" id="ambari_stack" placeholder="HDP">
+
+                                      </div>
+                                   </div>
+                                   <div class="form-group" name="ambari_version1" >
+                                      <label class="col-sm-3 control-label" for="ambari_version">Version</label>
+                                      <div class="col-sm-9">
+                                         <input type="string" name="ambari_version" class="form-control" ng-model="cluster.ambariStackDetails.version" id="ambari_version" placeholder="2.2">
+
+                                      </div>
+                                   </div>
+                                   <div class="form-group" name="ambari_os1" >
+                                      <label class="col-sm-3 control-label" for="ambari_os">Os</label>
+                                      <div class="col-sm-9">
+                                         <input type="string" disabled name="ambari_os" class="form-control" ng-model="cluster.ambariStackDetails.os" id="ambari_os" placeholder="redhat6">
+
+                                      </div>
+                                   </div>
+                                   <div class="form-group" name="ambari_stackRepoId1" >
+                                      <label class="col-sm-3 control-label" for="ambari_stackRepoId">Stack Repo Id</label>
+                                      <div class="col-sm-9">
+                                         <input type="string" name="ambari_stackRepoId" class="form-control" ng-model="cluster.ambariStackDetails.stackRepoId" id="ambari_stackRepoId" placeholder="HDP-2.2">
+
+                                      </div>
+                                   </div>
+                                   <div class="form-group" name="ambari_stackBaseURL1" >
+                                      <label class="col-sm-3 control-label" for="ambari_stackBaseURL">Base Url</label>
+                                      <div class="col-sm-9">
+                                         <input type="string" name="ambari_stackBaseURL" class="form-control" ng-model="cluster.ambariStackDetails.stackBaseURL" id="ambari_stackBaseURL" placeholder="http://public-repo-1.hortonworks.com/HDP/centos6/2.x/GA/2.2.0.0">
+
+                                      </div>
+                                   </div>
+                                   <div class="form-group" name="ambari_utilsRepoId1" >
+                                      <label class="col-sm-3 control-label" for="ambari_utilsRepoId">Utils Repo Id</label>
+                                      <div class="col-sm-9">
+                                         <input type="string" name="ambari_utilsRepoId" class="form-control" ng-model="cluster.ambariStackDetails.utilsRepoId" id="ambari_utilsRepoId" placeholder="HDP-UTILS-1.1.0.20">
+
+                                      </div>
+                                   </div>
+                                   <div class="form-group" name="ambari_utilsBaseURL1" >
+                                      <label class="col-sm-3 control-label" for="ambari_utilsBaseURL">Utils Base Url</label>
+                                      <div class="col-sm-9">
+                                         <input type="string" name="ambari_utilsBaseURL" class="form-control" ng-model="cluster.ambariStackDetails.utilsBaseURL" id="ambari_utilsBaseURL" placeholder="http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/centos6">
+                                      </div>
+                                   </div>
+                                   <div class="form-group" name="cluster_verify1" >
+                                        <label class="col-sm-3 control-label" for="cluster_verify">Verify</label>
+                                        <div class="col-sm-9">
+                                            <input type="checkbox" name="cluster_verify" id="cluster_verify" ng-model="cluster.ambariStackDetails.verify">
+                                        </div>
+                                   </div>
+                                </div>
+                             </div>
+                       </div>
                     </div>
                     <div class="form-group" ng-show="cluster.instanceGroups">
                       <label class="col-sm-3 control-label" for="hostgroupconfig">Hostgroup configuration</label>

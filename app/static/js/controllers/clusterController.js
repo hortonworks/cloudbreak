@@ -104,6 +104,10 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
           $scope.cluster.hostGroups = hostGroups;
         }
 
+        $scope.isUndefined = function (variable) {
+            return angular.isUndefined(variable) || variable === null;
+        }
+
         $scope.createCluster = function () {
             var blueprint = $filter('filter')($rootScope.blueprints, {id: $scope.cluster.blueprintId}, true)[0];
 
@@ -114,6 +118,31 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             if (blueprint.hostGroupCount === 1 && $scope.cluster.nodeCount != 1) {
                 $scope.showErrorMessage($rootScope.error_msg.hostgroup_single_invalid);
                 return;
+            }
+            if (!$scope.isUndefined($scope.cluster.ambariStackDetails)) {
+                 for (var item in $scope.cluster.ambariStackDetails) {
+                    if ($scope.cluster.ambariStackDetails[item] === "" || $scope.cluster.ambariStackDetails[item] === undefined) {
+                        delete $scope.cluster.ambariStackDetails[item];
+                    }
+                 }
+            }
+            if (!$scope.isUndefined($scope.cluster.ambariStackDetails) && Object.keys($scope.cluster.ambariStackDetails).length !== 0) {
+                if ($scope.isUndefined($scope.cluster.ambariStackDetails.stack) ||
+                    $scope.isUndefined($scope.cluster.ambariStackDetails.version) ||
+                    $scope.isUndefined($scope.cluster.ambariStackDetails.stackRepoId) ||
+                    $scope.isUndefined($scope.cluster.ambariStackDetails.stackBaseURL) ||
+                    $scope.isUndefined($scope.cluster.ambariStackDetails.utilsRepoId) ||
+                    $scope.isUndefined($scope.cluster.ambariStackDetails.utilsBaseURL)) {
+                    $scope.showErrorMessage($rootScope.error_msg.ambari_repository_config_error);
+                    return;
+                } else {
+                    $scope.cluster.ambariStackDetails.os = "redhat6";
+                    if ($scope.isUndefined($scope.cluster.ambariStackDetails.verify)) {
+                        $scope.cluster.ambariStackDetails.verify = false;
+                    }
+                }
+            } else {
+                $scope.cluster.ambariStackDetails = null;
             }
             $scope.cluster.credentialId = $rootScope.activeCredential.id;
             $scope.prepareParameters($scope.cluster);
@@ -181,6 +210,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
               validateBlueprint: true,
               blueprintId: $rootScope.activeClusterBlueprint.id,
               hostgroups: $rootScope.activeCluster.cluster.hostGroups,
+              ambariStackDetails: $rootScope.activeCluster.cluster.ambariStackDetails,
               fullBp: $rootScope.activeClusterBlueprint,
             };
             GlobalStack.get({ id: clusterId }, function(success) {
@@ -261,10 +291,36 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.reinstallCluster = function (activeCluster) {
+            if (!$scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails)) {
+                for (var item in $rootScope.reinstallClusterObject.ambariStackDetails) {
+                    if ($rootScope.reinstallClusterObject.ambariStackDetails[item] === "" || $rootScope.reinstallClusterObject.ambariStackDetails[item] === undefined) {
+                        delete $rootScope.reinstallClusterObject.ambariStackDetails[item];
+                    }
+                }
+            }
+            if (!$scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails) && Object.keys($rootScope.reinstallClusterObject.ambariStackDetails).length !== 0) {
+                if ($scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stack) ||
+                    $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.version) ||
+                    $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stackRepoId) ||
+                    $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stackBaseURL) ||
+                    $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.utilsRepoId) ||
+                    $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.utilsBaseURL)) {
+                    $scope.showErrorMessage($rootScope.error_msg.ambari_repository_config_error);
+                    return;
+                } else {
+                    $rootScope.reinstallClusterObject.ambariStackDetails.os = "redhat6";
+                    if ($scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.verify)) {
+                        $rootScope.reinstallClusterObject.ambariStackDetails.verify = false;
+                    }
+                }
+            } else {
+                $rootScope.reinstallClusterObject.ambariStackDetails = null;
+            }
             var newInstall = {
                 "blueprintId": $rootScope.reinstallClusterObject.blueprintId,
                 "hostgroups": $rootScope.reinstallClusterObject.hostgroups,
-                "validateBlueprint": $rootScope.reinstallClusterObject.validateBlueprint
+                "validateBlueprint": $rootScope.reinstallClusterObject.validateBlueprint,
+                "ambariStackDetails": $rootScope.reinstallClusterObject.ambariStackDetails
             };
             Cluster.update({id: activeCluster.id}, newInstall, function(success){
                   $rootScope.activeCluster.blueprintId = $rootScope.reinstallClusterObject.blueprintId;
