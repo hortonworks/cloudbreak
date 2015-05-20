@@ -43,10 +43,10 @@ public class EnvironmentVariableConfig {
     public static final String CB_DOCKER_CONTAINER_DOCKER_CONSUL_WATCH_PLUGN = "sequenceiq/docker-consul-watch-plugn:2.0.0-consul";
     public static final String CB_DOCKER_CONTAINER_AMBARI_DB = "postgres:9.4.1";
 
-    public static final String CB_AZURE_IMAGE_URI = "https://102589fae040d8westeurope.blob.core.windows.net/images/packer-cloudbreak-2015-05-15-centos6_2015-May-15_12-38-os-2015-05-15.vhd";
-    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-cad318ca,ap-southeast-1:ami-d4dfe186,ap-southeast-2:ami-9d146aa7,eu-west-1:ami-4384f134,sa-east-1:ami-6deb6d70,us-east-1:ami-16f7ea7e,us-west-1:ami-67aa4323,us-west-2:ami-69526059";
-    public static final String CB_OPENSTACK_IMAGE = "cb-centos66-amb200-2015-05-15";
-    public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos66-amb200-2015-05-15-1403.image.tar.gz";
+    public static final String CB_AZURE_IMAGE_URI = "https://102589fae040d8westeurope.blob.core.windows.net/images/packer-cloudbreak-2015-05-19-centos6_2015-May-19_16-30-os-2015-05-19.vhd";
+    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-80fa2f80,ap-southeast-1:ami-7a102928,ap-southeast-2:ami-51fa846b,eu-west-1:ami-d37b0ca4,sa-east-1:ami-f15ed8ec,us-east-1:ami-18100970,us-west-1:ami-e33fd6a7,us-west-2:ami-df6d50ef";
+    public static final String CB_OPENSTACK_IMAGE = "cb-centos66-amb200-2015-05-19";
+    public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos66-amb200-2015-05-19-1810.image.tar.gz";
 
     public static final String CB_GCP_AND_AZURE_USER_NAME = "cloudbreak";
 
