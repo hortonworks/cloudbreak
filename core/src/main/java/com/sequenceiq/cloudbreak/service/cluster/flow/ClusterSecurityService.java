@@ -55,7 +55,8 @@ public class ClusterSecurityService {
         try {
             updateClusterState(stack, Status.UPDATE_IN_PROGRESS, "Enabling kerberos security.");
             createAndStartKDC(stack);
-            AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(stack);
+            Cluster cluster = stack.getCluster();
+            AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(cluster);
             ambariClient.addService(KERBEROS_SERVICE);
             ambariClient.addServiceComponent(KERBEROS_SERVICE, KERBEROS_CLIENT);
             ambariClient.addComponentsToHosts(ambariClient.getClusterHosts(), asList(KERBEROS_CLIENT));
@@ -69,7 +70,7 @@ public class ClusterSecurityService {
                 pollingResult = waitForOperation(stack, ambariClient, singletonMap("STOP_SERVICES", ambariClient.stopAllServices()));
                 if (isContinue(pollingResult)) {
                     ambariClient.createKerberosDescriptor(REALM);
-                    ambariClientProvider.setKerberosSession(ambariClient, stack.getCluster());
+                    ambariClientProvider.setKerberosSession(ambariClient, cluster);
                     pollingResult = waitForOperation(stack, ambariClient, singletonMap("ENABLE_KERBEROS", ambariClient.enableKerberos()));
                     if (isContinue(pollingResult)) {
                         waitForOperation(stack, ambariClient, singletonMap("START_SERVICES", ambariClient.startAllServices()));

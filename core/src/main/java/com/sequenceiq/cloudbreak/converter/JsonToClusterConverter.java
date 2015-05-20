@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.converter;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.controller.json.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
+import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Status;
 
@@ -15,11 +17,17 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         cluster.setStatus(Status.REQUESTED);
         cluster.setDescription(source.getDescription());
         cluster.setEmailNeeded(source.getEmailNeeded());
+        cluster.setUserName(source.getUserName());
+        cluster.setPassword(source.getPassword());
         Boolean enableSecurity = source.getEnableSecurity();
         cluster.setSecure(enableSecurity == null ? false : enableSecurity);
         cluster.setKerberosMasterKey(source.getKerberosMasterKey());
         cluster.setKerberosAdmin(source.getKerberosAdmin());
         cluster.setKerberosPassword(source.getKerberosPassword());
+        AmbariStackDetailsJson ambariStackDetails = source.getAmbariStackDetails();
+        if (ambariStackDetails != null) {
+            cluster.setAmbariStackDetails(getConversionService().convert(ambariStackDetails, AmbariStackDetails.class));
+        }
         return cluster;
     }
 }

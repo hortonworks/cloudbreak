@@ -56,10 +56,6 @@ public class RetryingStackUpdater {
         return doRemoveResources(stackId, resources, INITIAL_ATTEMPT);
     }
 
-    public Stack updateAmbariIp(Long stackId, String ambariIp) {
-        return doUpdateAmbariIp(stackId, ambariIp, INITIAL_ATTEMPT);
-    }
-
     public Stack updateStackCluster(Long stackId, Cluster cluster) {
         return doUpdateStackCluster(stackId, cluster, INITIAL_ATTEMPT);
     }
@@ -144,24 +140,6 @@ public class RetryingStackUpdater {
                 return doUpdateMetaData(stackId, instanceMetaData, groupName, attempt + 1);
             } else {
                 throw new CloudbreakServiceException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update metadata)",
-                        stackId, MAX_RETRIES), e);
-            }
-        }
-    }
-
-    private Stack doUpdateAmbariIp(Long stackId, String ambariIp, int attempt) {
-        try {
-            Stack stack = stackRepository.findById(stackId);
-            stack.setAmbariIp(ambariIp);
-            stack = stackRepository.save(stack);
-            LOGGER.info("Updated stack: [ambariIp: '{}'].", ambariIp);
-            return stack;
-        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            if (attempt <= MAX_RETRIES) {
-                LOGGER.info("Failed to update stack's Ambari IP. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt, e.getClass().getSimpleName());
-                return doUpdateAmbariIp(stackId, ambariIp, attempt + 1);
-            } else {
-                throw new CloudbreakServiceException(String.format("Failed to update stack '%s' in %d attempts. (while trying to update ambariIp)",
                         stackId, MAX_RETRIES), e);
             }
         }

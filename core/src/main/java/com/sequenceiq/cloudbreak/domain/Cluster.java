@@ -14,6 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -61,6 +62,11 @@ public class Cluster implements ProvisionEntity {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String statusReason;
 
+    private String ambariIp;
+
+    private String userName;
+    private String password;
+
     private Boolean secure;
     private String kerberosMasterKey;
     private String kerberosAdmin;
@@ -70,6 +76,9 @@ public class Cluster implements ProvisionEntity {
 
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<HostGroup> hostGroups = new HashSet<>();
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private AmbariStackDetails ambariStackDetails;
 
     public String getDescription() {
         return description;
@@ -209,5 +218,37 @@ public class Cluster implements ProvisionEntity {
 
     public void setKerberosPassword(String kerberosPassword) {
         this.kerberosPassword = kerberosPassword;
+    }
+
+    public AmbariStackDetails getAmbariStackDetails() {
+        return ambariStackDetails;
+    }
+
+    public void setAmbariStackDetails(AmbariStackDetails ambariStackDetails) {
+        this.ambariStackDetails = ambariStackDetails;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getAmbariIp() {
+        return ambariIp;
+    }
+
+    public void setAmbariIp(String ambariIp) {
+        this.ambariIp = ambariIp;
     }
 }

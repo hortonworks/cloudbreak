@@ -123,7 +123,6 @@ public final class ServiceTestUtils {
         instanceGroup2.setTemplate(template2);
         instanceGroups.add(instanceGroup2);
         Stack stack = new Stack();
-        stack.setAmbariIp("168.192.12.13");
         stack.setCredential(credential);
         stack.setRegion("EU_WEST_1");
         stack.setOwner(owner);
@@ -141,6 +140,7 @@ public final class ServiceTestUtils {
         cluster.setName("test-cluster");
         cluster.setDescription("test cluster");
         cluster.setEmailNeeded(false);
+        cluster.setAmbariIp("168.192.12.13");
         cluster.setStatus(Status.AVAILABLE);
         cluster.setStatusReason("");
         cluster.setCreationStarted(123456789L);

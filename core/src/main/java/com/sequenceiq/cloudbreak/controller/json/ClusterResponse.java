@@ -26,8 +26,15 @@ public class ClusterResponse {
     private String description;
     @ApiModelProperty(ClusterModelDescription.STATUS_REASON)
     private String statusReason;
+    @ApiModelProperty(ModelDescriptions.StackModelDescription.AMBARI_IP)
+    private String ambariServerIp;
+    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.USERNAME, required = true)
+    private String userName;
+    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD, required = true)
+    private String password;
     private boolean secure;
     private Set<HostGroupJson> hostGroups;
+    private AmbariStackDetailsJson ambariStackDetails;
 
     public String getDescription() {
         return description;
@@ -108,5 +115,37 @@ public class ClusterResponse {
 
     public void setSecure(boolean secure) {
         this.secure = secure;
+    }
+
+    public String getAmbariServerIp() {
+        return ambariServerIp;
+    }
+
+    public void setAmbariServerIp(String ambariServerIp) {
+        this.ambariServerIp = ambariServerIp;
+    }
+
+    public AmbariStackDetailsJson getAmbariStackDetails() {
+        return ambariStackDetails;
+    }
+
+    public void setAmbariStackDetails(AmbariStackDetailsJson ambariStackDetails) {
+        this.ambariStackDetails = ambariStackDetails;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

@@ -20,6 +20,8 @@ import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -88,27 +90,29 @@ public class AmbariClusterFacade implements ClusterFacade {
         ProvisioningContext provisioningContext = (ProvisioningContext) context;
         Stack stack = stackService.getById(provisioningContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
-        LOGGER.debug("Starting Ambari. Context: {}", context);
-        AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, provisioningContext.getAmbariIp(),
-                ambariClientProvider.getDefaultAmbariClient(provisioningContext.getAmbariIp()));
-
-        PollingResult pollingResult = ambariStartupPollerObjectPollingService.pollWithTimeout(ambariStartupListenerTask, ambariStartupPollerObject,
-                POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-
-        if (isSuccess(pollingResult)) {
-            LOGGER.info("Ambari has successfully started! Polling result: {}", pollingResult);
-            assert provisioningContext.getAmbariIp() != null;
-
+        Cluster cluster = stack.getCluster();
+        if (cluster == null) {
+            LOGGER.debug("There is no cluster installed on the stack, skipping start Ambari step");
         } else {
-            LOGGER.info("Could not start Ambari. polling result: {},  Context: {}", pollingResult, context);
-            throw new CloudbreakException(String.format("Could not start Ambari. polling result: '%s',  Context: '%s'", pollingResult, context));
-        }
-        stack = stackUpdater.updateAmbariIp(stack.getId(), provisioningContext.getAmbariIp());
-        String statusReason = "Cluster infrastructure and ambari are available on the cloud. AMBARI_IP:" + stack.getAmbariIp();
-        stack = stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, statusReason);
-        stackUpdater.updateStackStatusReason(stack.getId(), "");
-        changeAmbariCredentials(provisioningContext.getAmbariIp(), stack);
+            MDCBuilder.buildMdcContext(cluster);
+            LOGGER.debug("Starting Ambari. Context: {}", context);
+            AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, provisioningContext.getAmbariIp(),
+                    ambariClientProvider.getDefaultAmbariClient(provisioningContext.getAmbariIp()));
 
+            PollingResult pollingResult = ambariStartupPollerObjectPollingService.pollWithTimeout(ambariStartupListenerTask, ambariStartupPollerObject,
+                    POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+
+            if (isSuccess(pollingResult)) {
+                LOGGER.info("Ambari has successfully started! Polling result: {}", pollingResult);
+                assert provisioningContext.getAmbariIp() != null;
+
+            } else {
+                LOGGER.info("Could not start Ambari. polling result: {},  Context: {}", pollingResult, context);
+                throw new CloudbreakException(String.format("Could not start Ambari. polling result: '%s',  Context: '%s'", pollingResult, context));
+            }
+            clusterService.updateAmbariIp(cluster.getId(), provisioningContext.getAmbariIp());
+            changeAmbariCredentials(provisioningContext.getAmbariIp(), cluster);
+        }
         return provisioningContext;
     }
 
@@ -116,16 +120,16 @@ public class AmbariClusterFacade implements ClusterFacade {
     public FlowContext buildAmbariCluster(FlowContext context) throws Exception {
         ProvisioningContext provisioningContext = (ProvisioningContext) context;
         Stack stack = stackService.getById(provisioningContext.getStackId());
-        MDCBuilder.buildMdcContext(stack.getCluster());
-        LOGGER.debug("Building Ambari cluster. Context: {}", context);
-
-        if (stack.getCluster() != null && stack.getCluster().getStatus().equals(Status.REQUESTED)) {
+        MDCBuilder.buildMdcContext(stack);
+        if (stack.getCluster() == null) {
+            LOGGER.debug("There is no cluster installed on the stack, skipping build Ambari step");
+        } else {
+            MDCBuilder.buildMdcContext(stack.getCluster());
+            LOGGER.debug("Building Ambari cluster. Context: {}", context);
             Cluster cluster = ambariClusterConnector.buildAmbariCluster(stack);
             if (cluster.getEmailNeeded()) {
                 emailSenderService.sendSuccessEmail(cluster.getOwner(), stack.getAmbariIp());
             }
-        } else {
-            LOGGER.info("Ambari has started but there were no cluster request to this stack yet. Won't install cluster now.");
         }
         return provisioningContext;
     }
@@ -254,9 +258,25 @@ public class AmbariClusterFacade implements ClusterFacade {
 
     @Override
     public FlowContext runClusterContainers(FlowContext context) throws CloudbreakException {
+        ProvisioningContext provisioningContext = (ProvisioningContext) context;
+        Stack stack = stackService.getById(provisioningContext.getStackId());
+        MDCBuilder.buildMdcContext(stack);
         try {
-            containerRunner.runClusterContainers((ProvisioningContext) context);
-            return context;
+            if (stack.getCluster() != null && stack.getCluster().getStatus().equals(Status.REQUESTED)) {
+                MDCBuilder.buildMdcContext(stack.getCluster());
+                stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Cluster installation has been started");
+                LOGGER.debug("Launching Ambari cluster containers. Context: {}", context);
+                containerRunner.runClusterContainers((ProvisioningContext) context);
+                InstanceGroup gateway = stack.getGatewayInstanceGroup();
+                InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+                provisioningContext = new ProvisioningContext.Builder()
+                        .setDefaultParams(provisioningContext.getStackId(), provisioningContext.getCloudPlatform())
+                        .setAmbariIp(gatewayInstance.getPublicIp())
+                        .build();
+            } else {
+                LOGGER.info("The stack has started but there were no cluster request, yet. Won't install cluster now.");
+            }
+            return provisioningContext;
         } catch (Exception e) {
             LOGGER.error("Error occurred while setting up containers for the cluster: {}", e.getMessage());
             throw new CloudbreakException(e);
@@ -332,9 +352,9 @@ public class AmbariClusterFacade implements ClusterFacade {
         return provisioningContext;
     }
 
-    private void changeAmbariCredentials(String ambariIp, Stack stack) {
-        String userName = stack.getUserName();
-        String password = stack.getPassword();
+    private void changeAmbariCredentials(String ambariIp, Cluster cluster) {
+        String userName = cluster.getUserName();
+        String password = cluster.getPassword();
         AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(ambariIp);
         if (ADMIN.equals(userName)) {
             if (!ADMIN.equals(password)) {

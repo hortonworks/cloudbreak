@@ -67,7 +67,7 @@ public class ReactorFlowManager implements FlowManager {
         ProvisionRequest provisionRequest = (ProvisionRequest) object;
         ProvisioningContext context = new ProvisioningContext.Builder().
                 setDefaultParams(provisionRequest.getStackId(), provisionRequest.getCloudPlatform()).build();
-        reactor.notify(FlowPhases.CLUSTER_INSTALL.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_INSTALL.name()));
+        reactor.notify(FlowPhases.RUN_CLUSTER_CONTAINERS.name(), eventFactory.createEvent(context, FlowPhases.RUN_CLUSTER_CONTAINERS.name()));
     }
 
     @Override
@@ -131,7 +131,7 @@ public class ReactorFlowManager implements FlowManager {
     public void triggerClusterUpscale(Object object) {
         UpdateAmbariHostsRequest request = (UpdateAmbariHostsRequest) object;
         ClusterScalingContext context = new ClusterScalingContext(request);
-        reactor.notify(FlowPhases.CLUSTER_UPSCALE.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_UPSCALE.name()));
+        reactor.notify(FlowPhases.ADD_CLUSTER_CONTAINERS.name(), eventFactory.createEvent(context, FlowPhases.ADD_CLUSTER_CONTAINERS.name()));
     }
 
     @Override

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
@@ -19,9 +20,10 @@ public class AmbariHostsRemover {
     private AmbariClientProvider ambariClientProvider;
 
     public void deleteHosts(Stack stack, List<String> hosts, List<String> components) {
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword());
+        Cluster cluster = stack.getCluster();
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
         for (String hostName : hosts) {
-            if (stack.getCluster() != null) {
+            if (cluster != null) {
                 ambariClient.deleteHostComponents(hostName, components);
                 ambariClient.deleteHost(hostName);
             }

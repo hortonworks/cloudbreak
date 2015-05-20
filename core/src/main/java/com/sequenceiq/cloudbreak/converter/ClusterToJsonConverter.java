@@ -6,8 +6,10 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.controller.json.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupJson;
+import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -38,6 +40,13 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             clusterResponse.setHoursUp(0);
             clusterResponse.setMinutesUp(0);
         }
+        AmbariStackDetails ambariStackDetails = source.getAmbariStackDetails();
+        if (ambariStackDetails != null) {
+            clusterResponse.setAmbariStackDetails(getConversionService().convert(ambariStackDetails, AmbariStackDetailsJson.class));
+        }
+        clusterResponse.setAmbariServerIp(source.getAmbariIp());
+        clusterResponse.setUserName(source.getUserName());
+        clusterResponse.setPassword(source.getPassword());
         clusterResponse.setDescription(source.getDescription() == null ? "" : source.getDescription());
         clusterResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
         return clusterResponse;

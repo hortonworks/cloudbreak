@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow.handlers;
 
+import static com.sequenceiq.cloudbreak.domain.ScalingType.isClusterUpScale;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,8 +21,12 @@ public class AddClusterContainersHandler extends AbstractFlowHandler<ClusterScal
     @Override
     protected Object execute(Event<ClusterScalingContext> event) throws CloudbreakException {
         LOGGER.info("execute() for phase: {}", event.getKey());
-        ClusterScalingContext context = (ClusterScalingContext) getFlowFacade().addClusterContainers(event.getData());
-        LOGGER.info("Added cluster containers. Context: {}", context);
-        return context;
+        ClusterScalingContext clusterScalingContext = event.getData();
+        if (isClusterUpScale(clusterScalingContext.getScalingType())) {
+            ClusterScalingContext context = (ClusterScalingContext) getFlowFacade().addClusterContainers(event.getData());
+            LOGGER.info("Added cluster containers. Context: {}", context);
+            return context;
+        }
+        return clusterScalingContext;
     }
 }

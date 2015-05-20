@@ -26,8 +26,6 @@ public class StackResponse extends StackBase {
     private boolean publicInAccount;
     @ApiModelProperty(StackModelDescription.STATUS)
     private Status status;
-    @ApiModelProperty(StackModelDescription.AMBARI_IP)
-    private String ambariServerIp;
     private ClusterResponse cluster;
     @ApiModelProperty(StackModelDescription.STATUS_REASON)
     private String statusReason;
@@ -43,14 +41,6 @@ public class StackResponse extends StackBase {
 
     public void setAccount(String account) {
         this.account = account;
-    }
-
-    public String getAmbariServerIp() {
-        return ambariServerIp;
-    }
-
-    public void setAmbariServerIp(String ambariServerIp) {
-        this.ambariServerIp = ambariServerIp;
     }
 
     public ClusterResponse getCluster() {

@@ -32,10 +32,24 @@ public class ClusterRequest {
     @ApiModelProperty(ClusterModelDescription.EMAIL_NEEDED)
     private Boolean emailNeeded = Boolean.FALSE;
     private Boolean enableSecurity = Boolean.FALSE;
+    @Size(max = 15, min = 5, message = "The length of the username has to be in range of 5 to 15")
+    @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
+            message = "The username can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.USERNAME, required = true)
+    private String userName;
+    @Size(max = 15, min = 5, message = "The length of the password has to be in range of 5 to 15")
+    @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
+            message = "The password can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD, required = true)
+    private String password;
     private String kerberosMasterKey;
     private String kerberosAdmin;
     private String kerberosPassword;
     private Boolean validateBlueprint = true;
+    @Valid
+    private AmbariStackDetailsJson ambariStackDetails;
 
     public String getDescription() {
         return description;
@@ -115,5 +129,29 @@ public class ClusterRequest {
 
     public void setValidateBlueprint(Boolean validateBlueprint) {
         this.validateBlueprint = validateBlueprint;
+    }
+
+    public AmbariStackDetailsJson getAmbariStackDetails() {
+        return ambariStackDetails;
+    }
+
+    public void setAmbariStackDetails(AmbariStackDetailsJson ambariStackDetails) {
+        this.ambariStackDetails = ambariStackDetails;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

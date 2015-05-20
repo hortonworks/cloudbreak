@@ -47,7 +47,6 @@ public class ConsulMetadataSetup {
     @Autowired
     private ConsulHostCheckerTask consulHostCheckerTask;
 
-
     public void setupConsulMetadata(Long stackId) {
         LOGGER.info("Setting up Consul metadata for the cluster.");
         Stack stack = stackService.getById(stackId);

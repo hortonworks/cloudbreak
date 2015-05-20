@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.core.flow.FlowManager;
 import com.sequenceiq.cloudbreak.domain.APIResourceType;
+import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -127,12 +128,22 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
+    public Cluster updateAmbariIp(Long clusterId, String ambariIp) {
+        Cluster cluster = clusterRepository.findById(clusterId);
+        cluster.setAmbariIp(ambariIp);
+        cluster = clusterRepository.save(cluster);
+        LOGGER.info("Updated cluster: [ambariIp: '{}'].", ambariIp);
+        return cluster;
+    }
+
+    @Override
     public String getClusterJson(String ambariIp, Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
         if (stack.getAmbariIp() == null) {
             throw new NotFoundException(String.format("Ambari server could not be available for the stack.[id: %s]", stackId));
         }
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword());
+        Cluster cluster = stack.getCluster();
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
         try {
             String clusterJson = ambariClient.getClusterAsJson();
             if (clusterJson == null) {
@@ -252,7 +263,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint) {
+    public Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, AmbariStackDetails ambariStackDetails) {
         if (blueprintId == null || hostGroups == null) {
             throw new BadRequestException("Blueprint id and hostGroup assignments can not be null.");
         }
@@ -268,6 +279,9 @@ public class AmbariClusterService implements ClusterService {
         cluster.setBlueprint(blueprint);
         cluster.getHostGroups().removeAll(cluster.getHostGroups());
         cluster.getHostGroups().addAll(hostGroups);
+        if (ambariStackDetails != null) {
+            cluster.setAmbariStackDetails(ambariStackDetails);
+        }
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         stack = stackUpdater.updateStackCluster(stack.getId(), cluster);
         flowManager.triggerClusterReInstall(new ProvisionRequest(stack.cloudPlatform(), stack.getId()));
@@ -299,7 +313,7 @@ public class AmbariClusterService implements ClusterService {
                 instanceMetadataRepository.findUnregisteredHostsInInstanceGroup(hostGroup.getInstanceGroup().getId());
         Set<String> instanceIds = new HashSet<>();
         for (InstanceMetaData instanceMetaData : unregisteredHostsInInstanceGroup) {
-            instanceIds.add(instanceMetaData.getInstanceId());
+            instanceIds.add(instanceMetaData.getPrivateIp());
             if (instanceIds.size() >= adjustmentJson.getScalingAdjustment()) {
                 break;
             }
@@ -310,7 +324,7 @@ public class AmbariClusterService implements ClusterService {
     private List<HostMetadata> collectDownscaleCandidates(HostGroupAdjustmentJson adjustmentJson, Stack stack, Cluster cluster, boolean decommissionRequest) {
         List<HostMetadata> downScaleCandidates = new ArrayList<>();
         if (decommissionRequest) {
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword());
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(stack.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
             int replication = getReplicationFactor(ambariClient, adjustmentJson.getHostGroup());
             HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), adjustmentJson.getHostGroup());
             Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();
@@ -338,8 +352,8 @@ public class AmbariClusterService implements ClusterService {
     }
 
     private void validateComponentsCategory(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(stack.getAmbariIp(), stack.getUserName(), stack.getPassword());
         Cluster cluster = stack.getCluster();
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
         String hostGroup = hostGroupAdjustment.getHostGroup();
         Blueprint blueprint = cluster.getBlueprint();
         ObjectMapper mapper = new ObjectMapper();
@@ -487,4 +501,5 @@ public class AmbariClusterService implements ClusterService {
         }
         return result;
     }
+
 }

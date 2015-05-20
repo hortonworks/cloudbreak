@@ -26,7 +26,6 @@ import com.google.api.services.compute.model.Tags;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -280,12 +279,6 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
             Stack stack = startStopContextObject.getStack();
             InstanceMetaData metaData = instanceMetaDataRepository.findByInstanceId(stack.getId(), resource.getResourceName());
             String publicIP = instance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP();
-            if (metaData.getAmbariServer()) {
-                stack.setAmbariIp(publicIP);
-                Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-                stack.setCluster(cluster);
-                stackRepository.save(stack);
-            }
             metaData.setPublicIp(publicIP);
             instanceMetaDataRepository.save(metaData);
         } else {

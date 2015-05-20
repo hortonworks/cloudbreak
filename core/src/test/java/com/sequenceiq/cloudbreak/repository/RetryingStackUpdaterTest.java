@@ -35,7 +35,6 @@ public class RetryingStackUpdaterTest {
     private static final String DUMMY_GROUP_NAME = "dummyGroup";
     private static final String DUMMY_STATUS_REASON = "dummyReason";
     private static final String DUMMY_RESOURCE_NAME = "dummyResourceName";
-    private static final String DUMMY_AMBARI_IP = "52.51.103.112";
     private static final Integer DUMMY_NODE_COUNT = 2;
 
     @InjectMocks
@@ -298,38 +297,6 @@ public class RetryingStackUpdaterTest {
         failMocks(dummyStack);
         // WHEN
         underTest.removeStackResources(DUMMY_ID, resources);
-    }
-
-    @Test
-    public void testUpdateAmbariIpSuccessFirst() {
-        // GIVEN
-        Stack dummyStack = createDummyStack();
-        defaultMocks(dummyStack);
-        // WHEN
-        Stack result = underTest.updateAmbariIp(DUMMY_ID, DUMMY_AMBARI_IP);
-        // THEN
-        assertEquals(result.getAmbariIp(), DUMMY_AMBARI_IP);
-    }
-
-    @Test
-    public void testUpdateAmbariIpFailThreeTimes() {
-        // GIVEN
-        Stack dummyStack = createDummyStack();
-        failThreeTimesMocks(dummyStack);
-        // WHEN
-        Stack result = underTest.updateAmbariIp(DUMMY_ID, DUMMY_AMBARI_IP);
-        // THEN
-        verify(stackRepository, times(4)).save(dummyStack);
-        assertEquals(result.getAmbariIp(), DUMMY_AMBARI_IP);
-    }
-
-    @Test(expected = CloudbreakServiceException.class)
-    public void testUpdateAmbariIpFail() {
-        // GIVEN
-        Stack dummyStack = createDummyStack();
-        failMocks(dummyStack);
-        // WHEN
-        underTest.updateAmbariIp(DUMMY_ID, DUMMY_AMBARI_IP);
     }
 
     @Test

@@ -25,7 +25,6 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
         Stack stack = new Stack();
         stack.setId(DEFAULT_ID);
         stack.setName(STACK_NAME);
-        stack.setAmbariIp(AMBARI_IP);
         stack.setCredential(credential);
         stack.setOwner(owner);
         stack.setAccount(account);

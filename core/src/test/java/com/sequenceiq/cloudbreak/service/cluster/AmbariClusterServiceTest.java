@@ -418,7 +418,6 @@ public class AmbariClusterServiceTest {
         Stack stack = new Stack();
         stack.setId(1L);
         stack.setCluster(cluster);
-        stack.setAmbariIp("52.53.54.100");
         return stack;
     }
 
@@ -427,6 +426,7 @@ public class AmbariClusterServiceTest {
         cluster.setId(1L);
         cluster.setName("dummyCluster");
         Blueprint blueprint = new Blueprint();
+        cluster.setAmbariIp("52.53.54.100");
         blueprint.setId(1L);
         blueprint.setBlueprintText("{\"host_groups\":[{\"name\":\"slave_1\",\"components\":[{\"name\":\"DATANODE\"}]}]}");
         blueprint.setName("multi-node-yarn");

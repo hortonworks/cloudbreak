@@ -83,7 +83,6 @@ import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsNetwork;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -485,12 +484,6 @@ public class AwsConnector implements CloudPlatformConnector {
                 for (InstanceMetaData metaData : instanceMetaData) {
                     if (metaData.getInstanceId().equals(instance.getInstanceId())) {
                         String publicIp = instance.getPublicIpAddress();
-                        if (metaData.getAmbariServer()) {
-                            stack.setAmbariIp(publicIp);
-                            Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-                            stack.setCluster(cluster);
-                            stackRepository.save(stack);
-                        }
                         metaData.setPublicIp(publicIp);
                         instanceMetaDataRepository.save(metaData);
                         break;

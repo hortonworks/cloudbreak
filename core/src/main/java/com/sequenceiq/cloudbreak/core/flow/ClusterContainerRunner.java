@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_CONTAINER_ORCHESTRATOR;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_AMBARI;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_AMBARI_DB;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_AMBARI_WARMUP;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_DOCKER_CONSUL_WATCH_PLUGN;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_REGISTRATOR;
 
@@ -34,6 +35,9 @@ public class ClusterContainerRunner {
 
     @Value("${cb.container.orchestrator:" + CB_CONTAINER_ORCHESTRATOR + "}")
     private ContainerOrchestratorTool containerOrchestratorTool;
+
+    @Value("${cb.docker.container.ambari.warm:" + CB_DOCKER_CONTAINER_AMBARI_WARMUP + "}")
+    private String warmAmbariDockerImageName;
 
     @Value("${cb.docker.container.ambari:" + CB_DOCKER_CONTAINER_AMBARI + "}")
     private String ambariDockerImageName;
@@ -73,8 +77,8 @@ public class ClusterContainerRunner {
         try {
             ContainerOrchestratorCluster cluster = new ContainerOrchestratorCluster(gatewayInstance.getPublicIp(), nodes);
             containerOrchestrator.startRegistrator(cluster, registratorDockerImageName);
-            containerOrchestrator.startAmbariServer(cluster, postgresDockerImageName, ambariDockerImageName, cloudPlatform);
-            containerOrchestrator.startAmbariAgents(cluster, ambariDockerImageName, cluster.getNodes().size() - 1, cloudPlatform);
+            containerOrchestrator.startAmbariServer(cluster, postgresDockerImageName, getAmbariImageName(stack), cloudPlatform);
+            containerOrchestrator.startAmbariAgents(cluster, getAmbariImageName(stack), cluster.getNodes().size() - 1, cloudPlatform);
             containerOrchestrator.startConsulWatches(cluster, consulWatchPlugnDockerImageName, cluster.getNodes().size());
         } catch (CloudbreakOrchestratorException e) {
             throw new CloudbreakException(e);
@@ -102,10 +106,14 @@ public class ClusterContainerRunner {
         }
         try {
             ContainerOrchestratorCluster cluster = new ContainerOrchestratorCluster(gatewayInstance.getPublicIp(), nodes);
-            containerOrchestrator.startAmbariAgents(cluster, ambariDockerImageName, cluster.getNodes().size(), cloudPlatform);
+            containerOrchestrator.startAmbariAgents(cluster, getAmbariImageName(stack), cluster.getNodes().size(), cloudPlatform);
             containerOrchestrator.startConsulWatches(cluster, consulWatchPlugnDockerImageName, cluster.getNodes().size());
         } catch (CloudbreakOrchestratorException e) {
             throw new CloudbreakException(e);
         }
+    }
+
+    private String getAmbariImageName(Stack stack) {
+        return stack.getCluster().getAmbariStackDetails() == null ? warmAmbariDockerImageName : ambariDockerImageName;
     }
 }

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.cluster;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -19,6 +20,8 @@ public interface ClusterService {
 
     Cluster retrieveClusterForCurrentUser(Long stackId);
 
+    Cluster updateAmbariIp(Long clusterId, String ambariIp);
+
     String getClusterJson(String ambariIp, Long stackId);
 
     UpdateAmbariHostsRequest updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment);
@@ -29,5 +32,5 @@ public interface ClusterService {
 
     Cluster updateCluster(Cluster cluster);
 
-    Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint);
+    Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, AmbariStackDetails ambariStackDetails);
 }
