@@ -132,7 +132,8 @@ public class StackStartService {
                 ambariHealthCheckerTask,
                 new AmbariClientPollerObject(stack, ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword())),
                 AmbariOperationService.AMBARI_POLLING_INTERVAL,
-                AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS);
+                AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS,
+                AmbariOperationService.MAX_FAILURE_COUNT);
     }
 
     private PollingResult waitForHostsToJoin(Stack stack) {
@@ -144,7 +145,8 @@ public class StackStartService {
                     ambariHostsJoinStatusCheckerTask,
                     ambariHosts,
                     AmbariOperationService.AMBARI_POLLING_INTERVAL,
-                    AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS);
+                    AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS,
+                    AmbariOperationService.MAX_FAILURE_COUNT);
         } catch (AmbariHostsUnavailableException ex) {
             LOGGER.error(ex.getMessage());
             return PollingResult.EXIT;

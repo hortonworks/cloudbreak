@@ -25,6 +25,7 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
     protected static final Logger LOGGER = LoggerFactory.getLogger(AzureSimpleInstanceResourceBuilder.class);
     protected static final int POLLING_INTERVAL = 5000;
     protected static final int MAX_POLLING_ATTEMPTS = 60;
+    protected static final int MAX_FAILURE_COUNT = 3;
     protected static final int MAX_NAME_LENGTH = 50;
     protected static final int MAX_ATTEMPTS_FOR_AMBARI_OPS = -1;
     protected static final int NOT_FOUND = 404;

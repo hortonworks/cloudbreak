@@ -6,7 +6,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
-public abstract class StackBasedStatusCheckerTask<T extends StackContext> implements StatusCheckerTask<T> {
+public abstract class StackBasedStatusCheckerTask<T extends StackContext> extends SimpleStatusCheckerTask<T> {
 
     @Autowired
     private StackRepository stackRepository;

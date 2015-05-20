@@ -11,12 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.SimpleStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureResourceException;
 
 import groovyx.net.http.HttpResponseDecorator;
 
-public abstract class AzureResourceStatusCheckerTask implements StatusCheckerTask<AzureResourcePollerObject> {
+public abstract class AzureResourceStatusCheckerTask extends SimpleStatusCheckerTask<AzureResourcePollerObject> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureResourceStatusCheckerTask.class);
 
     @Autowired

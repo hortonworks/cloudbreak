@@ -58,7 +58,7 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
                     HttpResponseDecorator storageResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createStorageAccount(aCSCR.getProps());
                     AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), stack, storageResponse);
                     azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
-                            POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+                            POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
                 } else {
                     LOGGER.error("Error creating storage: {}", aCSCR.getName(), httpResponseException);
                     throw new CloudConnectorException(httpResponseException.getResponse().toString());

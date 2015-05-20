@@ -81,7 +81,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             AzureResourcePollerObject azureResourcePollerObject =
                     new AzureResourcePollerObject(aCSCR.getAzureClient(), aCSCR.getStack(), virtualMachineResponse);
             azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
-                    POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+                    POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
         } catch (Exception ex) {
             throw checkException(ex);
         }
@@ -173,7 +173,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             HttpResponseDecorator deleteVirtualMachineResult = (HttpResponseDecorator) azureClient.deleteVirtualMachine(props);
             AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(azureClient, stack, deleteVirtualMachineResult);
             azureResourcePollerObjectPollingService.pollWithTimeout(azureDeleteResourceStatusCheckerTask, azureResourcePollerObject,
-                    POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+                    POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
         } catch (HttpResponseException ex) {
             httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner(), stack);
         } catch (Exception ex) {
@@ -192,7 +192,8 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
                     azureInstanceStatusCheckerTask,
                     new AzureInstances(aSSCO.getStack(), azureStackUtil.createAzureClient(credential), Arrays.asList(resource.getResourceName()), "Running"),
                     POLLING_INTERVAL,
-                    MAX_ATTEMPTS_FOR_AMBARI_OPS);
+                    MAX_ATTEMPTS_FOR_AMBARI_OPS,
+                    MAX_FAILURE_COUNT);
             return true;
         }
         return false;

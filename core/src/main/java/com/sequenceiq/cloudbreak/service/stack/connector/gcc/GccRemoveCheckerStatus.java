@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.SimpleStatusCheckerTask;
 
 @Component
-public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyPollerObject> {
+public class GccRemoveCheckerStatus extends SimpleStatusCheckerTask<GccRemoveReadyPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GccRemoveCheckerStatus.class);
     private static final int FINISHED = 100;
@@ -93,20 +93,20 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
             LOGGER.error("Operation is null!");
             return msg;
         }
-        if (operation.orNull().getError() != null) {
+        if (operation.get().getError() != null) {
             StringBuilder error = new StringBuilder();
-            if (operation.orNull().getError().getErrors() != null) {
-                for (Operation.Error.Errors errors : operation.orNull().getError().getErrors()) {
+            if (operation.get().getError().getErrors() != null) {
+                for (Operation.Error.Errors errors : operation.get().getError().getErrors()) {
                     error.append(String.format("code: %s -> message: %s %s", errors.getCode(), errors.getMessage(), System.lineSeparator()));
                 }
                 msg = error.toString();
             } else {
-                LOGGER.debug("No errors found, Error: {}", operation.orNull().getError());
+                LOGGER.debug("No errors found, Error: {}", operation.get().getError());
             }
         }
-        if (operation.orNull().getHttpErrorStatusCode() != null) {
+        if (operation.get().getHttpErrorStatusCode() != null) {
             msg += String.format(" HTTP error message: %s, HTTP error status code: %s",
-                    operation.orNull().getHttpErrorMessage(), operation.orNull().getHttpErrorStatusCode());
+                    operation.get().getHttpErrorMessage(), operation.get().getHttpErrorStatusCode());
         }
         return msg;
     }

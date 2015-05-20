@@ -24,4 +24,5 @@ public class AzureCreateResourceStatusCheckerTask extends AzureResourceStatusChe
             return true;
         }
     }
+
 }

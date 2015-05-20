@@ -20,6 +20,7 @@ public class AmbariOperationService {
     public static final int MAX_ATTEMPTS_FOR_AMBARI_OPS = -1;
     public static final int AMBARI_POLLING_INTERVAL = 5000;
     public static final int MAX_ATTEMPTS_FOR_HOSTS = 240;
+    public static final int MAX_FAILURE_COUNT = 5;
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariOperationService.class);
 
     @Autowired
@@ -35,6 +36,6 @@ public class AmbariOperationService {
 
     public PollingResult waitForAmbariOperations(Stack stack, AmbariClient ambariClient, StatusCheckerTask task, Map<String, Integer> operationRequests) {
         return operationsPollingService.pollWithTimeout(task, new AmbariOperations(stack, ambariClient, operationRequests),
-                AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_AMBARI_OPS);
+                AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_AMBARI_OPS, MAX_FAILURE_COUNT);
     }
 }
