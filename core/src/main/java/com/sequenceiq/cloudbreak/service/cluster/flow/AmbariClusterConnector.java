@@ -506,7 +506,7 @@ public class AmbariClusterConnector {
     private List<String> findFreeHosts(Long stackId, HostGroup hostGroup, int scalingAdjustment) {
         Set<InstanceMetaData> unregisteredHosts = instanceMetadataRepository.findUnregisteredHostsInInstanceGroup(hostGroup.getInstanceGroup().getId());
         Set<InstanceMetaData> instances = FluentIterable.from(unregisteredHosts).limit(scalingAdjustment).toSet();
-        String statusReason = String.format("Adding '%s' new host(s) to the '%s' host group.", scalingAdjustment, hostGroup.getName());
+        String statusReason = String.format("Adding '%s' new host(s) to the '%s' host group.", instances.size(), hostGroup.getName());
         eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), statusReason, hostGroup.getName());
         return getHostNames(instances);
     }

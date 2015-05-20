@@ -29,8 +29,8 @@ public class AmbariOperationsStatusCheckerTask extends StackBasedStatusCheckerTa
             AmbariClient ambariClient = t.getAmbariClient();
             BigDecimal installProgress = ambariClient.getRequestProgress(request.getValue());
             LOGGER.info("Ambari operation: '{}', Progress: {}", request.getKey(), installProgress);
-            allFinished = allFinished && installProgress.compareTo(COMPLETED) == 0;
-            if (installProgress.compareTo(FAILED) == 0) {
+            allFinished = allFinished && COMPLETED.compareTo(installProgress) == 0;
+            if (FAILED.compareTo(installProgress) == 0) {
                 boolean failed = true;
                 for (int i = 0; i < MAX_RETRY; i++) {
                     if (ambariClient.getRequestProgress(request.getValue()).compareTo(FAILED) != 0) {
