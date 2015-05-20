@@ -22,6 +22,8 @@ public class GccResourceCheckerStatus extends StackBasedStatusCheckerTask<GccRes
                 operation = gccResourceReadyPollerObject.getZoneOperations().get().execute();
             } else if (gccResourceReadyPollerObject.getRegionOperations().isPresent()) {
                 operation = gccResourceReadyPollerObject.getRegionOperations().get().execute();
+            } else if (gccResourceReadyPollerObject.getGlobalOperations().isPresent()) {
+                operation = gccResourceReadyPollerObject.getGlobalOperations().get().execute();
             }
             return analyzeOperation(operation);
         } catch (Exception e) {

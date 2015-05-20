@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.gcc.builders.network;
 
+import static com.sequenceiq.cloudbreak.domain.ResourceType.GCC_FIREWALL_INTERNAL;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -23,6 +25,8 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCheckerStatus;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GcpResourceException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
@@ -40,12 +44,25 @@ public class GccFireWallInternalResourceBuilder extends GccSimpleNetworkResource
     private GccRemoveCheckerStatus gccRemoveCheckerStatus;
     @Autowired
     private PollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
+    @Autowired
+    private PollingService<GccResourceReadyPollerObject> gccFirewallInternalReadyPollerObjectPollingService;
+    @Autowired
+    private GccResourceCheckerStatus gccResourceCheckerStatus;
 
     @Override
     public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
         final GccFireWallOutCreateRequest gFWOCR = (GccFireWallOutCreateRequest) createResourceRequest;
         Compute.Firewalls.Insert firewallInsert = gFWOCR.getCompute().firewalls().insert(gFWOCR.getProjectId(), gFWOCR.getFirewall());
-        firewallInsert.execute();
+        Operation execute = firewallInsert.execute();
+        Stack stack = stackRepository.findById(gFWOCR.getStackId());
+        if (execute.getHttpErrorStatusCode() == null) {
+            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(gFWOCR.getCompute(), (GccCredential) stack.getCredential(), execute);
+            GccResourceReadyPollerObject instReady =
+                    new GccResourceReadyPollerObject(globalOperations, stack, gFWOCR.getFirewall().getName(), execute.getName(), GCC_FIREWALL_INTERNAL);
+            gccFirewallInternalReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, instReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+        } else {
+            throw new GcpResourceException(execute.getHttpErrorMessage(), resourceType(), gFWOCR.getFirewall().getName());
+        }
         return true;
     }
 
@@ -103,7 +120,7 @@ public class GccFireWallInternalResourceBuilder extends GccSimpleNetworkResource
 
     @Override
     public ResourceType resourceType() {
-        return ResourceType.GCC_FIREWALL_INTERNAL;
+        return GCC_FIREWALL_INTERNAL;
     }
 
     public class GccFireWallOutCreateRequest extends CreateResourceRequest {

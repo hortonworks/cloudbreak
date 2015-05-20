@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.gcc.builders.network;
 
+import static com.sequenceiq.cloudbreak.domain.ResourceType.GCC_NETWORK;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +24,8 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCheckerStatus;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GcpResourceException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
@@ -40,12 +44,25 @@ public class GccNetworkResourceBuilder extends GccSimpleNetworkResourceBuilder {
     private GccRemoveCheckerStatus gccRemoveCheckerStatus;
     @Autowired
     private PollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
+    @Autowired
+    private PollingService<GccResourceReadyPollerObject> gccNetworkReadyPollerObjectPollingService;
+    @Autowired
+    private GccResourceCheckerStatus gccResourceCheckerStatus;
 
     @Override
     public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
         final GccNetworkCreateRequest gNCR = (GccNetworkCreateRequest) createResourceRequest;
+        Stack stack = stackRepository.findById(gNCR.getStackId());
         Compute.Networks.Insert networkInsert = gNCR.getCompute().networks().insert(gNCR.getProjectId(), gNCR.getNetwork());
-        networkInsert.execute();
+        Operation execute = networkInsert.execute();
+        if (execute.getHttpErrorStatusCode() == null) {
+            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(gNCR.getCompute(), (GccCredential) stack.getCredential(), execute);
+            GccResourceReadyPollerObject instReady =
+                    new GccResourceReadyPollerObject(globalOperations, stack, gNCR.getNetwork().getName(), execute.getName(), GCC_NETWORK);
+            gccNetworkReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, instReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+        } else {
+            throw new GcpResourceException(execute.getHttpErrorMessage(), resourceType(), gNCR.getNetwork().getName());
+        }
         return true;
     }
 
@@ -98,7 +115,7 @@ public class GccNetworkResourceBuilder extends GccSimpleNetworkResourceBuilder {
 
     @Override
     public ResourceType resourceType() {
-        return ResourceType.GCC_NETWORK;
+        return GCC_NETWORK;
     }
 
     public class GccNetworkCreateRequest extends CreateResourceRequest {
