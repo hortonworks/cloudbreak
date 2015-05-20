@@ -1,7 +1,7 @@
 #!/bin/bash
 set -x
 
-START_LABEL=62
+START_LABEL=98
 PLATFORM_DISK_PREFIX=sd
 
 start_proxy() {
@@ -30,8 +30,8 @@ configure_docker() {
 
 format_disks() {
   mkdir /hadoopfs
-  for (( i=1; i<=15; i++ )); do
-    LABEL=$(printf "\x$((START_LABEL+i))")
+  for (( i=1; i<=24; i++ )); do
+    LABEL=$(printf "\x$(printf %x $((START_LABEL+i)))")
     if [ -e /dev/${PLATFORM_DISK_PREFIX}"$LABEL" ]; then
       mkfs -E lazy_itable_init=1 -O uninit_bg -F -t ext4 /dev/${PLATFORM_DISK_PREFIX}${LABEL}
       mkdir /hadoopfs/fs${i}

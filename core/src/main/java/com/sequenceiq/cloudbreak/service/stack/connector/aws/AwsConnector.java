@@ -350,7 +350,7 @@ public class AwsConnector implements CloudPlatformConnector {
             try {
                 client.describeStacks(describeStacksRequest);
             } catch (AmazonServiceException e) {
-                if (e.getErrorMessage().equals("Stack with id " + cFStackName + " does not exist")) {
+                if (e.getErrorMessage().contains(cFStackName + " does not exist")) {
                     AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
                     releaseReservedIp(stack, amazonEC2Client);
                     return;

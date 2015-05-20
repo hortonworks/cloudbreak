@@ -71,9 +71,9 @@ public class CloudFormationTemplateBuilderTest {
         // WHEN
         String result = underTest.build(stack, null, false, "templates/aws-cf-stack.ftl");
         // THEN
-        assertTrue(result.contains("\"DeviceName\" : \"/dev/xvdf\""));
-        assertTrue(result.contains("\"DeviceName\" : \"/dev/xvdg\""));
-        assertFalse(result.contains("\"DeviceName\" : \"/dev/xvdh\""));
+        assertTrue(result.contains("\"DeviceName\" : \"/dev/xvdb\""));
+        assertTrue(result.contains("\"DeviceName\" : \"/dev/xvdc\""));
+        assertFalse(result.contains("\"DeviceName\" : \"/dev/xvdd\""));
     }
 
     @Test

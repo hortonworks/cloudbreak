@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.service.PollingService;
 public class ClusterBootstrapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterBootstrapper.class);
     private static final int POLLING_INTERVAL = 5000;
-    private static final int MAX_POLLING_ATTEMPTS = 100;
+    private static final int MAX_POLLING_ATTEMPTS = 500;
 
     @Value("${cb.container.orchestrator:" + CB_CONTAINER_ORCHESTRATOR + "}")
     private ContainerOrchestratorTool containerOrchestratorTool;

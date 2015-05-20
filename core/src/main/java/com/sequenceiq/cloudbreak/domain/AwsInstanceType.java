@@ -30,12 +30,17 @@ public enum AwsInstanceType {
     R3Xlarge("r3.xlarge", 1),
     R32xlarge("r3.2xlarge", 1),
     R34xlarge("r3.4xlarge", 1),
-    R38xlarge("r3.8xlarge", 2);
+    R38xlarge("r3.8xlarge", 2),
+
+    D2Xlarge("d2.xlarge", 3),
+    D22xlarge("d2.2xlarge", 6),
+    D24xlarge("d2.4xlarge", 12),
+    D28xlarge("d2.8xlarge", 24);
 
     private String value;
     private int ephemeralVolumes;
 
-    private AwsInstanceType(String value, int ephemeralVolumes) {
+    AwsInstanceType(String value, int ephemeralVolumes) {
         this.value = value;
         this.ephemeralVolumes = ephemeralVolumes;
     }
