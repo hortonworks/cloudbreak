@@ -33,7 +33,7 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="gcc_tvolumecount">Attached volumes per instance</label>
     <div class="col-sm-9">
-        <input type="number" name="gcc_tvolumecount" class="form-control" id="gcc_tvolumecount" min="1" ng-model="gccTemp.volumeCount" placeholder="1 -10" max="10" required>
+        <input type="number" name="gcc_tvolumecount" class="form-control" id="gcc_tvolumecount" min="1" ng-model="gccTemp.volumeCount" placeholder="1 -12" max="12" required>
         <div class="help-block"  ng-show="gccTemplateForm.gcc_tvolumecount.$dirty && gccTemplateForm.gcc_tvolumecount.$invalid"><i class="fa fa-warning"></i>
             {{error_msg.volume_count_invalid}}
         </div>
