@@ -16,9 +16,11 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ResourceRequestResult;
 import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
@@ -46,6 +48,9 @@ public class StackFailureHandlerService implements FailureHandlerService {
     @javax.annotation.Resource
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
 
+    @Autowired
+    private CloudbreakEventService eventService;
+
     @Override
     public void handleFailure(Stack stack, List<ResourceRequestResult> failedResourceRequestResults) {
         Stack localStack = stackRepository.findById(stack.getId());
@@ -55,6 +60,8 @@ public class StackFailureHandlerService implements FailureHandlerService {
                 throwError(localStack, failedResourceRequestResults);
             }
         } else {
+            eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
+                    "Error occurred during the provisioning so some resource will be rolled back");
             switch (localStack.getFailurePolicy().getAdjustmentType()) {
             case EXACT:
                 if (localStack.getFailurePolicy().getThreshold() > localStack.getFullNodeCount() - failedResourceRequestResults.size()) {
@@ -129,8 +136,10 @@ public class StackFailureHandlerService implements FailureHandlerService {
                     ResourceType resourceType = instanceResourceBuilders.get(cloudPlatform).get(i).resourceType();
                     for (Resource tmpResource : resourceList) {
                         if (resourceType.equals(tmpResource.getResourceType())) {
-                            LOGGER.info(String.format("Resource will rollback with %s name %s id and %s type.",
-                                    tmpResource.getResourceName(), tmpResource.getId(), tmpResource.getResourceType()));
+                            String message = String.format("Resource will be rolled back because provision failed on the resource: %s",
+                                    tmpResource.getResourceName());
+                            eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), message);
+                            LOGGER.info(message);
                             instanceResourceBuilders.get(cloudPlatform).get(i).delete(tmpResource, dCO, stack.getRegion());
                         }
                     }
@@ -146,6 +155,8 @@ public class StackFailureHandlerService implements FailureHandlerService {
     }
 
     private void throwError(Stack stack, List<ResourceRequestResult> resourceRequestResults) {
+        eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
+                "All resource will be rolled back because too much resource creation failed during the provisioning.");
         Stack oneWithLists = stackRepository.findOneWithLists(stack.getId());
         StringBuilder sb = new StringBuilder();
         for (ResourceRequestResult resourceRequestResult : resourceRequestResults) {

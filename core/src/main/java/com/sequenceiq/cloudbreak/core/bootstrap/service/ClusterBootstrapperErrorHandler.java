@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.Node;
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
@@ -53,17 +55,21 @@ public class ClusterBootstrapperErrorHandler {
     @javax.annotation.Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
+    @Autowired
+    private CloudbreakEventService eventService;
+
     public void terminateFailedNodes(ContainerOrchestrator orchestrator, Stack stack, Set<Node> nodes) throws CloudbreakOrchestratorException {
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
         List<String> allAvailableNode = orchestrator.getAvailableNodes(gatewayInstance.getPublicIp(), nodes);
         List<Node> missingNodes = selectMissingNodes(nodes, allAvailableNode);
         if (missingNodes.size() > 0) {
-            LOGGER.info(String.format("Bootstrap failed on %s nodes. These nodes will be terminated.", missingNodes.size()));
+            String message = String.format("Bootstrap failed on %s nodes. These nodes will be terminated.", missingNodes.size());
+            LOGGER.info(message);
+            eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), message);
             for (Node missingNode : missingNodes) {
                 InstanceMetaData instanceMetaData =
                         instanceMetaDataRepository.findByPrivateAddress(stack.getId(), missingNode.getPrivateIp());
-                LOGGER.info(String.format("InstanceMetadata deleted with %s id and %s name.", instanceMetaData.getId(), instanceMetaData.getInstanceId()));
                 Resource resource = resourceRepository.findByStackIdAndName(stack.getId(), instanceMetaData.getInstanceId());
                 InstanceGroup ig = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceMetaData.getInstanceGroup().getGroupName());
                 ig.setNodeCount(ig.getNodeCount() - 1);
@@ -72,13 +78,18 @@ public class ClusterBootstrapperErrorHandler {
                             ig.getGroupName()));
                 }
                 instanceGroupRepository.save(ig);
-                LOGGER.info(String.format("Decreased nodecount on %s instancegroup.", ig.getGroupName()));
+                message = String.format("Delete '%s' node. and Decrease the nodecount on %s instancegroup",
+                        instanceMetaData.getInstanceId(), ig.getGroupName());
+                LOGGER.info(message);
+                eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), message);
                 deleteResourceAndDependencies(stack, instanceMetaData);
                 if (resourceRepository.findOne(resource.getId()) != null) {
                     resourceRepository.delete(resource.getId());
                 }
                 instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
                 instanceMetaDataRepository.save(instanceMetaData);
+                LOGGER.info(String.format("The status of instanceMetadata with %s id and %s name setted to TERMINATED.",
+                        instanceMetaData.getId(), instanceMetaData.getInstanceId()));
             }
         }
     }
