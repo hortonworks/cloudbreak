@@ -281,7 +281,7 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
         function createAmbariJsonFromUluwatuCluster(uluCluster) {
           return {
             'host': uluCluster.cluster.ambariServerIp,
-            'port': '8080',
+            'port': '80',
             'user': uluCluster.cluster.userName,
             'pass': uluCluster.cluster.password
           };
