@@ -47,8 +47,8 @@
         <label class="col-sm-3 control-label" for="aws_tvolumecount">Attached volumes per instance</label>
 
         <div class="col-sm-9">
-            <input type="number" name="aws_tvolumecount" class="form-control" ng-model="awsTemp.volumeCount" id="aws_tvolumecount" min="1" max="10"
-                   placeholder="1 -10" required>
+            <input type="number" name="aws_tvolumecount" class="form-control" ng-model="awsTemp.volumeCount" id="aws_tvolumecount" min="1" max="12"
+                   placeholder="1 -12" required>
 
             <div class="help-block"
                  ng-show="awsTemplateForm.aws_tvolumecount.$dirty && awsTemplateForm.aws_tvolumecount.$invalid"><i class="fa fa-warning"></i>

@@ -142,7 +142,10 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                     {key: 'R3Xlarge', value: 'R3Xlarge', cloud: 'AWS', ephemeralVolumeSize: '80 GB SSD', maxEphemeralVolumeCount: 1},
                     {key: 'R32xlarge', value: 'R32xlarge', cloud: 'AWS', ephemeralVolumeSize: '160 GB SSD', maxEphemeralVolumeCount: 1},
                     {key: 'R34xlarge', value: 'R34xlarge', cloud: 'AWS', ephemeralVolumeSize: '320 GB SSD', maxEphemeralVolumeCount: 1},
-                    {key: 'R38xlarge', value: 'R38xlarge', cloud: 'AWS', ephemeralVolumeSize: '320 GB SSD', maxEphemeralVolumeCount: 2}
+                    {key: 'R38xlarge', value: 'R38xlarge', cloud: 'AWS', ephemeralVolumeSize: '320 GB SSD', maxEphemeralVolumeCount: 2},
+                    {key: 'D2Xlarge', value: 'D2Xlarge', cloud: 'AWS', ephemeralVolumeSize: '2000 GB STANDARD', maxEphemeralVolumeCount: 3},
+                    {key: 'D22xlarge', value: 'D22xlarge', cloud: 'AWS', ephemeralVolumeSize: '2000 GB STANDARD', maxEphemeralVolumeCount: 6},
+                    {key: 'D24xlarge', value: 'D24xlarge', cloud: 'AWS', ephemeralVolumeSize: '2000 GB STANDARD', maxEphemeralVolumeCount: 12}
                 ]
 
             },

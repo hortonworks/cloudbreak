@@ -44,8 +44,8 @@
         <label class="col-sm-3 control-label" for="openstack_tvolumecount">Attached volumes per instance</label>
 
         <div class="col-sm-9">
-            <input type="number" name="openstack_tvolumecount" class="form-control" ng-model="openstackTemp.volumeCount" id="openstack_tvolumecount" min="1" max="10"
-                   placeholder="1 -10" required>
+            <input type="number" name="openstack_tvolumecount" class="form-control" ng-model="openstackTemp.volumeCount" id="openstack_tvolumecount" min="1" max="12"
+                   placeholder="1 -12" required>
 
             <div class="help-block"
                  ng-show="openstackTemplateForm.openstack_tvolumecount.$dirty && openstackTemplateForm.openstack_tvolumecount.$invalid"><i class="fa fa-warning"></i>
