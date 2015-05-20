@@ -157,11 +157,9 @@ public class SimpleStackFacade implements StackFacade {
             stackUpdater.updateStackStatus(actualContext.getStackId(), START_IN_PROGRESS, "Cluster infrastructure is now starting.");
             Stack stack = stackService.getById(actualContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
-
             logBefore(actualContext.getStackId(), context, "Starting infrastructure", START_IN_PROGRESS);
             context = stackStartService.start(actualContext);
             logAfter(actualContext.getStackId(), context, "Starting infrastructure", AVAILABLE);
-
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
         } catch (Exception e) {
             LOGGER.error("Exception during the stack start process.", e);

@@ -18,7 +18,7 @@ public class CloudbreakErrorHandler implements Consumer<Throwable> {
 
     @Override
     public void accept(Throwable errorData) {
-        LOGGER.info("Consuming error:", errorData);
+        LOGGER.debug("Consuming error:", errorData.getMessage());
         errorLogic(errorData);
     }
 
