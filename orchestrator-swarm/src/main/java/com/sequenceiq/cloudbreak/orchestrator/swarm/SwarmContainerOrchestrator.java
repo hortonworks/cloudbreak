@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.RegistratorBootst
 public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     private static final Logger LOGGER = LoggerFactory.getLogger(SwarmContainerOrchestrator.class);
     private static final int READ_TIMEOUT = 30000;
-    private static final String MUNCHAUSEN_WAIT = "360";
+    private static final String MUNCHAUSEN_WAIT = "3600";
     private static final String MUNCHAUSEN_DOCKER_IMAGE = "sequenceiq/munchausen:0.3";
     private static final int MAX_IP_FOR_ONE_REQUEST = 600;
 

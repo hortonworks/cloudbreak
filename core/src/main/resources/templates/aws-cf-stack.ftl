@@ -214,24 +214,8 @@
               "VolumeSize" : "50",
               "VolumeType" : "gp2"
             }
-          }, {
-            "DeviceName" : "/dev/sdb",
-            "NoDevice" : true,
-            "Ebs": {}
-      	  }, {
-            "DeviceName" : "/dev/sdc",
-            "NoDevice" : true,
-            "Ebs": {}
-          }, {
-            "DeviceName" : "/dev/sdd",
-            "NoDevice" : true,
-            "Ebs": {}
-          }, {
-            "DeviceName" : "/dev/sde",
-            "NoDevice" : true,
-            "Ebs": {}
           }
-		  <#assign seq = ["f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]>
+		  <#assign seq = ["b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]>
 			<#list seq as x>
 			<#if x_index = instanceGroup.template.volumeCount><#break></#if>
   		  ,{

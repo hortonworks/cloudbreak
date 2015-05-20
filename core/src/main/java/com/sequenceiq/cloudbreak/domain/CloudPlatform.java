@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.domain;
 
 public enum CloudPlatform {
-    AWS("ec2", true, 0, "xvd", 65),
-    AZURE("azure", false, 6, "sd", 62),
-    GCC("gcc", false, 30, "sd", 61),
-    OPENSTACK("openstack", true, 0, "vd", 61);
+    AWS("ec2", true, 0, "xvd", 97),
+    AZURE("azure", false, 6, "sd", 98),
+    GCC("gcc", false, 30, "sd", 97),
+    OPENSTACK("openstack", true, 0, "vd", 97);
 
     private final String initScriptPrefix;
     private final boolean withTemplate;
