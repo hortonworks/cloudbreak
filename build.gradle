@@ -286,6 +286,7 @@ jar { baseName = 'periscope' }
 configurations {
     deployerJars
     all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+    all*.exclude group: 'log4j'
 }
 
 uploadArchives {
