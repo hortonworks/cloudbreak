@@ -14,7 +14,9 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.FailureHandlerService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ResourceRequestResult;
 import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
@@ -35,6 +37,9 @@ public class ScalingFailureHandlerService implements FailureHandlerService {
 
     @javax.annotation.Resource
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
+
+    @Autowired
+    private CloudbreakEventService eventService;
 
     @Override
     public void handleFailure(Stack stack, List<ResourceRequestResult> failedResourceRequestResults) {
@@ -70,8 +75,10 @@ public class ScalingFailureHandlerService implements FailureHandlerService {
                 ResourceType resourceType = instanceResourceBuilders.get(cloudPlatform).get(i).resourceType();
                 for (Resource tmpResource : resourceList) {
                     if (resourceType.equals(tmpResource.getResourceType())) {
-                        LOGGER.info("Resource will be rolled back. name: {}, id: {}, type: {}", tmpResource.getResourceName(), tmpResource.getId(),
-                                tmpResource.getResourceType());
+                        String message = String.format("Resource will be rolled back because provision failed on the resource: %s",
+                                tmpResource.getResourceName());
+                        eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), message);
+                        LOGGER.info(message);
                         instanceResourceBuilders.get(cloudPlatform).get(i).delete(tmpResource, dCO, stack.getRegion());
                     }
                 }
