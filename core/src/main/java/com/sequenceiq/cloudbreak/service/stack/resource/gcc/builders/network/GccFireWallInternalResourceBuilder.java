@@ -90,7 +90,7 @@ public class GccFireWallInternalResourceBuilder extends GccSimpleNetworkResource
     public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources,
             Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        return Arrays.asList(new Resource(resourceType(), stack.getName() + "internal", stack, null));
+        return Arrays.asList(new Resource(resourceType(), getTimestampedName(stack.getName() + "internal"), stack, null));
     }
 
     @Override
