@@ -1,15 +1,16 @@
 package com.sequenceiq.it.cloudbreak;
 
-import com.sequenceiq.it.IntegrationTestContext;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.sequenceiq.it.IntegrationTestContext;
 
 public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
     @BeforeMethod
@@ -21,10 +22,9 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    @Parameters({ "stackName", "region", "ambariUser", "ambariPassword", "onFailureAction", "threshold", "adjustmentType" })
-    public void testStackCreation(@Optional("testing1") String stackName, @Optional("EUROPE_WEST1_B") String region, @Optional("admin") String ambariUser,
-            @Optional("admin") String ambariPassword, @Optional("DO_NOTHING") String onFailureAction, @Optional("4") Long threshold,
-            @Optional("EXACT") String adjustmentType) throws Exception {
+    @Parameters({ "stackName", "region", "onFailureAction", "threshold", "adjustmentType" })
+    public void testStackCreation(@Optional("testing1") String stackName, @Optional("EUROPE_WEST1_B") String region,
+            @Optional("DO_NOTHING") String onFailureAction, @Optional("4") Long threshold, @Optional("EXACT") String adjustmentType) throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
@@ -35,7 +35,7 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         String credentialId = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID);
         String networkId = itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID);
         // WHEN
-        String stackId = getClient().postStack(stackName, ambariUser, ambariPassword, credentialId, region, false, igMap, onFailureAction, threshold,
+        String stackId = getClient().postStack(stackName, credentialId, region, false, igMap, onFailureAction, threshold,
                 adjustmentType, null, networkId);
         // THEN
         Assert.assertNotNull(stackId);
