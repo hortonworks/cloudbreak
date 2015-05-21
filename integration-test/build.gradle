@@ -22,7 +22,7 @@ dependencies {
     compile group: 'org.springframework', name: 'spring-web', version: '4.1.4.RELEASE'
     compile group: 'org.springframework', name: 'spring-context-support', version: '4.1.4.RELEASE'
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.3.5'
-    compile ('com.sequenceiq:cloudbreak-rest-client:0.4.4') {
+    compile ('com.sequenceiq:cloudbreak-rest-client:0.4.5') {
         exclude group: 'org.slf4j';
     }
     compile "org.testng:testng:6.8.21"

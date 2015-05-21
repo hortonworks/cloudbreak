@@ -77,7 +77,7 @@ public class CloudbreakUtil {
         Assert.assertEquals(((Map<String, Object>) stack.get("cluster")).get("status"), "AVAILABLE", "The cluster hasn't been started!");
         Assert.assertEquals(stack.get("status"), "AVAILABLE", "The stack hasn't been started!");
 
-        String ambariIp = (String) stack.get("ambariServerIp");
+        String ambariIp = (String) ((Map<String, Object>) stack.get("cluster")).get("ambariServerIp");
         Assert.assertNotNull(ambariIp, "The Ambari IP is not available!");
 
         AmbariClient ambariClient = new AmbariClient(ambariIp);

@@ -27,8 +27,9 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    @Parameters({ "clusterName", "emailNeeded" })
-    public void testClusterCreation(@Optional("it-cluster") String clusterName, @Optional("false") boolean emailNeeded) throws Exception {
+    @Parameters({ "clusterName", "ambariUser", "ambariPassword", "emailNeeded" })
+    public void testClusterCreation(@Optional("it-cluster") String clusterName, @Optional("admin") String ambariUser,
+            @Optional("admin") String ambariPassword, @Optional("false") boolean emailNeeded) throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackIdStr = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
@@ -39,7 +40,7 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         // WHEN
         // TODO email needed
         CloudbreakClient client = getClient();
-        client.postCluster(clusterName, blueprintId, "Cluster for integration test", Integer.valueOf(stackId), map);
+        client.postCluster(clusterName, ambariUser, ambariPassword, blueprintId, "Cluster for integration test", Integer.valueOf(stackId), map);
         // THEN
         CloudbreakUtil.waitForStackStatus(itContext, stackIdStr, "AVAILABLE");
         CloudbreakUtil.checkClusterAvailability(client, stackIdStr);
