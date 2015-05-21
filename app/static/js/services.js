@@ -243,6 +243,11 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
       return $resource('periscope/clusters/:id', null, {'update': {method:'PUT', isArray:false}});
     }]);
 
+    uluwatuServices.factory('PeriscopeClusterScalingHistory', ['$resource',
+    function ($resource) {
+      return $resource('periscope/clusters/:id/history');
+    }]);
+
     uluwatuServices.factory('PeriscopeClusterScalingConfiguration', ['$resource',
     function ($resource) {
       return $resource('periscope/clusters/:id/configurations/scaling');
