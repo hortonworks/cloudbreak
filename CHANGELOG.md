@@ -8,8 +8,21 @@
 
 ### Changed
 
+## [v0.5.2] - 2015-05-21
+
+### Fixed
+
+### Added
+
+### Removed
+
+### Changed
+
 - Command `doctor` hints to run boot2docker shellinit if env is unset
 - Command `init` in case of OSX, DOCKER_XXX envs are initialized in local profile (Profile)
+- Default docker images are updated to:
+    - sequenceiq/periscope:0.5.5
+
 
 ## [v0.5.1] - 2015-05-18
 
@@ -21,7 +34,7 @@
 
 ### Removed
 
-- deployer doesn’t specify cloud specific image defaults. If left empty, they fall back 
+- deployer doesn’t specify cloud specific image defaults. If left empty, they fall back
   to defaults specified in [java code](https://github.com/sequenceiq/cloudbreak/blob/master/core/src/main/java/com/sequenceiq/cloudbreak/EnvironmentVariableConfig.java#L46-L49)
     - CB_AZURE_IMAGE_URI
     - CB_AWS_AMI_MAP
@@ -31,7 +44,7 @@
 ### Changed
 
 - Command `logs` got usage example for specifying servies as filter
-- Default docker images are updated to: 
+- Default docker images are updated to:
     - sequenceiq/cloudbreak:0.5.49
     - sequenceiq/uluwatu:0.5.16
     - sequenceiq/sutans:0.5.2
