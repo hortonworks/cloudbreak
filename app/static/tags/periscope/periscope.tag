@@ -167,5 +167,47 @@
       <!-- .panel-body -->
     </div>
     <!-- .panel -->
+
+    <div class="panel panel-default" ng-show="scalingHistory && scalingHistory.length !== 0">
+              <div class="panel-heading">
+                <h5><i class="fa fa-history fa-fw"></i> HISTORY</h5>
+              </div>
+              <!-- .panel-heading -->
+              <div class="panel-body pagination">
+                    <select name="itemsPerPageSelector" class="form-control pull-right" style="width: auto" data-live-search="true" ng-model="pagination.itemsPerPage">
+                        <option selected value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    <table id="metadataTable" class="table table-report table-sortable-cols table-with-pagination table-condensed" style="background-color: transparent;">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Trigger Time</th>
+                                <th class="text-center"># of Nodes</th>
+                                <th class="text-center">Adjustment</th>
+                                <th class="text-center">Type</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Reason</th>
+                                <th class="text-center">Type</th>
+                                <th class="text-center">Hostgroup</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="actual in filteredScalingHistory|orderBy:eventTimestampAsFloat" ng-class="{ 'danger':  actual.scalingStatus == 'FAILED'}">
+                                <td data-title="'timestamp'" class="col-sm-2 text-center">{{actual.timestamp}}</td>
+                                <td data-title="'originalNodeCount'" class="col-sm-1 text-center">{{actual.originalNodeCount}}</td>
+                                <td data-title="'adjustment'" class="col-sm-1 text-center">{{actual.adjustment}}</td>
+                                <td data-title="'adjustmentType'" class="col-sm-1 text-center">{{actual.adjustmentType}}</td>
+                                <td data-title="'scalingStatus'" class="col-sm-1 text-center">{{actual.scalingStatus}}</td>
+                                <td data-title="'statusReason'" class="col-sm-4">{{actual.statusReason}}</td>
+                                <td data-title="'alertType'" class="col-sm-1 text-center">{{actual.alertType}}</td>
+                                <td data-title="'hostgroup'" class="col-sm-2 text-center"><span class="label label-default">{{actual.hostGroup}}</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <pagination boundary-links="true" total-items="pagination.totalItems" items-per-page="pagination.itemsPerPage" ng-model="pagination.currentPage" max-size="10"></pagination>
+              </div>
+        </div>
   </div>
 </div>

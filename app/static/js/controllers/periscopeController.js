@@ -3,15 +3,16 @@
 var log = log4javascript.getLogger("periscopeController-logger");
 
 angular.module('uluwatuControllers').controller('periscopeController', ['$scope', '$rootScope', '$filter', 'PeriscopeCluster', 'MetricAlert',
-  'TimeAlert', 'ScalingPolicy', 'Cluster', 'PeriscopeClusterState', 'PeriscopeClusterScalingConfiguration', 'MetricDefinitions',
+  'TimeAlert', 'ScalingPolicy', 'Cluster', 'PeriscopeClusterState', 'PeriscopeClusterScalingConfiguration', 'MetricDefinitions', 'PeriscopeClusterScalingHistory',
   function ($scope, $rootScope, $filter, PeriscopeCluster, MetricAlert, TimeAlert, ScalingPolicy, Cluster, PeriscopeClusterState,
-              PeriscopeClusterScalingConfiguration, MetricDefinitions) {
+              PeriscopeClusterScalingConfiguration, MetricDefinitions, PeriscopeClusterScalingHistory) {
         $rootScope.periscopeClusters = PeriscopeCluster.query();
         $scope.alerts = [];
         $scope.policies = {};
         $scope.scalingConfiguration = {};
         $scope.scalingAction = {};
         $scope.alert = {};
+        $scope.scalingHistory = {};
         $scope.metricBasedAlarm = true;
         $scope.timeBasedAlarm = false;
         $scope.actPeriscopeCluster = undefined;
@@ -20,7 +21,7 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
         resetScalingActionForm();
 
         $rootScope.$watch('activeCluster', function(uluCluster, oldUluCluster){
-          if (uluCluster.cluster.ambariServerIp != undefined) {
+          if (uluCluster.cluster != undefined && uluCluster.cluster.ambariServerIp != undefined) {
             var periCluster = selectPeriscopeClusterByAmbariIp(uluCluster.cluster.ambariServerIp);
             if (isSelectedUluClusterEqualsPeriClusterAndRunning(periCluster)) {
               setActivePeriClusterWithResources(periCluster);
@@ -43,6 +44,7 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
           getAlertDefinitions(periscopeCluster.id);
           getAlarms(periscopeCluster.id);
           getScalingConfigurations(periscopeCluster.id);
+          getScalingHistory(periscopeCluster.id);
           getScalingPolicies(periscopeCluster.id);
         }
 
@@ -73,6 +75,46 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
             $scope.scalingConfiguration = success;
           });
         }
+
+        function getScalingHistory(id) {
+            PeriscopeClusterScalingHistory.query({id: id}, function(success) {
+                angular.forEach(success, function(item) {
+                    item.eventTimestampAsFloat = item.timestamp;
+                    item.timestamp = new Date(item.timestamp).toLocaleString();
+                });
+                $scope.scalingHistory = success;
+                $scope.pagination = {
+                    currentPage: 1,
+                    itemsPerPage: 10,
+                    totalItems: $scope.scalingHistory.length
+                }
+            }, function(error){
+                console.log(error);
+            });
+        }
+
+        $scope.$watch('scalingHistory', function() {
+            if ($scope.scalingHistory != null) {
+                paginateScalingHistory();
+            }
+        });
+
+        $scope.$watch('pagination.currentPage + pagination.itemsPerPage', function(){
+            if ($scope.scalingHistory != null) {
+                paginateScalingHistory();
+            }
+        });
+
+         function paginateScalingHistory() {
+            if ($scope.pagination != null && $scope.scalingHistory.length > 0) {
+                $scope.pagination.totalItems = $scope.scalingHistory.length;
+                var begin = (($scope.pagination.currentPage - 1) * $scope.pagination.itemsPerPage),
+                end = begin + $scope.pagination.itemsPerPage;
+                $scope.filteredScalingHistory = $scope.scalingHistory.slice(begin, end);
+            } else {
+                $scope.filteredScalingHistory = [];
+            }
+         }
 
         function getScalingPolicies(id){
           ScalingPolicy.query({id: id}, function (policies) {
