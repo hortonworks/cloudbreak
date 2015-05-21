@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.gcc;
 
 import java.io.IOException;
+import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccUpdateConte
 public abstract class GccSimpleNetworkResourceBuilder implements
         ResourceBuilder<GccProvisionContextObject, GccDeleteContextObject, GccStartStopContextObject, GccUpdateContextObject> {
     protected static final Logger LOGGER = LoggerFactory.getLogger(GccSimpleNetworkResourceBuilder.class);
+    protected static final int MAX_NAME_LENGTH = 63;
     protected static final int MAX_POLLING_ATTEMPTS = 60;
     protected static final int POLLING_INTERVAL = 5000;
     private static final int NOT_FOUND = 404;
@@ -53,6 +55,14 @@ public abstract class GccSimpleNetworkResourceBuilder implements
         } else {
             throw new GcpResourceException(ex.getMessage(), ex);
         }
+    }
+
+    protected String getTimestampedName(String name) {
+        String timeStampedName = name + "-" + String.valueOf(new Date().getTime());
+        if (timeStampedName.length() > MAX_NAME_LENGTH) {
+            timeStampedName = timeStampedName.substring(0, MAX_NAME_LENGTH);
+        }
+        return timeStampedName;
     }
 
     @Override

@@ -116,7 +116,7 @@ public class GccReservedIpResourceBuilder extends GccSimpleNetworkResourceBuilde
     public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources,
             Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        return Arrays.asList(new Resource(resourceType(), stack.getName() + "reservedip", stack, null));
+        return Arrays.asList(new Resource(resourceType(), getTimestampedName(stack.getName() + "reservedip"), stack, null));
     }
 
     @Override
