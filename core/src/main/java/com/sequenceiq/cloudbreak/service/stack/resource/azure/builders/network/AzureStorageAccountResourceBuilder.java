@@ -80,7 +80,7 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
     public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources,
             Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        return Arrays.asList(new Resource(resourceType(), provisionContextObject.getCommonName(), stack, null));
+        return Arrays.asList(new Resource(resourceType(), provisionContextObject.getAffinityGroupName(), stack, null));
     }
 
     @Override
@@ -91,7 +91,7 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
         Map<String, String> props = new HashMap<>();
         props.put(NAME, buildResources.get(0).getResourceName());
         props.put(DESCRIPTION, "description");
-        props.put(AFFINITYGROUP, provisionContextObject.getCommonName());
+        props.put(AFFINITYGROUP, provisionContextObject.getAffinityGroupName());
         AzureClient azureClient = azureStackUtil.createAzureClient(credential);
         return new AzureStorageAccountCreateRequest(buildResources.get(0).getResourceName(), provisionContextObject.getStackId(), props, azureClient,
                 resources, buildResources);

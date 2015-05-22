@@ -12,7 +12,6 @@ import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -37,7 +36,7 @@ public class AzureResourceBuilderInit implements
         AzureCredential credential = (AzureCredential) stack.getCredential();
         AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
         AzureProvisionContextObject azureProvisionContextObject =
-                new AzureProvisionContextObject(stack.getId(), credential.getCommonName(azureLocation), getAllocatedAddresses(stack));
+                new AzureProvisionContextObject(stack.getId(), credential.getAffinityGroupName(azureLocation), getAllocatedAddresses(stack));
         return azureProvisionContextObject;
     }
 
@@ -83,10 +82,6 @@ public class AzureResourceBuilderInit implements
     @Override
     public CloudPlatform cloudPlatform() {
         return CloudPlatform.AZURE;
-    }
-
-    public String getOsImageName(Credential credential, AzureLocation location, String imageUrl) {
-        return azureStackUtil.getOsImageName(credential, location, imageUrl);
     }
 
     private Set<String> getAllocatedAddresses(Stack stack) {

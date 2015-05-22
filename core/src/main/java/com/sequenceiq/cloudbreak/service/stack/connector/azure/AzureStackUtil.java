@@ -41,8 +41,9 @@ public class AzureStackUtil {
     public static final String SERVICENAME = "serviceName";
     public static final String VIRTUAL_NETWORK_IP_ADDRESS = "virtualNetworkIPAddress";
     public static final String CREDENTIAL = "credential";
-    public static final String IMAGE_NAME = "ambari-docker-v1";
+    public static final String IMAGE_NAME = "ambari-docker";
     public static final String DEFAULT_JKS_PASS = "azure1";
+    public static final String CB_STORAGE_BASE = "cb";
     public static final Logger LOGGER = LoggerFactory.getLogger(AzureStackUtil.class);
 
     @Autowired
@@ -57,8 +58,12 @@ public class AzureStackUtil {
     public String getOsImageName(Credential credential, AzureLocation location, String image) {
         String[] split = image.split("/");
         AzureCredential azureCredential = (AzureCredential) credential;
-        return format("%s-%s-%s", azureCredential.getCommonName(location), IMAGE_NAME,
+        return format("%s-%s-%s", azureCredential.getAffinityGroupName(location), IMAGE_NAME,
                 split[split.length - 1].replaceAll(".vhd", ""));
+    }
+
+    public String getOSStorageName(AzureLocation location) {
+        return CB_STORAGE_BASE + location.region().toLowerCase().replaceAll(" ", "");
     }
 
     public synchronized AzureClient createAzureClient(AzureCredential credential) {

@@ -82,7 +82,7 @@ public class AzureAffinityGroupResourceBuilder extends AzureSimpleNetworkResourc
     public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources,
             Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        return Arrays.asList(new Resource(resourceType(), provisionContextObject.getCommonName(), stack, null));
+        return Arrays.asList(new Resource(resourceType(), provisionContextObject.getAffinityGroupName(), stack, null));
     }
 
     @Override

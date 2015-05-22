@@ -71,18 +71,19 @@ public class AzureProvisionSetup implements ProvisionSetup {
         AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) credential);
         LOGGER.info("Checking image exist in Azure image list.");
         if (!azureClient.isImageAvailable(azureStackUtil.getOsImageName(credential, azureLocation, stack.getImage()))) {
-            String affinityGroupName = ((AzureCredential) credential).getCommonName(azureLocation);
-            LOGGER.info("Starting create affinitygroup with {} name", affinityGroupName);
+            String affinityGroupName = ((AzureCredential) credential).getAffinityGroupName(azureLocation);
             createAffinityGroup(stack, azureClient, affinityGroupName);
+            // TODO distributed storage accounts
+            //String osStorageName = azureStackUtil.getOSStorageName(azureLocation);
+            String osStorageName = affinityGroupName;
+            createOSStorage(stack, azureClient, osStorageName, affinityGroupName);
+            String targetBlobContainerUri = "http://" + osStorageName + ".blob.core.windows.net/vm-images";
             String[] split = stack.getImage().split("/");
-            String storageName = split[split.length - 1].replaceAll(".vhd", "");
-            LOGGER.info("Starting create storage with {} name", storageName);
-            createStorage(stack, azureClient, affinityGroupName);
-            String targetBlobContainerUri = "http://" + affinityGroupName + ".blob.core.windows.net/vm-images";
-            String targetImageUri = targetBlobContainerUri + '/' + storageName + ".vhd";
-            LOGGER.info("Image destination will be: {}", targetImageUri);
+            String imageVHDName = split[split.length - 1];
+            String targetImageUri = targetBlobContainerUri + '/' + imageVHDName;
+            LOGGER.info("OS image destination will be: {}", targetImageUri);
             Map<String, String> params = new HashMap<>();
-            params.put(AzureStackUtil.NAME, affinityGroupName);
+            params.put(AzureStackUtil.NAME, osStorageName);
             LOGGER.info("Starting to get a storage key on Azure.");
             String keyJson = (String) azureClient.getStorageAccountKeys(params);
             JsonNode actualObj = null;
@@ -131,7 +132,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
             try {
                 Thread.sleep(MILLIS);
             } catch (InterruptedException e) {
-                LOGGER.info("Interrupted exception occured during sleep.", e);
+                LOGGER.info("Interrupted exception occurred during sleep.", e);
                 Thread.currentThread().interrupt();
             }
         }
@@ -147,7 +148,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
         } catch (Exception ex) {
             if (ex instanceof ResponseParseException) {
                 if (((ResponseParseException) ex).getStatusCode() != CONTAINER_EXISTS) {
-                    LOGGER.info("Error occured when created blob container.", ex);
+                    LOGGER.info("Error occurred when created blob container.", ex);
                     throw ex;
                 } else {
                     LOGGER.info("Blob container already exist no need to create it.");
@@ -175,23 +176,24 @@ public class AzureProvisionSetup implements ProvisionSetup {
         return null;
     }
 
-    private void createStorage(Stack stack, AzureClient azureClient, String affinityGroupName) {
+    private void createOSStorage(Stack stack, AzureClient azureClient, String storageName, String affinityGroupName) {
         try {
-            azureClient.getStorageAccount(affinityGroupName);
-            LOGGER.info("Storage already exist no need to create it with {} name", affinityGroupName);
+            LOGGER.info("Starting to create storage with {} name", storageName);
+            azureClient.getStorageAccount(storageName);
+            LOGGER.info("Storage already exist no need to create it with {} name", storageName);
         } catch (Exception ex) {
             if (ex instanceof HttpResponseException && ((HttpResponseException) ex).getStatusCode() == NOT_FOUND) {
                 Map<String, String> params = new HashMap<>();
-                params.put(AzureStackUtil.NAME, affinityGroupName);
+                params.put(AzureStackUtil.NAME, storageName);
                 params.put(DESCRIPTION, VM_COMMON_NAME);
                 params.put(AFFINITYGROUP, affinityGroupName);
                 HttpResponseDecorator response = (HttpResponseDecorator) azureClient.createStorageAccount(params);
                 AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(azureClient, stack, response);
                 azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                         POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-                LOGGER.info("Storage storage was success with {} name", affinityGroupName);
+                LOGGER.info("Storage creation was successful with {} name", storageName);
             } else {
-                LOGGER.error(String.format("Failure during storage creation: {}", stack.getId()), ex);
+                LOGGER.error(String.format("Failure occurred during storage creation: {}", stack.getId()), ex);
                 throw new AzureResourceException(ex);
             }
         }
@@ -199,8 +201,9 @@ public class AzureProvisionSetup implements ProvisionSetup {
 
     private void createAffinityGroup(Stack stack, AzureClient azureClient, String affinityGroupName) {
         try {
+            LOGGER.info("Starting to create affinity group with {} name", affinityGroupName);
             azureClient.getAffinityGroup(affinityGroupName);
-            LOGGER.info("Affinitygroup exist no need to create it with {} name", affinityGroupName);
+            LOGGER.info("Affinity group already exists, no need to create it with {} name", affinityGroupName);
         } catch (Exception ex) {
             if (ex instanceof HttpResponseException && ((HttpResponseException) ex).getStatusCode() == NOT_FOUND) {
                 Map<String, String> params = new HashMap<>();
@@ -208,7 +211,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
                 params.put(DESCRIPTION, VM_COMMON_NAME);
                 params.put(LOCATION, AzureLocation.valueOf(stack.getRegion()).region());
                 azureClient.createAffinityGroup(params);
-                LOGGER.info("Affinitygroup creation was success with {} name", affinityGroupName);
+                LOGGER.info("Affinity group creation was success with {} name", affinityGroupName);
             } else {
                 LOGGER.error("Error creating affinity group: {}, stack Id: {}", affinityGroupName, stack.getId(), ex);
                 throw new AzureResourceException(ex);

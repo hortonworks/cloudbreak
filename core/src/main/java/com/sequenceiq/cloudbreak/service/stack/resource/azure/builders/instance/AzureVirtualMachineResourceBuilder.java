@@ -105,17 +105,20 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             AzureCredential azureCredential = (AzureCredential) stack.getCredential();
             byte[] encoded = Base64.encodeBase64(buildResources.get(0).getResourceName().getBytes());
             String label = new String(encoded);
+            AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
             Map<String, Object> props = new HashMap<>();
             props.put(NAME, buildResources.get(0).getResourceName());
             props.put(DEPLOYMENTSLOT, PRODUCTION);
             props.put(LABEL, label);
-            props.put(IMAGENAME, azureStackUtil.getOsImageName(stack.getCredential(), AzureLocation.valueOf(stack.getRegion()), stack.getImage()));
-            props.put(IMAGESTOREURI, buildImageStoreUri(provisionContextObject.getCommonName(), buildResources.get(0).getResourceName()));
+            props.put(IMAGENAME, azureStackUtil.getOsImageName(azureCredential, azureLocation, stack.getImage()));
+            //TODO use newly created image stores, os storage
+            props.put(IMAGESTOREURI, buildImageStoreUri(provisionContextObject.getAffinityGroupName(), buildResources.get(0).getResourceName()));
             props.put(HOSTNAME, buildResources.get(0).getResourceName());
             props.put(USERNAME, CB_GCP_AND_AZURE_USER_NAME);
             props.put(SSHPUBLICKEYFINGERPRINT, azureStackUtil.createX509Certificate(azureCredential).getSha1Fingerprint().toUpperCase());
             props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", CB_GCP_AND_AZURE_USER_NAME));
-            props.put(AFFINITYGROUP, provisionContextObject.getCommonName());
+            // TODO replace in rest client
+            props.put(AFFINITYGROUP, provisionContextObject.getAffinityGroupName());
             if (azureTemplate.getVolumeCount() > 0) {
                 props.put(DISKS, generateDisksProperty(azureTemplate));
             }
@@ -157,8 +160,8 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         return ip;
     }
 
-    private String buildImageStoreUri(String commonName, String vmName) {
-        return String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", commonName, vmName);
+    private String buildImageStoreUri(String storageName, String vmName) {
+        return String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", storageName, vmName);
     }
 
     @Override

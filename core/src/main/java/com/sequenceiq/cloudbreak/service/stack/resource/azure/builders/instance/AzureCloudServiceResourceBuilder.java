@@ -100,7 +100,7 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
         Map<String, String> props = new HashMap<>();
         props.put(NAME, vmName);
         props.put(DESCRIPTION, azureTemplate.getDescription());
-        props.put(AFFINITYGROUP, provisionContextObject.getCommonName());
+        props.put(AFFINITYGROUP, provisionContextObject.getAffinityGroupName());
         return new AzureCloudServiceCreateRequest(props, resources, buildResources, stack, instanceGroup.orNull());
     }
 
