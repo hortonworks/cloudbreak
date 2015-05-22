@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
-import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +26,6 @@ public class AzureCloudServiceDeleteTask extends SimpleStatusCheckerTask<AzureCl
         LOGGER.info("Checking status of remove cloud service '{}'.", aRRPO.getName());
         try {
             Map<String, String> props = new HashMap<>();
-            props.put(SERVICENAME, aRRPO.getCommonName());
             props.put(NAME, aRRPO.getName());
             AzureClient azureClient = aRRPO.getAzureClient();
             HttpResponseDecorator deleteCloudServiceResult = (HttpResponseDecorator) azureClient.deleteCloudService(props);

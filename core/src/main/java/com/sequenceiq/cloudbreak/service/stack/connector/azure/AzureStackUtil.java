@@ -40,7 +40,6 @@ public class AzureStackUtil {
     public static final String RESERVEDIPNAME = "reservedIpName";
     public static final String SERVICENAME = "serviceName";
     public static final String VIRTUAL_NETWORK_IP_ADDRESS = "virtualNetworkIPAddress";
-    public static final String ERROR = "\"error\":\"Could not fetch data from azure\"";
     public static final String CREDENTIAL = "credential";
     public static final String IMAGE_NAME = "ambari-docker-v1";
     public static final String DEFAULT_JKS_PASS = "azure1";

@@ -37,8 +37,7 @@ public class AzureResourceBuilderInit implements
         AzureCredential credential = (AzureCredential) stack.getCredential();
         AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
         AzureProvisionContextObject azureProvisionContextObject =
-                new AzureProvisionContextObject(stack.getId(), credential.getCommonName(azureLocation),
-                        getOsImageName(credential, azureLocation, stack.getImage()), getAllocatedAddresses(stack));
+                new AzureProvisionContextObject(stack.getId(), credential.getCommonName(azureLocation), getAllocatedAddresses(stack));
         return azureProvisionContextObject;
     }
 
@@ -49,20 +48,14 @@ public class AzureResourceBuilderInit implements
 
     @Override
     public AzureDeleteContextObject deleteInit(Stack stack) throws Exception {
-        AzureCredential credential = (AzureCredential) stack.getCredential();
-        AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
-
         AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
         AzureDeleteContextObject azureDeleteContextObject =
-                new AzureDeleteContextObject(stack.getId(), credential.getCommonName(azureLocation), azureClient);
+                new AzureDeleteContextObject(stack.getId(), azureClient);
         return azureDeleteContextObject;
     }
 
     @Override
     public AzureDeleteContextObject decommissionInit(Stack stack, Set<String> decommissionSet) throws Exception {
-        AzureCredential credential = (AzureCredential) stack.getCredential();
-        AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
-
         AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
         List<Resource> resourceList = new ArrayList<>();
         for (String res : decommissionSet) {
@@ -73,7 +66,7 @@ public class AzureResourceBuilderInit implements
             }
         }
         AzureDeleteContextObject azureDeleteContextObject =
-                new AzureDeleteContextObject(stack.getId(), credential.getCommonName(azureLocation), azureClient, resourceList);
+                new AzureDeleteContextObject(stack.getId(), azureClient, resourceList);
         return azureDeleteContextObject;
     }
 
