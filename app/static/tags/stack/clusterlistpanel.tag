@@ -10,7 +10,7 @@
                 <dl class="row" style="padding-bottom: 4px;height: 25px;">
                   <div class="col-md-6">
                     <h6 style="margin: 0px;">
-                      <span class="label label-info">{{cluster.cloudPlatform == "GCC" ? "GCP" : cluster.cloudPlatform}}</span>
+                      <span class="label label-info">{{cluster.cloudPlatform}}</span>
                     </h6>
                   </div>
                   <div class="col-md-4" ng-show="cluster.public">

@@ -30,7 +30,7 @@
                                         <a id="azureTemplateChange" class="btn btn-default" role="button" ng-click="createAzureTemplateRequest()">Azure</a>
                                     </div>
                                     <div class="btn-group btn-group-justified">
-                                      <a id="gccTemplateChange" class="btn btn-default" role="button" ng-click="createGccTemplateRequest()">GCP</a>
+                                      <a id="gcpTemplateChange" class="btn btn-default" role="button" ng-click="createGcpTemplateRequest()">GCP</a>
                                       <a id="openstackTemplateChange" class="btn btn-default" role="button" ng-click="createOpenstackTemplateRequest()">OpenStack</a>
                                     </div>
                                 </div>
@@ -44,8 +44,8 @@
                                 <div ng-include src="'tags/template/awsform.tag'"></div>
                             </form>
 
-                            <form class="form-horizontal" role="form" ng-show="gccTemplate" name="gccTemplateForm" ng-show="gccTemplate">
-                                <div ng-include src="'tags/template/gccform.tag'"></div>
+                            <form class="form-horizontal" role="form" ng-show="gcpTemplate" name="gcpTemplateForm" ng-show="gcpTemplate">
+                                <div ng-include src="'tags/template/gcpform.tag'"></div>
                             </form>
                             <form class="form-horizontal" role="form" ng-show="openstackTemplate" name="openstackTemplateForm" ng-show="openstackTemplate">
                               <div ng-include src="'tags/template/openstackform.tag'"></div>
@@ -66,7 +66,7 @@
                         <div class="panel-heading">
                             <h5>
                                 <a href="" data-toggle="collapse" data-parent="#templete-list-accordion" data-target="#panel-template-collapse{{template.id}}"><i class="fa fa-file-o fa-fw"></i>{{template.name}}</a>
-                                <span class="label label-info pull-right" >{{template.cloudPlatform === "GCC" ? "GCP" : template.cloudPlatform}}</span>
+                                <span class="label label-info pull-right" >{{template.cloudPlatform}}</span>
                                 <i class="fa fa-users fa-lg public-account-info pull-right" style="padding-right: 5px" ng-show="template.public"></i>
                             </h5>
                         </div>
@@ -82,8 +82,8 @@
                                 <div ng-include src="'tags/template/azurelist.tag'"></div>
                             </div>
 
-                            <div class="panel-body" ng-if="template.cloudPlatform == 'GCC' ">
-                                <div ng-include src="'tags/template/gcclist.tag'"></div>
+                            <div class="panel-body" ng-if="template.cloudPlatform == 'GCP' ">
+                                <div ng-include src="'tags/template/gcplist.tag'"></div>
                             </div>
 
                             <div class="panel-body" ng-if="template.cloudPlatform == 'AWS' ">

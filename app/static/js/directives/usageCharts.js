@@ -62,7 +62,7 @@ cloudbreakApp.directive('usagecharts', function() {
         convertDatesAndSelectMax(openstackUsage, openstackMaxHour);
 
         var unitedChartData = [];
-        if (value.cloud == 'all' || value.cloud == 'GCC') {
+        if (value.cloud == 'all' || value.cloud == 'GCP') {
           element.append('<div id="gcpChart" class="col-xs-12 col-sm-6 col-md-6"/>');
           createChart('GCP running hours', gcpUsage, 'gcpChart', (gcpMaxHour > 0));
           unitedChartData.push(gcpUsage);

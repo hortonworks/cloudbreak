@@ -21,37 +21,37 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
 
 
         $rootScope.config = {
-            'GCC' : {
-                gccRegions: [
-                    {key: 'US_CENTRAL1_A', value: "us-central1-a", cloud: 'GCC'},
-                    {key: 'US_CENTRAL1_B', value: "us-central1-b", cloud: 'GCC'},
-                    {key: 'US_CENTRAL1_C', value: "us-central1-c", cloud: 'GCC'},
-                    {key: 'US_CENTRAL1_F', value: "us-central1-f", cloud: 'GCC'},
-                    {key: 'EUROPE_WEST1_B', value: "europe-west1-b", cloud: 'GCC'},
-                    {key: 'EUROPE_WEST1_C', value: "europe-west1-c", cloud: 'GCC'},
-                    {key: 'EUROPE_WEST1_D', value: "europe-west1-d", cloud: 'GCC'},
-                    {key: 'ASIA_EAST1_A', value: "asia-east1-a", cloud: 'GCC'},
-                    {key: 'ASIA_EAST1_B', value: "asia-east1-b", cloud: 'GCC'},
-                    {key: 'ASIA_EAST1_C', value: "asia-east1-c", cloud: 'GCC'}
+            'GCP' : {
+                gcpRegions: [
+                    {key: 'US_CENTRAL1_A', value: "us-central1-a", cloud: 'GCP'},
+                    {key: 'US_CENTRAL1_B', value: "us-central1-b", cloud: 'GCP'},
+                    {key: 'US_CENTRAL1_C', value: "us-central1-c", cloud: 'GCP'},
+                    {key: 'US_CENTRAL1_F', value: "us-central1-f", cloud: 'GCP'},
+                    {key: 'EUROPE_WEST1_B', value: "europe-west1-b", cloud: 'GCP'},
+                    {key: 'EUROPE_WEST1_C', value: "europe-west1-c", cloud: 'GCP'},
+                    {key: 'EUROPE_WEST1_D', value: "europe-west1-d", cloud: 'GCP'},
+                    {key: 'ASIA_EAST1_A', value: "asia-east1-a", cloud: 'GCP'},
+                    {key: 'ASIA_EAST1_B', value: "asia-east1-b", cloud: 'GCP'},
+                    {key: 'ASIA_EAST1_C', value: "asia-east1-c", cloud: 'GCP'}
                 ],
-                gccDiskTypes: [
+                gcpDiskTypes: [
                     {key: 'HDD', value: 'Magnetic'},
                     {key: 'SSD', value: 'SSD'}
                 ],
-                gccInstanceTypes: [
-                    {key: 'N1_STANDARD_1', value: 'n1-standard-1', cloud: 'GCC'},
-                    {key: 'N1_STANDARD_2', value:'n1-standard-2', cloud: 'GCC'},
-                    {key: 'N1_STANDARD_4', value:'n1-standard-4', cloud: 'GCC'},
-                    {key: 'N1_STANDARD_8', value:'n1-standard-8', cloud: 'GCC'},
-                    {key: 'N1_STANDARD_16', value:'n1-standard-16', cloud: 'GCC'},
-                    {key: 'N1_HIGHMEM_2', value:'n1-highmem-2', cloud: 'GCC'},
-                    {key: 'N1_HIGHMEM_4', value:'n1-highmem-4', cloud: 'GCC'},
-                    {key: 'N1_HIGHMEM_8', value:'n1-highmem-8', cloud: 'GCC'},
-                    {key: 'N1_HIGHMEM_16', value:'n1-highmem-16', cloud: 'GCC'},
-                    {key: 'N1_HIGHCPU_2', value:'n1-highcpu-2', cloud: 'GCC'},
-                    {key: 'N1_HIGHCPU_4', value:'n1-highcpu-4', cloud: 'GCC'},
-                    {key: 'N1_HIGHCPU_8', value:'n1-highcpu-8', cloud: 'GCC'},
-                    {key: 'N1_HIGHCPU_16', value:'n1-highcpu-16', cloud: 'GCC'}
+                gcpInstanceTypes: [
+                    {key: 'N1_STANDARD_1', value: 'n1-standard-1', cloud: 'GCP'},
+                    {key: 'N1_STANDARD_2', value:'n1-standard-2', cloud: 'GCP'},
+                    {key: 'N1_STANDARD_4', value:'n1-standard-4', cloud: 'GCP'},
+                    {key: 'N1_STANDARD_8', value:'n1-standard-8', cloud: 'GCP'},
+                    {key: 'N1_STANDARD_16', value:'n1-standard-16', cloud: 'GCP'},
+                    {key: 'N1_HIGHMEM_2', value:'n1-highmem-2', cloud: 'GCP'},
+                    {key: 'N1_HIGHMEM_4', value:'n1-highmem-4', cloud: 'GCP'},
+                    {key: 'N1_HIGHMEM_8', value:'n1-highmem-8', cloud: 'GCP'},
+                    {key: 'N1_HIGHMEM_16', value:'n1-highmem-16', cloud: 'GCP'},
+                    {key: 'N1_HIGHCPU_2', value:'n1-highcpu-2', cloud: 'GCP'},
+                    {key: 'N1_HIGHCPU_4', value:'n1-highcpu-4', cloud: 'GCP'},
+                    {key: 'N1_HIGHCPU_8', value:'n1-highcpu-8', cloud: 'GCP'},
+                    {key: 'N1_HIGHCPU_16', value:'n1-highcpu-16', cloud: 'GCP'}
                 ]
             },
             'AZURE': {
