@@ -3,8 +3,37 @@ docker-check-boot2docker() {
     boot2docker version &> /dev/null || local missing=1
     if [[ "$missing" ]]; then
         echo "[ERROR] boot2docker command not found, please install by:" | red
-        echo "brew install boot2docker" | blue
+        echo "  brew install boot2docker" | blue
         exit 127
+    fi
+
+    : << "UNTIL-BOOT2DOCKER-CLI-366-GET-MERGED"
+    if [[ "$(boot2docker status)" == "running" ]]; then
+        if [[ "$(boot2docker shellinit 2>/dev/null)" == "" ]];then
+            info "boot2docker shellinit: OK"
+        else
+            echo "[ERROR] boot2docker shell env is not set correctly, please run:" | red
+            echo ' eval "$(boot2docker shellinit)"' | blue
+            exit 125
+        fi
+    else
+        echo "[ERROR] boot2docker is not running, please start by:" | red
+        echo "  boot2docker start" | blue
+        exit 126
+    fi
+UNTIL-BOOT2DOCKER-CLI-366-GET-MERGED
+    if [[ "$(boot2docker status)" == "running" ]]; then
+        if [[ "$DOCKER_HOST" != "" ]] && [[ "$DOCKER_CERT_PATH" != "" ]] && [[ "$DOCKER_TLS_VERIFY" != "" ]]; then
+            info "boot2docker shellinit: OK"
+        else
+            echo "[ERROR] boot2docker shell env is not set correctly, please run:" | red
+            echo ' eval "$(boot2docker shellinit)"' | blue
+            exit 125
+        fi
+    else
+        echo "[ERROR] boot2docker is not running, please start by:" | red
+        echo "  boot2docker start" | blue
+        exit 126
     fi
 
     debug "TODO: check for version and instruction for update ..."

@@ -4,13 +4,13 @@ More detailes needed here ...
 
 - **uaa**: OAuth Identity Server
 - cloudbreak - the Cloudbreak app
-- persicope - the Periscope app
+- periscope - the Periscope app
 - uluwatu - Cloudbreak UI
 - sultans - user management
 
 ## System Level Containers
 
 - consul: Service Registry
-- registrator: automatically requirementsgisters/deregisters containers into Consul
+- registrator: automatically registers/unregisters containers with Consul
 
 

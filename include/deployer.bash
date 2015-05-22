@@ -99,6 +99,7 @@ init-profile() {
             if [[ "$(boot2docker status)" == "running" ]]; then
                 echo "export PUBLIC_IP=$(boot2docker ip)" > $CBD_PROFILE
                 echo "export PRIVATE_IP=$(boot2docker ip)" >> $CBD_PROFILE
+                boot2docker shellinit 2>/dev/null >> $CBD_PROFILE
             else
                 echo "boot2docker isn't running, please start it, with the following 2 commands:" | red
                 echo "boot2docker start" | blue
