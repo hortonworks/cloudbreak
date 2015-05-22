@@ -6,23 +6,23 @@ import java.util.Map;
 import com.sequenceiq.cloudbreak.controller.json.CredentialResponse;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.validation.GccCredentialParam;
+import com.sequenceiq.cloudbreak.controller.validation.GcpCredentialParam;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.GccCredential;
+import com.sequenceiq.cloudbreak.domain.GcpCredential;
 
 @Component
-public class GcpCredentialToJsonConverter extends AbstractConversionServiceAwareConverter<GccCredential, CredentialResponse> {
+public class GcpCredentialToJsonConverter extends AbstractConversionServiceAwareConverter<GcpCredential, CredentialResponse> {
 
     @Override
-    public CredentialResponse convert(GccCredential source) {
+    public CredentialResponse convert(GcpCredential source) {
         CredentialResponse credentialJson = new CredentialResponse();
         credentialJson.setId(source.getId());
-        credentialJson.setCloudPlatform(CloudPlatform.GCC);
+        credentialJson.setCloudPlatform(CloudPlatform.GCP);
         credentialJson.setName(source.getName());
         credentialJson.setPublicInAccount(source.isPublicInAccount());
         Map<String, Object> params = new HashMap<>();
-        params.put(GccCredentialParam.SERVICE_ACCOUNT_ID.getName(), source.getServiceAccountId());
-        params.put(GccCredentialParam.PROJECTID.getName(), source.getProjectId());
+        params.put(GcpCredentialParam.SERVICE_ACCOUNT_ID.getName(), source.getServiceAccountId());
+        params.put(GcpCredentialParam.PROJECTID.getName(), source.getProjectId());
         credentialJson.setParameters(params);
         credentialJson.setDescription(source.getDescription() == null ? "" : source.getDescription());
         return credentialJson;

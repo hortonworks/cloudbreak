@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import com.sequenceiq.cloudbreak.domain.GccTemplate;
+import com.sequenceiq.cloudbreak.domain.GcpTemplate;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
@@ -72,9 +72,9 @@ public class IntervalStackUsageGenerator {
         if (CloudPlatform.AWS.equals(cloudPlatform)) {
             AwsTemplate awsTemp = (AwsTemplate) template;
             instanceType = awsTemp.getInstanceType().name();
-        } else if (CloudPlatform.GCC.equals(cloudPlatform)) {
-            GccTemplate gceTemp = (GccTemplate) template;
-            instanceType = gceTemp.getGccInstanceType().name();
+        } else if (CloudPlatform.GCP.equals(cloudPlatform)) {
+            GcpTemplate gceTemp = (GcpTemplate) template;
+            instanceType = gceTemp.getGcpInstanceType().name();
         } else if (CloudPlatform.AZURE.equals(cloudPlatform)) {
             AzureTemplate azureTemp = (AzureTemplate) template;
             instanceType = azureTemp.getVmType().toString();

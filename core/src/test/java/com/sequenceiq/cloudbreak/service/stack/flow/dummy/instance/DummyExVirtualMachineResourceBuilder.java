@@ -70,12 +70,12 @@ public class DummyExVirtualMachineResourceBuilder
 
     @Override
     public ResourceType resourceType() {
-        return ResourceType.GCC_INSTANCE;
+        return ResourceType.GCP_INSTANCE;
     }
 
     @Override
     public CloudPlatform cloudPlatform() {
-        return CloudPlatform.GCC;
+        return CloudPlatform.GCP;
     }
 
     public class DummyVirtualMachineCreateRequest extends CreateResourceRequest {

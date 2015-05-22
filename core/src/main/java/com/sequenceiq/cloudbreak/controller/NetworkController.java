@@ -146,7 +146,7 @@ public class NetworkController {
             case AZURE:
                 converted = conversionService.convert(networkRequest, AzureNetwork.class);
                 break;
-            case GCC:
+            case GCP:
                 converted = conversionService.convert(networkRequest, GcpNetwork.class);
                 break;
             case OPENSTACK:

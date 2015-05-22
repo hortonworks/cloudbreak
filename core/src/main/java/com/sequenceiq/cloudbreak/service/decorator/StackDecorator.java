@@ -94,7 +94,7 @@ public class StackDecorator implements Decorator<Stack> {
             case AZURE:
                 selectedImage = determineImageName(azureImage, CB_AZURE_IMAGE_URI);
                 break;
-            case GCC:
+            case GCP:
                 selectedImage = determineImageName(gcpImage, CB_GCP_SOURCE_IMAGE_PATH);
                 break;
             case OPENSTACK:

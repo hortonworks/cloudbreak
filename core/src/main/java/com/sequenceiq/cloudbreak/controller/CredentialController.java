@@ -10,14 +10,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.sequenceiq.cloudbreak.controller.doc.ContentType;
-import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
-import com.sequenceiq.cloudbreak.controller.doc.Notes;
-import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions.CredentialOpDescription;
-import com.sequenceiq.cloudbreak.controller.json.CredentialRequest;
-import com.sequenceiq.cloudbreak.controller.json.CredentialResponse;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
@@ -33,16 +25,24 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.sequenceiq.cloudbreak.controller.doc.ContentType;
+import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
+import com.sequenceiq.cloudbreak.controller.doc.Notes;
+import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions.CredentialOpDescription;
+import com.sequenceiq.cloudbreak.controller.json.CredentialRequest;
+import com.sequenceiq.cloudbreak.controller.json.CredentialResponse;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.GccCredential;
+import com.sequenceiq.cloudbreak.domain.GcpCredential;
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 
 @Controller
 @Api(value = "/credentials", description = ControllerDescription.CREDENTIAL_DESCRIPTION, position = 1)
@@ -202,8 +202,8 @@ public class CredentialController {
         case AZURE:
             converted = conversionService.convert(json, AzureCredential.class);
             break;
-        case GCC:
-            converted = conversionService.convert(json, GccCredential.class);
+        case GCP:
+            converted = conversionService.convert(json, GcpCredential.class);
             break;
         case OPENSTACK:
             converted = conversionService.convert(json, OpenStackCredential.class);
@@ -222,8 +222,8 @@ public class CredentialController {
             return conversionService.convert((AwsCredential) credential, CredentialResponse.class);
         case AZURE:
             return conversionService.convert((AzureCredential) credential, CredentialResponse.class);
-        case GCC:
-            return conversionService.convert((GccCredential) credential, CredentialResponse.class);
+        case GCP:
+            return conversionService.convert((GcpCredential) credential, CredentialResponse.class);
         case OPENSTACK:
             return conversionService.convert((OpenStackCredential) credential, CredentialResponse.class);
         default:

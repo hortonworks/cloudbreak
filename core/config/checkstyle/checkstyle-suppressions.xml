@@ -12,9 +12,8 @@
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="PublicKeyReaderUtil.java"/>
     <suppress checks="ParameterNumber" files="CloudbreakUsageController.java"/>
     <suppress checks="IllegalCatch" files="CredentialController.java"/>
-    <suppress checks="IllegalCatch" files="GccRemoveCheckerStatus.java"/>
-    <suppress checks="IllegalCatch" files="GccStackUtil.java"/>
-    <suppress checks="IllegalCatch" files="GccProvisionSetup.java"/>
+    <suppress checks="IllegalCatch" files="GcpStackUtil.java"/>
+    <suppress checks="IllegalCatch" files="GcpProvisionSetup.java"/>
     <suppress checks="MagicNumber" files="AzureStackUtil.java"/>
 
     <!-- suppressing checks in tests -->

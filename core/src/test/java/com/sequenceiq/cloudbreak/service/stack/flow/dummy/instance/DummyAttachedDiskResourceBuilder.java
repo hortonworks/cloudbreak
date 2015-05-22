@@ -69,12 +69,12 @@ public class DummyAttachedDiskResourceBuilder
 
     @Override
     public ResourceType resourceType() {
-        return ResourceType.GCC_ATTACHED_DISK;
+        return ResourceType.GCP_ATTACHED_DISK;
     }
 
     @Override
     public CloudPlatform cloudPlatform() {
-        return CloudPlatform.GCC;
+        return CloudPlatform.GCP;
     }
 
     public class DummyAttachedDiskCreateRequest extends CreateResourceRequest {

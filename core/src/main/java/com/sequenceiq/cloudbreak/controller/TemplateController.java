@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.domain.GccTemplate;
+import com.sequenceiq.cloudbreak.domain.GcpTemplate;
 import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -153,8 +153,8 @@ public class TemplateController {
         case AZURE:
             converted = conversionService.convert(templateRequest, AzureTemplate.class);
             break;
-        case GCC:
-            converted = conversionService.convert(templateRequest, GccTemplate.class);
+        case GCP:
+            converted = conversionService.convert(templateRequest, GcpTemplate.class);
             break;
         case OPENSTACK:
             converted = conversionService.convert(templateRequest, OpenStackTemplate.class);

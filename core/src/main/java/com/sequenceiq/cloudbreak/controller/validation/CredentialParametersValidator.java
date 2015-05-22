@@ -18,7 +18,7 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
 
     private List<TemplateParam> requiredAWSParams = new ArrayList<>();
     private List<TemplateParam> requiredAzureParams = new ArrayList<>();
-    private List<TemplateParam> requiredGccParams = new ArrayList<>();
+    private List<TemplateParam> requiredGcpParams = new ArrayList<>();
 
 
     @Override
@@ -29,8 +29,8 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
         for (RequiredAzureCredentialParam param : RequiredAzureCredentialParam.values()) {
             requiredAzureParams.add(param);
         }
-        for (GccCredentialParam param : GccCredentialParam.values()) {
-            requiredGccParams.add(param);
+        for (GcpCredentialParam param : GcpCredentialParam.values()) {
+            requiredGcpParams.add(param);
         }
     }
 
@@ -44,8 +44,8 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
             case AZURE:
                 valid = validateParams(request.getParameters(), context, requiredAzureParams);
                 break;
-            case GCC:
-                valid = validateParams(request.getParameters(), context, requiredGccParams);
+            case GCP:
+                valid = validateParams(request.getParameters(), context, requiredGcpParams);
                 break;
             default:
                 break;
