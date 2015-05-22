@@ -52,7 +52,6 @@ public class AzureProvisionSetup implements ProvisionSetup {
     private static final int POLLING_INTERVAL = 5000;
     private static final int MAX_POLLING_ATTEMPTS = 60;
 
-
     @Autowired
     private AzureStackUtil azureStackUtil;
 
@@ -75,7 +74,8 @@ public class AzureProvisionSetup implements ProvisionSetup {
             String affinityGroupName = ((AzureCredential) credential).getCommonName(azureLocation);
             LOGGER.info("Starting create affinitygroup with {} name", affinityGroupName);
             createAffinityGroup(stack, azureClient, affinityGroupName);
-            String storageName = String.format("%s%s", VM_COMMON_NAME, stack.getId());
+            String[] split = stack.getImage().split("/");
+            String storageName = split[split.length - 1].replaceAll(".vhd", "");
             LOGGER.info("Starting create storage with {} name", storageName);
             createStorage(stack, azureClient, affinityGroupName);
             String targetBlobContainerUri = "http://" + affinityGroupName + ".blob.core.windows.net/vm-images";
