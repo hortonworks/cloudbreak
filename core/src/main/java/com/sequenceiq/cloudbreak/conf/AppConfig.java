@@ -4,9 +4,9 @@ import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_CONTAINER_T
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_CONTAINER_THREADPOOL_CORE_SIZE;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_INTERMEDIATE_THREADPOOL_CAPACITY_SIZE;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_INTERMEDIATE_THREADPOOL_CORE_SIZE;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SUPPORTED_CONTAINER_ORCHESTRATORS;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_THREADPOOL_CAPACITY_SIZE;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_THREADPOOL_CORE_SIZE;
-import static com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorTool.SWARM;
 
 import java.io.IOException;
 import java.security.cert.CertificateException;
@@ -15,12 +15,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,13 +38,12 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptorMapFactory;
+import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ExecutorBasedParallelContainerRunner;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorTool;
 import com.sequenceiq.cloudbreak.orchestrator.ParallelContainerRunner;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.SwarmContainerOrchestrator;
 import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
@@ -51,31 +53,39 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 @Configuration
 public class AppConfig {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
+
+    @Value("#{'${cb.supported.container.orchestrators:" + CB_SUPPORTED_CONTAINER_ORCHESTRATORS + "}'.split(',')}")
+    private List<String> orchestrators;
+
     @Value("${cb.threadpool.core.size:" + CB_THREADPOOL_CORE_SIZE + "}")
     private int corePoolSize;
+
     @Value("${cb.threadpool.capacity.size:" + CB_THREADPOOL_CAPACITY_SIZE + "}")
     private int queueCapacity;
 
     @Value("${cb.intermediate.threadpool.core.size:" + CB_INTERMEDIATE_THREADPOOL_CORE_SIZE + "}")
     private int intermediateCorePoolSize;
+
     @Value("${cb.intermediate.threadpool.capacity.size:" + CB_INTERMEDIATE_THREADPOOL_CAPACITY_SIZE + "}")
     private int intermediateQueueCapacity;
 
     @Value("${cb.container.threadpool.core.size:" + CB_CONTAINER_THREADPOOL_CORE_SIZE + "}")
     private int containerCorePoolSize;
+
     @Value("${cb.container.threadpool.capacity.size:" + CB_CONTAINER_THREADPOOL_CAPACITY_SIZE + "}")
     private int containerteQueueCapacity;
 
-    @Autowired
+    @Inject
     private List<CloudPlatformConnector> cloudPlatformConnectorList;
 
-    @Autowired
+    @Inject
     private List<ProvisionSetup> provisionSetups;
 
-    @Autowired
+    @Inject
     private List<MetadataSetup> metadataSetups;
 
-    @Autowired
+    @Inject
     private List<CredentialHandler<? extends Credential>> credentialHandlers;
 
     @Bean
@@ -84,9 +94,26 @@ public class AppConfig {
     }
 
     @Bean
-    public Map<ContainerOrchestratorTool, ContainerOrchestrator> containerOrchestrators() {
-        Map<ContainerOrchestratorTool, ContainerOrchestrator> map = new HashMap<>();
-        map.put(SWARM, new SwarmContainerOrchestrator(simpleParalellContainerRunnerExecutor()));
+    public Map<String, ContainerOrchestrator> containerOrchestrators() throws CloudbreakException {
+        Map<String, ContainerOrchestrator> map = new HashMap<>();
+        for (String className : orchestrators) {
+            try {
+                Class<?> coClass = AppConfig.class.getClassLoader().loadClass(className);
+                if (ContainerOrchestrator.class.isAssignableFrom(coClass)) {
+                    ContainerOrchestrator co = (ContainerOrchestrator) coClass.newInstance();
+                    co.init(simpleParalellContainerRunnerExecutor());
+                    map.put(co.name(), co);
+                }
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                throw new CloudbreakException("Invalid ContainerOrchestrator definition: " + className, e);
+            }
+        }
+
+        if (map.isEmpty()) {
+            LOGGER.error("No any ContainerOrchestrator has been loaded. Following ContainerOrchestrators were tried {}", orchestrators);
+            throw new CloudbreakException("No any ContainerOrchestrator has been loaded");
+        }
+
         return map;
     }
 

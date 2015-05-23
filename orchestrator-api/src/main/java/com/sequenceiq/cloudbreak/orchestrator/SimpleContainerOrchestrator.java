@@ -4,11 +4,12 @@ public abstract class SimpleContainerOrchestrator implements ContainerOrchestrat
 
     private ParallelContainerRunner parallelContainerRunner;
 
-    public SimpleContainerOrchestrator(ParallelContainerRunner parallelContainerRunner) {
+    @Override
+    public void init(ParallelContainerRunner parallelContainerRunner) {
         this.parallelContainerRunner = parallelContainerRunner;
     }
 
-    public ParallelContainerRunner getParallelContainerRunner() {
+    protected ParallelContainerRunner getParallelContainerRunner() {
         return parallelContainerRunner;
     }
 }

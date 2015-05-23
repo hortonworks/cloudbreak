@@ -1,18 +1,16 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_CONTAINER_ORCHESTRATOR;
 import static com.sequenceiq.cloudbreak.service.PollingResult.TIMEOUT;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
@@ -25,7 +23,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorTool;
 import com.sequenceiq.cloudbreak.orchestrator.Node;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
@@ -33,33 +30,33 @@ import com.sequenceiq.cloudbreak.service.PollingService;
 
 @Component
 public class ClusterBootstrapper {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterBootstrapper.class);
+
     private static final int POLLING_INTERVAL = 5000;
+
     private static final int MAX_POLLING_ATTEMPTS = 500;
 
-    @Value("${cb.container.orchestrator:" + CB_CONTAINER_ORCHESTRATOR + "}")
-    private ContainerOrchestratorTool containerOrchestratorTool;
-
-    @javax.annotation.Resource
-    private Map<ContainerOrchestratorTool, ContainerOrchestrator> containerOrchestrators;
-
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
-    @Autowired
+    @Inject
     private PollingService<BootstrapApiContext> bootstrapApiPollingService;
 
-    @Autowired
+    @Inject
     private BootstrapApiCheckerTask bootstrapApiCheckerTask;
 
-    @Autowired
+    @Inject
     private PollingService<ContainerOrchestratorClusterContext> clusterAvailabilityPollingService;
 
-    @Autowired
+    @Inject
     private ClusterAvailabilityCheckerTask clusterAvailabilityCheckerTask;
 
-    @Autowired
+    @Inject
     private ClusterBootstrapperErrorHandler clusterBootstrapperErrorHandler;
+
+    @Inject
+    private ContainerOrchestratorResolver containerOrchestratorResolver;
 
     public void bootstrapCluster(ProvisioningContext provisioningContext) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
@@ -71,7 +68,7 @@ public class ClusterBootstrapper {
             nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp()));
         }
         try {
-            ContainerOrchestrator containerOrchestrator = containerOrchestrators.get(containerOrchestratorTool);
+            ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
             bootstrapApiPollingService.pollWithTimeout(
                     bootstrapApiCheckerTask,
                     new BootstrapApiContext(stack, gatewayInstance.getPublicIp(), containerOrchestrator),
@@ -117,7 +114,7 @@ public class ClusterBootstrapper {
             }
         }
         try {
-            ContainerOrchestrator containerOrchestrator = containerOrchestrators.get(containerOrchestratorTool);
+            ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
             List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIp());
             for (int i = 0; i < nodeMap.size(); i++) {
                 containerOrchestrator.bootstrapNewNodes(gatewayInstance.getPublicIp(), nodeMap.get(i));
