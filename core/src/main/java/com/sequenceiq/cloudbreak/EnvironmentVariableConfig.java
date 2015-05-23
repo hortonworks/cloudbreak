@@ -19,7 +19,6 @@ public class EnvironmentVariableConfig {
     public static final String CB_DB_ENV_USER = "postgres";
     public static final String CB_DB_ENV_PASS = "";
     public static final String CB_DB_ENV_DB = "postgres";
-    public static final String CB_HBM2DDL_STRATEGY = "update";
 
     public static final String CB_PLUGINS_TRUSTED_SOURCES = "all-accounts";
 
