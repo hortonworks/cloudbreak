@@ -28,7 +28,7 @@ public class GcpTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
         // GIVEN
         // WHEN
         // TODO: publicInAccount
-        String id = getClient().postGccTemplate(gcpName, "GCP template for integration testing", gcpInstanceType, volumeType, volumeCount, volumeSize, false);
+        String id = getClient().postGcpTemplate(gcpName, "GCP template for integration testing", gcpInstanceType, volumeType, volumeCount, volumeSize, false);
         // THEN
         Assert.assertNotNull(id);
         additionHelper.handleTemplateAdditions(getItContext(), id, additions);
