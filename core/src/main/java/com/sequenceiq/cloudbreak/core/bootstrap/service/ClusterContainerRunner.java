@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_CONTAINER_ORCHESTRATOR;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_AMBARI;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_AMBARI_DB;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_AMBARI_WARMUP;
@@ -8,12 +7,10 @@ import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONT
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_REGISTRATOR;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Resource;
+import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -26,15 +23,11 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
-import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorTool;
 import com.sequenceiq.cloudbreak.orchestrator.Node;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 @Component
 public class ClusterContainerRunner {
-
-    @Value("${cb.container.orchestrator:" + CB_CONTAINER_ORCHESTRATOR + "}")
-    private ContainerOrchestratorTool containerOrchestratorTool;
 
     @Value("${cb.docker.container.ambari.warm:" + CB_DOCKER_CONTAINER_AMBARI_WARMUP + "}")
     private String warmAmbariDockerImageName;
@@ -51,14 +44,14 @@ public class ClusterContainerRunner {
     @Value("${cb.docker.container.ambari.db:" + CB_DOCKER_CONTAINER_AMBARI_DB + "}")
     private String postgresDockerImageName;
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
-    @Resource
-    private Map<ContainerOrchestratorTool, ContainerOrchestrator> containerOrchestrators;
+    @Inject
+    private ContainerOrchestratorResolver containerOrchestratorResolver;
 
     public void runClusterContainers(ProvisioningContext provisioningContext) throws CloudbreakException {
-        ContainerOrchestrator containerOrchestrator = containerOrchestrators.get(containerOrchestratorTool);
+        ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
         String cloudPlatform = provisioningContext.getCloudPlatform().name();
 
         Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
@@ -86,7 +79,7 @@ public class ClusterContainerRunner {
     }
 
     public void addClusterContainers(ClusterScalingContext context) throws CloudbreakException {
-        ContainerOrchestrator containerOrchestrator = containerOrchestrators.get(containerOrchestratorTool);
+        ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
         String cloudPlatform = context.getCloudPlatform().name();
 
         Stack stack = stackRepository.findOneWithLists(context.getStackId());

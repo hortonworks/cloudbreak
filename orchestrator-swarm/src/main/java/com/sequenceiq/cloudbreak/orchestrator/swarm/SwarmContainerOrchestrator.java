@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.swarm;
 
-import static com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorTool.SWARM;
+
 import static com.sequenceiq.cloudbreak.orchestrator.SimpleContainerBootstrapRunner.simpleContainerBootstrapRunner;
 
 import java.util.ArrayList;
@@ -23,9 +23,7 @@ import com.github.dockerjava.jaxrs.DockerCmdExecFactoryImpl;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
-import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorTool;
 import com.sequenceiq.cloudbreak.orchestrator.Node;
-import com.sequenceiq.cloudbreak.orchestrator.ParallelContainerRunner;
 import com.sequenceiq.cloudbreak.orchestrator.SimpleContainerBootstrapRunner;
 import com.sequenceiq.cloudbreak.orchestrator.SimpleContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariAgentBootstrap;
@@ -42,9 +40,6 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     private static final String MUNCHAUSEN_DOCKER_IMAGE = "sequenceiq/munchausen:0.3";
     private static final int MAX_IP_FOR_ONE_REQUEST = 600;
 
-    public SwarmContainerOrchestrator(ParallelContainerRunner parallelContainerRunner) {
-        super(parallelContainerRunner);
-    }
 
     /**
      * Bootstraps a Swarm based container orchestration cluster with a Consul discovery backend with the Munchausen tool.
@@ -235,8 +230,8 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public ContainerOrchestratorTool type() {
-        return SWARM;
+    public String name() {
+        return "SWARM";
     }
 
     private Set<String> selectConsulServers(String gatewayAddress, Set<String> privateAddresses, int consulServerCount) {
