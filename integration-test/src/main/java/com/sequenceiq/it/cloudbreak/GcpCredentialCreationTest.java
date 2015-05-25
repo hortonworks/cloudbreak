@@ -35,7 +35,7 @@ public class GcpCredentialCreationTest extends AbstractCloudbreakIntegrationTest
         String publicKey = ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "");
         // WHEN
         // TODO publicInAccount
-        String id = getClient().postGccCredential(credentialName, "GCP credential for integartiontest", publicKey, false, projectId, serviceAccountId,
+        String id = getClient().postGcpCredential(credentialName, "GCP credential for integartiontest", publicKey, false, projectId, serviceAccountId,
                 serviceAccountPrivateKey);
         // THEN
         Assert.assertNotNull(id);
