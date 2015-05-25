@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcp.domain.GcpZone;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
@@ -49,8 +49,8 @@ public class CloudbreakUsageToJsonConverter extends AbstractConversionServiceAwa
         if (zoneFromUsage != null && CloudPlatform.AWS.name().equals(cloud)) {
             Regions transformedZone = Regions.valueOf(zoneFromUsage);
             zone = transformedZone.name();
-        } else if (zoneFromUsage != null && CloudPlatform.GCC.name().equals(cloud)) {
-            GccZone transformedZone = GccZone.valueOf(zoneFromUsage);
+        } else if (zoneFromUsage != null && CloudPlatform.GCP.name().equals(cloud)) {
+            GcpZone transformedZone = GcpZone.valueOf(zoneFromUsage);
             zone = transformedZone.name();
         } else if (zoneFromUsage != null && CloudPlatform.AZURE.name().equals(cloud)) {
             AzureLocation transformedZone = AzureLocation.valueOf(zoneFromUsage);

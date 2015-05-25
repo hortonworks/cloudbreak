@@ -17,15 +17,15 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.GccCredential;
-import com.sequenceiq.cloudbreak.domain.GccTemplate;
+import com.sequenceiq.cloudbreak.domain.GcpCredential;
+import com.sequenceiq.cloudbreak.domain.GcpTemplate;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccInstanceType;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccRawDiskType;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcp.domain.GcpInstanceType;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcp.domain.GcpRawDiskType;
 
 public final class ServiceTestUtils {
 
@@ -182,14 +182,14 @@ public final class ServiceTestUtils {
                 awsCredential.setRoleArn("rolearn");
                 awsCredential.setPublicKey(PUBLIC_KEY);
                 return awsCredential;
-            case GCC:
-                GccCredential gccCredential = new GccCredential();
-                gccCredential.setId(1L);
-                gccCredential.setOwner(owner);
-                gccCredential.setAccount(account);
-                gccCredential.setPublicInAccount(true);
-                gccCredential.setPublicKey(PUBLIC_KEY);
-                return gccCredential;
+            case GCP:
+                GcpCredential gcpCredential = new GcpCredential();
+                gcpCredential.setId(1L);
+                gcpCredential.setOwner(owner);
+                gcpCredential.setAccount(account);
+                gcpCredential.setPublicInAccount(true);
+                gcpCredential.setPublicKey(PUBLIC_KEY);
+                return gcpCredential;
             default:
                 return null;
         }
@@ -225,18 +225,18 @@ public final class ServiceTestUtils {
                 awsTemplate.setDescription("aws test template");
                 awsTemplate.setPublicInAccount(true);
                 return awsTemplate;
-            case GCC:
-                GccTemplate gccTemplate = new GccTemplate();
-                gccTemplate.setId(1L);
-                gccTemplate.setGccInstanceType(GccInstanceType.N1_STANDARD_1);
-                gccTemplate.setGccRawDiskType(GccRawDiskType.HDD);
-                gccTemplate.setDescription("gcc test template");
-                gccTemplate.setOwner(owner);
-                gccTemplate.setAccount(account);
-                gccTemplate.setVolumeCount(1);
-                gccTemplate.setVolumeSize(100);
-                gccTemplate.setPublicInAccount(true);
-                return gccTemplate;
+            case GCP:
+                GcpTemplate gcpTemplate = new GcpTemplate();
+                gcpTemplate.setId(1L);
+                gcpTemplate.setGcpInstanceType(GcpInstanceType.N1_STANDARD_1);
+                gcpTemplate.setGcpRawDiskType(GcpRawDiskType.HDD);
+                gcpTemplate.setDescription("gcp test template");
+                gcpTemplate.setOwner(owner);
+                gcpTemplate.setAccount(account);
+                gcpTemplate.setVolumeCount(1);
+                gcpTemplate.setVolumeSize(100);
+                gcpTemplate.setPublicInAccount(true);
+                return gcpTemplate;
             default:
                 return null;
         }

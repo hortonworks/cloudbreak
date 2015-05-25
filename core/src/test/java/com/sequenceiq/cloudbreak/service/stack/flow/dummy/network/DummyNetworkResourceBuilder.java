@@ -69,12 +69,12 @@ public class DummyNetworkResourceBuilder
 
     @Override
     public ResourceType resourceType() {
-        return ResourceType.GCC_NETWORK;
+        return ResourceType.GCP_NETWORK;
     }
 
     @Override
     public CloudPlatform cloudPlatform() {
-        return CloudPlatform.GCC;
+        return CloudPlatform.GCP;
     }
 
     public class DummyNetworkCreateRequest extends CreateResourceRequest {

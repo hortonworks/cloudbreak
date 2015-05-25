@@ -44,6 +44,6 @@ public class DummyResourceBuilderInit implements ResourceBuilderInit {
 
     @Override
     public CloudPlatform cloudPlatform() {
-        return CloudPlatform.GCC;
+        return CloudPlatform.GCP;
     }
 }

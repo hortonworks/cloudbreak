@@ -7,6 +7,6 @@ public class GcpNetwork extends Network {
 
     @Override
     public CloudPlatform cloudPlatform() {
-        return CloudPlatform.GCC;
+        return CloudPlatform.GCP;
     }
 }

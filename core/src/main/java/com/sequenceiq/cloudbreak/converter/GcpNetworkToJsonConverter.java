@@ -13,7 +13,7 @@ public class GcpNetworkToJsonConverter extends AbstractConversionServiceAwareCon
     public NetworkJson convert(GcpNetwork source) {
         NetworkJson json = new NetworkJson();
         json.setId(source.getId().toString());
-        json.setCloudPlatform(CloudPlatform.GCC);
+        json.setCloudPlatform(CloudPlatform.GCP);
         json.setName(source.getName());
         json.setDescription(source.getDescription());
         json.setSubnetCIDR(source.getSubnetCIDR());
