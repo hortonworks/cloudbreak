@@ -33,7 +33,7 @@
                                         <a id="azureChange" type="button" class="btn btn-default" ng-click="createAzureCredentialRequest()">Azure</a>
                                     </div>
                                     <div class="btn-group btn-group-justified">
-                                      <a id="gccChange" type="button" class="btn btn-default" ng-click="createGccCredentialRequest()">GCP</a>
+                                      <a id="gcpChange" type="button" class="btn btn-default" ng-click="createGcpCredentialRequest()">GCP</a>
                                       <a id="openstackChange" type="button" class="btn btn-default" ng-click="createOpenstackCredentialRequest()">OpenStack</a>
                                     </div>
                                 </div>
@@ -48,8 +48,8 @@
                                 <div ng-include src="'tags/credential/azureform.tag'"></div>
                             </form>
 
-                            <form class="form-horizontal" role="form" name="gccCredentialForm" ng-show="gccCredential && !credentialInCreation">
-                                <div ng-include src="'tags/credential/gccform.tag'"></div>
+                            <form class="form-horizontal" role="form" name="gcpCredentialForm" ng-show="gcpCredential && !credentialInCreation">
+                                <div ng-include src="'tags/credential/gcpform.tag'"></div>
                             </form>
 
                             <form class="form-horizontal" role="form" name="openstackCredentialForm" ng-show="openstackCredential && !credentialInCreation">
@@ -70,7 +70,7 @@
                         <div class="panel-heading">
                             <h5><a href="" data-toggle="collapse" data-parent="#credential-list-accordion"
                                    data-target="#panel-credential-collapse{{credential.id}}"><i class="fa fa-tag fa-fw"></i>{{credential.name}}</a>
-                                <span class="label label-info pull-right" >{{credential.cloudPlatform == "GCC" ? "GCP" : credential.cloudPlatform}}</span>
+                                <span class="label label-info pull-right" >{{credential.cloudPlatform == "GCP" ? "GCP" : credential.cloudPlatform}}</span>
                                 <i class="fa fa-users fa-lg public-account-info pull-right" style="padding-right: 5px" ng-show="credential.public"></i>
 
                             </h5>
@@ -89,8 +89,8 @@
                                 <div ng-include src="'tags/credential/azurelist.tag'"></div>
                             </div>
 
-                            <div class="panel-body" ng-if="credential.cloudPlatform == 'GCC' ">
-                                <div ng-include src="'tags/credential/gcclist.tag'"></div>
+                            <div class="panel-body" ng-if="credential.cloudPlatform == 'GCP' ">
+                                <div ng-include src="'tags/credential/gcplist.tag'"></div>
                             </div>
 
                             <div class="panel-body" ng-if="credential.cloudPlatform == 'AWS' ">

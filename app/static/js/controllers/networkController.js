@@ -52,7 +52,7 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
         }
 
         $scope.createGcpNetwork = function() {
-            $scope.network.cloudPlatform = 'GCC';
+            $scope.network.cloudPlatform = 'GCP';
             doCreateNetwork();
         }
 

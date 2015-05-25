@@ -68,7 +68,7 @@
                 <option>all</option>
                 <option value="AWS">Amazon EC2</option>
                 <option value="AZURE">Microsoft Azure</option>
-                <option value="GCC">Google Cloud Platform</option>
+                <option value="GCP">Google Cloud Platform</option>
                 <option value="OPENSTACK">OpenStack</option>
               </select>
             </div>
@@ -114,11 +114,11 @@
               </tr>
             </thead>
             <tbody>
-              <tr ng-repeat="usage in gccSum.items">
-                <td ng-if="$index == 0" rowspan="{{gccSum.items.length}}">GCP</td>
+              <tr ng-repeat="usage in gcpSum.items">
+                <td ng-if="$index == 0" rowspan="{{gcpSum.items.length}}">GCP</td>
                 <td>{{usage.stackName}}</td>
                 <td>{{usage.username}}</td>
-                <td><p id="awsregion" ng-repeat="item in $root.config.GCC.gccRegions | filter:{key: usage.region}">{{item.value}}</p></td>
+                <td><p id="awsregion" ng-repeat="item in $root.config.GCP.gcpRegions | filter:{key: usage.region}">{{item.value}}</p></td>
                 <td>
                   <table class="table usage-inline-table" style="background-color: #FFFFFF; margin-bottom: 0px;">
                     <thead>
@@ -131,7 +131,7 @@
                     <tbody>
                       <tr ng-repeat="group in usage.instanceGroups | orderBy:'name'">
                         <td>{{group.name}}</td>
-                        <td><p ng-repeat="item in $root.config.GCC.gccInstanceTypes | filter:{key: group.instanceType}">{{item.value}}</p></td>
+                        <td><p ng-repeat="item in $root.config.GCP.gcpInstanceTypes | filter:{key: group.instanceType}">{{item.value}}</p></td>
                         <td>{{group.hours}}</td>
                       </tr>
                     </tbody>
@@ -139,13 +139,13 @@
                 </td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
               </tr>
-              <tr class="row-summa" ng-show="usages && gccSum.items.length != 0">
+              <tr class="row-summa" ng-show="usages && gcpSum.items.length != 0">
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
-                <td class="text-right">{{gccSum.fullHours}} hrs</td>
+                <td class="text-right">{{gcpSum.fullHours}} hrs</td>
               </tr>
 
               <tr ng-repeat="usage in awsSum.items">

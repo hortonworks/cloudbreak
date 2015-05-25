@@ -7,39 +7,39 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
 
         $rootScope.templates = AccountTemplate.query();
         $scope.awsTemplateForm = {};
-        $scope.gccTemplateForm = {};
+        $scope.gcpTemplateForm = {};
         $scope.openstackTemplateForm = {};
         $scope.awsInstanceType = {};
         initializeAzureTemp();
         initializeAwsTemp();
-        initializeGccTemp();
+        initializeGcpTemp();
         initializeOpenstackTemp();
 
         $scope.createAwsTemplateRequest = function () {
             $scope.azureTemplate = false;
             $scope.awsTemplate = true;
-            $scope.gccTemplate = false;
+            $scope.gcpTemplate = false;
             $scope.openstackTemplate = false;
         }
 
         $scope.createAzureTemplateRequest = function () {
             $scope.azureTemplate = true;
             $scope.awsTemplate = false;
-            $scope.gccTemplate = false;
+            $scope.gcpTemplate = false;
             $scope.openstackTemplate = false;
         }
 
-        $scope.createGccTemplateRequest = function () {
+        $scope.createGcpTemplateRequest = function () {
             $scope.azureTemplate = false;
             $scope.awsTemplate = false;
-            $scope.gccTemplate = true;
+            $scope.gcpTemplate = true;
             $scope.openstackTemplate = false;
         }
 
         $scope.createOpenstackTemplateRequest = function () {
           $scope.azureTemplate = false;
           $scope.awsTemplate = false;
-          $scope.gccTemplate = false;
+          $scope.gcpTemplate = false;
           $scope.openstackTemplate = true;
         }
 
@@ -97,28 +97,28 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
 
         }
 
-        $scope.createGccTemplate = function () {
-            $scope.gccTemp.cloudPlatform = 'GCC';
-            if ($scope.gccTemp.public) {
-                AccountTemplate.save($scope.gccTemp, function (result) {
-                    handleGccTemplateSuccess(result)
+        $scope.createGcpTemplate = function () {
+            $scope.gcpTemp.cloudPlatform = 'GCP';
+            if ($scope.gcpTemp.public) {
+                AccountTemplate.save($scope.gcpTemp, function (result) {
+                    handleGcpTemplateSuccess(result)
                 }, function (error) {
-                    $scope.showError(error, $rootScope.error_msg.gcc_template_failed)
+                    $scope.showError(error, $rootScope.error_msg.gcp_template_failed)
                 });
             } else {
-                UserTemplate.save($scope.gccTemp, function (result) {
-                    handleGccTemplateSuccess(result)
+                UserTemplate.save($scope.gcpTemp, function (result) {
+                    handleGcpTemplateSuccess(result)
                 }, function (error) {
-                    $scope.showError(error, $rootScope.error_msg.gcc_template_failed)
+                    $scope.showError(error, $rootScope.error_msg.gcp_template_failed)
                 });
             }
 
-            function handleGccTemplateSuccess(result) {
-                $scope.gccTemp.id = result.id;
-                $rootScope.templates.push($scope.gccTemp);
-                initializeGccTemp();
-                $scope.showSuccess($rootScope.error_msg.gcc_template_success1 + result.id + $rootScope.error_msg.gcc_template_success2);
-                $scope.gccTemplateForm.$setPristine();
+            function handleGcpTemplateSuccess(result) {
+                $scope.gcpTemp.id = result.id;
+                $rootScope.templates.push($scope.gcpTemp);
+                initializeGcpTemp();
+                $scope.showSuccess($rootScope.error_msg.gcp_template_success1 + result.id + $rootScope.error_msg.gcp_template_success2);
+                $scope.gcpTemplateForm.$setPristine();
                 collapseCreateTemplateFormPanel();
             }
         }
@@ -214,12 +214,12 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
           }
         }
 
-        function initializeGccTemp() {
-            $scope.gccTemp = {
+        function initializeGcpTemp() {
+            $scope.gcpTemp = {
                 volumeCount: 1,
                 volumeSize: 100,
                 parameters: {
-                    gccInstanceType: "N1_STANDARD_2",
+                    gcpInstanceType: "N1_STANDARD_2",
                     volumeType: "HDD"
                 }
             }

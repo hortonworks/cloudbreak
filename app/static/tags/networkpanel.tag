@@ -66,7 +66,7 @@
                         <div class="panel-heading">
                             <h5>
                                 <a href="" data-toggle="collapse" data-parent="#templete-list-accordion" data-target="#panel-network-collapse{{network.id}}"><i class="fa fa-file-o fa-fw"></i>{{network.name}}</a>
-                                <span class="label label-info pull-right" >{{network.cloudPlatform === "GCC" ? "GCP" : network.cloudPlatform}}</span>
+                                <span class="label label-info pull-right" >{{network.cloudPlatform}}</span>
                                 <i class="fa fa-users fa-lg public-account-info pull-right" style="padding-right: 5px" ng-show="network.publicInAccount"></i>
                             </h5>
                         </div>
@@ -82,7 +82,7 @@
                                 <div ng-include src="'tags/network/azurenetworklist.tag'"></div>
                             </div>
 
-                            <div class="panel-body" ng-if="network.cloudPlatform == 'GCC' ">
+                            <div class="panel-body" ng-if="network.cloudPlatform == 'GCP' ">
                                 <div ng-include src="'tags/network/gcpnetworklist.tag'"></div>
                             </div>
 

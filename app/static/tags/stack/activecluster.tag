@@ -43,7 +43,7 @@
                             <div class="form-group">
                                 <label class="col-sm-3 control-label" for="sl_cloudPlatform">Platform</label>
                                 <div class="col-sm-9">
-                                    <p id="sl_cloudPlatform" class="form-control-static">{{activeCluster.cloudPlatform == "GCC" ? "GCP" : activeCluster.cloudPlatform}}</p>
+                                    <p id="sl_cloudPlatform" class="form-control-static">{{activeCluster.cloudPlatform}}</p>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -57,8 +57,8 @@
                                 <div class="col-sm-9" ng-if="activeCluster.cloudPlatform == 'AWS' ">
                                     <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.AWS.awsRegions | filter:{key: activeCluster.region}:true">{{item.value}}</p>
                                 </div>
-                                <div class="col-sm-9" ng-if="activeCluster.cloudPlatform == 'GCC' ">
-                                     <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.GCC.gccRegions | filter:{key: activeCluster.region}:true">{{item.value}}</p>
+                                <div class="col-sm-9" ng-if="activeCluster.cloudPlatform == 'GCP' ">
+                                     <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.GCP.gcpRegions | filter:{key: activeCluster.region}:true">{{item.value}}</p>
                                 </div>
                                 <div class="col-sm-9" ng-if="activeCluster.cloudPlatform == 'AZURE' ">
                                     <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.AZURE.azureRegions | filter:{key: activeCluster.region}:true">{{item.value}}</p>
@@ -162,8 +162,8 @@
                                 <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'AZURE' ">
                                     <div ng-include="'tags/template/azurelist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}:true"></div>
                                 </div>
-                                <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'GCC' ">
-                                    <div ng-include="'tags/template/gcclist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}:true"></div>
+                                <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'GCP' ">
+                                    <div ng-include="'tags/template/gcplist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}:true"></div>
                                 </div>
                                 <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'OPENSTACK' ">
                                   <div ng-include="'tags/template/openstacklist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}:true"></div>
@@ -181,7 +181,7 @@
                                     <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'AZURE' ">
                                         <div ng-include="'tags/network/azurenetworklist.tag'" ng-repeat="network in [activeClusterNetwork]"></div>
                                     </div>
-                                    <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'GCC' ">
+                                    <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'GCP' ">
                                         <div ng-include="'tags/network/gcpnetworklist.tag'" ng-repeat="network in [activeClusterNetwork]"></div>
                                     </div>
                                     <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'OPENSTACK' ">
@@ -210,8 +210,8 @@
                                 <div class="panel-body" ng-if="activeClusterCredential.cloudPlatform == 'AZURE' ">
                                     <div ng-include="'tags/credential/azurelist.tag'" ng-repeat="credential in [activeClusterCredential]"></div>
                                 </div>
-                                <div class="panel-body" ng-if="activeClusterCredential.cloudPlatform == 'GCC' ">
-                                    <div ng-include="'tags/credential/gcclist.tag'" ng-repeat="credential in [activeClusterCredential]"></div>
+                                <div class="panel-body" ng-if="activeClusterCredential.cloudPlatform == 'GCP' ">
+                                    <div ng-include="'tags/credential/gcplist.tag'" ng-repeat="credential in [activeClusterCredential]"></div>
                                 </div>
                                 <div class="panel-body" ng-if="activeClusterCredential.cloudPlatform == 'OPENSTACK' ">
                                   <div ng-include="'tags/credential/openstacklist.tag'" ng-repeat="credential in [activeClusterCredential]"></div>

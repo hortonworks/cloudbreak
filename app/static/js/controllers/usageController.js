@@ -67,8 +67,8 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             var calculatedCost;
             var usageByProvider;
             var chartsDataByProvider;
-            if ($scope.elementProviderEquals(item, 'GCC')) {
-              usageByProvider = $scope.gccSum;
+            if ($scope.elementProviderEquals(item, 'GCP')) {
+              usageByProvider = $scope.gcpSum;
               chartsDataByProvider = chartsData.gcp;
             } else if($scope.elementProviderEquals(item, 'AZURE')) {
               usageByProvider = $scope.azureSum;
@@ -138,8 +138,8 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             $rootScope.config.AZURE.azureRegions.forEach(function(item) {$scope.regions.push(item);});
           }
 
-          if ($scope.usageFilter.provider == 'GCC' || $scope.usageFilter.provider == 'all') {
-            $rootScope.config.GCC.gccRegions.forEach(function(item) {$scope.regions.push(item);});
+          if ($scope.usageFilter.provider == 'GCP' || $scope.usageFilter.provider == 'all') {
+            $rootScope.config.GCP.gcpRegions.forEach(function(item) {$scope.regions.push(item);});
           }
         };
 
@@ -148,8 +148,8 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
                 $scope.usageFilter.provider = 'AWS';
             } else if ($filter('filter')($rootScope.config.AZURE.azureRegions, { key: $scope.usageFilter.region}).length === 1) {
                 $scope.usageFilter.provider = 'AZURE';
-            } else if($filter('filter')($rootScope.config.GCC.gccRegions, { key: $scope.usageFilter.region}).length === 1) {
-                $scope.usageFilter.provider = 'GCC';
+            } else if($filter('filter')($rootScope.config.GCP.gcpRegions, { key: $scope.usageFilter.region}).length === 1) {
+                $scope.usageFilter.provider = 'GCP';
             }
         }
 
@@ -164,14 +164,14 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
         }
 
         $scope.orderUsagesBy = function(predicate, reverse) {
-          $scope.gccSum.items = $filter('orderBy')($scope.gccSum.items, predicate, reverse);
+          $scope.gcpSum.items = $filter('orderBy')($scope.gcpSum.items, predicate, reverse);
           $scope.azureSum.items = $filter('orderBy')($scope.azureSum.items, predicate, reverse);
           $scope.awsSum.items = $filter('orderBy')($scope.awsSum.items, predicate, reverse);
         }
 
         function initSums() {
             $scope.awsSum = {fullHours: 0, items: []};
-            $scope.gccSum = {fullHours: 0,items: []};
+            $scope.gcpSum = {fullHours: 0,items: []};
             $scope.azureSum = {fullHours: 0,items: []};
             $scope.openstackSum = {fullHours: 0,items: []};
         }
