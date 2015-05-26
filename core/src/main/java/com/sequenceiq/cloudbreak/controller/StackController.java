@@ -210,10 +210,10 @@ public class StackController {
 
     private ResponseEntity<IdJson> createStack(CbUser user, StackRequest stackRequest, boolean publicInAccount) {
         Stack stack = conversionService.convert(stackRequest, Stack.class);
+        MDCBuilder.buildMdcContext(stack);
         stack = stackDecorator.decorate(stack, stackRequest.getCredentialId(), stackRequest.getConsulServerCount(), stackRequest.getNetworkId());
         stack.setPublicInAccount(publicInAccount);
         stack = stackService.create(user, stack);
-        MDCBuilder.buildMdcContext(stack);
         return new ResponseEntity<>(new IdJson(stack.getId()), HttpStatus.CREATED);
     }
 

@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.Subnet;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
@@ -143,12 +144,14 @@ public class DefaultStackService implements StackService {
         Stack savedStack = null;
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
+        MDCBuilder.buildMdcContext(stack);
         String result = provisionSetups.get(stack.cloudPlatform()).preProvisionCheck(stack);
         if (null != result) {
             throw new BadRequestException(result);
         } else {
             try {
                 savedStack = stackRepository.save(stack);
+                MDCBuilder.buildMdcContext(savedStack);
                 flowManager.triggerProvisioning(new ProvisionRequest(savedStack.cloudPlatform(), savedStack.getId()));
             } catch (DataIntegrityViolationException ex) {
                 throw new DuplicateKeyValueException(APIResourceType.STACK, stack.getName(), ex);

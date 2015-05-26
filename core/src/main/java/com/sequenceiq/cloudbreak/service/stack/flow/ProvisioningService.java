@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
@@ -38,6 +39,7 @@ public class ProvisioningService {
     public ProvisionComplete buildStack(final CloudPlatform cloudPlatform, Long stackId, Map<String, Object> setupProperties) throws Exception {
         ProvisionComplete provisionComplete = null;
         Stack stack = stackRepository.findOneWithLists(stackId);
+        MDCBuilder.buildMdcContext(stack);
         if (stack.getStatus().equals(Status.REQUESTED)) {
             String statusReason = "Creation of cluster infrastructure has started on the cloud provider.";
             stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS, statusReason);

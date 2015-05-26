@@ -14,6 +14,8 @@ import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
@@ -52,8 +54,10 @@ public class SimpleFlowFacade implements FlowFacade {
         LOGGER.debug("Provisioning setup. Context: {}", context);
         try {
             ProvisioningContext provisioningContext = (ProvisioningContext) context;
+            Stack stack = stackService.getById(provisioningContext.getStackId());
+            MDCBuilder.buildMdcContext(stack);
             ProvisionSetupComplete setupComplete = (ProvisionSetupComplete) provisionSetups.get(provisioningContext.getCloudPlatform())
-                    .setupProvisioning(stackService.getById(provisioningContext.getStackId()));
+                    .setupProvisioning(stack);
             LOGGER.debug("Provisioning setup DONE.");
             return new ProvisioningContext.Builder()
                     .setDefaultParams(setupComplete.getStackId(), setupComplete.getCloudPlatform())
