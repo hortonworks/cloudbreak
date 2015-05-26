@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.conf;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DB_ENV_DB;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DB_ENV_PASS;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DB_ENV_USER;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_HBM2DDL_STRATEGY;
 
 import java.util.Properties;
 
@@ -43,7 +42,7 @@ public class DatabaseConfig {
     @Value("${cb.db.port.5432.tcp.port}")
     private String dbPort;
 
-    @Value("${cb.hbm2ddl.strategy:" + CB_HBM2DDL_STRATEGY + "}")
+    @Value("${cb.hbm2ddl.strategy:validate}")
     private String hbm2ddlStrategy;
 
     @Bean
