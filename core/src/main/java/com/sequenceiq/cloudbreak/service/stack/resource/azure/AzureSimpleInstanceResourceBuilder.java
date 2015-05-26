@@ -35,6 +35,7 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
     protected static final String LABEL = "label";
     protected static final String IMAGENAME = "imageName";
     protected static final String IMAGESTOREURI = "imageStoreUri";
+    protected static final String STORAGE_NAME = "storageName";
     protected static final String HOSTNAME = "hostname";
     protected static final String USERNAME = "username";
     protected static final String SUBNETNAME = "subnetName";

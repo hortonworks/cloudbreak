@@ -35,8 +35,14 @@ public class AzureResourceBuilderInit implements
     public AzureProvisionContextObject provisionInit(Stack stack) throws Exception {
         AzureCredential credential = (AzureCredential) stack.getCredential();
         AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
-        AzureProvisionContextObject azureProvisionContextObject =
-                new AzureProvisionContextObject(stack.getId(), credential.getAffinityGroupName(azureLocation), getAllocatedAddresses(stack));
+        int numStorageAccount = azureStackUtil.getNumOfStorageAccount(stack);
+        int vhdPerStorageAccount = azureStackUtil.getNumOfVHDPerStorageAccount(stack);
+        int vhdPerStorage[] = new int[numStorageAccount];
+        for (int i = 0; i < numStorageAccount; i++) {
+            vhdPerStorage[i] = vhdPerStorageAccount;
+        }
+        AzureProvisionContextObject azureProvisionContextObject = new AzureProvisionContextObject(stack.getId(),
+                credential.getAffinityGroupName(azureLocation), getAllocatedAddresses(stack), vhdPerStorage);
         return azureProvisionContextObject;
     }
 

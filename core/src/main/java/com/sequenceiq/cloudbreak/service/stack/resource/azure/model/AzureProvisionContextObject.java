@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.azure.model;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -9,15 +10,13 @@ public class AzureProvisionContextObject extends ProvisionContextObject {
 
     private String affinityGroupName;
     private volatile Set<String> allocatedIPs;
+    private volatile int vhdPerStorage[];
 
-    public AzureProvisionContextObject(long stackId, String affinityGroupName) {
-        this(stackId, affinityGroupName, new HashSet<String>());
-    }
-
-    public AzureProvisionContextObject(long stackId, String affinityGroupName, Set<String> ips) {
+    public AzureProvisionContextObject(long stackId, String affinityGroupName, Set<String> ips, int vhdPerStorage[]) {
         super(stackId);
         this.affinityGroupName = affinityGroupName;
         this.allocatedIPs = new HashSet<>(ips);
+        this.vhdPerStorage = Arrays.copyOf(vhdPerStorage, vhdPerStorage.length);
     }
 
     public String getAffinityGroupName() {
@@ -31,5 +30,16 @@ public class AzureProvisionContextObject extends ProvisionContextObject {
             added = true;
         }
         return added;
+    }
+
+    public synchronized int setAndGetStorageAccountIndex(int volumeCount) {
+        for (int i = 0; i < vhdPerStorage.length; i++) {
+            int space = vhdPerStorage[i];
+            if (space >= volumeCount) {
+                vhdPerStorage[i] = space - volumeCount;
+                return i;
+            }
+        }
+        return -1;
     }
 }

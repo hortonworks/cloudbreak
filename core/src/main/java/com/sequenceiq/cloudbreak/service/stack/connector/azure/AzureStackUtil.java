@@ -25,7 +25,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
-import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
@@ -45,6 +46,8 @@ public class AzureStackUtil {
     public static final String DEFAULT_JKS_PASS = "azure1";
     public static final String CB_STORAGE_BASE = "cb";
     public static final Logger LOGGER = LoggerFactory.getLogger(AzureStackUtil.class);
+    public static final int ROOTFS_COUNT = 1;
+    private static final int VHD_PER_STORAGE = 10;
 
     @Autowired
     private KeyGeneratorService keyGeneratorService;
@@ -55,15 +58,36 @@ public class AzureStackUtil {
     @Autowired
     private UserDetailsService userDetailsService;
 
-    public String getOsImageName(Credential credential, AzureLocation location, String image) {
+    public String getOsImageName(int storageIndex, AzureLocation location, String image) {
         String[] split = image.split("/");
-        AzureCredential azureCredential = (AzureCredential) credential;
-        return format("%s-%s-%s", azureCredential.getAffinityGroupName(location), IMAGE_NAME,
+        // TODO why do we need an IMAGE_NAME here?
+        return format("%s-%s-%s", getOSStorageName(location, storageIndex), IMAGE_NAME,
                 split[split.length - 1].replaceAll(".vhd", ""));
     }
 
-    public String getOSStorageName(AzureLocation location) {
-        return CB_STORAGE_BASE + location.region().toLowerCase().replaceAll(" ", "");
+    public String getOSStorageName(AzureLocation location, int index) {
+        return CB_STORAGE_BASE + location.region().toLowerCase().replaceAll(" ", "") + index;
+    }
+
+    public int getNumOfStorageAccount(Stack stack) {
+        int diskCount = 0;
+        for (InstanceGroup ig : stack.getInstanceGroups()) {
+            int nodesCount = ig.getNodeCount();
+            int volumeCount = ig.getTemplate().getVolumeCount() + ROOTFS_COUNT;
+            diskCount += volumeCount * nodesCount;
+        }
+        return (int) Math.ceil(diskCount / (double) getNumOfVHDPerStorageAccount(stack));
+    }
+
+    public int getNumOfVHDPerStorageAccount(Stack stack) {
+        int vhdPS = VHD_PER_STORAGE;
+        for (InstanceGroup ig : stack.getInstanceGroups()) {
+            int volumeCount = ig.getTemplate().getVolumeCount() + ROOTFS_COUNT;
+            if (volumeCount > vhdPS) {
+                vhdPS = volumeCount;
+            }
+        }
+        return vhdPS;
     }
 
     public synchronized AzureClient createAzureClient(AzureCredential credential) {

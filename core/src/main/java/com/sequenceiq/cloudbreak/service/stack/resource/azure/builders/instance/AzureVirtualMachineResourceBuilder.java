@@ -103,26 +103,36 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             Stack stack = stackRepository.findById(provisionContextObject.getStackId());
             AzureTemplate azureTemplate = (AzureTemplate) instanceGroup.orNull().getTemplate();
             AzureCredential azureCredential = (AzureCredential) stack.getCredential();
-            byte[] encoded = Base64.encodeBase64(buildResources.get(0).getResourceName().getBytes());
+            String resourceName = buildResources.get(0).getResourceName();
+            byte[] encoded = Base64.encodeBase64(resourceName.getBytes());
             String label = new String(encoded);
             AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
+
+            int storageIndex = provisionContextObject.setAndGetStorageAccountIndex(azureTemplate.getVolumeCount() + AzureStackUtil.ROOTFS_COUNT);
+            if (storageIndex < 0) {
+                LOGGER.warn("VHD allocation is not optimal");
+                // TODO overbook one of the accounts
+            }
+            LOGGER.info("Storage index selected: {} for {}", storageIndex, resourceName);
+            String osStorageName = azureStackUtil.getOSStorageName(azureLocation, storageIndex);
+
             Map<String, Object> props = new HashMap<>();
-            props.put(NAME, buildResources.get(0).getResourceName());
+            props.put(NAME, resourceName);
             props.put(DEPLOYMENTSLOT, PRODUCTION);
             props.put(LABEL, label);
-            props.put(IMAGENAME, azureStackUtil.getOsImageName(azureCredential, azureLocation, stack.getImage()));
-            //TODO use newly created image stores, os storage
-            props.put(IMAGESTOREURI, buildImageStoreUri(provisionContextObject.getAffinityGroupName(), buildResources.get(0).getResourceName()));
-            props.put(HOSTNAME, buildResources.get(0).getResourceName());
+            props.put(IMAGENAME, azureStackUtil.getOsImageName(storageIndex, azureLocation, stack.getImage()));
+            props.put(IMAGESTOREURI, buildImageStoreUri(osStorageName, resourceName));
+            props.put(HOSTNAME, resourceName);
             props.put(USERNAME, CB_GCP_AND_AZURE_USER_NAME);
             props.put(SSHPUBLICKEYFINGERPRINT, azureStackUtil.createX509Certificate(azureCredential).getSha1Fingerprint().toUpperCase());
             props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", CB_GCP_AND_AZURE_USER_NAME));
-            // TODO replace in rest client
+            // TODO fix in rest client to not to use the affinity group name
+            props.put(STORAGE_NAME, osStorageName);
             props.put(AFFINITYGROUP, provisionContextObject.getAffinityGroupName());
             if (azureTemplate.getVolumeCount() > 0) {
                 props.put(DISKS, generateDisksProperty(azureTemplate));
             }
-            props.put(SERVICENAME, buildResources.get(0).getResourceName());
+            props.put(SERVICENAME, resourceName);
             props.put(SUBNETNAME, provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
             props.put(VIRTUAL_NETWORK_IP_ADDRESS, findNextValidIp(provisionContextObject));
             props.put(CUSTOMDATA, new String(Base64.encodeBase64(userData.orNull().getBytes())));

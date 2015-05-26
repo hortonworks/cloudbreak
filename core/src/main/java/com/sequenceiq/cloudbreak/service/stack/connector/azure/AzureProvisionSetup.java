@@ -69,51 +69,69 @@ public class AzureProvisionSetup implements ProvisionSetup {
         Credential credential = stack.getCredential();
         AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
         AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) credential);
-        LOGGER.info("Checking image exist in Azure image list.");
-        if (!azureClient.isImageAvailable(azureStackUtil.getOsImageName(credential, azureLocation, stack.getImage()))) {
-            String affinityGroupName = ((AzureCredential) credential).getAffinityGroupName(azureLocation);
-            createAffinityGroup(stack, azureClient, affinityGroupName);
-            // TODO distributed storage accounts
-            //String osStorageName = azureStackUtil.getOSStorageName(azureLocation);
-            String osStorageName = affinityGroupName;
-            createOSStorage(stack, azureClient, osStorageName, affinityGroupName);
-            String targetBlobContainerUri = "http://" + osStorageName + ".blob.core.windows.net/vm-images";
-            String[] split = stack.getImage().split("/");
-            String imageVHDName = split[split.length - 1];
-            String targetImageUri = targetBlobContainerUri + '/' + imageVHDName;
-            LOGGER.info("OS image destination will be: {}", targetImageUri);
-            Map<String, String> params = new HashMap<>();
-            params.put(AzureStackUtil.NAME, osStorageName);
-            LOGGER.info("Starting to get a storage key on Azure.");
-            String keyJson = (String) azureClient.getStorageAccountKeys(params);
-            JsonNode actualObj = null;
-            try {
-                actualObj = MAPPER.readValue(keyJson, JsonNode.class);
-            } catch (IOException e) {
-                LOGGER.info("Can not read Json node which was returned from Azure: ", e);
-                throw new AzureResourceException(e);
-            }
-            String storageAccountKey = actualObj.get("StorageService").get("StorageServiceKeys").get("Primary").asText();
-            LOGGER.info(String.format("Storage key will be: %s", storageAccountKey));
-            LOGGER.info("Starting to create a new blob-container on Azure");
-            createBlobContainer(targetBlobContainerUri, storageAccountKey);
-            LOGGER.info("Starting to copy a new Os image on Azure");
-            AzureClientUtil.copyOsImage(storageAccountKey, stack.getImage(), targetImageUri);
-            checkCopyStatus(stack, targetImageUri, storageAccountKey);
-            LOGGER.info("Starting to create a new Os image LINK on Azure");
-            createOsImageLink(credential, azureClient, targetImageUri, azureLocation, stack.getImage());
-            LOGGER.info("Image creation was success on Azure");
-        } else {
-            LOGGER.info("Image already exist no need to copy it.");
-        }
+
+        String affinityGroupName = ((AzureCredential) credential).getAffinityGroupName(azureLocation);
+        createAffinityGroup(stack, azureClient, affinityGroupName);
+
+        Map<Integer, String[]> accountIndexKeys = createImages(stack, azureLocation, azureClient, affinityGroupName);
+        createImageLinks(stack, azureLocation, azureClient, accountIndexKeys);
         return new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
                 .withSetupProperty(CREDENTIAL, stack.getCredential());
     }
 
-    private void createOsImageLink(Credential credential, AzureClient azureClient, String targetImageUri, AzureLocation location, String imageUrl) {
+    private Map<Integer, String[]> createImages(Stack stack, AzureLocation azureLocation, AzureClient azureClient, String affinityGroupName) {
+        Map<Integer, String[]> accountIndexKeys = new HashMap<>();
+        int numStorageAccounts = azureStackUtil.getNumOfStorageAccount(stack);
+        for (int storageAccountIndex = 0; storageAccountIndex < numStorageAccounts; storageAccountIndex++) {
+            LOGGER.info("Checking image exists in Azure image list.");
+            String osImageName = azureStackUtil.getOsImageName(storageAccountIndex, azureLocation, stack.getImage());
+            if (!azureClient.isImageAvailable(osImageName)) {
+                String osStorageName = azureStackUtil.getOSStorageName(azureLocation, storageAccountIndex);
+                createOSStorage(stack, azureClient, osStorageName, affinityGroupName);
+                String targetBlobContainerUri = "http://" + osStorageName + ".blob.core.windows.net/vm-images";
+                String[] split = stack.getImage().split("/");
+                String imageVHDName = split[split.length - 1];
+                String targetImageUri = targetBlobContainerUri + '/' + imageVHDName;
+                LOGGER.info("OS image destination will be: {}", targetImageUri);
+                Map<String, String> params = new HashMap<>();
+                params.put(AzureStackUtil.NAME, osStorageName);
+                LOGGER.info("Starting to get a storage key on Azure.");
+                String keyJson = (String) azureClient.getStorageAccountKeys(params);
+                JsonNode actualObj = null;
+                try {
+                    actualObj = MAPPER.readValue(keyJson, JsonNode.class);
+                } catch (IOException e) {
+                    LOGGER.info("Can not read Json node which was returned from Azure: ", e);
+                    throw new AzureResourceException(e);
+                }
+                String storageAccountKey = actualObj.get("StorageService").get("StorageServiceKeys").get("Primary").asText();
+                LOGGER.info(String.format("Storage key will be: %s", storageAccountKey));
+                LOGGER.info("Starting to create a new blob-container on Azure");
+                createBlobContainer(targetBlobContainerUri, storageAccountKey);
+                LOGGER.info("Starting to copy a new Os image on Azure");
+                AzureClientUtil.copyOsImage(storageAccountKey, stack.getImage(), targetImageUri);
+                accountIndexKeys.put(storageAccountIndex, new String[]{storageAccountKey, targetImageUri});
+            } else {
+                LOGGER.info("Image: {} already exist no need to copy it.", osImageName);
+            }
+        }
+        return accountIndexKeys;
+    }
+
+    private void createImageLinks(Stack stack, AzureLocation azureLocation, AzureClient azureClient, Map<Integer, String[]> accountIndexKeys) {
+        for (int storageIndex : accountIndexKeys.keySet()) {
+            String[] accountKeys = accountIndexKeys.get(storageIndex);
+            String targetImageUri = accountKeys[1];
+            checkCopyStatus(stack, targetImageUri, accountKeys[0]);
+            createOsImageLink(storageIndex, azureClient, targetImageUri, azureLocation, stack.getImage());
+        }
+    }
+
+    private void createOsImageLink(int storageIndex, AzureClient azureClient, String targetImageUri, AzureLocation location, String imageUrl) {
+        LOGGER.info("Starting to create a new Os image LINK on Azure for image: {}", targetImageUri);
         Map<String, String> params;
         params = new HashMap<>();
-        params.put(AzureStackUtil.NAME, azureStackUtil.getOsImageName(credential, location, imageUrl));
+        params.put(AzureStackUtil.NAME, azureStackUtil.getOsImageName(storageIndex, location, imageUrl));
         params.put(OS, "Linux");
         params.put(MEDIALINK, targetImageUri);
         azureClient.addOsImage(params);
