@@ -74,7 +74,9 @@ public class SimpleFlowFacade implements FlowFacade {
         LOGGER.debug("Provisioning. Context: {}", context);
         try {
             ProvisioningContext provisioningContext = (ProvisioningContext) context;
-            ProvisionComplete provisionResult = provisioningService.buildStack(provisioningContext.getCloudPlatform(), provisioningContext.getStackId(),
+            Stack stack = stackService.getById(provisioningContext.getStackId());
+            MDCBuilder.buildMdcContext(stack);
+            ProvisionComplete provisionResult = provisioningService.buildStack(provisioningContext.getCloudPlatform(), stack,
                     provisioningContext.getSetupProperties());
             LOGGER.debug("Provisioning DONE.");
             return new ProvisioningContext.Builder()
@@ -92,7 +94,9 @@ public class SimpleFlowFacade implements FlowFacade {
         LOGGER.debug("Metadata setup. Context: {}", context);
         try {
             ProvisioningContext provisioningContext = (ProvisioningContext) context;
-            metadataSetupService.setupMetadata(provisioningContext.getCloudPlatform(), provisioningContext.getStackId());
+            Stack stack = stackService.getById(provisioningContext.getStackId());
+            MDCBuilder.buildMdcContext(stack);
+            metadataSetupService.setupMetadata(provisioningContext.getCloudPlatform(), stack);
             cloudbreakEventService.fireCloudbreakEvent(provisioningContext.getStackId(), BillingStatus.BILLING_STARTED.name(),
                     "Provision of stack is successfully finished");
             LOGGER.debug("Metadata setup DONE.");
