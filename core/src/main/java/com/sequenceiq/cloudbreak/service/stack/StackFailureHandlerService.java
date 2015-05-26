@@ -60,8 +60,6 @@ public class StackFailureHandlerService implements FailureHandlerService {
                 throwError(localStack, failedResourceRequestResults);
             }
         } else {
-            eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
-                    "Error occurred during the provisioning so some resource will be rolled back");
             switch (localStack.getFailurePolicy().getAdjustmentType()) {
             case EXACT:
                 if (localStack.getFailurePolicy().getThreshold() > localStack.getFullNodeCount() - failedResourceRequestResults.size()) {
