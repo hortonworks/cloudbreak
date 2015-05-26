@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
-import static com.sequenceiq.cloudbreak.orchestrator.DockerContainer.AMBARI_AGENT;
-import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
-
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -19,8 +16,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.cluster.flow.ConsulPluginEvent;
-import com.sequenceiq.cloudbreak.service.cluster.flow.PluginManager;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 
@@ -38,9 +33,6 @@ public class StackStopService {
     @Autowired
     private CloudbreakEventService cloudbreakEventService;
 
-    @Autowired
-    private PluginManager pluginManager;
-
     @javax.annotation.Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
@@ -48,20 +40,16 @@ public class StackStopService {
         StackStatusUpdateContext stackStatusUpdateContext = (StackStatusUpdateContext) context;
         long stackId = stackStatusUpdateContext.getStackId();
         Stack stack = stackRepository.findOneWithLists(stackId);
-        final CloudPlatform cloudPlatform = stack.cloudPlatform();
 
         if (stack != null && Status.STOP_REQUESTED.equals(stack.getStatus())) {
             stackUpdater.updateStackStatus(stackId, Status.STOP_IN_PROGRESS, "Cluster infrastructure is stopping.");
-            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.STOP_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
-            boolean stopped;
-            CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
-            stopped = connector.stopAll(stack);
-            if (stopped) {
+            CloudPlatformConnector connector = cloudPlatformConnectors.get(stack.cloudPlatform());
+            if (connector.stopAll(stack)) {
                 LOGGER.info("Update stack state to: {}", Status.STOPPED);
                 stackUpdater.updateStackStatus(stackId, Status.STOPPED, "Cluster infrastructure stopped successfully.");
                 cloudbreakEventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_STOPPED.name(), "Cluster infrastructure stopped.");
             } else {
-                throw new CloudbreakException("Unfortunately the cluster infrastructure could not be stopped.");
+                throw new CloudbreakException("The cluster infrastructure could not be stopped.");
             }
         } else {
             LOGGER.info("Stack stop has not been requested, stop stack later.");

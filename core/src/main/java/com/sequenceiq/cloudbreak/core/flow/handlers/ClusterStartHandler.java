@@ -21,4 +21,10 @@ public class ClusterStartHandler extends AbstractFlowHandler<StackStatusUpdateCo
         StackStatusUpdateContext context = event.getData();
         return getFlowFacade().startCluster(context);
     }
+
+
+    @Override
+    protected Object handleErrorFlow(Throwable throwable, StackStatusUpdateContext data) throws Exception {
+        return super.handleErrorFlow(throwable, data);
+    }
 }

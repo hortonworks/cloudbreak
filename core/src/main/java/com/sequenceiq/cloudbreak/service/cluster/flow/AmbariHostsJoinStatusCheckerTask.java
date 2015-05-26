@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 
 @Component
 public class AmbariHostsJoinStatusCheckerTask extends StackBasedStatusCheckerTask<AmbariHosts> {
@@ -35,8 +34,7 @@ public class AmbariHostsJoinStatusCheckerTask extends StackBasedStatusCheckerTas
 
     @Override
     public void handleTimeout(AmbariHosts t) {
-        throw new AmbariHostsUnavailableException(String.format("Operation timed out. Failed to find all '%s' Ambari hosts. Stack: '%s'",
-                t.getHostCount(), t.getStack().getId()));
+        LOGGER.error("Operation timed out. Failed to find all '{}' Ambari hosts. Stack: '{}'", t.getHostCount(), t.getStack().getId());
     }
 
     @Override

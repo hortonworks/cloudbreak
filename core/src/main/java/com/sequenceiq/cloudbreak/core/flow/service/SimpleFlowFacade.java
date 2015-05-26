@@ -120,7 +120,7 @@ public class SimpleFlowFacade implements FlowFacade {
         try {
             return clusterFacade.runClusterContainers(context);
         } catch (Exception e) {
-            LOGGER.error("Exception during Ambari role allocation.", e);
+            LOGGER.error("Exception while setting up cluster containers.", e);
             throw new CloudbreakException(e);
         }
     }
