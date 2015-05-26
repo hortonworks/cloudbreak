@@ -64,7 +64,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
         AzureNetworkCreateRequest request = (AzureNetworkCreateRequest) createResourceRequest;
         try {
             Stack stack = stackRepository.findById(request.getStackId());
-            if (!request.getAzureClient().getVirtualNetworkConfiguration().toString().contains(request.getName())) {
+            if (!request.getAzureClient().getVirtualNetworks().toString().contains(request.getName())) {
                 HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) request.getAzureClient().createVirtualNetwork(request.getProps());
                 AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(request.getAzureClient(), stack, virtualNetworkResponse);
                 azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
