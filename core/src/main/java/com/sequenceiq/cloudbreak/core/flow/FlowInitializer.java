@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterInstallHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterResetHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterSecurityHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStartHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStartRequestedHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStatusUpdateFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStopHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterUpscaleHandler;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.StackDownscaleHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStatusUpdateFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStopHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.StackStopRequestedHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackTerminationHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.UpdateAllowedSubnetsHandler;
 
@@ -65,6 +67,8 @@ public class FlowInitializer implements InitializingBean {
         registerDownscaleFlows();
         registerResetFlows();
         registerUpdateAllowedSubnetFlow();
+        registerStopRequestedFlows();
+        registerStartRequestedFlows();
 
         reactor.on($(FlowPhases.PROVISIONING_SETUP.name()), getHandlerForClass(ProvisioningSetupHandler.class));
         reactor.on($(FlowPhases.PROVISIONING.name()), getHandlerForClass(ProvisioningHandler.class));
@@ -91,6 +95,8 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.CLUSTER_DOWNSCALE.name()), getHandlerForClass(ClusterDownscaleHandler.class));
         reactor.on($(FlowPhases.UPDATE_ALLOWED_SUBNETS.name()), getHandlerForClass(UpdateAllowedSubnetsHandler.class));
         reactor.on($(FlowPhases.STACK_CREATION_FAILED.name()), getHandlerForClass(StackCreationFailureHandler.class));
+        reactor.on($(FlowPhases.STACK_STOP_REQUESTED.name()), getHandlerForClass(StackStopRequestedHandler.class));
+        reactor.on($(FlowPhases.CLUSTER_START_REQUESTED.name()), getHandlerForClass(ClusterStartRequestedHandler.class));
         reactor.on($(FlowPhases.STACK_STATUS_UPDATE_FAILED.name()), getHandlerForClass(StackStatusUpdateFailureHandler.class));
         reactor.on($(FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name()), getHandlerForClass(ClusterStatusUpdateFailureHandler.class));
 
@@ -159,6 +165,16 @@ public class FlowInitializer implements InitializingBean {
 
         transitionKeyService.registerTransition(ClusterStatusUpdateFailureHandler.class, TransitionFactory
                 .createTransition(FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
+    }
+
+    private void registerStopRequestedFlows() {
+        transitionKeyService.registerTransition(StackStopRequestedHandler.class, TransitionFactory
+                .createTransition(FlowPhases.STACK_STOP_REQUESTED.name(), FlowPhases.NONE.name(), FlowPhases.STACK_STATUS_UPDATE_FAILED.name()));
+    }
+
+    private void registerStartRequestedFlows() {
+        transitionKeyService.registerTransition(ClusterStartRequestedHandler.class, TransitionFactory
+                .createTransition(FlowPhases.CLUSTER_START_REQUESTED.name(), FlowPhases.NONE.name(), FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name()));
     }
 
     private void registerUpscaleFlows() {

@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
@@ -37,10 +36,8 @@ public class ProvisioningService {
 
     public ProvisionComplete buildStack(final CloudPlatform cloudPlatform, Stack stack, Map<String, Object> setupProperties) throws Exception {
         ProvisionComplete provisionComplete = null;
-        if (stack.getStatus().equals(Status.REQUESTED)) {
-            String statusReason = "Creation of cluster infrastructure has started on the cloud provider.";
-            stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS, statusReason);
-            stackUpdater.updateStackStatusReason(stack.getId(), stack.getStatus().name());
+        stack = stackRepository.findOneWithLists(stack.getId());
+        if (stack.isRequested()) {
             Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(cloudPlatform);
             CloudPlatformConnector cloudPlatformConnector = cloudPlatformConnectors.get(cloudPlatform);
             Set<Resource> resources = cloudPlatformConnector

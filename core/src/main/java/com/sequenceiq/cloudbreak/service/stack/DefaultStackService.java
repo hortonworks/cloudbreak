@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateway;
+import static com.sequenceiq.cloudbreak.domain.Status.START_REQUESTED;
+import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_REQUESTED;
+import static com.sequenceiq.cloudbreak.domain.StatusRequest.STARTED;
 
 import java.util.List;
 import java.util.Map;
@@ -25,13 +28,13 @@ import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.ScalingType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.Subnet;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -172,31 +175,27 @@ public class DefaultStackService implements StackService {
     @Override
     public void updateStatus(Long stackId, StatusRequest status) {
         Stack stack = stackRepository.findOne(stackId);
-        Status stackStatus = stack.getStatus();
-        if (status.equals(StatusRequest.STARTED)) {
-            Status clusterStatus = clusterRepository.findOneWithLists(stack.getCluster().getId()).getStatus();
-            if (!Status.STOPPED.equals(stackStatus) && !(Status.AVAILABLE.equals(stackStatus) && Status.START_REQUESTED.equals(clusterStatus))) {
+        Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
+        if (status.equals(STARTED)) {
+            if (!stack.isStopped() || !cluster.isStopped()) {
                 throw new BadRequestException(String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stackId));
             }
-            if (!Status.AVAILABLE.equals(stackStatus)) {
-                stackUpdater.updateStackStatus(stackId, Status.START_IN_PROGRESS, "Cluster infrastructure is now starting.");
+            if (stack.isStopped()) {
+                stackUpdater.updateStackStatus(stackId, START_REQUESTED);
                 flowManager.triggerStackStart(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), status));
             }
         } else {
-            Status clusterStatus = clusterRepository.findOneWithLists(stack.getCluster().getId()).getStatus();
-            String stopRequestedMsg = "Stopping of cluster infrastructure has been requested.";
-            if (Status.STOP_IN_PROGRESS.equals(clusterStatus)) {
-                stackUpdater.updateStackStatus(stackId, Status.STOP_REQUESTED, stopRequestedMsg);
+            if (cluster.isStopInProgress()) {
+                flowManager.triggerStackStopRequested(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), status));
             } else {
-                if (!Status.AVAILABLE.equals(stackStatus)) {
+                if (!stack.isAvailable()) {
                     throw new BadRequestException(
                             String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stackId));
                 }
-                if (!Status.STOPPED.equals(clusterStatus)) {
+                if (!cluster.isStopped()) {
                     throw new BadRequestException(
                             String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.", stackId));
                 }
-                stackUpdater.updateStackStatus(stackId, Status.STOP_REQUESTED, stopRequestedMsg);
                 flowManager.triggerStackStop(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), status));
             }
         }
@@ -208,21 +207,16 @@ public class DefaultStackService implements StackService {
         validateStackStatus(stack);
         validateInstanceGroup(stack, instanceGroupAdjustmentJson.getInstanceGroup());
         validateScalingAdjustment(instanceGroupAdjustmentJson, stack);
-        int absScalingAdjustment = Math.abs(instanceGroupAdjustmentJson.getScalingAdjustment());
-
         if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
             UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(stack.cloudPlatform(), stack.getId(),
                     instanceGroupAdjustmentJson.getScalingAdjustment(), instanceGroupAdjustmentJson.getInstanceGroup(),
                     instanceGroupAdjustmentJson.getWithClusterEvent() ? ScalingType.UPSCALE_TOGETHER : ScalingType.UPSCALE_ONLY_STACK);
-            String statusMessage = "Adding '%s' new instance(s) to the cluster infrastructure.";
-            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, String.format(statusMessage, absScalingAdjustment));
+            stackUpdater.updateStackStatus(stackId, UPDATE_REQUESTED);
             flowManager.triggerStackUpscale(updateInstancesRequest);
         } else {
             UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(stack.cloudPlatform(), stack.getId(),
                     instanceGroupAdjustmentJson.getScalingAdjustment(), instanceGroupAdjustmentJson.getInstanceGroup(),
                     ScalingType.DOWNSCALE_ONLY_STACK);
-            String statusMessage = "Removing '%s' instance(s) from the cluster infrastructure.";
-            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, String.format(statusMessage, absScalingAdjustment));
             flowManager.triggerStackDownscale(updateInstancesRequest);
         }
     }
@@ -230,10 +224,9 @@ public class DefaultStackService implements StackService {
     @Override
     public void updateAllowedSubnets(Long stackId, List<Subnet> subnetList) {
         Stack stack = stackRepository.findOne(stackId);
-        if (!Status.AVAILABLE.equals(stack.getStatus())) {
+        if (!stack.isAvailable()) {
             throw new BadRequestException(String.format("Stack is currently in '%s' state. Security constraints cannot be updated.", stack.getStatus()));
         }
-        stackUpdater.updateStackStatus(stackId, Status.UPDATE_IN_PROGRESS, "Updating allowed subnets");
         flowManager.triggerUpdateAllowedSubnets(new UpdateAllowedSubnetsRequest(stack.cloudPlatform(), stackId, subnetList));
     }
 
@@ -273,7 +266,7 @@ public class DefaultStackService implements StackService {
     }
 
     private void validateStackStatus(Stack stack) {
-        if (!Status.AVAILABLE.equals(stack.getStatus())) {
+        if (!stack.isAvailable()) {
             throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. Node count can only be updated if it's running.", stack.getId(),
                     stack.getStatus()));
         }
@@ -293,7 +286,7 @@ public class DefaultStackService implements StackService {
         if (!user.getUserId().equals(stack.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
             throw new BadRequestException("Stacks can be deleted only by account admins or owners.");
         }
-        if (!Status.DELETE_COMPLETED.equals(stack.getStatus())) {
+        if (!stack.isDeleteCompleted()) {
             flowManager.triggerTermination(new StackDeleteRequest(stack.cloudPlatform(), stack.getId()));
         } else {
             LOGGER.info("Stack is already deleted.");

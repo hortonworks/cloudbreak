@@ -1,5 +1,12 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import static com.sequenceiq.cloudbreak.domain.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.domain.Status.REQUESTED;
+import static com.sequenceiq.cloudbreak.domain.Status.START_REQUESTED;
+import static com.sequenceiq.cloudbreak.domain.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.domain.Status.STOP_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.domain.Status.STOP_REQUESTED;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -250,5 +257,33 @@ public class Cluster implements ProvisionEntity {
 
     public void setAmbariIp(String ambariIp) {
         this.ambariIp = ambariIp;
+    }
+
+    public boolean isClusterReadyForStop() {
+        return AVAILABLE.equals(status) || STOPPED.equals(status);
+    }
+
+    public boolean isAvailable() {
+        return AVAILABLE.equals(status);
+    }
+
+    public boolean isStopped() {
+        return STOPPED.equals(status);
+    }
+
+    public boolean isStartRequested() {
+        return START_REQUESTED.equals(status);
+    }
+
+    public boolean isStopInProgress() {
+        return STOP_IN_PROGRESS.equals(status) || STOP_REQUESTED.equals(status);
+    }
+
+    public boolean isRequested() {
+        return REQUESTED.equals(status);
+    }
+
+    public boolean isClusterReadyForStart() {
+        return STOPPED.equals(status) || START_REQUESTED.equals(status);
     }
 }

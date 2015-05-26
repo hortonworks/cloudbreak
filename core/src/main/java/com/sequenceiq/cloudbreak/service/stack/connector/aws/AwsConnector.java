@@ -89,7 +89,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
@@ -177,8 +176,6 @@ public class AwsConnector implements CloudPlatformConnector {
         PollingResult pollingResult = cloudFormationPollingService
                 .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
         if (!isSuccess(pollingResult)) {
-            LOGGER.error(String.format("Failed to create CloudFormation stack: %s", stackId));
-            stackUpdater.updateStackStatus(stackId, Status.CREATE_FAILED, "Creation of cluster infrastructure failed");
             throw new AwsResourceException(String.format("Failed to create CloudFormation stack: %s, polling result '%s'",
                     stackId, pollingResult));
         }

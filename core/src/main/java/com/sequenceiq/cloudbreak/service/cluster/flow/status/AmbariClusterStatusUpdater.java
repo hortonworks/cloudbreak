@@ -49,11 +49,9 @@ public class AmbariClusterStatusUpdater {
     private boolean isClusterStatusCheckNecessary(Stack stack) {
         boolean result = false;
         Cluster cluster = stack.getCluster();
-        Status stackStatus = stack.getStatus();
-        if (stackStatus != Status.DELETE_COMPLETED && cluster != null) {
-            Status clusterStatus = cluster.getStatus();
-            result = failedStatuses.contains(stackStatus) || failedStatuses.contains(clusterStatus)
-                    || (stackStatus == Status.AVAILABLE && (clusterStatus == Status.AVAILABLE || clusterStatus == Status.STOPPED));
+        if (stack.isDeleteCompleted() && cluster != null) {
+            result = failedStatuses.contains(stack.getStatus()) || failedStatuses.contains(cluster.getStatus())
+                    || (stack.isAvailable() && (cluster.isAvailable() || cluster.isStopped()));
         }
         return result;
     }

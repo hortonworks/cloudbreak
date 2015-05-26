@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.FailureHandlerService;
@@ -76,7 +75,6 @@ public class ParallelCloudResourceManager {
             Map<String, String> ctxMap = MDC.getCopyOfContextMap();
             Set<Resource> resourceSet = new HashSet<>();
             CloudPlatform cloudPlatform = stack.cloudPlatform();
-            stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS, "Creating cluster infrastructure");
             final ProvisionContextObject pCO = resourceBuilderInit.provisionInit(stack);
             for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
                 List<Resource> buildResources = resourceBuilder.buildResources(pCO, 0, Arrays.asList(resourceSet), Optional.<InstanceGroup>absent());

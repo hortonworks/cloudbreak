@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.websocket;
 
-import static com.sequenceiq.cloudbreak.domain.Status.DELETE_COMPLETED;
-
 import java.util.Date;
 import java.util.List;
 
@@ -11,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
@@ -37,8 +34,8 @@ public class UptimeNotifier {
         long now = new Date().getTime();
         for (Cluster cluster : clusters) {
             Stack stack = stackRepository.findStackForCluster(cluster.getId());
-            if (stack != null && !DELETE_COMPLETED.equals(stack.getStatus())) {
-                Long uptime = cluster.getUpSince() == null || !Status.AVAILABLE.equals(cluster.getStatus()) ? 0L : now - cluster.getUpSince();
+            if (stack != null && !stack.isDeleteCompleted()) {
+                Long uptime = cluster.getUpSince() == null || !cluster.isAvailable() ? 0L : now - cluster.getUpSince();
                 Notification notification = createUptimeNotification(stack, uptime);
                 notificationSender.send(notification);
             }

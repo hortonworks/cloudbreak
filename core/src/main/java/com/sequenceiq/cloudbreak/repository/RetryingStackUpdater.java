@@ -32,6 +32,10 @@ public class RetryingStackUpdater {
     @Autowired
     private CloudbreakEventService cloudbreakEventService;
 
+    public Stack updateStackStatus(Long stackId, Status status) {
+        return doUpdateStackStatus(stackId, status, "", INITIAL_ATTEMPT);
+    }
+
     public Stack updateStackStatus(Long stackId, Status status, String statusReason) {
         return doUpdateStackStatus(stackId, status, statusReason, INITIAL_ATTEMPT);
     }
@@ -84,7 +88,7 @@ public class RetryingStackUpdater {
     private Stack doUpdateStackStatus(Long stackId, Status status, String statusReason, int attempt) {
         try {
             Stack stack = stackRepository.findById(stackId);
-            if (!stack.getStatus().equals(Status.DELETE_COMPLETED)) {
+            if (!stack.isDeleteCompleted()) {
                 if (status != null) {
                     stack.setStatus(status);
                 }

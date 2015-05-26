@@ -122,15 +122,12 @@ public class AmbariClusterConnector {
     public Cluster buildAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
         try {
-            LOGGER.info("Starting Ambari cluster [Ambari server address: {}]", stack.getAmbariIp());
-            stack = stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Building the Ambari cluster.");
             cluster.setCreationStarted(new Date().getTime());
             cluster = clusterRepository.save(cluster);
             AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
             setBaseRepoURL(cluster, ambariClient);
             addBlueprint(stack, ambariClient, cluster.getBlueprint());
             PollingResult waitForHostsResult = waitForHosts(stack, ambariClient);
-
             if (!isSuccess(waitForHostsResult)) {
                 throw new ClusterException("Error while waiting for hosts to connect. Polling result: " + waitForHostsResult.name());
             }
@@ -170,11 +167,8 @@ public class AmbariClusterConnector {
         Set<String> result = new HashSet<>();
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-        stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Adding new host(s) to the cluster.");
-
         AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(cluster);
-        if (PollingResult.SUCCESS.equals(waitForHosts(stack, ambariClient))) {
-
+        if (SUCCESS.equals(waitForHosts(stack, ambariClient))) {
             HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
             List<String> hosts = findFreeHosts(stack.getId(), hostGroup, hostGroupAdjustment.getScalingAdjustment());
             Set<HostGroup> hostGroupAsSet = Sets.newHashSet(hostGroup);
@@ -220,8 +214,6 @@ public class AmbariClusterConnector {
         int adjustment = Math.abs(adjustmentRequest.getScalingAdjustment());
         String hostGroupName = adjustmentRequest.getHostGroup();
         LOGGER.info("Decommissioning {} hosts from host group '{}'", adjustment, hostGroupName);
-        String statusReason = String.format("Removing '%s' node(s) from the cluster.", adjustment);
-        stackUpdater.updateStackStatus(stackId, Status.UPDATE_IN_PROGRESS, statusReason);
         String eventMsg = String.format("Removing '%s' node(s) from the '%s' hostgroup.", adjustment, hostGroupName);
         eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), eventMsg, hostGroupName);
         AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(cluster);
@@ -310,8 +302,6 @@ public class AmbariClusterConnector {
 
     private Cluster handleClusterCreationSuccess(Stack stack, Cluster cluster) {
         LOGGER.info("Cluster created successfully. Cluster name: {}", cluster.getName());
-        cluster.setStatus(Status.AVAILABLE);
-        cluster.setStatusReason("");
         cluster.setCreationFinished(new Date().getTime());
         cluster.setUpSince(new Date().getTime());
         cluster = clusterRepository.save(cluster);
@@ -324,9 +314,6 @@ public class AmbariClusterConnector {
             }
             stackUpdater.updateStackMetaData(stack.getId(), instances, instanceGroup.getGroupName());
         }
-        stackUpdater.updateStackStatus(stack.getId(),
-                Status.AVAILABLE, "Cluster installation successfully finished. AMBARI_IP:" + stack.getAmbariIp());
-
         return cluster;
 
     }
