@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.azure.builders;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -35,15 +36,17 @@ public class AzureResourceBuilderInit implements
     public AzureProvisionContextObject provisionInit(Stack stack) throws Exception {
         AzureCredential credential = (AzureCredential) stack.getCredential();
         AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
-        int numStorageAccount = azureStackUtil.getNumOfStorageAccount(stack);
-        int vhdPerStorageAccount = azureStackUtil.getNumOfVHDPerStorageAccount(stack);
-        int vhdPerStorage[] = new int[numStorageAccount];
-        for (int i = 0; i < numStorageAccount; i++) {
-            vhdPerStorage[i] = vhdPerStorageAccount;
+        int numStorageAccount = azureStackUtil.getNumOfStorageAccounts(stack);
+        if (numStorageAccount == AzureStackUtil.GLOBAL_STORAGE) {
+            return new AzureProvisionContextObject(stack.getId(),
+                    credential.getAffinityGroupName(azureLocation), getAllocatedAddresses(stack), true);
+        } else {
+            int vhdPerStorageAccount = azureStackUtil.getNumOfVHDPerStorageAccount(stack);
+            int vhdPerStorage[] = new int[numStorageAccount];
+            Arrays.fill(vhdPerStorage, vhdPerStorageAccount);
+            return new AzureProvisionContextObject(stack.getId(),
+                    credential.getAffinityGroupName(azureLocation), getAllocatedAddresses(stack), vhdPerStorage);
         }
-        AzureProvisionContextObject azureProvisionContextObject = new AzureProvisionContextObject(stack.getId(),
-                credential.getAffinityGroupName(azureLocation), getAllocatedAddresses(stack), vhdPerStorage);
-        return azureProvisionContextObject;
     }
 
     @Override

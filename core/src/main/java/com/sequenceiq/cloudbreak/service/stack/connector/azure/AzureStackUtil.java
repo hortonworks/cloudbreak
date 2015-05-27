@@ -12,7 +12,11 @@ import java.nio.file.StandardCopyOption;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
@@ -23,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.controller.validation.StackParam;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -47,7 +52,7 @@ public class AzureStackUtil {
     public static final String CB_STORAGE_BASE = "cb";
     public static final Logger LOGGER = LoggerFactory.getLogger(AzureStackUtil.class);
     public static final int ROOTFS_COUNT = 1;
-    private static final int VHD_PER_STORAGE = 10;
+    public static final int GLOBAL_STORAGE = -1;
 
     @Autowired
     private KeyGeneratorService keyGeneratorService;
@@ -58,29 +63,53 @@ public class AzureStackUtil {
     @Autowired
     private UserDetailsService userDetailsService;
 
-    public String getOsImageName(int storageIndex, AzureLocation location, String image) {
-        String[] split = image.split("/");
+    public String getOsImageName(Stack stack, AzureLocation location, int storageIndex) {
+        String[] split = stack.getImage().split("/");
         // TODO why do we need an IMAGE_NAME here?
-        return format("%s-%s-%s", getOSStorageName(location, storageIndex), IMAGE_NAME,
+        return format("%s-%s-%s", getOSStorageName(stack, location, storageIndex), IMAGE_NAME,
                 split[split.length - 1].replaceAll(".vhd", ""));
     }
 
-    public String getOSStorageName(AzureLocation location, int index) {
-        return CB_STORAGE_BASE + location.region().toLowerCase().replaceAll(" ", "") + index;
+    public String getOSStorageName(Stack stack, AzureLocation location, int index) {
+        String baseStorageName = CB_STORAGE_BASE + location.region().toLowerCase().replaceAll(" ", "");
+        return index == GLOBAL_STORAGE ? baseStorageName : baseStorageName + stack.getId() + index;
     }
 
-    public int getNumOfStorageAccount(Stack stack) {
-        int diskCount = 0;
-        for (InstanceGroup ig : stack.getInstanceGroups()) {
-            int nodesCount = ig.getNodeCount();
-            int volumeCount = ig.getTemplate().getVolumeCount() + ROOTFS_COUNT;
-            diskCount += volumeCount * nodesCount;
+    public int getNumOfStorageAccounts(Stack stack) {
+        if (!stack.isBlobCountSpecified()) {
+            return GLOBAL_STORAGE;
         }
-        return (int) Math.ceil(diskCount / (double) getNumOfVHDPerStorageAccount(stack));
+        int vhdPerStorageAccount = getNumOfVHDPerStorageAccount(stack);
+        List<InstanceGroup> instanceGroups = getOrderedInstanceGroups(stack);
+        int accounts[] = new int[4096];
+        Arrays.fill(accounts, vhdPerStorageAccount);
+        for (InstanceGroup ig : instanceGroups) {
+            int nodeCount = ig.getNodeCount();
+            int volumeCount = ig.getTemplate().getVolumeCount() + ROOTFS_COUNT;
+            for (int i = 0; i < nodeCount; i++) {
+                for (int j = 0; j < accounts.length; j++) {
+                    int space = accounts[j];
+                    if (space - volumeCount >= 0) {
+                        accounts[j] = space - volumeCount;
+                        break;
+                    }
+                }
+            }
+        }
+        int numAccounts = 0;
+        for (int i = 0; i < accounts.length; i++) {
+            if (accounts[i] != vhdPerStorageAccount) {
+                numAccounts++;
+            } else {
+                break;
+            }
+        }
+        return numAccounts;
     }
 
     public int getNumOfVHDPerStorageAccount(Stack stack) {
-        int vhdPS = VHD_PER_STORAGE;
+        String vhdNum = stack.getParameters().get(StackParam.BLOB_PER_STORAGE.getName());
+        int vhdPS = Integer.valueOf(vhdNum == null ? "0" : vhdNum);
         for (InstanceGroup ig : stack.getInstanceGroups()) {
             int volumeCount = ig.getTemplate().getVolumeCount() + ROOTFS_COUNT;
             if (volumeCount > vhdPS) {
@@ -139,6 +168,17 @@ public class AzureStackUtil {
             throw new AzureResourceException(e);
         }
         return azureCredential;
+    }
+
+    private List<InstanceGroup> getOrderedInstanceGroups(Stack stack) {
+        List<InstanceGroup> instanceGroups = stack.getInstanceGroupsAsList();
+        Collections.sort(instanceGroups, new Comparator<InstanceGroup>() {
+            @Override
+            public int compare(InstanceGroup o1, InstanceGroup o2) {
+                return o1.getNodeCount().compareTo(o2.getNodeCount());
+            }
+        });
+        return instanceGroups;
     }
 
     private Certificate getCertificate(AzureCredential azureCredential, String serviceFilesPathWithoutExtension) throws Exception {

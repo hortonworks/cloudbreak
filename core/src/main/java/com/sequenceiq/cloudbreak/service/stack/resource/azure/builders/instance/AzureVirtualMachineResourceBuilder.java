@@ -108,19 +108,25 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             String label = new String(encoded);
             AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
 
-            int storageIndex = provisionContextObject.setAndGetStorageAccountIndex(azureTemplate.getVolumeCount() + AzureStackUtil.ROOTFS_COUNT);
-            if (storageIndex < 0) {
-                LOGGER.warn("VHD allocation is not optimal");
-                // TODO overbook one of the accounts
+            int storageIndex;
+            if (provisionContextObject.isUseGlobalStorageAccount()) {
+                storageIndex = AzureStackUtil.GLOBAL_STORAGE;
+            } else {
+                storageIndex = provisionContextObject.setAndGetStorageAccountIndex(azureTemplate.getVolumeCount() + AzureStackUtil.ROOTFS_COUNT);
+                if (storageIndex < 0) {
+                    LOGGER.warn("VHD allocation is not optimal");
+                    // TODO overbook one of the accounts
+                }
             }
+
             LOGGER.info("Storage index selected: {} for {}", storageIndex, resourceName);
-            String osStorageName = azureStackUtil.getOSStorageName(azureLocation, storageIndex);
+            String osStorageName = azureStackUtil.getOSStorageName(stack, azureLocation, storageIndex);
 
             Map<String, Object> props = new HashMap<>();
             props.put(NAME, resourceName);
             props.put(DEPLOYMENTSLOT, PRODUCTION);
             props.put(LABEL, label);
-            props.put(IMAGENAME, azureStackUtil.getOsImageName(storageIndex, azureLocation, stack.getImage()));
+            props.put(IMAGENAME, azureStackUtil.getOsImageName(stack, azureLocation, storageIndex));
             props.put(IMAGESTOREURI, buildImageStoreUri(osStorageName, resourceName));
             props.put(HOSTNAME, resourceName);
             props.put(USERNAME, CB_GCP_AND_AZURE_USER_NAME);
