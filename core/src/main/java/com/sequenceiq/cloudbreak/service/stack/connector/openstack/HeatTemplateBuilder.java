@@ -84,8 +84,8 @@ public class HeatTemplateBuilder {
             Map<String, Object> model = new HashMap<>();
             model.put("cb_stack_name", stack.getName());
             model.put("agents", agents);
-            model.put("coreuserdata", formatUserData(coreUserData));
-            model.put("gatewayuserdata", formatUserData(gateWayUserData));
+            model.put("core_user_data", formatUserData(coreUserData));
+            model.put("gateway_user_data", formatUserData(gateWayUserData));
             model.put("subnets", stack.getAllowedSubnets());
             model.put("ports", NetworkUtils.getPorts(stack));
             String generatedTemplate = processTemplateIntoString(freemarkerConfiguration.getTemplate(openStackHeatTemplatePath, "UTF-8"), model);
