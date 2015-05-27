@@ -47,9 +47,7 @@ public class MetadataSetupService {
     @Autowired
     private CloudbreakEventService eventService;
 
-
-    public String setupMetadata(final CloudPlatform cloudPlatform, Long stackId) throws Exception {
-        Stack stack = stackService.getById(stackId);
+    public String setupMetadata(final CloudPlatform cloudPlatform, Stack stack) throws Exception {
         Set<CoreInstanceMetaData> coreInstanceMetaData = metadataSetups.get(cloudPlatform).collectMetadata(stack);
         if (coreInstanceMetaData.size() != stack.getFullNodeCount()) {
             throw new WrongMetadataException(String.format(

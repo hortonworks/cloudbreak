@@ -35,9 +35,8 @@ public class ProvisioningService {
     @Autowired
     private UserDataBuilder userDataBuilder;
 
-    public ProvisionComplete buildStack(final CloudPlatform cloudPlatform, Long stackId, Map<String, Object> setupProperties) throws Exception {
+    public ProvisionComplete buildStack(final CloudPlatform cloudPlatform, Stack stack, Map<String, Object> setupProperties) throws Exception {
         ProvisionComplete provisionComplete = null;
-        Stack stack = stackRepository.findOneWithLists(stackId);
         if (stack.getStatus().equals(Status.REQUESTED)) {
             String statusReason = "Creation of cluster infrastructure has started on the cloud provider.";
             stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS, statusReason);
