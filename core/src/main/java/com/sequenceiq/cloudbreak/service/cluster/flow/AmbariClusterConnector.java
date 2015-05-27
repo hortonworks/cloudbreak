@@ -170,7 +170,6 @@ public class AmbariClusterConnector {
         Set<String> result = new HashSet<>();
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-        stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Adding new host(s) to the cluster.");
 
         AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(cluster);
         if (PollingResult.SUCCESS.equals(waitForHosts(stack, ambariClient))) {
