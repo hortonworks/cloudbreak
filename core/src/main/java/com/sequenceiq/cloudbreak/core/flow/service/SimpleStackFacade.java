@@ -150,6 +150,7 @@ public class SimpleStackFacade implements StackFacade {
             MDCBuilder.buildMdcContext(stackService.getById(stackStatusUpdateContext.getStackId()));
             LOGGER.debug("Starting stack. Context: {}", stackStatusUpdateContext);
             context = stackStartService.start(stackStatusUpdateContext);
+            stackUpdater.updateStackStatus(stackStatusUpdateContext.getStackId(), Status.AVAILABLE, "Instances were started.");
             LOGGER.debug("Starting stack is DONE.");
             return context;
         } catch (Exception e) {

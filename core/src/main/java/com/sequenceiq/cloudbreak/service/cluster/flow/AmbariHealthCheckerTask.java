@@ -21,7 +21,7 @@ public class AmbariHealthCheckerTask extends StackBasedStatusCheckerTask<AmbariC
             }
             return false;
         } catch (Exception e) {
-            LOGGER.info("Ambari is not running yet, polling");
+            LOGGER.info("Ambari is not running yet: {}", e.getMessage());
             return false;
         }
     }

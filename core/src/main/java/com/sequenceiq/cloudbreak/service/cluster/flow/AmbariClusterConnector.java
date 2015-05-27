@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import static com.sequenceiq.cloudbreak.orchestrator.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.orchestrator.DockerContainer.AMBARI_DB;
 import static com.sequenceiq.cloudbreak.orchestrator.DockerContainer.AMBARI_SERVER;
 import static com.sequenceiq.cloudbreak.service.PollingResult.SUCCESS;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isTimeout;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
 import static java.util.Collections.singletonMap;
 
@@ -33,7 +36,9 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.ClusterException;
+import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
 import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -105,6 +110,14 @@ public class AmbariClusterConnector {
 
     @Autowired
     private AmbariHostsRemover ambariHostsRemover;
+    @Autowired
+    private PollingService<AmbariHosts> ambariHostJoin;
+    @Autowired
+    private PollingService<AmbariClientPollerObject> ambariHealthChecker;
+    @Autowired
+    private AmbariHealthCheckerTask ambariHealthCheckerTask;
+    @Autowired
+    private AmbariHostsJoinStatusCheckerTask ambariHostsJoinStatusCheckerTask;
 
     public Cluster buildAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
@@ -240,12 +253,51 @@ public class AmbariClusterConnector {
         return result;
     }
 
-    public boolean stopCluster(Stack stack) {
-        return setClusterState(stack, true);
+    public void stopCluster(Stack stack) throws CloudbreakException {
+        Cluster cluster = stack.getCluster();
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
+        if (!allServiceStopped(ambariClient.getHostComponentsStates())) {
+            stopAllServices(stack, ambariClient);
+        }
+        stopAmbariAgents(stack);
     }
 
-    public boolean startCluster(Stack stack) {
-        return setClusterState(stack, false);
+    public void startCluster(Stack stack) throws CloudbreakException {
+        Cluster cluster = stack.getCluster();
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
+        waitForAmbariToStart(stack);
+        startAmbariAgents(stack);
+        startAllServices(stack, ambariClient);
+    }
+
+    private void stopAllServices(Stack stack, AmbariClient ambariClient) throws CloudbreakException {
+        int requestId = ambariClient.stopAllServices();
+        if (requestId != -1) {
+            LOGGER.info("Waiting for Hadoop services to stop on stack");
+            PollingResult servicesStopResult = ambariOperationService.waitForAmbariOperations(stack, ambariClient, singletonMap("stop services", requestId));
+            if (isExited(servicesStopResult)) {
+                throw new FlowCancelledException("Cluster was terminated while waiting for Hadoop services to start");
+            } else if (isTimeout(servicesStopResult)) {
+                throw new CloudbreakException("Timeout while stopping Ambari services.");
+            }
+        } else {
+            throw new CloudbreakException("Failed to stop Hadoop services.");
+        }
+    }
+
+    private void startAllServices(Stack stack, AmbariClient ambariClient) throws CloudbreakException {
+        int requestId = ambariClient.startAllServices();
+        if (requestId != -1) {
+            LOGGER.info("Waiting for Hadoop services to start on stack");
+            PollingResult servicesStartResult = ambariOperationService.waitForAmbariOperations(stack, ambariClient, singletonMap("start services", requestId));
+            if (isExited(servicesStartResult)) {
+                throw new FlowCancelledException("Cluster was terminated while waiting for Hadoop services to start");
+            } else if (isTimeout(servicesStartResult)) {
+                throw new CloudbreakException("Timeout while starting Ambari services.");
+            }
+        } else {
+            throw new CloudbreakException("Failed to start Hadoop services.");
+        }
     }
 
     private Set<String> getHadoopComponents(Cluster cluster, AmbariClient ambariClient, String hostGroupName, String blueprintName) {
@@ -364,34 +416,59 @@ public class AmbariClusterConnector {
         return waitForAmbariOperations(stack, ambariClient, restartRequests);
     }
 
-    private boolean setClusterState(Stack stack, boolean stopped) {
-        boolean result = true;
+    private void waitForAmbariToStart(Stack stack) throws CloudbreakException {
+        LOGGER.info("Checking if Ambari Server is available.");
         Cluster cluster = stack.getCluster();
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
-        String action = stopped ? "stop" : "start";
-        int requestId = -1;
-        try {
-            if (stopped) {
-                if (!allServiceStopped(ambariClient.getHostComponentsStates())) {
-                    requestId = ambariClient.stopAllServices();
-                } else {
-                    requestId = -1;
-                }
-            } else {
-                requestId = ambariClient.startAllServices();
-            }
-        } catch (Exception e) {
-            LOGGER.warn(String.format("Failed to %s Hadoop services", action), e);
-            result = false;
+        PollingResult ambariHealthCheckResult = ambariHealthChecker.pollWithTimeout(
+                ambariHealthCheckerTask,
+                new AmbariClientPollerObject(stack, ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword())),
+                AmbariOperationService.AMBARI_POLLING_INTERVAL,
+                AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS,
+                AmbariOperationService.MAX_FAILURE_COUNT);
+        if (isExited(ambariHealthCheckResult)) {
+            throw new FlowCancelledException("Cluster was terminated while waiting for Ambari to start.");
+        } else if (isTimeout(ambariHealthCheckResult)) {
+            throw new CloudbreakException("Ambari server was not restarted properly.");
         }
-        if (requestId != -1) {
-            LOGGER.info("Waiting for Hadoop services to {} on stack", action);
-            PollingResult pollingResult = ambariOperationService.waitForAmbariOperations(stack, ambariClient, singletonMap(action + " services", requestId));
-            if (!isSuccess(pollingResult)) {
-                result = false;
-            }
+    }
+
+    private void stopAmbariAgents(Stack stack) throws CloudbreakException {
+        LOGGER.info("Stopping Ambari agents on the hosts.");
+        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.STOP_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
+    }
+
+    private void startAmbariAgents(Stack stack) throws CloudbreakException {
+        LOGGER.info("Starting Ambari agents on the hosts.");
+        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.START_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
+        PollingResult hostsJoinedResult = waitForHostsToJoin(stack);
+        if (PollingResult.EXIT.equals(hostsJoinedResult)) {
+            throw new FlowCancelledException("Cluster was terminated while starting Ambari agents.");
+        } else if (PollingResult.TIMEOUT.equals(hostsJoinedResult)) {
+            LOGGER.info("Ambari agents couldn't join. Restarting ambari agents...");
+            restartAmbariAgents(stack);
         }
-        return result;
+    }
+
+    private void restartAmbariAgents(Stack stack) throws CloudbreakException {
+        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.RESTART_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
+        PollingResult hostsJoinedResult = waitForHostsToJoin(stack);
+        if (isExited(hostsJoinedResult)) {
+            throw new FlowCancelledException("Cluster was terminated while restarting Ambari agents.");
+        } else if (isTimeout(hostsJoinedResult)) {
+            throw new CloudbreakException("Services could not start because host(s) could not join.");
+        }
+    }
+
+    private PollingResult waitForHostsToJoin(Stack stack) {
+        Cluster cluster = stack.getCluster();
+        AmbariHosts ambariHosts = new AmbariHosts(stack, ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(),
+                cluster.getPassword()), stack.getFullNodeCount());
+        return ambariHostJoin.pollWithTimeout(
+                ambariHostsJoinStatusCheckerTask,
+                ambariHosts,
+                AmbariOperationService.AMBARI_POLLING_INTERVAL,
+                AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS,
+                AmbariOperationService.MAX_FAILURE_COUNT);
     }
 
     private boolean allServiceStopped(Map<String, Map<String, String>> hostComponentsStates) {

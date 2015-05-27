@@ -10,4 +10,9 @@ public enum PollingResult {
     public static boolean isExited(PollingResult pollingResult) {
         return PollingResult.EXIT.equals(pollingResult);
     }
+
+    public static boolean isTimeout(PollingResult pollingResult) {
+        return PollingResult.TIMEOUT.equals(pollingResult);
+    }
+
 }

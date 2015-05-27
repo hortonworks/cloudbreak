@@ -46,6 +46,10 @@ public abstract class AbstractFlowHandler<T extends DefaultFlowContext> implemen
             result = execute(event);
             success = true;
         } catch (Exception t) {
+            if (t instanceof FlowCancelledException || t.getCause() instanceof FlowCancelledException) {
+                LOGGER.warn("Flow was cancelled: {}", t.getMessage());
+                return;
+            }
             consumeError(event, t);
             try {
                 result = handleErrorFlow(t, event.getData());

@@ -136,62 +136,44 @@ public class AmbariClusterFacade implements ClusterFacade {
 
     @Override
     public FlowContext startCluster(FlowContext context) throws CloudbreakException {
-        try {
-            StackStatusUpdateContext startContext = (StackStatusUpdateContext) context;
-            Stack stack = stackService.getById(startContext.getStackId());
-            Cluster cluster = stack.getCluster();
-            MDCBuilder.buildMdcContext(cluster);
-            LOGGER.debug("Starting cluster. Context: {}", context);
-            if (cluster != null && Status.START_REQUESTED.equals(cluster.getStatus())) {
-                clusterService.updateClusterStatusByStackId(stack.getId(), Status.START_IN_PROGRESS, "Services are starting.");
-                stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Services are starting.");
-                boolean started = ambariClusterConnector.startCluster(stack);
-                if (started) {
-                    LOGGER.info("Successfully started Hadoop services, setting cluster state to: {}", Status.AVAILABLE);
-                    cluster.setUpSince(new Date().getTime());
-                    cluster.setStatus(Status.AVAILABLE);
-                    clusterService.updateCluster(cluster);
-                    stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "Cluster started successfully.");
-                } else {
-                    String statusReason = "Failed to start cluster, some of the services could not start.";
-                    stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, statusReason);
-                    throw new CloudbreakException(statusReason);
-                }
-                LOGGER.debug("Custer STARTED.");
-            } else {
-                LOGGER.info("Cluster start has not been requested, start cluster later.");
-            }
-            return context;
-        } catch (Exception e) {
-            LOGGER.error("Exception during cluster start: {}", e.getMessage());
-            throw new CloudbreakException(e);
+        StackStatusUpdateContext startContext = (StackStatusUpdateContext) context;
+        Stack stack = stackService.getById(startContext.getStackId());
+        Cluster cluster = stack.getCluster();
+        MDCBuilder.buildMdcContext(cluster);
+        LOGGER.debug("Starting cluster. Context: {}", context);
+        if (cluster != null && Status.START_REQUESTED.equals(cluster.getStatus())) {
+            clusterService.updateClusterStatusByStackId(stack.getId(), Status.START_IN_PROGRESS, "Services are starting.");
+            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Services are starting.");
+            ambariClusterConnector.startCluster(stack);
+            LOGGER.info("Successfully started Hadoop services, setting cluster state to: {}", Status.AVAILABLE);
+            cluster.setUpSince(new Date().getTime());
+            cluster.setStatus(Status.AVAILABLE);
+            clusterService.updateCluster(cluster);
+            stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "Cluster started successfully.");
+            LOGGER.debug("Cluster STARTED.");
+        } else {
+            LOGGER.info("Cluster start has not been requested, start cluster later.");
         }
+        return context;
     }
 
     @Override
     public FlowContext stopCluster(FlowContext context) throws CloudbreakException {
-        try {
-            StackStatusUpdateContext startContext = (StackStatusUpdateContext) context;
-            Cluster cluster = clusterService.retrieveClusterByStackId(startContext.getStackId());
-            MDCBuilder.buildMdcContext(cluster);
-            LOGGER.debug("Stopping cluster. Context: {}", context);
-            eventService.fireCloudbreakEvent(startContext.getStackId(), Status.STOP_IN_PROGRESS.name(), "Services are stopping.");
-            boolean stopped = ambariClusterConnector.stopCluster(stackService.getById(startContext.getStackId()));
-            if (stopped) {
-                cluster.setStatus(Status.STOPPED);
-                cluster = clusterService.updateCluster(cluster);
-                eventService.fireCloudbreakEvent(startContext.getStackId(), Status.AVAILABLE.name(), "Services have been stopped successfully.");
-                if (Status.STOP_REQUESTED.equals(stackService.getById(startContext.getStackId()).getStatus())) {
-                    LOGGER.info("Hadoop services stopped, stack stop requested.");
-                }
-            } else {
-                throw new CloudbreakException("Failed to stop cluster, some of the services could not stopped.");
-            }
-            return context;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the cluster stop process: {}", e.getMessage());
-            throw new CloudbreakException(e);
+        StackStatusUpdateContext statusUpdateContext = (StackStatusUpdateContext) context;
+        Cluster cluster = clusterService.retrieveClusterByStackId(statusUpdateContext.getStackId());
+        MDCBuilder.buildMdcContext(cluster);
+        LOGGER.debug("Stopping cluster. Context: {}", context);
+        clusterService.updateClusterStatusByStackId(statusUpdateContext.getStackId(), Status.STOP_IN_PROGRESS, "Services are stopping.");
+        eventService.fireCloudbreakEvent(statusUpdateContext.getStackId(), Status.STOP_IN_PROGRESS.name(), "Services are stopping.");
+        stackUpdater.updateStackStatus(statusUpdateContext.getStackId(), Status.UPDATE_IN_PROGRESS, "Services are starting.");
+        ambariClusterConnector.stopCluster(stackService.getById(statusUpdateContext.getStackId()));
+        cluster.setStatus(Status.STOPPED);
+        clusterService.updateCluster(cluster);
+        eventService.fireCloudbreakEvent(statusUpdateContext.getStackId(), Status.AVAILABLE.name(), "Services have been stopped successfully.");
+        if (Status.STOP_REQUESTED.equals(stackService.getById(statusUpdateContext.getStackId()).getStatus())) {
+            LOGGER.info("Hadoop services stopped, stack stop requested.");
         }
+        return context;
     }
 
     @Override
@@ -261,26 +243,21 @@ public class AmbariClusterFacade implements ClusterFacade {
         ProvisioningContext provisioningContext = (ProvisioningContext) context;
         Stack stack = stackService.getById(provisioningContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
-        try {
-            if (stack.getCluster() != null && stack.getCluster().getStatus().equals(Status.REQUESTED)) {
-                MDCBuilder.buildMdcContext(stack.getCluster());
-                stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Cluster installation has been started");
-                LOGGER.debug("Launching Ambari cluster containers. Context: {}", context);
-                containerRunner.runClusterContainers((ProvisioningContext) context);
-                InstanceGroup gateway = stack.getGatewayInstanceGroup();
-                InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-                provisioningContext = new ProvisioningContext.Builder()
-                        .setDefaultParams(provisioningContext.getStackId(), provisioningContext.getCloudPlatform())
-                        .setAmbariIp(gatewayInstance.getPublicIp())
-                        .build();
-            } else {
-                LOGGER.info("The stack has started but there were no cluster request, yet. Won't install cluster now.");
-            }
-            return provisioningContext;
-        } catch (Exception e) {
-            LOGGER.error("Error occurred while setting up containers for the cluster: {}", e.getMessage());
-            throw new CloudbreakException(e);
+        if (stack.getCluster() != null && stack.getCluster().getStatus().equals(Status.REQUESTED)) {
+            MDCBuilder.buildMdcContext(stack.getCluster());
+            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Cluster installation has been started");
+            LOGGER.debug("Launching Ambari cluster containers. Context: {}", context);
+            containerRunner.runClusterContainers((ProvisioningContext) context);
+            InstanceGroup gateway = stack.getGatewayInstanceGroup();
+            InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+            provisioningContext = new ProvisioningContext.Builder()
+                    .setDefaultParams(provisioningContext.getStackId(), provisioningContext.getCloudPlatform())
+                    .setAmbariIp(gatewayInstance.getPublicIp())
+                    .build();
+        } else {
+            LOGGER.info("The stack has started but there were no cluster request, yet. Won't install cluster now.");
         }
+        return provisioningContext;
     }
 
     @Override
