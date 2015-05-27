@@ -8,7 +8,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
+import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 
 @Component
 public class JsonHelper {
@@ -20,7 +20,7 @@ public class JsonHelper {
             JsonParser jp = factory.createParser(jsonString);
             return mapper.readTree(jp);
         } catch (IOException e) {
-            throw new InternalServerException("Failed to parse JSON string.", e);
+            throw new CloudbreakApiException("Failed to parse JSON string.", e);
         }
     }
 
