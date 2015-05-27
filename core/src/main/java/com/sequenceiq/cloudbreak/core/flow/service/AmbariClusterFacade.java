@@ -217,7 +217,10 @@ public class AmbariClusterFacade implements ClusterFacade {
     @Override
     public FlowContext addClusterContainers(FlowContext context) throws CloudbreakException {
         try {
-            containerRunner.addClusterContainers((ClusterScalingContext) context);
+            ClusterScalingContext scalingContext = (ClusterScalingContext) context;
+            Stack stack = stackService.getById(scalingContext.getStackId());
+            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Adding new host(s) to the cluster.");
+            containerRunner.addClusterContainers(scalingContext);
             return context;
         } catch (Exception e) {
             LOGGER.error("Error occurred while setting up containers for the cluster: {}", e.getMessage());
