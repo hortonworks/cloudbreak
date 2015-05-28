@@ -9,7 +9,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.dockerjava.api.ConflictException;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.ExposedPort;
@@ -75,8 +74,6 @@ public class AmbariAgentBootstrap implements ContainerBootstrap {
                     .withRestartPolicy(RestartPolicy.alwaysRestart())
                     .withBinds(array));
             LOGGER.info("Ambari agent container started successfully");
-        } catch (ConflictException ex) {
-            LOGGER.warn("Swarm api tried to create a container with the same name: {}", ex.getMessage());
         } catch (Exception ex) {
             LOGGER.error("Ambari agent container failed to start.");
             throw ex;
