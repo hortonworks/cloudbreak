@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.orchestrator.DockerContainer.CONSUL_WATC
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.dockerjava.api.ConflictException;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.ExposedPort;
@@ -53,10 +54,12 @@ public class ConsulWatchBootstrap implements ContainerBootstrap {
                     .withRestartPolicy(RestartPolicy.alwaysRestart())
                     .withBinds(new Bind("/var/run/docker.sock", new Volume("/var/run/docker.sock"))));
             LOGGER.info("Consul watch container started successfully");
-            return true;
+        } catch (ConflictException ex) {
+            LOGGER.warn("Swarm api tried to create a container with the same name: {}", ex.getMessage());
         } catch (Exception ex) {
             LOGGER.info("Consul watch container failed to start on node %s.");
             throw ex;
         }
+        return true;
     }
 }

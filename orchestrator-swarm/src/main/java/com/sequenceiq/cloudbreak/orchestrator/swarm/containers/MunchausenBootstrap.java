@@ -7,6 +7,7 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.dockerjava.api.ConflictException;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
@@ -30,15 +31,19 @@ public class MunchausenBootstrap implements ContainerBootstrap {
 
     @Override
     public Boolean call() throws Exception {
-        HostConfig hostConfig = new HostConfig();
-        hostConfig.setPrivileged(true);
-        String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(containerName)
-                .withName(MUNCHAUSEN.getName() + new Date().getTime())
-                .withHostConfig(hostConfig)
-                .withCmd(cmd));
-        DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
-                .withBinds(new Bind("/var/run/docker.sock", new Volume("/var/run/docker.sock"))));
-        LOGGER.info("Munchausen bootstrap container started.");
+        try {
+            HostConfig hostConfig = new HostConfig();
+            hostConfig.setPrivileged(true);
+            String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(containerName)
+                    .withName(MUNCHAUSEN.getName() + new Date().getTime())
+                    .withHostConfig(hostConfig)
+                    .withCmd(cmd));
+            DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
+                    .withBinds(new Bind("/var/run/docker.sock", new Volume("/var/run/docker.sock"))));
+            LOGGER.info("Munchausen bootstrap container started.");
+        } catch (ConflictException ex) {
+            LOGGER.warn("Swarm api tried to create a container with the same name: {}", ex.getMessage());
+        }
         return true;
     }
 }

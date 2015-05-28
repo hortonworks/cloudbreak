@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.orchestrator.DockerContainer.AMBARI_SERV
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.dockerjava.api.ConflictException;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
@@ -41,21 +42,25 @@ public class AmbariServerBootstrap implements ContainerBootstrap {
         ports.add(new PortBinding(new Ports.Binding(PORT), new ExposedPort(PORT)));
         hostConfig.setPortBindings(ports);
 
-        String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
-                .withHostConfig(hostConfig)
-                .withExposedPorts(new ExposedPort(PORT))
-                .withEnv(String.format("constraint:node==%s", node),
-                        String.format("POSTGRES_DB=localhost"),
-                        String.format("CLOUD_PLATFORM=%s", cloudPlatform),
-                        String.format("SERVICE_NAME=%s", "ambari-8080"))
-                .withName(AMBARI_SERVER.getName())
-                .withCmd("/start-server"));
-        DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
-                .withPortBindings(new PortBinding(new Ports.Binding("0.0.0.0", PORT), new ExposedPort(PORT)))
-                .withNetworkMode("host")
-                .withRestartPolicy(RestartPolicy.alwaysRestart())
-                .withPrivileged(true));
-        LOGGER.info("Ambari server started successfully");
+        try {
+            String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
+                    .withHostConfig(hostConfig)
+                    .withExposedPorts(new ExposedPort(PORT))
+                    .withEnv(String.format("constraint:node==%s", node),
+                            String.format("POSTGRES_DB=localhost"),
+                            String.format("CLOUD_PLATFORM=%s", cloudPlatform),
+                            String.format("SERVICE_NAME=%s", "ambari-8080"))
+                    .withName(AMBARI_SERVER.getName())
+                    .withCmd("/start-server"));
+            DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
+                    .withPortBindings(new PortBinding(new Ports.Binding("0.0.0.0", PORT), new ExposedPort(PORT)))
+                    .withNetworkMode("host")
+                    .withRestartPolicy(RestartPolicy.alwaysRestart())
+                    .withPrivileged(true));
+            LOGGER.info("Ambari server started successfully");
+        } catch (ConflictException ex) {
+            LOGGER.warn("Swarm api tried to create a container with the same name: {}", ex.getMessage());
+        }
         return true;
     }
 }
