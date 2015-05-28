@@ -7,11 +7,13 @@ import javax.ws.rs.ProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.dockerjava.api.ConflictException;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.NotFoundException;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.InspectContainerCmd;
 import com.github.dockerjava.api.command.InspectContainerResponse;
+import com.github.dockerjava.api.command.RemoveContainerCmd;
 import com.github.dockerjava.api.command.StartContainerCmd;
 
 
@@ -32,7 +34,12 @@ public class DockerClientUtil {
         String response = null;
         while (attempts < MAX_RETRIES && response == null) {
             try {
+                removeContainerIfExist(client, createContainerCmd.getName());
                 response = createContainerCmd.exec().getId();
+            } catch (ConflictException e) {
+                LOGGER.warn("Conflict while creating container, checking id of created container....");
+                String[] segments = e.getMessage().split("\\.")[0].split(" ");
+                response = segments[segments.length - 1];
             } catch (ProcessingException e) {
                 if (e.getCause() instanceof SocketTimeoutException) {
                     LOGGER.info("Read timed out while creating container, checking if container was created....");
@@ -52,6 +59,20 @@ public class DockerClientUtil {
             throw cause;
         }
         return response;
+    }
+
+    public static void removeContainerIfExist(DockerClient client, String name) throws Exception {
+        try {
+            InspectContainerResponse inspectResponse = client.inspectContainerCmd(name).exec();
+            if (inspectResponse != null && inspectResponse.getId() != null) {
+                LOGGER.warn("Container with name {} already exists, it will be removed.", inspectResponse.getName());
+                RemoveContainerCmd removeContainerCmd = client.removeContainerCmd(inspectResponse.getId()).withForce(true);
+                removeContainerCmd.exec();
+                return;
+            }
+        } catch (NotFoundException ex) {
+            return;
+        }
     }
 
     public static void startContainer(DockerClient client, StartContainerCmd startContainerCmd) throws Exception {

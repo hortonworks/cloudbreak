@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.orchestrator.DockerContainer.AMBARI_DB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.dockerjava.api.ConflictException;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
@@ -30,26 +29,22 @@ public class AmbariServerDatabaseBootstrap implements ContainerBootstrap {
 
     @Override
     public Boolean call() throws Exception {
-        try {
-            HostConfig hostConfig = new HostConfig();
-            hostConfig.setPrivileged(true);
-            hostConfig.setNetworkMode("host");
-            hostConfig.setRestartPolicy(RestartPolicy.alwaysRestart());
+        HostConfig hostConfig = new HostConfig();
+        hostConfig.setPrivileged(true);
+        hostConfig.setNetworkMode("host");
+        hostConfig.setRestartPolicy(RestartPolicy.alwaysRestart());
 
-            String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
-                    .withEnv(String.format("POSTGRES_PASSWORD=%s", "bigdata"),
-                            String.format("POSTGRES_USER=%s", "ambari"),
-                            String.format("constraint:node==%s", node))
-                    .withHostConfig(hostConfig)
-                    .withName(AMBARI_DB.getName()));
-            DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
-                    .withRestartPolicy(RestartPolicy.alwaysRestart())
-                    .withNetworkMode("host")
-                    .withBinds(new Bind("/data/ambari-server/pgsql/data", new Volume("/var/lib/postgresql/data"))));
-            LOGGER.info("Database container for Ambari server started successfully");
-        } catch (ConflictException ex) {
-            LOGGER.warn("Swarm api tried to create a container with the same name: {}", ex.getMessage());
-        }
+        String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
+                .withEnv(String.format("POSTGRES_PASSWORD=%s", "bigdata"),
+                        String.format("POSTGRES_USER=%s", "ambari"),
+                        String.format("constraint:node==%s", node))
+                .withHostConfig(hostConfig)
+                .withName(AMBARI_DB.getName()));
+        DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
+                .withRestartPolicy(RestartPolicy.alwaysRestart())
+                .withNetworkMode("host")
+                .withBinds(new Bind("/data/ambari-server/pgsql/data", new Volume("/var/lib/postgresql/data"))));
+        LOGGER.info("Database container for Ambari server started successfully");
         return true;
     }
 }
