@@ -2,7 +2,7 @@
 heat_template_version: 2014-10-16
 
 description: >
-  Heat OpenStack-native for Ambari
+  Heat template for Cloudbreak
 
 parameters:
 
@@ -15,11 +15,9 @@ parameters:
   image_id:
     type: string
     description: ID of the image
-    default: Ubuntu 14.04 LTS amd64
   app_net_cidr:
     type: string
     description: app network address (CIDR notation)
-    default: ${cbSubnet}
   public_net_id:
     type: string
     description: The ID of the public network. You will need to replace it with your DevStack public network ID
@@ -55,14 +53,21 @@ resources:
         router_id: { get_resource: router }
         subnet_id: { get_resource: app_subnet }
         
+  gw_user_data_config:
+      type: OS::Heat::SoftwareConfig
+      properties:
+        config: |
+${gateway_user_data}
+
+  core_user_data_config:
+      type: OS::Heat::SoftwareConfig
+      properties:
+        config: |
+${core_user_data}
+
   <#list agents as agent>
   <#assign metadata = agent.metadata?eval>
   <#assign instance_id = metadata.cb_instance_group_name?replace('_', '') + "_" + metadata.cb_instance_private_id>
-  <#if agent.type == "GATEWAY">
-     <#assign userdata = gatewayuserdata>
-  <#elseif agent.type == "CORE">
-     <#assign userdata = coreuserdata>
-  </#if>
 
   ambari_${instance_id}:
     type: OS::Nova::Server
@@ -73,13 +78,12 @@ resources:
       metadata: ${agent.metadata}
       networks:
         - port: { get_resource: ambari_app_port_${instance_id} }
-      user_data_format: RAW
-      user_data:
-        str_replace:
-          template: |
-${userdata}
-          params:
-            public_net_id: { get_param: public_net_id }
+      user_data_format: SOFTWARE_CONFIG
+      <#if agent.type == "GATEWAY">
+      user_data:  { get_resource: gw_user_data_config }
+      <#elseif agent.type == "CORE">
+      user_data:  { get_resource: core_user_data_config }
+      </#if>
 
   ambari_app_port_${instance_id}:
       type: OS::Neutron::Port
@@ -97,7 +101,6 @@ ${userdata}
     properties:
       name: hdfs-volume
       size: ${volume.size}
-      volume_type: lvmdriver-1
 
   ambari_volume_attach_${instance_id}_${volume_index}:
     type: OS::Cinder::VolumeAttachment
@@ -119,7 +122,7 @@ ${userdata}
     type: OS::Neutron::SecurityGroup
     properties:
       description: Cloudbreak security group
-      name: cb-sec-group
+      name: cb-sec-group_${cb_stack_name}
       rules: [
         <#list subnets as s>
         <#list ports as p>
@@ -129,15 +132,15 @@ ${userdata}
         port_range_max: ${p.localPort}},
         </#list>
         </#list>
-        {remote_ip_prefix: ${cbSubnet},
+        {remote_ip_prefix: { get_param: app_net_cidr },
         protocol: tcp,
         port_range_min: 1,
         port_range_max: 65535},
-        {remote_ip_prefix: ${cbSubnet},
+        {remote_ip_prefix: { get_param: app_net_cidr },
         protocol: udp,
         port_range_min: 1,
         port_range_max: 65535},
-        {remote_ip_prefix: ${cbSubnet},
+        {remote_ip_prefix: { get_param: app_net_cidr },
         protocol: icmp}]
         
 outputs:
