@@ -209,8 +209,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             $rootScope.reinstallClusterObject = {
               validateBlueprint: true,
               blueprintId: $rootScope.activeClusterBlueprint.id,
-              hostgroups: $rootScope.activeCluster.cluster.hostGroups,
-              ambariStackDetails: $rootScope.activeCluster.cluster.ambariStackDetails,
+              hostgroups: $rootScope.activeCluster.cluster != undefined ? $rootScope.activeCluster.cluster.hostGroups : [],
+              ambariStackDetails: $rootScope.activeCluster.cluster != undefined ? $rootScope.activeCluster.cluster.ambariStackDetails : '',
               fullBp: $rootScope.activeClusterBlueprint,
             };
             GlobalStack.get({ id: clusterId }, function(success) {
