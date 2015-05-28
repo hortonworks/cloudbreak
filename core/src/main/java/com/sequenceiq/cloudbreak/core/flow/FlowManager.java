@@ -37,4 +37,9 @@ public interface FlowManager {
     void triggerClusterDownscale(Object object);
 
     void triggerUpdateAllowedSubnets(Object object);
+
+    void triggerClusterSync(Object object);
+
+    void triggerStackSync(Object object);
+
 }

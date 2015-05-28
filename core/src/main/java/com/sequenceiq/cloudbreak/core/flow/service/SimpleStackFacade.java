@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow.service;
 
 import static com.sequenceiq.cloudbreak.domain.BillingStatus.BILLING_STOPPED;
 import static com.sequenceiq.cloudbreak.domain.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.domain.Status.CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.domain.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.domain.Status.DELETE_FAILED;
@@ -10,6 +11,7 @@ import static com.sequenceiq.cloudbreak.domain.Status.START_FAILED;
 import static com.sequenceiq.cloudbreak.domain.Status.START_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_FAILED;
+import static com.sequenceiq.cloudbreak.domain.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_IN_PROGRESS;
 
@@ -114,330 +116,266 @@ public class SimpleStackFacade implements StackFacade {
 
     @Override
     public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
+        ProvisioningContext actualContext = (ProvisioningContext) context;
         try {
-            ProvisioningContext provisioningContext = (ProvisioningContext) context;
-            MDCBuilder.buildMdcContext(stackService.getById(provisioningContext.getStackId()));
-            LOGGER.debug("Bootstrap Cluster. Context: {}", context);
-            clusterBootstrapper.bootstrapCluster(provisioningContext);
-            return context;
+            stackUpdater.updateStackStatus(actualContext.getStackId(), UPDATE_IN_PROGRESS);
+            logBefore(actualContext.getStackId(), context, "Bootstrap cluster on infrastructure", UPDATE_IN_PROGRESS);
+            clusterBootstrapper.bootstrapCluster(actualContext);
+            logAfter(actualContext.getStackId(), context, "Bootstrap cluster on infrastructure", UPDATE_IN_PROGRESS);
         } catch (Exception e) {
             LOGGER.error("Error occurred while bootstrapping container orchestrator: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
-    }
-
-    @Override
-    public FlowContext setupConsulMetadata(FlowContext context) throws CloudbreakException {
-        try {
-            ProvisioningContext provisioningContext = (ProvisioningContext) context;
-            MDCBuilder.buildMdcContext(stackService.getById(provisioningContext.getStackId()));
-            LOGGER.debug("Setting up consul metadata. Context: {}", context);
-            consulMetadataSetup.setupConsulMetadata(provisioningContext.getStackId());
-            stackUpdater.updateStackStatus(provisioningContext.getStackId(), AVAILABLE, "Stack is ready");
-            return provisioningContext;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the consul metadata setup process.", e);
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext handleCreationFailure(FlowContext context) throws CloudbreakException {
-        ProvisioningContext provisioningContext = (ProvisioningContext) context;
-        final Stack stack = stackService.getById(provisioningContext.getStackId());
-        MDCBuilder.buildMdcContext(stack);
-        LOGGER.info("Stack creation failure. Context: {}", provisioningContext);
-        try {
-            if (!stack.isStackInDeletionPhase()) {
-                final CloudPlatform cloudPlatform = provisioningContext.getCloudPlatform();
-
-                if (!stack.getOnFailureActionAction().equals(OnFailureAction.ROLLBACK)) {
-                    LOGGER.debug("Nothing to do. OnFailureAction {}", stack.getOnFailureActionAction());
-                } else {
-                    stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS,
-                            "Rollback is in progress, cause: " + provisioningContext.getErrorReason());
-                    cloudPlatformConnectors.get(cloudPlatform).rollback(stack, stack.getResources());
-                    cloudbreakEventService.fireCloudbreakEvent(stack.getId(), BILLING_STOPPED.name(), "Stack creation failed.");
-                }
-                stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_FAILED, provisioningContext.getErrorReason());
-            }
-            return new ProvisioningContext.Builder()
-                    .setDefaultParams(stack.getId(), stack.cloudPlatform())
-                    .build();
-        } catch (Exception ex) {
-            LOGGER.error("Stack rollback failed on stack id : {}. Exception:", provisioningContext.getStackId(), ex);
-            stackUpdater.updateStackStatus(provisioningContext.getStackId(), Status.CREATE_FAILED, "Rollback failed: " + ex.getMessage());
-            throw new CloudbreakException(String.format("Stack rollback failed on {} stack: ", provisioningContext.getStackId(), ex));
-        }
-    }
-
-    @Override
-    public FlowContext start(FlowContext context) throws CloudbreakException {
-        try {
-            StackStatusUpdateContext stackStatusUpdateContext = (StackStatusUpdateContext) context;
-            stackUpdater.updateStackStatus(stackStatusUpdateContext.getStackId(), START_IN_PROGRESS, "Cluster infrastructure is now starting.");
-            MDCBuilder.buildMdcContext(stackService.getById(stackStatusUpdateContext.getStackId()));
-            LOGGER.debug("Starting stack. Context: {}", stackStatusUpdateContext);
-            context = stackStartService.start(stackStatusUpdateContext);
-            stackUpdater.updateStackStatus(stackStatusUpdateContext.getStackId(), AVAILABLE, "Instances were started.");
-            LOGGER.debug("Starting stack is DONE.");
-            return context;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the stack start process.", e);
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext stop(FlowContext context) throws CloudbreakException {
-        try {
-            StackStatusUpdateContext stackStatusUpdateContext = (StackStatusUpdateContext) context;
-            String stopRequestedMsg = "Stopping of cluster infrastructure has been requested.";
-            stackUpdater.updateStackStatus(stackStatusUpdateContext.getStackId(), STOP_REQUESTED, stopRequestedMsg);
-            MDCBuilder.buildMdcContext(stackService.getById(stackStatusUpdateContext.getStackId()));
-            LOGGER.debug("Stopping stack. Context: {}", stackStatusUpdateContext);
-            if (stackStopService.isStopPossible(stackStatusUpdateContext)) {
-                stackUpdater.updateStackStatus(stackStatusUpdateContext.getStackId(), Status.STOP_IN_PROGRESS, "Cluster infrastructure is stopping.");
-                context = stackStopService.stop(stackStatusUpdateContext);
-                LOGGER.info("Update stack state to: {}", STOPPED);
-                stackUpdater.updateStackStatus(stackStatusUpdateContext.getStackId(), STOPPED, "Cluster infrastructure stopped successfully.");
-                cloudbreakEventService.fireCloudbreakEvent(stackStatusUpdateContext.getStackId(), BILLING_STOPPED.name(), "Cluster infrastructure stopped.");
-                LOGGER.debug("Stopping stack is DONE.");
-            }
-            return context;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the stack stop process: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext terminateStack(FlowContext context) throws CloudbreakException {
-        try {
-            DefaultFlowContext defaultFlowContext = (DefaultFlowContext) context;
-            MDCBuilder.buildMdcContext(stackService.getById(defaultFlowContext.getStackId()));
-            LOGGER.debug("Terminating stack. Context: {}", context);
-            stackUpdater.updateStackStatus(defaultFlowContext.getStackId(), DELETE_IN_PROGRESS, "Terminating cluster infrastructure.");
-            terminationService.terminateStack(defaultFlowContext.getStackId(), defaultFlowContext.getCloudPlatform());
-            terminationService.finalizeTermination(defaultFlowContext.getStackId());
-            String deleteCompletedMessage = "The cluster and its infrastructure have successfully been terminated.";
-            updateClusterStatus(defaultFlowContext.getStackId(), DELETE_COMPLETED, deleteCompletedMessage);
-            cloudbreakEventService.fireCloudbreakEvent(defaultFlowContext.getStackId(), Status.DELETE_COMPLETED.name(), deleteCompletedMessage);
-            String billingStoppedMessage = "Billing stopped; the cluster and its infrastructure have been terminated.";
-            stackUpdater.updateStackStatus(defaultFlowContext.getStackId(), DELETE_COMPLETED, billingStoppedMessage);
-            cloudbreakEventService.fireCloudbreakEvent(defaultFlowContext.getStackId(), BillingStatus.BILLING_STOPPED.name(), billingStoppedMessage);
-            LOGGER.debug("Terminating stack is DONE");
-            return context;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the stack termination process: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext handleTerminationFailure(FlowContext context) throws CloudbreakException {
-        DefaultFlowContext defaultFlowContext = (DefaultFlowContext) context;
-        MDCBuilder.buildMdcContext(stackService.getById(defaultFlowContext.getStackId()));
-        LOGGER.info("Termination failure. Context: {}", defaultFlowContext);
-        LOGGER.info("Failed to delete stack {}. Setting it's status to {}.", defaultFlowContext.getStackId(), DELETE_FAILED);
-        stackUpdater.updateStackStatus(defaultFlowContext.getStackId(), DELETE_FAILED, defaultFlowContext.getErrorReason());
         return context;
     }
 
     @Override
-    public FlowContext handleStatusUpdateFailure(FlowContext flowContext) throws CloudbreakException {
-        StackStatusUpdateContext context = (StackStatusUpdateContext) flowContext;
-        MDCBuilder.buildMdcContext(stackService.getById(context.getStackId()));
-        LOGGER.info("Status update failure. Context: {}", context);
-        if (context.isStart()) {
-            LOGGER.info("Update stack state to: {}", START_FAILED);
-            stackUpdater.updateStackStatus(context.getStackId(), START_FAILED, context.getErrorReason());
-        } else {
-            LOGGER.info("Update stack state to: {}", STOP_FAILED);
-            stackUpdater.updateStackStatus(context.getStackId(), STOP_FAILED, context.getErrorReason());
+    public FlowContext setupConsulMetadata(FlowContext context) throws CloudbreakException {
+        ProvisioningContext actualContext = (ProvisioningContext) context;
+        try {
+            stackUpdater.updateStackStatus(actualContext.getStackId(), UPDATE_IN_PROGRESS);
+            Stack stack = stackService.getById(actualContext.getStackId());
+            MDCBuilder.buildMdcContext(stack);
+
+            logBefore(actualContext.getStackId(), context, "Setting up metadata for stack", UPDATE_IN_PROGRESS);
+            consulMetadataSetup.setupConsulMetadata(stack.getId());
+            logAfter(actualContext.getStackId(), context, "Setting up metadata for stack", AVAILABLE);
+
+            stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
+
+        } catch (Exception e) {
+            LOGGER.error("Exception during the consul metadata setup process.", e);
+            throw new CloudbreakException(e);
+        }
+        return context;
+    }
+
+    @Override
+    public FlowContext start(FlowContext context) throws CloudbreakException {
+        StackStatusUpdateContext actualContext = (StackStatusUpdateContext) context;
+        try {
+            stackUpdater.updateStackStatus(actualContext.getStackId(), START_IN_PROGRESS, "Cluster infrastructure is now starting.");
+            Stack stack = stackService.getById(actualContext.getStackId());
+            MDCBuilder.buildMdcContext(stack);
+
+            logBefore(actualContext.getStackId(), context, "Starting infrastructure", START_IN_PROGRESS);
+            context = stackStartService.start(actualContext);
+            logAfter(actualContext.getStackId(), context, "Starting infrastructure", AVAILABLE);
+
+            stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
+        } catch (Exception e) {
+            LOGGER.error("Exception during the stack start process.", e);
+            throw new CloudbreakException(e);
+        }
+        return context;
+    }
+
+    @Override
+    public FlowContext stop(FlowContext context) throws CloudbreakException {
+        StackStatusUpdateContext actualContext = (StackStatusUpdateContext) context;
+        try {
+            if (stackStopService.isStopPossible(actualContext)) {
+                stackUpdater.updateStackStatus(actualContext.getStackId(), STOP_IN_PROGRESS, "Cluster infrastructure is stopping.");
+                Stack stack = stackService.getById(actualContext.getStackId());
+                MDCBuilder.buildMdcContext(stack);
+
+                logBefore(actualContext.getStackId(), context, "Stopping infrastructure", STOP_IN_PROGRESS);
+                context = stackStopService.stop(actualContext);
+                logAfter(actualContext.getStackId(), context, "Stopping infrastructure", STOPPED);
+
+                stackUpdater.updateStackStatus(stack.getId(), STOPPED);
+
+                cloudbreakEventService.fireCloudbreakEvent(stack.getId(), BILLING_STOPPED.name(), "Cluster infrastructure stopped.");
+            }
+        } catch (Exception e) {
+            LOGGER.error("Exception during the stack stop process: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+        return context;
+    }
+
+    @Override
+    public FlowContext terminateStack(FlowContext context) throws CloudbreakException {
+        DefaultFlowContext actualContext = (DefaultFlowContext) context;
+        try {
+            stackUpdater.updateStackStatus(actualContext.getStackId(), DELETE_IN_PROGRESS);
+            Stack stack = stackService.getById(actualContext.getStackId());
+            MDCBuilder.buildMdcContext(stack);
+
+            if (stack != null && stack.getCredential() != null) {
+                logBefore(actualContext.getStackId(), context, "Termination of stack", DELETE_IN_PROGRESS);
+                terminationService.terminateStack(stack.getId(), actualContext.getCloudPlatform());
+                logAfter(actualContext.getStackId(), context, "Termination of stack", DELETE_IN_PROGRESS);
+            }
+
+            logBefore(actualContext.getStackId(), context, "Termination of stack finalize", DELETE_IN_PROGRESS);
+            terminationService.finalizeTermination(stack.getId());
+            logAfter(actualContext.getStackId(), context, "Termination of stack finalize", DELETE_COMPLETED);
+
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), DELETE_COMPLETED.name(),
+                    "The cluster and its infrastructure have successfully been terminated.");
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_STOPPED.name(),
+                    "Billing stopped; the cluster and its infrastructure have been terminated.");
+
+            if (stack.getCluster() != null) {
+                clusterService.updateClusterStatusByStackId(actualContext.getStackId(), DELETE_COMPLETED);
+            }
+            stackUpdater.updateStackStatus(actualContext.getStackId(), DELETE_COMPLETED);
+
+        } catch (Exception e) {
+            LOGGER.error("Exception during the stack termination process: {}", e.getMessage());
+            throw new CloudbreakException(e);
         }
         return context;
     }
 
     @Override
     public FlowContext addInstances(FlowContext context) throws CloudbreakException {
+        StackScalingContext actualContext = (StackScalingContext) context;
         try {
-            StackScalingContext updateContext = (StackScalingContext) context;
-            String statusMessage = "Adding '%s' new instance(s) to the cluster infrastructure.";
-            stackUpdater.updateStackStatus(updateContext.getStackId(), UPDATE_IN_PROGRESS, String.format(statusMessage, updateContext.getScalingAdjustment()));
-            MDCBuilder.buildMdcContext(stackService.getById(updateContext.getStackId()));
-            Set<Resource> resources = stackScalingService.addInstances(updateContext.getStackId(), updateContext.getInstanceGroup(),
-                    updateContext.getScalingAdjustment());
-            return new StackScalingContext(updateContext.getStackId(),
-                    updateContext.getCloudPlatform(),
-                    updateContext.getScalingAdjustment(),
-                    updateContext.getInstanceGroup(),
-                    resources,
-                    updateContext.getScalingType(),
-                    null);
+            stackUpdater.updateStackStatus(actualContext.getStackId(), UPDATE_IN_PROGRESS);
+            Stack stack = stackService.getById(actualContext.getStackId());
+            MDCBuilder.buildMdcContext(stack);
+
+            logBefore(actualContext.getStackId(), context, "Add new instances to the stack", UPDATE_IN_PROGRESS);
+            Set<Resource> resources = stackScalingService.addInstances(stack.getId(), actualContext.getInstanceGroup(), actualContext.getScalingAdjustment());
+            context = new StackScalingContext(stack.getId(), actualContext.getCloudPlatform(), actualContext.getScalingAdjustment(),
+                    actualContext.getInstanceGroup(), resources, actualContext.getScalingType(), null);
+            logAfter(actualContext.getStackId(), context, "Add new instances to the stack", UPDATE_IN_PROGRESS);
 
         } catch (Exception e) {
             LOGGER.error("Exception during the upscaling of stack: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
+        return context;
     }
 
     @Override
     public FlowContext extendMetadata(FlowContext context) throws CloudbreakException {
-        StackScalingContext updateContext = (StackScalingContext) context;
-        MDCBuilder.buildMdcContext(stackService.getById(updateContext.getStackId()));
-        Set<String> upscaleCandidateAddresses = metadataSetupService.setupNewMetadata(
-                updateContext.getStackId(),
-                updateContext.getResources(),
-                updateContext.getInstanceGroup());
+        StackScalingContext actualCont = (StackScalingContext) context;
+        Stack stack = stackService.getById(actualCont.getStackId());
+        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
+        MDCBuilder.buildMdcContext(stackService.getById(stack.getId()));
 
-        Stack stack = stackService.getById(updateContext.getStackId());
+        logBefore(actualCont.getStackId(), context, "Extend metadata of the stack", UPDATE_IN_PROGRESS);
+        Set<String> upscaleCandidateAddresses = metadataSetupService.setupNewMetadata(stack.getId(), actualCont.getResources(), actualCont.getInstanceGroup());
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
         hostGroupAdjustmentJson.setWithStackUpdate(false);
-        hostGroupAdjustmentJson.setScalingAdjustment(updateContext.getScalingAdjustment());
+        hostGroupAdjustmentJson.setScalingAdjustment(actualCont.getScalingAdjustment());
         if (stack.getCluster() != null) {
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(stack.getCluster().getId(), updateContext.getInstanceGroup());
+            HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(cluster.getId(), actualCont.getInstanceGroup());
             hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
         }
-        return new StackScalingContext(
-                updateContext.getStackId(),
-                updateContext.getCloudPlatform(),
-                updateContext.getScalingAdjustment(),
-                updateContext.getInstanceGroup(),
-                updateContext.getResources(),
-                updateContext.getScalingType(),
-                upscaleCandidateAddresses);
+        logAfter(actualCont.getStackId(), context, "Extend metadata of the stack", UPDATE_IN_PROGRESS);
+
+        context = new StackScalingContext(stack.getId(), actualCont.getCloudPlatform(), actualCont.getScalingAdjustment(), actualCont.getInstanceGroup(),
+                actualCont.getResources(), actualCont.getScalingType(), upscaleCandidateAddresses);
+        return context;
     }
 
     @Override
     public FlowContext bootstrapNewNodes(FlowContext context) throws CloudbreakException {
-        StackScalingContext scalingContext = (StackScalingContext) context;
+        StackScalingContext actualContext = (StackScalingContext) context;
         try {
-            clusterBootstrapper.bootstrapNewNodes(scalingContext);
-            stackUpdater.updateStackStatus(scalingContext.getStackId(), AVAILABLE, "");
-            return scalingContext;
+            Stack stack = stackService.getById(actualContext.getStackId());
+
+            logBefore(actualContext.getStackId(), context, "Bootstrap new nodes of the stack", UPDATE_IN_PROGRESS);
+            clusterBootstrapper.bootstrapNewNodes(actualContext);
+            logAfter(actualContext.getStackId(), context, "Bootstrap new nodes of the stack", AVAILABLE);
+
+            stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
         } catch (Exception e) {
             LOGGER.error("Exception during the handling of munchausen setup: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
+        return context;
     }
 
     @Override
     public FlowContext extendConsulMetadata(FlowContext context) throws CloudbreakException {
+        StackScalingContext actualContext = (StackScalingContext) context;
         try {
-            StackScalingContext stackContext = (StackScalingContext) context;
-            MDCBuilder.buildMdcContext(stackService.getById(stackContext.getStackId()));
-            consulMetadataSetup.setupNewConsulMetadata(stackContext.getStackId(), stackContext.getUpscaleCandidateAddresses());
+            Stack stack = stackService.getById(actualContext.getStackId());
+            Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
+            MDCBuilder.buildMdcContext(stack);
 
-            Stack stack = stackService.getById(stackContext.getStackId());
+            logBefore(actualContext.getStackId(), context, "Extend consul with the new metadata", UPDATE_IN_PROGRESS);
+            consulMetadataSetup.setupNewConsulMetadata(stack.getId(), actualContext.getUpscaleCandidateAddresses());
             HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
             hostGroupAdjustmentJson.setWithStackUpdate(false);
-            hostGroupAdjustmentJson.setScalingAdjustment(stackContext.getScalingAdjustment());
-            if (stack.getCluster() != null) {
-                HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(stack.getCluster().getId(), stackContext.getInstanceGroup());
+            hostGroupAdjustmentJson.setScalingAdjustment(actualContext.getScalingAdjustment());
+            if (cluster != null) {
+                HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(cluster.getId(), actualContext.getInstanceGroup());
                 hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
             }
-            return new ClusterScalingContext(
-                    stackContext.getStackId(),
-                    stackContext.getCloudPlatform(),
-                    hostGroupAdjustmentJson,
-                    stackContext.getUpscaleCandidateAddresses(),
-                    new ArrayList<HostMetadata>(),
-                    stackContext.getScalingType());
+            logAfter(actualContext.getStackId(), context, "Extend consul with the new metadata", UPDATE_IN_PROGRESS);
+
+            context = new ClusterScalingContext(stack.getId(), actualContext.getCloudPlatform(),
+                    hostGroupAdjustmentJson, actualContext.getUpscaleCandidateAddresses(), new ArrayList<HostMetadata>(), actualContext.getScalingType());
         } catch (Exception e) {
             LOGGER.error("Exception during the extend consul metadata phase: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
+        return context;
     }
 
     @Override
     public FlowContext downscaleStack(FlowContext context) throws CloudbreakException {
+        StackScalingContext actualContext = (StackScalingContext) context;
         try {
-            StackScalingContext updateContext = (StackScalingContext) context;
-            MDCBuilder.buildMdcContext(stackService.getById(updateContext.getStackId()));
-            LOGGER.info("Downscaling stack. Context: {}", updateContext);
+            Stack stack = stackService.getById(actualContext.getStackId());
+            MDCBuilder.buildMdcContext(stack);
+
+            logBefore(actualContext.getStackId(), context, "Donwscale stack", UPDATE_IN_PROGRESS);
             String statusMessage = "Removing '%s' instance(s) from the cluster infrastructure.";
-            stackUpdater.updateStackStatus(updateContext.getStackId(), UPDATE_IN_PROGRESS, String.format(statusMessage, updateContext.getScalingAdjustment()));
-            stackScalingService.downscaleStack(updateContext.getStackId(), updateContext.getInstanceGroup(), updateContext.getScalingAdjustment());
-            stackUpdater.updateStackStatus(updateContext.getStackId(), AVAILABLE, "Downscaling of cluster infrastructure was successful.");
-            return context;
+            stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
+            cloudbreakEventService
+                    .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), String.format(statusMessage, actualContext.getScalingAdjustment()));
+            stackScalingService.downscaleStack(stack.getId(), actualContext.getInstanceGroup(), actualContext.getScalingAdjustment());
+            logAfter(actualContext.getStackId(), context, "Donwscale stack", UPDATE_IN_PROGRESS);
+
+            stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
         } catch (Exception e) {
             LOGGER.error("Exception during the downscaling of stack: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
-    }
-
-    @Override
-    public FlowContext handleScalingFailure(FlowContext context) throws CloudbreakException {
-        try {
-            Long id = null;
-            String errorReason = null;
-            if (context instanceof StackScalingContext) {
-                StackScalingContext stackScalingContext = (StackScalingContext) context;
-                id = stackScalingContext.getStackId();
-                errorReason = stackScalingContext.getErrorReason();
-            } else if (context instanceof ClusterScalingContext) {
-                ClusterScalingContext clusterScalingContext = (ClusterScalingContext) context;
-                id = clusterScalingContext.getStackId();
-                errorReason = clusterScalingContext.getErrorReason();
-            }
-            if (id != null) {
-                MDCBuilder.buildMdcContext(stackService.getById(id));
-                LOGGER.info("Scaling failure. Context: {}", context);
-                stackUpdater.updateStackStatus(id, AVAILABLE, "Stack update failed. " + errorReason);
-            }
-            return context;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the handling of stack scaling failure: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext handleUpdateAllowedSubnetsFailure(FlowContext context) throws CloudbreakException {
-        try {
-            UpdateAllowedSubnetsContext updateContext = (UpdateAllowedSubnetsContext) context;
-            MDCBuilder.buildMdcContext(stackService.getById(updateContext.getStackId()));
-            LOGGER.info("Update allowed subnets failure. Context {}", updateContext);
-            stackUpdater.updateStackStatus(updateContext.getStackId(), AVAILABLE, "Stack update failed. " + updateContext.getErrorReason());
-            return updateContext;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the handling of update allowed subnet failure: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
+        return context;
     }
 
     @Override
     public FlowContext stopRequested(FlowContext context) throws CloudbreakException {
+        StackStatusUpdateContext actualContext = (StackStatusUpdateContext) context;
         try {
-            StackStatusUpdateContext stackStatusUpdateContext = (StackStatusUpdateContext) context;
-            MDCBuilder.buildMdcContext(stackService.getById(stackStatusUpdateContext.getStackId()));
-            stackUpdater.updateStackStatus(stackStatusUpdateContext.getStackId(), STOP_REQUESTED,
-                    "Stopping of cluster infrastructure has been requested.");
-            LOGGER.debug("Stop requested stack is DONE.");
-            return context;
+            Stack stack = stackService.getById(actualContext.getStackId());
+            MDCBuilder.buildMdcContext(stack);
+
+            logBefore(actualContext.getStackId(), context, "Stop requested on stack", UPDATE_IN_PROGRESS);
+            stackUpdater.updateStackStatus(stack.getId(), STOP_REQUESTED, "Stopping of cluster infrastructure has been requested.");
+            logAfter(actualContext.getStackId(), context, "Stop requested on stack", UPDATE_IN_PROGRESS);
         } catch (Exception e) {
             LOGGER.error("Exception during the stack stop requested process: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
+        return context;
     }
 
     @Override
     public FlowContext provision(FlowContext context) throws CloudbreakException {
+        ProvisioningContext actualContext = (ProvisioningContext) context;
         try {
             Date startDate = new Date();
-            ProvisioningContext provisioningContext = (ProvisioningContext) context;
-            stackUpdater.updateStackStatus(provisioningContext.getStackId(), CREATE_IN_PROGRESS,
-                    "Creation of cluster infrastructure has started on the cloud provider.");
-            Stack stack = stackService.getById(provisioningContext.getStackId());
-            ProvisionComplete provisionResult = provisioningService.buildStack(provisioningContext.getCloudPlatform(), stack,
-                provisioningContext.getSetupProperties());
-            LOGGER.debug("Provisioning DONE.");
+            Stack stack = stackService.getById(actualContext.getStackId());
+
+            logBefore(actualContext.getStackId(), context, "Provisioning stack", UPDATE_IN_PROGRESS);
+            LOGGER.debug("Provision stack [FLOW_STEP] [STARTED]. Context: {}", context);
+            stackUpdater.updateStackStatus(stack.getId(), CREATE_IN_PROGRESS);
+            ProvisionComplete provisionResult = provisioningService.buildStack(actualContext.getCloudPlatform(), stack, actualContext.getSetupProperties());
             Date endDate = new Date();
+            logAfter(actualContext.getStackId(), context, "Provisioning stack", UPDATE_IN_PROGRESS);
+
             long seconds = (endDate.getTime() - startDate.getTime()) / DateUtils.MILLIS_PER_SECOND;
-            cloudbreakEventService.fireCloudbreakEvent(provisioningContext.getStackId(), AVAILABLE.name(),
-                    String.format("The creation of the instratructure was %s sec", seconds));
-            return new ProvisioningContext.Builder()
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), String.format("The creation of instratructure was %s sec", seconds));
+            context = new ProvisioningContext.Builder()
                     .setDefaultParams(provisionResult.getStackId(), provisionResult.getCloudPlatform())
                     .setProvisionedResources(provisionResult.getResources())
                     .build();
@@ -445,26 +383,54 @@ public class SimpleStackFacade implements StackFacade {
             LOGGER.error("Exception during the stack stop requested process: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
+        return context;
+    }
+
+    @Override
+    public FlowContext sync(FlowContext context) throws CloudbreakException {
+        StackStatusUpdateContext actualContext = (StackStatusUpdateContext) context;
+        try {
+            Stack stack = stackService.getById(actualContext.getStackId());
+            MDCBuilder.buildMdcContext(stack);
+
+            Status status = UPDATE_IN_PROGRESS;
+
+            logBefore(actualContext.getStackId(), context, "Stack sync", UPDATE_IN_PROGRESS);
+            if (!stack.isDeleteInProgress()) {
+                if (Status.stopStatusesForUpdate().contains(stack.getStatus())) {
+                    stackUpdater.updateStackStatus(stack.getId(), STOPPED);
+                } else if (Status.availableStatusesForUpdate().contains(stack.getStatus())) {
+                    stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
+                }
+            }
+            logAfter(actualContext.getStackId(), context, "Stack sync", status);
+
+        } catch (Exception e) {
+            LOGGER.error("Exception during the stack sync process: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+        return context;
     }
 
     @Override
     public FlowContext updateAllowedSubnets(FlowContext context) throws CloudbreakException {
-        UpdateAllowedSubnetsContext request = (UpdateAllowedSubnetsContext) context;
-        Long stackId = request.getStackId();
-        stackUpdater.updateStackStatus(stackId, UPDATE_IN_PROGRESS, "Updating allowed subnets");
-        Stack stack = stackService.getById(stackId);
-        MDCBuilder.buildMdcContext(stack);
+        UpdateAllowedSubnetsContext actualContext = (UpdateAllowedSubnetsContext) context;
         try {
-            stack = stackService.getById(request.getStackId());
+            Stack stack = stackService.getById(actualContext.getStackId());
+            stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
             MDCBuilder.buildMdcContext(stack);
+
+            logBefore(actualContext.getStackId(), context, "Update subnet on stack", UPDATE_IN_PROGRESS);
             Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(stack.cloudPlatform());
-            stack.setAllowedSubnets(getNewSubnetList(stack, request.getAllowedSubnets()));
+            stack.setAllowedSubnets(getNewSubnetList(stack, actualContext.getAllowedSubnets()));
             cloudPlatformConnectors.get(stack.cloudPlatform())
                     .updateAllowedSubnets(stack, userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE));
             stackUpdater.updateStack(stack);
-            stackUpdater.updateStackStatus(request.getStackId(), AVAILABLE, "Security update successfully finished");
-            return context;
+            logAfter(actualContext.getStackId(), context, "Update subnet on stack", UPDATE_IN_PROGRESS);
+
+            stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Security update successfully finished");
         } catch (Exception e) {
+            Stack stack = stackService.getById(actualContext.getStackId());
             String msg = String.format("Failed to update security constraints with allowed subnets: %s", stack.getAllowedSubnets());
             if (stack != null && stack.isStackInDeletionPhase()) {
                 msg = String.format("Failed to update security constraints with allowed subnets: %s; stack is already in deletion phase.",
@@ -473,14 +439,119 @@ public class SimpleStackFacade implements StackFacade {
             LOGGER.error(msg, e);
             throw new CloudbreakException(e);
         }
+        return context;
     }
 
-    private void updateClusterStatus(Long stackId, Status status, String statusMessage) {
-        Cluster cluster = clusterService.retrieveClusterByStackId(stackId);
-        cluster.setStatusReason(statusMessage);
-        cluster.setStatus(status);
-        stackUpdater.updateStackCluster(stackId, cluster);
-        cloudbreakEventService.fireCloudbreakEvent(stackId, status.name(), statusMessage);
+    @Override
+    public FlowContext handleUpdateAllowedSubnetsFailure(FlowContext context) throws CloudbreakException {
+        UpdateAllowedSubnetsContext actualContext = (UpdateAllowedSubnetsContext) context;
+        try {
+            Stack stack = stackService.getById(actualContext.getStackId());
+            MDCBuilder.buildMdcContext(stack);
+
+            logBefore(actualContext.getStackId(), context, "Update subnet failed on stack", UPDATE_IN_PROGRESS);
+            stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, String.format("Stack update failed. %s", actualContext.getErrorReason()));
+            logAfter(actualContext.getStackId(), context, "Update subnet failed on stack", AVAILABLE);
+
+        } catch (Exception e) {
+            LOGGER.error("Exception during the handling of update allowed subnet failure: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+        return context;
+    }
+
+    @Override
+    public FlowContext handleScalingFailure(FlowContext context) throws CloudbreakException {
+        try {
+            Long id = null;
+            String errorReason = null;
+            if (context instanceof StackScalingContext) {
+                StackScalingContext actualContext = (StackScalingContext) context;
+                id = actualContext.getStackId();
+                errorReason = actualContext.getErrorReason();
+            } else if (context instanceof ClusterScalingContext) {
+                ClusterScalingContext actualContext = (ClusterScalingContext) context;
+                id = actualContext.getStackId();
+                errorReason = actualContext.getErrorReason();
+            }
+            if (id != null) {
+                Stack stack = stackService.getById(id);
+                MDCBuilder.buildMdcContext(stack);
+
+                logBefore(id, context, "Scaling failed on stack", UPDATE_IN_PROGRESS);
+                stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Stack update failed. " + errorReason);
+                logAfter(id, context, "Scaling failed on stack", AVAILABLE);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Exception during the handling of stack scaling failure: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+        return context;
+    }
+
+    @Override
+    public FlowContext handleCreationFailure(FlowContext context) throws CloudbreakException {
+        ProvisioningContext actualContext = (ProvisioningContext) context;
+        final Stack stack = stackService.getById(actualContext.getStackId());
+        MDCBuilder.buildMdcContext(stack);
+        try {
+            logBefore(actualContext.getStackId(), context, "Creation of infrastructure failed", UPDATE_IN_PROGRESS);
+            if (!stack.isStackInDeletionPhase()) {
+                final CloudPlatform cloudPlatform = actualContext.getCloudPlatform();
+                if (!stack.getOnFailureActionAction().equals(OnFailureAction.ROLLBACK)) {
+                    LOGGER.debug("Nothing to do. OnFailureAction {}", stack.getOnFailureActionAction());
+                } else {
+                    stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
+                    cloudPlatformConnectors.get(cloudPlatform).rollback(stack, stack.getResources());
+                    cloudbreakEventService.fireCloudbreakEvent(stack.getId(), BILLING_STOPPED.name(), "Stack creation failed.");
+                }
+                stackUpdater.updateStackStatus(stack.getId(), CREATE_FAILED, actualContext.getErrorReason());
+            }
+            logAfter(actualContext.getStackId(), context, "Creation of infrastructure failed", CREATE_FAILED);
+
+            context = new ProvisioningContext.Builder().setDefaultParams(stack.getId(), stack.cloudPlatform()).build();
+        } catch (Exception ex) {
+            LOGGER.error("Stack rollback failed on stack id : {}. Exception:", stack.getId(), ex);
+            stackUpdater.updateStackStatus(stack.getId(), CREATE_FAILED, String.format("Rollback failed: %s", ex.getMessage()));
+            throw new CloudbreakException(String.format("Stack rollback failed on {} stack: ", stack.getId(), ex));
+        }
+        return context;
+    }
+
+    @Override
+    public FlowContext handleTerminationFailure(FlowContext context) throws CloudbreakException {
+        DefaultFlowContext actualContext = (DefaultFlowContext) context;
+        Stack stack = stackService.getById(actualContext.getStackId());
+        MDCBuilder.buildMdcContext(stack);
+
+        logBefore(actualContext.getStackId(), context, "Termination failed on stack", DELETE_FAILED);
+        stackUpdater.updateStackStatus(stack.getId(), DELETE_FAILED, actualContext.getErrorReason());
+        logAfter(actualContext.getStackId(), context, "Termination failed on stack", DELETE_FAILED);
+
+        return context;
+    }
+
+    @Override
+    public FlowContext handleStatusUpdateFailure(FlowContext flowContext) throws CloudbreakException {
+        StackStatusUpdateContext context = (StackStatusUpdateContext) flowContext;
+        Stack stack = stackService.getById(context.getStackId());
+        MDCBuilder.buildMdcContext(stack);
+        if (context.isStart()) {
+            logBefore(context.getStackId(), context, "Start status update failed on stack", START_FAILED);
+            stackUpdater.updateStackStatus(context.getStackId(), START_FAILED, context.getErrorReason());
+            if (stack.getCluster() != null) {
+                clusterService.updateClusterStatusByStackId(context.getStackId(), STOPPED);
+            }
+            logAfter(context.getStackId(), context, "Start status update failed on stack", START_FAILED);
+        } else {
+            logBefore(context.getStackId(), context, "Stop status update failed on stack", STOP_FAILED);
+            stackUpdater.updateStackStatus(context.getStackId(), STOP_FAILED, context.getErrorReason());
+            if (stack.getCluster() != null) {
+                clusterService.updateClusterStatusByStackId(context.getStackId(), STOPPED);
+            }
+            logAfter(context.getStackId(), context, "Stop status update failed on stack", STOP_FAILED);
+        }
+        return context;
     }
 
     private Set<Subnet> getNewSubnetList(Stack stack, List<Subnet> subnetList) {
@@ -507,4 +578,15 @@ public class SimpleStackFacade implements StackFacade {
             }
         }
     }
+
+    private void logBefore(Long stackId, FlowContext context, String eventMessage, Status eventType) {
+        LOGGER.debug("{} [STACK_FLOW_STEP] [STARTED]. Context: {}", eventMessage, context);
+        cloudbreakEventService.fireCloudbreakEvent(stackId, eventType.name(), String.format("%s started.", eventMessage));
+    }
+
+    private void logAfter(Long stackId, FlowContext context, String eventMessage, Status eventType) {
+        LOGGER.debug("{} [STACK_FLOW_STEP] [FINISHED]. Context: {}", eventMessage, context);
+        cloudbreakEventService.fireCloudbreakEvent(stackId, eventType.name(), String.format("%s finished.", eventMessage));
+    }
+
 }

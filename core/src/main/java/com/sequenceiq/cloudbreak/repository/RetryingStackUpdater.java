@@ -96,8 +96,10 @@ public class RetryingStackUpdater {
                     stack.setStatusReason(statusReason);
                 }
                 stack = stackRepository.save(stack);
-                LOGGER.info("Updated stack: [status: '{}', statusReason: '{}'].", status.name(), statusReason);
-                cloudbreakEventService.fireCloudbreakEvent(stackId, status.name(), statusReason);
+                if (statusReason != null && !statusReason.isEmpty()) {
+                    LOGGER.info("Updated stack: [status: '{}', statusReason: '{}'].", status.name(), statusReason);
+                    cloudbreakEventService.fireCloudbreakEvent(stackId, status.name(), statusReason);
+                }
             }
             return stack;
         } catch (OptimisticLockException | OptimisticLockingFailureException e) {

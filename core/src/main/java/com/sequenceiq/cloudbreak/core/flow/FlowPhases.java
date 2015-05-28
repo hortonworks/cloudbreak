@@ -31,5 +31,7 @@ public enum FlowPhases {
     TERMINATION,
     TERMINATION_FAILED,
     UPDATE_ALLOWED_SUBNETS,
+    CLUSTER_SYNC,
+    STACK_SYNC,
     NONE;
 }

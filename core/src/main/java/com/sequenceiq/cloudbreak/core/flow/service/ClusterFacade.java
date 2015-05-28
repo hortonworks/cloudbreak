@@ -39,4 +39,6 @@ public interface ClusterFacade {
     FlowContext enableSecurity(FlowContext context) throws CloudbreakException;
 
     FlowContext startRequested(FlowContext context) throws CloudbreakException;
+
+    FlowContext sync(FlowContext context) throws CloudbreakException;
 }

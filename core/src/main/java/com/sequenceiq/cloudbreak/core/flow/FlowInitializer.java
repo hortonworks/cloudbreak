@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStartRequestedHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStatusUpdateFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStopHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterSyncHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterUpscaleHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ConsulMetadataSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ExtendConsulMetadataHandler;
@@ -37,6 +38,7 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.StackStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStatusUpdateFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStopHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStopRequestedHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.StackSyncHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackTerminationHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.UpdateAllowedSubnetsHandler;
 
@@ -69,6 +71,8 @@ public class FlowInitializer implements InitializingBean {
         registerUpdateAllowedSubnetFlow();
         registerStopRequestedFlows();
         registerStartRequestedFlows();
+        registerSyncCluster();
+        registerSyncStack();
 
         reactor.on($(FlowPhases.PROVISIONING_SETUP.name()), getHandlerForClass(ProvisioningSetupHandler.class));
         reactor.on($(FlowPhases.PROVISIONING.name()), getHandlerForClass(ProvisioningHandler.class));
@@ -99,7 +103,19 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.CLUSTER_START_REQUESTED.name()), getHandlerForClass(ClusterStartRequestedHandler.class));
         reactor.on($(FlowPhases.STACK_STATUS_UPDATE_FAILED.name()), getHandlerForClass(StackStatusUpdateFailureHandler.class));
         reactor.on($(FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name()), getHandlerForClass(ClusterStatusUpdateFailureHandler.class));
+        reactor.on($(FlowPhases.STACK_SYNC.name()), getHandlerForClass(StackSyncHandler.class));
+        reactor.on($(FlowPhases.CLUSTER_SYNC.name()), getHandlerForClass(ClusterSyncHandler.class));
 
+    }
+
+    private void registerSyncStack() {
+        transitionKeyService.registerTransition(StackSyncHandler.class, TransitionFactory
+                .createTransition(FlowPhases.STACK_SYNC.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
+    }
+
+    private void registerSyncCluster() {
+        transitionKeyService.registerTransition(ClusterSyncHandler.class, TransitionFactory
+                .createTransition(FlowPhases.CLUSTER_SYNC.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerProvisioningFlows() {

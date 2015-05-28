@@ -227,9 +227,17 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         try {
             Map<String, String> vmContext = createVMContext(resource.getResourceName());
             if (stopped) {
-                azureClient.stopVirtualMachine(vmContext);
+                if ("Running".equals(azureClient.getVirtualMachineState(vmContext))) {
+                    azureClient.stopVirtualMachine(vmContext);
+                } else {
+                    return true;
+                }
             } else {
-                azureClient.startVirtualMachine(vmContext);
+                if ("Suspended".equals(azureClient.getVirtualMachineState(vmContext))) {
+                    azureClient.startVirtualMachine(vmContext);
+                } else {
+                    return true;
+                }
             }
 
         } catch (Exception e) {

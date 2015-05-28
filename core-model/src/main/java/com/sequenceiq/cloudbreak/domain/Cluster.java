@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import static com.sequenceiq.cloudbreak.domain.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.domain.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.Status.REQUESTED;
+import static com.sequenceiq.cloudbreak.domain.Status.START_FAILED;
 import static com.sequenceiq.cloudbreak.domain.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.domain.Status.STOP_FAILED;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_REQUESTED;
 
@@ -191,7 +194,7 @@ public class Cluster implements ProvisionEntity {
         this.hostGroups = hostGroups;
     }
 
-    public boolean isStateFailed() {
+    public boolean isCreateFailed() {
         return status.equals(Status.CREATE_FAILED);
     }
 
@@ -271,6 +274,14 @@ public class Cluster implements ProvisionEntity {
         return STOPPED.equals(status);
     }
 
+    public boolean isStopFailed() {
+        return STOP_FAILED.equals(status);
+    }
+
+    public boolean isStartFailed() {
+        return START_FAILED.equals(status);
+    }
+
     public boolean isStartRequested() {
         return START_REQUESTED.equals(status);
     }
@@ -281,6 +292,10 @@ public class Cluster implements ProvisionEntity {
 
     public boolean isRequested() {
         return REQUESTED.equals(status);
+    }
+
+    public boolean isDeleteInProgress() {
+        return DELETE_IN_PROGRESS.equals(status);
     }
 
     public boolean isClusterReadyForStart() {
