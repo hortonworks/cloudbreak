@@ -1,3 +1,4 @@
+include 'core-model'
 include 'core'
 include 'integration-test'
 include 'orchestrator-swarm'

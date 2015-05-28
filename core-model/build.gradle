@@ -1,0 +1,17 @@
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+jar {
+    baseName = 'core-model'
+}
+
+dependencies {
+    compile group: 'org.hibernate.javax.persistence',  name: 'hibernate-jpa-2.1-api',  version: '1.0.0.Final'
+    compile group: 'org.apache.commons',               name: 'commons-lang3',  version: '3.3.2'
+}

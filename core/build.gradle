@@ -21,6 +21,11 @@ jar {
 }
 
 dependencies {
+
+    compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
+        exclude group: 'org.slf4j';
+    }
+
     compile "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
     compile "org.springframework.boot:spring-boot-starter-actuator:${springBootVersion}"
     compile "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
@@ -57,6 +62,8 @@ dependencies {
     compile (group: 'com.google.oauth-client',      name: 'google-oauth-client-jetty',      version: '1.17.0-rc')   { exclude module: 'servlet-api' }
     compile ("com.sequenceiq:azure-rest-client:${azureRestClientVersion}")                                          { exclude group: 'log4j' }
     compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: '1.9.35')      { exclude group: 'commons-logging' }
+
+    compile project(':core-model')
 
     runtime project(':orchestrator-swarm')
     compile project(':orchestrator-api')
