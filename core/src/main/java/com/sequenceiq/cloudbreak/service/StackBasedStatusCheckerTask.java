@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 public abstract class StackBasedStatusCheckerTask<T extends StackContext> extends SimpleStatusCheckerTask<T> {
@@ -14,7 +13,7 @@ public abstract class StackBasedStatusCheckerTask<T extends StackContext> extend
     public boolean exitPolling(T t) {
         try {
             Stack stack = stackRepository.findById(t.getStack().getId());
-            if (stack == null || stack.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
+            if (stack == null || stack.isDeleteInProgress()) {
                 return true;
             }
             return false;

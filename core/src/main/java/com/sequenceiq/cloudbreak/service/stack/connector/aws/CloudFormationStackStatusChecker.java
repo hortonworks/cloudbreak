@@ -17,7 +17,6 @@ import com.amazonaws.services.cloudformation.model.StackEvent;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.SimpleStatusCheckerTask;
 
@@ -77,8 +76,8 @@ public class CloudFormationStackStatusChecker extends SimpleStatusCheckerTask<Cl
     public boolean exitPolling(CloudFormationStackPollerObject cloudFormationStackPollerObject) {
         if (!cloudFormationStackPollerObject.getSuccessStatus().equals(DELETE_COMPLETE)) {
             try {
-                Stack byId = stackRepository.findById(cloudFormationStackPollerObject.getStack().getId());
-                if (byId == null || byId.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
+                Stack stack = stackRepository.findById(cloudFormationStackPollerObject.getStack().getId());
+                if (stack == null || stack.isDeleteInProgress()) {
                     return true;
                 }
                 return false;

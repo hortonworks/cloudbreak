@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
-import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisioningService;
@@ -76,12 +75,11 @@ public class SimpleFlowFacade implements FlowFacade {
             ProvisioningContext provisioningContext = (ProvisioningContext) context;
             Stack stack = stackService.getById(provisioningContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
-            ProvisionComplete provisionResult = provisioningService.buildStack(provisioningContext.getCloudPlatform(), stack,
-                    provisioningContext.getSetupProperties());
+            ProvisioningContext provision = (ProvisioningContext) stackFacade.provision(context);
             LOGGER.debug("Provisioning DONE.");
             return new ProvisioningContext.Builder()
-                    .setDefaultParams(provisionResult.getStackId(), provisionResult.getCloudPlatform())
-                    .setProvisionedResources(provisionResult.getResources())
+                    .setDefaultParams(provision.getStackId(), provision.getCloudPlatform())
+                    .setProvisionedResources(provision.getResources())
                     .build();
         } catch (Exception e) {
             LOGGER.error("Exception during provisioning setup: {}", e.getMessage());
@@ -228,6 +226,17 @@ public class SimpleFlowFacade implements FlowFacade {
             return stackFacade.stop(context);
         } catch (Exception e) {
             LOGGER.error("Exception during stack stop!: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext stopStackRequested(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Stopping stack requested. Context: {}", context);
+        try {
+            return stackFacade.stopRequested(context);
+        } catch (Exception e) {
+            LOGGER.error("Exception during stack stop requested!: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }
@@ -525,6 +534,17 @@ public class SimpleFlowFacade implements FlowFacade {
             throw e;
         } catch (Exception e) {
             LOGGER.error("Exception occurred during enabling kerberos security, failure: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext startClusterRequested(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Starting cluster requested. Context: {}", context);
+        try {
+            return clusterFacade.startRequested(context);
+        } catch (Exception e) {
+            LOGGER.error("Exception during cluster start requested!: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }

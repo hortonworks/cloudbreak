@@ -114,7 +114,7 @@ public class AmbariClusterStatusUpdaterTest {
         underTest.updateClusterStatus(stack);
         // THEN
         Assert.assertEquals(Status.STOPPED, stack.getCluster().getStatus());
-        BDDMockito.verify(stackUpdater, BDDMockito.times(1)).updateStackStatus(stack.getId(), Status.STOPPED, TEST_REASON);
+        BDDMockito.verify(stackUpdater, BDDMockito.times(0)).updateStackStatus(stack.getId(), Status.STOPPED, TEST_REASON);
         BDDMockito.verify(clusterRepository, BDDMockito.times(0)).save(BDDMockito.any(Cluster.class));
         BDDMockito.verify(cloudbreakEventService, BDDMockito.times(0)).fireCloudbreakEvent(BDDMockito.any(Long.class), BDDMockito.any(String.class),
                 BDDMockito.any(String.class));
@@ -130,9 +130,9 @@ public class AmbariClusterStatusUpdaterTest {
         // WHEN
         underTest.updateClusterStatus(stack);
         // THEN
-        Assert.assertEquals(Status.STOPPED, stack.getCluster().getStatus());
-        BDDMockito.verify(clusterRepository, BDDMockito.times(1)).save(stack.getCluster());
-        BDDMockito.verify(cloudbreakEventService, BDDMockito.times(1)).fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(), TEST_REASON);
+        Assert.assertEquals(Status.AVAILABLE, stack.getCluster().getStatus());
+        BDDMockito.verify(clusterRepository, BDDMockito.times(0)).save(stack.getCluster());
+        BDDMockito.verify(cloudbreakEventService, BDDMockito.times(0)).fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(), TEST_REASON);
         BDDMockito.verify(stackUpdater, BDDMockito.times(0)).updateStackStatus(BDDMockito.any(Long.class), BDDMockito.any(Status.class),
                 BDDMockito.any(String.class));
     }
@@ -147,9 +147,9 @@ public class AmbariClusterStatusUpdaterTest {
         // WHEN
         underTest.updateClusterStatus(stack);
         // THEN
-        Assert.assertEquals(Status.STOPPED, stack.getCluster().getStatus());
-        BDDMockito.verify(clusterRepository, BDDMockito.times(1)).save(stack.getCluster());
-        BDDMockito.verify(stackUpdater, BDDMockito.times(1)).updateStackStatus(stack.getId(), Status.STOPPED, TEST_REASON);
+        Assert.assertEquals(Status.AVAILABLE, stack.getCluster().getStatus());
+        BDDMockito.verify(clusterRepository, BDDMockito.times(0)).save(stack.getCluster());
+        BDDMockito.verify(stackUpdater, BDDMockito.times(0)).updateStackStatus(stack.getId(), Status.STOPPED, TEST_REASON);
         BDDMockito.verify(cloudbreakEventService, BDDMockito.times(0)).fireCloudbreakEvent(BDDMockito.any(Long.class), BDDMockito.any(String.class),
                 BDDMockito.any(String.class));
     }

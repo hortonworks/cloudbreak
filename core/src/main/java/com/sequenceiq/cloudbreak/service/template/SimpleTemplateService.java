@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
@@ -134,7 +133,7 @@ public class SimpleTemplateService implements TemplateService {
     private boolean isRunningStackReferToTemplate(List<Stack> allStackForTemplate) {
         boolean result = false;
         for (Stack stack : allStackForTemplate) {
-            if (!Status.DELETE_COMPLETED.equals(stack.getStatus())) {
+            if (!stack.isDeleteCompleted()) {
                 result = true;
                 break;
             }

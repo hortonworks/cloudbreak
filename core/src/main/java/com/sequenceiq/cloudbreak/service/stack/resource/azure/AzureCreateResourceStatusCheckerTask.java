@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 @Component
@@ -15,8 +14,8 @@ public class AzureCreateResourceStatusCheckerTask extends AzureResourceStatusChe
 
     public boolean exitPolling(AzureResourcePollerObject t) {
         try {
-            Stack byId = stackRepository.findById(t.getStack().getId());
-            if (byId == null || byId.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
+            Stack stack = stackRepository.findById(t.getStack().getId());
+            if (stack == null || stack.isDeleteInProgress()) {
                 return true;
             }
             return false;

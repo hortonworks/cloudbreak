@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
@@ -39,12 +38,5 @@ public class StackStartService {
             throw new CloudbreakException("The cluster infrastructure cannot be started.");
         }
         return stackStatusUpdateContext;
-    }
-
-    public FlowContext handleStackStartFailure(FlowContext context) {
-        StackStatusUpdateContext stackStatusUpdateContext = (StackStatusUpdateContext) context;
-        LOGGER.info("Update stack state to: {}", Status.START_FAILED);
-        stackUpdater.updateStackStatus(stackStatusUpdateContext.getStackId(), Status.START_FAILED, stackStatusUpdateContext.getErrorReason());
-        return context;
     }
 }

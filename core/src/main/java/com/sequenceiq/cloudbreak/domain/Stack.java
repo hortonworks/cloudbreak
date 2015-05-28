@@ -1,5 +1,15 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import static com.sequenceiq.cloudbreak.domain.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.domain.Status.CREATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.domain.Status.DELETE_COMPLETED;
+import static com.sequenceiq.cloudbreak.domain.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.domain.Status.REQUESTED;
+import static com.sequenceiq.cloudbreak.domain.Status.START_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.domain.Status.START_REQUESTED;
+import static com.sequenceiq.cloudbreak.domain.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.domain.Status.STOP_REQUESTED;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -448,5 +458,37 @@ public class Stack implements ProvisionEntity {
 
     public String getAmbariIp() {
         return cluster == null ? null : cluster.getAmbariIp();
+    }
+
+    public boolean isAvailable() {
+        return AVAILABLE.equals(status);
+    }
+
+    public boolean isStopRequested() {
+        return STOP_REQUESTED.equals(status);
+    }
+
+    public boolean isStopped() {
+        return STOPPED.equals(status);
+    }
+
+    public boolean isDeleteCompleted() {
+        return DELETE_COMPLETED.equals(status);
+    }
+
+    public boolean isDeleteInProgress() {
+        return DELETE_IN_PROGRESS.equals(status);
+    }
+
+    public boolean isStartInProgress() {
+        return START_IN_PROGRESS.equals(status) || START_REQUESTED.equals(status);
+    }
+
+    public boolean isRequested() {
+        return REQUESTED.equals(status) || CREATE_IN_PROGRESS.equals(status);
+    }
+
+    public boolean isStackReadyForStop() {
+        return AVAILABLE.equals(status) || STOP_REQUESTED.equals(status);
     }
 }

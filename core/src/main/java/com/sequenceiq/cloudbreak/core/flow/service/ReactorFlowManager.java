@@ -97,6 +97,20 @@ public class ReactorFlowManager implements FlowManager {
     }
 
     @Override
+    public void triggerStackStopRequested(Object object) {
+        StackStatusUpdateRequest statusUpdateRequest = (StackStatusUpdateRequest) object;
+        StackStatusUpdateContext context = new StackStatusUpdateContext(statusUpdateRequest.getStackId(), statusUpdateRequest.getCloudPlatform(), false);
+        reactor.notify(FlowPhases.STACK_STOP_REQUESTED.name(), eventFactory.createEvent(context, FlowPhases.STACK_STOP_REQUESTED.name()));
+    }
+
+    @Override
+    public void triggerClusterStartRequested(Object object) {
+        ClusterStatusUpdateRequest statusUpdateRequest = (ClusterStatusUpdateRequest) object;
+        StackStatusUpdateContext context = new StackStatusUpdateContext(statusUpdateRequest.getStackId(), statusUpdateRequest.getCloudPlatform(), true);
+        reactor.notify(FlowPhases.CLUSTER_START_REQUESTED.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_START_REQUESTED.name()));
+    }
+
+    @Override
     public void triggerClusterStop(Object object) {
         ClusterStatusUpdateRequest statusUpdateRequest = (ClusterStatusUpdateRequest) object;
         StackStatusUpdateContext context = new StackStatusUpdateContext(statusUpdateRequest.getStackId(), statusUpdateRequest.getCloudPlatform(), false);

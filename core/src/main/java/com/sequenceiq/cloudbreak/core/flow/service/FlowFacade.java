@@ -36,6 +36,8 @@ public interface FlowFacade {
 
     FlowContext stopStack(FlowContext context) throws CloudbreakException;
 
+    FlowContext stopStackRequested(FlowContext context) throws CloudbreakException;
+
     FlowContext handleStackStatusUpdateFailure(FlowContext context) throws CloudbreakException;
 
     FlowContext startCluster(FlowContext flowContext) throws CloudbreakException;
@@ -76,4 +78,5 @@ public interface FlowFacade {
 
     FlowContext enableSecurity(FlowContext context) throws CloudbreakException;
 
+    FlowContext startClusterRequested(FlowContext context) throws CloudbreakException;
 }

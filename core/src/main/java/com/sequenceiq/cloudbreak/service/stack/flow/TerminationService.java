@@ -9,25 +9,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 
 @Service
 public class TerminationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TerminationService.class);
-    private static final String DELETE_COMPLETED_MSG = "The cluster and its infrastructure have successfully been terminated.";
-    private static final String BILLING_STOPPED_MSG = "Billing stopped; the cluster and its infrastructure have been terminated.";
     private static final String DELIMITER = "_";
 
     @javax.annotation.Resource
@@ -42,54 +37,39 @@ public class TerminationService {
     @Autowired
     private HostGroupRepository hostGroupRepository;
 
-    @Autowired
-    private CloudbreakEventService cloudbreakEventService;
-
-    public void handleTerminationFailure(Long stackId, String errorReason) {
-        LOGGER.info("Failed to delete stack {}. Setting it's status to {}.", stackId, Status.DELETE_FAILED);
-        retryingStackUpdater.updateStackStatus(stackId, Status.DELETE_FAILED, errorReason);
-    }
-
     public void terminateStack(Long stackId, CloudPlatform cloudPlatform) {
-        retryingStackUpdater.updateStackStatus(stackId, Status.DELETE_IN_PROGRESS, "Terminating cluster infrastructure.");
         final Stack stack = stackRepository.findOneWithLists(stackId);
         try {
             cloudPlatformConnectors.get(cloudPlatform).deleteStack(stack, stack.getCredential());
-            finalizeTermination(stackId);
         } catch (Exception ex) {
             LOGGER.error("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
             throw new TerminationFailedException(ex);
         }
     }
 
-    private void finalizeTermination(Long stackId) {
+    public void finalizeTermination(Long stackId) {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        cloudbreakEventService.fireCloudbreakEvent(stack.getId(), Status.DELETE_COMPLETED.name(), DELETE_COMPLETED_MSG);
-        cloudbreakEventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_STOPPED.name(), BILLING_STOPPED_MSG);
-        retryingStackUpdater.updateStack(updateStackFields(stack));
-    }
-
-    private Stack updateStackFields(Stack stack) {
-        Date now = new Date();
-        String terminatedName = stack.getName() + DELIMITER + now.getTime();
-        Cluster cluster = stack.getCluster();
-        if (cluster != null) {
-            cluster.setName(terminatedName);
-            cluster.setBlueprint(null);
-            cluster.setStatus(Status.DELETE_COMPLETED);
-            cluster.setStatusReason(DELETE_COMPLETED_MSG);
-            for (HostGroup hostGroup : hostGroupRepository.findHostGroupsInCluster(cluster.getId())) {
-                hostGroup.getRecipes().clear();
-                hostGroupRepository.save(hostGroup);
+        try {
+            Date now = new Date();
+            String terminatedName = stack.getName() + DELIMITER + now.getTime();
+            Cluster cluster = stack.getCluster();
+            if (cluster != null) {
+                cluster.setName(terminatedName);
+                cluster.setBlueprint(null);
+                for (HostGroup hostGroup : hostGroupRepository.findHostGroupsInCluster(cluster.getId())) {
+                    hostGroup.getRecipes().clear();
+                    hostGroupRepository.save(hostGroup);
+                }
             }
+            stack.setCredential(null);
+            stack.setNetwork(null);
+            stack.setName(terminatedName);
+            terminateMetaDataInstances(stack);
+            retryingStackUpdater.updateStack(stack);
+        } catch (Exception ex) {
+            LOGGER.error("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
+            throw new TerminationFailedException(ex);
         }
-        stack.setCredential(null);
-        stack.setNetwork(null);
-        stack.setName(terminatedName);
-        stack.setStatus(Status.DELETE_COMPLETED);
-        stack.setStatusReason(DELETE_COMPLETED_MSG);
-        terminateMetaDataInstances(stack);
-        return stack;
     }
 
     private void terminateMetaDataInstances(Stack stack) {

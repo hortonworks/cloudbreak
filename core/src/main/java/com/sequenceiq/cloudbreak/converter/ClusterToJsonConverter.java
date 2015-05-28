@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.controller.json.HostGroupJson;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.Status;
 
 @Component
 public class ClusterToJsonConverter extends AbstractConversionServiceAwareConverter<Cluster, ClusterResponse> {
@@ -29,7 +28,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         if (source.getBlueprint() != null) {
             clusterResponse.setBlueprintId(source.getBlueprint().getId());
         }
-        if (source.getUpSince() != null && Status.AVAILABLE.equals(source.getStatus())) {
+        if (source.getUpSince() != null && source.isAvailable()) {
             long now = new Date().getTime();
             long uptime = now - source.getUpSince();
             int minutes = (int) ((uptime / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE)) % SECONDS_PER_MINUTE);

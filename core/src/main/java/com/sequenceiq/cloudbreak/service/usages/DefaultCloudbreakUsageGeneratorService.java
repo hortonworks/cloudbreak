@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventSpecifications;
@@ -109,7 +108,7 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
     private void deleteTerminatedStacks(Set<Long> stackIds) {
         for (Long stackId : stackIds) {
             Stack stack = stackRepository.findById(stackId);
-            if (stack != null && Status.DELETE_COMPLETED.equals(stack.getStatus())) {
+            if (stack != null && stack.isDeleteCompleted()) {
                 stackRepository.delete(stack);
                 deleteTemplatesOfStack(stack);
                 eventRepository.delete(eventRepository.findCloudbreakEventsForStack(stackId));

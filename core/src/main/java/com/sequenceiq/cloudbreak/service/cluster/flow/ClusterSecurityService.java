@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.orchestrator.DockerContainer.KERBEROS;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
@@ -53,7 +52,6 @@ public class ClusterSecurityService {
 
     public void enableKerberosSecurity(Stack stack) throws CloudbreakException {
         try {
-            updateClusterState(stack, Status.UPDATE_IN_PROGRESS, "Enabling kerberos security.");
             createAndStartKDC(stack);
             Cluster cluster = stack.getCluster();
             AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(cluster);
@@ -77,7 +75,6 @@ public class ClusterSecurityService {
                     }
                 }
             }
-            updateClusterState(stack, Status.AVAILABLE, "Kerberos security is enabled.");
         } catch (InterruptedException ie) {
             throw new CloudbreakException(ie);
         } catch (Exception e) {
@@ -101,15 +98,6 @@ public class ClusterSecurityService {
             throw new InterruptedException("Interrupt enabling kerberos flow");
         }
         return true;
-    }
-
-    private void updateClusterState(Stack stack, Status status, String statusMessage) {
-        long stackId = stack.getId();
-        Cluster cluster = stack.getCluster();
-        cluster.setStatusReason(statusMessage);
-        cluster.setStatus(status);
-        stackUpdater.updateStackCluster(stackId, cluster);
-        eventService.fireCloudbreakEvent(stackId, status.name(), statusMessage);
     }
 
     private PollingResult waitForOperation(Stack stack, AmbariClient ambariClient, Map<String, Integer> requests) {

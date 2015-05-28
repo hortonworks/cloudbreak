@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.domain.OpenStackNetwork;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
@@ -97,7 +96,6 @@ public class OpenStackConnector implements CloudPlatformConnector {
                 POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         if (!isSuccess(pollingResult)) {
             LOGGER.error(String.format("Failed to create Heat stack: %s", stack.getId()));
-            stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_FAILED, "Creation of cluster infrastructure failed: ");
             throw new OpenStackResourceException(String.format("Failed to update Heat stack while building stack; polling reached an invalid end state: '%s'",
                     pollingResult.name()));
         }

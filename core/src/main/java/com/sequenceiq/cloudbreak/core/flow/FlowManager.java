@@ -20,6 +20,10 @@ public interface FlowManager {
 
     void triggerStackStart(Object object);
 
+    void triggerStackStopRequested(Object object);
+
+    void triggerClusterStartRequested(Object object);
+
     void triggerClusterStop(Object object);
 
     void triggerClusterStart(Object object);

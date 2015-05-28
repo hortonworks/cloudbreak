@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
@@ -148,7 +147,7 @@ public class ClusterController {
         }
 
         if (updateJson.getHostGroupAdjustment() != null) {
-            if (!stack.getStatus().equals(Status.AVAILABLE)) {
+            if (!stack.isAvailable()) {
                 throw new BadRequestException(String.format(
                         "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
                         stack.getStatus()));
