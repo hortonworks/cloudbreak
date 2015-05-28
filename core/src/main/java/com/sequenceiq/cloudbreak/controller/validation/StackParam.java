@@ -4,7 +4,7 @@ import com.google.common.base.Optional;
 
 public enum StackParam implements TemplateParam {
 
-    BLOB_PER_STORAGE("blobPerStorage", false, String.class, Optional.<String>absent());
+    DISK_PER_STORAGE("diskPerStorage", false, String.class, Optional.<String>absent());
 
     private final String paramName;
     private final Class clazz;

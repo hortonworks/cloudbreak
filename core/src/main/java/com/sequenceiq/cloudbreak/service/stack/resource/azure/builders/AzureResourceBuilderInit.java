@@ -42,7 +42,7 @@ public class AzureResourceBuilderInit implements
                     credential.getAffinityGroupName(azureLocation), getAllocatedAddresses(stack), true);
         } else {
             int vhdPerStorageAccount = azureStackUtil.getNumOfVHDPerStorageAccount(stack);
-            int vhdPerStorage[] = new int[numStorageAccount];
+            int[] vhdPerStorage = new int[numStorageAccount];
             Arrays.fill(vhdPerStorage, vhdPerStorageAccount);
             return new AzureProvisionContextObject(stack.getId(),
                     credential.getAffinityGroupName(azureLocation), getAllocatedAddresses(stack), vhdPerStorage);

@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.controller.validation.StackParam;
 
 @Entity
 @Table(name = "Stack", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"account", "name"})
+        @UniqueConstraint(columnNames = { "account", "name" })
 })
 @NamedQueries({
         @NamedQuery(
@@ -454,7 +454,7 @@ public class Stack implements ProvisionEntity {
     }
 
     public boolean isBlobCountSpecified() {
-        return parameters != null && parameters.get(StackParam.BLOB_PER_STORAGE.getName()) != null;
+        return parameters != null && parameters.get(StackParam.DISK_PER_STORAGE.getName()) != null;
     }
 
     public InstanceGroup getGatewayInstanceGroup() {

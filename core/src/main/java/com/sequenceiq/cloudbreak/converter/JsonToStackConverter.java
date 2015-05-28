@@ -43,11 +43,13 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
     private Map<String, String> getValidParameters(StackRequest stackRequest) {
         Map<String, String> params = new HashMap<>();
         Map<String, String> userParams = stackRequest.getParameters();
-        for (StackParam stackParam : StackParam.values()) {
-            String paramName = stackParam.getName();
-            String value = userParams.get(paramName);
-            if (value != null) {
-                params.put(paramName, value);
+        if (userParams != null) {
+            for (StackParam stackParam : StackParam.values()) {
+                String paramName = stackParam.getName();
+                String value = userParams.get(paramName);
+                if (value != null) {
+                    params.put(paramName, value);
+                }
             }
         }
         return params;

@@ -31,6 +31,8 @@ import com.sequenceiq.cloudbreak.controller.validation.StackParam;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
@@ -64,10 +66,12 @@ public class AzureStackUtil {
     private UserDetailsService userDetailsService;
 
     public String getOsImageName(Stack stack, AzureLocation location, int storageIndex) {
+        return getOsImageName(stack, getOSStorageName(stack, location, storageIndex));
+    }
+
+    public String getOsImageName(Stack stack, String storageName) {
         String[] split = stack.getImage().split("/");
-        // TODO why do we need an IMAGE_NAME here?
-        return format("%s-%s-%s", getOSStorageName(stack, location, storageIndex), IMAGE_NAME,
-                split[split.length - 1].replaceAll(".vhd", ""));
+        return format("%s-%s-%s", storageName, IMAGE_NAME, split[split.length - 1].replaceAll(".vhd", ""));
     }
 
     public String getOSStorageName(Stack stack, AzureLocation location, int index) {
@@ -75,13 +79,21 @@ public class AzureStackUtil {
         return index == GLOBAL_STORAGE ? baseStorageName : baseStorageName + stack.getId() + index;
     }
 
+    /**
+     * Determines the number of required Storage Accounts to distribute the VHDs.
+     * In case of global Storage Account it returns -1.
+     */
     public int getNumOfStorageAccounts(Stack stack) {
         if (!stack.isBlobCountSpecified()) {
             return GLOBAL_STORAGE;
         }
+        List<Resource> storages = stack.getResourcesByType(ResourceType.AZURE_STORAGE);
+        if (!storages.isEmpty()) {
+            return storages.size();
+        }
         int vhdPerStorageAccount = getNumOfVHDPerStorageAccount(stack);
         List<InstanceGroup> instanceGroups = getOrderedInstanceGroups(stack);
-        int accounts[] = new int[4096];
+        int[] accounts = new int[4096];
         Arrays.fill(accounts, vhdPerStorageAccount);
         for (InstanceGroup ig : instanceGroups) {
             int nodeCount = ig.getNodeCount();
@@ -108,7 +120,7 @@ public class AzureStackUtil {
     }
 
     public int getNumOfVHDPerStorageAccount(Stack stack) {
-        String vhdNum = stack.getParameters().get(StackParam.BLOB_PER_STORAGE.getName());
+        String vhdNum = stack.getParameters().get(StackParam.DISK_PER_STORAGE.getName());
         int vhdPS = Integer.valueOf(vhdNum == null ? "0" : vhdNum);
         for (InstanceGroup ig : stack.getInstanceGroups()) {
             int volumeCount = ig.getTemplate().getVolumeCount() + ROOTFS_COUNT;

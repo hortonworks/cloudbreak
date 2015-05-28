@@ -107,21 +107,10 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             byte[] encoded = Base64.encodeBase64(resourceName.getBytes());
             String label = new String(encoded);
             AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
-
-            int storageIndex;
-            if (provisionContextObject.isUseGlobalStorageAccount()) {
-                storageIndex = AzureStackUtil.GLOBAL_STORAGE;
-            } else {
-                storageIndex = provisionContextObject.setAndGetStorageAccountIndex(azureTemplate.getVolumeCount() + AzureStackUtil.ROOTFS_COUNT);
-                if (storageIndex < 0) {
-                    LOGGER.warn("VHD allocation is not optimal");
-                    // TODO overbook one of the accounts
-                }
-            }
-
+            int storageIndex = provisionContextObject.isUseGlobalStorageAccount() ? AzureStackUtil.GLOBAL_STORAGE
+                    : provisionContextObject.setAndGetStorageAccountIndex(azureTemplate.getVolumeCount() + AzureStackUtil.ROOTFS_COUNT);
             LOGGER.info("Storage index selected: {} for {}", storageIndex, resourceName);
             String osStorageName = azureStackUtil.getOSStorageName(stack, azureLocation, storageIndex);
-
             Map<String, Object> props = new HashMap<>();
             props.put(NAME, resourceName);
             props.put(DEPLOYMENTSLOT, PRODUCTION);
@@ -132,7 +121,6 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             props.put(USERNAME, CB_GCP_AND_AZURE_USER_NAME);
             props.put(SSHPUBLICKEYFINGERPRINT, azureStackUtil.createX509Certificate(azureCredential).getSha1Fingerprint().toUpperCase());
             props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", CB_GCP_AND_AZURE_USER_NAME));
-            // TODO fix in rest client to not to use the affinity group name
             props.put(STORAGE_NAME, osStorageName);
             props.put(AFFINITYGROUP, provisionContextObject.getAffinityGroupName());
             if (azureTemplate.getVolumeCount() > 0) {
