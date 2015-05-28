@@ -731,7 +731,7 @@ In order to understand the state of your Hadoop as a Servie stack and the potent
 
 We provide you two different ways to start using Cloudbreak. The simplest and easiest solution is hosted by SequenceIQ, however we encourage you to get Cloudbreak and deployed it on-premise or on your favorite cloud provider.
 
-###Hosted - Cloudbreak UI and API  
+###Hosted - Cloudbreak UI and API
 The easiest way to start your own Hadoop cluster in your favorite cloud provider is to use our hosted solution. We host, maintain and support [Cloudbreak](https://cloudbreak.sequenceiq.com/) for you.
 
 Please note that Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. We do not store your cloud provider account details (such as username, password, keys, private SSL certificates, etc), but work around the concept that Identity and Access Management is fully controlled by you - the end user.
@@ -744,11 +744,11 @@ Though Cloudbreak controls your Hadoop cluster lifecycle (start, stop, pause), w
 To deploy a running Cloudbreak instance the only thing you will need to do is to get the code first.
 
 ```
-git clone https://github.com/sequenceiq/cloudbreak-deployment.git
-cloudbreak-deployment
+git clone https://github.com/sequenceiq/cloudbreak-deployer.git
+cd cloudbreak-deployer
 ```
 
-Follow the instructions.
+Follow the instructions found in README.md file.
 
 <!--quickstart.md-->
 
@@ -912,7 +912,7 @@ Please consider submitting your resume and applying for open positions at jobs@s
 *Brought to you courtesy of our legal counsel.*
 
 Use and transfer of Cloudbreak may be subject to certain restrictions by the
-United States and other governments.  
+United States and other governments.
 It is your responsibility to ensure that your use and/or transfer does not
 violate applicable laws.
 
