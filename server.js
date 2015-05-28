@@ -35,9 +35,9 @@ app.use(session({
   store: sessionStore
 }))
 app.use(morgan('dev'));
-app.use(bodyParser.urlencoded({'extended':'true'}));
-app.use(bodyParser.json());
-app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
+app.use(bodyParser.urlencoded({'extended':'true', limit: '50mb'}));
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.json({ limit: '50mb', type: 'application/vnd.api+json' }));
 app.use(methodOverride());
 
 // oauth2 and identity server config ===========================================
