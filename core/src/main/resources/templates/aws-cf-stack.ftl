@@ -239,7 +239,7 @@
         "InstanceType"   : "${instanceGroup.template.instanceType}",
         "KeyName"        : { "Ref" : "KeyName" },
         "AssociatePublicIpAddress" : "true",
-        <#if useSpot>
+        <#if instanceGroup.template.spotPrice??>
         "SpotPrice"      : ${instanceGroup.template.spotPrice},
         </#if>
         <#if instanceGroup.instanceGroupType == "CORE">
