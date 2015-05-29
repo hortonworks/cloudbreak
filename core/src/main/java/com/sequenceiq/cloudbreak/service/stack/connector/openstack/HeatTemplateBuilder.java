@@ -101,7 +101,6 @@ public class HeatTemplateBuilder {
         parameters.put("public_net_id", publicNetId);
         parameters.put("image_id", image);
         parameters.put("key_name", openStackUtil.getKeyPairName(credential));
-        parameters.put("tenant_id", credential.getTenantName());
         parameters.put("app_net_cidr", network.getSubnetCIDR());
         return parameters;
     }
