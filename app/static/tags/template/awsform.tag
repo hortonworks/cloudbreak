@@ -79,7 +79,7 @@
         <label class="col-sm-3 control-label" for="aws_tspotprice">Spot price (USD)</label>
 
         <div class="col-sm-9">
-            <input type="number" name="aws_tspotprice" class="form-control" id="aws_tspotprice" ng-model="awsTemp.parameters.spotPrice" min="0.1" max="100.0">
+            <input type="number" name="aws_tspotprice" class="form-control" id="aws_tspotprice" ng-model="awsTemp.parameters.spotPrice" min="0.04" max="100.0">
           <div class="help-block" ng-show="awsTemplateForm.aws_tspotprice.$dirty"><i class="fa fa-warning"></i>
               If you enter a spot price it cannot be guaranteed when your instances will be able to start.
           </div>
