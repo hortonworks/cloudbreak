@@ -23,6 +23,10 @@
 - Command `doctor` hints to run boot2docker shellinit if env is unset
 - Command `init` in case of OSX, DOCKER_XXX envs are initialized in local profile (Profile)
 - Default docker images are updated to:
+    - sequenceiq/cloudbreak:0.5.93
+    - sequenceiq/cbdb:0.5.92
+    - sequenceiq/uluwatu:0.5.28
+    - sequenceiq/sultans:0.5.3
     - sequenceiq/periscope:0.5.5
 
 
