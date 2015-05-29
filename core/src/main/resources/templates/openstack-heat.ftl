@@ -9,9 +9,6 @@ parameters:
   key_name:
     type: string
     description : Name of a KeyPair to enable SSH access to the instance
-  tenant_id:
-    type: string
-    description : ID of the tenant
   image_id:
     type: string
     description: ID of the image
@@ -29,8 +26,6 @@ resources:
       properties:
         admin_state_up: true
         name: app_network
-        shared: true
-        tenant_id: { get_param: tenant_id }
 
   app_subnet:
       type: OS::Neutron::Subnet
