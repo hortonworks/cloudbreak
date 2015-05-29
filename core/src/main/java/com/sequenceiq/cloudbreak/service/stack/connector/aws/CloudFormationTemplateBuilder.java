@@ -3,15 +3,12 @@ package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 
@@ -27,7 +24,6 @@ public class CloudFormationTemplateBuilder {
     public String build(Stack stack, String snapshotId, boolean existingVPC, String templatePath) {
         Map<String, Object> model = new HashMap<>();
         model.put("instanceGroups", stack.getInstanceGroupsAsList());
-        model.put("useSpot", spotPriceNeeded(stack.getInstanceGroups()));
         model.put("existingVPC", existingVPC);
         model.put("subnets", stack.getAllowedSubnets());
         model.put("ports", NetworkUtils.getPorts(stack));
@@ -47,14 +43,4 @@ public class CloudFormationTemplateBuilder {
         this.freemarkerConfiguration = freemarkerConfiguration;
     }
 
-    private boolean spotPriceNeeded(Set<InstanceGroup> instanceGroups) {
-        boolean spotPrice = true;
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            AwsTemplate awsTemplate = (AwsTemplate) instanceGroup.getTemplate();
-            if (awsTemplate.getSpotPrice() == null) {
-                spotPrice = false;
-            }
-        }
-        return spotPrice;
-    }
 }
