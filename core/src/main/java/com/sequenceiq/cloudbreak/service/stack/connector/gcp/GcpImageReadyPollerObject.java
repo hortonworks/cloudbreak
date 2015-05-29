@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack.connector.gcp;
 import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.StackContext;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcp.domain.GcpZone;
+import com.sequenceiq.cloudbreak.domain.GcpZone;
 
 public class GcpImageReadyPollerObject extends StackContext {
 

@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcp.domain.GcpZone;
+import com.sequenceiq.cloudbreak.domain.GcpZone;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 

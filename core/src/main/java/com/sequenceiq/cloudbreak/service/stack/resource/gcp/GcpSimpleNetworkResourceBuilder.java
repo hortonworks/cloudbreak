@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.domain.GcpCredential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceException;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcp.domain.GcpZone;
+import com.sequenceiq.cloudbreak.domain.GcpZone;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpDeleteContextObject;

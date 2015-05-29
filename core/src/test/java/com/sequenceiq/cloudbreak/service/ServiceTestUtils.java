@@ -24,8 +24,8 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcp.domain.GcpInstanceType;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcp.domain.GcpRawDiskType;
+import com.sequenceiq.cloudbreak.domain.GcpInstanceType;
+import com.sequenceiq.cloudbreak.domain.GcpRawDiskType;
 
 public final class ServiceTestUtils {
 

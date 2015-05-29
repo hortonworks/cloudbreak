@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcp.domain.GcpInstanceType;
+import com.sequenceiq.cloudbreak.domain.GcpInstanceType;
 
 public enum GcpTemplateParam implements TemplateParam {
 
