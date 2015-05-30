@@ -115,7 +115,10 @@ public class SimpleStackFacade implements StackFacade {
     @Override
     public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
         try {
-            clusterBootstrapper.bootstrapCluster((ProvisioningContext) context);
+            ProvisioningContext provisioningContext = (ProvisioningContext) context;
+            MDCBuilder.buildMdcContext(stackService.getById(provisioningContext.getStackId()));
+            LOGGER.debug("Bootstrap Cluster. Context: {}", context);
+            clusterBootstrapper.bootstrapCluster(provisioningContext);
             return context;
         } catch (Exception e) {
             LOGGER.error("Error occurred while bootstrapping container orchestrator: {}", e.getMessage());
