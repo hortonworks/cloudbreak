@@ -45,6 +45,9 @@ public class DatabaseConfig {
     @Value("${cb.hbm2ddl.strategy:validate}")
     private String hbm2ddlStrategy;
 
+    @Value("${cb.hibernate.debug:false}")
+    private boolean debug;
+
     @Bean
     public DataSource dataSource() {
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
@@ -92,7 +95,9 @@ public class DatabaseConfig {
     private Properties jpaProperties() {
         Properties properties = new Properties();
         properties.setProperty("hibernate.hbm2ddl.auto", hbm2ddlStrategy);
-        properties.setProperty("hibernate.show_sql", "false");
+        properties.setProperty("hibernate.show_sql", Boolean.toString(debug));
+        properties.setProperty("hibernate.format_sql", Boolean.toString(debug));
+        properties.setProperty("hibernate.use_sql_comments", Boolean.toString(debug));
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
         return properties;
     }
