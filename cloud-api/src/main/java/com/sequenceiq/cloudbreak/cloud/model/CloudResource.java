@@ -28,4 +28,13 @@ public class CloudResource {
     public String getReference() {
         return reference;
     }
+
+    @Override
+    public String toString() {
+        return "CloudResource{" +
+                "type=" + type +
+                ", name='" + name + '\'' +
+                ", reference='" + reference + '\'' +
+                '}';
+    }
 }

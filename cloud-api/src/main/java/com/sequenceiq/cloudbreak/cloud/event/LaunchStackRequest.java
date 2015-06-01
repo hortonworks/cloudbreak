@@ -1,53 +1,36 @@
 package com.sequenceiq.cloudbreak.cloud.event;
 
-import java.util.List;
-
 import com.sequenceiq.cloudbreak.cloud.event.context.StackContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.Network;
-import com.sequenceiq.cloudbreak.cloud.model.Security;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
-public class LaunchStackRequest extends CloudPlatformRequest {
+import reactor.rx.Promise;
+
+public class LaunchStackRequest<T> extends CloudPlatformRequest<T> {
 
     private CloudCredential cloudCredential;
 
-    private List<Group> groups;
+    private CloudStack cloudStack;
 
-    private Network network;
-
-    private Security security;
-
-    private Image image;
-
-    public LaunchStackRequest(StackContext stackContext, CloudCredential cloudCredential, List<Group> groups, Network network, Security security,
-            Image image) {
-        super(stackContext);
+    public LaunchStackRequest(StackContext stackContext, CloudCredential cloudCredential, CloudStack cloudStack, Promise<T> result) {
+        super(stackContext, result);
         this.cloudCredential = cloudCredential;
-        this.groups = groups;
-        this.network = network;
-        this.security = security;
-        this.image = image;
+        this.cloudStack = cloudStack;
     }
 
     public CloudCredential getCloudCredential() {
         return cloudCredential;
     }
 
-    public List<Group> getGroups() {
-        return groups;
+    public CloudStack getCloudStack() {
+        return cloudStack;
     }
 
-    public Network getNetwork() {
-        return network;
-    }
-
-    public Security getSecurity() {
-        return security;
-    }
-
-    public Image getImage() {
-        return image;
+    @Override
+    public String toString() {
+        return "LaunchStackRequest{" +
+                "cloudCredential=" + cloudCredential +
+                ", cloudStack=" + cloudStack +
+                '}';
     }
 }

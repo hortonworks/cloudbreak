@@ -29,4 +29,13 @@ public class CloudResourceStatus {
     public String getStatusReason() {
         return statusReason;
     }
+
+    @Override
+    public String toString() {
+        return "CloudResourceStatus{" +
+                "cloudResource=" + cloudResource +
+                ", status=" + status +
+                ", statusReason='" + statusReason + '\'' +
+                '}';
+    }
 }
