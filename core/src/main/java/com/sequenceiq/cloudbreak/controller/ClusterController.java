@@ -129,7 +129,7 @@ public class ClusterController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
-        if (updateJson.getBlueprintId() != null && updateJson.getHostgroups() != null && stack.getCluster().isStateFailed()) {
+        if (updateJson.getBlueprintId() != null && updateJson.getHostgroups() != null && stack.getCluster().isCreateFailed()) {
             LOGGER.info("Cluster rebuild request received. Stack id:  {}", stackId);
             Set<HostGroup> hostGroups = new HashSet<>();
             for (HostGroupJson json : updateJson.getHostgroups()) {

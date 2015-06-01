@@ -166,5 +166,19 @@ public class ReactorFlowManager implements FlowManager {
         reactor.notify(FlowPhases.UPDATE_ALLOWED_SUBNETS.name(), eventFactory.createEvent(context, FlowPhases.UPDATE_ALLOWED_SUBNETS.name()));
     }
 
+    @Override
+    public void triggerClusterSync(Object object) {
+        ClusterStatusUpdateRequest statusUpdateRequest = (ClusterStatusUpdateRequest) object;
+        StackStatusUpdateContext context = new StackStatusUpdateContext(statusUpdateRequest.getStackId(), statusUpdateRequest.getCloudPlatform(), false);
+        reactor.notify(FlowPhases.CLUSTER_SYNC.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_SYNC.name()));
+    }
+
+    @Override
+    public void triggerStackSync(Object object) {
+        StackStatusUpdateRequest statusUpdateRequest = (StackStatusUpdateRequest) object;
+        StackStatusUpdateContext context = new StackStatusUpdateContext(statusUpdateRequest.getStackId(), statusUpdateRequest.getCloudPlatform(), false);
+        reactor.notify(FlowPhases.STACK_SYNC.name(), eventFactory.createEvent(context, FlowPhases.STACK_SYNC.name()));
+    }
+
 }
 

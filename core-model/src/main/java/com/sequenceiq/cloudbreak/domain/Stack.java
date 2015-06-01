@@ -5,9 +5,12 @@ import static com.sequenceiq.cloudbreak.domain.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.domain.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.Status.REQUESTED;
+import static com.sequenceiq.cloudbreak.domain.Status.START_FAILED;
 import static com.sequenceiq.cloudbreak.domain.Status.START_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.domain.Status.STOP_FAILED;
+import static com.sequenceiq.cloudbreak.domain.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_REQUESTED;
 
 import java.util.ArrayList;
@@ -419,6 +422,18 @@ public class Stack implements ProvisionEntity {
 
     public boolean isStackInDeletionPhase() {
         return status.equals(DELETE_COMPLETED) || status.equals(DELETE_IN_PROGRESS);
+    }
+
+    public boolean isStopFailed() {
+        return STOP_FAILED.equals(status);
+    }
+
+    public boolean isStopInProgress() {
+        return STOP_IN_PROGRESS.equals(status);
+    }
+
+    public boolean isStartFailed() {
+        return START_FAILED.equals(status);
     }
 
     public Boolean isCloudPlatformUsedWithTemplate() {

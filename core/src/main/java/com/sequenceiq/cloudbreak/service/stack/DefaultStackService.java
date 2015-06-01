@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateway;
 import static com.sequenceiq.cloudbreak.domain.Status.START_REQUESTED;
+import static com.sequenceiq.cloudbreak.domain.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_REQUESTED;
-import static com.sequenceiq.cloudbreak.domain.StatusRequest.STARTED;
 
 import java.util.List;
 import java.util.Map;
@@ -176,28 +176,50 @@ public class DefaultStackService implements StackService {
     public void updateStatus(Long stackId, StatusRequest status) {
         Stack stack = stackRepository.findOne(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-        if (status.equals(STARTED)) {
-            if (!stack.isStopped() || !cluster.isStopped()) {
-                throw new BadRequestException(String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stackId));
-            }
-            if (stack.isStopped()) {
-                stackUpdater.updateStackStatus(stackId, START_REQUESTED);
-                flowManager.triggerStackStart(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), status));
-            }
+        switch (status) {
+            case SYNC:
+                sync(stack, cluster, status);
+                break;
+            case STOPPED:
+                stop(stack, cluster, status);
+                break;
+            case STARTED:
+                start(stack, cluster, status);
+                break;
+            default:
+                throw new BadRequestException("Cannot update the status of stack because status request not valid.");
+        }
+    }
+
+    private void sync(Stack stack, Cluster cluster, StatusRequest statusRequest) {
+        flowManager.triggerStackSync(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), statusRequest));
+    }
+
+    private void stop(Stack stack, Cluster cluster, StatusRequest statusRequest) {
+        if (cluster.isStopInProgress()) {
+            flowManager.triggerStackStopRequested(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), statusRequest));
         } else {
-            if (cluster.isStopInProgress()) {
-                flowManager.triggerStackStopRequested(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), status));
-            } else {
-                if (!stack.isAvailable()) {
-                    throw new BadRequestException(
-                            String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stackId));
-                }
-                if (!cluster.isStopped()) {
-                    throw new BadRequestException(
-                            String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.", stackId));
-                }
-                flowManager.triggerStackStop(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), status));
+            if (!stack.isAvailable() && !stack.isStopFailed()) {
+                throw new BadRequestException(
+                        String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getId()));
             }
+            if (!cluster.isStopped() && !stack.isStopFailed()) {
+                throw new BadRequestException(
+                        String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.", stack.getId()));
+            }
+            stackUpdater.updateStackStatus(stack.getId(), STOP_REQUESTED);
+            flowManager.triggerStackStop(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), statusRequest));
+        }
+    }
+
+    private void start(Stack stack, Cluster cluster, StatusRequest statusRequest) {
+        if ((!stack.isStopped() || !cluster.isStopped()) && !stack.isStartFailed()) {
+            throw new BadRequestException(
+                    String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stack.getId()));
+        }
+        if (stack.isStopped() || stack.isStartFailed()) {
+            stackUpdater.updateStackStatus(stack.getId(), START_REQUESTED);
+            flowManager.triggerStackStart(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), statusRequest));
         }
     }
 

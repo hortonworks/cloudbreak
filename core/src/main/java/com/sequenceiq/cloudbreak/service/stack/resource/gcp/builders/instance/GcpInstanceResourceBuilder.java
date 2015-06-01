@@ -229,10 +229,16 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
     public Boolean stop(GcpStartStopContextObject startStopContextObject, Resource resource, String region) {
         GcpCredential credential = (GcpCredential) startStopContextObject.getStack().getCredential();
         try {
-            Compute.Instances.Stop stop = startStopContextObject.getCompute().instances()
-                    .stop(credential.getProjectId(), GcpZone.valueOf(region).getValue(), resource.getResourceName());
-            stop.setPrettyPrint(Boolean.TRUE);
-            return setInstanceState(stop.execute(), startStopContextObject, resource, credential, false);
+            Compute.Instances.Get get = startStopContextObject.getCompute().instances()
+                    .get(credential.getProjectId(), GcpZone.valueOf(region).getValue(), resource.getResourceName());
+            if ("RUNNING".equals(get.execute().getStatus())) {
+                Compute.Instances.Stop stop = startStopContextObject.getCompute().instances()
+                        .stop(credential.getProjectId(), GcpZone.valueOf(region).getValue(), resource.getResourceName());
+                stop.setPrettyPrint(Boolean.TRUE);
+                return setInstanceState(stop.execute(), startStopContextObject, resource, credential, false);
+            } else {
+                return true;
+            }
         } catch (IOException e) {
             LOGGER.error(String.format("There was an error in the vm stop [%s]: %s", resource.getResourceName(), e.getMessage()));
             return false;
@@ -243,10 +249,16 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
     public Boolean start(GcpStartStopContextObject startStopContextObject, Resource resource, String region) {
         GcpCredential credential = (GcpCredential) startStopContextObject.getStack().getCredential();
         try {
-            Compute.Instances.Start start = startStopContextObject.getCompute().instances()
-                    .start(credential.getProjectId(), GcpZone.valueOf(region).getValue(), resource.getResourceName());
-            start.setPrettyPrint(Boolean.TRUE);
-            return setInstanceState(start.execute(), startStopContextObject, resource, credential, true);
+            Compute.Instances.Get get = startStopContextObject.getCompute().instances()
+                    .get(credential.getProjectId(), GcpZone.valueOf(region).getValue(), resource.getResourceName());
+            if ("TERMINATED".equals(get.execute().getStatus())) {
+                Compute.Instances.Start start = startStopContextObject.getCompute().instances()
+                        .start(credential.getProjectId(), GcpZone.valueOf(region).getValue(), resource.getResourceName());
+                start.setPrettyPrint(Boolean.TRUE);
+                return setInstanceState(start.execute(), startStopContextObject, resource, credential, true);
+            } else {
+                return true;
+            }
         } catch (IOException e) {
             LOGGER.error(String.format("There was an error in the vm start [%s]: %s", resource.getResourceName(), e.getMessage()));
             return false;

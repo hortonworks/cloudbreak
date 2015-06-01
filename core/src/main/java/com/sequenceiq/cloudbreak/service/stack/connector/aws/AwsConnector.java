@@ -445,6 +445,7 @@ public class AwsConnector implements CloudPlatformConnector {
             }
             try {
                 if (stopped) {
+                    instances = removeInstanceIdsWhichAreNotInCorrectState(instances, amazonEC2Client, "Stopped");
                     amazonASClient.suspendProcesses(new SuspendProcessesRequest().withAutoScalingGroupName(asGroupName));
                     amazonEC2Client.stopInstances(new StopInstancesRequest().withInstanceIds(instances));
                     awsPollingService.pollWithTimeout(
@@ -453,6 +454,7 @@ public class AwsConnector implements CloudPlatformConnector {
                             AmbariOperationService.AMBARI_POLLING_INTERVAL,
                             AmbariOperationService.MAX_ATTEMPTS_FOR_AMBARI_OPS);
                 } else {
+                    instances = removeInstanceIdsWhichAreNotInCorrectState(instances, amazonEC2Client, "Running");
                     amazonEC2Client.startInstances(new StartInstancesRequest().withInstanceIds(instances));
                     PollingResult pollingResult = awsPollingService.pollWithTimeout(
                             awsInstanceStatusCheckerTask,
@@ -472,6 +474,19 @@ public class AwsConnector implements CloudPlatformConnector {
             }
         }
         return result;
+    }
+
+    private Collection<String> removeInstanceIdsWhichAreNotInCorrectState(Collection<String> instances, AmazonEC2Client amazonEC2Client, String state) {
+        DescribeInstancesResult describeInstances = amazonEC2Client.describeInstances(
+                new DescribeInstancesRequest().withInstanceIds(instances));
+        for (Reservation reservation : describeInstances.getReservations()) {
+            for (Instance instance : reservation.getInstances()) {
+                if (state.equalsIgnoreCase(instance.getState().getName())) {
+                    instances.remove(instance.getInstanceId());
+                }
+            }
+        }
+        return instances;
     }
 
     private void updateInstanceMetadata(Stack stack, AmazonEC2Client amazonEC2Client, Set<InstanceMetaData> instanceMetaData, Collection<String> instances) {

@@ -40,4 +40,6 @@ public interface StackFacade {
     FlowContext stopRequested(FlowContext context) throws CloudbreakException;
 
     FlowContext provision(FlowContext context) throws CloudbreakException;
+
+    FlowContext sync(FlowContext context) throws CloudbreakException;
 }

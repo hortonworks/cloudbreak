@@ -20,3 +20,6 @@ integrationtest/build/
 integrationtest/test-output/
 owners_log/
 stacks_log/
+application.yml
+suites_log/
+test-output/

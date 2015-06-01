@@ -33,6 +33,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.ambari.client.AmbariConnectionException;
 import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
@@ -248,10 +249,14 @@ public class AmbariClusterConnector {
     public void stopCluster(Stack stack) throws CloudbreakException {
         Cluster cluster = stack.getCluster();
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
-        if (!allServiceStopped(ambariClient.getHostComponentsStates())) {
-            stopAllServices(stack, ambariClient);
+        try {
+            if (!allServiceStopped(ambariClient.getHostComponentsStates())) {
+                stopAllServices(stack, ambariClient);
+            }
+            stopAmbariAgents(stack);
+        } catch (AmbariConnectionException ex) {
+            LOGGER.debug("Ambari not running on the gateway machine, no need to stop it.");
         }
-        stopAmbariAgents(stack);
     }
 
     public void startCluster(Stack stack) throws CloudbreakException {
@@ -260,6 +265,21 @@ public class AmbariClusterConnector {
         waitForAmbariToStart(stack);
         startAmbariAgents(stack);
         startAllServices(stack, ambariClient);
+    }
+
+    public boolean isAmbariAvailable(Stack stack) throws CloudbreakException {
+        Cluster cluster = stack.getCluster();
+        if (cluster != null) {
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
+            try {
+                ambariClient.getHostNames();
+            } catch (Exception ex) {
+                return false;
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private void stopAllServices(Stack stack, AmbariClient ambariClient) throws CloudbreakException {
