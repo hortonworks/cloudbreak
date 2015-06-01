@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.azure.builders;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -12,7 +13,6 @@ import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -36,10 +36,17 @@ public class AzureResourceBuilderInit implements
     public AzureProvisionContextObject provisionInit(Stack stack) throws Exception {
         AzureCredential credential = (AzureCredential) stack.getCredential();
         AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
-        AzureProvisionContextObject azureProvisionContextObject =
-                new AzureProvisionContextObject(stack.getId(), credential.getCommonName(azureLocation),
-                        getOsImageName(credential, azureLocation, stack.getImage()), getAllocatedAddresses(stack));
-        return azureProvisionContextObject;
+        int numStorageAccount = azureStackUtil.getNumOfStorageAccounts(stack);
+        if (numStorageAccount == AzureStackUtil.GLOBAL_STORAGE) {
+            return new AzureProvisionContextObject(stack.getId(),
+                    credential.getAffinityGroupName(azureLocation), getAllocatedAddresses(stack), true);
+        } else {
+            int vhdPerStorageAccount = azureStackUtil.getNumOfVHDPerStorageAccount(stack);
+            int[] vhdPerStorage = new int[numStorageAccount];
+            Arrays.fill(vhdPerStorage, vhdPerStorageAccount);
+            return new AzureProvisionContextObject(stack.getId(),
+                    credential.getAffinityGroupName(azureLocation), getAllocatedAddresses(stack), vhdPerStorage);
+        }
     }
 
     @Override
@@ -49,20 +56,14 @@ public class AzureResourceBuilderInit implements
 
     @Override
     public AzureDeleteContextObject deleteInit(Stack stack) throws Exception {
-        AzureCredential credential = (AzureCredential) stack.getCredential();
-        AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
-
         AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
         AzureDeleteContextObject azureDeleteContextObject =
-                new AzureDeleteContextObject(stack.getId(), credential.getCommonName(azureLocation), azureClient);
+                new AzureDeleteContextObject(stack.getId(), azureClient);
         return azureDeleteContextObject;
     }
 
     @Override
     public AzureDeleteContextObject decommissionInit(Stack stack, Set<String> decommissionSet) throws Exception {
-        AzureCredential credential = (AzureCredential) stack.getCredential();
-        AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
-
         AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
         List<Resource> resourceList = new ArrayList<>();
         for (String res : decommissionSet) {
@@ -73,7 +74,7 @@ public class AzureResourceBuilderInit implements
             }
         }
         AzureDeleteContextObject azureDeleteContextObject =
-                new AzureDeleteContextObject(stack.getId(), credential.getCommonName(azureLocation), azureClient, resourceList);
+                new AzureDeleteContextObject(stack.getId(), azureClient, resourceList);
         return azureDeleteContextObject;
     }
 
@@ -90,10 +91,6 @@ public class AzureResourceBuilderInit implements
     @Override
     public CloudPlatform cloudPlatform() {
         return CloudPlatform.AZURE;
-    }
-
-    public String getOsImageName(Credential credential, AzureLocation location, String imageUrl) {
-        return azureStackUtil.getOsImageName(credential, location, imageUrl);
     }
 
     private Set<String> getAllocatedAddresses(Stack stack) {

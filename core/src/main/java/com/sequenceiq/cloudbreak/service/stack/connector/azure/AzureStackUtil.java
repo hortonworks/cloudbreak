@@ -12,7 +12,11 @@ import java.nio.file.StandardCopyOption;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
@@ -23,9 +27,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.controller.validation.StackParam;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
-import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
@@ -40,11 +48,13 @@ public class AzureStackUtil {
     public static final String RESERVEDIPNAME = "reservedIpName";
     public static final String SERVICENAME = "serviceName";
     public static final String VIRTUAL_NETWORK_IP_ADDRESS = "virtualNetworkIPAddress";
-    public static final String ERROR = "\"error\":\"Could not fetch data from azure\"";
     public static final String CREDENTIAL = "credential";
-    public static final String IMAGE_NAME = "ambari-docker-v1";
+    public static final String IMAGE_NAME = "ambari-docker";
     public static final String DEFAULT_JKS_PASS = "azure1";
+    public static final String CB_STORAGE_BASE = "cb";
     public static final Logger LOGGER = LoggerFactory.getLogger(AzureStackUtil.class);
+    public static final int ROOTFS_COUNT = 1;
+    public static final int GLOBAL_STORAGE = -1;
 
     @Autowired
     private KeyGeneratorService keyGeneratorService;
@@ -55,11 +65,70 @@ public class AzureStackUtil {
     @Autowired
     private UserDetailsService userDetailsService;
 
-    public String getOsImageName(Credential credential, AzureLocation location, String image) {
-        String[] split = image.split("/");
-        AzureCredential azureCredential = (AzureCredential) credential;
-        return format("%s-%s-%s", azureCredential.getCommonName(location), IMAGE_NAME,
-                split[split.length - 1].replaceAll(".vhd", ""));
+    public String getOsImageName(Stack stack, AzureLocation location, int storageIndex) {
+        return getOsImageName(stack, getOSStorageName(stack, location, storageIndex));
+    }
+
+    public String getOsImageName(Stack stack, String storageName) {
+        String[] split = stack.getImage().split("/");
+        return format("%s-%s-%s", storageName, IMAGE_NAME, split[split.length - 1].replaceAll(".vhd", ""));
+    }
+
+    public String getOSStorageName(Stack stack, AzureLocation location, int index) {
+        String baseStorageName = CB_STORAGE_BASE + location.region().toLowerCase().replaceAll(" ", "");
+        return index == GLOBAL_STORAGE ? baseStorageName : baseStorageName + stack.getId() + index;
+    }
+
+    /**
+     * Determines the number of required Storage Accounts to distribute the VHDs.
+     * In case of global Storage Account it returns -1.
+     */
+    public int getNumOfStorageAccounts(Stack stack) {
+        if (!stack.isBlobCountSpecified()) {
+            return GLOBAL_STORAGE;
+        }
+        List<Resource> storages = stack.getResourcesByType(ResourceType.AZURE_STORAGE);
+        if (!storages.isEmpty()) {
+            return storages.size();
+        }
+        int vhdPerStorageAccount = getNumOfVHDPerStorageAccount(stack);
+        List<InstanceGroup> instanceGroups = getOrderedInstanceGroups(stack);
+        int[] accounts = new int[4096];
+        Arrays.fill(accounts, vhdPerStorageAccount);
+        for (InstanceGroup ig : instanceGroups) {
+            int nodeCount = ig.getNodeCount();
+            int volumeCount = ig.getTemplate().getVolumeCount() + ROOTFS_COUNT;
+            for (int i = 0; i < nodeCount; i++) {
+                for (int j = 0; j < accounts.length; j++) {
+                    int space = accounts[j];
+                    if (space - volumeCount >= 0) {
+                        accounts[j] = space - volumeCount;
+                        break;
+                    }
+                }
+            }
+        }
+        int numAccounts = 0;
+        for (int i = 0; i < accounts.length; i++) {
+            if (accounts[i] != vhdPerStorageAccount) {
+                numAccounts++;
+            } else {
+                break;
+            }
+        }
+        return numAccounts;
+    }
+
+    public int getNumOfVHDPerStorageAccount(Stack stack) {
+        String vhdNum = stack.getParameters().get(StackParam.DISK_PER_STORAGE.getName());
+        int vhdPS = Integer.valueOf(vhdNum == null ? "0" : vhdNum);
+        for (InstanceGroup ig : stack.getInstanceGroups()) {
+            int volumeCount = ig.getTemplate().getVolumeCount() + ROOTFS_COUNT;
+            if (volumeCount > vhdPS) {
+                vhdPS = volumeCount;
+            }
+        }
+        return vhdPS;
     }
 
     public synchronized AzureClient createAzureClient(AzureCredential credential) {
@@ -111,6 +180,17 @@ public class AzureStackUtil {
             throw new AzureResourceException(e);
         }
         return azureCredential;
+    }
+
+    private List<InstanceGroup> getOrderedInstanceGroups(Stack stack) {
+        List<InstanceGroup> instanceGroups = stack.getInstanceGroupsAsList();
+        Collections.sort(instanceGroups, new Comparator<InstanceGroup>() {
+            @Override
+            public int compare(InstanceGroup o1, InstanceGroup o2) {
+                return o1.getNodeCount().compareTo(o2.getNodeCount());
+            }
+        });
+        return instanceGroups;
     }
 
     private Certificate getCertificate(AzureCredential azureCredential, String serviceFilesPathWithoutExtension) throws Exception {

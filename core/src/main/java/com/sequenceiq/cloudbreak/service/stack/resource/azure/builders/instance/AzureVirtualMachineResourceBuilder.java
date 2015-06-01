@@ -103,23 +103,30 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             Stack stack = stackRepository.findById(provisionContextObject.getStackId());
             AzureTemplate azureTemplate = (AzureTemplate) instanceGroup.orNull().getTemplate();
             AzureCredential azureCredential = (AzureCredential) stack.getCredential();
-            byte[] encoded = Base64.encodeBase64(buildResources.get(0).getResourceName().getBytes());
+            String resourceName = buildResources.get(0).getResourceName();
+            byte[] encoded = Base64.encodeBase64(resourceName.getBytes());
             String label = new String(encoded);
+            AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
+            int storageIndex = provisionContextObject.isUseGlobalStorageAccount() ? AzureStackUtil.GLOBAL_STORAGE
+                    : provisionContextObject.setAndGetStorageAccountIndex(azureTemplate.getVolumeCount() + AzureStackUtil.ROOTFS_COUNT);
+            LOGGER.info("Storage index selected: {} for {}", storageIndex, resourceName);
+            String osStorageName = azureStackUtil.getOSStorageName(stack, azureLocation, storageIndex);
             Map<String, Object> props = new HashMap<>();
-            props.put(NAME, buildResources.get(0).getResourceName());
+            props.put(NAME, resourceName);
             props.put(DEPLOYMENTSLOT, PRODUCTION);
             props.put(LABEL, label);
-            props.put(IMAGENAME, azureStackUtil.getOsImageName(stack.getCredential(), AzureLocation.valueOf(stack.getRegion()), stack.getImage()));
-            props.put(IMAGESTOREURI, buildImageStoreUri(provisionContextObject.getCommonName(), buildResources.get(0).getResourceName()));
-            props.put(HOSTNAME, buildResources.get(0).getResourceName());
+            props.put(IMAGENAME, azureStackUtil.getOsImageName(stack, azureLocation, storageIndex));
+            props.put(IMAGESTOREURI, buildImageStoreUri(osStorageName, resourceName));
+            props.put(HOSTNAME, resourceName);
             props.put(USERNAME, CB_GCP_AND_AZURE_USER_NAME);
             props.put(SSHPUBLICKEYFINGERPRINT, azureStackUtil.createX509Certificate(azureCredential).getSha1Fingerprint().toUpperCase());
             props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", CB_GCP_AND_AZURE_USER_NAME));
-            props.put(AFFINITYGROUP, provisionContextObject.getCommonName());
+            props.put(STORAGE_NAME, osStorageName);
+            props.put(AFFINITYGROUP, provisionContextObject.getAffinityGroupName());
             if (azureTemplate.getVolumeCount() > 0) {
                 props.put(DISKS, generateDisksProperty(azureTemplate));
             }
-            props.put(SERVICENAME, buildResources.get(0).getResourceName());
+            props.put(SERVICENAME, resourceName);
             props.put(SUBNETNAME, provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
             props.put(VIRTUAL_NETWORK_IP_ADDRESS, findNextValidIp(provisionContextObject));
             props.put(CUSTOMDATA, new String(Base64.encodeBase64(userData.orNull().getBytes())));
@@ -157,8 +164,8 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         return ip;
     }
 
-    private String buildImageStoreUri(String commonName, String vmName) {
-        return String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", commonName, vmName);
+    private String buildImageStoreUri(String storageName, String vmName) {
+        return String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", storageName, vmName);
     }
 
     @Override

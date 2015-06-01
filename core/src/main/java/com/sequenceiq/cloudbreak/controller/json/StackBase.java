@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -47,6 +49,8 @@ public abstract class StackBase implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = StackModelDescription.NETWORK_ID, required = true)
     private Long networkId;
+    @ApiModelProperty(StackModelDescription.PARAMETERS)
+    private Map<String, String> parameters = new HashMap<>();
 
     public FailurePolicyJson getFailurePolicy() {
         return failurePolicy;
@@ -128,5 +132,13 @@ public abstract class StackBase implements JsonEntity {
 
     public void setNetworkId(Long networkId) {
         this.networkId = networkId;
+    }
+
+    public Map<String, String> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(Map<String, String> parameters) {
+        this.parameters = parameters;
     }
 }

@@ -39,6 +39,7 @@ public class ModelDescriptions {
         public static final String IMAGE = "name of the image for instance creation";
         public static final String CONSUL_SERVER_COUNT = "consul server count";
         public static final String CONSUL_SERVER_COUNT_BY_USER = "user defined consul server count";
+        public static final String PARAMETERS = "additional cloud specific parameters for stack";
         public static final String ALLOWED_SUBNETS = "allowed subnets";
         public static final String FAILURE_ACTION = "action on failure";
         public static final String FAILURE_POLICY = "failure policy in case of failures";

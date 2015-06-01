@@ -9,18 +9,15 @@ import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
 public class AzureDeleteContextObject extends DeleteContextObject {
 
     private AzureClient azureClient;
-    private String commonName;
 
-    public AzureDeleteContextObject(Long stackId, String commonName, AzureClient azureClient) {
+    public AzureDeleteContextObject(Long stackId, AzureClient azureClient) {
         super(stackId);
         this.azureClient = azureClient;
-        this.commonName = commonName;
     }
 
-    public AzureDeleteContextObject(Long stackId, String commonName, AzureClient azureClient, List<Resource> decommisionResources) {
-        super(stackId, decommisionResources);
+    public AzureDeleteContextObject(Long stackId, AzureClient azureClient, List<Resource> decommissionResources) {
+        super(stackId, decommissionResources);
         this.azureClient = azureClient;
-        this.commonName = commonName;
     }
 
     public AzureClient getAzureClient() {
@@ -29,14 +26,6 @@ public class AzureDeleteContextObject extends DeleteContextObject {
 
     public void setAzureClient(AzureClient azureClient) {
         this.azureClient = azureClient;
-    }
-
-    public String getCommonName() {
-        return commonName;
-    }
-
-    public void setCommonName(String commonName) {
-        this.commonName = commonName;
     }
 
 }

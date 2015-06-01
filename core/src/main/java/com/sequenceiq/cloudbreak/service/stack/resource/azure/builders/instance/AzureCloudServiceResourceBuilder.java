@@ -72,9 +72,8 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
     public Boolean delete(Resource resource, AzureDeleteContextObject deleteContextObject, String region) throws Exception {
         Stack stack = stackRepository.findById(deleteContextObject.getStackId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
-        AzureCloudServiceDeleteTaskContext azureCloudServiceDeleteTaskContext =
-                new AzureCloudServiceDeleteTaskContext(deleteContextObject.getCommonName(), resource.getResourceName(),
-                        stack, azureStackUtil.createAzureClient(credential));
+        AzureCloudServiceDeleteTaskContext azureCloudServiceDeleteTaskContext = new AzureCloudServiceDeleteTaskContext(resource.getResourceName(),
+                stack, azureStackUtil.createAzureClient(credential));
         azureCloudServiceRemoveReadyPollerObjectPollingService
                 .pollWithTimeout(azureCloudServiceDeleteTask, azureCloudServiceDeleteTaskContext, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
         return true;
@@ -101,9 +100,8 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
         Map<String, String> props = new HashMap<>();
         props.put(NAME, vmName);
         props.put(DESCRIPTION, azureTemplate.getDescription());
-        props.put(AFFINITYGROUP, provisionContextObject.getCommonName());
-        return new AzureCloudServiceCreateRequest(props, azureStackUtil.createAzureClient((AzureCredential) stack.getCredential()),
-                resources, buildResources, stack, instanceGroup.orNull());
+        props.put(AFFINITYGROUP, provisionContextObject.getAffinityGroupName());
+        return new AzureCloudServiceCreateRequest(props, resources, buildResources, stack, instanceGroup.orNull());
     }
 
     @Override
@@ -113,16 +111,14 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
 
     public class AzureCloudServiceCreateRequest extends CreateResourceRequest {
         private Map<String, String> props = new HashMap<>();
-        private AzureClient azureClient;
         private List<Resource> resources;
         private Stack stack;
         private InstanceGroup instanceGroup;
 
-        public AzureCloudServiceCreateRequest(Map<String, String> props, AzureClient azureClient, List<Resource> resources, List<Resource> buildNames,
+        public AzureCloudServiceCreateRequest(Map<String, String> props, List<Resource> resources, List<Resource> buildNames,
                 Stack stack, InstanceGroup instanceGroup) {
             super(buildNames);
             this.props = props;
-            this.azureClient = azureClient;
             this.resources = resources;
             this.stack = stack;
             this.instanceGroup = instanceGroup;

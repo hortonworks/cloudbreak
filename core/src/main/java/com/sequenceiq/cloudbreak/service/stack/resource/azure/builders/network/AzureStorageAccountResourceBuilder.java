@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack.resource.azure.builders.network;
 
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,17 +13,19 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.cloud.connector.CloudConnectorException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureResourceException;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureCreateResourceStatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureDeleteResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourcePollerObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
@@ -43,29 +45,35 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
     @Autowired
     private AzureCreateResourceStatusCheckerTask azureCreateResourceStatusCheckerTask;
     @Autowired
+    private AzureDeleteResourceStatusCheckerTask azureDeleteResourceStatusCheckerTask;
+    @Autowired
     private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
 
     @Override
     public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
         AzureStorageAccountCreateRequest aCSCR = (AzureStorageAccountCreateRequest) createResourceRequest;
         Stack stack = stackRepository.findById(aCSCR.stackId);
-        try {
-            aCSCR.getAzureClient().getStorageAccount(aCSCR.getName());
-        } catch (Exception ex) {
-            if (ex instanceof HttpResponseException) {
-                HttpResponseException httpResponseException = (HttpResponseException) ex;
-                if (httpResponseException.getStatusCode() == NOT_FOUND) {
-                    HttpResponseDecorator storageResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createStorageAccount(aCSCR.getProps());
-                    AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), stack, storageResponse);
-                    azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
-                            POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
+        AzureClient azureClient = aCSCR.getAzureClient();
+        for (Map<String, String> properties : aCSCR.getProps()) {
+            String storageName = properties.get(NAME);
+            try {
+                azureClient.getStorageAccount(storageName);
+            } catch (Exception ex) {
+                if (ex instanceof HttpResponseException) {
+                    HttpResponseException httpResponseException = (HttpResponseException) ex;
+                    if (httpResponseException.getStatusCode() == NOT_FOUND) {
+                        HttpResponseDecorator storageResponse = (HttpResponseDecorator) azureClient.createStorageAccount(properties);
+                        AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(azureClient, stack, storageResponse);
+                        azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
+                                POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
+                    } else {
+                        LOGGER.error("Error creating storage: {}", storageName, httpResponseException);
+                        throw new AzureResourceException(httpResponseException.getResponse().toString());
+                    }
                 } else {
-                    LOGGER.error("Error creating storage: {}", aCSCR.getName(), httpResponseException);
-                    throw new CloudConnectorException(httpResponseException.getResponse().toString());
+                    LOGGER.error("Error creating storage: {} for stack: {}", storageName, aCSCR.getStackId(), ex);
+                    throw new AzureResourceException(ex);
                 }
-            } else {
-                LOGGER.error("Error creating storage: {} for stack: {}", aCSCR.getName(), aCSCR.getStackId(), ex);
-                throw new CloudConnectorException(ex);
             }
         }
         return true;
@@ -73,6 +81,32 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
 
     @Override
     public Boolean delete(Resource resource, AzureDeleteContextObject deleteContextObject, String region) throws Exception {
+        Stack stack = stackRepository.findById(deleteContextObject.getStackId());
+        if (AzureStackUtil.GLOBAL_STORAGE != azureStackUtil.getNumOfStorageAccounts(stack)) {
+            AzureClient azureClient = deleteContextObject.getAzureClient();
+            String storageName = resource.getResourceName();
+            String osImageName = azureStackUtil.getOsImageName(stack, storageName);
+            if (azureClient.isImageAvailable(osImageName)) {
+                HttpResponseDecorator imageResponse = (HttpResponseDecorator) azureClient.deleteOsImage(osImageName);
+                AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(azureClient, stack, imageResponse);
+                azureResourcePollerObjectPollingService.pollWithTimeout(azureDeleteResourceStatusCheckerTask, azureResourcePollerObject,
+                        POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
+            }
+            try {
+                azureClient.deleteStorageAccount(storageName);
+            } catch (Exception e) {
+                if (e instanceof HttpResponseException) {
+                    HttpResponseException httpResponseException = (HttpResponseException) e;
+                    if (httpResponseException.getStatusCode() == NOT_FOUND) {
+                        LOGGER.info("Storage Account: {} has already been deleted", storageName);
+                    } else {
+                        throw new AzureResourceException(httpResponseException.getResponse().toString());
+                    }
+                } else {
+                    throw new AzureResourceException(e);
+                }
+            }
+        }
         return true;
     }
 
@@ -80,7 +114,17 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
     public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources,
             Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        return Arrays.asList(new Resource(resourceType(), provisionContextObject.getCommonName(), stack, null));
+        AzureLocation location = AzureLocation.valueOf(stack.getRegion());
+        List<Resource> accounts = new ArrayList<>();
+        int storageAccountNum = azureStackUtil.getNumOfStorageAccounts(stack);
+        if (storageAccountNum == AzureStackUtil.GLOBAL_STORAGE) {
+            accounts.add(new Resource(resourceType(), azureStackUtil.getOSStorageName(stack, location, storageAccountNum), stack, null));
+        } else {
+            for (int i = 0; i < storageAccountNum; i++) {
+                accounts.add(new Resource(resourceType(), azureStackUtil.getOSStorageName(stack, location, i), stack, null));
+            }
+        }
+        return accounts;
     }
 
     @Override
@@ -88,13 +132,16 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
             List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup, Optional<String> userData) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
-        Map<String, String> props = new HashMap<>();
-        props.put(NAME, buildResources.get(0).getResourceName());
-        props.put(DESCRIPTION, "description");
-        props.put(AFFINITYGROUP, provisionContextObject.getCommonName());
         AzureClient azureClient = azureStackUtil.createAzureClient(credential);
-        return new AzureStorageAccountCreateRequest(buildResources.get(0).getResourceName(), provisionContextObject.getStackId(), props, azureClient,
-                resources, buildResources);
+        List<Map<String, String>> propertyList = new ArrayList<>(buildResources.size());
+        for (Resource resource : buildResources) {
+            Map<String, String> props = new HashMap<>();
+            props.put(NAME, resource.getResourceName());
+            props.put(DESCRIPTION, "description");
+            props.put(AFFINITYGROUP, provisionContextObject.getAffinityGroupName());
+            propertyList.add(props);
+        }
+        return new AzureStorageAccountCreateRequest(provisionContextObject.getStackId(), propertyList, azureClient, resources, buildResources);
     }
 
     @Override
@@ -103,32 +150,30 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
     }
 
     public class AzureStorageAccountCreateRequest extends CreateResourceRequest {
-        private Map<String, String> props = new HashMap<>();
+        private List<Map<String, String>> props = new ArrayList<>();
         private AzureClient azureClient;
-        private String name;
         private Long stackId;
         private List<Resource> resources;
 
-        public AzureStorageAccountCreateRequest(String name, Long stackId, Map<String, String> props, AzureClient azureClient, List<Resource> resources,
+        public AzureStorageAccountCreateRequest(Long stackId, List<Map<String, String>> props, AzureClient azureClient, List<Resource> resources,
                 List<Resource> buildNames) {
             super(buildNames);
-            this.name = name;
             this.stackId = stackId;
             this.props = props;
             this.azureClient = azureClient;
             this.resources = resources;
         }
 
-        public String getName() {
-            return name;
-        }
-
         public Long getStackId() {
             return stackId;
         }
 
-        public Map<String, String> getProps() {
+        public List<Map<String, String>> getProps() {
             return props;
+        }
+
+        public void setProps(List<Map<String, String>> props) {
+            this.props = props;
         }
 
         public AzureClient getAzureClient() {

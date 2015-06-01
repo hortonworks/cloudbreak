@@ -57,6 +57,7 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         } else {
             stackJson.setNetworkId(source.getNetwork().getId());
         }
+        stackJson.setParameters(source.getParameters());
         return stackJson;
     }
 
