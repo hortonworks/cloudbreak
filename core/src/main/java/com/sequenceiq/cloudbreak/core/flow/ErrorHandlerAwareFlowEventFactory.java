@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import reactor.event.Event;
+import reactor.bus.Event;
 
 /**
  * Even factory that registers an error handler into the event.

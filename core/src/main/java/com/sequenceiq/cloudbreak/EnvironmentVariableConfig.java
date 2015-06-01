@@ -9,7 +9,7 @@ public class EnvironmentVariableConfig {
     public static final String CB_CONTAINER_THREADPOOL_CORE_SIZE = "40";
     public static final String CB_CONTAINER_THREADPOOL_CAPACITY_SIZE = "4000";
 
-    public static final String CB_REACTOR_THREADPOOL_CORE_SIZE = "100";
+    public static final String CB_EVENTBUS_THREADPOOL_CORE_SIZE = "100";
 
     public static final String CB_SMTP_SENDER_HOST = "";
     public static final String CB_SMTP_SENDER_PORT = "25";

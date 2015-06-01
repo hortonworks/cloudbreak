@@ -12,21 +12,14 @@ import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.FlowManager;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 
-import reactor.core.Environment;
-import reactor.core.Reactor;
-import reactor.core.spec.Reactors;
-import reactor.event.dispatch.SynchronousDispatcher;
+import reactor.Environment;
+import reactor.bus.EventBus;
+
 
 @Configuration
-@ComponentScan(basePackageClasses = { FlowManager.class, FlowHandler.class, ProvisionSetup.class })
+@ComponentScan(basePackageClasses = {FlowManager.class, FlowHandler.class, ProvisionSetup.class })
 @Import(FlowConfig.class)
 public class TestConfig {
-
-//    @Autowired
-//    private List<ProvisionSetup> provisionSetups;
-//
-//    @Autowired
-//    private List<FlowHandler> flowHandlers;
 
     @Bean
     public static PropertyResourceConfigurer propertyResourceConfigurer() {
@@ -35,24 +28,12 @@ public class TestConfig {
 
     @Bean
     public Environment env() {
-        return new Environment();
+        return Environment.initializeIfEmpty();
     }
 
     @Bean
-    public Reactor reactor(Environment env) {
-        return Reactors.reactor()
-                .env(env)
-                .dispatcher(new SynchronousDispatcher())
-                .get();
+    public EventBus reactor(Environment env) {
+        return EventBus.create(env);
     }
-
-    //    @Bean
-    //    public Map<CloudPlatform, ProvisionSetup> provisionSetups() {
-    //        Map<CloudPlatform, ProvisionSetup> map = new HashMap<>();
-    //        for (ProvisionSetup provisionSetup : provisionSetups) {
-    //            map.put(provisionSetup.getCloudPlatform(), provisionSetup);
-    //        }
-    //        return map;
-    //    }
 
 }

@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import reactor.function.Consumer;
+import reactor.fn.Consumer;
 
 /**
  * Generic error handler for the Cloudbreak application.

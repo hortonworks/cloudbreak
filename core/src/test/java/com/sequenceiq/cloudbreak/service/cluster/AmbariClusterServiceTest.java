@@ -50,9 +50,8 @@ import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
 
 import groovyx.net.http.HttpResponseException;
-import reactor.core.Reactor;
-import reactor.event.Event;
-
+import reactor.bus.Event;
+import reactor.bus.EventBus;
 public class AmbariClusterServiceTest {
 
     @InjectMocks
@@ -69,7 +68,7 @@ public class AmbariClusterServiceTest {
     private RetryingStackUpdater stackUpdater;
 
     @Mock
-    private Reactor reactor;
+    private EventBus reactor;
 
     @Mock
     private AmbariClient ambariClient;

@@ -12,8 +12,7 @@ import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 
-import reactor.event.Event;
-
+import reactor.bus.Event;
 @Component
 public class StackDownscaleHandler extends AbstractFlowHandler<StackScalingContext> implements FlowHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDownscaleHandler.class);

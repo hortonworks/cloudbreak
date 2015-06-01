@@ -10,8 +10,7 @@ import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 
-import reactor.event.Event;
-
+import reactor.bus.Event;
 @Component
 public class ClusterStartRequestedHandler extends AbstractFlowHandler<StackStatusUpdateContext> implements FlowHandler {
 

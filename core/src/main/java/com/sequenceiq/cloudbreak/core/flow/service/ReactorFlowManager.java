@@ -23,9 +23,8 @@ import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateAllowedSubnetsRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
+import reactor.bus.Event;
+import reactor.bus.EventBus;
 /**
  * Flow manager implementation backed by Reactor.
  * This class is the flow state machine and mediates between the states and reactor events
@@ -35,7 +34,7 @@ public class ReactorFlowManager implements FlowManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReactorFlowManager.class);
 
     @Autowired
-    private Reactor reactor;
+    private EventBus reactor;
 
     @Autowired
     private TransitionKeyService transitionKeyService;

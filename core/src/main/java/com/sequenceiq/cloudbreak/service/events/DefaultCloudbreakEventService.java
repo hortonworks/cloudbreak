@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.conf.EventBusConfig;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
@@ -19,8 +19,8 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
+import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 @Service
 public class DefaultCloudbreakEventService implements CloudbreakEventService {
@@ -33,7 +33,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     private CloudbreakEventRepository eventRepository;
 
     @Autowired
-    private Reactor reactor;
+    private EventBus reactor;
 
     @Autowired
     private NotificationSender notificationSender;
@@ -43,7 +43,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         CloudbreakEventData eventData = new CloudbreakEventData(stackId, eventType, eventMessage);
         LOGGER.info("Firing Cloudbreak event: {}", eventData);
         Event reactorEvent = Event.wrap(eventData);
-        reactor.notify(ReactorConfig.CLOUDBREAK_EVENT, reactorEvent);
+        reactor.notify(EventBusConfig.CLOUDBREAK_EVENT, reactorEvent);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         InstanceGroupEventData eventData = new InstanceGroupEventData(stackId, eventType, eventMessage, instanceGroupName);
         LOGGER.info("Fireing cloudbreak event: {}", eventData);
         Event reactorEvent = Event.wrap(eventData);
-        reactor.notify(ReactorConfig.CLOUDBREAK_EVENT, reactorEvent);
+        reactor.notify(EventBusConfig.CLOUDBREAK_EVENT, reactorEvent);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
-import reactor.event.Event;
+import reactor.bus.Event;
 
 public interface FlowEventFactory<T> {
     Event<T> createEvent(T payLoad, String eventKey);
