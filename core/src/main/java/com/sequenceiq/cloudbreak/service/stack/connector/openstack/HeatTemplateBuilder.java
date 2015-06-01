@@ -93,7 +93,7 @@ public class HeatTemplateBuilder {
             LOGGER.debug("Generated Heat template: {}",  generatedTemplate);
             return generatedTemplate;
         } catch (IOException | TemplateException e) {
-            throw new OpenStackResourceException("Failed to process the OpenStack HeatTemplate", e);
+            throw new OpenStackResourceException("Failed to process the OpenStack HeatTemplateBuilder", e);
         }
     }
 

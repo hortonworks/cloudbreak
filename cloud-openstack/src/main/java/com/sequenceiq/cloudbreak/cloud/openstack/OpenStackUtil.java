@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("OpenStackUtilV2")
 public class OpenStackUtil {
 
     public static final String OPENSTACK = "OPENSTACK";

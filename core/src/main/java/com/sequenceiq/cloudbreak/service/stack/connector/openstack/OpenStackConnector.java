@@ -36,11 +36,10 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 
 @Service
-public class OpenStackConnector implements CloudPlatformConnector {
+public class OpenStackConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackConnector.class);
 
@@ -75,7 +74,6 @@ public class OpenStackConnector implements CloudPlatformConnector {
     @Inject
     private OpenStackInstanceStatusCheckerTask openStackInstanceStatusCheckerTask;
 
-    @Override
     public Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties) {
         String stackName = stack.getName();
         OpenStackCredential credential = (OpenStackCredential) stack.getCredential();
@@ -102,7 +100,6 @@ public class OpenStackConnector implements CloudPlatformConnector {
         return new HashSet<>(resources);
     }
 
-    @Override
     public Set<Resource> addInstances(Stack stack, String gateWayUserData, String coreUserData, Integer adjustment, String instanceGroup) {
         InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         group.setNodeCount(group.getNodeCount() + adjustment);
@@ -116,7 +113,6 @@ public class OpenStackConnector implements CloudPlatformConnector {
         return Collections.emptySet();
     }
 
-    @Override
     public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
         Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(stack.cloudPlatform());
         String heatTemplate = heatTemplateBuilder.remove(stack, userData.get(InstanceGroupType.GATEWAY), userData.get(InstanceGroupType.CORE),
@@ -129,7 +125,6 @@ public class OpenStackConnector implements CloudPlatformConnector {
         return instanceIds;
     }
 
-    @Override
     public void deleteStack(Stack stack, Credential credential) {
         OSClient osClient = openStackUtil.createOSClient(stack);
         Resource heatStack = stack.getResourceByType(ResourceType.HEAT_STACK);
@@ -149,27 +144,22 @@ public class OpenStackConnector implements CloudPlatformConnector {
         }
     }
 
-    @Override
     public void rollback(Stack stack, Set<Resource> resourceSet) {
         deleteStack(stack, stack.getCredential());
     }
 
-    @Override
     public boolean startAll(Stack stack) {
         return setStackState(stack, false);
     }
 
-    @Override
     public boolean stopAll(Stack stack) {
         return setStackState(stack, true);
     }
 
-    @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.OPENSTACK;
     }
 
-    @Override
     public void updateAllowedSubnets(Stack stack, String gateWayUserData, String coreUserData) {
         Set<InstanceMetaData> metadata = instanceMetaDataRepository.findAllInStack(stack.getId());
         String heatTemplate = heatTemplateBuilder.update(stack, gateWayUserData, coreUserData, metadata);

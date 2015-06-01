@@ -25,4 +25,13 @@ public class StackContext {
     public String getPlatform() {
         return platform;
     }
+
+    @Override
+    public String toString() {
+        return "StackContext{" +
+                "stackId=" + stackId +
+                ", stackName='" + stackName + '\'' +
+                ", platform='" + platform + '\'' +
+                '}';
+    }
 }
