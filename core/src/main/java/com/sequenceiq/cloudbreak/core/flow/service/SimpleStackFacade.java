@@ -206,19 +206,15 @@ public class SimpleStackFacade implements StackFacade {
                 logAfter(actualContext.getStackId(), context, "Termination of stack", DELETE_IN_PROGRESS);
             }
 
-            logBefore(actualContext.getStackId(), context, "Termination of stack finalize", DELETE_IN_PROGRESS);
-            terminationService.finalizeTermination(stack.getId());
-            logAfter(actualContext.getStackId(), context, "Termination of stack finalize", DELETE_COMPLETED);
-
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), DELETE_COMPLETED.name(),
                     "The cluster and its infrastructure have successfully been terminated.");
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_STOPPED.name(),
                     "Billing stopped; the cluster and its infrastructure have been terminated.");
-
             if (stack.getCluster() != null) {
                 clusterService.updateClusterStatusByStackId(actualContext.getStackId(), DELETE_COMPLETED);
             }
             stackUpdater.updateStackStatus(actualContext.getStackId(), DELETE_COMPLETED);
+            terminationService.finalizeTermination(stack.getId());
 
         } catch (Exception e) {
             LOGGER.error("Exception during the stack termination process: {}", e.getMessage());
