@@ -1,11 +1,11 @@
-package com.sequenceiq.cloudbreak.controller;
+package com.sequenceiq.cloudbreak.service;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.domain.Resource;
 
-public class BuildStackFailureException extends RuntimeException {
+public class BuildStackFailureException extends CloudbreakServiceException {
 
     private final Set<Resource> resourceSet;
 

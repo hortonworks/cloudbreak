@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.subscription;
 
-public class SubscriptionAlreadyExistException extends RuntimeException {
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+
+public class SubscriptionAlreadyExistException extends CloudbreakServiceException {
 
     public SubscriptionAlreadyExistException(String message) {
         super(message);

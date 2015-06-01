@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.connector;
 
 /**
  * Base for cloud provider specific errors.
- * Intended to replace the InternalServerException.
  */
 public class CloudConnectorException extends RuntimeException {
 

@@ -99,7 +99,7 @@ public abstract class AbstractFlowHandler<T extends DefaultFlowContext> implemen
      * @param event     the received data
      */
     protected void consumeError(Event<T> event, Throwable throwable) {
-        LOGGER.debug("Default error consumption logic for exception: ", throwable);
+        LOGGER.debug("Default error consumption logic for exception: ", throwable.getMessage());
         event.consumeError(throwable);
     }
 
