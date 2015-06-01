@@ -37,8 +37,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import com.sequenceiq.cloudbreak.controller.validation.StackParam;
-
 @Entity
 @Table(name = "Stack", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "account", "name" })
@@ -420,7 +418,7 @@ public class Stack implements ProvisionEntity {
     }
 
     public boolean isStackInDeletionPhase() {
-        return status.equals(Status.DELETE_COMPLETED) || status.equals(Status.DELETE_IN_PROGRESS);
+        return status.equals(DELETE_COMPLETED) || status.equals(DELETE_IN_PROGRESS);
     }
 
     public Boolean isCloudPlatformUsedWithTemplate() {
@@ -451,10 +449,6 @@ public class Stack implements ProvisionEntity {
 
     public void setParameters(Map<String, String> parameters) {
         this.parameters = parameters;
-    }
-
-    public boolean isBlobCountSpecified() {
-        return parameters != null && parameters.get(StackParam.DISK_PER_STORAGE.getName()) != null;
     }
 
     public InstanceGroup getGatewayInstanceGroup() {

@@ -84,7 +84,7 @@ public class AzureStackUtil {
      * In case of global Storage Account it returns -1.
      */
     public int getNumOfStorageAccounts(Stack stack) {
-        if (!stack.isBlobCountSpecified()) {
+        if (!isBlobCountSpecified(stack)) {
             return GLOBAL_STORAGE;
         }
         List<Resource> storages = stack.getResourcesByType(ResourceType.AZURE_STORAGE);
@@ -117,6 +117,10 @@ public class AzureStackUtil {
             }
         }
         return numAccounts;
+    }
+
+    public boolean isBlobCountSpecified(Stack stack) {
+        return stack.getParameters() != null && stack.getParameters().get(StackParam.DISK_PER_STORAGE.getName()) != null;
     }
 
     public int getNumOfVHDPerStorageAccount(Stack stack) {

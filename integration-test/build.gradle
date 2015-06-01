@@ -17,14 +17,18 @@ apply plugin: 'spring-boot'
 mainClassName = 'com.sequenceiq.it.IntegrationTestApp'
 
 dependencies {
+    compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
+        exclude group: 'org.slf4j';
+    }
+    compile ('com.sequenceiq:cloudbreak-rest-client:0.4.6') {
+        exclude group: 'org.slf4j';
+    }
     compile group: 'org.springframework.boot', name: 'spring-boot-starter', version: "${springBootVersion}"
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "${springBootVersion}"
     compile group: 'org.springframework', name: 'spring-web', version: '4.1.4.RELEASE'
     compile group: 'org.springframework', name: 'spring-context-support', version: '4.1.4.RELEASE'
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.3.5'
-    compile ('com.sequenceiq:cloudbreak-rest-client:0.4.6') {
-        exclude group: 'org.slf4j';
-    }
+
     compile "org.testng:testng:6.8.21"
     compile "org.uncommons:reportng:1.1.4"
     runtime "com.google.inject:guice:3.0"

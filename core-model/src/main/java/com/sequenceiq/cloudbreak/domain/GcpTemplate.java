@@ -4,9 +4,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
-import com.sequenceiq.cloudbreak.service.stack.connector.gcp.domain.GcpInstanceType;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcp.domain.GcpRawDiskType;
-
 @Entity
 public class GcpTemplate extends Template implements ProvisionEntity {
 

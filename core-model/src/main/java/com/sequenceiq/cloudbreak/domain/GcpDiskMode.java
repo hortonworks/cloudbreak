@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.connector.gcp.domain;
+package com.sequenceiq.cloudbreak.domain;
 
 public enum GcpDiskMode {
 

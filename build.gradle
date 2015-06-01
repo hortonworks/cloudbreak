@@ -56,9 +56,6 @@ subprojects {
     }
 
     dependencies {
-        compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
-            exclude group: 'org.slf4j';
-        }
         checkstyle('com.puppycrawl.tools:checkstyle:5.7') {
             exclude group: 'com.google.guava'
         }
