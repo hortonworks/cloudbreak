@@ -9,6 +9,7 @@ cloudbreak-config() {
   cloudbreak-conf-smtp
   cloudbreak-conf-cloud-provider
   cloudbreak-conf-ui
+  cloudbreak-conf-java
 }
 
 cloudbreak-conf-tags() {
@@ -124,6 +125,10 @@ cloudbreak-conf-ui() {
     env-import ULU_OAUTH_REDIRECT_URI  "$ULU_HOST_ADDRESS/authorize"
     env-import ULU_SULTANS_ADDRESS  "http://$PUBLIC_IP:3001"
 
+}
+
+cloudbreak-conf-java() {
+    env-import SECURE_RANDOM "false"
 }
 
 cloudbreak-shell() {

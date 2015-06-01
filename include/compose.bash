@@ -19,7 +19,7 @@ compose-pull() {
 
     [ -f docker-compose.yml ] || deployer-generate
 
-    # parallell pull 
+    # parallell pull
     # sed -n "s/.*image: //p" docker-compose.yml | sort -u | xargs -I@ -n1 bash -c "docker pull @ &"
     dockerCompose pull
 }
@@ -186,6 +186,7 @@ cloudbreak:
         - CB_DB_PORT_5432_TCP_PORT=5432
         - BACKEND_5432=cbdb.service.consul
         - BACKEND_8089=identity.service.consul
+        - SECURE_RANDOM=$SECURE_RANDOM
     links:
         - ambassador:backend
     ports:
@@ -276,6 +277,7 @@ periscope:
         - BACKEND_8080=cloudbreak.service.consul
         - BACKEND_5433=pcdb.service.consul
         - BACKEND_8089=identity.service.consul
+        - SECURE_RANDOM=$SECURE_RANDOM
     links:
         - ambassador:backend
     ports:
