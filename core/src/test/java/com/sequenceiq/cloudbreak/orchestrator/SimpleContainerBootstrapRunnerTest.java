@@ -16,7 +16,10 @@ public class SimpleContainerBootstrapRunnerTest {
     @Test
     public void bootstrapSuccessWithoutException() throws Exception {
         MDC.put("test", "test");
-        Boolean call = simpleContainerBootstrapRunner(new MockBootstrapRunner(1, MDC.getCopyOfContextMap()), MDC.getCopyOfContextMap()).call();
+        Boolean call = simpleContainerBootstrapRunner(new MockBootstrapRunner(1, MDC.getCopyOfContextMap()),
+                new MockExitCriteria(),
+                new MockExitCriteriaModel(),
+                MDC.getCopyOfContextMap()).call();
         assertEquals(true, call);
     }
 
@@ -39,6 +42,26 @@ public class SimpleContainerBootstrapRunnerTest {
             } else {
                 return true;
             }
+        }
+
+    }
+
+    public class MockExitCriteriaModel extends ExitCriteriaModel {
+        public MockExitCriteriaModel() {
+
+        }
+    }
+
+    public class MockExitCriteria implements ExitCriteria {
+
+        @Override
+        public boolean isExitNeeded(ExitCriteriaModel exitCriteriaModel) {
+            return false;
+        }
+
+        @Override
+        public String exitMessage() {
+            return "test";
         }
     }
 }

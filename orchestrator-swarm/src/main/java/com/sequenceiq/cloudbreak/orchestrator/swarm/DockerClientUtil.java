@@ -22,7 +22,7 @@ public class DockerClientUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(DockerClientUtil.class);
 
     private static final int MAX_RETRIES = 3;
-    private static final int MAX_WAIT_FOR_CONTAINER_RETRIES = 100;
+    private static final int MAX_WAIT_FOR_CONTAINER_RETRIES = 60;
     private static final int TIMEOUT = 3000;
 
     private DockerClientUtil() {

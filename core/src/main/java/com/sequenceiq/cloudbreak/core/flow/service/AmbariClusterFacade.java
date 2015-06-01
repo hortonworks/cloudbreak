@@ -268,7 +268,6 @@ public class AmbariClusterFacade implements ClusterFacade {
             stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
 
             logBefore(actualContext.getStackId(), context, "Run cluster containers in ambari cluster", UPDATE_IN_PROGRESS);
-            LOGGER.debug("Run cluster containers on ambari cluster [FLOW_STEP] [STARTED]. Context: {}", context);
             containerRunner.runClusterContainers(actualContext);
             InstanceGroup gateway = stack.getGatewayInstanceGroup();
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();

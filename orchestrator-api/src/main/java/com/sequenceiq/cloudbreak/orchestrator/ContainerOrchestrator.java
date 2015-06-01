@@ -7,20 +7,26 @@ public interface ContainerOrchestrator {
 
     String name();
 
-    void init(ParallelContainerRunner parallelContainerRunner);
+    void init(ParallelContainerRunner parallelContainerRunner, ExitCriteria exitCriteria);
 
-    void bootstrap(String gatewayAddress, Set<Node> nodes, int consulServerCount) throws CloudbreakOrchestratorException;
+    void bootstrap(String gatewayAddress, Set<Node> nodes, int consulServerCount, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException;
 
-    void bootstrapNewNodes(String gatewayAddress, Set<Node> nodes) throws CloudbreakOrchestratorException;
+    void bootstrapNewNodes(String gatewayAddress, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
-    void startRegistrator(ContainerOrchestratorCluster cluster, String imageName) throws CloudbreakOrchestratorException;
+    void startRegistrator(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
-    void startAmbariServer(ContainerOrchestratorCluster cluster, String dbImageName,
-            String serverImageName, String platform) throws CloudbreakOrchestratorException;
+    void startAmbariServer(ContainerOrchestratorCluster cluster, String dbImageName, String serverImageName, String platform,
+            ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
-    void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, int count, String platform) throws CloudbreakOrchestratorException;
+    void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, int count, String platform, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
-    void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, int count) throws CloudbreakOrchestratorException;
+    void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, int count, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
     boolean areAllNodesAvailable(String gatewayAddress, Set<Node> nodes);
 

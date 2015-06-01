@@ -21,8 +21,10 @@ import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.jaxrs.DockerCmdExecFactoryImpl;
 import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorCancelledException;
+import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
+import com.sequenceiq.cloudbreak.orchestrator.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.orchestrator.Node;
 import com.sequenceiq.cloudbreak.orchestrator.SimpleContainerBootstrapRunner;
 import com.sequenceiq.cloudbreak.orchestrator.SimpleContainerOrchestrator;
@@ -50,9 +52,9 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
      * @return The API address of the container orchestrator
      */
     @Override
-    public void bootstrap(String gatewayAddress, Set<Node> nodes, int consulServerCount) throws CloudbreakOrchestratorException {
+    public void bootstrap(String gatewayAddress, Set<Node> nodes, int consulServerCount, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         try {
-
             String privateGatewayIp = getPrivateGatewayIp(gatewayAddress, nodes);
             Set<String> privateAddresses = getPrivateAddresses(nodes);
             Set<String> privateAddressesWithoutGateway = getPrivateAddresses(getNodesWithoutGateway(gatewayAddress, nodes));
@@ -64,60 +66,79 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             String[] cmd = {"--debug", "bootstrap", "--wait", MUNCHAUSEN_WAIT, "--consulServers",
                     concatToString(consulServers), concatToString(result)};
             new MunchausenBootstrap(dockerApiClient, MUNCHAUSEN_DOCKER_IMAGE, cmd).call();
-        } catch (Exception e) {
-            throw new CloudbreakOrchestratorException(e);
+        } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {
+                throw cloudbreakOrchestratorCancelledExceptionException;
+        } catch (CloudbreakOrchestratorFailedException cloudbreakOrchestratorFailedException) {
+                throw cloudbreakOrchestratorFailedException;
+        } catch (Exception ex) {
+                throw new CloudbreakOrchestratorFailedException(ex);
         }
     }
 
     @Override
-    public void bootstrapNewNodes(String gatewayAddress, Set<Node> nodes) throws CloudbreakOrchestratorException {
+    public void bootstrapNewNodes(String gatewayAddress, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         try {
             DockerClient dockerApiClient = DockerClientBuilder.getInstance(getDockerClientConfig(gatewayAddress)).build();
             Set<String> privateAddresses = getPrivateAddresses(nodes);
             Set<String> result = prepareDockerAddressInventory(privateAddresses);
             String[] cmd = {"--debug", "add", "--wait", MUNCHAUSEN_WAIT, "--join", getConsulJoinIp(gatewayAddress), concatToString(result)};
             new MunchausenBootstrap(dockerApiClient, MUNCHAUSEN_DOCKER_IMAGE, cmd).call();
-        } catch (Exception e) {
-            throw new CloudbreakOrchestratorException(e);
+        } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {
+            throw cloudbreakOrchestratorCancelledExceptionException;
+        } catch (CloudbreakOrchestratorFailedException cloudbreakOrchestratorFailedException) {
+            throw cloudbreakOrchestratorFailedException;
+        } catch (Exception ex) {
+            throw new CloudbreakOrchestratorFailedException(ex);
         }
     }
 
     @Override
-    public void startRegistrator(ContainerOrchestratorCluster cluster, String imageName) throws CloudbreakOrchestratorException {
+    public void startRegistrator(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         try {
             Node gateway = getGatewayNode(cluster.getApiAddress(), cluster.getNodes());
             DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(cluster.getApiAddress()))
                     .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
                     .build();
-            simpleContainerBootstrapRunner(new RegistratorBootstrap(swarmManagerClient, imageName, gateway.getHostname(), gateway.getPrivateIp()),
-                    MDC.getCopyOfContextMap()).call();
-        } catch (Exception e) {
-            throw new CloudbreakOrchestratorException(e);
+            simpleContainerBootstrapRunner(
+                    new RegistratorBootstrap(swarmManagerClient, imageName, gateway.getHostname(), gateway.getPrivateIp()),
+                    getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
+        } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {
+            throw cloudbreakOrchestratorCancelledExceptionException;
+        } catch (CloudbreakOrchestratorFailedException cloudbreakOrchestratorFailedException) {
+            throw cloudbreakOrchestratorFailedException;
+        } catch (Exception ex) {
+            throw new CloudbreakOrchestratorFailedException(ex);
         }
     }
 
     @Override
-    public void startAmbariServer(ContainerOrchestratorCluster cluster, String dbImageName, String serverImageName, String platform)
-            throws CloudbreakOrchestratorException {
+    public void startAmbariServer(ContainerOrchestratorCluster cluster, String dbImageName, String serverImageName, String platform,
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         try {
             Node gateway = getGatewayNode(cluster.getApiAddress(), cluster.getNodes());
             DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(cluster.getApiAddress()))
                     .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
                     .build();
             simpleContainerBootstrapRunner(new AmbariServerDatabaseBootstrap(swarmManagerClient, dbImageName, gateway.getHostname()),
-                    MDC.getCopyOfContextMap()).call();
+                    getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
             simpleContainerBootstrapRunner(new AmbariServerBootstrap(swarmManagerClient, serverImageName, gateway.getHostname(), platform),
-                    MDC.getCopyOfContextMap()).call();
-        } catch (Exception e) {
-            throw new CloudbreakOrchestratorException(e);
+                    getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
+        } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {
+            throw cloudbreakOrchestratorCancelledExceptionException;
+        } catch (CloudbreakOrchestratorFailedException cloudbreakOrchestratorFailedException) {
+            throw cloudbreakOrchestratorFailedException;
+        } catch (Exception ex) {
+            throw new CloudbreakOrchestratorFailedException(ex);
         }
     }
 
     @Override
-    public void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, int count, String platform)
-            throws CloudbreakOrchestratorException {
+    public void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, int count, String platform,
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         if (count > cluster.getNodes().size()) {
-            throw new CloudbreakOrchestratorException("Cannot orchestrate more Ambari agent containers than the available nodes.");
+            throw new CloudbreakOrchestratorFailedException("Cannot orchestrate more Ambari agent containers than the available nodes.");
         }
         try {
             List<Future<Boolean>> futures = new ArrayList<>();
@@ -129,22 +150,30 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             for (int i = 0; i < count; i++) {
                 Node node = nodeIterator.next();
                 String time = String.valueOf(new Date().getTime()) + i;
-                AmbariAgentBootstrap runner = new AmbariAgentBootstrap(swarmManagerClient, imageName, node.getHostname(), node.getDataVolumes(), time, platform);
-                futures.add(getParallelContainerRunner().submit(simpleContainerBootstrapRunner(runner, MDC.getCopyOfContextMap())));
+                AmbariAgentBootstrap runner =
+                        new AmbariAgentBootstrap(swarmManagerClient, imageName, node.getHostname(), node.getDataVolumes(), time, platform);
+                futures.add(getParallelContainerRunner()
+                        .submit(simpleContainerBootstrapRunner(runner, getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap())));
             }
             for (Future<Boolean> future : futures) {
                 future.get();
             }
-        } catch (Exception e) {
-            throw new CloudbreakOrchestratorException(e);
+        } catch (Exception exception) {
+            if (exception instanceof CloudbreakOrchestratorCancelledException) {
+                throw (CloudbreakOrchestratorCancelledException) exception;
+            } else if (exception instanceof CloudbreakOrchestratorFailedException) {
+                throw (CloudbreakOrchestratorFailedException) exception;
+            } else {
+                throw new CloudbreakOrchestratorFailedException(exception);
+            }
         }
     }
 
     @Override
-    public void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, int count)
-            throws CloudbreakOrchestratorException {
+    public void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, int count, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         if (count > cluster.getNodes().size()) {
-            throw new CloudbreakOrchestratorException("Cannot orchestrate more Consul watch containers than the available nodes.");
+            throw new CloudbreakOrchestratorFailedException("Cannot orchestrate more Consul watch containers than the available nodes.");
         }
         try {
             List<Future<Boolean>> futures = new ArrayList<>();
@@ -153,15 +182,22 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
                     .build();
             for (int i = 0; i < count; i++) {
                 String time = String.valueOf(new Date().getTime()) + i;
-                SimpleContainerBootstrapRunner runner = simpleContainerBootstrapRunner(new ConsulWatchBootstrap(swarmManagerClient, imageName, time),
-                        MDC.getCopyOfContextMap());
+                SimpleContainerBootstrapRunner runner = simpleContainerBootstrapRunner(
+                        new ConsulWatchBootstrap(swarmManagerClient, imageName, time),
+                        getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap());
                 futures.add(getParallelContainerRunner().submit(runner));
             }
             for (Future<Boolean> future : futures) {
                 future.get();
             }
-        } catch (Exception e) {
-            throw new CloudbreakOrchestratorException(e);
+        } catch (Exception exception) {
+            if (exception instanceof CloudbreakOrchestratorCancelledException) {
+                throw (CloudbreakOrchestratorCancelledException) exception;
+            } else if (exception instanceof CloudbreakOrchestratorFailedException) {
+                throw (CloudbreakOrchestratorFailedException) exception;
+            } else {
+                throw new CloudbreakOrchestratorFailedException(exception);
+            }
         }
     }
 
@@ -317,5 +353,4 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     private String getConsulJoinIp(String publicIp) {
         return String.format("consul://%s:8500", publicIp);
     }
-
 }

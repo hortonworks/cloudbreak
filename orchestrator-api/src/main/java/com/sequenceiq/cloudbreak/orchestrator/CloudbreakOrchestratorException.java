@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator;
 
-public class CloudbreakOrchestratorException extends Exception {
+public abstract class CloudbreakOrchestratorException extends Exception {
 
     public CloudbreakOrchestratorException(String message) {
         super(message);

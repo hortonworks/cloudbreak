@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import static com.sequenceiq.cloudbreak.domain.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.domain.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.domain.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.START_FAILED;
@@ -296,6 +297,10 @@ public class Cluster implements ProvisionEntity {
 
     public boolean isDeleteInProgress() {
         return DELETE_IN_PROGRESS.equals(status);
+    }
+
+    public boolean isDeleteCompleted() {
+        return DELETE_COMPLETED.equals(status);
     }
 
     public boolean isClusterReadyForStart() {

@@ -40,9 +40,11 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptorMapFactory;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ExecutorBasedParallelContainerRunner;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.StackDeletionBasedExitCriteria;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.ParallelContainerRunner;
 import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
@@ -89,6 +91,11 @@ public class AppConfig {
     private List<CredentialHandler<? extends Credential>> credentialHandlers;
 
     @Bean
+    public ExitCriteria stackDeletionBasedExitCriteria() {
+        return new StackDeletionBasedExitCriteria();
+    }
+
+    @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
@@ -101,7 +108,7 @@ public class AppConfig {
                 Class<?> coClass = AppConfig.class.getClassLoader().loadClass(className);
                 if (ContainerOrchestrator.class.isAssignableFrom(coClass)) {
                     ContainerOrchestrator co = (ContainerOrchestrator) coClass.newInstance();
-                    co.init(simpleParalellContainerRunnerExecutor());
+                    co.init(simpleParalellContainerRunnerExecutor(), stackDeletionBasedExitCriteria());
                     map.put(co.name(), co);
                 }
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {

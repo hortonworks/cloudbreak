@@ -129,9 +129,7 @@ public class AmbariClusterConnector {
             setBaseRepoURL(cluster, ambariClient);
             addBlueprint(stack, ambariClient, cluster.getBlueprint());
             PollingResult waitForHostsResult = waitForHosts(stack, ambariClient);
-            if (!isSuccess(waitForHostsResult)) {
-                throw new ClusterException("Error while waiting for hosts to connect. Polling result: " + waitForHostsResult.name());
-            }
+            checkPollingResult(waitForHostsResult, "Error while waiting for hosts to connect. Polling result: " + waitForHostsResult.name());
 
             Set<HostGroup> hostGroups = hostGroupRepository.findHostGroupsInCluster(cluster.getId());
             Map<String, List<String>> hostGroupMappings = buildHostGroupAssociations(hostGroups);
@@ -143,24 +141,29 @@ public class AmbariClusterConnector {
             }
             ambariClient.createCluster(cluster.getName(), cluster.getBlueprint().getBlueprintName(), hostGroupMappings);
             PollingResult pollingResult = waitForClusterInstall(stack, ambariClient);
-
-            if (!isSuccess(pollingResult)) {
-                throw new ClusterException("Cluster installation failed. Polling result: " + pollingResult.name());
-            }
+            checkPollingResult(pollingResult, "Cluster installation failed. Polling result: " + pollingResult.name());
 
             pollingResult = runSmokeTest(stack, ambariClient);
-            if (!isSuccess(pollingResult)) {
-                throw new ClusterException("Ambari Smoke tests failed. Polling result: " + pollingResult.name());
-            }
+            checkPollingResult(pollingResult, "Ambari Smoke tests failed. Polling result: " + pollingResult.name());
 
             cluster = handleClusterCreationSuccess(stack, cluster);
             if (recipesFound) {
                 recipeEngine.executePostInstall(stack);
             }
             return cluster;
+        } catch (FlowCancelledException flowCancelledException) {
+            throw flowCancelledException;
         } catch (Exception e) {
             LOGGER.error("Error while building the Ambari cluster. Message {}, throwable: {}", e.getMessage(), e);
             throw new AmbariOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    private void checkPollingResult(PollingResult waitForHostsResult, String message) throws ClusterException {
+        if (isExited(waitForHostsResult)) {
+            throw new FlowCancelledException("Stack or cluster in delete in progress phase.");
+        } else if (!isSuccess(waitForHostsResult)) {
+            throw new ClusterException(message);
         }
     }
 
