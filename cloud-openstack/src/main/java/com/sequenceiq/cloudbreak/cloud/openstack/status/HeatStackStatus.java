@@ -1,33 +1,28 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.status;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 
-public enum HeatStackStatus {
+public class HeatStackStatus {
 
-    CREATED("CREATE_COMPLETE"),
-    DELETED("DELETE_COMPLETE"),
-    UPDATED("UPDATE_COMPLETE"),
-    FAILED("FAILED");
-
-    private final String status;
-
-    private HeatStackStatus(String status) {
-        this.status = status;
+    private HeatStackStatus() {
     }
 
-    public String getStatus() {
-        return status;
-    }
+    public static ResourceStatus mapResourceStatus(String status) {
+        if (Strings.isNullOrEmpty(status) || status.contains("FAILED")) {
+            return ResourceStatus.FAILED;
+        }
 
-
-    public ResourceStatus mapResourceStatus(String status) {
         switch (status) {
             case "CREATE_COMPLETE":
                 return ResourceStatus.CREATED;
+            case "DELETE_COMPLETE":
+                return ResourceStatus.DELETED;
+            case "UPDATE_COMPLETE":
+                return ResourceStatus.UPDATED;
             default:
-
+                return ResourceStatus.IN_PROGRESS;
 
         }
-        return ResourceStatus.IN_PROGRESS;
     }
 }

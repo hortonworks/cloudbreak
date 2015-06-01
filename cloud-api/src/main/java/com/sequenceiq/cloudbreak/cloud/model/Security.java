@@ -7,7 +7,6 @@ import java.util.List;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.service.network.EndpointRule;
-import com.sequenceiq.cloudbreak.service.network.Port;
 
 public class Security {
 

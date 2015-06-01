@@ -21,4 +21,6 @@ public class AuthenticatedContext extends DynamicModel {
     public CloudCredential getCloudCredential() {
         return cloudCredential;
     }
+
+
 }

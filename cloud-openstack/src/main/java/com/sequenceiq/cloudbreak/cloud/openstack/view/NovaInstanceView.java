@@ -1,10 +1,15 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.view;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.cloud.model.Instance;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackUtil;
 import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 
 public class NovaInstanceView {
@@ -49,6 +54,21 @@ public class NovaInstanceView {
             index++;
         }
         return list;
+    }
+
+    public String getMetadata() {
+        try {
+            return new ObjectMapper().writeValueAsString(generateMetadata());
+        } catch (JsonProcessingException e) {
+            return generateMetadata().toString();
+        }
+    }
+
+    private Map<String, String> generateMetadata() {
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put(OpenStackUtil.CB_INSTANCE_GROUP_NAME, groupName);
+        metadata.put(OpenStackUtil.CB_INSTANCE_PRIVATE_ID, "" + privateId);
+        return metadata;
     }
 
 }
