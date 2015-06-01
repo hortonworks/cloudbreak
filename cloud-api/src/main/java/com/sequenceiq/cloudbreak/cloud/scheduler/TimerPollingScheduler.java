@@ -38,6 +38,8 @@ public class TimerPollingScheduler implements Consumer<Long> {
         if (latch.getCount() == 0) {
             cancel();
         }
+
+
     }
 
     public void schedule(int count, int period) {

@@ -28,4 +28,15 @@ public class CloudResource {
     public String getReference() {
         return reference;
     }
+
+    //BEGIN GENERATED CODE
+    @Override
+    public String toString() {
+        return "CloudResource{" +
+                "type=" + type +
+                ", name='" + name + '\'' +
+                ", reference='" + reference + '\'' +
+                '}';
+    }
+    //END GENERATED CODE
 }

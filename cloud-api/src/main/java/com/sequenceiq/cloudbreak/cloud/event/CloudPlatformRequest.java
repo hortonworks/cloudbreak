@@ -4,14 +4,15 @@ import com.sequenceiq.cloudbreak.cloud.event.context.StackContext;
 
 import reactor.rx.Promise;
 
-public class CloudPlatformRequest {
+public class CloudPlatformRequest<T> {
 
     private StackContext stackContext;
 
-    private Promise<String> result;
+    private Promise<T> result;
 
-    public CloudPlatformRequest(StackContext stackContext) {
+    public CloudPlatformRequest(StackContext stackContext, Promise<T> result) {
         this.stackContext = stackContext;
+        this.result = result;
     }
 
     public static String selector(Class clazz) {
@@ -22,11 +23,7 @@ public class CloudPlatformRequest {
         return stackContext;
     }
 
-    public Promise<String> getResult() {
+    public Promise<T> getResult() {
         return result;
-    }
-
-    public void setResult(Promise<String> result) {
-        this.result = result;
     }
 }

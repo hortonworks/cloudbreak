@@ -206,7 +206,8 @@
 
         <!-- Makes suppression comments available -->
         <module name="FileContentsHolder" />
-        <!-- -->
+
+
     </module>
 
     <!-- Deprecation -->
@@ -309,6 +310,10 @@
         <property name="offCommentFormat" value="ENUM ITEMS START" />
         <property name="onCommentFormat" value="ENUM ITEMS END" />
         <property name="checkFormat" value="JavadocVariable" />
+    </module>
+    <module name="SuppressionCommentFilter">
+        <property name="offCommentFormat" value="BEGIN GENERATED CODE"/>
+        <property name="onCommentFormat" value="END GENERATED CODE"/>
     </module>
     <module name="SuppressionFilter">
         <property name="file" value="${config_loc}/checkstyle-suppressions.xml" />

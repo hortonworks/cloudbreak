@@ -25,4 +25,15 @@ public class StackContext {
     public String getPlatform() {
         return platform;
     }
+
+    //BEGIN GENERATED CODE
+    @Override
+    public String toString() {
+        return "StackContext{" +
+                "stackId=" + stackId +
+                ", stackName='" + stackName + '\'' +
+                ", platform='" + platform + '\'' +
+                '}';
+    }
+    //END GENERATED CODE
 }
