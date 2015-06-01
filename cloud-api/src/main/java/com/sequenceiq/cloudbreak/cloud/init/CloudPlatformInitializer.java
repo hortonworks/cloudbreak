@@ -39,7 +39,7 @@ public class CloudPlatformInitializer {
     }
 
     public Map<Class, CloudPlatformEventHandler> handlersMap() {
-              Map<Class, CloudPlatformEventHandler> handlersMap = new HashMap<>();
+        Map<Class, CloudPlatformEventHandler> handlersMap = new HashMap<>();
         for (CloudPlatformEventHandler handler : handlers) {
             CloudPlatformEventHandler existing = handlersMap.put(handler.type(), handler);
             if (existing != null) {
@@ -65,8 +65,6 @@ public class CloudPlatformInitializer {
         }
         return handler;
     }
-
-
 
 
 }

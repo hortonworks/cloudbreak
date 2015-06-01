@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 
-@Service
+@Service("HeatTemplateBuilderV2")
 public class HeatTemplateBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HeatTemplateBuilder.class);
@@ -57,7 +57,7 @@ public class HeatTemplateBuilder {
             LOGGER.debug("Generated Heat template: {}", generatedTemplate);
             return generatedTemplate;
         } catch (IOException | TemplateException e) {
-            throw new RuntimeException("Failed to process the OpenStack HeatTemplate", e);
+            throw new RuntimeException("Failed to process the OpenStack HeatTemplateBuilder", e);
         }
     }
 

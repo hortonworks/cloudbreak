@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -16,9 +17,12 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.LaunchStackRequest;
+import com.sequenceiq.cloudbreak.cloud.event.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.StackContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Instance;
@@ -70,30 +74,29 @@ public class ReactorApplication implements CommandLineRunner {
         promiseTest();
     }
 
-    private void asyncNotify(Promise<String> promise) {
+    private void asyncNotify(Promise<LaunchStackResult> promise) {
         LaunchStackRequest sr = request(promise);
-        for (int i = 0; i < 1; i++) {
-            eventBus.notify(sr.selector(LaunchStackRequest.class), Event.wrap(sr));
-        }
+        eventBus.notify(CloudPlatformRequest.selector(LaunchStackRequest.class), Event.wrap(sr));
     }
 
     private void promiseTest() {
-        Promise<String> promise = Promises.prepare();
-        asyncNotify(promise);
 
         try {
-            LOGGER.info("########### {}", promise.await());
+            Promise<LaunchStackResult> promise = Promises.prepare();
+            asyncNotify(promise);
+            LaunchStackResult result = promise.await(1, TimeUnit.HOURS);
+            LOGGER.info("########### {}", result);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    private LaunchStackRequest request(Promise<String> p) {
+    private LaunchStackRequest request(Promise<LaunchStackResult> promise) {
         CloudCredential c = new CloudCredential("opencred");
-        c.putParameters("userName", userName);
-        c.putParameters("password", password);
-        c.putParameters("tenantName", tenantName);
-        c.putParameters("endpoint", endpoint);
+        c.putParameter("userName", userName);
+        c.putParameter("password", password);
+        c.putParameter("tenantName", tenantName);
+        c.putParameter("endpoint", endpoint);
 
         List<Group> groups = new ArrayList<>();
         Group g = new Group("master", InstanceGroupType.CORE);
@@ -112,7 +115,7 @@ public class ReactorApplication implements CommandLineRunner {
 
         Subnet subnet = new Subnet("10.0.0.0/24");
         Network network = new Network(subnet);
-        network.putParameters("publicNetId", "028ffc0c-63c5-4ca0-802a-3ac753eaf76c");
+        network.putParameter("publicNetId", "028ffc0c-63c5-4ca0-802a-3ac753eaf76c");
 
         Subnet all = new Subnet("0.0.0.0/0");
         Security security = new Security();
@@ -123,8 +126,8 @@ public class ReactorApplication implements CommandLineRunner {
         String ts = sdf.format(new Date());
 
         StackContext stackContext = new StackContext(0, "stack-name_" + ts, "OPENSTACK");
-        LaunchStackRequest lr = new LaunchStackRequest(stackContext, c, groups, network, security, image);
-        lr.setResult(p);
+        CloudStack cs = new CloudStack(groups, network, security, image);
+        LaunchStackRequest lr = new LaunchStackRequest(stackContext, c, cs, promise);
         return lr;
 
     }

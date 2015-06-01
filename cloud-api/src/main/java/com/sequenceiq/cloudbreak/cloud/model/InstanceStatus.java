@@ -1,16 +1,16 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-public enum ResourceStatus {
+public enum InstanceStatus {
 
     CREATED(StatusGroup.PERMANENT),
-    DELETED(StatusGroup.PERMANENT),
-    UPDATED(StatusGroup.PERMANENT),
-    FAILED(StatusGroup.PERMANENT),
+    STARTED(StatusGroup.PERMANENT),
+    STOPPED(StatusGroup.PERMANENT),
+    TERMINATED(StatusGroup.PERMANENT),
     IN_PROGRESS(StatusGroup.TRANSIENT);
 
     private StatusGroup statusGroup;
 
-    private ResourceStatus(StatusGroup statusGroup) {
+    private InstanceStatus(StatusGroup statusGroup) {
         this.statusGroup = statusGroup;
     }
 

@@ -21,7 +21,7 @@ dependencies {
     compile group: 'io.projectreactor',             name: 'reactor-core',                   version: eventBusVersion
     compile group: 'io.projectreactor',             name: 'reactor-bus',                    version: eventBusVersion
     compile group: 'io.projectreactor',             name: 'reactor-stream',                 version: eventBusVersion
-    compile group: 'org.pacesys',                   name: 'openstack4j',                    version: '2.0.0'
+    compile group: 'org.pacesys',                   name: 'openstack4j',                    version: '2.0.3'
     compile group: 'org.freemarker',                name: 'freemarker',                     version: '2.3.20'
 
 }
