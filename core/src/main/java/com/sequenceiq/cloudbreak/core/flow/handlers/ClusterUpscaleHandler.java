@@ -12,8 +12,7 @@ import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 
-import reactor.event.Event;
-
+import reactor.bus.Event;
 @Component
 public class ClusterUpscaleHandler extends AbstractFlowHandler<ClusterScalingContext> implements FlowHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpscaleHandler.class);

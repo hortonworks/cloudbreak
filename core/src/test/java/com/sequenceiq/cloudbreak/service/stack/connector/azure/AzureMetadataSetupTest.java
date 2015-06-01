@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
 
-import reactor.core.Reactor;
+import reactor.bus.EventBus;
 
 public class AzureMetadataSetupTest {
 
@@ -29,7 +29,7 @@ public class AzureMetadataSetupTest {
     private AzureMetadataSetup underTest;
 
     @Mock
-    private Reactor reactor;
+    private EventBus reactor;
 
     @Mock
     private AzureStackUtil azureStackUtil;

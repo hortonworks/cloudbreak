@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
 
-import reactor.core.Reactor;
+import reactor.bus.EventBus;
 
 public class AwsProvisionerTest {
 
@@ -64,7 +64,7 @@ public class AwsProvisionerTest {
     private CreateStackResult createStackResult;
 
     @Mock
-    private Reactor reactor;
+    private EventBus reactor;
 
     private Stack stack;
 

@@ -10,8 +10,7 @@ import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 
-import reactor.event.Event;
-
+import reactor.bus.Event;
 @Component
 public class StackStopRequestedHandler extends AbstractFlowHandler<DefaultFlowContext> implements FlowHandler {
 

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
-import static reactor.event.selector.Selectors.$;
+import static reactor.bus.selector.Selectors.$;
 
 import java.util.Map;
 
@@ -42,15 +42,15 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.StackSyncHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackTerminationHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.UpdateAllowedSubnetsHandler;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-import reactor.function.Consumer;
+import reactor.bus.Event;
+import reactor.bus.EventBus;
+import reactor.fn.Consumer;
 
 @Component
 public class FlowInitializer implements InitializingBean {
 
     @Autowired
-    private Reactor reactor;
+    private EventBus reactor;
 
     @Resource
     private Map<Class, FlowHandler> flowHandlersMap;

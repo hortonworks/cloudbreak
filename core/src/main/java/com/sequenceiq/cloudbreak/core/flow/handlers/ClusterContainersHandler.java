@@ -10,8 +10,7 @@ import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 
-import reactor.event.Event;
-
+import reactor.bus.Event;
 @Component
 public class ClusterContainersHandler extends AbstractFlowHandler<ProvisioningContext> implements FlowHandler {
 

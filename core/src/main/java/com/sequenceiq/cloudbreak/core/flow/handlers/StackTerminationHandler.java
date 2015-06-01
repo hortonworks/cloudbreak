@@ -9,8 +9,7 @@ import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 
-import reactor.event.Event;
-
+import reactor.bus.Event;
 @Service
 public class StackTerminationHandler extends AbstractFlowHandler<DefaultFlowContext> implements FlowHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackTerminationHandler.class);

@@ -8,8 +8,9 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow.service.FlowFacade;
 
-import reactor.event.Event;
-import reactor.function.Consumer;
+import reactor.bus.Event;
+import reactor.fn.Consumer;
+
 
 /**
  * Abstract base class for reactor event consumers.

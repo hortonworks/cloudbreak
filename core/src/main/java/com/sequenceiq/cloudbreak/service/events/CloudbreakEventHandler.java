@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
-import reactor.event.Event;
-import reactor.function.Consumer;
+import reactor.bus.Event;
+import reactor.fn.Consumer;
 
 @Component
 public class CloudbreakEventHandler implements Consumer<Event<CloudbreakEventData>> {

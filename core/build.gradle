@@ -1,5 +1,6 @@
 buildscript {
     repositories {
+        maven { url 'http://repo.spring.io/libs-release' }
         mavenCentral()
         jcenter()
     }
@@ -34,7 +35,9 @@ dependencies {
     compile group: 'org.springframework.security',  name: 'spring-security-config',         version: '3.2.3.RELEASE'
     compile group: 'org.springframework.security',  name: 'spring-security-web',            version: '3.2.3.RELEASE'
     compile group: 'org.springframework',           name: 'spring-messaging',               version: '4.0.3.RELEASE'
-    compile group: 'org.projectreactor',            name: 'reactor-spring',                 version: '1.0.1.RELEASE'
+    compile group: 'org.springframework',           name: 'spring-context-support',         version: '4.0.3.RELEASE'
+    compile group: 'io.projectreactor',             name: 'reactor-core',                   version: eventBusVersion
+    compile group: 'io.projectreactor',             name: 'reactor-bus',                    version: eventBusVersion
     compile group: 'net.sf.ehcache',                name: 'ehcache',                        version: '2.8.3'
     compile group: 'org.postgresql',                name: 'postgresql',                     version: '9.3-1101-jdbc41'
     compile group: 'org.hibernate',                 name: 'hibernate-validator',            version: '5.1.1.Final'

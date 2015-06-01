@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
 import com.sequenceiq.cloudbreak.service.stack.connector.ConnectorTestUtil;
 
-import reactor.core.Reactor;
+import reactor.bus.EventBus;
 
 public class AwsConnectorTest {
     private static final String DUMMY_NUMBER_STR = "1";
@@ -54,7 +54,7 @@ public class AwsConnectorTest {
     private AwsStackUtil awsStackUtil;
 
     @Mock
-    private Reactor reactor;
+    private EventBus reactor;
 
     @Mock
     private AmazonCloudFormationClient amazonCloudFormationClient;

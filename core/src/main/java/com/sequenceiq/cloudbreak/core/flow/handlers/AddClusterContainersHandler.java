@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.core.flow.AbstractFlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 
-import reactor.event.Event;
+import reactor.bus.Event;
 
 @Component
 public class AddClusterContainersHandler extends AbstractFlowHandler<ClusterScalingContext> implements FlowHandler {

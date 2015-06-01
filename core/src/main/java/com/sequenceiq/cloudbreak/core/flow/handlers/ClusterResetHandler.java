@@ -10,8 +10,7 @@ import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 
-import reactor.event.Event;
-
+import reactor.bus.Event;
 @Component
 public class ClusterResetHandler extends AbstractFlowHandler<ProvisioningContext> implements FlowHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterResetHandler.class);
