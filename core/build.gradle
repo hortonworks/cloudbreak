@@ -65,6 +65,9 @@ dependencies {
     compile (group: 'com.google.oauth-client',      name: 'google-oauth-client-jetty',      version: '1.17.0-rc')   { exclude module: 'servlet-api' }
     compile ("com.sequenceiq:azure-rest-client:${azureRestClientVersion}")                                          { exclude group: 'log4j' }
     compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: '1.9.35')      { exclude group: 'commons-logging' }
+    compile group: 'com.jcraft',                    name: 'jsch',                           version: '0.1.52'
+    compile group: 'com.hierynomus',                name: 'sshj',                           version: '0.11.0'
+
 
     compile project(':core-model')
 
