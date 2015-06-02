@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
 import static com.sequenceiq.cloudbreak.domain.Status.START_REQUESTED;
+import static com.sequenceiq.cloudbreak.domain.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.service.cluster.DataNodeUtils.sortByUsedSpace;
 
@@ -248,7 +249,7 @@ public class AmbariClusterService implements ClusterService {
                     String.format("Cannot update the status of cluster '%s' to STARTED, because the stack is not AVAILABLE", cluster.getId()));
         }
         if (cluster.isAvailable() || cluster.isStopFailed()) {
-            updateClusterStatusByStackId(stack.getId(), START_REQUESTED);
+            updateClusterStatusByStackId(stack.getId(), STOP_REQUESTED);
             retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest, stack.cloudPlatform());
             flowManager.triggerClusterStop(retVal);
         }
