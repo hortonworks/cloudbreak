@@ -31,4 +31,6 @@ public interface CloudPlatformConnector {
     String getSSHUser();
 
     String getSSHThumbprint(Stack stack, String gateway);
+
+    void cleanupTemporarySSH(Stack stack, String instanceId);
 }

@@ -45,7 +45,6 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.OnFailureAction;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -430,10 +429,10 @@ public class SimpleStackFacade implements StackFacade {
             MDCBuilder.buildMdcContext(stack);
 
             logBefore(actualContext.getStackId(), context, "Update subnet on stack", UPDATE_IN_PROGRESS);
-            Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(stack.cloudPlatform());
+            String userdata = userDataBuilder.buildUserData(stack.cloudPlatform());
             stack.setAllowedSubnets(getNewSubnetList(stack, actualContext.getAllowedSubnets()));
             cloudPlatformConnectors.get(stack.cloudPlatform())
-                    .updateAllowedSubnets(stack, userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE));
+                    .updateAllowedSubnets(stack, userdata, userdata);
             stackUpdater.updateStack(stack);
             logAfter(actualContext.getStackId(), context, "Update subnet on stack", UPDATE_IN_PROGRESS);
 
