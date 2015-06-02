@@ -8,8 +8,10 @@ import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.EnvironmentVariableConfig;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.service.ProvisioningSetupService;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -32,6 +34,9 @@ public class TlsSetupService {
     @Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
+    @Value("${cb.tls.cert.path:" + EnvironmentVariableConfig.CB_TLS_CERT_FILE + "}")
+    private String tlsCertificatePath;
+
     public void setupTls(CloudPlatform cloudPlatform, Stack stack, Map<String, Object> setupProperties) throws CloudbreakException {
 
         InstanceMetaData gateway = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
@@ -39,18 +44,22 @@ public class TlsSetupService {
 
         LOGGER.info("SSH into gateway node to setup certificates on gateway.");
         final SSHClient ssh = new SSHClient();
-        String sshFingerprint = connector.getSSHThumbprint(stack, gateway.getInstanceId());
+        String sshFingerprint = connector.getSSHFingerprint(stack, gateway.getInstanceId());
         ssh.addHostKeyVerifier(sshFingerprint);
         try {
             ssh.connect(gateway.getPublicIp(), SSH_PORT);
             ssh.authPublickey(connector.getSSHUser(), (String) setupProperties.get(ProvisioningSetupService.SSH_PRIVATEKEY_LOCATION));
-            // TODO: SCP cloudbreak TLS cert
+
+            ssh.newSCPFileTransfer().upload(tlsCertificatePath, "/tmp/cb-client.pem");
 
             final Session tlsSetupSession = ssh.startSession();
-            final Session.Command tlsSetupCmd = tlsSetupSession.exec(FileReaderUtils.readFileFromClasspath("init/tls-setup.sh"));
 
-            tlsSetupCmd.join(5, TimeUnit.SECONDS);
-            LOGGER.info("exit status: " + tlsSetupCmd.getExitStatus());
+            String tlsSetupScript = FileReaderUtils.readFileFromClasspath("init/tls-setup.sh");
+            tlsSetupScript = tlsSetupScript.replace("$PUBLIC_IP", gateway.getPublicIp());
+            final Session.Command tlsSetupCmd = tlsSetupSession.exec(tlsSetupScript);
+            tlsSetupCmd.join(30, TimeUnit.SECONDS);
+//            LOGGER.info("exit status: " + tlsSetupCmd.getExitStatus());
+            // TODO: check exit status
             tlsSetupSession.close();
 
             final Session changeSshKeySession = ssh.startSession();
@@ -58,7 +67,10 @@ public class TlsSetupService {
             LOGGER.info(IOUtils.readFully(changeSshKeyCmd.getInputStream()).toString());
             changeSshKeyCmd.join(5, TimeUnit.SECONDS);
             LOGGER.info("Change SSH key command exit status: " + changeSshKeyCmd.getExitStatus());
+            // TODO: check exit status
             changeSshKeySession.close();
+
+            // TODO: scp generated server certificate
 
             ssh.disconnect();
         } catch (IOException e) {

@@ -349,7 +349,7 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public String getSSHThumbprint(Stack stack, String gatewayId) {
+    public String getSSHFingerprint(Stack stack, String gatewayId) {
         ConsoleOutputContext consoleOutputContext = new ConsoleOutputContext(stack, gatewayId);
         PollingResult pollingResult = consoleOutputPollingService
                 .pollWithTimeout(consoleOutputCheckerTask, consoleOutputContext, POLLING_INTERVAL, CONSOLE_OUTPUT_POLLING_ATTEMPTS);
@@ -360,7 +360,8 @@ public class AwsConnector implements CloudPlatformConnector {
         }
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(consoleOutputContext.getStack());
         String consoleOutput = amazonEC2Client.getConsoleOutput(new GetConsoleOutputRequest().withInstanceId(gatewayId)).getDecodedOutput();
-        String[] fingerprints = consoleOutput.split("cb: -----BEGIN SSH HOST KEY FINGERPRINTS-----|cb: -----END SSH HOST KEY FINGERPRINTS-----")[1].split("\n");
+        String[] fingerprints = consoleOutput.split("\ncb: -----BEGIN SSH HOST KEY FINGERPRINTS-----|\ncb: -----END SSH HOST KEY FINGERPRINTS-----")[1]
+                .split("\n");
         for (String fingerprint : fingerprints) {
             if (fingerprint.contains("(RSA)") && fingerprint.trim().startsWith("cb:")) {
                 return fingerprint.split(" ")[2];

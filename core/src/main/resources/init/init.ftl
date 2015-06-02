@@ -25,10 +25,10 @@ configure_docker() {
   service docker restart
 }
 
-print_fingerprint() {
-    echo cb: -----BEGIN SSH HOST KEY FINGERPRINTS-----
-    echo ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub
-    echo cb: -----END SSH HOST KEY FINGERPRINTS-----
+print_ssh_fingerprint() {
+    echo "cb: -----BEGIN SSH HOST KEY FINGERPRINTS-----"
+    echo "cb: $(ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub)"
+    echo "cb: -----END SSH HOST KEY FINGERPRINTS-----"
 }
 
 format_disks() {
@@ -53,7 +53,7 @@ main() {
     format_disks
     fix_hostname
     configure_docker
-    print_fingerprint
+    print_ssh_fingerprint
     touch /var/cb-init-executed
     echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/cb-init-executed
   fi

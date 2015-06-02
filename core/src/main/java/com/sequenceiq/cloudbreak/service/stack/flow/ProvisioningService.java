@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
@@ -24,9 +23,6 @@ public class ProvisioningService {
 
     @Inject
     private StackRepository stackRepository;
-
-    @Inject
-    private RetryingStackUpdater stackUpdater;
 
     @javax.annotation.Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
