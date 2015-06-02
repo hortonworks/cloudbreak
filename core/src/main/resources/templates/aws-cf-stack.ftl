@@ -69,6 +69,15 @@
       "ConstraintDescription" : "can contain only ASCII characters."
     },
 
+    "TempKeyName": {
+      "Description" : "Name of an existing EC2 KeyPair to enable temporary SSH access to the gateway node",
+      "Type": "String",
+      "MinLength": "1",
+      "MaxLength": "255",
+      "AllowedPattern" : "[\\x20-\\x7E]*",
+      "ConstraintDescription" : "can contain only ASCII characters."
+    },
+
     "AMI" : {
       "Description" : "AMI that's used to start instances",
       "Type" : "String",
@@ -240,7 +249,11 @@
         "ImageId"        : { "Ref" : "AMI" },
         "SecurityGroups" : [ { "Ref" : "ClusterNodeSecurityGroup" } ],
         "InstanceType"   : "${instanceGroup.template.instanceType}",
+        <#if instanceGroup.instanceGroupType == "CORE">
         "KeyName"        : { "Ref" : "KeyName" },
+        <#else>
+        "KeyName"        : { "Ref" : "TempKeyName" },
+        </#if>
         "AssociatePublicIpAddress" : "true",
         <#if instanceGroup.template.spotPrice??>
         "SpotPrice"      : ${instanceGroup.template.spotPrice},

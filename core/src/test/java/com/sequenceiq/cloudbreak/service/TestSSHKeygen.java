@@ -5,40 +5,34 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
+import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.KeyPair;
 
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.common.IOUtils;
 import net.schmizz.sshj.connection.channel.direct.Session;
 
-//import java.security.KeyPair;
-
 public class TestSSHKeygen {
     @Test
     public void testSSHKeyGen() throws IOException, JSchException {
-//        String publicKeyFilename = null;
-//        String privateKeyFilename = null;
-//
-//        publicKeyFilename = "/tmp/bouncy.pub";
-//        privateKeyFilename = "/tmp/bouncy";
-//
-//        JSch jsch=new JSch();
-//        KeyPair kpair= KeyPair.genKeyPair(jsch, KeyPair.RSA, 2048);
-//        kpair.writePrivateKey(privateKeyFilename);
-//        kpair.writePublicKey(publicKeyFilename, "sequence-eu");
-//        System.out.println("Finger print: " + kpair.getFingerPrint());
+        String publicKeyFilename = null;
+        String privateKeyFilename = null;
 
+        publicKeyFilename = "/tmp/bouncy.pub";
+        privateKeyFilename = "/tmp/bouncy";
 
-//        HostKeyRepository hkr=jsch.getHostKeyRepository();
-//        hkr.add(new HostKey("104.197.58.210", null), null);
-////        jsch.setKnownHosts("/tmp/known_hosts");
-//        jsch.addIdentity(privateKeyFilename);
-//        jsch.setHostKeyRepository(hkr);
-//
-//        Session session=jsch.getSession("cloudbreak", "104.197.58.210", 22);
-//        session.connect();
-//        kpair.dispose();
-        
+        JSch jsch=new JSch();
+        KeyPair kpair= KeyPair.genKeyPair(jsch, KeyPair.RSA, 2048);
+        kpair.writePrivateKey(privateKeyFilename);
+        kpair.writePublicKey(publicKeyFilename, "sequence-eu");
+        System.out.println("Finger print: " + kpair.getFingerPrint());
+
+        kpair.dispose();
+    }
+
+    @Test
+    public void testSSHConnect() throws IOException {
 
         final SSHClient ssh = new SSHClient();
         ssh.addHostKeyVerifier("98:09:32:3c:66:00:01:ef:a0:15:b1:f2:7a:81:d1:44");

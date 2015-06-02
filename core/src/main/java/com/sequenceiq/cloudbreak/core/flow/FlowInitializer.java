@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.StackStopHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStopRequestedHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackSyncHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackTerminationHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.TlsSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.UpdateAllowedSubnetsHandler;
 
 import reactor.bus.Event;
@@ -77,6 +78,7 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.PROVISIONING_SETUP.name()), getHandlerForClass(ProvisioningSetupHandler.class));
         reactor.on($(FlowPhases.PROVISIONING.name()), getHandlerForClass(ProvisioningHandler.class));
         reactor.on($(FlowPhases.METADATA_SETUP.name()), getHandlerForClass(MetadataSetupHandler.class));
+        reactor.on($(FlowPhases.TLS_SETUP.name()), getHandlerForClass(TlsSetupHandler.class));
         reactor.on($(FlowPhases.BOOTSTRAP_CLUSTER.name()), getHandlerForClass(BootstrapClusterHandler.class));
         reactor.on($(FlowPhases.CONSUL_METADATA_SETUP.name()), getHandlerForClass(ConsulMetadataSetupHandler.class));
         reactor.on($(FlowPhases.RUN_CLUSTER_CONTAINERS.name()), getHandlerForClass(ClusterContainersHandler.class));
@@ -126,7 +128,10 @@ public class FlowInitializer implements InitializingBean {
                 .createTransition(FlowPhases.PROVISIONING.name(), FlowPhases.METADATA_SETUP.name(), FlowPhases.STACK_CREATION_FAILED.name()));
 
         transitionKeyService.registerTransition(MetadataSetupHandler.class, TransitionFactory
-                .createTransition(FlowPhases.METADATA_SETUP.name(), FlowPhases.BOOTSTRAP_CLUSTER.name(), FlowPhases.STACK_CREATION_FAILED.name()));
+                .createTransition(FlowPhases.METADATA_SETUP.name(), FlowPhases.TLS_SETUP.name(), FlowPhases.STACK_CREATION_FAILED.name()));
+
+        transitionKeyService.registerTransition(TlsSetupHandler.class, TransitionFactory
+                .createTransition(FlowPhases.TLS_SETUP.name(), FlowPhases.BOOTSTRAP_CLUSTER.name(), FlowPhases.STACK_CREATION_FAILED.name()));
 
         transitionKeyService.registerTransition(BootstrapClusterHandler.class, TransitionFactory
                 .createTransition(FlowPhases.BOOTSTRAP_CLUSTER.name(), FlowPhases.CONSUL_METADATA_SETUP.name(), FlowPhases.STACK_CREATION_FAILED.name()));

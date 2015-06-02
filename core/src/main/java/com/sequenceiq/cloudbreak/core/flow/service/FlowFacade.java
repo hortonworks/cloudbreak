@@ -14,6 +14,8 @@ public interface FlowFacade {
 
     FlowContext setupMetadata(FlowContext flowContext) throws CloudbreakException;
 
+    FlowContext setupTls(FlowContext context) throws CloudbreakException;
+
     FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException;
 
     FlowContext setupConsulMetadata(FlowContext flowContext) throws CloudbreakException;
@@ -83,6 +85,5 @@ public interface FlowFacade {
     FlowContext handleClusterSync(FlowContext context) throws CloudbreakException;
 
     FlowContext handleStackSync(FlowContext context) throws CloudbreakException;
-
 
 }

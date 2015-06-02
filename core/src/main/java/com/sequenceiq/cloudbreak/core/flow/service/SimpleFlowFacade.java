@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
-import java.util.Map;
-
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -13,22 +10,16 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
-import com.sequenceiq.cloudbreak.service.stack.flow.ProvisioningService;
 
 @Service
 public class SimpleFlowFacade implements FlowFacade {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleFlowFacade.class);
-
-    @Resource
-    private Map<CloudPlatform, ProvisionSetup> provisionSetups;
 
     @Inject
     private ClusterFacade clusterFacade;
@@ -37,7 +28,7 @@ public class SimpleFlowFacade implements FlowFacade {
     private StackFacade stackFacade;
 
     @Inject
-    private ProvisioningService provisioningService;
+    private ProvisioningSetupService provisioningSetupService;
 
     @Inject
     private MetadataSetupService metadataSetupService;
@@ -55,8 +46,7 @@ public class SimpleFlowFacade implements FlowFacade {
             ProvisioningContext provisioningContext = (ProvisioningContext) context;
             Stack stack = stackService.getById(provisioningContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
-            ProvisionSetupComplete setupComplete = (ProvisionSetupComplete) provisionSetups.get(provisioningContext.getCloudPlatform())
-                    .setupProvisioning(stack);
+            ProvisionSetupComplete setupComplete = provisioningSetupService.setup(stack);
             LOGGER.debug("Provisioning setup DONE.");
             return new ProvisioningContext.Builder()
                     .setDefaultParams(setupComplete.getStackId(), setupComplete.getCloudPlatform())
@@ -100,6 +90,25 @@ public class SimpleFlowFacade implements FlowFacade {
             LOGGER.debug("Metadata setup DONE.");
             return new ProvisioningContext.Builder()
                     .setDefaultParams(provisioningContext.getStackId(), provisioningContext.getCloudPlatform())
+                    .setProvisionSetupProperties(provisioningContext.getSetupProperties())
+                    .build();
+        } catch (Exception e) {
+            LOGGER.error("Exception during metadata setup: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext setupTls(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Metadata setup. Context: {}", context);
+        try {
+            ProvisioningContext provisioningContext = (ProvisioningContext) context;
+            Stack stack = stackService.getById(provisioningContext.getStackId());
+            MDCBuilder.buildMdcContext(stack);
+            ProvisioningContext provision = (ProvisioningContext) stackFacade.setupTls(context);
+            LOGGER.debug("TLS setup is DONE.");
+            return new ProvisioningContext.Builder()
+                    .setDefaultParams(provision.getStackId(), provision.getCloudPlatform())
                     .build();
         } catch (Exception e) {
             LOGGER.error("Exception during metadata setup: {}", e.getMessage());
