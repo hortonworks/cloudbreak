@@ -64,6 +64,7 @@ import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisioningService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
+import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
 
 @Service
 public class SimpleStackFacade implements StackFacade {
@@ -113,6 +114,9 @@ public class SimpleStackFacade implements StackFacade {
 
     @Autowired
     private RetryingStackUpdater stackUpdater;
+
+    @Autowired
+    private TlsSetupService tlsSetupService;
 
     @Override
     public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
@@ -360,17 +364,17 @@ public class SimpleStackFacade implements StackFacade {
             Date startDate = new Date();
             Stack stack = stackService.getById(actualContext.getStackId());
 
-            logBefore(actualContext.getStackId(), context, "Provisioning stack", UPDATE_IN_PROGRESS);
-            LOGGER.debug("Provision stack [FLOW_STEP] [STARTED]. Context: {}", context);
+            logBefore(actualContext.getStackId(), context, "Provisioning stack", CREATE_IN_PROGRESS);
             stackUpdater.updateStackStatus(stack.getId(), CREATE_IN_PROGRESS);
             ProvisionComplete provisionResult = provisioningService.buildStack(actualContext.getCloudPlatform(), stack, actualContext.getSetupProperties());
             Date endDate = new Date();
-            logAfter(actualContext.getStackId(), context, "Provisioning stack", UPDATE_IN_PROGRESS);
+            logAfter(actualContext.getStackId(), context, "Provisioning stack", CREATE_IN_PROGRESS);
 
             long seconds = (endDate.getTime() - startDate.getTime()) / DateUtils.MILLIS_PER_SECOND;
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), String.format("The creation of instratructure was %s sec", seconds));
             context = new ProvisioningContext.Builder()
                     .setDefaultParams(provisionResult.getStackId(), provisionResult.getCloudPlatform())
+                    .setProvisionSetupProperties(actualContext.getSetupProperties())
                     .setProvisionedResources(provisionResult.getResources())
                     .build();
         } catch (Exception e) {
@@ -378,6 +382,16 @@ public class SimpleStackFacade implements StackFacade {
             throw new CloudbreakException(e);
         }
         return context;
+    }
+
+    @Override
+    public FlowContext setupTls(FlowContext context) throws CloudbreakException {
+        ProvisioningContext actualContext = (ProvisioningContext) context;
+        Stack stack = stackService.getById(actualContext.getStackId());
+        logBefore(actualContext.getStackId(), context, "Setting up TLS", CREATE_IN_PROGRESS);
+        tlsSetupService.setupTls(actualContext.getCloudPlatform(), stack, actualContext.getSetupProperties());
+        logAfter(actualContext.getStackId(), context, "Setting up TLS", CREATE_IN_PROGRESS);
+        return actualContext;
     }
 
     @Override

@@ -28,4 +28,7 @@ public interface CloudPlatformConnector {
 
     void updateAllowedSubnets(Stack stack, String gateWayUserData, String coreUserData);
 
+    String getSSHUser();
+
+    String getSSHThumbprint(Stack stack, String gateway);
 }

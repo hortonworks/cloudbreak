@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.EnvironmentVariableConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -69,5 +70,15 @@ public class GcpConnector implements CloudPlatformConnector {
     @Override
     public void updateAllowedSubnets(Stack stack, String gateWayUserData, String coreUserData) {
         cloudResourceManager.updateAllowedSubnets(stack, gcpResourceBuilderInit);
+    }
+
+    @Override
+    public String getSSHUser() {
+        return EnvironmentVariableConfig.CB_GCP_AND_AZURE_USER_NAME;
+    }
+
+    @Override
+    public String getSSHThumbprint(Stack stack, String gateway) {
+        return "THUMBPRINT";
     }
 }
