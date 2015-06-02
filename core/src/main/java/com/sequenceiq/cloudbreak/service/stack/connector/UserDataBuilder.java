@@ -27,18 +27,15 @@ public class UserDataBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    public Map<InstanceGroupType, String> buildUserData(CloudPlatform cloudPlatform) {
+    public String buildUserData(CloudPlatform cloudPlatform) {
         Map<InstanceGroupType, String> result = new HashMap<>();
-        result.put(InstanceGroupType.GATEWAY, build(cloudPlatform, true));
-        result.put(InstanceGroupType.CORE, build(cloudPlatform, false));
-        return result;
+        return build(cloudPlatform);
     }
 
-    private String build(CloudPlatform cloudPlatform, boolean gateway) {
+    private String build(CloudPlatform cloudPlatform) {
         Map<String, Object> model = new HashMap<>();
         model.put("platformDiskPrefix", cloudPlatform.getDiskPrefix());
         model.put("platformDiskStartLabel", cloudPlatform.startLabel());
-        model.put("gateway", gateway);
         try {
             return FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate("init/init.ftl", "UTF-8"), model);
         } catch (IOException | TemplateException e) {

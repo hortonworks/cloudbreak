@@ -57,6 +57,7 @@ import com.amazonaws.services.ec2.model.CreateSnapshotResult;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeResult;
+import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesResult;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
@@ -366,6 +367,14 @@ public class AwsConnector implements CloudPlatformConnector {
             }
         }
         throw new AwsResourceException("Couldn't parse SSH fingerprint from console output.");
+    }
+
+    @Override
+    public void cleanupTemporarySSH(Stack stack, String instanceId) {
+        AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
+        String tmpKeyPairName = TMP_KEYPAIR_PREFIX + "-" + stack.getId();
+        DeleteKeyPairRequest deleteKeyPairRequest = new DeleteKeyPairRequest(tmpKeyPairName);
+        amazonEC2Client.deleteKeyPair(deleteKeyPairRequest);
     }
 
     @Override
