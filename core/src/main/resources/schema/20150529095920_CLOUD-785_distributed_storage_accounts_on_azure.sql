@@ -14,4 +14,6 @@ ALTER TABLE stack_parameters ADD CONSTRAINT "FK_stack_parameters_1" FOREIGN KEY 
 -- //@UNDO
 -- SQL to undo the change goes here.
 
+DROP TABLE stack_parameters;
+
 

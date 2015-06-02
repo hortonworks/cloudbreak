@@ -50,6 +50,9 @@ public class Cluster implements ProvisionEntity {
     @GeneratedValue
     private Long id;
 
+    @OneToOne
+    private Stack stack;
+
     @ManyToOne
     private Blueprint blueprint;
 
@@ -90,6 +93,14 @@ public class Cluster implements ProvisionEntity {
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private AmbariStackDetails ambariStackDetails;
+
+    public Stack getStack() {
+        return stack;
+    }
+
+    public void setStack(Stack stack) {
+        this.stack = stack;
+    }
 
     public String getDescription() {
         return description;
