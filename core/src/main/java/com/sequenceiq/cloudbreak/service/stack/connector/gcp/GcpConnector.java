@@ -81,4 +81,9 @@ public class GcpConnector implements CloudPlatformConnector {
     public String getSSHThumbprint(Stack stack, String gateway) {
         return "THUMBPRINT";
     }
+
+    @Override
+    public void cleanupTemporarySSH(Stack stack, String instanceId) {
+        LOGGER.info("Not implemented");
+    }
 }
