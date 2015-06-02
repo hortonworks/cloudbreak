@@ -47,6 +47,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
     private static final int POLLING_INTERVAL = 10000;
     private static final int MAX_POLLING_ATTEMPTS = 1000;
     private static final long OPERATION_TIMEOUT = 60L;
+    public static final String DEFAULT_SSH_USER = "centos";
 
     @Inject
     private OpenStackUtil openStackUtil;
@@ -178,6 +179,16 @@ public class OpenStackConnector implements CloudPlatformConnector {
             LOGGER.debug("polling exited during updating subnets. Failing the process; stack: {}", stack.getId());
             throw new OpenStackResourceException(String.format("Polling exited. Failed to update subnets. stackId '%s'", stack.getId()));
         }
+    }
+
+    @Override
+    public String getSSHUser() {
+        return DEFAULT_SSH_USER;
+    }
+
+    @Override
+    public String getSSHThumbprint(Stack stack, String gateway) {
+        return "THUMBPRINT";
     }
 
     private PollingResult updateHeatStack(Stack stack, String heatTemplate) {
