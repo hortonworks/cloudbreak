@@ -33,7 +33,7 @@ public final class NetworkUtils {
         ports.add(new Port("Oozie", "11000", "11000", "tcp", aclRules));
         ports.add(new Port("Container logs", "8042", "8042", "tcp", aclRules));
         ports.add(new Port("Zeppelin web socket", "9999", "9999", "tcp", aclRules));
-        ports.add(new Port("Zeppelin ui", "9998", "9998", "tcp", aclRules));
+        ports.add(new Port("Zeppelin ui", "9995", "9995", "tcp", aclRules));
         ports.add(new Port("Kibana", "3080", "3080", "tcp", aclRules));
         ports.add(new Port("Elastic Search", "9200", "9200", "tcp", aclRules));
         return ports;
