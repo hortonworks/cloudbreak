@@ -360,9 +360,9 @@ public class AwsConnector implements CloudPlatformConnector {
         }
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(consoleOutputContext.getStack());
         String consoleOutput = amazonEC2Client.getConsoleOutput(new GetConsoleOutputRequest().withInstanceId(gatewayId)).getDecodedOutput();
-        String[] fingerprints = consoleOutput.split("-----BEGIN SSH HOST KEY FINGERPRINTS-----|-----END SSH HOST KEY FINGERPRINTS-----")[1].split("\n");
+        String[] fingerprints = consoleOutput.split("cb: -----BEGIN SSH HOST KEY FINGERPRINTS-----|cb: -----END SSH HOST KEY FINGERPRINTS-----")[1].split("\n");
         for (String fingerprint : fingerprints) {
-            if (fingerprint.contains("(RSA)")) {
+            if (fingerprint.contains("(RSA)") && fingerprint.trim().startsWith("cb:")) {
                 return fingerprint.split(" ")[2];
             }
         }
