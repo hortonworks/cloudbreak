@@ -4,12 +4,6 @@ set -x
 START_LABEL=${platformDiskStartLabel}
 PLATFORM_DISK_PREFIX=${platformDiskPrefix}
 
-<#if gateway>
-start_proxy() {
-  docker run --name gateway -d --net=host --restart=always sequenceiq/cb-gateway-nginx:0.1
-}
-</#if>
-
 <#noparse>
 get_ip() {
   ifconfig eth0 | awk '/inet addr/{print substr($2,6)}'
@@ -59,12 +53,6 @@ main() {
     format_disks
     fix_hostname
     configure_docker
-    <#if gateway>
-    MAX_RETRIES=60
-    retries=0
-    while ((retries++ < MAX_RETRIES)) && ! docker info &> /dev/null; do echo "Docker is not running yet."; sleep 5; done
-    start_proxy
-    </#if>
     touch /var/cb-init-executed
     echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/cb-init-executed
   fi

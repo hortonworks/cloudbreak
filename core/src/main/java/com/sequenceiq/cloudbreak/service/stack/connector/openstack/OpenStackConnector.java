@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
 import com.sequenceiq.cloudbreak.domain.OpenStackNetwork;
@@ -119,8 +118,8 @@ public class OpenStackConnector implements CloudPlatformConnector {
 
     @Override
     public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
-        Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(stack.cloudPlatform());
-        String heatTemplate = heatTemplateBuilder.remove(stack, userData.get(InstanceGroupType.GATEWAY), userData.get(InstanceGroupType.CORE),
+        String userData = userDataBuilder.buildUserData(stack.cloudPlatform());
+        String heatTemplate = heatTemplateBuilder.remove(stack, userData, userData,
                 instanceMetaDataRepository.findAllInStack(stack.getId()), instanceIds, instanceGroup);
         PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
         if (!isSuccess(pollingResult)) {
@@ -189,6 +188,11 @@ public class OpenStackConnector implements CloudPlatformConnector {
     @Override
     public String getSSHThumbprint(Stack stack, String gateway) {
         return "THUMBPRINT";
+    }
+
+    @Override
+    public void cleanupTemporarySSH(Stack stack, String instanceId) {
+        LOGGER.info("Not implemented");
     }
 
     private PollingResult updateHeatStack(Stack stack, String heatTemplate) {
