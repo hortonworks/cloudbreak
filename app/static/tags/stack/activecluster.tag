@@ -13,6 +13,9 @@
                 <div class="tab-content">
                     <section id="cluster-details-pane" ng-class="{ 'active': detailsShow }" ng-show="detailsShow" class="tab-pane fade in">
                         <p class="text-right">
+                            <a href="" class="btn btn-info" role="button" data-toggle="modal" data-target="#modal-sync-cluster">
+                                <i class="fa fa-refresh fa-fw"></i><span> sync</span>
+                            </a>
                             <a href="" class="btn btn-success" role="button" ng-show="activeCluster.cluster.status == 'CREATE_FAILED'" data-toggle="modal" data-target="#modal-reset-cluster">
                                 <i class="fa fa-undo fa-fw"></i><span> reinstall</span>
                             </a>
@@ -264,6 +267,27 @@
                         </div>
                         <div class="col-xs-6">
                             <button type="button" class="btn btn-block btn-warning" data-dismiss="modal" id="stackStackBtn" ng-click="stopCluster(activeCluster)"><i class="fa fa-pause fa-fw"></i>stop</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-sync-cluster" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <!-- .modal-header -->
+                <div class="modal-body">
+                    <p>Sync cluster <strong>{{activeCluster.name}}</strong> and its stack?</p>
+                </div>
+                <div class="modal-footer">
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <button type="button" class="btn btn-block btn-default" data-dismiss="modal">cancel</button>
+                        </div>
+                        <div class="col-xs-6">
+                            <button type="button" class="btn btn-block btn-success" data-dismiss="modal" id="stackStackBtn" ng-click="syncCluster(activeCluster)"><i class="fa fa-play fa-fw"></i>sync</button>
                         </div>
                     </div>
                 </div>
