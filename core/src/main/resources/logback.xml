@@ -29,6 +29,10 @@
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
+    <logger name="com.sequenceiq.cloud.azure.client">
+        <level value="INFO"/>
+    </logger>
+
 
     <appender name="OWNER_BASED" class="ch.qos.logback.classic.sift.SiftingAppender">
         <discriminator>

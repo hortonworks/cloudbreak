@@ -77,9 +77,11 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     public Boolean create(final CreateResourceRequest createResourceRequest, final String region) throws Exception {
         AzureVirtualMachineCreateRequest aCSCR = (AzureVirtualMachineCreateRequest) createResourceRequest;
         try {
-            HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createVirtualMachine(aCSCR.getProps());
-            AzureResourcePollerObject azureResourcePollerObject =
-                    new AzureResourcePollerObject(aCSCR.getAzureClient(), aCSCR.getStack(), virtualMachineResponse);
+            Map<String, Object> props = aCSCR.getProps();
+            AzureClient azureClient = aCSCR.getAzureClient();
+            HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) azureClient.createVirtualMachine(props);
+            AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(
+                    azureClient, ResourceType.AZURE_VIRTUAL_MACHINE, String.valueOf(props.get(NAME)), aCSCR.getStack(), virtualMachineResponse);
             azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                     POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
         } catch (Exception ex) {
@@ -178,7 +180,8 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             props.put(NAME, resource.getResourceName());
             AzureClient azureClient = azureStackUtil.createAzureClient(credential);
             HttpResponseDecorator deleteVirtualMachineResult = (HttpResponseDecorator) azureClient.deleteVirtualMachine(props);
-            AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(azureClient, stack, deleteVirtualMachineResult);
+            AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(
+                    azureClient, ResourceType.AZURE_VIRTUAL_MACHINE, props.get(NAME), stack, deleteVirtualMachineResult);
             azureResourcePollerObjectPollingService.pollWithTimeout(azureDeleteResourceStatusCheckerTask, azureResourcePollerObject,
                     POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
         } catch (HttpResponseException ex) {

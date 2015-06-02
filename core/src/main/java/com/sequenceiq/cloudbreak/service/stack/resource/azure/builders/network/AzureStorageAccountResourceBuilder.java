@@ -63,7 +63,8 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
                     HttpResponseException httpResponseException = (HttpResponseException) ex;
                     if (httpResponseException.getStatusCode() == NOT_FOUND) {
                         HttpResponseDecorator storageResponse = (HttpResponseDecorator) azureClient.createStorageAccount(properties);
-                        AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(azureClient, stack, storageResponse);
+                        AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(
+                                azureClient, ResourceType.AZURE_STORAGE, storageName, stack, storageResponse);
                         azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                                 POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
                     } else {
@@ -88,7 +89,8 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
             String osImageName = azureStackUtil.getOsImageName(stack, storageName);
             if (azureClient.isImageAvailable(osImageName)) {
                 HttpResponseDecorator imageResponse = (HttpResponseDecorator) azureClient.deleteOsImage(osImageName);
-                AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(azureClient, stack, imageResponse);
+                AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(
+                        azureClient, ResourceType.AZURE_STORAGE, storageName, stack, imageResponse);
                 azureResourcePollerObjectPollingService.pollWithTimeout(azureDeleteResourceStatusCheckerTask, azureResourcePollerObject,
                         POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
             }

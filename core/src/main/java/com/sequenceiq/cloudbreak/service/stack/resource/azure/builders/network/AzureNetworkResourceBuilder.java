@@ -14,6 +14,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -64,9 +65,12 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
         AzureNetworkCreateRequest request = (AzureNetworkCreateRequest) createResourceRequest;
         try {
             Stack stack = stackRepository.findById(request.getStackId());
-            if (!request.getAzureClient().getVirtualNetworks().toString().contains(request.getName())) {
-                HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) request.getAzureClient().createVirtualNetwork(request.getProps());
-                AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(request.getAzureClient(), stack, virtualNetworkResponse);
+            AzureClient azureClient = request.getAzureClient();
+            Map<String, String> props = request.getProps();
+            if (!azureClient.getVirtualNetworks().toString().contains(request.getName())) {
+                HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) azureClient.createVirtualNetwork(props);
+                AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(
+                        azureClient, ResourceType.AZURE_NETWORK, props.get(NAME), stack, virtualNetworkResponse);
                 azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                         POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
             }
@@ -83,6 +87,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
         List<Port> ports = NetworkUtils.getPorts(stack);
         Resource network = stack.getResourceByType(ResourceType.AZURE_NETWORK);
         List<HttpResponseDecorator> responses = new ArrayList<>();
+        List<String> resourceNames = new ArrayList<>();
         try {
             for (Resource resource : stack.getResourcesByType(ResourceType.AZURE_VIRTUAL_MACHINE)) {
                 Map<String, Object> props = new HashMap<>();
@@ -92,8 +97,10 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
                 props.put(PORTS, ports);
                 HttpResponseDecorator response = (HttpResponseDecorator) azureClient.updateEndpoints(props);
                 responses.add(response);
+                resourceNames.add(resource.getResourceName());
             }
-            AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(azureClient, stack, responses);
+            AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(
+                    azureClient, ResourceType.AZURE_NETWORK, StringUtils.join(resourceNames, ','), stack, responses);
             PollingResult pollingResult =
                     azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                             POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
