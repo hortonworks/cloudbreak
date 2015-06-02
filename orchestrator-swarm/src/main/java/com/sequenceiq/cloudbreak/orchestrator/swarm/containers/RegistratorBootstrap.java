@@ -53,4 +53,5 @@ public class RegistratorBootstrap implements ContainerBootstrap {
         LOGGER.info(String.format("Registrator started successfully on node %s.", nodeName));
         return true;
     }
+
 }

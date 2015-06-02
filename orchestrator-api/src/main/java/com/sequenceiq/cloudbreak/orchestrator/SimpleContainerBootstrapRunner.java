@@ -16,10 +16,15 @@ public class SimpleContainerBootstrapRunner implements Callable<Boolean> {
 
     private final ContainerBootstrap containerBootstrap;
     private final Map<String, String> mdcMap;
+    private final ExitCriteria exitCriteria;
+    private final ExitCriteriaModel exitCriteriaModel;
 
-    private SimpleContainerBootstrapRunner(ContainerBootstrap containerBootstrap, Map<String, String> mdcReplica) {
+    private SimpleContainerBootstrapRunner(ContainerBootstrap containerBootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,
+            Map<String, String> mdcReplica) {
         this.containerBootstrap = containerBootstrap;
         this.mdcMap = mdcReplica;
+        this.exitCriteria = exitCriteria;
+        this.exitCriteriaModel = exitCriteriaModel;
     }
 
     @Override
@@ -28,18 +33,26 @@ public class SimpleContainerBootstrapRunner implements Callable<Boolean> {
         boolean success = false;
         int retryCount = 0;
         Exception actualException = null;
-        while (!success && MAX_RETRY_COUNT >= retryCount) {
-            try {
-                containerBootstrap.call();
-                success = true;
-                LOGGER.info("Container started successfully.");
-            } catch (Exception ex) {
-                success = false;
-                actualException = ex;
-                retryCount++;
-                LOGGER.error(String.format("Container failed to start, retrying [%s/%s]: %s", MAX_RETRY_COUNT, retryCount, ex.getMessage()));
-                Thread.sleep(SLEEP_TIME);
+        boolean exitNeeded = false;
+        while (!success && MAX_RETRY_COUNT >= retryCount && !exitNeeded) {
+            exitNeeded = isExitNeeded();
+            if (!exitNeeded) {
+                try {
+                    containerBootstrap.call();
+                    success = true;
+                    LOGGER.info("Container started successfully.");
+                } catch (Exception ex) {
+                    success = false;
+                    actualException = ex;
+                    retryCount++;
+                    LOGGER.error(String.format("Container failed to start, retrying [%s/%s]: %s", MAX_RETRY_COUNT, retryCount, ex.getMessage()));
+                    Thread.sleep(SLEEP_TIME);
+                }
             }
+        }
+        if (exitNeeded) {
+            LOGGER.error(exitCriteria.exitMessage());
+            throw new CloudbreakOrchestratorCancelledException(exitCriteria.exitMessage());
         }
         if (!success) {
             LOGGER.error(String.format("Container failed to start in %s attempts: %s", MAX_RETRY_COUNT, actualException));
@@ -48,7 +61,16 @@ public class SimpleContainerBootstrapRunner implements Callable<Boolean> {
         return Boolean.TRUE;
     }
 
-    public static SimpleContainerBootstrapRunner simpleContainerBootstrapRunner(ContainerBootstrap containerBootstrap, Map<String, String> mdcMap) {
-        return new SimpleContainerBootstrapRunner(containerBootstrap, mdcMap);
+    private boolean isExitNeeded() {
+        if (exitCriteriaModel != null && exitCriteria != null) {
+            return exitCriteria.isExitNeeded(exitCriteriaModel);
+        } else {
+            return false;
+        }
+    }
+
+    public static SimpleContainerBootstrapRunner simpleContainerBootstrapRunner(ContainerBootstrap containerBootstrap, ExitCriteria exitCriteria,
+            ExitCriteriaModel exitCriteriaModel, Map<String, String> mdcMap) {
+        return new SimpleContainerBootstrapRunner(containerBootstrap, exitCriteria, exitCriteriaModel, mdcMap);
     }
 }

@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.Node;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
@@ -58,7 +58,7 @@ public class ClusterBootstrapperErrorHandler {
     @Autowired
     private CloudbreakEventService eventService;
 
-    public void terminateFailedNodes(ContainerOrchestrator orchestrator, Stack stack, Set<Node> nodes) throws CloudbreakOrchestratorException {
+    public void terminateFailedNodes(ContainerOrchestrator orchestrator, Stack stack, Set<Node> nodes) throws CloudbreakOrchestratorFailedException {
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
         List<String> allAvailableNode = orchestrator.getAvailableNodes(gatewayInstance.getPublicIp(), nodes);
@@ -74,7 +74,7 @@ public class ClusterBootstrapperErrorHandler {
                 InstanceGroup ig = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceMetaData.getInstanceGroup().getGroupName());
                 ig.setNodeCount(ig.getNodeCount() - 1);
                 if (ig.getNodeCount() < 1) {
-                    throw new CloudbreakOrchestratorException(String.format("%s instancegroup nodecount was lower than 1 cluster creation failed.",
+                    throw new CloudbreakOrchestratorFailedException(String.format("%s instancegroup nodecount was lower than 1 cluster creation failed.",
                             ig.getGroupName()));
                 }
                 instanceGroupRepository.save(ig);

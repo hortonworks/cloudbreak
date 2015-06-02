@@ -15,5 +15,6 @@
 
     <!-- suppress everything in package level JavaDoc files -->
     <suppress checks=".*" files="package-info.java"/>
+    <suppress checks="RedundantThrows" files="SwarmContainerOrchestrator.java"/>
 
 </suppressions>

@@ -80,4 +80,5 @@ public class AmbariAgentBootstrap implements ContainerBootstrap {
         }
         return true;
     }
+
 }

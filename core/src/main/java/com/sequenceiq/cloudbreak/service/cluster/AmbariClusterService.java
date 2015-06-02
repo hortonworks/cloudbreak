@@ -303,13 +303,6 @@ public class AmbariClusterService implements ClusterService {
         return stack.getCluster();
     }
 
-    @Override
-    public Cluster sync(Long stackId, StatusRequest statusRequest) {
-        Stack stack = stackRepository.findOne(stackId);
-        flowManager.triggerClusterSync(new ClusterStatusUpdateRequest(stack.getId(), statusRequest, stack.cloudPlatform()));
-        return stack.getCluster();
-    }
-
     private boolean validateRequest(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
         HostGroup hostGroup = getHostGroup(stack, hostGroupAdjustment);
         int scalingAdjustment = hostGroupAdjustment.getScalingAdjustment();

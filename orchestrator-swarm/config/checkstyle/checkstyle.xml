@@ -120,6 +120,8 @@
         <module name="RedundantModifier" />
         <module name="RedundantThrows">
             <property name="suppressLoadErrors" value="true" />
+            <property name="allowUnchecked" value="true"/>
+            <property name="allowSubclasses" value="true"/>
         </module>
         <module name="ExplicitInitialization" />
         <module name="Regexp">

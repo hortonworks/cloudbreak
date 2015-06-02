@@ -41,4 +41,5 @@ public class MunchausenBootstrap implements ContainerBootstrap {
         LOGGER.info("Munchausen bootstrap container started.");
         return true;
     }
+
 }

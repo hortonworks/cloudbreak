@@ -35,6 +35,4 @@ public interface ClusterService {
     Cluster updateCluster(Cluster cluster);
 
     Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, AmbariStackDetails ambariStackDetails);
-
-    Cluster sync(Long stackId, StatusRequest statusRequest);
 }

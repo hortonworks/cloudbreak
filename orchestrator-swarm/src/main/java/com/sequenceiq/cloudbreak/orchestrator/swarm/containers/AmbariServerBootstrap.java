@@ -58,4 +58,5 @@ public class AmbariServerBootstrap implements ContainerBootstrap {
         LOGGER.info("Ambari server started successfully");
         return true;
     }
+
 }
