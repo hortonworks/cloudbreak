@@ -150,6 +150,27 @@
       ]
     },
     {
+      "href": "http://108.59.81.195:8080/api/v1/stacks/HDP/versions/2.2/services/ZEPPELIN",
+      "StackServices" : {
+        "service_name" : "ZEPPELIN",
+        "stack_name" : "HDP",
+        "stack_version" : "2.2"
+      },
+      "components" : [
+        {
+          "href" : "http://104.197.89.157:8080/api/v1/stacks/HDP/versions/2.2/services/ZEPPELIN/components/ZEPPELIN_MASTER",
+          "StackServiceComponents" : {
+            "component_name" : "ZEPPELIN_MASTER",
+            "service_name" : "ZEPPELIN",
+            "cardinality": "1",
+            "component_category": "MASTER",
+            "stack_name" : "HDP",
+            "stack_version" : "2.2"
+          }
+        }
+      ]
+    },
+    {
       "href": "http://108.59.81.195:8080/api/v1/stacks/HDP/versions/2.2/services/RANGER",
       "StackServices": {
         "service_name": "RANGER",

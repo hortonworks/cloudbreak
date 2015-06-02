@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -87,7 +88,7 @@ public class HeatTemplateBuilder {
             model.put("core_user_data", formatUserData(coreUserData));
             model.put("gateway_user_data", formatUserData(gateWayUserData));
             model.put("subnets", stack.getAllowedSubnets());
-            model.put("ports", NetworkUtils.getPorts(stack));
+            model.put("ports", NetworkUtils.getPorts(Optional.fromNullable(stack)));
             String generatedTemplate = processTemplateIntoString(freemarkerConfiguration.getTemplate(openStackHeatTemplatePath, "UTF-8"), model);
             LOGGER.debug("Generated Heat template: {}",  generatedTemplate);
             return generatedTemplate;

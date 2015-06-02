@@ -36,8 +36,7 @@ public class BlueprintValidator {
 
     public void validateBlueprintForStack(Blueprint blueprint, Set<HostGroup> hostGroups, Set<InstanceGroup> instanceGroups) {
         try {
-            JsonNode blueprintJsonTree = createJsonTree(blueprint);
-            JsonNode hostGroupsNode = blueprintJsonTree.get("host_groups");
+            JsonNode hostGroupsNode = getHostGroupNode(blueprint);
             validateHostGroups(hostGroupsNode, hostGroups, instanceGroups);
             Map<String, HostGroup> hostGroupMap = createHostGroupMap(hostGroups);
             Map<String, BlueprintServiceComponent> blueprintServiceComponentMap = Maps.newHashMap();
@@ -48,6 +47,11 @@ public class BlueprintValidator {
         }  catch (IOException e) {
             throw new BadRequestException(String.format("Blueprint [%s] can not be parsed from JSON.", blueprint.getId()));
         }
+    }
+
+    public JsonNode getHostGroupNode(Blueprint blueprint) throws IOException {
+        JsonNode blueprintJsonTree = createJsonTree(blueprint);
+        return blueprintJsonTree.get("host_groups");
     }
 
     private JsonNode createJsonTree(Blueprint blueprint) throws IOException {
@@ -95,7 +99,7 @@ public class BlueprintValidator {
         return hostGroupsInBlueprint;
     }
 
-    private Map<String, HostGroup> createHostGroupMap(Set<HostGroup> hostGroups) {
+    public Map<String, HostGroup> createHostGroupMap(Set<HostGroup> hostGroups) {
         Map<String, HostGroup> groupMap = Maps.newHashMap();
         for (HostGroup hostGroup : hostGroups) {
             groupMap.put(hostGroup.getName(), hostGroup);
@@ -105,12 +109,24 @@ public class BlueprintValidator {
 
     private void validateHostGroup(JsonNode hostGroupNode, Map<String, HostGroup> hostGroupMap,
             Map<String, BlueprintServiceComponent> blueprintServiceComponentMap) {
-        String hostGroupName = hostGroupNode.get("name").asText();
-        HostGroup hostGroup = hostGroupMap.get(hostGroupName);
-        JsonNode componentsNode = hostGroupNode.get("components");
+        String hostGroupName = getHostGroupName(hostGroupNode);
+        HostGroup hostGroup = getHostGroup(hostGroupMap, hostGroupName);
+        JsonNode componentsNode = getComponentsNode(hostGroupNode);
         for (JsonNode componentNode : componentsNode) {
             validateComponent(componentNode, hostGroup, blueprintServiceComponentMap);
         }
+    }
+
+    public String getHostGroupName(JsonNode hostGroupNode) {
+        return hostGroupNode.get("name").asText();
+    }
+
+    public HostGroup getHostGroup(Map<String, HostGroup> hostGroupMap, String hostGroupName) {
+        return hostGroupMap.get(hostGroupName);
+    }
+
+    public JsonNode getComponentsNode(JsonNode hostGroupNode) {
+        return hostGroupNode.get("components");
     }
 
     private void validateComponent(JsonNode componentNode, HostGroup hostGroup, Map<String, BlueprintServiceComponent> blueprintServiceComponentMap) {

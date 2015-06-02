@@ -133,7 +133,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             props.put(VIRTUAL_NETWORK_IP_ADDRESS, findNextValidIp(provisionContextObject));
             props.put(CUSTOMDATA, new String(Base64.encodeBase64(userData.orNull().getBytes())));
             props.put(VIRTUALNETWORKNAME, provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
-            props.put(PORTS, NetworkUtils.getPorts(stack));
+            props.put(PORTS, NetworkUtils.getPorts(Optional.fromNullable(stack)));
             props.put(VMTYPE, azureTemplate.getVmType().vmType().replaceAll(" ", ""));
             if (isGateway(instanceGroup.orNull().getInstanceGroupType())) {
                 props.put(RESERVEDIPNAME, stack.getResourceByType(ResourceType.AZURE_RESERVED_IP).getResourceName());

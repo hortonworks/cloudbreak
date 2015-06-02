@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonRawValue;
@@ -35,6 +37,8 @@ public class ClusterResponse {
     private boolean secure;
     private Set<HostGroupJson> hostGroups;
     private AmbariStackDetailsJson ambariStackDetails;
+    @ApiModelProperty(ClusterModelDescription.SERVICE_ENDPOINT_MAP)
+    private Map<String, String> serviceEndPoints = new HashMap<>();
 
     public String getDescription() {
         return description;
@@ -147,5 +151,13 @@ public class ClusterResponse {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Map<String, String> getServiceEndPoints() {
+        return serviceEndPoints;
+    }
+
+    public void setServiceEndPoints(Map<String, String> serviceEndPoints) {
+        this.serviceEndPoints = serviceEndPoints;
     }
 }
