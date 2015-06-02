@@ -65,15 +65,11 @@ public class SimpleFlowFacade implements FlowFacade {
     public FlowContext provision(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Provisioning. Context: {}", context);
         try {
-            ProvisioningContext provisioningContext = (ProvisioningContext) context;
-            Stack stack = stackService.getById(provisioningContext.getStackId());
+            Stack stack = stackService.getById(((ProvisioningContext) context).getStackId());
             MDCBuilder.buildMdcContext(stack);
-            ProvisioningContext provision = (ProvisioningContext) stackFacade.provision(context);
+            ProvisioningContext provisioningContext = (ProvisioningContext) stackFacade.provision(context);
             LOGGER.debug("Provisioning DONE.");
-            return new ProvisioningContext.Builder()
-                    .setDefaultParams(provision.getStackId(), provision.getCloudPlatform())
-                    .setProvisionedResources(provision.getResources())
-                    .build();
+            return provisioningContext;
         } catch (Exception e) {
             LOGGER.error("Exception during provisioning setup: {}", e.getMessage());
             throw new CloudbreakException(e);

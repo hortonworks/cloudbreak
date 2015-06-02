@@ -371,7 +371,7 @@ public class SimpleStackFacade implements StackFacade {
             logAfter(actualContext.getStackId(), context, "Provisioning stack", CREATE_IN_PROGRESS);
 
             long seconds = (endDate.getTime() - startDate.getTime()) / DateUtils.MILLIS_PER_SECOND;
-            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), String.format("The creation of instratructure was %s sec", seconds));
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), String.format("The creation of the infrastructure took %s seconds.", seconds));
             context = new ProvisioningContext.Builder()
                     .setDefaultParams(provisionResult.getStackId(), provisionResult.getCloudPlatform())
                     .setProvisionSetupProperties(actualContext.getSetupProperties())
