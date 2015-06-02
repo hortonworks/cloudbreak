@@ -101,8 +101,8 @@ public class ClusterContainerRunner {
                 if (StringUtils.isEmpty(baywatchServerExternLocation)) {
                     containerOrchestrator.startBaywatchServer(cluster, baywatchServerDockerImageName, stackDeletionBasedExitCriteriaModel(stack.getId()));
                 }
-                containerOrchestrator.startBaywatchClients(cluster, baywatchClientDockerImageName, cluster.getNodes().size(), ConsulUtils.CONSUL_DOMAIN,
-                        baywatchServerExternLocation, stackDeletionBasedExitCriteriaModel(stack.getId()));
+                containerOrchestrator.startBaywatchClients(cluster, baywatchClientDockerImageName, gatewayInstance.getPrivateIp(), cluster.getNodes().size(),
+                        ConsulUtils.CONSUL_DOMAIN, baywatchServerExternLocation, stackDeletionBasedExitCriteriaModel(stack.getId()));
             }
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new FlowCancelledException(e.getMessage());
@@ -137,8 +137,8 @@ public class ClusterContainerRunner {
             containerOrchestrator.startConsulWatches(cluster, consulWatchPlugnDockerImageName, cluster.getNodes().size(),
                     stackDeletionBasedExitCriteriaModel(stack.getId()));
             if (baywatchEnabled) {
-                containerOrchestrator.startBaywatchClients(cluster, baywatchClientDockerImageName, cluster.getNodes().size(),
-                        ConsulUtils.CONSUL_DOMAIN, baywatchServerExternLocation, stackDeletionBasedExitCriteriaModel(stack.getId()));
+                containerOrchestrator.startBaywatchClients(cluster, baywatchClientDockerImageName, gatewayInstance.getPrivateIp(),
+                        cluster.getNodes().size(), ConsulUtils.CONSUL_DOMAIN, baywatchServerExternLocation, stackDeletionBasedExitCriteriaModel(stack.getId()));
             }
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new FlowCancelledException(e.getMessage());

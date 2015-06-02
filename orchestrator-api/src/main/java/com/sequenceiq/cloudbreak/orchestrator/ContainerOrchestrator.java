@@ -31,7 +31,7 @@ public interface ContainerOrchestrator {
     void startBaywatchServer(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
-    void startBaywatchClients(ContainerOrchestratorCluster cluster, String imageName,
+    void startBaywatchClients(ContainerOrchestratorCluster cluster, String imageName, String gatewayAddress,
             int count, String consulDomain, String externServerLocation, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 

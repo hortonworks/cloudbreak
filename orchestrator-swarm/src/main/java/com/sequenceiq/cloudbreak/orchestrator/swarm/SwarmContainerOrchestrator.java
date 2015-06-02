@@ -223,7 +223,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void startBaywatchClients(ContainerOrchestratorCluster cluster, String imageName, int count, String consulDomain,
+    public void startBaywatchClients(ContainerOrchestratorCluster cluster, String imageName, String gatewayPrivateIp, int count, String consulDomain,
             String externServerLocation, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
         if (count > cluster.getNodes().size()) {
@@ -235,13 +235,12 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
                     .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
                     .build();
             Set<Node> nodes = cluster.getNodes();
-            Node gateway = getGatewayNode(cluster.getApiAddress(), nodes);
             Iterator<Node> nodeIterator = nodes.iterator();
             for (int i = 0; i < count; i++) {
                 Node node = nodeIterator.next();
                 String time = String.valueOf(new Date().getTime()) + i;
                 BaywatchClientBootstrap runner =
-                        new BaywatchClientBootstrap(swarmManagerClient, gateway.getPrivateIp(), imageName, time, node,
+                        new BaywatchClientBootstrap(swarmManagerClient, gatewayPrivateIp, imageName, time, node,
                                 consulDomain, externServerLocation);
                 futures.add(getParallelContainerRunner().submit(simpleContainerBootstrapRunner(runner, getExitCriteria(), exitCriteriaModel,
                         MDC.getCopyOfContextMap())));
