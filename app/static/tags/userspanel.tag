@@ -16,7 +16,7 @@
                     <div id="panel-create-users-collapse" class="panel-under-btn-collapse collapse">
                         <div class="panel-body">
 
-                            <form class="form-horizontal" role="form" name="inviteForm">
+                            <form class="form-horizontal" role="form" name="$parent.inviteForm">
 
                                 <div class="form-group" ng-class="{ 'has-error': inviteForm.emailNewUser.$dirty && inviteForm.emailNewUser.$invalid }">
                                     <label class="col-sm-3 control-label" for="emailNewUser">email address</label>

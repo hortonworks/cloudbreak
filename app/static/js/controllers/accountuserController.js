@@ -12,7 +12,10 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
 
         $scope.inviteUser = function() {
             UserInvite.save({ invite_email: $scope.invite.mail }, function (result) {
-                $scope.accountUsers.push({active: false, username: $scope.invite.mail, idx:  $scope.invite.mail.toString().replace(/\./g, '').replace(/@/g, '')});
+                var newUser = $filter('filter')($scope.accountUsers, { username: $scope.invite.mail })[0];
+                if (newUser == null) {
+                    $scope.accountUsers.push({active: false, username: $scope.invite.mail, idx:  $scope.invite.mail.toString().replace(/\./g, '').replace(/@/g, '')});
+                }
                 $scope.inviteForm.$setPristine();
                 initInvite();
                 collapseInviteUsersFormPanel();
