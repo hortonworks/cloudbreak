@@ -1,8 +1,12 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_BAYWATCH_ENABLED;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_BAYWATCH_EXTERN_LOCATION;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_AMBARI;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_AMBARI_DB;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_AMBARI_WARMUP;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_BAYWATCH_CLIENT;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_BAYWATCH_SERVER;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_DOCKER_CONSUL_WATCH_PLUGN;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_REGISTRATOR;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.StackDeletionBasedExitCriteriaModel.stackDeletionBasedExitCriteriaModel;
@@ -12,6 +16,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +33,7 @@ import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
 import com.sequenceiq.cloudbreak.orchestrator.Node;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
 
 @Component
 public class ClusterContainerRunner {
@@ -46,6 +52,18 @@ public class ClusterContainerRunner {
 
     @Value("${cb.docker.container.ambari.db:" + CB_DOCKER_CONTAINER_AMBARI_DB + "}")
     private String postgresDockerImageName;
+
+    @Value("${cb.docker.container.baywatch.server:" + CB_DOCKER_CONTAINER_BAYWATCH_SERVER + "}")
+    private String baywatchServerDockerImageName;
+
+    @Value("${cb.docker.container.baywatch.client:" + CB_DOCKER_CONTAINER_BAYWATCH_CLIENT + "}")
+    private String baywatchClientDockerImageName;
+
+    @Value("${cb.baywatch.extern.location:" + CB_BAYWATCH_EXTERN_LOCATION + "}")
+    private String baywatchServerExternLocation;
+
+    @Value("${cb.baywatch.enabled:" + CB_BAYWATCH_ENABLED + "}")
+    private Boolean baywatchEnabled;
 
     @Inject
     private StackRepository stackRepository;
@@ -79,6 +97,13 @@ public class ClusterContainerRunner {
                     stackDeletionBasedExitCriteriaModel(stack.getId()));
             containerOrchestrator.startConsulWatches(cluster, consulWatchPlugnDockerImageName, cluster.getNodes().size(),
                     stackDeletionBasedExitCriteriaModel(stack.getId()));
+            if (baywatchEnabled) {
+                if (StringUtils.isEmpty(baywatchServerExternLocation)) {
+                    containerOrchestrator.startBaywatchServer(cluster, baywatchServerDockerImageName, stackDeletionBasedExitCriteriaModel(stack.getId()));
+                }
+                containerOrchestrator.startBaywatchClients(cluster, baywatchClientDockerImageName, gatewayInstance.getPrivateIp(), cluster.getNodes().size(),
+                        ConsulUtils.CONSUL_DOMAIN, baywatchServerExternLocation, stackDeletionBasedExitCriteriaModel(stack.getId()));
+            }
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new FlowCancelledException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {
@@ -111,6 +136,10 @@ public class ClusterContainerRunner {
                     stackDeletionBasedExitCriteriaModel(stack.getId()));
             containerOrchestrator.startConsulWatches(cluster, consulWatchPlugnDockerImageName, cluster.getNodes().size(),
                     stackDeletionBasedExitCriteriaModel(stack.getId()));
+            if (baywatchEnabled) {
+                containerOrchestrator.startBaywatchClients(cluster, baywatchClientDockerImageName, gatewayInstance.getPrivateIp(),
+                        cluster.getNodes().size(), ConsulUtils.CONSUL_DOMAIN, baywatchServerExternLocation, stackDeletionBasedExitCriteriaModel(stack.getId()));
+            }
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new FlowCancelledException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {

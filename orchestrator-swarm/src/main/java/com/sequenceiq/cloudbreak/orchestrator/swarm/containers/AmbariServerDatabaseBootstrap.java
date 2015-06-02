@@ -43,7 +43,9 @@ public class AmbariServerDatabaseBootstrap implements ContainerBootstrap {
         DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
                 .withRestartPolicy(RestartPolicy.alwaysRestart())
                 .withNetworkMode("host")
-                .withBinds(new Bind("/data/ambari-server/pgsql/data", new Volume("/var/lib/postgresql/data"))));
+                .withBinds(new Bind("/data/ambari-server/pgsql/data", new Volume("/var/lib/postgresql/data")),
+                    new Bind("/var/log/containers/consul-watch", new Volume("/var/log/consul-watch"))));
+
         LOGGER.info("Database container for Ambari server started successfully");
         return true;
     }

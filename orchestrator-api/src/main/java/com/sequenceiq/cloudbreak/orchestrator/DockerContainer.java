@@ -8,7 +8,9 @@ public enum DockerContainer {
     KERBEROS("kerberos"),
     REGISTRATOR("registrator"),
     MUNCHAUSEN("munchausen"),
-    CONSUL_WATCH("consul-watch");
+    CONSUL_WATCH("consul-watch"),
+    BAYWATCH_SERVER("baywatch-server"),
+    BAYWATCH_CLIENT("baywatch-client");
 
     private final String name;
 

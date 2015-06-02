@@ -31,6 +31,8 @@ import com.sequenceiq.cloudbreak.orchestrator.SimpleContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariAgentBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariServerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariServerDatabaseBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.BaywatchClientBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.BaywatchServerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.ConsulWatchBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.MunchausenBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.RegistratorBootstrap;
@@ -186,6 +188,62 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
                         new ConsulWatchBootstrap(swarmManagerClient, imageName, time),
                         getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap());
                 futures.add(getParallelContainerRunner().submit(runner));
+            }
+            for (Future<Boolean> future : futures) {
+                future.get();
+            }
+        } catch (Exception exception) {
+            if (exception instanceof CloudbreakOrchestratorCancelledException) {
+                throw (CloudbreakOrchestratorCancelledException) exception;
+            } else if (exception instanceof CloudbreakOrchestratorFailedException) {
+                throw (CloudbreakOrchestratorFailedException) exception;
+            } else {
+                throw new CloudbreakOrchestratorFailedException(exception);
+            }
+        }
+    }
+
+    @Override
+    public void startBaywatchServer(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
+        try {
+            Node gateway = getGatewayNode(cluster.getApiAddress(), cluster.getNodes());
+            DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(cluster.getApiAddress()))
+                    .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
+                    .build();
+            simpleContainerBootstrapRunner(new BaywatchServerBootstrap(swarmManagerClient, imageName, gateway.getHostname()),
+                    getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
+        } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {
+            throw cloudbreakOrchestratorCancelledExceptionException;
+        } catch (CloudbreakOrchestratorFailedException cloudbreakOrchestratorFailedException) {
+            throw cloudbreakOrchestratorFailedException;
+        } catch (Exception ex) {
+            throw new CloudbreakOrchestratorFailedException(ex);
+        }
+    }
+
+    @Override
+    public void startBaywatchClients(ContainerOrchestratorCluster cluster, String imageName, String gatewayPrivateIp, int count, String consulDomain,
+            String externServerLocation, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
+        if (count > cluster.getNodes().size()) {
+            throw new CloudbreakOrchestratorFailedException("Cannot orchestrate more Baywatch client containers than the available nodes.");
+        }
+        try {
+            List<Future<Boolean>> futures = new ArrayList<>();
+            DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(cluster.getApiAddress()))
+                    .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
+                    .build();
+            Set<Node> nodes = cluster.getNodes();
+            Iterator<Node> nodeIterator = nodes.iterator();
+            for (int i = 0; i < count; i++) {
+                Node node = nodeIterator.next();
+                String time = String.valueOf(new Date().getTime()) + i;
+                BaywatchClientBootstrap runner =
+                        new BaywatchClientBootstrap(swarmManagerClient, gatewayPrivateIp, imageName, time, node,
+                                consulDomain, externServerLocation);
+                futures.add(getParallelContainerRunner().submit(simpleContainerBootstrapRunner(runner, getExitCriteria(), exitCriteriaModel,
+                        MDC.getCopyOfContextMap())));
             }
             for (Future<Boolean> future : futures) {
                 future.get();
