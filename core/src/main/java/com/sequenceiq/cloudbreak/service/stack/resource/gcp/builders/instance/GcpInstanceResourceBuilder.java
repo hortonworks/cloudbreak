@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpStartStopCo
 @Order(3)
 public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder {
 
+    private static final int END_INDEX = 62;
     @Inject
     private StackRepository stackRepository;
     @Inject
@@ -151,9 +152,12 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
     public List<Resource> buildResources(GcpProvisionContextObject provisionContextObject, int index, List<Resource> resources,
             Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        Resource resource = new Resource(resourceType(),
-                String.format("%s-%s-%s", stack.getName(), index, new Date().getTime()), stack,
-                instanceGroup.orNull().getGroupName());
+        String name = String.format("%s-%s-%s-%s", stack.getName(), instanceGroup.get().getGroupName().replaceAll("[^a-zA-Z0-9]", "").toLowerCase(),
+                index, new Date().getTime());
+        if (name.length() > END_INDEX) {
+            name = name.substring(name.length() - END_INDEX, name.length());
+        }
+        Resource resource = new Resource(resourceType(), name, stack, instanceGroup.orNull().getGroupName());
         return Arrays.asList(resource);
     }
 

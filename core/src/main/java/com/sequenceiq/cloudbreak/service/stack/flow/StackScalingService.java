@@ -62,9 +62,9 @@ public class StackScalingService {
     public Set<Resource> addInstances(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
         Set<Resource> resources;
         Stack stack = stackService.getById(stackId);
-        Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(stack.cloudPlatform());
-        resources = cloudPlatformConnectors.get(stack.cloudPlatform())
-                .addInstances(stack, userData.get(InstanceGroupType.GATEWAY), userData.get(InstanceGroupType.CORE), scalingAdjustment, instanceGroupName);
+        Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(stack.cloudPlatform(), null, null);
+        resources = cloudPlatformConnectors.get(stack.cloudPlatform()).addInstances(stack, userdata.get(InstanceGroupType.GATEWAY),
+                userdata.get(InstanceGroupType.CORE), scalingAdjustment, instanceGroupName);
         return resources;
     }
 
@@ -103,13 +103,17 @@ public class StackScalingService {
         int nodeCount = instanceGroup.getNodeCount() - instanceIds.size();
         instanceGroup.setNodeCount(nodeCount);
         instanceGroupRepository.save(instanceGroup);
-        List<ConsulClient> clients = createConsulClients(stack, instanceGroup.getGroupName());
+
+        InstanceGroup gateway = stack.getGatewayInstanceGroup();
+        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+        TLSClientConfig clientConfig = new TLSClientConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
+        ConsulClient client = ConsulUtils.createClient(clientConfig);
         for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
             if (instanceIds.contains(instanceMetaData.getInstanceId())) {
                 long timeInMillis = Calendar.getInstance().getTimeInMillis();
                 instanceMetaData.setTerminationDate(timeInMillis);
                 instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
-                removeAgentFromConsul(stack, clients, instanceMetaData);
+                removeAgentFromConsul(stack, client, instanceMetaData);
                 instanceMetaDataRepository.save(instanceMetaData);
             }
         }
@@ -118,15 +122,11 @@ public class StackScalingService {
                 "Billing changed due to downscaling of cluster infrastructure.");
     }
 
-    private List<ConsulClient> createConsulClients(Stack stack, String instanceGroupName) {
-        return ConsulUtils.createClients(stack.getGatewayInstanceGroup().getInstanceMetaData());
-    }
-
-    private void removeAgentFromConsul(Stack stack, List<ConsulClient> clients, InstanceMetaData metaData) {
+    private void removeAgentFromConsul(Stack stack, ConsulClient client, InstanceMetaData metaData) {
         String nodeName = metaData.getDiscoveryFQDN().replace(ConsulUtils.CONSUL_DOMAIN, "");
         consulPollingService.pollWithTimeout(
                 consulAgentLeaveCheckerTask,
-                new ConsulContext(stack, clients, Collections.singletonList(nodeName)),
+                new ConsulContext(stack, client, Collections.singletonList(nodeName)),
                 POLLING_INTERVAL,
                 MAX_POLLING_ATTEMPTS);
     }

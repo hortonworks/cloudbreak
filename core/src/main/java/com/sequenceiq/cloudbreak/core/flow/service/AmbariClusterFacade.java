@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListenerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
+import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 @Service
 public class AmbariClusterFacade implements ClusterFacade {
@@ -111,7 +112,14 @@ public class AmbariClusterFacade implements ClusterFacade {
             MDCBuilder.buildMdcContext(cluster);
             stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Ambari cluster is now starting.");
             clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
+<<<<<<< HEAD
             AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(actualContext.getAmbariIp());
+=======
+
+            logBefore(actualContext.getStackId(), context, "Start ambari cluster", UPDATE_IN_PROGRESS);
+            TLSClientConfig clientConfig = new TLSClientConfig(actualContext.getAmbariIp(), stack.getCertDir());
+            AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(clientConfig);
+>>>>>>> access ambari through tls
             AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, actualContext.getAmbariIp(), ambariClient);
             PollingResult pollingResult = ambariStartupPollerObjectPollingService
                     .pollWithTimeout(ambariStartupListenerTask, ambariStartupPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -123,7 +131,15 @@ public class AmbariClusterFacade implements ClusterFacade {
                 throw new CloudbreakException(String.format("Could not start Ambari. polling result: '%s',  Context: '%s'", pollingResult, context));
             }
             clusterService.updateAmbariIp(cluster.getId(), actualContext.getAmbariIp());
+<<<<<<< HEAD
             changeAmbariCredentials(actualContext.getAmbariIp(), cluster);
+=======
+            logAfter(actualContext.getStackId(), context, "Update ambari ip", UPDATE_IN_PROGRESS);
+
+            logBefore(actualContext.getStackId(), context, "Changing ambari credentials", UPDATE_IN_PROGRESS);
+            changeAmbariCredentials(actualContext.getAmbariIp(), stack);
+            logAfter(actualContext.getStackId(), context, "Changing ambari credentials", UPDATE_IN_PROGRESS);
+>>>>>>> access ambari through tls
         }
         return context;
     }
@@ -412,11 +428,13 @@ public class AmbariClusterFacade implements ClusterFacade {
         return context;
     }
 
-    private void changeAmbariCredentials(String ambariIp, Cluster cluster) {
-        LOGGER.info("Changing ambari credentails for cluster: {}, ambari ip: {}", cluster.getName(), ambariIp);
+    private void changeAmbariCredentials(String ambariIp, Stack stack) {
+        Cluster cluster = stack.getCluster();
+        LOGGER.info("Changing ambari credentials for cluster: {}, ambari ip: {}", cluster.getName(), ambariIp);
         String userName = cluster.getUserName();
         String password = cluster.getPassword();
-        AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(ambariIp);
+        TLSClientConfig clientConfig = new TLSClientConfig(cluster.getAmbariIp(), stack.getCertDir());
+        AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(clientConfig);
         if (ADMIN.equals(userName)) {
             if (!ADMIN.equals(password)) {
                 ambariClient.changePassword(ADMIN, ADMIN, password, true);

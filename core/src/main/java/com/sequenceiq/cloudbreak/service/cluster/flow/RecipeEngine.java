@@ -17,11 +17,13 @@ import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 @Component
 public class RecipeEngine {
@@ -37,7 +39,7 @@ public class RecipeEngine {
 
     public void setupRecipes(Stack stack, Set<HostGroup> hostGroups) {
         Set<InstanceMetaData> instances = instanceMetadataRepository.findAllInStack(stack.getId());
-        setupProperties(hostGroups, stack.getGatewayInstanceGroup().getInstanceMetaData());
+        setupProperties(stack, hostGroups);
         installPlugins(stack, hostGroups, instances);
     }
 
@@ -54,9 +56,12 @@ public class RecipeEngine {
         pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.POST_INSTALL, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
     }
 
-    private void setupProperties(Set<HostGroup> hostGroups, Set<InstanceMetaData> instances) {
+    private void setupProperties(Stack stack, Set<HostGroup> hostGroups) {
         LOGGER.info("Setting up recipe properties.");
-        pluginManager.prepareKeyValues(instances, getAllPropertiesFromRecipes(hostGroups));
+        InstanceGroup gateway = stack.getGatewayInstanceGroup();
+        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+        TLSClientConfig clientConfig = new TLSClientConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
+        pluginManager.prepareKeyValues(clientConfig, getAllPropertiesFromRecipes(hostGroups));
     }
 
     private void installPlugins(Stack stack, Set<HostGroup> hostGroups, Set<InstanceMetaData> instances) {
@@ -67,10 +72,13 @@ public class RecipeEngine {
     }
 
     private void installPluginsOnHosts(Stack stack, Set<Recipe> recipes, Set<HostMetadata> hostMetadata, Set<InstanceMetaData> instances) {
+        InstanceGroup gateway = stack.getGatewayInstanceGroup();
+        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+        TLSClientConfig clientConfig = new TLSClientConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
         for (Recipe recipe : recipes) {
             Map<String, PluginExecutionType> plugins = recipe.getPlugins();
             Map<String, Set<String>> eventIdMap =
-                    pluginManager.installPlugins(stack.getGatewayInstanceGroup().getInstanceMetaData(), plugins, getHostnames(hostMetadata));
+                    pluginManager.installPlugins(clientConfig, plugins, getHostnames(hostMetadata));
             pluginManager.waitForEventFinish(stack, instances, eventIdMap, recipe.getTimeout());
         }
     }

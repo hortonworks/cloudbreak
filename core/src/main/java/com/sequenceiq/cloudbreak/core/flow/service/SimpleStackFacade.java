@@ -69,6 +69,7 @@ import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisioningService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
+import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
 
 @Service
 public class SimpleStackFacade implements StackFacade {
@@ -110,6 +111,8 @@ public class SimpleStackFacade implements StackFacade {
     private SubnetRepository subnetRepository;
     @Inject
     private EmailSenderService emailSenderService;
+    @Inject
+    private TlsSetupService tlsSetupService;
 
     @Override
     public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
@@ -136,7 +139,7 @@ public class SimpleStackFacade implements StackFacade {
             consulMetadataSetup.setupConsulMetadata(stack.getId());
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
         } catch (Exception e) {
-            LOGGER.error("Exception during the consul metadata setup process.", e);
+            LOGGER.error("Exception during the consul metadata setup process.", e.getMessage());
             throw new CloudbreakException(e);
         }
         return context;
@@ -153,7 +156,7 @@ public class SimpleStackFacade implements StackFacade {
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Cluster infrastructure started successfully.");
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), BILLING_STARTED.name(), "Cluster infrastructure started successfully.");
         } catch (Exception e) {
-            LOGGER.error("Exception during the stack start process.", e);
+            LOGGER.error("Exception during the stack start process.", e.getMessage());
             throw new CloudbreakException(e);
         }
         return context;
@@ -334,11 +337,11 @@ public class SimpleStackFacade implements StackFacade {
             stackUpdater.updateStackStatus(stack.getId(), CREATE_IN_PROGRESS, "Creating infrastructure");
             ProvisionComplete provisionResult = provisioningService.buildStack(actualContext.getCloudPlatform(), stack, actualContext.getSetupProperties());
             Date endDate = new Date();
-
             long seconds = (endDate.getTime() - startDate.getTime()) / DateUtils.MILLIS_PER_SECOND;
             fireEventAndLog(stack.getId(), context, String.format("The creation of infrastructure took %s seconds.", seconds), AVAILABLE);
             context = new ProvisioningContext.Builder()
                     .setDefaultParams(provisionResult.getStackId(), provisionResult.getCloudPlatform())
+                    .setProvisionSetupProperties(actualContext.getSetupProperties())
                     .setProvisionedResources(provisionResult.getResources())
                     .build();
         } catch (Exception e) {
@@ -346,6 +349,14 @@ public class SimpleStackFacade implements StackFacade {
             throw new CloudbreakException(e);
         }
         return context;
+    }
+
+    @Override
+    public FlowContext setupTls(FlowContext context) throws CloudbreakException {
+        ProvisioningContext actualContext = (ProvisioningContext) context;
+        Stack stack = stackService.getById(actualContext.getStackId());
+        tlsSetupService.setupTls(actualContext.getCloudPlatform(), stack, actualContext.getSetupProperties());
+        return actualContext;
     }
 
     @Override
@@ -376,12 +387,12 @@ public class SimpleStackFacade implements StackFacade {
             Stack stack = stackService.getById(actualContext.getStackId());
             stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Updating allowed subnets.");
             MDCBuilder.buildMdcContext(stack);
-            Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(stack.cloudPlatform());
+            Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(stack.cloudPlatform(), null, null);
             Map<String, Set<Subnet>> modifiedSubnets = getModifiedSubnetList(stack, actualContext.getAllowedSubnets());
             Set<Subnet> newSubnets = modifiedSubnets.get(UPDATED_SUBNETS);
             stack.setAllowedSubnets(newSubnets);
-            cloudPlatformConnectors.get(stack.cloudPlatform())
-                    .updateAllowedSubnets(stack, userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE));
+            cloudPlatformConnectors.get(stack.cloudPlatform()).updateAllowedSubnets(stack,
+                    userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE));
             subnetRepository.delete(modifiedSubnets.get(REMOVED_SUBNETS));
             subnetRepository.save(newSubnets);
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Updating of allowed subnets successfully finished.");
@@ -392,7 +403,7 @@ public class SimpleStackFacade implements StackFacade {
                 msg = String.format("Failed to update security constraints with allowed subnets: %s; stack is already in deletion phase.",
                         stack.getAllowedSubnets());
             }
-            LOGGER.error(msg, e);
+            LOGGER.error(msg, e.getMessage());
             throw new CloudbreakException(e);
         }
         return context;

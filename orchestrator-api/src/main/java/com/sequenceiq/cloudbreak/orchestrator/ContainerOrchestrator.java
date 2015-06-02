@@ -9,10 +9,10 @@ public interface ContainerOrchestrator {
 
     void init(ParallelContainerRunner parallelContainerRunner, ExitCriteria exitCriteria);
 
-    void bootstrap(String gatewayAddress, Set<Node> nodes, int consulServerCount, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException;
+    void bootstrap(GatewayConfig gatewayConfig, Set<Node> nodes, int consulServerCount, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
-    void bootstrapNewNodes(String gatewayAddress, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel)
+    void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
     void startRegistrator(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
@@ -35,11 +35,11 @@ public interface ContainerOrchestrator {
             int count, String consulDomain, String externServerLocation, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
-    boolean areAllNodesAvailable(String gatewayAddress, Set<Node> nodes);
+    boolean areAllNodesAvailable(GatewayConfig gatewayConfig, Set<Node> nodes);
 
-    List<String> getAvailableNodes(String gatewayAddress, Set<Node> nodes);
+    List<String> getAvailableNodes(GatewayConfig gatewayConfig, Set<Node> nodes);
 
-    boolean isBootstrapApiAvailable(String gatewayAddress);
+    boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig);
 
     int getMaxBootstrapNodes();
 

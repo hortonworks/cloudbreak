@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -19,9 +20,9 @@ public class ConsulServiceCheckerTask extends StackBasedStatusCheckerTask<Consul
     @Override
     public boolean checkStatus(ConsulContext consulContext) {
         String serviceName = consulContext.getTargets().get(0);
-        List<ConsulClient> clients = consulContext.getConsulClients();
-        LOGGER.info("Checking '{}' different hosts for service registration of '{}'", clients.size(), serviceName);
-        List<CatalogService> service = ConsulUtils.getService(clients, serviceName);
+        ConsulClient client = consulContext.getConsulClient();
+        LOGGER.info("Checking consul service registration of '{}'", serviceName);
+        List<CatalogService> service = ConsulUtils.getService(Arrays.asList(client), serviceName);
         if (service.isEmpty()) {
             LOGGER.info("Consul service '{}' is not registered yet", serviceName);
             return false;

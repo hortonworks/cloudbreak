@@ -8,21 +8,21 @@ import com.sequenceiq.cloudbreak.service.StackContext;
 
 public class ConsulKVCheckerContext extends StackContext {
 
-    private final List<ConsulClient> consulClients;
+    private final ConsulClient consulClient;
     private final List<String> keys;
     private final String expectedValue;
     private final String failValue;
 
-    public ConsulKVCheckerContext(Stack stack, List<ConsulClient> consulClients, List<String> keys, String expectedValue, String failValue) {
+    public ConsulKVCheckerContext(Stack stack, ConsulClient consulClient, List<String> keys, String expectedValue, String failValue) {
         super(stack);
-        this.consulClients = consulClients;
+        this.consulClient = consulClient;
         this.keys = keys;
         this.expectedValue = expectedValue;
         this.failValue = failValue;
     }
 
-    public List<ConsulClient> getConsulClients() {
-        return consulClients;
+    public ConsulClient getConsulClient() {
+        return consulClient;
     }
 
     public List<String> getKeys() {

@@ -103,7 +103,8 @@ public abstract class AbstractFlowHandler<T extends DefaultFlowContext> implemen
      * @param event     the received data
      */
     protected void consumeError(Event<T> event, Throwable throwable) {
-        LOGGER.debug("Delegating throwable to event's error handler. Event: {}, Exception message: {}", event, throwable);
+        LOGGER.error(String.format("Error occurred during phase execution: %s", throwable.getMessage()), throwable);
+        LOGGER.debug("Delegating throwable to event's error handler. Event: {}", event);
         event.consumeError(throwable);
     }
 

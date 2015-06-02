@@ -27,18 +27,32 @@ public class UserDataBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    public Map<InstanceGroupType, String> buildUserData(CloudPlatform cloudPlatform) {
+    public Map<InstanceGroupType, String> buildUserData(CloudPlatform cloudPlatform, String tmpSshKey, String sshUser) {
         Map<InstanceGroupType, String> result = new HashMap<>();
-        result.put(InstanceGroupType.GATEWAY, build(cloudPlatform, true));
-        result.put(InstanceGroupType.CORE, build(cloudPlatform, false));
+        result.put(InstanceGroupType.GATEWAY, buildGatewayUserdata(cloudPlatform, tmpSshKey, sshUser));
+        result.put(InstanceGroupType.CORE, buildCoreUserdata(cloudPlatform));
         return result;
     }
 
-    private String build(CloudPlatform cloudPlatform, boolean gateway) {
+    public String buildGatewayUserdata(CloudPlatform cloudPlatform, String tmpSshKey, String sshUser) {
         Map<String, Object> model = new HashMap<>();
         model.put("platformDiskPrefix", cloudPlatform.getDiskPrefix());
         model.put("platformDiskStartLabel", cloudPlatform.startLabel());
-        model.put("gateway", gateway);
+        model.put("gateway", true);
+        model.put("tmpSshKey", tmpSshKey);
+        model.put("sshUser", sshUser);
+        return build(model);
+    }
+
+    public String buildCoreUserdata(CloudPlatform cloudPlatform) {
+        Map<String, Object> model = new HashMap<>();
+        model.put("platformDiskPrefix", cloudPlatform.getDiskPrefix());
+        model.put("platformDiskStartLabel", cloudPlatform.startLabel());
+        model.put("gateway", false);
+        return build(model);
+    }
+
+    private String build(Map<String, Object> model) {
         try {
             return FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate("init/init.ftl", "UTF-8"), model);
         } catch (IOException | TemplateException e) {

@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
-import static com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.createClients;
+import static com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.createClient;
 import static com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.getAliveMembers;
 import static com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.getService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.catalog.model.CatalogService;
 import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -52,38 +54,45 @@ public class ConsulMetadataSetup {
         LOGGER.info("Setting up Consul metadata for the cluster.");
         Stack stack = stackService.getById(stackId);
         Set<InstanceMetaData> allInstanceMetaData = stack.getRunningInstanceMetaData();
-        PollingResult pollingResult = waitForConsulAgents(stack, allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
+        InstanceGroup gateway = stack.getGatewayInstanceGroup();
+        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+        TLSClientConfig clientConfig = new TLSClientConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
+        PollingResult pollingResult = waitForConsulAgents(stack, clientConfig, allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
         if (!isSuccess(pollingResult)) {
             throw new WrongMetadataException("Connecting to consul hosts is interrupted.");
         }
-        updateWithConsulData(allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
+        updateWithConsulData(clientConfig, allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
         instanceMetaDataRepository.save(allInstanceMetaData);
     }
 
     public void setupNewConsulMetadata(Long stackId, Set<String> newAddresses) {
         LOGGER.info("Extending Consul metadata.");
         Stack stack = stackService.getById(stackId);
+        InstanceGroup gateway = stack.getGatewayInstanceGroup();
+        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+        TLSClientConfig clientConfig = new TLSClientConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
         Set<InstanceMetaData> newInstanceMetadata = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
             if (newAddresses.contains(instanceMetaData.getPrivateIp())) {
                 newInstanceMetadata.add(instanceMetaData);
             }
         }
-        PollingResult pollingResult = waitForConsulAgents(stack, stack.getRunningInstanceMetaData(), newInstanceMetadata);
+        PollingResult pollingResult = waitForConsulAgents(stack, clientConfig, stack.getRunningInstanceMetaData(), newInstanceMetadata);
         if (!isSuccess(pollingResult)) {
             throw new WrongMetadataException("Connecting to consul hosts is interrupted.");
         }
-        updateWithConsulData(stack.getRunningInstanceMetaData(), newInstanceMetadata);
+        updateWithConsulData(clientConfig, stack.getRunningInstanceMetaData(), newInstanceMetadata);
         instanceMetaDataRepository.save(newInstanceMetadata);
     }
 
 
-    private PollingResult waitForConsulAgents(Stack stack, Set<InstanceMetaData> originalMetaData, Set<InstanceMetaData> newInstanceMetadata) {
+    private PollingResult waitForConsulAgents(Stack stack, TLSClientConfig clientConfig, Set<InstanceMetaData> originalMetaData,
+            Set<InstanceMetaData> newInstanceMetadata) {
         Set<InstanceMetaData> copy = new HashSet<>(originalMetaData);
         if (newInstanceMetadata != null) {
             copy.removeAll(newInstanceMetadata);
         }
-        List<ConsulClient> clients = createClients(copy);
+        ConsulClient client = createClient(clientConfig);
         List<String> privateIps = new ArrayList<>();
         if (newInstanceMetadata == null || newInstanceMetadata.isEmpty()) {
             for (InstanceMetaData instance : originalMetaData) {
@@ -96,16 +105,17 @@ public class ConsulMetadataSetup {
         }
         return consulPollingService.pollWithTimeout(
                 consulHostCheckerTask,
-                new ConsulContext(stack, clients, privateIps),
+                new ConsulContext(stack, client, privateIps),
                 POLLING_INTERVAL,
                 MAX_POLLING_ATTEMPTS);
     }
 
     @VisibleForTesting
-    protected void updateWithConsulData(Set<InstanceMetaData> originalMetadata, Set<InstanceMetaData> newInstanceMetadata) {
-        List<ConsulClient> clients = createClients(originalMetadata);
-        Map<String, String> members = getAliveMembers(clients);
-        Set<String> consulServers = getConsulServers(clients);
+    protected void updateWithConsulData(TLSClientConfig clientConfig, Set<InstanceMetaData> originalMetadata,
+            Set<InstanceMetaData> newInstanceMetadata) {
+        ConsulClient client = createClient(clientConfig);
+        Map<String, String> members = getAliveMembers(Arrays.asList(client));
+        Set<String> consulServers = getConsulServers(Arrays.asList(client));
         Set<InstanceMetaData> metadataToUpdate = new HashSet<>();
         if (newInstanceMetadata == null || newInstanceMetadata.isEmpty()) {
             metadataToUpdate = originalMetadata;
