@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingService;
@@ -120,8 +121,8 @@ public class AzureProvisionSetup implements ProvisionSetup {
     private Map<Integer, String[]> prepareStorageAccounts(Stack stack, AzureLocation azureLocation,
             final AzureClient azureClient, String affinityGroupName, int storageAccountIndex) {
         Map<Integer, String[]> accountIndexKeys = new HashMap<>();
-        LOGGER.info("Checking image exists in Azure image list.");
         final String osImageName = azureStackUtil.getOsImageName(stack, azureLocation, storageAccountIndex);
+        LOGGER.info("Checking if image: {} exists in Azure image list.", osImageName);
         if (!isImageAvailable(azureClient, osImageName)) {
             String osStorageName = azureStackUtil.getOSStorageName(stack, azureLocation, storageAccountIndex);
             createOSStorage(stack, azureClient, osStorageName, affinityGroupName);
@@ -149,7 +150,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
             AzureClientUtil.copyOsImage(storageAccountKey, stack.getImage(), targetImageUri);
             accountIndexKeys.put(storageAccountIndex, new String[]{storageAccountKey, targetImageUri});
         } else {
-            LOGGER.info("Image: {} already exist no need to copy it.", osImageName);
+            LOGGER.info("Image: {} already exists, no need to copy it.", osImageName);
         }
         return accountIndexKeys;
     }
@@ -225,7 +226,8 @@ public class AzureProvisionSetup implements ProvisionSetup {
                 params.put(DESCRIPTION, VM_COMMON_NAME);
                 params.put(AFFINITYGROUP, affinityGroupName);
                 HttpResponseDecorator response = createStorageAccount(azureClient, params);
-                AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(azureClient, stack, response);
+                AzureResourcePollerObject azureResourcePollerObject =
+                        new AzureResourcePollerObject(azureClient, ResourceType.AZURE_STORAGE, storageName, stack, response);
                 azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                         POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
                 LOGGER.info("Storage creation was successful with {} name", storageName);

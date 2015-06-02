@@ -29,6 +29,7 @@ public abstract class AzureResourceStatusCheckerTask extends SimpleStatusChecker
         Iterator<HttpResponseDecorator> iterator = responses.iterator();
         while (iterator.hasNext()) {
             try {
+                LOGGER.info("Checking status of Azure resource type: {} name: {}", t.getType(), t.getName());
                 HttpResponseDecorator response = iterator.next();
                 String requestId = getRequestId(response);
                 String requestStatus = String.valueOf(t.getAzureClient().getRequestStatus(requestId));
@@ -56,13 +57,14 @@ public abstract class AzureResourceStatusCheckerTask extends SimpleStatusChecker
 
     @Override
     public void handleTimeout(AzureResourcePollerObject t) {
-        throw new AzureResourceException(String.format("Operation timed out. Azure resource could not reach the desired status: %s on stack.",
-                t.getStack().getId()));
+        throw new AzureResourceException(String.format("Operation timed out. Azure resource type: %s name: %s could not reach the desired state on stack: %s",
+                t.getType(), t.getName(), t.getStack().getId()));
     }
 
     @Override
     public String successMessage(AzureResourcePollerObject t) {
-        return String.format("Azure resource successfully reached status: %s on stack.", t.getStack().getId());
+        return String.format("Azure resource type: %s name: %s successfully reached the desired state on stack: %s",
+                t.getType(), t.getName(), t.getStack().getId());
     }
 
     private String getRequestId(HttpResponseDecorator response) {

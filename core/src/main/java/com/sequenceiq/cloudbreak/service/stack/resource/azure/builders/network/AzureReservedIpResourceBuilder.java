@@ -53,10 +53,11 @@ public class AzureReservedIpResourceBuilder extends AzureSimpleNetworkResourceBu
     public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
         AzureReservedIpCreateRequest azureReservedIpCreateRequest = (AzureReservedIpCreateRequest) createResourceRequest;
         try {
-            HttpResponseDecorator serviceCertificate = (HttpResponseDecorator) azureReservedIpCreateRequest.getAzureClient()
-                    .createReservedIP(azureReservedIpCreateRequest.getProps());
-            AzureResourcePollerObject azureResourcePollerObject =
-                    new AzureResourcePollerObject(azureReservedIpCreateRequest.getAzureClient(), azureReservedIpCreateRequest.getStack(), serviceCertificate);
+            AzureClient azureClient = azureReservedIpCreateRequest.getAzureClient();
+            Map<String, String> props = azureReservedIpCreateRequest.getProps();
+            HttpResponseDecorator serviceCertificate = (HttpResponseDecorator) azureClient.createReservedIP(props);
+            AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(
+                    azureClient, ResourceType.AZURE_RESERVED_IP, props.get(NAME), azureReservedIpCreateRequest.getStack(), serviceCertificate);
             azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                     POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
         } catch (Exception ex) {
@@ -74,7 +75,8 @@ public class AzureReservedIpResourceBuilder extends AzureSimpleNetworkResourceBu
             props.put(NAME, resource.getResourceName());
             AzureClient azureClient = azureStackUtil.createAzureClient(credential);
             HttpResponseDecorator deleteVirtualMachineResult = (HttpResponseDecorator) azureClient.deleteReservedIP(props);
-            AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(azureClient, stack, deleteVirtualMachineResult);
+            AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(
+                    azureClient, ResourceType.AZURE_RESERVED_IP, resource.getResourceName(), stack, deleteVirtualMachineResult);
             azureResourcePollerObjectPollingService.pollWithTimeout(azureDeleteResourceStatusCheckerTask, azureResourcePollerObject,
                     POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
         } catch (HttpResponseException ex) {

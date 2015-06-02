@@ -49,16 +49,19 @@ public class AzureAffinityGroupResourceBuilder extends AzureSimpleNetworkResourc
     public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
         AzureAffinityGroupCreateRequest aCSCR = (AzureAffinityGroupCreateRequest) createResourceRequest;
         Stack stack = stackRepository.findById(aCSCR.stackId);
+        AzureClient azureClient = aCSCR.getAzureClient();
+        Map<String, String> props = aCSCR.getProps();
         try {
             LOGGER.debug("Checking for affinity group: {}", aCSCR.getName());
-            aCSCR.getAzureClient().getAffinityGroup(aCSCR.getName());
+            azureClient.getAffinityGroup(aCSCR.getName());
         } catch (Exception ex) {
             if (ex instanceof HttpResponseException) {
                 HttpResponseException httpResponseException = (HttpResponseException) ex;
                 if (httpResponseException.getStatusCode() == NOT_FOUND) {
                     LOGGER.debug("Affinity group not found; creating new  affinity group: {}", aCSCR.getName());
-                    HttpResponseDecorator affinityResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createAffinityGroup(aCSCR.getProps());
-                    AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), stack, affinityResponse);
+                    HttpResponseDecorator affinityResponse = (HttpResponseDecorator) azureClient.createAffinityGroup(props);
+                    AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(
+                            azureClient, ResourceType.AZURE_AFFINITY_GROUP, props.get(NAME), stack, affinityResponse);
                     azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                             POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
                 } else {
