@@ -103,7 +103,7 @@ public class AzureConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public String getSSHThumbprint(Stack stack, String gateway) {
+    public String getSSHFingerprint(Stack stack, String gateway) {
         return "THUMBPRINT";
     }
 
