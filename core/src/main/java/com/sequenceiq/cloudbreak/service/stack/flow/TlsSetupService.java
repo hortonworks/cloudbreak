@@ -70,7 +70,7 @@ public class TlsSetupService {
             // TODO: check exit status
             changeSshKeySession.close();
 
-            // TODO: scp generated server certificate
+            ssh.newSCPFileTransfer().download("/tmp/server.pem","/tmp/certs/ca.pem");
 
             ssh.disconnect();
         } catch (IOException e) {
