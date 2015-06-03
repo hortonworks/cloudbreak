@@ -14,6 +14,7 @@ echo -e '## Unreleased\n\n### Fixed\n\n### Added\n\n### Removed\n\n### Changed\n
 git commit -m "prepare for release $VER" VERSION CHANGELOG.md
 git push origin master
 
-checkout -b release-${VER} origin/master
+git checkout -b release-${VER} origin/master
 git push origin release-$VER
 hub pull-request -b release -m "release $VER"
+git checkout master
