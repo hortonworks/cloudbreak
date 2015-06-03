@@ -105,6 +105,9 @@
         "CidrBlock" : { "Fn::FindInMap" : [ "SubnetConfig", "VPC", "CIDR" ]},
         "EnableDnsSupport" : "true",
         "EnableDnsHostnames" : "true",
+        <#if dedicatedInstances>
+        "InstanceTenancy": "dedicated",
+        </#if>
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Public" }

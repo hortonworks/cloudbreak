@@ -21,6 +21,9 @@ import freemarker.template.TemplateException;
 public class CloudFormationTemplateBuilder {
 
     @Inject
+    private AwsStackUtil awsStackUtil;
+
+    @Inject
     private Configuration freemarkerConfiguration;
 
     public String build(Stack stack, String snapshotId, boolean existingVPC, String templatePath) {
@@ -30,6 +33,7 @@ public class CloudFormationTemplateBuilder {
         model.put("subnets", stack.getAllowedSubnets());
         model.put("ports", NetworkUtils.getPorts(Optional.fromNullable(stack)));
         model.put("cbSubnet", stack.getNetwork().getSubnetCIDR());
+        model.put("dedicatedInstances", awsStackUtil.areDedicatedInstancesRequested(stack));
         if (snapshotId != null) {
             model.put("snapshotId", snapshotId);
         }

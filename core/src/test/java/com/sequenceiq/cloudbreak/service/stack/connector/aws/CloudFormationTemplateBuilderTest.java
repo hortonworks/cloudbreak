@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import freemarker.template.Configuration;
 
 public class CloudFormationTemplateBuilderTest {
+    private static final String DEDICATED_INSTANCES_REQUESTED_JSON_PART = "\"InstanceTenancy\": \"dedicated\"";
 
     @InjectMocks
     private CloudFormationTemplateBuilder underTest;
@@ -35,6 +36,9 @@ public class CloudFormationTemplateBuilderTest {
 
     @Mock
     private Network network;
+
+    @Mock
+    private AwsStackUtil awsStackUtil;
 
     @Before
     public void setUp() throws Exception {
@@ -121,6 +125,54 @@ public class CloudFormationTemplateBuilderTest {
         String result = underTest.build(stack, null, false, "templates/aws-cf-stack.ftl");
         // THEN
         assertFalse(result.contains("\"SpotPrice\""));
+    }
+
+    @Test
+    public void testBuildTemplateShouldHaveInstanceTenancySpecifiedWhenDedicatedInstancesAreRequested() {
+        InstanceGroup instanceGroup1 = new InstanceGroup();
+        AwsTemplate awsTemplate = new AwsTemplate();
+        awsTemplate.setInstanceType(AwsInstanceType.C3Large);
+        awsTemplate.setSshLocation("0.0.0.0/0");
+        awsTemplate.setName("awstemp1");
+        awsTemplate.setVolumeCount(1);
+        awsTemplate.setVolumeSize(100);
+        awsTemplate.setVolumeType(AwsVolumeType.Gp2);
+        instanceGroup1.setNodeCount(1);
+        instanceGroup1.setTemplate(awsTemplate);
+        instanceGroup1.setGroupName("master");
+        List<InstanceGroup> instanceGroupsList = Arrays.asList(instanceGroup1);
+        Set<InstanceGroup> instanceGroupSet = new HashSet<>(instanceGroupsList);
+        when(stack.getInstanceGroupsAsList()).thenReturn(instanceGroupsList);
+        when(stack.getInstanceGroups()).thenReturn(instanceGroupSet);
+        when(awsStackUtil.areDedicatedInstancesRequested(stack)).thenReturn(true);
+        // WHEN
+        String result = underTest.build(stack, null, false, "templates/aws-cf-stack.ftl");
+        // THEN
+        assertTrue(result.contains(DEDICATED_INSTANCES_REQUESTED_JSON_PART));
+    }
+
+    @Test
+    public void testBuildTemplateShouldHaveNotInstanceTenancySpecifiedWhenDedicatedInstancesAreNotRequested() {
+        InstanceGroup instanceGroup1 = new InstanceGroup();
+        AwsTemplate awsTemplate = new AwsTemplate();
+        awsTemplate.setInstanceType(AwsInstanceType.C3Large);
+        awsTemplate.setSshLocation("0.0.0.0/0");
+        awsTemplate.setName("awstemp1");
+        awsTemplate.setVolumeCount(1);
+        awsTemplate.setVolumeSize(100);
+        awsTemplate.setVolumeType(AwsVolumeType.Gp2);
+        instanceGroup1.setNodeCount(1);
+        instanceGroup1.setTemplate(awsTemplate);
+        instanceGroup1.setGroupName("master");
+        List<InstanceGroup> instanceGroupsList = Arrays.asList(instanceGroup1);
+        Set<InstanceGroup> instanceGroupSet = new HashSet<>(instanceGroupsList);
+        when(stack.getInstanceGroupsAsList()).thenReturn(instanceGroupsList);
+        when(stack.getInstanceGroups()).thenReturn(instanceGroupSet);
+        when(awsStackUtil.areDedicatedInstancesRequested(stack)).thenReturn(false);
+        // WHEN
+        String result = underTest.build(stack, null, false, "templates/aws-cf-stack.ftl");
+        // THEN
+        assertFalse(result.contains(DEDICATED_INSTANCES_REQUESTED_JSON_PART));
     }
 
     @Test(expected = AwsResourceException.class)

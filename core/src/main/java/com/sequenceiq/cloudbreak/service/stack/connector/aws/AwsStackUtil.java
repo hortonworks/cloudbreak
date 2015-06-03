@@ -14,6 +14,7 @@ import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.sns.AmazonSNSClient;
+import com.sequenceiq.cloudbreak.controller.validation.StackParam;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.credential.aws.CrossAccountCredentialsProvider;
@@ -88,4 +89,16 @@ public class AwsStackUtil {
         }
     }
 
+    public boolean areDedicatedInstancesRequested(Stack stack) {
+        boolean result = false;
+        if (isDedicatedInstancesParamExistAndTrue(stack)) {
+            result = true;
+        }
+        return result;
+    }
+
+    private boolean isDedicatedInstancesParamExistAndTrue(Stack stack) {
+        return stack.getParameters().containsKey(StackParam.DEDICATED_INSTANCES.getName())
+                && Boolean.valueOf(stack.getParameters().get(StackParam.DEDICATED_INSTANCES.getName()));
+    }
 }
