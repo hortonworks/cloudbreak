@@ -6,6 +6,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 
 public class ResourceStatusLists {
+    private ResourceStatusLists() {
+    }
 
     public static CloudResourceStatus aggregate(List<CloudResourceStatus> cloudResourceStatuses) {
 

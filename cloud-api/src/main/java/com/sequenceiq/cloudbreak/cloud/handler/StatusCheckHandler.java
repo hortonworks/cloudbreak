@@ -24,7 +24,7 @@ public class StatusCheckHandler implements CloudPlatformEventHandler<StatusCheck
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Inject
-    private Provider<SyncPollingScheduler> listnablePollingScheduler;
+    private Provider<SyncPollingScheduler> listenablePollingScheduler;
 
     @Inject
     private PollTaskFactory statusCheckFactory;

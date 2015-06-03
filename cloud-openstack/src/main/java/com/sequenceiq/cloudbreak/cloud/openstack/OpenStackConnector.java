@@ -69,6 +69,7 @@ public class OpenStackConnector implements CloudPlatformConnectorV2 {
 
         CloudResource cloudResource = new CloudResource(ResourceType.HEAT_STACK, stackName, heatStack.getId());
         List<CloudResourceStatus> resources = checkResourcesState(authenticatedContext, Arrays.asList(cloudResource));
+        LOGGER.debug("Launched resources: {}", resources);
         return resources;
     }
 
@@ -186,6 +187,7 @@ public class OpenStackConnector implements CloudPlatformConnectorV2 {
         String status = heatStack.getStatus();
         LOGGER.info("Heat stack status of: {}  is: {}", heatStack, status);
         CloudResourceStatus heatResourceStatus = new CloudResourceStatus(resource, HeatStackStatus.mapResourceStatus(status), heatStack.getStackStatusReason());
+        LOGGER.debug("Cloudresource status: {}", heatResourceStatus);
         return heatResourceStatus;
     }
 }

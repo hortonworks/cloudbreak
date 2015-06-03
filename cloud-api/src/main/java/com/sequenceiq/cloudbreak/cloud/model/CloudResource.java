@@ -29,6 +29,7 @@ public class CloudResource {
         return reference;
     }
 
+    //BEGIN GENERATED CODE
     @Override
     public String toString() {
         return "CloudResource{" +
@@ -37,4 +38,5 @@ public class CloudResource {
                 ", reference='" + reference + '\'' +
                 '}';
     }
+    //END GENERATED CODE
 }

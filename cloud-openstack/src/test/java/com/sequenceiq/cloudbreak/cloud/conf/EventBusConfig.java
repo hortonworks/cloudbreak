@@ -22,7 +22,7 @@ public class EventBusConfig {
 
     @Bean
     public ListeningScheduledExecutorService listeningScheduledExecutorService() {
-        return MoreExecutors.listeningDecorator(new ScheduledThreadPoolExecutor(10));
+        return MoreExecutors.listeningDecorator(new ScheduledThreadPoolExecutor(eventBusThreadPoolSize));
     }
 
     @Bean
