@@ -39,6 +39,8 @@ public class LaunchStackResult {
         return results;
     }
 
+
+    //BEGIN GENERATED CODE
     @Override
     public String toString() {
         return "LaunchStackResult{" +
@@ -48,4 +50,5 @@ public class LaunchStackResult {
                 ", results=" + results +
                 '}';
     }
+    //END GENERATED CODE
 }

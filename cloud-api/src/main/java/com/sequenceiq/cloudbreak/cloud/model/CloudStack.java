@@ -35,6 +35,7 @@ public class CloudStack {
         return image;
     }
 
+    //BEGIN GENERATED CODE
     @Override
     public String toString() {
         return "CloudStack{" +
@@ -44,4 +45,5 @@ public class CloudStack {
                 ", image=" + image +
                 '}';
     }
+    //END GENERATED CODE
 }

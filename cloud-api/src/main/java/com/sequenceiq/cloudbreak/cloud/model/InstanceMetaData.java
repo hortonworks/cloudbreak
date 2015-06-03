@@ -25,6 +25,7 @@ public class InstanceMetaData {
         return publicIp;
     }
 
+    //BEGIN GENERATED CODE
     @Override
     public String toString() {
         return "InstanceMetaData{" +
@@ -33,4 +34,5 @@ public class InstanceMetaData {
                 ", publicIp='" + publicIp + '\'' +
                 '}';
     }
+    //END GENERATED CODE
 }

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.scheduler;
 
-public interface SceduledResult {
+public interface ScheduledResult {
 
     boolean completed();
 }

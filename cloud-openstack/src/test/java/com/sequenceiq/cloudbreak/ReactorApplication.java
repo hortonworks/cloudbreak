@@ -87,7 +87,7 @@ public class ReactorApplication implements CommandLineRunner {
             LaunchStackResult result = promise.await(1, TimeUnit.HOURS);
             LOGGER.info("########### {}", result);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.error("Exception:", e);
         }
     }
 
@@ -126,8 +126,10 @@ public class ReactorApplication implements CommandLineRunner {
         String ts = sdf.format(new Date());
 
         StackContext stackContext = new StackContext(0, "stack-name_" + ts, "OPENSTACK");
+
         CloudStack cs = new CloudStack(groups, network, security, image);
         LaunchStackRequest lr = new LaunchStackRequest(stackContext, c, cs, promise);
+        LOGGER.debug("Launchrequest: {}", lr);
         return lr;
 
     }

@@ -24,15 +24,13 @@ import com.sequenceiq.cloudbreak.cloud.transform.LaunchStackResults;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 
 import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStackRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LaunchStackHandler.class);
-
-    @Inject
-    private EventBus eventBus;
+    private static final int INTERVAL = 5;
+    private static final int MAX_ATTEMPT = 100;
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -50,7 +48,7 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
 
     @Override
     public void accept(Event<LaunchStackRequest> launchStackRequestEvent) {
-        LOGGER.info("Request received: {}", launchStackRequestEvent);
+        LOGGER.info("Received event: {}", launchStackRequestEvent);
         LaunchStackRequest r = launchStackRequestEvent.getData();
         try {
 
@@ -66,7 +64,7 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
             PollTask<LaunchStackResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources);
             LaunchStackResult launchStackResult = LaunchStackResults.build(r.getStackContext(), resourceStatus);
             if (!task.completed(launchStackResult)) {
-                launchStackResult = syncPollingScheduler.schedule(task, 5, 100);
+                launchStackResult = syncPollingScheduler.schedule(task, INTERVAL, MAX_ATTEMPT);
             }
 
             r.getResult().onNext(launchStackResult);
@@ -75,8 +73,6 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
             LOGGER.error("Failed to handle LaunchStackRequest: {}", e);
             r.getResult().onNext(new LaunchStackResult(r.getStackContext(), ResourceStatus.FAILED, e.getMessage(), null));
         }
-
-
         LOGGER.info("LaunchStackHandler finished");
     }
 

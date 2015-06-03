@@ -21,8 +21,8 @@ public class OpenStackConnectorAdapter implements CloudPlatformConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackConnectorAdapter.class);
 
 
-    @Value("${use.new.connector:false}")
-    boolean useNewConnector;
+    @Value("${cb.openstack.experimental.connector:false}")
+    private boolean experimentalConnector;
 
     @Inject
     private OpenStackConnector openStackConnector;
@@ -32,7 +32,7 @@ public class OpenStackConnectorAdapter implements CloudPlatformConnector {
 
     @Override
     public Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties) {
-        if (useNewConnector) {
+        if (experimentalConnector) {
             return openStackConnectorV2Facade.buildStack(stack, gateWayUserData, coreUserData, setupProperties);
         } else {
             return openStackConnector.buildStack(stack, gateWayUserData, coreUserData, setupProperties);
@@ -41,7 +41,7 @@ public class OpenStackConnectorAdapter implements CloudPlatformConnector {
 
     @Override
     public Set<Resource> addInstances(Stack stack, String gateWayUserData, String coreUserData, Integer adjustment, String instanceGroup) {
-        if (useNewConnector) {
+        if (experimentalConnector) {
             return openStackConnectorV2Facade.addInstances(stack, gateWayUserData, coreUserData, adjustment, instanceGroup);
         } else {
             return openStackConnector.addInstances(stack, gateWayUserData, coreUserData, adjustment, instanceGroup);
@@ -55,7 +55,11 @@ public class OpenStackConnectorAdapter implements CloudPlatformConnector {
 
     @Override
     public void deleteStack(Stack stack, Credential credential) {
-        openStackConnector.deleteStack(stack, credential);
+        if (experimentalConnector) {
+            openStackConnectorV2Facade.deleteStack(stack, credential);
+        } else {
+            openStackConnector.deleteStack(stack, credential);
+        }
     }
 
     @Override

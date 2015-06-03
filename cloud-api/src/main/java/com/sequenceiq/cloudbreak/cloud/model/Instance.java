@@ -37,6 +37,7 @@ public class Instance {
         volumes.add(volume);
     }
 
+    //BEGIN GENERATED CODE
     @Override
     public String toString() {
         return "Instance{" +
@@ -45,4 +46,5 @@ public class Instance {
                 ", volumes=" + volumes +
                 '}';
     }
+    //END GENERATED CODE
 }
