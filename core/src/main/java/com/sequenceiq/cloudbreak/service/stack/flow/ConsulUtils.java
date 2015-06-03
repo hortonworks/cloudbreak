@@ -170,7 +170,11 @@ public final class ConsulUtils {
     public static List<ConsulClient> createClients(Collection<InstanceMetaData> gatewayInstanceMetadata, int timeout) {
         List<ConsulClient> clients = new ArrayList<>();
         for (InstanceMetaData instanceMetaData : gatewayInstanceMetadata) {
-            clients.add(new ConsulClient(instanceMetaData.getPublicIp(), GATEWAY_PORT, timeout));
+            clients.add(new ConsulClient("https://" + instanceMetaData.getPublicIp(), GATEWAY_PORT,
+                    "/tmp/certs/client.pem",
+                    "/tmp/certs/key.pem",
+                    "/tmp/certs/ca.pem",
+                    timeout));
         }
         return clients;
     }
