@@ -35,7 +35,7 @@
                                 <div class="col-sm-9">
                                     <p id="sl_ambariServerIp" class="form-control-static">
                                         <div ng-if="activeCluster.cluster.ambariServerIp != null">
-                                            <a ng-show="activeCluster.cluster.ambariServerIp != null" target="_blank" href="http://{{activeCluster.cluster.ambariServerIp}}">http://{{activeCluster.cluster.ambariServerIp}}</a>
+                                            <a ng-show="activeCluster.cluster.ambariServerIp != null" target="_blank" href="http://{{activeCluster.cluster.ambariServerIp}}:8080">http://{{activeCluster.cluster.ambariServerIp}}:8080</a>
                                         </div>
                                         <div ng-if="activeCluster.cluster.ambariServerIp == null">
                                             <a ng-show="activeCluster.cluster.ambariServerIp == null" target="_blank" href="">Not Available</a>
@@ -86,6 +86,40 @@
                                 </div>
                             </div>
                         </form>
+                        <div class="panel panel-default" >
+                                <div class="panel-heading">
+                                    <h5><a data-toggle="collapse" data-target="#cluster-exposed-ports-collapse01"><i class="fa fa-link fa-fw"></i>Hadoop services</a></h5>
+                                </div>
+
+                                <div id="cluster-exposed-ports-collapse01" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <form class="form" role="document">
+                                            <div class="form-group">
+                                                <div class="col-sm-12">
+                                                    <table id="metadataTable" class="table table-report table-sortable-cols table-with-pagination table-condensed" style="background-color: transparent;">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>
+                                                                    <span>ServiceName</span>
+                                                                </th>
+                                                                <th>
+                                                                    <span>Address</span>
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr ng-repeat="(key, value) in activeCluster.cluster.serviceEndPoints">
+                                                                <td data-title="'servicename'" class="col-md-4">{{key}}</td>
+                                                                <td data-title="'address'" class="col-md-3"><a target="_blank" href="http://{{value}}">{{value}}</a></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                        </div>
 
                         <div class="panel panel-default panel-cluster-history">
                             <div class="panel-heading">
