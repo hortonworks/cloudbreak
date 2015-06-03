@@ -294,7 +294,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
         eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
-                String.format("Removing '%s' node(s) from the cluster.", actualContext.getHostGroupAdjustment()));
+                String.format("Removing '%s' node(s) from the cluster.", actualContext.getHostGroupAdjustment().getScalingAdjustment()));
 
         logBefore(actualContext.getStackId(), context, "Downscale ambari cluster", UPDATE_IN_PROGRESS);
         Set<String> hostNames = ambariClusterConnector

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 
@@ -26,7 +27,7 @@ public class CloudFormationTemplateBuilder {
         model.put("instanceGroups", stack.getInstanceGroupsAsList());
         model.put("existingVPC", existingVPC);
         model.put("subnets", stack.getAllowedSubnets());
-        model.put("ports", NetworkUtils.getPorts(stack));
+        model.put("ports", NetworkUtils.getPorts(Optional.fromNullable(stack)));
         model.put("cbSubnet", stack.getNetwork().getSubnetCIDR());
         if (snapshotId != null) {
             model.put("snapshotId", snapshotId);

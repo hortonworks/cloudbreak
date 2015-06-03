@@ -84,7 +84,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     public void update(AzureUpdateContextObject updateContextObject) {
         Stack stack = updateContextObject.getStack();
         AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
-        List<Port> ports = NetworkUtils.getPorts(stack);
+        List<Port> ports = NetworkUtils.getPorts(Optional.fromNullable(stack));
         Resource network = stack.getResourceByType(ResourceType.AZURE_NETWORK);
         List<HttpResponseDecorator> responses = new ArrayList<>();
         List<String> resourceNames = new ArrayList<>();
