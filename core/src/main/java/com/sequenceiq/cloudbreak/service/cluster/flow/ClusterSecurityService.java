@@ -13,9 +13,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
@@ -39,15 +40,15 @@ public class ClusterSecurityService {
     private static final String DOMAIN = "node.consul";
     private static final String INSTALLED_STATE = "INSTALLED";
 
-    @Autowired
+    @Inject
     private AmbariClientProvider ambariClientProvider;
-    @Autowired
+    @Inject
     private AmbariOperationService ambariOperationService;
-    @Autowired
+    @Inject
     private RetryingStackUpdater stackUpdater;
-    @Autowired
+    @Inject
     private CloudbreakEventService eventService;
-    @Autowired
+    @Inject
     private PluginManager pluginManager;
 
     public void enableKerberosSecurity(Stack stack) throws CloudbreakException {

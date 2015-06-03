@@ -4,11 +4,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.persistence.OptimisticLockException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
@@ -27,9 +27,9 @@ public class RetryingStackUpdater {
     private static final int MAX_RETRIES = 5;
     private static final Logger LOGGER = LoggerFactory.getLogger(RetryingStackUpdater.class);
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
-    @Autowired
+    @Inject
     private CloudbreakEventService cloudbreakEventService;
 
     public Stack updateStackStatus(Long stackId, Status status) {

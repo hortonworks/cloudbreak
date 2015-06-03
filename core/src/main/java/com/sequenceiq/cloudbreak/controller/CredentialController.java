@@ -7,10 +7,10 @@ import java.util.Set;
 import java.util.UnknownFormatConversionException;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -52,10 +52,10 @@ public class CredentialController {
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
-    @Autowired
+    @Inject
     private CredentialService credentialService;
 
-    @Autowired
+    @Inject
     private AzureStackUtil azureStackUtil;
 
     @ApiOperation(value = CredentialOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)

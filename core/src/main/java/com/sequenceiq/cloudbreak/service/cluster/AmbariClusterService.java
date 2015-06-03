@@ -15,9 +15,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -64,37 +65,37 @@ public class AmbariClusterService implements ClusterService {
     private static final String DATANODE = "DATANODE";
     private static final double SAFETY_PERCENTAGE = 1.2;
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
-    @Autowired
+    @Inject
     private BlueprintRepository blueprintRepository;
 
-    @Autowired
+    @Inject
     private ClusterRepository clusterRepository;
 
-    @Autowired
+    @Inject
     private RetryingStackUpdater stackUpdater;
 
-    @Autowired
+    @Inject
     private InstanceMetaDataRepository instanceMetadataRepository;
 
-    @Autowired
+    @Inject
     private HostGroupRepository hostGroupRepository;
 
-    @Autowired
+    @Inject
     private AmbariClientProvider ambariClientProvider;
 
-    @Autowired
+    @Inject
     private AmbariConfigurationService configurationService;
 
-    @Autowired
+    @Inject
     private HostFilterService hostFilterService;
 
-    @Autowired
+    @Inject
     private FlowManager flowManager;
 
-    @Autowired
+    @Inject
     private BlueprintValidator blueprintValidator;
 
     @Override

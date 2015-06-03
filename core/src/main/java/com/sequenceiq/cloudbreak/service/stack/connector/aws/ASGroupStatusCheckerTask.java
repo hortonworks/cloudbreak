@@ -2,9 +2,10 @@ package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.ec2.AmazonEC2Client;
@@ -21,7 +22,7 @@ public class ASGroupStatusCheckerTask extends StackBasedStatusCheckerTask<AutoSc
 
     private static final int INSTANCE_RUNNING = 16;
 
-    @Autowired
+    @Inject
     private CloudFormationStackUtil cfStackUtil;
 
     @Override

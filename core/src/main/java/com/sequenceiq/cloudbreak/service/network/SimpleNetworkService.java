@@ -2,9 +2,10 @@ package com.sequenceiq.cloudbreak.service.network;
 
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +24,10 @@ import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 public class SimpleNetworkService implements NetworkService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleNetworkService.class);
 
-    @Autowired
+    @Inject
     private NetworkRepository networkRepository;
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
     @Override

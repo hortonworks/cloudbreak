@@ -18,12 +18,13 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.util.SubnetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
@@ -56,13 +57,13 @@ public class AzureStackUtil {
     public static final int ROOTFS_COUNT = 1;
     public static final int GLOBAL_STORAGE = -1;
 
-    @Autowired
+    @Inject
     private KeyGeneratorService keyGeneratorService;
 
-    @Autowired
+    @Inject
     private CredentialRepository credentialRepository;
 
-    @Autowired
+    @Inject
     private UserDetailsService userDetailsService;
 
     public String getOsImageName(Stack stack, AzureLocation location, int storageIndex) {

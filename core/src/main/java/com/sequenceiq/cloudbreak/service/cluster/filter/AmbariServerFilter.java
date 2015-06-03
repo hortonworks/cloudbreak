@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
@@ -14,7 +15,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 @Component
 public class AmbariServerFilter implements HostFilter {
 
-    @Autowired
+    @Inject
     private InstanceMetaDataRepository instanceMetadataRepository;
 
     @Override

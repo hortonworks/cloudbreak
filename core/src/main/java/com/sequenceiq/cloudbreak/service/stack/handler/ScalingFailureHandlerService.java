@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +30,7 @@ public class ScalingFailureHandlerService implements FailureHandlerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ScalingFailureHandlerService.class);
 
-    @Autowired
+    @Inject
     private ResourceRepository resourceRepository;
 
     @javax.annotation.Resource
@@ -38,7 +39,7 @@ public class ScalingFailureHandlerService implements FailureHandlerService {
     @javax.annotation.Resource
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
 
-    @Autowired
+    @Inject
     private CloudbreakEventService eventService;
 
     @Override

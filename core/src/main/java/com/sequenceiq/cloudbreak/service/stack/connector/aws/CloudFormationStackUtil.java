@@ -3,7 +3,8 @@ package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.regions.Regions;
@@ -21,7 +22,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 @Service
 public class CloudFormationStackUtil {
 
-    @Autowired
+    @Inject
     private AwsStackUtil awsStackUtil;
 
     public String getAutoscalingGroupName(Stack stack, String instanceGroup) {

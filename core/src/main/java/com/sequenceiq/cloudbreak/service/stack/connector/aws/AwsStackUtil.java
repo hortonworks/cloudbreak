@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.auth.BasicSessionCredentials;
@@ -22,7 +23,7 @@ public class AwsStackUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsStackUtil.class);
 
-    @Autowired
+    @Inject
     private CrossAccountCredentialsProvider credentialsProvider;
 
     public AmazonCloudFormationClient createCloudFormationClient(Stack stack) {

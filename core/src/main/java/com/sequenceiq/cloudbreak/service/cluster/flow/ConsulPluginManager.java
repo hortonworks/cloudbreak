@@ -10,9 +10,9 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.ecwid.consul.v1.ConsulClient;
@@ -41,13 +41,13 @@ public class ConsulPluginManager implements PluginManager {
     public static final int ONE_THOUSAND = 1000;
     public static final int SECONDS_IN_MINUTE = 60;
 
-    @Autowired
+    @Inject
     private ConsulKVCheckerTask consulKVCheckerTask;
 
-    @Autowired
+    @Inject
     private PollingService<ConsulKVCheckerContext> keyValuePollingService;
 
-    @Autowired
+    @Inject
     private HostMetadataRepository hostMetadataRepository;
 
     @Override

@@ -18,9 +18,10 @@ import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 import java.util.Date;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
@@ -62,40 +63,40 @@ public class AmbariClusterFacade implements ClusterFacade {
     private static final int MAX_POLLING_ATTEMPTS = SEC_PER_MIN / (POLLING_INTERVAL / MS_PER_SEC) * 10;
     private static final String ADMIN = "admin";
 
-    @Autowired
+    @Inject
     private AmbariClientProvider ambariClientProvider;
 
-    @Autowired
+    @Inject
     private AmbariStartupListenerTask ambariStartupListenerTask;
 
-    @Autowired
+    @Inject
     private RetryingStackUpdater stackUpdater;
 
-    @Autowired
+    @Inject
     private AmbariClusterConnector ambariClusterConnector;
 
-    @Autowired
+    @Inject
     private StackService stackService;
 
-    @Autowired
+    @Inject
     private ClusterService clusterService;
 
-    @Autowired
+    @Inject
     private PollingService<AmbariStartupPollerObject> ambariStartupPollerObjectPollingService;
 
-    @Autowired
+    @Inject
     private EmailSenderService emailSenderService;
 
-    @Autowired
+    @Inject
     private CloudbreakEventService eventService;
 
-    @Autowired
+    @Inject
     private HostGroupService hostGroupService;
 
-    @Autowired
+    @Inject
     private ClusterSecurityService securityService;
 
-    @Autowired
+    @Inject
     private ClusterContainerRunner containerRunner;
 
     @Override

@@ -23,10 +23,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Function;
@@ -73,51 +73,51 @@ public class AmbariClusterConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterConnector.class);
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
-    @Autowired
+    @Inject
     private ClusterRepository clusterRepository;
-    @Autowired
+    @Inject
     private InstanceMetaDataRepository instanceMetadataRepository;
-    @Autowired
+    @Inject
     private HostGroupRepository hostGroupRepository;
-    @Autowired
+    @Inject
     private RetryingStackUpdater stackUpdater;
-    @Autowired
+    @Inject
     private AmbariOperationService ambariOperationService;
-    @Autowired
+    @Inject
     private PollingService<AmbariHosts> hostsPollingService;
-    @Autowired
+    @Inject
     private PollingService<AmbariHostsWithNames> rsPollerService;
-    @Autowired
+    @Inject
     private HadoopConfigurationService hadoopConfigurationService;
-    @Autowired
+    @Inject
     private AmbariClientProvider ambariClientProvider;
-    @Autowired
+    @Inject
     private CloudbreakEventService eventService;
-    @Autowired
+    @Inject
     private RecipeEngine recipeEngine;
-    @Autowired
+    @Inject
     private PluginManager pluginManager;
 
-    @Autowired
+    @Inject
     private AmbariHostsStatusCheckerTask ambariHostsStatusCheckerTask;
-    @Autowired
+    @Inject
     private DNDecommissionStatusCheckerTask dnDecommissionStatusCheckerTask;
-    @Autowired
+    @Inject
     private RSDecommissionStatusCheckerTask rsDecommissionStatusCheckerTask;
-    @Autowired
+    @Inject
     private ClusterSecurityService securityService;
 
-    @Autowired
+    @Inject
     private AmbariHostsRemover ambariHostsRemover;
-    @Autowired
+    @Inject
     private PollingService<AmbariHosts> ambariHostJoin;
-    @Autowired
+    @Inject
     private PollingService<AmbariClientPollerObject> ambariHealthChecker;
-    @Autowired
+    @Inject
     private AmbariHealthCheckerTask ambariHealthCheckerTask;
-    @Autowired
+    @Inject
     private AmbariHostsJoinStatusCheckerTask ambariHostsJoinStatusCheckerTask;
 
     public Cluster buildAmbariCluster(Stack stack) {

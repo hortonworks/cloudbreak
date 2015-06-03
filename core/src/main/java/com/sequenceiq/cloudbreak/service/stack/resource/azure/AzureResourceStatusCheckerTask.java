@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.http.Header;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
@@ -19,7 +20,7 @@ import groovyx.net.http.HttpResponseDecorator;
 public abstract class AzureResourceStatusCheckerTask extends SimpleStatusCheckerTask<AzureResourcePollerObject> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureResourceStatusCheckerTask.class);
 
-    @Autowired
+    @Inject
     private JsonHelper jsonHelper;
 
     @Override

@@ -5,9 +5,9 @@ import static reactor.bus.selector.Selectors.$;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow.handlers.AddClusterContainersHandler;
@@ -49,13 +49,13 @@ import reactor.fn.Consumer;
 @Component
 public class FlowInitializer implements InitializingBean {
 
-    @Autowired
+    @Inject
     private EventBus reactor;
 
     @Resource
     private Map<Class, FlowHandler> flowHandlersMap;
 
-    @Autowired
+    @Inject
     private TransitionKeyService transitionKeyService;
 
     @Override

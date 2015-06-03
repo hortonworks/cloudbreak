@@ -8,9 +8,10 @@ import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_OPENSTACK_I
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -34,13 +35,13 @@ public class StackDecorator implements Decorator<Stack> {
 
     private static final double ONE_HUNDRED = 100.0;
 
-    @Autowired
+    @Inject
     private CredentialRepository credentialRepository;
 
-    @Autowired
+    @Inject
     private SecurityService securityService;
 
-    @Autowired
+    @Inject
     private NetworkService networkService;
 
     @Value("${cb.azure.image.uri:}")

@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.service.BuildStackFailureException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.BuildStackFailureException;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ResourceRequestResult;
 import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
@@ -33,13 +34,13 @@ public class StackFailureHandlerService implements FailureHandlerService {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackFailureHandlerService.class);
     private static final double ONE_HUNDRED = 100.0;
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
-    @Autowired
+    @Inject
     private InstanceGroupRepository instanceGroupRepository;
 
-    @Autowired
+    @Inject
     private ResourceRepository resourceRepository;
 
     @javax.annotation.Resource
@@ -48,7 +49,7 @@ public class StackFailureHandlerService implements FailureHandlerService {
     @javax.annotation.Resource
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
 
-    @Autowired
+    @Inject
     private CloudbreakEventService eventService;
 
     @Override

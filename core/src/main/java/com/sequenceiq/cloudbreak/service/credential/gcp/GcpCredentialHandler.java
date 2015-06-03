@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.service.credential.gcp;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.Compute;
@@ -17,9 +18,9 @@ import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpStackUtil;
 public class GcpCredentialHandler implements CredentialHandler<GcpCredential> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpCredentialHandler.class);
-    @Autowired
+    @Inject
     private OpenSshPublicKeyValidator rsaPublicKeyValidator;
-    @Autowired
+    @Inject
     private GcpStackUtil gcpStackUtil;
 
     @Override

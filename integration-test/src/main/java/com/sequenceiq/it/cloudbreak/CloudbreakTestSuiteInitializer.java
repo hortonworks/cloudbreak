@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.ConfigFileApplicationContextInitializer;
 import org.springframework.test.context.ContextConfiguration;
@@ -44,11 +45,11 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     @Value("${integrationtest.testsuite.cleanUpOnFailure}")
     private boolean cleanUpOnFailure;
 
-    @Autowired
+    @Inject
     private ITProps itProps;
-    @Autowired
+    @Inject
     private TemplateAdditionHelper templateAdditionHelper;
-    @Autowired
+    @Inject
     private SuiteContext suiteContext;
     private IntegrationTestContext itContext;
 

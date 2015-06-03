@@ -4,7 +4,8 @@ import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AWS_EXTERNA
 
 import java.util.Date;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -36,10 +37,10 @@ public class CrossAccountCredentialsProvider {
     @Value("${cb.aws.external.id:" + CB_AWS_EXTERNAL_ID + "}")
     private String externalId;
 
-    @Autowired
+    @Inject
     private TemporaryAwsCredentialsRepository credentialsRepository;
 
-    @Autowired
+    @Inject
     private CredentialRepository credentialRepository;
 
     public BasicSessionCredentials retrieveSessionCredentials(int durationInSeconds, String externalId, AwsCredential awsCredential) {

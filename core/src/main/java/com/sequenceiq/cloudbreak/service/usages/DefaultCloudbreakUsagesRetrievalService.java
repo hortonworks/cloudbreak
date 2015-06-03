@@ -2,7 +2,8 @@ package com.sequenceiq.cloudbreak.service.usages;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,7 @@ import com.sequenceiq.cloudbreak.repository.CloudbreakUsageSpecifications;
 @Service
 public class DefaultCloudbreakUsagesRetrievalService implements CloudbreakUsagesRetrievalService {
 
-    @Autowired
+    @Inject
     private CloudbreakUsageRepository usageRepository;
 
     @Override

@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 public abstract class StackBasedStatusCheckerTask<T extends StackContext> extends SimpleStatusCheckerTask<T> {
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
     public boolean exitPolling(T t) {

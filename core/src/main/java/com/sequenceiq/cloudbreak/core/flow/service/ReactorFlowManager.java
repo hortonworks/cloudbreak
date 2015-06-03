@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.core.flow.ErrorHandlerAwareFlowEventFactory;
@@ -33,13 +34,13 @@ import reactor.bus.EventBus;
 public class ReactorFlowManager implements FlowManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReactorFlowManager.class);
 
-    @Autowired
+    @Inject
     private EventBus reactor;
 
-    @Autowired
+    @Inject
     private TransitionKeyService transitionKeyService;
 
-    @Autowired
+    @Inject
     private ErrorHandlerAwareFlowEventFactory eventFactory;
 
     @Override

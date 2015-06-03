@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -34,16 +35,16 @@ import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 public class ClusterBootstrapperErrorHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterBootstrapperErrorHandler.class);
 
-    @Autowired
+    @Inject
     private ResourceRepository resourceRepository;
 
-    @Autowired
+    @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
-    @Autowired
+    @Inject
     private InstanceGroupRepository instanceGroupRepository;
 
-    @Autowired
+    @Inject
     private HostMetadataRepository hostMetadataRepository;
 
     @javax.annotation.Resource
@@ -55,7 +56,7 @@ public class ClusterBootstrapperErrorHandler {
     @javax.annotation.Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
-    @Autowired
+    @Inject
     private CloudbreakEventService eventService;
 
     public void terminateFailedNodes(ContainerOrchestrator orchestrator, Stack stack, Set<Node> nodes) throws CloudbreakOrchestratorFailedException {

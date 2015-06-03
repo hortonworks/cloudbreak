@@ -2,7 +2,8 @@ package com.sequenceiq.cloudbreak.converter;
 
 import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateway;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +15,7 @@ import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 @Component
 public class JsonToInstanceGroupConverter extends AbstractConversionServiceAwareConverter<InstanceGroupJson, InstanceGroup> {
 
-    @Autowired
+    @Inject
     private TemplateRepository templateRepository;
 
     @Override

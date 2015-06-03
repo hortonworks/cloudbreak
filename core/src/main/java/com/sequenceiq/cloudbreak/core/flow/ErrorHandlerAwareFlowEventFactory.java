@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import reactor.bus.Event;
@@ -11,7 +12,7 @@ import reactor.bus.Event;
 @Service
 public class ErrorHandlerAwareFlowEventFactory implements FlowEventFactory<Object> {
 
-    @Autowired
+    @Inject
     private CloudbreakErrorHandler errorHandler;
 
     @Override

@@ -2,7 +2,8 @@ package com.sequenceiq.cloudbreak.service.recipe;
 
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
@@ -19,10 +20,10 @@ import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 @Component
 public class SimpleRecipeService implements RecipeService {
 
-    @Autowired
+    @Inject
     private RecipeRepository recipeRepository;
 
-    @Autowired
+    @Inject
     private HostGroupRepository hostGroupRepository;
 
     @Override

@@ -9,9 +9,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -56,16 +57,16 @@ public class AzureProvisionSetup implements ProvisionSetup {
     private static final int MAX_POLLING_ATTEMPTS = 60;
     private static final int REQ_RETRY_COUNT = 5;
 
-    @Autowired
+    @Inject
     private AzureStackUtil azureStackUtil;
 
-    @Autowired
+    @Inject
     private RetryingStackUpdater retryingStackUpdater;
 
-    @Autowired
+    @Inject
     private AzureCreateResourceStatusCheckerTask azureCreateResourceStatusCheckerTask;
 
-    @Autowired
+    @Inject
     private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
 
     @Override

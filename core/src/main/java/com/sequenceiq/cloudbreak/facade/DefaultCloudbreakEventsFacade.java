@@ -2,7 +2,8 @@ package com.sequenceiq.cloudbreak.facade;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -15,10 +16,10 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 @Service
 public class DefaultCloudbreakEventsFacade implements CloudbreakEventsFacade {
 
-    @Autowired
+    @Inject
     private CloudbreakEventService cloudbreakEventService;
 
-    @Autowired
+    @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
 

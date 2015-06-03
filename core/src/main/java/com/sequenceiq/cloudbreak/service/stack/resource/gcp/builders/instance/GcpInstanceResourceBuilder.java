@@ -10,7 +10,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +28,10 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.domain.GcpCredential;
+import com.sequenceiq.cloudbreak.domain.GcpDiskMode;
+import com.sequenceiq.cloudbreak.domain.GcpDiskType;
 import com.sequenceiq.cloudbreak.domain.GcpTemplate;
+import com.sequenceiq.cloudbreak.domain.GcpZone;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -40,12 +44,9 @@ import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpRemoveCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpRemoveReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceCheckerStatus;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpStackUtil;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceException;
-import com.sequenceiq.cloudbreak.domain.GcpDiskMode;
-import com.sequenceiq.cloudbreak.domain.GcpDiskType;
-import com.sequenceiq.cloudbreak.domain.GcpZone;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.GcpSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpDeleteContextObject;
@@ -56,21 +57,21 @@ import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpStartStopCo
 @Order(3)
 public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder {
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
-    @Autowired
+    @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
-    @Autowired
+    @Inject
     private ClusterRepository clusterRepository;
-    @Autowired
+    @Inject
     private GcpResourceCheckerStatus gcpResourceCheckerStatus;
-    @Autowired
+    @Inject
     private PollingService<GcpResourceReadyPollerObject> gcpInstanceReadyPollerObjectPollingService;
-    @Autowired
+    @Inject
     private GcpRemoveCheckerStatus gcpRemoveCheckerStatus;
-    @Autowired
+    @Inject
     private PollingService<GcpRemoveReadyPollerObject> gcpRemoveReadyPollerObjectPollingService;
-    @Autowired
+    @Inject
     private GcpStackUtil gcpStackUtil;
 
     @Override

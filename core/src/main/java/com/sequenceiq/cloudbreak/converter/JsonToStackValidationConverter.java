@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 @Component
 public class JsonToStackValidationConverter extends AbstractConversionServiceAwareConverter<StackValidationRequest, StackValidation> {
 
-    @Autowired
+    @Inject
     private BlueprintRepository blueprintRepository;
 
     @Override

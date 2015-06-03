@@ -2,7 +2,8 @@ package com.sequenceiq.it.cloudbreak;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Optional;
@@ -10,7 +11,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 public class GcpTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
-    @Autowired
+    @Inject
     private TemplateAdditionHelper additionHelper;
 
     private List<TemplateAddition> additions;

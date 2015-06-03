@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
@@ -24,13 +25,13 @@ public class HostFilterService {
     public static final String RM_WS_PATH = "/ws/v1/cluster";
     private static final Logger LOGGER = LoggerFactory.getLogger(HostFilterService.class);
 
-    @Autowired
+    @Inject
     private List<HostFilter> hostFilters;
 
-    @Autowired
+    @Inject
     private AmbariConfigurationService configurationService;
 
-    @Autowired
+    @Inject
     private AmbariClientProvider ambariClientProvider;
 
     public List<HostMetadata> filterHostsForDecommission(Stack stack, Set<HostMetadata> hosts, String hostGroup) {

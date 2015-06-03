@@ -3,9 +3,10 @@ package com.sequenceiq.it.cloudbreak;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.ConfigFileApplicationContextInitializer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -30,7 +31,7 @@ public abstract class AbstractCloudbreakIntegrationTest extends AbstractTestNGSp
     private IntegrationTestContext itContext;
     private CloudbreakClient client;
 
-    @Autowired
+    @Inject
     private SuiteContext suiteContext;
 
     @BeforeClass

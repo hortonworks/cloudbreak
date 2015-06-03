@@ -7,10 +7,10 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
@@ -29,10 +29,10 @@ public class RecipeEngine {
     public static final int DEFAULT_RECIPE_TIMEOUT = 15;
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeEngine.class);
 
-    @Autowired
+    @Inject
     private InstanceMetaDataRepository instanceMetadataRepository;
 
-    @Autowired
+    @Inject
     private PluginManager pluginManager;
 
     public void setupRecipes(Stack stack, Set<HostGroup> hostGroups) {

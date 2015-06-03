@@ -2,7 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow.service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
@@ -16,7 +17,7 @@ public class AmbariHostsRemover {
 
     private static final int UNREGISTER_RETRY = 5;
 
-    @Autowired
+    @Inject
     private AmbariClientProvider ambariClientProvider;
 
     public void deleteHosts(Stack stack, List<String> hosts, List<String> components) {

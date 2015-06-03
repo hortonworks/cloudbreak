@@ -10,11 +10,11 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -55,25 +55,25 @@ public class DefaultStackService implements StackService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultStackService.class);
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
-    @Autowired
+    @Inject
     private RetryingStackUpdater stackUpdater;
 
-    @Autowired
+    @Inject
     private ClusterRepository clusterRepository;
 
-    @Autowired
+    @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
-    @Autowired
+    @Inject
     private FlowManager flowManager;
 
     @Resource
     private Map<CloudPlatform, ProvisionSetup> provisionSetups;
 
-    @Autowired
+    @Inject
     private BlueprintValidator blueprintValidator;
 
     @Override

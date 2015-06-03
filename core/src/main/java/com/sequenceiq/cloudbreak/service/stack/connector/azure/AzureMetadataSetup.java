@@ -12,9 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -40,11 +41,11 @@ public class AzureMetadataSetup implements MetadataSetup {
     private static final int MAX_POLLING_ATTEMPTS = 100;
     private static final int MAX_FAILURE_COUNT = 3;
 
-    @Autowired
+    @Inject
     private AzureMetadataSetupCheckerTask azureMetadataSetupCheckerTask;
-    @Autowired
+    @Inject
     private PollingService<AzureMetadataSetupCheckerTaskContext> azureMetadataSetupCheckerTaskPollingService;
-    @Autowired
+    @Inject
     private AzureStackUtil azureStackUtil;
 
     @Override

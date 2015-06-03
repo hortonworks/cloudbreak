@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
@@ -27,10 +28,10 @@ import reactor.fn.Consumer;
 public abstract class AbstractFlowHandler<T extends DefaultFlowContext> implements Consumer<Event<T>>, FlowHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFlowHandler.class);
 
-    @Autowired
+    @Inject
     private FlowManager flowManager;
 
-    @Autowired
+    @Inject
     private FlowFacade flowFacade;
 
     /**

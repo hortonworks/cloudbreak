@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.hostgroup;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -9,7 +10,7 @@ import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 @Service
 public class DefaultHostGroupService implements HostGroupService {
 
-    @Autowired private HostGroupRepository hostGroupRepository;
+    @Inject private HostGroupRepository hostGroupRepository;
 
     @Override
     public HostGroup getByClusterIdAndName(Long clusterId, String hostGroupName) {

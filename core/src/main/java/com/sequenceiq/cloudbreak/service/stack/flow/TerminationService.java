@@ -4,9 +4,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -28,13 +29,13 @@ public class TerminationService {
     @javax.annotation.Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
-    @Autowired
+    @Inject
     private RetryingStackUpdater retryingStackUpdater;
 
-    @Autowired
+    @Inject
     private HostGroupRepository hostGroupRepository;
 
     public void terminateStack(Long stackId, CloudPlatform cloudPlatform) {

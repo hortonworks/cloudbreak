@@ -1,7 +1,8 @@
 package com.sequenceiq.it;
 
+import javax.inject.Inject;
+
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.ConfigFileApplicationContextInitializer;
 import org.springframework.test.context.ContextConfiguration;
@@ -27,7 +28,7 @@ public class TestSuiteInitializer extends AbstractTestNGSpringContextTests {
     @Value("${integrationtest.uaa.password}")
     private String defaultUaaPassword;
 
-    @Autowired
+    @Inject
     private SuiteContext suiteContext;
     private IntegrationTestContext itContext;
 

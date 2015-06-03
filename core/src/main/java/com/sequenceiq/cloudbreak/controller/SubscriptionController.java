@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import javax.inject.Inject;
 import javax.validation.Valid;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.service.subscription.SubscriptionService;
 @Controller
 public class SubscriptionController {
 
-    @Autowired
+    @Inject
     private SubscriptionService subscriptionService;
 
     @RequestMapping(value = "subscriptions", method = RequestMethod.POST)

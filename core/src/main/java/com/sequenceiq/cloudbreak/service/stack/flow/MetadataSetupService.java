@@ -5,9 +5,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
@@ -32,19 +33,19 @@ public class MetadataSetupService {
     @javax.annotation.Resource
     private Map<CloudPlatform, MetadataSetup> metadataSetups;
 
-    @Autowired
+    @Inject
     private InstanceGroupRepository instanceGroupRepository;
 
-    @Autowired
+    @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
-    @Autowired
+    @Inject
     private StackService stackService;
 
-    @Autowired
+    @Inject
     private RetryingStackUpdater stackUpdater;
 
-    @Autowired
+    @Inject
     private CloudbreakEventService eventService;
 
     public String setupMetadata(final CloudPlatform cloudPlatform, Stack stack) throws Exception {

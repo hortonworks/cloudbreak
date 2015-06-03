@@ -3,9 +3,10 @@ package com.sequenceiq.cloudbreak.service.credential.aws;
 import java.util.Random;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.regions.Regions;
@@ -28,16 +29,16 @@ public class AwsCredentialHandler implements CredentialHandler<AwsCredential> {
     private static final int SUFFIX_RND = 999999;
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsCredentialHandler.class);
 
-    @Autowired
+    @Inject
     private RsaPublicKeyValidator rsaPublicKeyValidator;
 
-    @Autowired
+    @Inject
     private CrossAccountCredentialsProvider crossAccountCredentialsProvider;
 
-    @Autowired
+    @Inject
     private AwsStackUtil awsStackUtil;
 
-    @Autowired
+    @Inject
     private CredentialRepository credentialRepository;
 
     @Override

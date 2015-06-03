@@ -9,9 +9,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -49,13 +50,13 @@ public class IntegrationTestApp implements CommandLineRunner {
     @Value("${integrationtest.fulltest.regnum:-1}")
     private int fullTestRegionNumber;
 
-    @Autowired
+    @Inject
     private TestNG testng;
 
-    @Autowired
+    @Inject
     private ApplicationContext applicationContext;
 
-    @Autowired
+    @Inject
     private ITProps itProps;
 
     @Override

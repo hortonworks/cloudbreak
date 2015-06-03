@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
@@ -29,7 +30,7 @@ import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureUpdateC
 public class AzureResourceBuilderInit implements
         ResourceBuilderInit<AzureProvisionContextObject, AzureDeleteContextObject, AzureStartStopContextObject, AzureUpdateContextObject> {
 
-    @Autowired
+    @Inject
     private AzureStackUtil azureStackUtil;
 
     @Override

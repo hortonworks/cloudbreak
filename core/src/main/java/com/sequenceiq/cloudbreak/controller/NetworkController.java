@@ -4,9 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UnknownFormatConversionException;
 
+import javax.inject.Inject;
 import javax.validation.Valid;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -40,15 +40,15 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "/networks", description = ControllerDescription.NETWORK_DESCRIPTION, position = 8)
 public class NetworkController {
 
-    @Autowired
+    @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
-    @Autowired
+    @Inject
     private NetworkService networkService;
 
 
-    @Autowired
+    @Inject
     private DefaultNetworkCreator networkCreator;
 
     @ApiOperation(value = OperationDescriptions.NetworkOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.NETWORK_NOTES)
