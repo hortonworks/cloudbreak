@@ -2,6 +2,8 @@
 
 ### Fixed
 
+- One-liner installer fixed, to work if previous cbd exists on path.
+
 ### Added
 
 ### Removed

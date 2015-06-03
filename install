@@ -13,14 +13,20 @@ main() {
     local osarch=$(uname -sm|tr " " _)
 
     local url="https://github.com/${GIT_ORG}/${GIT_PROJECT}/releases/download/v${latest}/${GIT_PROJECT}_${latest}_${osarch}.tgz"
-    
-    curl -Ls $url | tar -xz -C /usr/local/bin
-    if cbd --version 2>/dev/null; then
-	echo "---> cbd installed into /usr/local/bin"
+
+    local dest=/bin
+    hash -r > /dev/null
+    if (command -v cbd > /dev/null); then
+        local existing=$(command -v cbd)
+        dest=${existing%/*}
     else
-	mv /usr/local/bin/cbd /bin
-        echo "---> cbd installed into /bin"
+        if echo "$PATH" | grep -q '/usr/local/bin' ; then
+            dest=/usr/local/bin
+        fi
     fi
+    
+    curl -Ls $url | tar -xz -C ${dest}
+    echo "---> cbd installed into ${dest}"
 }
 
 main
