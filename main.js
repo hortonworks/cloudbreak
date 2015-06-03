@@ -859,13 +859,36 @@ registerUser = function(req, res, token) {
                      updateCloudbreakGroups(token, createResp.body.id)
                      res.json({status: 200, message: 'SUCCESS'})
                  } else if (createResp.statusCode == 409) {
-                    getUserByName(req, res, token, req.body.email, 'id,active', function(userData) {
+                    getUserByName(req, res, token, req.body.email, 'id,active,version', function(userData) {
                          if (userData.active == false) { // TODO: check verified instead & refresh user data?
-                            console.log('Resending registration email for ' + userData.id + '(id) and name: ' + req.body.email)
-                            var templateFile = path.join(__dirname,'templates','confirmation-email.jade')
-                            mailer.sendMail(req.body.email, 'Registration' , templateFile, {user: req.body.firstName,
-                               confirm: process.env.SL_ADDRESS + '/confirm/' + userData.id })
-                            res.json({status: 200, message: 'SUCCESS'})
+                            var updateOptions = {
+                                  headers: {
+                                     'Accept' : 'application/json',
+                                     'Authorization' : 'Bearer ' + token,
+                                     'Content-Type' : 'application/json',
+                                     'If-Match': userData.version}
+                             }
+                             var updateData = {
+                                 'userName' : req.body.email,
+                                 'active' : false,
+                                 'name' : {
+                                    'familyName': req.body.lastName,
+                                     'givenName' : req.body.firstName
+                                  },
+                                  'emails':[
+                                     {'value': req.body.email}
+                                  ]
+                             }
+                             console.log("Resending registration starting...")
+                             updateUserData(req, res, token, userData.id, updateData, updateOptions, function(updateResp){
+                                updatePassword(req, res, token, userData.id, req.body.password, function(pwdResp){
+                                    console.log('Resending registration email for ' + userData.id + '(id) and name: ' + req.body.email)
+                                    var templateFile = path.join(__dirname,'templates','confirmation-email.jade')
+                                    mailer.sendMail(req.body.email, 'Registration' , templateFile, {user: req.body.firstName,
+                                     confirm: process.env.SL_ADDRESS + '/confirm/' + userData.id })
+                                    res.json({status: 200, message: 'SUCCESS'})
+                                });
+                             });
                          } else {
                             res.statusCode = 400
                             res.json({message: 'Registration failed. ' + createResp.body.message})
