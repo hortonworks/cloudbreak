@@ -32,6 +32,7 @@ deps:
 	go get -u github.com/jteeuwen/go-bindata/...
 	go get -u github.com/progrium/gh-release/...
 	go get github.com/progrium/basht
+	go get github.com/github/hub
 	go get || true
 
 tests:
@@ -48,6 +49,10 @@ release:
 	tar -zcf release/$(NAME)_$(VERSION)_Darwin_$(ARCH).tgz -C build/Darwin $(BINARYNAME)
 	gh-release checksums sha256
 	gh-release create sequenceiq/$(NAME) $(VERSION) $(GIT_BRANCH) v$(VERSION)
+
+
+release-next-ver: deps
+	./release-next-ver.sh 
 
 circleci:
 	rm ~/.gitconfig
