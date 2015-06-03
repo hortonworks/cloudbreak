@@ -2,7 +2,8 @@ package com.sequenceiq.cloudbreak.service.subscription;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.Subscription;
@@ -11,7 +12,7 @@ import com.sequenceiq.cloudbreak.repository.SubscriptionRepository;
 @Service
 public class SimpleSubscriptionService implements SubscriptionService {
 
-    @Autowired
+    @Inject
     private SubscriptionRepository subscriptionRepository;
 
     @Override

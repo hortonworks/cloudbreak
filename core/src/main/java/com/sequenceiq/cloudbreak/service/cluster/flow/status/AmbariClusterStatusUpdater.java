@@ -2,9 +2,10 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.status;
 
 import java.util.EnumSet;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -21,19 +22,19 @@ public class AmbariClusterStatusUpdater {
 
     private EnumSet<Status> failedStatuses = EnumSet.of(Status.CREATE_FAILED, Status.START_FAILED, Status.STOP_FAILED);
 
-    @Autowired
+    @Inject
     private ClusterRepository clusterRepository;
 
-    @Autowired
+    @Inject
     private RetryingStackUpdater stackUpdater;
 
-    @Autowired
+    @Inject
     private AmbariClientProvider ambariClientProvider;
 
-    @Autowired
+    @Inject
     private CloudbreakEventService cloudbreakEventService;
 
-    @Autowired
+    @Inject
     private AmbariClusterStatusFactory clusterStatusFactory;
 
     public void updateClusterStatus(Stack stack) {

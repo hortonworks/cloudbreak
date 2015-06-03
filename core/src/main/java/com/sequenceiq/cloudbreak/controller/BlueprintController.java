@@ -4,18 +4,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.validation.Valid;
 
-import com.mangofactory.swagger.annotations.ApiIgnore;
-import com.sequenceiq.cloudbreak.controller.doc.ContentType;
-import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
-import com.sequenceiq.cloudbreak.controller.doc.Notes;
-import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions.BlueprintOpDescription;
-import com.sequenceiq.cloudbreak.controller.json.BlueprintRequest;
-import com.sequenceiq.cloudbreak.controller.json.BlueprintResponse;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -29,6 +20,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.mangofactory.swagger.annotations.ApiIgnore;
+import com.sequenceiq.cloudbreak.controller.doc.ContentType;
+import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
+import com.sequenceiq.cloudbreak.controller.doc.Notes;
+import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions.BlueprintOpDescription;
+import com.sequenceiq.cloudbreak.controller.json.BlueprintRequest;
+import com.sequenceiq.cloudbreak.controller.json.BlueprintResponse;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -36,22 +34,24 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintLoaderService;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 
 @Controller
 @Api(value = "/blueprints", description = ControllerDescription.BLUEPRINT_DESCRIPTION, position = 0)
 public class BlueprintController {
 
-    @Autowired
+    @Inject
     private BlueprintService blueprintService;
 
-    @Autowired
+    @Inject
     private BlueprintRepository blueprintRepository;
 
-    @Autowired
+    @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
-    @Autowired
+    @Inject
     private DefaultBlueprintLoaderService defaultBlueprintLoaderService;
 
     @RequestMapping(value = "user/blueprints", method = RequestMethod.POST)

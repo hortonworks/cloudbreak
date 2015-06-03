@@ -2,11 +2,12 @@ package com.sequenceiq.cloudbreak.service.credential.openstack;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.openstack4j.api.OSClient;
 import org.openstack4j.model.compute.Keypair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -21,10 +22,10 @@ public class OpenStackCredentialHandler implements CredentialHandler<OpenStackCr
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackCredentialHandler.class);
 
-    @Autowired
+    @Inject
     private RsaPublicKeyValidator rsaPublicKeyValidator;
 
-    @Autowired
+    @Inject
     private OpenStackUtil openStackUtil;
 
     @Override

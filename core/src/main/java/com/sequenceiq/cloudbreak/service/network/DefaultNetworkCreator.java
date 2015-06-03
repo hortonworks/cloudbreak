@@ -3,7 +3,8 @@ package com.sequenceiq.cloudbreak.service.network;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.AwsNetwork;
@@ -20,7 +21,7 @@ public class DefaultNetworkCreator {
     private static final String DEFAULT_AZURE_NETWORK_NAME = "default-azure-network";
     private static final String DEFAULT_GCP_NETWORK_NAME = "default-gcp-network";
 
-    @Autowired
+    @Inject
     private NetworkRepository networkRepository;
 
     public Set<Network> createDefaultNetworks(CbUser user) {

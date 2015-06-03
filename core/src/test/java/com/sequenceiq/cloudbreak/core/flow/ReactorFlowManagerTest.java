@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
+import javax.inject.Inject;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -23,7 +24,7 @@ import com.sequenceiq.cloudbreak.core.flow.service.ReactorFlowManager;
 public class ReactorFlowManagerTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReactorFlowManagerTest.class);
 
-    @Autowired
+    @Inject
     private ReactorFlowManager flowManager;
 
     @Before

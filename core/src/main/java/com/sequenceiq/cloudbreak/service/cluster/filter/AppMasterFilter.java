@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,7 @@ public class AppMasterFilter implements HostFilter {
     private static final String APPS_NODE = "apps";
     private static final String APP_NODE = "app";
 
-    @Autowired
+    @Inject
     @Qualifier("restTemplate")
     private RestOperations restTemplate;
 

@@ -2,7 +2,8 @@ package com.sequenceiq.cloudbreak.converter;
 
 import java.text.SimpleDateFormat;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.regions.Regions;
@@ -19,7 +20,7 @@ import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 public class CloudbreakUsageToJsonConverter extends AbstractConversionServiceAwareConverter<CloudbreakUsage, CloudbreakUsageJson> {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
-    @Autowired
+    @Inject
     private UserDetailsService userDetailsService;
 
     @Override

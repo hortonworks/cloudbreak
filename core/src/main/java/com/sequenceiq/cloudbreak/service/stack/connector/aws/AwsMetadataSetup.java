@@ -5,9 +5,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.regions.Regions;
@@ -39,16 +40,16 @@ public class AwsMetadataSetup implements MetadataSetup {
     private static final int MAX_SPOT_POLLING_ATTEMPTS = 600;
     private static final int POLLING_INTERVAL = 5000;
 
-    @Autowired
+    @Inject
     private AwsStackUtil awsStackUtil;
 
-    @Autowired
+    @Inject
     private CloudFormationStackUtil cfStackUtil;
 
-    @Autowired
+    @Inject
     private PollingService<AutoScalingGroupReady> pollingService;
 
-    @Autowired
+    @Inject
     private ASGroupStatusCheckerTask asGroupStatusCheckerTask;
 
     @Override

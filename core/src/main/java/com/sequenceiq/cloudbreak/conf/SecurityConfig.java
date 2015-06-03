@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.conf;
 
 import java.io.IOException;
 
+import javax.inject.Inject;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -11,7 +12,6 @@ import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,10 +41,10 @@ public class SecurityConfig {
     @EnableGlobalMethodSecurity(prePostEnabled = true)
     protected static class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
 
-        @Autowired
+        @Inject
         private UserDetailsService userDetailsService;
 
-        @Autowired
+        @Inject
         private OwnerBasedPermissionEvaluator ownerBasedPermissionEvaluator;
 
         @Bean MethodSecurityExpressionHandler expressionHandler() {
@@ -75,7 +75,7 @@ public class SecurityConfig {
         @Value("${cb.identity.server.url}")
         private String identityServerUrl;
 
-        @Autowired
+        @Inject
         private UserDetailsService userDetailsService;
 
         @Bean RemoteTokenServices remoteTokenServices() {

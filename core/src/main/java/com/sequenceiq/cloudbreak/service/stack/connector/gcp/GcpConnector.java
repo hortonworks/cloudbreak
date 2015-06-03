@@ -3,9 +3,10 @@ package com.sequenceiq.cloudbreak.service.stack.connector.gcp;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -20,10 +21,10 @@ import com.sequenceiq.cloudbreak.service.stack.resource.gcp.builders.GcpResource
 public class GcpConnector implements CloudPlatformConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpConnector.class);
 
-    @Autowired
+    @Inject
     private GcpResourceBuilderInit gcpResourceBuilderInit;
 
-    @Autowired
+    @Inject
     private ParallelCloudResourceManager cloudResourceManager;
 
     @Override

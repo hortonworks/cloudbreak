@@ -655,7 +655,7 @@ When a DELETE request arrives, the controller layer finds the requested stack in
 ### Event handling and notifications
 Cloudbreak uses events and notifications extensively. Event publishing and subscribing uses the Reactor framework. This is an example to send a `METADATA_SETUP_COMPLETE` event after wiring the `Reactor` bean in the component:
 ```
-@Autowired
+@Inject
 private Reactor reactor;
 ...
 reactor.notify(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, Event.wrap(new MetadataSetupComplete(CloudPlatform.AWS, stack.getId(), coreInstanceMetadata)));

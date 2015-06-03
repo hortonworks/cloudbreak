@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
@@ -19,7 +20,7 @@ import freemarker.template.TemplateException;
 @Service
 public class CloudFormationTemplateBuilder {
 
-    @Autowired
+    @Inject
     private Configuration freemarkerConfiguration;
 
     public String build(Stack stack, String snapshotId, boolean existingVPC, String templatePath) {

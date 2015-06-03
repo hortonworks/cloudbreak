@@ -6,9 +6,10 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Iterator;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -22,7 +23,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConverter<BlueprintRequest, Blueprint> {
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonToBlueprintConverter.class);
 
-    @Autowired
+    @Inject
     private JsonHelper jsonHelper;
 
     @Override

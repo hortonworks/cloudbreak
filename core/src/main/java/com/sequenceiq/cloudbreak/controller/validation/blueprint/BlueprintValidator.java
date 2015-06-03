@@ -9,10 +9,10 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -31,7 +31,7 @@ public class BlueprintValidator {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    @Autowired
+    @Inject
     private StackServiceComponentDescriptors stackServiceComponentDescs;
 
     public void validateBlueprintForStack(Blueprint blueprint, Set<HostGroup> hostGroups, Set<InstanceGroup> instanceGroups) {

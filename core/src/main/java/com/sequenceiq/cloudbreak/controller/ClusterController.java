@@ -3,11 +3,11 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -48,26 +48,26 @@ import com.wordnik.swagger.annotations.ApiOperation;
 public class ClusterController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterController.class);
 
-    @Autowired
+    @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
-    @Autowired
+    @Inject
     private Decorator<Cluster> clusterDecorator;
 
-    @Autowired
+    @Inject
     private Decorator<HostGroup> hostGroupDecorator;
 
-    @Autowired
+    @Inject
     private ClusterService clusterService;
 
-    @Autowired
+    @Inject
     private HostGroupService hostGroupService;
 
-    @Autowired
+    @Inject
     private StackService stackService;
 
-    @Autowired
+    @Inject
     private JsonHelper jsonHelper;
 
     @ApiOperation(value = ClusterOpDescription.POST_FOR_STACK, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES)

@@ -3,9 +3,10 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -22,16 +23,16 @@ import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 public class ProvisioningService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisioningService.class);
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
-    @Autowired
+    @Inject
     private RetryingStackUpdater stackUpdater;
 
     @javax.annotation.Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
-    @Autowired
+    @Inject
     private UserDataBuilder userDataBuilder;
 
     public ProvisionComplete buildStack(final CloudPlatform cloudPlatform, Stack stack, Map<String, Object> setupProperties) throws Exception {

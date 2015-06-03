@@ -6,9 +6,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
@@ -27,11 +28,11 @@ public class DefaultBlueprintLoaderService {
     @Value("#{'${cb.blueprint.defaults:" + CB_BLUEPRINT_DEFAULTS + "}'.split(',')}")
     private List<String> blueprintArray;
 
-    @Autowired
+    @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
-    @Autowired
+    @Inject
     private JsonHelper jsonHelper;
 
     public Set<Blueprint> loadBlueprints(CbUser user) {

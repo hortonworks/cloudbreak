@@ -7,7 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -23,7 +24,7 @@ public class HadoopConfigurationService {
     public static final String YARN_NODEMANAGER_LOG_DIRS = "yarn.nodemanager.log-dirs";
     public static final String HDFS_DATANODE_DATA_DIRS = "dfs.datanode.data.dir";
 
-    @Autowired
+    @Inject
     private HostGroupRepository hostGroupRepository;
 
     public Map<String, Map<String, Map<String, String>>> getConfiguration(Stack stack) {

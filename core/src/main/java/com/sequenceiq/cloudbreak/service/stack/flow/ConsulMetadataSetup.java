@@ -12,9 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ecwid.consul.v1.ConsulClient;
@@ -35,16 +36,16 @@ public class ConsulMetadataSetup {
     private static final int POLLING_INTERVAL = 5000;
     private static final int MAX_POLLING_ATTEMPTS = 100;
 
-    @Autowired
+    @Inject
     private StackService stackService;
 
-    @Autowired
+    @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
-    @Autowired
+    @Inject
     private PollingService<ConsulContext> consulPollingService;
 
-    @Autowired
+    @Inject
     private ConsulHostCheckerTask consulHostCheckerTask;
 
     public void setupConsulMetadata(Long stackId) {

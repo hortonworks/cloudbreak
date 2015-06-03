@@ -3,7 +3,8 @@ package com.sequenceiq.cloudbreak.websocket;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -18,13 +19,13 @@ import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 public class UptimeNotifier {
     private static final String UPTIME_NOTIFICATION = "UPTIME_NOTIFICATION";
 
-    @Autowired
+    @Inject
     private ClusterRepository clusterRepository;
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
-    @Autowired
+    @Inject
     private NotificationSender notificationSender;
 
 

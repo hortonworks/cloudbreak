@@ -14,8 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.binary.Base64;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -52,25 +53,25 @@ import groovyx.net.http.HttpResponseException;
 @Order(3)
 public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResourceBuilder {
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
-    @Autowired
+    @Inject
     private PollingService<AzureInstances> azurePollingService;
 
-    @Autowired
+    @Inject
     private AzureStackUtil azureStackUtil;
 
-    @Autowired
+    @Inject
     private AzureCreateResourceStatusCheckerTask azureCreateResourceStatusCheckerTask;
 
-    @Autowired
+    @Inject
     private AzureDeleteResourceStatusCheckerTask azureDeleteResourceStatusCheckerTask;
 
-    @Autowired
+    @Inject
     private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
 
-    @Autowired
+    @Inject
     private AzureInstanceStatusCheckerTask azureInstanceStatusCheckerTask;
 
     @Override

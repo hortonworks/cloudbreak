@@ -4,16 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sequenceiq.cloudbreak.controller.json.CredentialRequest;
 
 public class CredentialParametersValidator implements ConstraintValidator<ValidCredentialRequest, CredentialRequest> {
 
-    @Autowired
+    @Inject
     private List<ParameterValidator> parameterValidators;
 
     private List<TemplateParam> requiredAWSParams = new ArrayList<>();

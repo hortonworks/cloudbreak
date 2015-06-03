@@ -8,11 +8,11 @@ import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processT
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.mail.internet.MimeMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -40,13 +40,13 @@ public class EmailSenderService {
     @Value("${cb.failed.cluster.installer.mail.template.path:" + CB_FAILED_CLUSTER_INSTALLER_MAIL_TEMPLATE_PATH + "}")
     private String failedClusterInstallerMailTemplatePath;
 
-    @Autowired
+    @Inject
     private JavaMailSender mailSender;
 
-    @Autowired
+    @Inject
     private Configuration freemarkerConfiguration;
 
-    @Autowired
+    @Inject
     private UserDetailsService userDetailsService;
 
     @Async

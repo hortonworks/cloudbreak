@@ -4,9 +4,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -28,10 +29,10 @@ public class SimpleTemplateService implements TemplateService {
 
     private static final String TEMPLATE_NOT_FOUND_MSG = "Template '%s' not found.";
 
-    @Autowired
+    @Inject
     private TemplateRepository templateRepository;
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
     @Override

@@ -6,7 +6,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import com.google.api.services.compute.model.Network;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.GcpCredential;
+import com.sequenceiq.cloudbreak.domain.GcpZone;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -25,9 +27,8 @@ import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpRemoveCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpRemoveReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceCheckerStatus;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceException;
-import com.sequenceiq.cloudbreak.domain.GcpZone;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.GcpSimpleNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpDeleteContextObject;
@@ -38,15 +39,15 @@ import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpStartStopCo
 @Order(1)
 public class GcpNetworkResourceBuilder extends GcpSimpleNetworkResourceBuilder {
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
-    @Autowired
+    @Inject
     private GcpRemoveCheckerStatus gcpRemoveCheckerStatus;
-    @Autowired
+    @Inject
     private PollingService<GcpRemoveReadyPollerObject> gcpRemoveReadyPollerObjectPollingService;
-    @Autowired
+    @Inject
     private PollingService<GcpResourceReadyPollerObject> gcpNetworkReadyPollerObjectPollingService;
-    @Autowired
+    @Inject
     private GcpResourceCheckerStatus gcpResourceCheckerStatus;
 
     @Override

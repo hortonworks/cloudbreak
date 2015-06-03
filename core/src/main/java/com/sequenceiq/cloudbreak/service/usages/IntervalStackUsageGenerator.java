@@ -8,9 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
@@ -32,13 +33,13 @@ public class IntervalStackUsageGenerator {
     private static final Logger LOGGER = LoggerFactory.getLogger(IntervalStackUsageGenerator.class);
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
-    @Autowired
+    @Inject
     private IntervalInstanceUsageGenerator instanceUsageGenerator;
 
-    @Autowired
+    @Inject
     private List<PriceGenerator> priceGenerators;
 
     public List<CloudbreakUsage> generateUsages(Date startTime, Date stopTime, CloudbreakEvent startEvent) throws ParseException {

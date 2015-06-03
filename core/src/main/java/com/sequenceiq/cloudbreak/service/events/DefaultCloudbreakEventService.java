@@ -4,9 +4,10 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
@@ -26,16 +27,16 @@ import reactor.bus.EventBus;
 public class DefaultCloudbreakEventService implements CloudbreakEventService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCloudbreakEventService.class);
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
-    @Autowired
+    @Inject
     private CloudbreakEventRepository eventRepository;
 
-    @Autowired
+    @Inject
     private EventBus reactor;
 
-    @Autowired
+    @Inject
     private NotificationSender notificationSender;
 
     @Override

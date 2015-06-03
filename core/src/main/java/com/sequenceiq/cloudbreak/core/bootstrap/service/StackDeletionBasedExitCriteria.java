@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -17,10 +18,10 @@ public class StackDeletionBasedExitCriteria implements ExitCriteria {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDeletionBasedExitCriteria.class);
 
-    @Autowired
+    @Inject
     private ClusterService clusterService;
 
-    @Autowired
+    @Inject
     private StackService stackService;
 
     @Override

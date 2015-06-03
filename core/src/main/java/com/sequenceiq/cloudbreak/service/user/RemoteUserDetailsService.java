@@ -7,9 +7,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
@@ -38,7 +39,7 @@ public class RemoteUserDetailsService implements UserDetailsService {
     @Value("${cb.identity.server.url}")
     private String identityServerUrl;
 
-    @Autowired
+    @Inject
     @Qualifier("restTemplate")
     private RestOperations restTemplate;
 

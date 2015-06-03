@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,10 +18,10 @@ import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 @Configuration
 public class ResourceBuilderConfig {
 
-    @Autowired
+    @Inject
     private List<ResourceBuilder> resourceBuilders;
 
-    @Autowired
+    @Inject
     private List<ResourceBuilderInit> resourceBuilderInits;
 
     @Bean

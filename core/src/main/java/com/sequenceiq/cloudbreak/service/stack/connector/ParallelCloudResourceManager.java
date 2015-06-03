@@ -11,10 +11,11 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -51,18 +52,18 @@ import com.sequenceiq.cloudbreak.service.stack.resource.UpdateContextObject;
 public class ParallelCloudResourceManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(ParallelCloudResourceManager.class);
 
-    @Autowired
+    @Inject
     private AsyncTaskExecutor resourceBuilderExecutor;
-    @Autowired
+    @Inject
     private RetryingStackUpdater stackUpdater;
-    @Autowired
+    @Inject
     private ProvisionUtil provisionUtil;
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
-    @Autowired
+    @Inject
     @Qualifier("stackFailureHandlerService")
     private FailureHandlerService stackFailureHandlerService;
-    @Autowired
+    @Inject
     @Qualifier("upscaleFailureHandlerService")
     private FailureHandlerService upscaleFailureHandlerService;
     @javax.annotation.Resource

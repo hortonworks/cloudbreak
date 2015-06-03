@@ -2,9 +2,10 @@ package com.sequenceiq.cloudbreak.service.blueprint;
 
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +24,10 @@ public class DefaultBlueprintService implements BlueprintService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBlueprintService.class);
 
-    @Autowired
+    @Inject
     private BlueprintRepository blueprintRepository;
 
-    @Autowired
+    @Inject
     private ClusterRepository clusterRepository;
 
     @Override

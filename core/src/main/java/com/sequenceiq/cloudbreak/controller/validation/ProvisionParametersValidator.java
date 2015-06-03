@@ -3,12 +3,13 @@ package com.sequenceiq.cloudbreak.controller.validation;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 
 /**
  * Validates a provision request. Because different parameters belong to
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProvisionParametersValidator implements ConstraintValidator<ValidProvisionRequest, TemplateRequest> {
 
-    @Autowired
+    @Inject
     private List<ParameterValidator> parameterValidators;
 
     private List<TemplateParam> awsParams = new ArrayList<>();

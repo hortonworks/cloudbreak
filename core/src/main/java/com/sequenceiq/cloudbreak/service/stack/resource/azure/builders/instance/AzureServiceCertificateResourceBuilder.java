@@ -7,7 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -35,16 +36,16 @@ import groovyx.net.http.HttpResponseDecorator;
 @Component
 @Order(2)
 public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceResourceBuilder {
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
-    @Autowired
+    @Inject
     private AzureStackUtil azureStackUtil;
 
-    @Autowired
+    @Inject
     private AzureCreateResourceStatusCheckerTask azureCreateResourceStatusCheckerTask;
 
-    @Autowired
+    @Inject
     private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
 
     @Override

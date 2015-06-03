@@ -3,7 +3,8 @@ package com.sequenceiq.cloudbreak.service.decorator;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
@@ -25,19 +26,19 @@ public class ClusterDecorator implements Decorator<Cluster> {
         VALIDATE_BLUEPRINT
     }
 
-    @Autowired
+    @Inject
     private BlueprintRepository blueprintRepository;
 
-    @Autowired
+    @Inject
     private BlueprintValidator blueprintValidator;
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
-    @Autowired
+    @Inject
     private ConversionService conversionService;
 
-    @Autowired
+    @Inject
     private HostGroupDecorator hostGroupDecorator;
 
     @Override

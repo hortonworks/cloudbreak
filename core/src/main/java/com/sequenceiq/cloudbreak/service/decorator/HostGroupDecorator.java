@@ -4,9 +4,10 @@ import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateway;
 
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -30,16 +31,16 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
         REQUEST_TYPE
     }
 
-    @Autowired
+    @Inject
     private InstanceGroupRepository instanceGroupRepository;
 
-    @Autowired
+    @Inject
     private HostGroupRepository hostGroupRepository;
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
-    @Autowired
+    @Inject
     private RecipeRepository recipeRepository;
 
     @Override

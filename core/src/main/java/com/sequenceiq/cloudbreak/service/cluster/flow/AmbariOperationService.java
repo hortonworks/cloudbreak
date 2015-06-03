@@ -2,9 +2,10 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
@@ -23,9 +24,9 @@ public class AmbariOperationService {
     public static final int MAX_FAILURE_COUNT = 5;
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariOperationService.class);
 
-    @Autowired
+    @Inject
     private AmbariOperationsStatusCheckerTask ambariOperationsStatusCheckerTask;
-    @Autowired
+    @Inject
     private PollingService<AmbariOperations> operationsPollingService;
 
     public PollingResult waitForAmbariOperations(Stack stack, AmbariClient ambariClient, Map<String, Integer> operationRequests) {

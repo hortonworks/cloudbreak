@@ -4,9 +4,10 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_COM
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.AmazonServiceException;
@@ -24,7 +25,7 @@ import com.sequenceiq.cloudbreak.service.SimpleStatusCheckerTask;
 public class CloudFormationStackStatusChecker extends SimpleStatusCheckerTask<CloudFormationStackPollerObject> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudFormationStackStatusChecker.class);
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
     @Override

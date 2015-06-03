@@ -8,7 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -39,19 +40,19 @@ import groovyx.net.http.HttpResponseDecorator;
 @Order(1)
 public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourceBuilder {
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
-    @Autowired
+    @Inject
     private AzureCloudServiceDeleteTask azureCloudServiceDeleteTask;
-    @Autowired
+    @Inject
     private PollingService<AzureCloudServiceDeleteTaskContext> azureCloudServiceRemoveReadyPollerObjectPollingService;
-    @Autowired
+    @Inject
     private AzureStackUtil azureStackUtil;
-    @Autowired
+    @Inject
     private AzureCreateResourceStatusCheckerTask azureCreateResourceStatusCheckerTask;
-    @Autowired
+    @Inject
     private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
-    @Autowired
+    @Inject
     private CloudbreakEventService eventService;
 
     @Override

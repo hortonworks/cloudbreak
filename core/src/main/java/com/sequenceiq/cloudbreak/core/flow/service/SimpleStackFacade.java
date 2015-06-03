@@ -23,10 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
@@ -69,49 +70,49 @@ import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 public class SimpleStackFacade implements StackFacade {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleStackFacade.class);
 
-    @Autowired
+    @Inject
     private StackService stackService;
 
     @javax.annotation.Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
-    @Autowired
+    @Inject
     private CloudbreakEventService cloudbreakEventService;
 
-    @Autowired
+    @Inject
     private TerminationService terminationService;
 
-    @Autowired
+    @Inject
     private StackStartService stackStartService;
 
-    @Autowired
+    @Inject
     private StackStopService stackStopService;
 
-    @Autowired
+    @Inject
     private StackScalingService stackScalingService;
 
-    @Autowired
+    @Inject
     private MetadataSetupService metadataSetupService;
 
-    @Autowired
+    @Inject
     private UserDataBuilder userDataBuilder;
 
-    @Autowired
+    @Inject
     private HostGroupService hostGroupService;
 
-    @Autowired
+    @Inject
     private ClusterBootstrapper clusterBootstrapper;
 
-    @Autowired
+    @Inject
     private ConsulMetadataSetup consulMetadataSetup;
 
-    @Autowired
+    @Inject
     private ProvisioningService provisioningService;
 
-    @Autowired
+    @Inject
     private ClusterService clusterService;
 
-    @Autowired
+    @Inject
     private RetryingStackUpdater stackUpdater;
 
     @Override

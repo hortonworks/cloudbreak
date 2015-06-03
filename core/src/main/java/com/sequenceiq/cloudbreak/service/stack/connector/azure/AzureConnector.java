@@ -6,9 +6,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -24,13 +25,13 @@ import com.sequenceiq.cloudbreak.service.stack.resource.azure.builders.AzureReso
 public class AzureConnector implements CloudPlatformConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureConnector.class);
 
-    @Autowired
+    @Inject
     private AzureResourceBuilderInit azureResourceBuilderInit;
 
-    @Autowired
+    @Inject
     private ParallelCloudResourceManager cloudResourceManager;
 
-    @Autowired
+    @Inject
     private CloudbreakEventService cloudbreakEventService;
 
     private Map<String, Lock> lockMap = Collections.synchronizedMap(new HashMap<String, Lock>());

@@ -7,7 +7,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 @EnableSwagger
 public class ApiDocConfig {
 
-    @Autowired
+    @Inject
     private SpringSwaggerConfig springSwaggerConfig;
 
     @Bean

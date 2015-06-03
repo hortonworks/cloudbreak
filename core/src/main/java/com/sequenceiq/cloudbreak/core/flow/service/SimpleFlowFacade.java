@@ -3,10 +3,10 @@ package com.sequenceiq.cloudbreak.core.flow.service;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
@@ -30,22 +30,22 @@ public class SimpleFlowFacade implements FlowFacade {
     @Resource
     private Map<CloudPlatform, ProvisionSetup> provisionSetups;
 
-    @Autowired
+    @Inject
     private ClusterFacade clusterFacade;
 
-    @Autowired
+    @Inject
     private StackFacade stackFacade;
 
-    @Autowired
+    @Inject
     private ProvisioningService provisioningService;
 
-    @Autowired
+    @Inject
     private MetadataSetupService metadataSetupService;
 
-    @Autowired
+    @Inject
     private StackService stackService;
 
-    @Autowired
+    @Inject
     private CloudbreakEventService cloudbreakEventService;
 
     @Override

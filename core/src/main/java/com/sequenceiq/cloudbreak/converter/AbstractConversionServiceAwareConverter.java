@@ -1,15 +1,15 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
 
 public abstract class AbstractConversionServiceAwareConverter<S, T> implements Converter<S, T> {
-    @Autowired
+    @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
 

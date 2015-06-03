@@ -5,10 +5,10 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -29,10 +29,10 @@ public class SimpleCredentialService implements CredentialService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleCredentialService.class);
 
-    @Autowired
+    @Inject
     private CredentialRepository credentialRepository;
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
     @Resource

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.azure;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -9,7 +10,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 @Component
 public class AzureCreateResourceStatusCheckerTask extends AzureResourceStatusCheckerTask {
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
     public boolean exitPolling(AzureResourcePollerObject t) {

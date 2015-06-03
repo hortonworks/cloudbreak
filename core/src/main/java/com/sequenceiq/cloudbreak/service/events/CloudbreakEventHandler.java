@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.service.events;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -12,7 +13,7 @@ import reactor.fn.Consumer;
 @Component
 public class CloudbreakEventHandler implements Consumer<Event<CloudbreakEventData>> {
 
-    @Autowired
+    @Inject
     private CloudbreakEventService eventService;
 
     @Override

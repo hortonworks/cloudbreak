@@ -4,17 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UnknownFormatConversionException;
 
+import javax.inject.Inject;
 import javax.validation.Valid;
 
-import com.sequenceiq.cloudbreak.controller.doc.ContentType;
-import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
-import com.sequenceiq.cloudbreak.controller.doc.Notes;
-import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions.TemplateOpDescription;
-import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
-import com.sequenceiq.cloudbreak.controller.json.TemplateResponse;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -27,7 +19,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sequenceiq.cloudbreak.controller.doc.ContentType;
+import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
+import com.sequenceiq.cloudbreak.controller.doc.Notes;
+import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions.TemplateOpDescription;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
+import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
+import com.sequenceiq.cloudbreak.controller.json.TemplateResponse;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -36,14 +34,16 @@ import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 
 @Controller
 @Api(value = "/templates", description = ControllerDescription.TEMPLATE_DESCRIPTION, position = 2)
 public class TemplateController {
-    @Autowired
+    @Inject
     private TemplateService templateService;
 
-    @Autowired
+    @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
 

@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -17,10 +18,10 @@ public class ScheduledStackStatusUpdaterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ScheduledStackStatusUpdaterService.class);
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
-    @Autowired
+    @Inject
     private AmbariClusterStatusUpdater clusterStatusUpdater;
 
     @Scheduled(fixedDelayString = "${cb.stack.statuscheck.delay:300000}")

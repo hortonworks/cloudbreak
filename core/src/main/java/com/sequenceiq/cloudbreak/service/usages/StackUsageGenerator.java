@@ -11,9 +11,10 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
@@ -25,10 +26,10 @@ import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
 public class StackUsageGenerator {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackUsageGenerator.class);
 
-    @Autowired
+    @Inject
     private CloudbreakEventRepository eventRepository;
 
-    @Autowired
+    @Inject
     private IntervalStackUsageGenerator intervalUsageGenerator;
 
     public List<CloudbreakUsage> generate(List<CloudbreakEvent> stackEvents) {
