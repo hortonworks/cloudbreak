@@ -33,7 +33,7 @@ public class HeatTemplateBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HeatTemplateBuilder.class);
 
-    @Value("${cb.openstack.heat.template.path:templates/openstack-heat.ftl}")
+    @Value("${cb.openstack.heat.template.path:templates/openstack-heat-v2.ftl}")
     private String openStackHeatTemplatePath;
 
     @Inject

@@ -26,6 +26,7 @@ public class StackContext {
         return platform;
     }
 
+    //BEGIN GENERATED CODE
     @Override
     public String toString() {
         return "StackContext{" +
@@ -34,4 +35,5 @@ public class StackContext {
                 ", platform='" + platform + '\'' +
                 '}';
     }
+    //END GENERATED CODE
 }

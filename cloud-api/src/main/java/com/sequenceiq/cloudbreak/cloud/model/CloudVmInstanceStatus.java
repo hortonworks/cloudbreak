@@ -31,6 +31,7 @@ public class CloudVmInstanceStatus {
         return statusReason;
     }
 
+    //BEGIN GENERATED CODE
     @Override
     public String toString() {
         return "CloudVmInstanceStatus{" +
@@ -39,4 +40,5 @@ public class CloudVmInstanceStatus {
                 ", statusReason='" + statusReason + '\'' +
                 '}';
     }
+    //BEGIN GENERATED CODE
 }

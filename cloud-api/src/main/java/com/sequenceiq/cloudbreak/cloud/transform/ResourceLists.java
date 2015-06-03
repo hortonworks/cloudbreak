@@ -10,6 +10,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 
 public class ResourceLists {
+    private ResourceLists() {
+    }
 
     public static List<CloudResource> transform(List<CloudResourceStatus> cloudResourceStatuses) {
         List<CloudResource> resources = Lists.transform(cloudResourceStatuses, new Function<CloudResourceStatus, CloudResource>() {

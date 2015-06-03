@@ -30,6 +30,7 @@ public class CloudResourceStatus {
         return statusReason;
     }
 
+    //BEGIN GENERATED CODE
     @Override
     public String toString() {
         return "CloudResourceStatus{" +
@@ -38,4 +39,5 @@ public class CloudResourceStatus {
                 ", statusReason='" + statusReason + '\'' +
                 '}';
     }
+    //BEGIN GENERATED CODE
 }

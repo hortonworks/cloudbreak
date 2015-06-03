@@ -8,6 +8,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 
 public class LaunchStackResults {
 
+    private LaunchStackResults() {
+    }
+
     public static LaunchStackResult build(StackContext context, List<CloudResourceStatus> results) {
         CloudResourceStatus status = ResourceStatusLists.aggregate(results);
         return new LaunchStackResult(context, status.getStatus(), status.getStatusReason(), results);

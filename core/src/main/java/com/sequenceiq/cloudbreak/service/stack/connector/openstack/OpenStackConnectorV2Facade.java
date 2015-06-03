@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.event.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.LaunchStackResult;
+import com.sequenceiq.cloudbreak.cloud.event.TerminateStackRequest;
+import com.sequenceiq.cloudbreak.cloud.event.TerminateStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.StackContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -76,15 +78,15 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
 
         CloudStack cloudStack = new CloudStack(groups, network, security, image);
         Promise<LaunchStackResult> promise = Promises.prepare();
-        LaunchStackRequest launchStackRequest = new LaunchStackRequest(stackContext, cloudCredential, cloudStack , promise);
+        LaunchStackRequest launchStackRequest = new LaunchStackRequest(stackContext, cloudCredential, cloudStack, promise);
 
-        LOGGER.info("Triggering event: {}", stack);
+        LOGGER.info("Triggering event: {}", launchStackRequest);
         eventBus.notify(launchStackRequest.selector(LaunchStackRequest.class), Event.wrap(launchStackRequest));
         try {
             LaunchStackResult res = promise.await();
             LOGGER.info("Result: {}", res);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.error("Error while launching stack: ", e);
         }
 
         return null;
@@ -103,7 +105,20 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
 
     @Override
     public void deleteStack(Stack stack, Credential credential) {
+        LOGGER.debug("Assembling terminate stack event for stack: {}", stack);
+        StackContext stackContext = new StackContext(stack.getId(), stack.getName(), CloudPlatform.OPENSTACK.name());
+        CloudCredential cloudCredential = buildCloudCredential(stack);
+        Promise<TerminateStackResult> promise = Promises.prepare();
+        TerminateStackRequest terminateStackRequest = new TerminateStackRequest(stackContext, cloudCredential, promise);
 
+        LOGGER.info("Triggering event: {}", stack);
+        eventBus.notify(terminateStackRequest.selector(TerminateStackRequest.class), Event.wrap(terminateStackRequest));
+        try {
+            TerminateStackResult res = promise.await();
+            LOGGER.info("Result: {}", res);
+        } catch (InterruptedException e) {
+            LOGGER.error("Error durong launch stack: ", e);
+        }
     }
 
     @Override
@@ -148,7 +163,6 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
         return groups;
     }
 
-
     private CloudCredential buildCloudCredential(Stack stack) {
         OpenStackCredential openstackCredential = (OpenStackCredential) stack.getCredential();
         CloudCredential cloudCredential = new CloudCredential(openstackCredential.getName());
@@ -158,6 +172,4 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
         cloudCredential.putParameter("endpoint", openstackCredential.getEndpoint());
         return cloudCredential;
     }
-
-
 }
