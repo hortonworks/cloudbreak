@@ -58,10 +58,10 @@ cbd-update-release() {
         debug upgrade needed |yellow
         
         local url=https://github.com/sequenceiq/cloudbreak-deployer/releases/download/v${lastver}/cloudbreak-deployer_${lastver}_${osarch}.tgz
-        info "Updating $EXECUTABLE from url: $url"
+        info "Updating $SELF_EXECUTABLE from url: $url"
         curl -Ls $url | tar -zx -C /tmp
-        mv /tmp/cbd $EXECUTABLE
-        debug $EXECUTABLE is updated
+        mv /tmp/cbd $SELF_EXECUTABLE
+        debug $SELF_EXECUTABLE is updated
     else
         debug you have the latest version | green
     fi
@@ -72,10 +72,10 @@ cbd-update-snap() {
     declare branch=${1:?branch name is required}
 
     url=$(cci-latest sequenceiq/cloudbreak-deployer $branch)
-    info "Update $EXECUTABLE from: $url"
+    info "Update $SELF_EXECUTABLE from: $url"
     curl -Ls $url | tar -zx -C /tmp
-    mv /tmp/cbd $EXECUTABLE
-    debug $EXECUTABLE is updated
+    mv /tmp/cbd $SELF_EXECUTABLE
+    debug $SELF_EXECUTABLE is updated
 }
 
 latest-version() {
