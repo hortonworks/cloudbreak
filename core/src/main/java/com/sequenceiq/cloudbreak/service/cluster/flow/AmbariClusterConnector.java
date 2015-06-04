@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -125,7 +126,8 @@ public class AmbariClusterConnector {
         try {
             cluster.setCreationStarted(new Date().getTime());
             cluster = clusterRepository.save(cluster);
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
+            TLSClientConfig clientConfig = new TLSClientConfig(cluster.getAmbariIp(), stack.getCertDir());
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
             setBaseRepoURL(cluster, ambariClient);
             addBlueprint(stack, ambariClient, cluster.getBlueprint());
             PollingResult waitForHostsResult = waitForHosts(stack, ambariClient);
@@ -171,7 +173,8 @@ public class AmbariClusterConnector {
         Set<String> result = new HashSet<>();
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(cluster);
+        TLSClientConfig clientConfig = new TLSClientConfig(cluster.getAmbariIp(), stack.getCertDir());
+        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
         if (SUCCESS.equals(waitForHosts(stack, ambariClient))) {
             HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
             List<String> hosts = findFreeHosts(stack.getId(), hostGroup, hostGroupAdjustment.getScalingAdjustment());
@@ -220,7 +223,8 @@ public class AmbariClusterConnector {
         LOGGER.info("Decommissioning {} hosts from host group '{}'", adjustment, hostGroupName);
         String eventMsg = String.format("Removing '%s' node(s) from the '%s' hostgroup.", adjustment, hostGroupName);
         eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), eventMsg, hostGroupName);
-        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(cluster);
+        TLSClientConfig clientConfig = new TLSClientConfig(cluster.getAmbariIp(), stack.getCertDir());
+        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
         String blueprintName = stack.getCluster().getBlueprint().getBlueprintName();
         Set<String> components = getHadoopComponents(cluster, ambariClient, hostGroupName, blueprintName);
         Map<String, HostMetadata> hostsToRemove = selectHostsToRemove(decommissionCandidates, stack, adjustment);
@@ -251,7 +255,8 @@ public class AmbariClusterConnector {
 
     public void stopCluster(Stack stack) throws CloudbreakException {
         Cluster cluster = stack.getCluster();
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
+        TLSClientConfig clientConfig = new TLSClientConfig(cluster.getAmbariIp(), stack.getCertDir());
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
         try {
             if (!allServiceStopped(ambariClient.getHostComponentsStates())) {
                 stopAllServices(stack, ambariClient);
@@ -264,7 +269,8 @@ public class AmbariClusterConnector {
 
     public void startCluster(Stack stack) throws CloudbreakException {
         Cluster cluster = stack.getCluster();
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
+        TLSClientConfig clientConfig = new TLSClientConfig(cluster.getAmbariIp(), stack.getCertDir());
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
         waitForAmbariToStart(stack);
         startAmbariAgents(stack);
         startAllServices(stack, ambariClient);
@@ -273,7 +279,8 @@ public class AmbariClusterConnector {
     public boolean isAmbariAvailable(Stack stack) throws CloudbreakException {
         Cluster cluster = stack.getCluster();
         if (cluster != null) {
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
+            TLSClientConfig clientConfig = new TLSClientConfig(cluster.getAmbariIp(), stack.getCertDir());
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
             try {
                 ambariClient.getHostNames();
             } catch (Exception ex) {
@@ -429,9 +436,10 @@ public class AmbariClusterConnector {
     private void waitForAmbariToStart(Stack stack) throws CloudbreakException {
         LOGGER.info("Checking if Ambari Server is available.");
         Cluster cluster = stack.getCluster();
+        TLSClientConfig clientConfig = new TLSClientConfig(cluster.getAmbariIp(), stack.getCertDir());
         PollingResult ambariHealthCheckResult = ambariHealthChecker.pollWithTimeout(
                 ambariHealthCheckerTask,
-                new AmbariClientPollerObject(stack, ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword())),
+                new AmbariClientPollerObject(stack, ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword())),
                 AmbariOperationService.AMBARI_POLLING_INTERVAL,
                 AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS,
                 AmbariOperationService.MAX_FAILURE_COUNT);
@@ -471,7 +479,8 @@ public class AmbariClusterConnector {
 
     private PollingResult waitForHostsToJoin(Stack stack) {
         Cluster cluster = stack.getCluster();
-        AmbariHosts ambariHosts = new AmbariHosts(stack, ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(),
+        TLSClientConfig clientConfig = new TLSClientConfig(cluster.getAmbariIp(), stack.getCertDir());
+        AmbariHosts ambariHosts = new AmbariHosts(stack, ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(),
                 cluster.getPassword()), stack.getFullNodeCount());
         return ambariHostJoin.pollWithTimeout(
                 ambariHostsJoinStatusCheckerTask,

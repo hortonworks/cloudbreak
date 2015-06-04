@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 public class AmbariClusterStatusUpdaterTest {
     private static final Long TEST_STACK_ID = 0L;
@@ -89,7 +90,7 @@ public class AmbariClusterStatusUpdaterTest {
     public void testUpdateClusterStatusShouldDoNothingWhenClusterStatusFactoryReturnsNull() {
         // GIVEN
         Stack stack = createStack(Status.AVAILABLE, Status.AVAILABLE);
-        BDDMockito.given(ambariClientProvider.getAmbariClient(any(String.class), any(String.class), any(String.class))).willReturn(ambariClient);
+        BDDMockito.given(ambariClientProvider.getAmbariClient(any(TLSClientConfig.class), any(String.class), any(String.class))).willReturn(ambariClient);
         BDDMockito.given(clusterStatusFactoy.createClusterStatus(ambariClient, TEST_BLUEPRINT)).willReturn(null);
         // WHEN
         underTest.updateClusterStatus(stack);
@@ -108,7 +109,7 @@ public class AmbariClusterStatusUpdaterTest {
         // GIVEN
         Stack stack = createStack(Status.AVAILABLE, Status.STOPPED);
         AmbariClusterStatus clusterStatus = new AmbariClusterStatus(ClusterStatus.INSTALLED, Status.STOPPED, Status.STOPPED, TEST_REASON);
-        BDDMockito.given(ambariClientProvider.getAmbariClient(any(String.class), any(String.class), any(String.class))).willReturn(ambariClient);
+        BDDMockito.given(ambariClientProvider.getAmbariClient(any(TLSClientConfig.class), any(String.class), any(String.class))).willReturn(ambariClient);
         BDDMockito.given(clusterStatusFactoy.createClusterStatus(ambariClient, TEST_BLUEPRINT)).willReturn(clusterStatus);
         // WHEN
         underTest.updateClusterStatus(stack);
@@ -125,7 +126,7 @@ public class AmbariClusterStatusUpdaterTest {
         // GIVEN
         Stack stack = createStack(Status.AVAILABLE, Status.AVAILABLE);
         AmbariClusterStatus clusterStatus = new AmbariClusterStatus(ClusterStatus.INSTALLED, Status.AVAILABLE, Status.STOPPED, TEST_REASON);
-        BDDMockito.given(ambariClientProvider.getAmbariClient(any(String.class), any(String.class), any(String.class))).willReturn(ambariClient);
+        BDDMockito.given(ambariClientProvider.getAmbariClient(any(TLSClientConfig.class), any(String.class), any(String.class))).willReturn(ambariClient);
         BDDMockito.given(clusterStatusFactoy.createClusterStatus(ambariClient, TEST_BLUEPRINT)).willReturn(clusterStatus);
         // WHEN
         underTest.updateClusterStatus(stack);
@@ -142,7 +143,7 @@ public class AmbariClusterStatusUpdaterTest {
         // GIVEN
         Stack stack = createStack(Status.AVAILABLE, Status.AVAILABLE);
         AmbariClusterStatus clusterStatus = new AmbariClusterStatus(ClusterStatus.INSTALLED, Status.STOPPED, Status.STOPPED, TEST_REASON);
-        BDDMockito.given(ambariClientProvider.getAmbariClient(any(String.class), any(String.class), any(String.class))).willReturn(ambariClient);
+        BDDMockito.given(ambariClientProvider.getAmbariClient(any(TLSClientConfig.class), any(String.class), any(String.class))).willReturn(ambariClient);
         BDDMockito.given(clusterStatusFactoy.createClusterStatus(ambariClient, TEST_BLUEPRINT)).willReturn(clusterStatus);
         // WHEN
         underTest.updateClusterStatus(stack);

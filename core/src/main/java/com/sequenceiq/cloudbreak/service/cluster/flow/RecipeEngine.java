@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.service.stack.flow.ConsulClientConfig;
+import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 @Component
 public class RecipeEngine {
@@ -60,7 +60,7 @@ public class RecipeEngine {
         LOGGER.info("Setting up recipe properties.");
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        ConsulClientConfig clientConfig = new ConsulClientConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
+        TLSClientConfig clientConfig = new TLSClientConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
         pluginManager.prepareKeyValues(clientConfig, getAllPropertiesFromRecipes(hostGroups));
     }
 
@@ -74,7 +74,7 @@ public class RecipeEngine {
     private void installPluginsOnHosts(Stack stack, Set<Recipe> recipes, Set<HostMetadata> hostMetadata, Set<InstanceMetaData> instances) {
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        ConsulClientConfig clientConfig = new ConsulClientConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
+        TLSClientConfig clientConfig = new TLSClientConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
         for (Recipe recipe : recipes) {
             Map<String, PluginExecutionType> plugins = recipe.getPlugins();
             Map<String, Set<String>> eventIdMap =

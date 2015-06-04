@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateReques
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
+import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -148,7 +149,8 @@ public class AmbariClusterService implements ClusterService {
             throw new NotFoundException(String.format("Ambari server could not be available for the stack.[id: %s]", stackId));
         }
         Cluster cluster = stack.getCluster();
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
+        TLSClientConfig clientConfig = new TLSClientConfig(cluster.getAmbariIp(), stack.getCertDir());
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
         try {
             String clusterJson = ambariClient.getClusterAsJson();
             if (clusterJson == null) {
@@ -342,7 +344,8 @@ public class AmbariClusterService implements ClusterService {
     private List<HostMetadata> collectDownscaleCandidates(HostGroupAdjustmentJson adjustmentJson, Stack stack, Cluster cluster, boolean decommissionRequest) {
         List<HostMetadata> downScaleCandidates = new ArrayList<>();
         if (decommissionRequest) {
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(stack.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
+            TLSClientConfig clientConfig = new TLSClientConfig(cluster.getAmbariIp(), stack.getCertDir());
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
             int replication = getReplicationFactor(ambariClient, adjustmentJson.getHostGroup());
             HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), adjustmentJson.getHostGroup());
             Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();
@@ -371,7 +374,8 @@ public class AmbariClusterService implements ClusterService {
 
     private void validateComponentsCategory(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
         Cluster cluster = stack.getCluster();
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
+        TLSClientConfig clientConfig = new TLSClientConfig(cluster.getAmbariIp(), stack.getCertDir());
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
         String hostGroup = hostGroupAdjustment.getHostGroup();
         Blueprint blueprint = cluster.getBlueprint();
         ObjectMapper mapper = new ObjectMapper();
