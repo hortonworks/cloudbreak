@@ -105,6 +105,7 @@ import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstances;
 
 @Service
 public class AwsConnector implements CloudPlatformConnector {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsConnector.class);
     private static final int MAX_POLLING_ATTEMPTS = 60;
     private static final int CONSOLE_OUTPUT_POLLING_ATTEMPTS = 120;
@@ -112,8 +113,7 @@ public class AwsConnector implements CloudPlatformConnector {
     private static final int INFINITE_ATTEMPTS = -1;
     private static final String CLOUDBREAK_EBS_SNAPSHOT = "cloudbreak-ebs-snapshot";
     private static final int SNAPSHOT_VOLUME_SIZE = 10;
-    public static final String DEFAULT_SSH_USER = "ec2-user";
-    public static final String TMP_KEYPAIR_PREFIX = "cloudbreak-tmp";
+    private static final String DEFAULT_SSH_USER = "ec2-user";
 
     @Value("${cb.aws.cf.template.path:" + CB_AWS_CF_TEMPLATE_PATH + "}")
     private String awsCloudformationTemplatePath;

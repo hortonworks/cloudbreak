@@ -29,7 +29,9 @@ public class TlsSetupService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TlsSetupService.class);
 
-    public static final int SSH_PORT = 22;
+    private static final int SSH_PORT = 22;
+    private static final int TLS_SETUP_TIMEOUT = 30;
+    private static final int REMOVE_SSH_KEY_TIMEOUT = 5;
 
     @Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
@@ -57,7 +59,7 @@ public class TlsSetupService {
             String tlsSetupScript = FileReaderUtils.readFileFromClasspath("init/tls-setup.sh");
             tlsSetupScript = tlsSetupScript.replace("$PUBLIC_IP", gateway.getPublicIp());
             final Session.Command tlsSetupCmd = tlsSetupSession.exec(tlsSetupScript);
-            tlsSetupCmd.join(30, TimeUnit.SECONDS);
+            tlsSetupCmd.join(TLS_SETUP_TIMEOUT, TimeUnit.SECONDS);
 //            LOGGER.info("exit status: " + tlsSetupCmd.getExitStatus());
             // TODO: check exit status
             tlsSetupSession.close();
@@ -65,7 +67,7 @@ public class TlsSetupService {
             final Session changeSshKeySession = ssh.startSession();
             final Session.Command changeSshKeyCmd = changeSshKeySession.exec("echo '" + stack.getCredential().getPublicKey() + "' > ~/.ssh/authorized_keys");
             LOGGER.info(IOUtils.readFully(changeSshKeyCmd.getInputStream()).toString());
-            changeSshKeyCmd.join(5, TimeUnit.SECONDS);
+            changeSshKeyCmd.join(REMOVE_SSH_KEY_TIMEOUT, TimeUnit.SECONDS);
             LOGGER.info("Change SSH key command exit status: " + changeSshKeyCmd.getExitStatus());
             // TODO: check exit status
             changeSshKeySession.close();

@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListenerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
+import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 @Service
 public class AmbariClusterFacade implements ClusterFacade {
@@ -114,7 +115,8 @@ public class AmbariClusterFacade implements ClusterFacade {
             clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
 
             logBefore(actualContext.getStackId(), context, "Start ambari cluster", UPDATE_IN_PROGRESS);
-            AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(actualContext.getAmbariIp());
+            TLSClientConfig clientConfig = new TLSClientConfig(actualContext.getAmbariIp(), stack.getCertDir());
+            AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(clientConfig);
             AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, actualContext.getAmbariIp(), ambariClient);
             PollingResult pollingResult = ambariStartupPollerObjectPollingService
                     .pollWithTimeout(ambariStartupListenerTask, ambariStartupPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -134,7 +136,7 @@ public class AmbariClusterFacade implements ClusterFacade {
             logAfter(actualContext.getStackId(), context, "Update ambari ip", UPDATE_IN_PROGRESS);
 
             logBefore(actualContext.getStackId(), context, "Changing ambari credentials", UPDATE_IN_PROGRESS);
-            changeAmbariCredentials(actualContext.getAmbariIp(), cluster);
+            changeAmbariCredentials(actualContext.getAmbariIp(), stack);
             logAfter(actualContext.getStackId(), context, "Changing ambari credentials", UPDATE_IN_PROGRESS);
         }
         return context;
@@ -494,10 +496,12 @@ public class AmbariClusterFacade implements ClusterFacade {
         return context;
     }
 
-    private void changeAmbariCredentials(String ambariIp, Cluster cluster) {
+    private void changeAmbariCredentials(String ambariIp, Stack stack) {
+        Cluster cluster = stack.getCluster();
         String userName = cluster.getUserName();
         String password = cluster.getPassword();
-        AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(ambariIp);
+        TLSClientConfig clientConfig = new TLSClientConfig(cluster.getAmbariIp(), stack.getCertDir());
+        AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(clientConfig);
         if (ADMIN.equals(userName)) {
             if (!ADMIN.equals(password)) {
                 ambariClient.changePassword(ADMIN, ADMIN, password, true);

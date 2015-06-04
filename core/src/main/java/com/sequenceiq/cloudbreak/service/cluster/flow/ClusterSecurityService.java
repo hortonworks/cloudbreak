@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 @Service
 public class ClusterSecurityService {
@@ -55,7 +56,8 @@ public class ClusterSecurityService {
         try {
             createAndStartKDC(stack);
             Cluster cluster = stack.getCluster();
-            AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(cluster);
+            TLSClientConfig clientConfig = new TLSClientConfig(cluster.getAmbariIp(), stack.getCertDir());
+            AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
             ambariClient.addService(KERBEROS_SERVICE);
             ambariClient.addServiceComponent(KERBEROS_SERVICE, KERBEROS_CLIENT);
             ambariClient.addComponentsToHosts(ambariClient.getClusterHosts(), asList(KERBEROS_CLIENT));
