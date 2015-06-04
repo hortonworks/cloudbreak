@@ -76,6 +76,5 @@ public class TlsSetupService {
         } catch (IOException e) {
             throw new CloudbreakException("Failed to setup TLS through temporary SSH.");
         }
-        connector.cleanupTemporarySSH(stack, gateway.getInstanceId());
     }
 }

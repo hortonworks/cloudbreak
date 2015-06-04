@@ -14,7 +14,6 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.UPDATE_ROL
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AWS_CF_TEMPLATE_PATH;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -57,7 +56,6 @@ import com.amazonaws.services.ec2.model.CreateSnapshotResult;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeResult;
-import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesResult;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
@@ -73,7 +71,6 @@ import com.amazonaws.services.ec2.model.DomainType;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.GetConsoleOutputRequest;
 import com.amazonaws.services.ec2.model.Image;
-import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.ReleaseAddressRequest;
 import com.amazonaws.services.ec2.model.Reservation;
@@ -84,7 +81,6 @@ import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
-import com.sequenceiq.cloudbreak.core.flow.service.ProvisioningSetupService;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsNetwork;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
@@ -105,7 +101,6 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstances;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Service
 public class AwsConnector implements CloudPlatformConnector {
@@ -175,20 +170,11 @@ public class AwsConnector implements CloudPlatformConnector {
         stack = stackUpdater.addStackResources(stackId, Arrays.asList(reservedIp));
         String snapshotId = getEbsSnapshotIdIfNeeded(stack);
         AwsNetwork network = (AwsNetwork) stack.getNetwork();
-        String tmpKeyPairName = TMP_KEYPAIR_PREFIX + "-" + stack.getId();
-        try {
-            ImportKeyPairRequest importKeyPairRequest = new ImportKeyPairRequest(
-                    tmpKeyPairName,
-                    FileReaderUtils.readFileFromPathToString((String) setupProperties.get(ProvisioningSetupService.SSH_PUBLICKEY_LOCATION)));
-            amazonEC2Client.importKeyPair(importKeyPairRequest);
-        } catch (IOException e) {
-            throw new AwsResourceException("Couldn't read temporary SSH key from path.", e);
-        }
         CreateStackRequest createStackRequest = new CreateStackRequest()
                 .withStackName(cFStackName)
                 .withOnFailure(OnFailure.valueOf(stack.getOnFailureActionAction().name()))
                 .withTemplateBody(cfTemplateBuilder.build(stack, snapshotId, network.isExistingVPC(), awsCloudformationTemplatePath))
-                .withParameters(getStackParameters(stack, coreUserData, gateWayUserData, awsCredential, cFStackName, network.isExistingVPC(), tmpKeyPairName));
+                .withParameters(getStackParameters(stack, coreUserData, gateWayUserData, awsCredential, cFStackName, network.isExistingVPC()));
         client.createStack(createStackRequest);
         Resource cloudFormationStackResource = new Resource(ResourceType.CLOUDFORMATION_STACK, cFStackName, stack, null);
         stack = stackUpdater.addStackResources(stackId, Arrays.asList(cloudFormationStackResource));
@@ -328,7 +314,7 @@ public class AwsConnector implements CloudPlatformConnector {
                 .withStackName(cFStackName)
                 .withTemplateBody(cfTemplateBuilder.build(stack, snapshotId, awsNetwork.isExistingVPC(), awsCloudformationTemplatePath))
                 .withParameters(getStackParameters(stack, coreUserData, gateWayUserData, (AwsCredential) stack.getCredential(),
-                        stack.getName(), awsNetwork.isExistingVPC(), ((AwsCredential) stack.getCredential()).getKeyPairName()));
+                        stack.getName(), awsNetwork.isExistingVPC()));
         AmazonCloudFormationClient cloudFormationClient = awsStackUtil.createCloudFormationClient(stack);
         cloudFormationClient.updateStack(updateStackRequest);
         List<StackStatus> errorStatuses = Arrays.asList(UPDATE_ROLLBACK_COMPLETE, UPDATE_ROLLBACK_FAILED);
@@ -368,14 +354,6 @@ public class AwsConnector implements CloudPlatformConnector {
             }
         }
         throw new AwsResourceException("Couldn't parse SSH fingerprint from console output.");
-    }
-
-    @Override
-    public void cleanupTemporarySSH(Stack stack, String instanceId) {
-        AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
-        String tmpKeyPairName = TMP_KEYPAIR_PREFIX + "-" + stack.getId();
-        DeleteKeyPairRequest deleteKeyPairRequest = new DeleteKeyPairRequest(tmpKeyPairName);
-        amazonEC2Client.deleteKeyPair(deleteKeyPairRequest);
     }
 
     @Override
@@ -458,14 +436,13 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     private List<Parameter> getStackParameters(Stack stack, String coreGroupUserData, String gateWayUserData, AwsCredential awsCredential, String stackName,
-            boolean existingVPC, String tmpKeyPairName) {
+            boolean existingVPC) {
         List<Parameter> parameters = new ArrayList<>(Arrays.asList(
                 new Parameter().withParameterKey("CBUserData").withParameterValue(coreGroupUserData),
                 new Parameter().withParameterKey("CBGateWayUserData").withParameterValue(gateWayUserData),
                 new Parameter().withParameterKey("StackName").withParameterValue(stackName),
                 new Parameter().withParameterKey("StackOwner").withParameterValue(awsCredential.getRoleArn()),
                 new Parameter().withParameterKey("KeyName").withParameterValue(awsCredential.getKeyPairName()),
-                new Parameter().withParameterKey("TempKeyName").withParameterValue(tmpKeyPairName),
                 new Parameter().withParameterKey("AMI").withParameterValue(stack.getImage()),
                 new Parameter().withParameterKey("RootDeviceName").withParameterValue(getRootDeviceName(stack, awsCredential))
         ));
