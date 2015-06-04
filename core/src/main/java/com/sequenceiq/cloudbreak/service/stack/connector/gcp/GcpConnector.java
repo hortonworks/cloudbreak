@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.gcp;
 
+import static com.sequenceiq.cloudbreak.domain.ResourceType.GCP_INSTANCE;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -9,11 +11,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.EnvironmentVariableConfig;
+import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.GcpCredential;
+import com.sequenceiq.cloudbreak.domain.GcpZone;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.repository.ResourceRepository;
+import com.sequenceiq.cloudbreak.service.PollingResult;
+import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.ParallelCloudResourceManager;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.builders.GcpResourceBuilderInit;
@@ -21,12 +30,26 @@ import com.sequenceiq.cloudbreak.service.stack.resource.gcp.builders.GcpResource
 @Service
 public class GcpConnector implements CloudPlatformConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpConnector.class);
+    private static final int CONSOLE_OUTPUT_POLLING_ATTEMPTS = 120;
+    protected static final int POLLING_INTERVAL = 5000;
 
     @Inject
     private GcpResourceBuilderInit gcpResourceBuilderInit;
 
     @Inject
     private ParallelCloudResourceManager cloudResourceManager;
+
+    @Inject
+    private ResourceRepository resourceRepository;
+
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
+    @Inject
+    private PollingService<GcpConsoleOutputContext> consoleOutputPollingService;
+
+    @Inject
+    private GcpConsoleOutputCheckerTask consoleOutputCheckerTask;
 
     @Override
     public Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties) {
@@ -80,7 +103,35 @@ public class GcpConnector implements CloudPlatformConnector {
 
     @Override
     public String getSSHFingerprint(Stack stack, String gateway) {
-        return "THUMBPRINT";
+        String result = "";
+        try {
+            GcpCredential credential = (GcpCredential) stack.getCredential();
+            Compute compute = gcpStackUtil.buildCompute(credential, stack);
+            Resource instance = resourceRepository.findByStackIdAndNameAndType(stack.getId(), gateway, GCP_INSTANCE);
+            Compute.Instances.GetSerialPortOutput instanceGet = compute.instances()
+                    .getSerialPortOutput(credential.getProjectId(),
+                            GcpZone.valueOf(stack.getRegion()).getValue(), instance.getResourceName());
+            GcpConsoleOutputContext gcpConsoleOutputContext = new GcpConsoleOutputContext(stack, instanceGet);
+            PollingResult pollingResult = consoleOutputPollingService
+                    .pollWithTimeout(consoleOutputCheckerTask, gcpConsoleOutputContext, POLLING_INTERVAL, CONSOLE_OUTPUT_POLLING_ATTEMPTS);
+            if (PollingResult.isExited(pollingResult)) {
+                throw new FlowCancelledException("Operation cancelled.");
+            } else if (PollingResult.isTimeout(pollingResult)) {
+                throw new GcpResourceException("Operation timed out: Couldn't get console output of gateway instance.");
+            }
+            String[] fingerprints = instanceGet.execute().getContents()
+                    .split("cb: -----BEGIN SSH HOST KEY FINGERPRINTS-----|cb: -----END SSH HOST KEY FINGERPRINTS-----")[2]
+                    .split("\n");
+            for (String fingerprint : fingerprints) {
+                if (fingerprint.contains("(RSA)") && fingerprint.trim().startsWith("cb:")) {
+                    result = fingerprint.split(" ")[10];
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            throw new GcpResourceException("Couldn't parse SSH fingerprint from console output.");
+        }
+        return result;
     }
 
 }

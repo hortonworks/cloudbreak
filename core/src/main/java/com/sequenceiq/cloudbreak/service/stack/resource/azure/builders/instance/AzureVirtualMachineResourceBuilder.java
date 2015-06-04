@@ -122,8 +122,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             props.put(IMAGESTOREURI, buildImageStoreUri(osStorageName, resourceName));
             props.put(HOSTNAME, resourceName);
             props.put(USERNAME, CB_GCP_AND_AZURE_USER_NAME);
-            props.put(SSHPUBLICKEYFINGERPRINT, azureStackUtil.createX509Certificate(azureCredential).getSha1Fingerprint().toUpperCase());
-            props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", CB_GCP_AND_AZURE_USER_NAME));
+            props.put(SSHKEYS, prepareKeys(provisionContextObject, buildResources, azureCredential));
             props.put(STORAGE_NAME, osStorageName);
             props.put(AFFINITYGROUP, provisionContextObject.getAffinityGroupName());
             if (azureTemplate.getVolumeCount() > 0) {
@@ -143,6 +142,13 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         } catch (Exception e) {
             throw new CloudConnectorException(e);
         }
+    }
+
+    private List<SshKey> prepareKeys(AzureProvisionContextObject provisionObject, List<Resource> resources, AzureCredential credential) throws Exception {
+        List<SshKey> result = new ArrayList<>();
+        result.add(new SshKey(azureStackUtil.createX509Certificate(credential).getSha1Fingerprint().toUpperCase(),
+                String.format("/home/%s/.ssh/authorized_keys", CB_GCP_AND_AZURE_USER_NAME)));
+        return result;
     }
 
     private List<Integer> generateDisksProperty(AzureTemplate azureTemplate) {
@@ -298,5 +304,24 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             return instanceGroup;
         }
     }
+
+    private class SshKey {
+        private String fingerPrint;
+        private String PublicKeyPath;
+
+        public SshKey(String fingerPrint, String publicKeyPath) {
+            this.fingerPrint = fingerPrint;
+            this.PublicKeyPath = publicKeyPath;
+        }
+
+        public String getFingerPrint() {
+            return fingerPrint;
+        }
+
+        public String getPublicKeyPath() {
+            return PublicKeyPath;
+        }
+    }
+
 
 }
