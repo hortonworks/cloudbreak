@@ -26,6 +26,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -154,6 +155,7 @@ public class AwsConnector implements CloudPlatformConnector {
     @Inject
     private SnapshotReadyCheckerTask snapshotReadyCheckerTask;
     @Inject
+    @Qualifier("aws")
     private ConsoleOutputCheckerTask consoleOutputCheckerTask;
 
     @Override
