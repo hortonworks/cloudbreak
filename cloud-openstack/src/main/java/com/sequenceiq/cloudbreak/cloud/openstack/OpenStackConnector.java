@@ -51,6 +51,7 @@ public class OpenStackConnector implements CloudPlatformConnectorV2 {
 
     @Override
     public AuthenticatedContext authenticate(StackContext stackContext, CloudCredential cloudCredential) {
+        LOGGER.info("Athenticating to openstack ...");
         return openStackClient.createAuthenticatedContext(stackContext, cloudCredential);
     }
 
@@ -72,7 +73,7 @@ public class OpenStackConnector implements CloudPlatformConnectorV2 {
 
 
         CloudResource cloudResource = new CloudResource(ResourceType.HEAT_STACK, stackName, heatStack.getId());
-        Promise<ResourceAllocationPersisted> promise = notifier.notifyResourceAllocation(cloudResource);
+        Promise<ResourceAllocationPersisted> promise = notifier.notifyResourceAllocation(cloudResource, authenticatedContext.getStackContext());
         try {
             promise.await();
         } catch (Exception e) {
@@ -101,7 +102,7 @@ public class OpenStackConnector implements CloudPlatformConnectorV2 {
                     result.add(heatResourceStatus);
                     break;
                 default:
-                    throw new RuntimeException("Checking of invalid resource");
+                    throw new RuntimeException("Invalid resource type: " + resource.getType());
             }
         }
 
@@ -121,7 +122,7 @@ public class OpenStackConnector implements CloudPlatformConnectorV2 {
                     client.heat().stacks().delete(stackName, heatStackId);
                     break;
                 default:
-                    throw new RuntimeException("Checking of invalid resource");
+                    throw new RuntimeException("Invalid resource type: " + resource.getType());
             }
         }
 

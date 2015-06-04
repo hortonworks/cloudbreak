@@ -7,11 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudPlatformConnectorV2;
-import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-import com.sequenceiq.cloudbreak.cloud.event.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.TerminateStackRequest;
+import com.sequenceiq.cloudbreak.cloud.event.TerminateStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 
 import reactor.bus.Event;
 
@@ -36,11 +35,10 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
             String platform = terminateStackRequest.getStackContext().getPlatform();
             CloudPlatformConnectorV2 connector = cloudPlatformConnectors.get(platform);
             AuthenticatedContext ac = connector.authenticate(terminateStackRequest.getStackContext(), terminateStackRequest.getCloudCredential());
-            throw new UnsupportedOperationException("Not yet implemented!");
+            connector.terminateStack(ac, terminateStackRequest.getCloudResources());
         } catch (Exception e) {
-            LOGGER.error("Failed to handle LaunchStackRequest: {}", e);
-            terminateStackRequest.getResult().onNext(new LaunchStackResult(terminateStackRequest.getStackContext(),
-                    ResourceStatus.FAILED, e.getMessage(), null));
+            LOGGER.error("Failed to handle TerminateStackRequest: {}", e);
+            terminateStackRequest.getResult().onNext(new TerminateStackResult());
         }
         LOGGER.info("TerminateStackHandler finished");
 

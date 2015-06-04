@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.openstack;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -18,6 +20,8 @@ import com.sequenceiq.cloudbreak.cloud.event.TerminateStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.TerminateStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.StackContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -34,6 +38,7 @@ import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
 import com.sequenceiq.cloudbreak.domain.OpenStackNetwork;
 import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 
@@ -56,6 +61,7 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
     @Override
     public Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties) {
         LOGGER.info("Assembling launch request for stack: {}", stack);
+        LaunchStackResult res = null;
         StackContext stackContext = new StackContext(stack.getId(), stack.getName(), CloudPlatform.OPENSTACK.name());
         CloudCredential cloudCredential = buildCloudCredential(stack);
 
@@ -83,13 +89,23 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
         LOGGER.info("Triggering event: {}", launchStackRequest);
         eventBus.notify(launchStackRequest.selector(LaunchStackRequest.class), Event.wrap(launchStackRequest));
         try {
-            LaunchStackResult res = promise.await();
+            res = promise.await(1, TimeUnit.HOURS);
             LOGGER.info("Result: {}", res);
         } catch (InterruptedException e) {
             LOGGER.error("Error while launching stack: ", e);
         }
 
-        return null;
+
+        return tranformResults(res.getResults(), stack);
+    }
+
+    private Set<Resource> tranformResults(List<CloudResourceStatus> cloudResourceStatuses, Stack stack) {
+        Set<Resource> retSet = new HashSet<>();
+        for (CloudResourceStatus cloudResourceStatus : cloudResourceStatuses) {
+            Resource resource = new Resource(cloudResourceStatus.getCloudResource().getType(), cloudResourceStatus.getCloudResource().getReference(), stack);
+            retSet.add(resource);
+        }
+        return retSet;
     }
 
 
@@ -110,14 +126,19 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
         CloudCredential cloudCredential = buildCloudCredential(stack);
         Promise<TerminateStackResult> promise = Promises.prepare();
         TerminateStackRequest terminateStackRequest = new TerminateStackRequest(stackContext, cloudCredential, promise);
+        String reference = stack.getResourceByType(ResourceType.HEAT_STACK) != null
+                ? stack.getResourceByType(ResourceType.HEAT_STACK).getResourceName() : null;
 
-        LOGGER.info("Triggering event: {}", stack);
+        CloudResource cloudResource = new CloudResource(ResourceType.HEAT_STACK, stack.getName(), reference);
+        terminateStackRequest.getCloudResources().add(cloudResource);
+
+        LOGGER.info("Triggering terminate stack event: {}", terminateStackRequest);
         eventBus.notify(terminateStackRequest.selector(TerminateStackRequest.class), Event.wrap(terminateStackRequest));
         try {
             TerminateStackResult res = promise.await();
-            LOGGER.info("Result: {}", res);
+            LOGGER.info("Terminate stack result: {}", res);
         } catch (InterruptedException e) {
-            LOGGER.error("Error durong launch stack: ", e);
+            LOGGER.error("Error while terminating stack: ", e);
         }
     }
 
