@@ -10,9 +10,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
 import com.sequenceiq.cloudbreak.cloud.CloudPlatformConnectorV2;
-import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.event.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 
 @Configuration
@@ -26,7 +26,6 @@ public class PollTaskConfig {
     public PollTaskFactory newFetchResourcesStateTask() {
 
         return new PollTaskFactory() {
-
 
             @Override
             public PollTask<LaunchStackResult> newPollResourcesStateTask(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResource) {

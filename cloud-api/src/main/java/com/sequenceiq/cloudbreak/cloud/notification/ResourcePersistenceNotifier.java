@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.notification;
 
 
+import com.sequenceiq.cloudbreak.cloud.event.context.StackContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceAllocationPersisted;
 
 import reactor.rx.Promise;
 
-public interface ResourcePersistenceNotifier {
+public interface ResourcePersistenceNotifier<T> {
 
-    Promise<ResourceAllocationPersisted> notifyResourceAllocation(CloudResource cloudResource);
+    Promise<T> notifyResourceAllocation(CloudResource cloudResource, StackContext stackContext);
 
 }
