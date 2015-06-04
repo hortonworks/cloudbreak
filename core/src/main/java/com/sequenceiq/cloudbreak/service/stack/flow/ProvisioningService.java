@@ -38,7 +38,7 @@ public class ProvisioningService {
         stack = stackRepository.findOneWithLists(stack.getId());
         if (stack.isRequested()) {
             CloudPlatformConnector cloudPlatformConnector = cloudPlatformConnectors.get(cloudPlatform);
-            String tmpSshKey = FileReaderUtils.readFileFromPathToString((String) setupProperties.get(ProvisioningSetupService.SSH_PUBLICKEY_LOCATION));
+            String tmpSshKey = FileReaderUtils.readFileFromPathToString((String) setupProperties.get(ProvisioningSetupService.SSH_PUBLIC_KEY_PATH));
             Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(cloudPlatform, tmpSshKey, cloudPlatformConnector.getSSHUser());
             Set<Resource> resources = cloudPlatformConnector
                     .buildStack(stack, userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE), setupProperties);

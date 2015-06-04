@@ -189,6 +189,7 @@ public class Stack implements ProvisionEntity {
     private String statusReason;
     @Enumerated(EnumType.STRING)
     private Status status;
+    private String certDir;
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "key")
     @Column(name = "value", columnDefinition = "TEXT", length = 100000)
@@ -282,6 +283,14 @@ public class Stack implements ProvisionEntity {
 
     public void setCredential(Credential credential) {
         this.credential = credential;
+    }
+
+    public String getCertDir() {
+        return certDir;
+    }
+
+    public void setCertDir(String certDir) {
+        this.certDir = certDir;
     }
 
     public Status getStatus() {

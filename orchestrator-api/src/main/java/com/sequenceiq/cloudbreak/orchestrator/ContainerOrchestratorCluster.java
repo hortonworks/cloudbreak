@@ -4,16 +4,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ContainerOrchestratorCluster {
-    private String apiAddress;
+    private GatewayConfig gatewayConfig;
     private Set<Node> nodes = new HashSet<>();
 
-    public ContainerOrchestratorCluster(String apiAddress, Set<Node> nodes) {
-        this.apiAddress = apiAddress;
+    public ContainerOrchestratorCluster(GatewayConfig gatewayConfig, Set<Node> nodes) {
+        this.gatewayConfig = gatewayConfig;
         this.nodes = nodes;
     }
 
-    public String getApiAddress() {
-        return apiAddress;
+    public GatewayConfig getGatewayConfig() {
+        return gatewayConfig;
     }
 
     public Set<Node> getNodes() {

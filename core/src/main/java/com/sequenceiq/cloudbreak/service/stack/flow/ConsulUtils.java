@@ -1,13 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -22,7 +18,6 @@ import com.ecwid.consul.v1.event.model.Event;
 import com.ecwid.consul.v1.event.model.EventParams;
 import com.ecwid.consul.v1.kv.model.GetValue;
 import com.ecwid.consul.v1.kv.model.PutParams;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 
 public final class ConsulUtils {
 
@@ -157,26 +152,16 @@ public final class ConsulUtils {
         }
     }
 
-    public static List<ConsulClient> createClients(InstanceMetaData gatewayInstanceMetadata) {
-        Set<InstanceMetaData> instanceMetadata = new HashSet<>();
-        instanceMetadata.add(gatewayInstanceMetadata);
-        return createClients(instanceMetadata, DEFAULT_TIMEOUT_MS);
+    public static ConsulClient createClient(ConsulClientConfig consulClientConfig) {
+        return createClient(consulClientConfig, DEFAULT_TIMEOUT_MS);
     }
 
-    public static List<ConsulClient> createClients(Collection<InstanceMetaData> gatewayInstanceMetadata) {
-        return createClients(gatewayInstanceMetadata, DEFAULT_TIMEOUT_MS);
-    }
-
-    public static List<ConsulClient> createClients(Collection<InstanceMetaData> gatewayInstanceMetadata, int timeout) {
-        List<ConsulClient> clients = new ArrayList<>();
-        for (InstanceMetaData instanceMetaData : gatewayInstanceMetadata) {
-            clients.add(new ConsulClient("https://" + instanceMetaData.getPublicIp(), GATEWAY_PORT,
-                    "/tmp/certs/client.pem",
-                    "/tmp/certs/key.pem",
-                    "/tmp/certs/ca.pem",
-                    timeout));
-        }
-        return clients;
+    public static ConsulClient createClient(ConsulClientConfig consulClientConfig, int timeout) {
+        return new ConsulClient("https://" + consulClientConfig.getApiAddress(), GATEWAY_PORT,
+                consulClientConfig.getClientCert(),
+                consulClientConfig.getClientKey(),
+                consulClientConfig.getServerCert(),
+                timeout);
     }
 
     public static void agentForceLeave(List<ConsulClient> clients, String nodeName) {
@@ -226,5 +211,4 @@ public final class ConsulUtils {
             return consulServerCount;
         }
     }
-
 }

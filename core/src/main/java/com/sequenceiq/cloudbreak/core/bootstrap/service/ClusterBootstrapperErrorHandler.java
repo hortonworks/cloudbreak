@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.Node;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
@@ -59,10 +60,10 @@ public class ClusterBootstrapperErrorHandler {
     @Inject
     private CloudbreakEventService eventService;
 
-    public void terminateFailedNodes(ContainerOrchestrator orchestrator, Stack stack, Set<Node> nodes) throws CloudbreakOrchestratorFailedException {
+    public void terminateFailedNodes(ContainerOrchestrator orchestrator, Stack stack, GatewayConfig gatewayConfig, Set<Node> nodes)
+            throws CloudbreakOrchestratorFailedException {
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
-        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        List<String> allAvailableNode = orchestrator.getAvailableNodes(gatewayInstance.getPublicIp(), nodes);
+        List<String> allAvailableNode = orchestrator.getAvailableNodes(gatewayConfig, nodes);
         List<Node> missingNodes = selectMissingNodes(nodes, allAvailableNode);
         if (missingNodes.size() > 0) {
             String message = String.format("Bootstrap failed on %s nodes. These nodes will be terminated.", missingNodes.size());

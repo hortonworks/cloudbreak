@@ -67,7 +67,10 @@ public class ConsulMetadataSetupTest {
         given(stackService.getById(1L)).willReturn(stack);
         given(consulPollingService.pollWithTimeout(any(ConsulServiceCheckerTask.class), any(ConsulContext.class),
                 anyInt(), anyInt())).willReturn(PollingResult.TIMEOUT).willReturn(PollingResult.EXIT);
-        doNothing().when(underTest).updateWithConsulData(anySet(), anySet());
+        InstanceGroup gateway = stack.getGatewayInstanceGroup();
+        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+        ConsulClientConfig clientConfig = new ConsulClientConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
+        doNothing().when(underTest).updateWithConsulData(clientConfig, anySet(), anySet());
         // WHEN
         underTest.setupConsulMetadata(1L);
     }

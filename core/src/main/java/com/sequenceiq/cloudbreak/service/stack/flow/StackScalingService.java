@@ -103,31 +103,36 @@ public class StackScalingService {
         int nodeCount = instanceGroup.getNodeCount() - instanceIds.size();
         instanceGroup.setNodeCount(nodeCount);
         instanceGroupRepository.save(instanceGroup);
-        List<ConsulClient> clients = createConsulClients(stack, instanceGroup.getGroupName());
-        List<InstanceMetaData> updatedInstances = new ArrayList<>();
+
+        InstanceGroup gateway = stack.getGatewayInstanceGroup();
+        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+        ConsulClientConfig clientConfig = new ConsulClientConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
+        ConsulClient client = ConsulUtils.createClient(clientConfig);
+//        List<InstanceMetaData> updatedInstances = new ArrayList<>();
+
         for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
             if (instanceIds.contains(instanceMetaData.getInstanceId())) {
                 long timeInMillis = Calendar.getInstance().getTimeInMillis();
                 instanceMetaData.setTerminationDate(timeInMillis);
                 instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
-                removeAgentFromConsul(stack, clients, instanceMetaData);
+                removeAgentFromConsul(stack, client, instanceMetaData);
             }
         }
-        instanceMetaDataRepository.save(updatedInstances);
+//        instanceMetaDataRepository.save(updatedInstances);
         LOGGER.info("Successfully terminated metadata of instances '{}' in stack.", instanceIds);
         eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
                 "Billing changed due to downscaling of cluster infrastructure.");
     }
 
-    private List<ConsulClient> createConsulClients(Stack stack, String instanceGroupName) {
-        return ConsulUtils.createClients(stack.getGatewayInstanceGroup().getInstanceMetaData());
-    }
+//    private List<ConsulClient> createConsulClients(Stack stack, String instanceGroupName) {
+//        return ConsulUtils.createClients(stack.getGatewayInstanceGroup().getInstanceMetaData());
+//    }
 
-    private void removeAgentFromConsul(Stack stack, List<ConsulClient> clients, InstanceMetaData metaData) {
+    private void removeAgentFromConsul(Stack stack, ConsulClient client, InstanceMetaData metaData) {
         String nodeName = metaData.getDiscoveryFQDN().replace(ConsulUtils.CONSUL_DOMAIN, "");
         consulPollingService.pollWithTimeout(
                 consulAgentLeaveCheckerTask,
-                new ConsulContext(stack, clients, Collections.singletonList(nodeName)),
+                new ConsulContext(stack, client, Collections.singletonList(nodeName)),
                 POLLING_INTERVAL,
                 MAX_POLLING_ATTEMPTS);
     }

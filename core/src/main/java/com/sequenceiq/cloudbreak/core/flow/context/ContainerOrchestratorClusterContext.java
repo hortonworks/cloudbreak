@@ -5,19 +5,20 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.Node;
 import com.sequenceiq.cloudbreak.service.StackContext;
 
 public class ContainerOrchestratorClusterContext extends StackContext {
 
     private ContainerOrchestrator containerOrchestrator;
-    private String apiAddress;
+    private GatewayConfig gatewayConfig;
     private Set<Node> nodes = new HashSet<>();
 
-    public ContainerOrchestratorClusterContext(Stack stack, ContainerOrchestrator containerOrchestrator, String apiAddress, Set<Node> nodes) {
+    public ContainerOrchestratorClusterContext(Stack stack, ContainerOrchestrator containerOrchestrator, GatewayConfig gatewayConfig, Set<Node> nodes) {
         super(stack);
         this.containerOrchestrator = containerOrchestrator;
-        this.apiAddress = apiAddress;
+        this.gatewayConfig = gatewayConfig;
         this.nodes = nodes;
     }
 
@@ -25,8 +26,8 @@ public class ContainerOrchestratorClusterContext extends StackContext {
         return containerOrchestrator;
     }
 
-    public String getApiAddress() {
-        return apiAddress;
+    public GatewayConfig getGatewayConfig() {
+        return gatewayConfig;
     }
 
     public Set<Node> getNodes() {

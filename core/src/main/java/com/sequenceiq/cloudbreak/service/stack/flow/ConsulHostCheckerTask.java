@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -19,9 +20,9 @@ public class ConsulHostCheckerTask extends StackBasedStatusCheckerTask<ConsulCon
     @Override
     public boolean checkStatus(ConsulContext consulContext) {
         List<String> privateIps = consulContext.getTargets();
-        List<ConsulClient> clients = consulContext.getConsulClients();
-        LOGGER.info("Checking '{}' different hosts for consul agents: '{}'", clients.size(), privateIps);
-        Map<String, String> members = ConsulUtils.getAliveMembers(clients);
+        ConsulClient client = consulContext.getConsulClient();
+        LOGGER.info("Checking consul agents: '{}'", privateIps);
+        Map<String, String> members = ConsulUtils.getAliveMembers(Arrays.asList(client));
         for (String ip : privateIps) {
             if (members.get(ip) == null) {
                 LOGGER.info("Consul agent didn't join on host: {}", ip);
