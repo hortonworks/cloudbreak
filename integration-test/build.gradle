@@ -20,19 +20,19 @@ dependencies {
     compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
         exclude group: 'org.slf4j';
     }
-    compile ('com.sequenceiq:cloudbreak-rest-client:0.4.6') {
-        exclude group: 'org.slf4j';
+    compile ("com.sequenceiq:cloudbreak-rest-client:0.4.6") {
+        exclude group: "org.slf4j";
     }
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter', version: "${springBootVersion}"
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "${springBootVersion}"
-    compile group: 'org.springframework', name: 'spring-web', version: '4.1.4.RELEASE'
-    compile group: 'org.springframework', name: 'spring-context-support', version: '4.1.4.RELEASE'
-    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.3.5'
-
+    compile "org.springframework.boot:spring-boot-starter:${springBootVersion}"
+    compile "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+    compile "org.springframework:spring-web:4.1.4.RELEASE"
+    compile "org.springframework:spring-context-support:4.1.4.RELEASE"
+    compile "org.apache.httpcomponents:httpclient:4.3.5"
     compile 'javax:javaee-api:7.0'
     compile "org.testng:testng:6.8.21"
     compile "org.uncommons:reportng:1.1.4"
     runtime "com.google.inject:guice:3.0"
+    runtime "org.hibernate:hibernate-validator:5.1.1.Final"
 }
 
 task buildInfo(type: BuildInfoTask) {
