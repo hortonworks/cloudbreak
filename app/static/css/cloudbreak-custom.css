@@ -264,3 +264,6 @@ ng\:form {
 .ng-hide-add-active, .ng-hide-remove {
   display: block!important;
 }
+.host-group-table{padding-left: 13px}
+.host-group {font-size: 15px !important; word-wrap: break-word !important;}
+.host-group-body {font-size: 13px !important;}
