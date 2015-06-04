@@ -71,6 +71,12 @@
                         <input class="form-control" type="number" id="consulServerCount" ng-model="cluster.consulServerCount">
                       </div>
                     </div>
+                    <div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE'">
+                      <label class="col-sm-3 control-label" for="diskPerStorageAccount">Disk(s) per storage account</label>
+                      <div class="col-sm-3">
+                        <input class="form-control" type="number" id="diskPerStorageAccount" name="diskPerStorageAccount" ng-model="cluster.parameters.diskPerStorage" min="1" max="10000">
+                      </div>
+                    </div>
                     <div class="form-group" ng-show="showAdvancedOptionForm">
                       <label class="col-sm-3 control-label" for="selectAdjustment">Minimum cluster size</label>
                       <div class="col-sm-3">
@@ -229,7 +235,6 @@
                              </div>
                        </div>
                     </div>
-
                     <div class="row btn-row">
                         <div class="col-sm-9 col-sm-offset-3">
                             <a href="" id="createCluster" class="btn btn-success btn-block" ng-disabled="clusterCreationForm.$invalid" role="button" ng-click="createCluster()"><i class="fa fa-plus fa-fw"></i>create and start cluster</a>
