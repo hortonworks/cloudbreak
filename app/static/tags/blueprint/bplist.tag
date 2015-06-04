@@ -47,18 +47,19 @@
                             <p>stack version: <a class="label label-default" href="http://hortonworks.com/hdp/">{{blueprint.ambariBlueprint.Blueprints.stack_version}}</a></p>
                         </div>
                     </div>
-                        <div ng-repeat="hostgroup in blueprint.ambariBlueprint.host_groups" id="hostgroupconfig" class="col-sm-3">
-                            <div class="" style="margin-left: 10px; margin-bottom: 10px; margin-right: 10px; background-color: #fff;   border: 1px solid #ddd;transition: border .2s ease-in-out;padding: 20px;padding-top: 0px;">
-                             <div class="thumbnail">
-                                  <div class="caption">
-                                    <h3>{{hostgroup.name}}</h3>
-                                  </div>
-                                  <div class="body">
-                                    <p ng-repeat="component in hostgroup.components"><span class="label label-default">{{component.name}}</span></p>
-                                  </div>
-                             </div>
-                           </div>
+                    <div class="host-group-table row" ng-repeat="hostgroup in blueprint.ambariBlueprint.host_groups track by $index" ng-if="$index % 4 == 0">
+                        <div class="col-md-3" ng-repeat="i in [$index, $index + 1, $index + 2, $index + 3]" id="hostgroupconfig" ng-if="blueprint.ambariBlueprint.host_groups[i] != null"
+                            style="width: 23%; margin-left: 6px; margin-bottom: 10px; margin-right: 6px; background-color: #fff;   border: 1px solid #ddd;transition: border .2s ease-in-out;padding: 10px;padding-top: 0px;">
+                            <div class="thumbnail">
+                                <div class="caption">
+                                    <h3 class="host-group">{{blueprint.ambariBlueprint.host_groups[i].name}}</h3>
+                                </div>
+                                <div class="body host-group-body">
+                                    <p ng-repeat="component in blueprint.ambariBlueprint.host_groups[i].components"><span class="label label-default">{{component.name}}</span></p>
+                                </div>
+                            </div>
                         </div>
+                    </div>
                 </div>
         </div>
         <!-- .col-sm-9 -->
