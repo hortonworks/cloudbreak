@@ -101,11 +101,7 @@ public class SimpleFlowFacade implements FlowFacade {
             ProvisioningContext provisioningContext = (ProvisioningContext) context;
             Stack stack = stackService.getById(provisioningContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
-            ProvisioningContext provision = (ProvisioningContext) stackFacade.setupTls(context);
-            LOGGER.debug("TLS setup is DONE.");
-            return new ProvisioningContext.Builder()
-                    .setDefaultParams(provision.getStackId(), provision.getCloudPlatform())
-                    .build();
+            return stackFacade.setupTls(context);
         } catch (Exception e) {
             LOGGER.error("Exception during metadata setup: {}", e.getMessage());
             throw new CloudbreakException(e);
@@ -116,9 +112,7 @@ public class SimpleFlowFacade implements FlowFacade {
     public FlowContext setupConsulMetadata(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Setting up Consul metadata. Context: {}", context);
         try {
-            ProvisioningContext setupConsulMetadataContext = (ProvisioningContext) stackFacade.setupConsulMetadata(context);
-            LOGGER.debug("Setting up Consul metadata is DONE.");
-            return setupConsulMetadataContext;
+            return stackFacade.setupConsulMetadata(context);
         } catch (Exception e) {
             LOGGER.error("Exception during Consul metadata setup.", e);
             throw new CloudbreakException(e);

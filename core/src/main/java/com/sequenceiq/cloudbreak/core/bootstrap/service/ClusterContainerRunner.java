@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorCancelledExc
 import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
+import com.sequenceiq.cloudbreak.orchestrator.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.Node;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
@@ -78,6 +79,7 @@ public class ClusterContainerRunner {
         Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+        GatewayConfig gatewayConfig = new GatewayConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
 
         Set<Node> nodes = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
@@ -89,7 +91,7 @@ public class ClusterContainerRunner {
             nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp(), instanceMetaData.getDiscoveryName(), dataVolumes));
         }
         try {
-            ContainerOrchestratorCluster cluster = new ContainerOrchestratorCluster(gatewayInstance.getPublicIp(), nodes);
+            ContainerOrchestratorCluster cluster = new ContainerOrchestratorCluster(gatewayConfig, nodes);
             containerOrchestrator.startRegistrator(cluster, registratorDockerImageName, stackDeletionBasedExitCriteriaModel(stack.getId()));
             containerOrchestrator.startAmbariServer(cluster, postgresDockerImageName, getAmbariImageName(stack), cloudPlatform,
                     stackDeletionBasedExitCriteriaModel(stack.getId()));
@@ -118,6 +120,7 @@ public class ClusterContainerRunner {
         Stack stack = stackRepository.findOneWithLists(context.getStackId());
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+        GatewayConfig gatewayConfig = new GatewayConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
 
         Set<Node> nodes = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
@@ -131,7 +134,7 @@ public class ClusterContainerRunner {
             }
         }
         try {
-            ContainerOrchestratorCluster cluster = new ContainerOrchestratorCluster(gatewayInstance.getPublicIp(), nodes);
+            ContainerOrchestratorCluster cluster = new ContainerOrchestratorCluster(gatewayConfig, nodes);
             containerOrchestrator.startAmbariAgents(cluster, getAmbariImageName(stack), cluster.getNodes().size(), cloudPlatform,
                     stackDeletionBasedExitCriteriaModel(stack.getId()));
             containerOrchestrator.startConsulWatches(cluster, consulWatchPlugnDockerImageName, cluster.getNodes().size(),

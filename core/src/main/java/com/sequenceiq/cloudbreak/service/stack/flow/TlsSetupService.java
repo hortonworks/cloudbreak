@@ -48,7 +48,7 @@ public class TlsSetupService {
         ssh.addHostKeyVerifier(sshFingerprint);
         try {
             ssh.connect(gateway.getPublicIp(), SSH_PORT);
-            ssh.authPublickey(connector.getSSHUser(), (String) setupProperties.get(ProvisioningSetupService.SSH_PRIVATEKEY_LOCATION));
+            ssh.authPublickey(connector.getSSHUser(), (String) setupProperties.get(ProvisioningSetupService.SSH_PRIVATE_KEY_PATH));
 
             ssh.newSCPFileTransfer().upload(tlsCertificatePath, "/tmp/cb-client.pem");
 
@@ -70,7 +70,7 @@ public class TlsSetupService {
             // TODO: check exit status
             changeSshKeySession.close();
 
-            ssh.newSCPFileTransfer().download("/tmp/server.pem","/tmp/certs/ca.pem");
+            ssh.newSCPFileTransfer().download("/tmp/server.pem", stack.getCertDir() + "/ca.pem");
 
             ssh.disconnect();
         } catch (IOException e) {

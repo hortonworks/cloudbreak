@@ -38,13 +38,10 @@ public class ConsulServiceCheckerTaskTest {
     @SuppressWarnings("unchecked")
     public void checkStatusForConnectionError() {
         ConsulRawClient raw1 = mock(ConsulRawClient.class);
-        ConsulRawClient raw2 = mock(ConsulRawClient.class);
         ConsulClient client1 = new ConsulClient(raw1);
-        ConsulClient client2 = new ConsulClient(raw2);
         when(raw1.makeGetRequest(SERVICE_ENDPOINT + AMBARI_SERVICE, null, QueryParams.DEFAULT)).thenThrow(ConnectException.class);
-        when(raw2.makeGetRequest(SERVICE_ENDPOINT + AMBARI_SERVICE, null, QueryParams.DEFAULT)).thenThrow(ConnectException.class);
 
-        boolean result = task.checkStatus(new ConsulContext(stack, Arrays.asList(client1, client2), Arrays.asList(AMBARI_SERVICE)));
+        boolean result = task.checkStatus(new ConsulContext(stack, client1, Arrays.asList(AMBARI_SERVICE)));
 
         assertFalse(result);
     }
@@ -53,14 +50,11 @@ public class ConsulServiceCheckerTaskTest {
     @SuppressWarnings("unchecked")
     public void checkStatusForOneNodeResponse() {
         ConsulRawClient raw1 = mock(ConsulRawClient.class);
-        ConsulRawClient raw2 = mock(ConsulRawClient.class);
         RawResponse rawResponse = new RawResponse(200, null, SERVICE_RESPONSE, null, null, null);
         ConsulClient client1 = new ConsulClient(raw1);
-        ConsulClient client2 = new ConsulClient(raw2);
-        when(raw1.makeGetRequest(SERVICE_ENDPOINT + AMBARI_SERVICE, null, QueryParams.DEFAULT)).thenThrow(ConnectException.class);
-        when(raw2.makeGetRequest(SERVICE_ENDPOINT + AMBARI_SERVICE, null, QueryParams.DEFAULT)).thenReturn(rawResponse);
+        when(raw1.makeGetRequest(SERVICE_ENDPOINT + AMBARI_SERVICE, null, QueryParams.DEFAULT)).thenReturn(rawResponse);
 
-        boolean result = task.checkStatus(new ConsulContext(stack, Arrays.asList(client1, client2), Arrays.asList(AMBARI_SERVICE)));
+        boolean result = task.checkStatus(new ConsulContext(stack, client1, Arrays.asList(AMBARI_SERVICE)));
 
         assertTrue(result);
     }
