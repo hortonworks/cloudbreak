@@ -88,6 +88,7 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
             Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String vmName = getVmName(provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName(), index);
+        vmName = vmName + instanceGroup.get().getGroupName().replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
         String newVmName = vmName + String.valueOf(new Date().getTime());
         if (newVmName.length() > MAX_NAME_LENGTH) {
             newVmName = newVmName.substring(newVmName.length() - MAX_NAME_LENGTH, newVmName.length());

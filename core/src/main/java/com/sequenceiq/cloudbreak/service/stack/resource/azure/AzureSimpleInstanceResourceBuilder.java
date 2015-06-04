@@ -42,8 +42,7 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
     protected static final String CUSTOMDATA = "customData";
     protected static final String VIRTUALNETWORKNAME = "virtualNetworkName";
     protected static final String VMTYPE = "vmType";
-    protected static final String SSHPUBLICKEYFINGERPRINT = "sshPublicKeyFingerprint";
-    protected static final String SSHPUBLICKEYPATH = "sshPublicKeyPath";
+    protected static final String SSHKEYS = "sshKeys";
     protected static final String DISKS = "disks";
     protected static final String DATA = "data";
     protected static final String PRODUCTION = "production";
