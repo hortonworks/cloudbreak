@@ -57,6 +57,7 @@ public class AzureStackUtil {
     public static final int ROOTFS_COUNT = 1;
     public static final int GLOBAL_STORAGE = -1;
     private static final int LENGTH = 8;
+    private static final int END_INDEX = 24;
 
     @Inject
     private KeyGeneratorService keyGeneratorService;
@@ -79,8 +80,12 @@ public class AzureStackUtil {
     public String getOSStorageName(Stack stack, AzureLocation location, int index) {
         AzureCredential azureCred = (AzureCredential) stack.getCredential();
         String affinityGroupName = azureCred.getAffinityGroupName(location);
-        return index == GLOBAL_STORAGE ? azureCred.getAffinityGroupName(location)
+        String result = index == GLOBAL_STORAGE ? azureCred.getAffinityGroupName(location)
                 : CB_STORAGE_BASE + affinityGroupName.substring(0, LENGTH) + stack.getId() + index;
+        if (result.length() > END_INDEX) {
+            return result.substring(result.length() - END_INDEX, result.length());
+        }
+        return result;
     }
 
     /**
