@@ -18,7 +18,6 @@ import org.mockito.MockitoAnnotations;
 
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Sets;
-import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -331,41 +330,6 @@ public class RetryingStackUpdaterTest {
         failMocks(dummyStack);
         // WHEN
         underTest.updateNodeCount(DUMMY_ID, DUMMY_NODE_COUNT, DUMMY_GROUP_NAME);
-    }
-
-    @Test
-    public void testUpdateStackClusterSuccessFirst() {
-        // GIVEN
-        Stack dummyStack = createDummyStack();
-        Cluster cluster = new Cluster();
-        defaultMocks(dummyStack);
-        // WHEN
-        Stack result = underTest.updateStackCluster(DUMMY_ID, cluster);
-        // THEN
-        assertEquals(result.getCluster(), cluster);
-    }
-
-    @Test
-    public void testUpdateStackClusterFailThreeTimes() {
-        // GIVEN
-        Stack dummyStack = createDummyStack();
-        Cluster cluster = new Cluster();
-        failThreeTimesMocks(dummyStack);
-        // WHEN
-        Stack result = underTest.updateStackCluster(DUMMY_ID, cluster);
-        // THEN
-        verify(stackRepository, times(4)).save(dummyStack);
-        assertEquals(result.getCluster(), cluster);
-    }
-
-    @Test(expected = CloudbreakServiceException.class)
-    public void testUpdateStackClusterFail() {
-        // GIVEN
-        Stack dummyStack = createDummyStack();
-        Cluster cluster = new Cluster();
-        failMocks(dummyStack);
-        // WHEN
-        underTest.updateStackCluster(DUMMY_ID, cluster);
     }
 
     private Set<InstanceMetaData> createInstanceMetadata() {

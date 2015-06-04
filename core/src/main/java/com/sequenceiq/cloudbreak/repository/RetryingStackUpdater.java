@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -58,10 +57,6 @@ public class RetryingStackUpdater {
 
     public synchronized Stack removeStackResources(Long stackId, List<Resource> resources) {
         return doRemoveResources(stackId, resources, INITIAL_ATTEMPT);
-    }
-
-    public Stack updateStackCluster(Long stackId, Cluster cluster) {
-        return doUpdateStackCluster(stackId, cluster, INITIAL_ATTEMPT);
     }
 
     public Stack updateNodeCount(Long stackId, Integer nodeCount, String instanceGroup) {
@@ -165,25 +160,6 @@ public class RetryingStackUpdater {
                 return doUpdateNodeCount(stackId, nodeCount, instanceGroup, attempt + 1);
             } else {
                 throw new CloudbreakServiceException(String.format("Failed to update stack '%s' in %d attempts. (while trying to set 'nodecount')",
-                        stackId, MAX_RETRIES), e);
-            }
-        }
-    }
-
-    private Stack doUpdateStackCluster(Long stackId, Cluster cluster, int attempt) {
-        try {
-            Stack stack = stackRepository.findById(stackId);
-            stack.setCluster(cluster);
-            stack = stackRepository.save(stack);
-            LOGGER.info("Saved cluster '{}' for stack.", cluster.getId());
-            return stack;
-        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            if (attempt <= MAX_RETRIES) {
-                LOGGER.info("Failed to update stack while creating corresponding cluster. [attempt: '{}', Cause: {}]. Trying to save it again.",
-                        attempt, e.getClass().getSimpleName());
-                return doUpdateStackCluster(stackId, cluster, attempt + 1);
-            } else {
-                throw new CloudbreakServiceException(String.format("Failed to update stack '%s' in %d attempts. (while trying to add cluster)",
                         stackId, MAX_RETRIES), e);
             }
         }

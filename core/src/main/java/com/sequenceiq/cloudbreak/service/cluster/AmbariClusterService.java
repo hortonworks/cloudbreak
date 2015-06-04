@@ -106,14 +106,15 @@ public class AmbariClusterService implements ClusterService {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster()
                     .getName()));
         }
+        cluster.setStack(stack);
         cluster.setOwner(user.getUserId());
         cluster.setAccount(user.getAccount());
+        stack.setCluster(cluster);
         try {
             cluster = clusterRepository.save(cluster);
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName(), ex);
         }
-        stack = stackUpdater.updateStackCluster(stack.getId(), cluster);
         if (stack.isAvailable()) {
             flowManager.triggerClusterInstall(new ProvisionRequest(stack.cloudPlatform(), stack.getId()));
         }
@@ -300,7 +301,7 @@ public class AmbariClusterService implements ClusterService {
             cluster.setAmbariStackDetails(ambariStackDetails);
         }
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
-        stack = stackUpdater.updateStackCluster(stack.getId(), cluster);
+        clusterRepository.save(cluster);
         flowManager.triggerClusterReInstall(new ProvisionRequest(stack.cloudPlatform(), stack.getId()));
         return stack.getCluster();
     }
