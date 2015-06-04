@@ -12,10 +12,13 @@ public class ResourceAllocationPersisted {
         return request;
     }
 
+
+    //BEGIN GENERATED CODE
     @Override
     public String toString() {
         return "ResourceAllocationPersisted{" +
                 "request=" + request +
                 '}';
     }
+    //BEGIN GENERATED CODE
 }

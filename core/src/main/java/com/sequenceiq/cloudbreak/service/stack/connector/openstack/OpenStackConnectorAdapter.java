@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 public class OpenStackConnectorAdapter implements CloudPlatformConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackConnectorAdapter.class);
 
-
     @Value("${cb.openstack.experimental.connector:false}")
     private boolean experimentalConnector;
 
