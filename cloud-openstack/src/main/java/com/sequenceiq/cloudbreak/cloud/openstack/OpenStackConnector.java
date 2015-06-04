@@ -24,8 +24,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Instance;
+import com.sequenceiq.cloudbreak.cloud.notification.ResourcePersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceAllocationPersisted;
 import com.sequenceiq.cloudbreak.cloud.openstack.status.HeatStackStatus;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
+
+import reactor.rx.Promise;
 
 @Service("OpenStackConnectorV2")
 public class OpenStackConnector implements CloudPlatformConnectorV2 {
@@ -52,7 +56,7 @@ public class OpenStackConnector implements CloudPlatformConnectorV2 {
 
 
     @Override
-    public List<CloudResourceStatus> launchStack(AuthenticatedContext authenticatedContext, CloudStack stack) {
+    public List<CloudResourceStatus> launchStack(AuthenticatedContext authenticatedContext, CloudStack stack, ResourcePersistenceNotifier notifier) {
         String stackName = authenticatedContext.getStackContext().getStackName();
         String heatTemplate = heatTemplateBuilder.build(stackName, stack.getGroups(), stack.getNetwork(),
                 stack.getSecurity(), stack.getImage());
@@ -68,6 +72,14 @@ public class OpenStackConnector implements CloudPlatformConnectorV2 {
 
 
         CloudResource cloudResource = new CloudResource(ResourceType.HEAT_STACK, stackName, heatStack.getId());
+        Promise<ResourceAllocationPersisted> promise = notifier.notifyResourceAllocation(cloudResource);
+        try {
+            promise.await();
+        } catch (Exception e) {
+            //Rollback
+            terminateStack(authenticatedContext, Arrays.asList(cloudResource));
+        }
+
         List<CloudResourceStatus> resources = checkResourcesState(authenticatedContext, Arrays.asList(cloudResource));
         LOGGER.debug("Launched resources: {}", resources);
         return resources;

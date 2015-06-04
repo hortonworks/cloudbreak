@@ -10,13 +10,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudPlatformConnectorV2;
-import com.sequenceiq.cloudbreak.cloud.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.event.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.notification.ResourcePersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
@@ -29,6 +30,7 @@ import reactor.bus.Event;
 public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStackRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LaunchStackHandler.class);
+
     private static final int INTERVAL = 5;
     private static final int MAX_ATTEMPT = 100;
 
@@ -40,6 +42,9 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
 
     @Inject
     private PollTaskFactory statusCheckFactory;
+
+    @Inject
+    private ResourcePersistenceNotifier resourcePersistenceNotifier;
 
     @Override
     public Class<LaunchStackRequest> type() {
@@ -57,7 +62,7 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
 
             AuthenticatedContext ac = connector.authenticate(r.getStackContext(), r.getCloudCredential());
 
-            List<CloudResourceStatus> resourceStatus = connector.launchStack(ac, r.getCloudStack());
+            List<CloudResourceStatus> resourceStatus = connector.launchStack(ac, r.getCloudStack(), resourcePersistenceNotifier);
 
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
 

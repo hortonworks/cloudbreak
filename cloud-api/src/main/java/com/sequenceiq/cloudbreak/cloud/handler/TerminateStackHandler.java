@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudPlatformConnectorV2;
-import com.sequenceiq.cloudbreak.cloud.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.event.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.TerminateStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
