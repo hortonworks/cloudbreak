@@ -15,10 +15,10 @@ import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 @Qualifier("aws")
 public class ConsoleOutputCheckerTask extends StackBasedStatusCheckerTask<ConsoleOutputContext> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleOutputCheckerTask.class);
+
     @Autowired
     private AwsStackUtil awsStackUtil;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleOutputCheckerTask.class);
 
     @Override
     public boolean checkStatus(ConsoleOutputContext consoleOutputContext) {

@@ -116,7 +116,7 @@ public class SimpleStackFacade implements StackFacade {
     @Inject
     private RetryingStackUpdater stackUpdater;
 
-    @Autowired
+    @Inject
     private TlsSetupService tlsSetupService;
 
     @Override
