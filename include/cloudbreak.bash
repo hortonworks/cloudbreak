@@ -10,6 +10,7 @@ cloudbreak-config() {
   cloudbreak-conf-cloud-provider
   cloudbreak-conf-ui
   cloudbreak-conf-java
+  cloudbreak-conf-baywatch
 }
 
 cloudbreak-conf-tags() {
@@ -129,6 +130,13 @@ cloudbreak-conf-ui() {
 
 cloudbreak-conf-java() {
     env-import SECURE_RANDOM "false"
+}
+
+cloudbreak-conf-baywatch() {
+  declare desc="Defines Baywatch related parameters"
+
+  env-import CB_BAYWATCH_ENABLED "false"
+  env-import CB_BAYWATCH_EXTERN_LOCATION ""
 }
 
 cloudbreak-shell() {
