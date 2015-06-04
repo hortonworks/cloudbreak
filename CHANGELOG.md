@@ -4,6 +4,8 @@
 
 ### Added
 
+- Baywatch default parameters added: `CB_BAYWATCH_ENABLED` and`CB_BAYWATCH_EXTERN_LOCATION`
+
 ### Removed
 
 ### Changed
