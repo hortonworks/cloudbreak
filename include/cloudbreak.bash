@@ -108,8 +108,8 @@ cloudbreak-conf-defaults() {
     env-import PUBLIC_IP
 
     env-import CB_HOST_ADDR $PUBLIC_IP
-    env-import CB_BLUEPRINT_DEFAULTS = "hdp-small-default,hdp-spark-cluster,hdp-streaming-cluster"
-    env-import CB_TEMPLATE_DEFAULTS = "minviable-gcp,minviable-azure,minviable-aws"
+    env-import CB_BLUEPRINT_DEFAULTS "hdp-small-default,hdp-spark-cluster,hdp-streaming-cluster"
+    env-import CB_TEMPLATE_DEFAULTS "minviable-gcp,minviable-azure,minviable-aws"
 }
 
 cloudbreak-conf-cloud-provider() {
