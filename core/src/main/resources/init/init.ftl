@@ -4,6 +4,12 @@ set -x
 START_LABEL=${platformDiskStartLabel}
 PLATFORM_DISK_PREFIX=${platformDiskPrefix}
 
+<#if gateway>
+setup_tmp_ssh() {
+  echo "${tmpSshKey}" >> /home/${sshUser}/.ssh/authorized_keys
+}
+</#if>
+
 <#noparse>
 get_ip() {
   ifconfig eth0 | awk '/inet addr/{print substr($2,6)}'
@@ -53,6 +59,9 @@ main() {
     format_disks
     fix_hostname
     configure_docker
+    <#if gateway>
+      setup_tmp_ssh
+    </#if>
     print_ssh_fingerprint
     touch /var/cb-init-executed
     echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/cb-init-executed

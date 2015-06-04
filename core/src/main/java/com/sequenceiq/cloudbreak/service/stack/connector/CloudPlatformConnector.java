@@ -32,5 +32,4 @@ public interface CloudPlatformConnector {
 
     String getSSHFingerprint(Stack stack, String gateway);
 
-    void cleanupTemporarySSH(Stack stack, String instanceId);
 }
