@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 @Component
 public class AmbariClusterStatusUpdater {
@@ -41,8 +42,9 @@ public class AmbariClusterStatusUpdater {
         if (isClusterStatusCheckNecessary(stack)) {
             Cluster cluster = stack.getCluster();
             String blueprintName = cluster != null ? cluster.getBlueprint().getBlueprintName() : null;
+            TLSClientConfig clientConfig = new TLSClientConfig(cluster.getAmbariIp(), stack.getCertDir());
             AmbariClusterStatus clusterStatus = clusterStatusFactory.createClusterStatus(ambariClientProvider.getAmbariClient(
-                    cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword()), blueprintName);
+                    clientConfig, cluster.getUserName(), cluster.getPassword()), blueprintName);
             updateClusterStatus(stack, clusterStatus);
         }
     }

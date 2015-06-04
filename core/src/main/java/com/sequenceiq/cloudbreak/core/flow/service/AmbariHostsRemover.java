@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
+import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 @Service
 public class AmbariHostsRemover {
@@ -22,7 +23,8 @@ public class AmbariHostsRemover {
 
     public void deleteHosts(Stack stack, List<String> hosts, List<String> components) {
         Cluster cluster = stack.getCluster();
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
+        TLSClientConfig clientConfig = new TLSClientConfig(cluster.getAmbariIp(), stack.getCertDir());
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
         for (String hostName : hosts) {
             if (cluster != null) {
                 ambariClient.deleteHostComponents(hostName, components);

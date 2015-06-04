@@ -32,14 +32,15 @@ import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 @Component
 public class ProvisioningSetupService {
 
+    public static final String SSH_PRIVATE_KEY_PATH = "ssh.private.key.path";
+    public static final String SSH_PUBLIC_KEY_PATH = "ssh.public.key.path";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisioningSetupService.class);
 
     private static final String SSH_KEY_PREFIX = "/cb-ssh-key-";
     private static final String SSH_PUBLIC_KEY_EXTENSION = ".pub";
     private static final String SSH_PUBLIC_KEY_COMMENT = "cloudbreak";
-
-    public static final String SSH_PRIVATE_KEY_PATH = "ssh.private.key.path";
-    public static final String SSH_PUBLIC_KEY_PATH = "ssh.public.key.path";
+    public static final int DEFAULT_KEY_SIZE = 2048;
 
     @Value("${cb.cert.dir:" + CB_CERT_DIR + "}")
     private String certDir;
@@ -92,7 +93,7 @@ public class ProvisioningSetupService {
         String publicKeyPath = stackCertDir + keyName + SSH_PUBLIC_KEY_EXTENSION;
         String privateKeyPath = stackCertDir + keyName;
         JSch jsch = new JSch();
-        KeyPair keyPair = KeyPair.genKeyPair(jsch, KeyPair.RSA, 2048);
+        KeyPair keyPair = KeyPair.genKeyPair(jsch, KeyPair.RSA, DEFAULT_KEY_SIZE);
         keyPair.writePrivateKey(privateKeyPath);
         keyPair.writePublicKey(publicKeyPath, SSH_PUBLIC_KEY_COMMENT);
         keyPair.dispose();

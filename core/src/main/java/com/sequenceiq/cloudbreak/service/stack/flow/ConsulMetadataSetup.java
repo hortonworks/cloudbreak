@@ -56,7 +56,7 @@ public class ConsulMetadataSetup {
         Set<InstanceMetaData> allInstanceMetaData = stack.getRunningInstanceMetaData();
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        ConsulClientConfig clientConfig = new ConsulClientConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
+        TLSClientConfig clientConfig = new TLSClientConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
         PollingResult pollingResult = waitForConsulAgents(stack, clientConfig, allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
         if (!isSuccess(pollingResult)) {
             throw new WrongMetadataException("Connecting to consul hosts is interrupted.");
@@ -70,7 +70,7 @@ public class ConsulMetadataSetup {
         Stack stack = stackService.getById(stackId);
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        ConsulClientConfig clientConfig = new ConsulClientConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
+        TLSClientConfig clientConfig = new TLSClientConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
         Set<InstanceMetaData> newInstanceMetadata = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
             if (newAddresses.contains(instanceMetaData.getPrivateIp())) {
@@ -86,7 +86,7 @@ public class ConsulMetadataSetup {
     }
 
 
-    private PollingResult waitForConsulAgents(Stack stack, ConsulClientConfig clientConfig, Set<InstanceMetaData> originalMetaData,
+    private PollingResult waitForConsulAgents(Stack stack, TLSClientConfig clientConfig, Set<InstanceMetaData> originalMetaData,
             Set<InstanceMetaData> newInstanceMetadata) {
         Set<InstanceMetaData> copy = new HashSet<>(originalMetaData);
         if (newInstanceMetadata != null) {
@@ -111,7 +111,7 @@ public class ConsulMetadataSetup {
     }
 
     @VisibleForTesting
-    protected void updateWithConsulData(ConsulClientConfig clientConfig, Set<InstanceMetaData> originalMetadata,
+    protected void updateWithConsulData(TLSClientConfig clientConfig, Set<InstanceMetaData> originalMetadata,
             Set<InstanceMetaData> newInstanceMetadata) {
         ConsulClient client = createClient(clientConfig);
         Map<String, String> members = getAliveMembers(Arrays.asList(client));
