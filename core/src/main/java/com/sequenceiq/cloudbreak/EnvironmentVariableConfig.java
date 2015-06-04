@@ -11,7 +11,7 @@ public class EnvironmentVariableConfig {
 
     public static final String CB_EVENTBUS_THREADPOOL_CORE_SIZE = "100";
 
-    public static final String CB_TEMP_SSH_KEY_LOCATION = "/tmp";
+    public static final String CB_CERT_DIR = "/tmp/certs/";
     public static final String CB_TLS_PRIVATE_KEY_FILE = "/tmp/certs/key.pem";
     public static final String CB_TLS_CERT_FILE = "/tmp/certs/client.pem";
 

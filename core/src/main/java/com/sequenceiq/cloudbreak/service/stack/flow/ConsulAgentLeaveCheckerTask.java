@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,10 +19,10 @@ public class ConsulAgentLeaveCheckerTask extends StackBasedStatusCheckerTask<Con
     @Override
     public boolean checkStatus(ConsulContext consulContext) {
         String nodeName = consulContext.getTargets().get(0);
-        List<ConsulClient> clients = consulContext.getConsulClients();
+        ConsulClient client = consulContext.getConsulClient();
         LOGGER.info("Trying to remove node: {} from consul", nodeName);
-        ConsulUtils.agentForceLeave(clients, nodeName);
-        Collection<String> leftMembers = ConsulUtils.getLeftMembers(clients).values();
+        ConsulUtils.agentForceLeave(Arrays.asList(client), nodeName);
+        Collection<String> leftMembers = ConsulUtils.getLeftMembers(Arrays.asList(client)).values();
         return leftMembers.contains(nodeName);
     }
 
