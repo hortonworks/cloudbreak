@@ -300,7 +300,7 @@ function proxyCloudbreakRequest(req, res, method){
   method(cloudbreakAddress + req.url, cbRequestArgs, function(data,response){
     res.status(response.statusCode).send(data);
   }).on('error', function(err){
-    res.status(500).send("Uluwatu could not connect to the requested backend.");
+    res.status(500).send("Uluwatu could not connect to Cloudbreak.");
   });
 }
 
@@ -314,7 +314,7 @@ function proxySultansRequest(req, res, method){
     method(sultansAddress + req_url, cbRequestArgs, function(data, response){
         res.status(response.statusCode).send(data);
     }).on('error', function(err){
-      res.status(500).send("Uluwatu could not connect to the requested backend.");
+      res.status(500).send("Uluwatu could not connect to Sultans.");
     });
 }
 
@@ -328,7 +328,7 @@ function proxyPeriscopeRequest(req, res, method){
   method(periscopeAddress + req_url, cbRequestArgs, function(data, response){
     res.status(response.statusCode).send(data);
   }).on('error', function(err){
-    res.status(500).send("Uluwatu could not connect to the requested backend.");
+    res.status(500).send("Uluwatu could not connect to Periscope.");
   });
 }
 

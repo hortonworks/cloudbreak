@@ -284,15 +284,18 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                 var failedMsg = ""
                 if (error.data != null && error.data.message != null) {
                     failedMsg += error.data.message
-                } else if (error.data != null && "validationErrors" in error.data) {
+                } else if (error.data != null && Object.prototype.toString.call(error.data) === '[object Object]'
+                        && "validationErrors" in error.data) {
                     var errorData = error.data["validationErrors"]
                     for (var key in errorData) {
                         failedMsg += errorData[key] + "; "
                     }
                 } else if (error.error_description != null) {
                     failedMsg += error.error_description
+                } else if (error.data != null && Object.prototype.toString.call(error.data) === '[object String]') {
+                    failedMsg += error.data
                 } else {
-                    failedMsg += "Unknown error or Cloudbreak Server is not running."
+                    failedMsg += "Unknown internal error. Error code: " + error.status
                 }
                 return failedMsg;
             }
