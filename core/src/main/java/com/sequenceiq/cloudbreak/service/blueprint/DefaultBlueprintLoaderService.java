@@ -54,8 +54,8 @@ public class DefaultBlueprintLoaderService {
                     BlueprintRequest blueprintJson = new BlueprintRequest();
                     blueprintJson.setName(blueprintName);
                     blueprintJson.setDescription(blueprintName);
-                    blueprintJson.setAmbariBlueprint(
-                            jsonHelper.createJsonFromString(FileReaderUtils.readFileFromClasspath(String.format("blueprints/%s.bp", blueprintName))));
+                    blueprintJson.setAmbariBlueprint(jsonHelper.createJsonFromString(
+                            FileReaderUtils.readFileFromClasspath(String.format("defaults/blueprints/%s.bp", blueprintName))));
                     Blueprint bp = conversionService.convert(blueprintJson, Blueprint.class);
                     bp.setOwner(user.getUserId());
                     bp.setAccount(user.getAccount());
