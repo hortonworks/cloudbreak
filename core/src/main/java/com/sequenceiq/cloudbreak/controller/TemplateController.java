@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UnknownFormatConversionException;
@@ -33,6 +34,8 @@ import com.sequenceiq.cloudbreak.domain.GcpTemplate;
 import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.repository.TemplateRepository;
+import com.sequenceiq.cloudbreak.service.template.SimpleTemplateLoaderService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -42,6 +45,12 @@ import com.wordnik.swagger.annotations.ApiOperation;
 public class TemplateController {
     @Inject
     private TemplateService templateService;
+
+    @Inject
+    private SimpleTemplateLoaderService templateLoaderService;
+
+    @Inject
+    private TemplateRepository templateRepository;
 
     @Inject
     @Qualifier("conversionService")
@@ -69,6 +78,10 @@ public class TemplateController {
     public ResponseEntity<Set<TemplateResponse>> getPrivateTemplates(@ModelAttribute("user") CbUser user) {
         MDCBuilder.buildMdcContext(user);
         Set<Template> templates = templateService.retrievePrivateTemplates(user);
+        if (templates.isEmpty()) {
+            Set<Template> templateList = templateLoaderService.loadTemplates(user);
+            templates = new HashSet<>((ArrayList<Template>) templateRepository.save(templateList));
+        }
         return new ResponseEntity<>(convert(templates), HttpStatus.OK);
     }
 
@@ -78,6 +91,11 @@ public class TemplateController {
     public ResponseEntity<Set<TemplateResponse>> getAccountTemplates(@ModelAttribute("user") CbUser user) {
         MDCBuilder.buildMdcContext(user);
         Set<Template> templates = templateService.retrieveAccountTemplates(user);
+        if (templateLoaderService.templateAdditionNeeded(templates)) {
+            Set<Template> templateList = templateLoaderService.loadTemplates(user);
+            templates = new HashSet<>((ArrayList<Template>) templateRepository.save(templateList));
+        }
+        templates = templateService.retrieveAccountTemplates(user);
         return new ResponseEntity<>(convert(templates), HttpStatus.OK);
     }
 
