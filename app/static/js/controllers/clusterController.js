@@ -240,6 +240,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.cluster.bestEffort = "BEST_EFFORT";
                 $scope.cluster.failurePolicy.adjustmentType = "BEST_EFFORT";
                 $scope.cluster.failurePolicy.threshold = null;
+                $scope.cluster.parameters = {};
             }
         });
 
