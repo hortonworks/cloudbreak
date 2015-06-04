@@ -108,11 +108,6 @@ public class AzureConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public void cleanupTemporarySSH(Stack stack, String instanceId) {
-        LOGGER.info("Not implemented");
-    }
-
-    @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AZURE;
     }
