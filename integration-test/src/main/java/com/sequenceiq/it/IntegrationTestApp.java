@@ -169,6 +169,8 @@ public class IntegrationTestApp implements CommandLineRunner {
     }
 
     public static void main(String[] args) throws Exception {
-        SpringApplication.run(IntegrationTestApp.class, args);
+        SpringApplication springApp = new SpringApplication(new Object[] { IntegrationTestApp.class });
+        springApp.setWebEnvironment(false);
+        springApp.run(args);
     }
 }
