@@ -1,34 +1,31 @@
-package com.sequenceiq.cloudbreak.service.stack.connector.aws;
+package com.sequenceiq.cloudbreak.service.stack.connector.openstack;
 
+import org.apache.commons.lang3.StringUtils;
+import org.openstack4j.api.OSClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.ec2.AmazonEC2Client;
-import com.amazonaws.services.ec2.model.GetConsoleOutputRequest;
-import com.amazonaws.services.ec2.model.GetConsoleOutputResult;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
-@Component("awsStackConsoleOutputCheckerTask")
-@Qualifier("aws")
+@Component("openStackConsoleOutputCheckerTask")
+@Qualifier("openstack")
 public class ConsoleOutputCheckerTask extends StackBasedStatusCheckerTask<ConsoleOutputContext> {
-
-    @Autowired
-    private AwsStackUtil awsStackUtil;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleOutputCheckerTask.class);
 
     @Override
     public boolean checkStatus(ConsoleOutputContext consoleOutputContext) {
-        AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(consoleOutputContext.getStack());
-        GetConsoleOutputResult result = amazonEC2Client.getConsoleOutput(new GetConsoleOutputRequest().withInstanceId(consoleOutputContext.getInstanceId()));
-        if (result != null && result.getOutput() != null) {
-            return true;
+        String instanceId = consoleOutputContext.getInstanceId();
+        LOGGER.info("Trying to retrieve console output of gateway instance, id: {}", instanceId);
+        OSClient osClient = consoleOutputContext.getOsClient();
+        String output = osClient.compute().servers().getConsoleOutput(instanceId, OpenStackConnector.CONSOLE_OUTPUT_LINES);
+        if (StringUtils.isEmpty(output)) {
+            LOGGER.info("Console output is not ready yet for gateway instance, id: {}", instanceId);
+            return false;
         }
-        LOGGER.warn("Console output is not yet available.");
-        return false;
+        return true;
     }
 
     @Override
