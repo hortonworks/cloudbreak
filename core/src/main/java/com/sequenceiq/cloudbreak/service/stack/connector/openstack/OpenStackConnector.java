@@ -194,12 +194,18 @@ public class OpenStackConnector implements CloudPlatformConnector {
         ConsoleOutputContext consoleOutputContext = new ConsoleOutputContext(osClient, stack, instanceId);
         PollingResult pollingResult = consoleOutputPollingService
                 .pollWithTimeout(consoleOutputCheckerTask, consoleOutputContext, POLLING_INTERVAL, CONSOLE_OUTPUT_POLLING_ATTEMPTS);
-        String output = osClient.compute().servers().getConsoleOutput(instanceId, CONSOLE_OUTPUT_LINES);
-        LOGGER.info(output);
         if (PollingResult.isExited(pollingResult)) {
             throw new FlowCancelledException("Operation cancelled.");
         } else if (PollingResult.isTimeout(pollingResult)) {
             throw new OpenStackResourceException("Operation timed out: Couldn't get console output of gateway instance.");
+        }
+        String consoleOutput = osClient.compute().servers().getConsoleOutput(instanceId, CONSOLE_OUTPUT_LINES);
+        String[] fingerprints = consoleOutput.split("\ncb: -----BEGIN SSH HOST KEY FINGERPRINTS-----|\ncb: -----END SSH HOST KEY FINGERPRINTS-----")[1]
+                .split("\n");
+        for (String fingerprint : fingerprints) {
+            if (fingerprint.contains("(RSA)") && fingerprint.trim().startsWith("cb:")) {
+                return fingerprint.split(" ")[2];
+            }
         }
         throw new OpenStackResourceException("Couldn't parse SSH fingerprint from console output.");
     }
