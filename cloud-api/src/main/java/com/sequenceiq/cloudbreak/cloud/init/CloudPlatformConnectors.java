@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud;
+package com.sequenceiq.cloudbreak.cloud.init;
 
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +8,8 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.cloud.CloudPlatformConnectorV2;
 
 @Component("CloudPlatformConnectorsV2")
 public class CloudPlatformConnectors {
