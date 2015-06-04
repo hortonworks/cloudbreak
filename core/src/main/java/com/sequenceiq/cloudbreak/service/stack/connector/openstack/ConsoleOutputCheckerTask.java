@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 public class ConsoleOutputCheckerTask extends StackBasedStatusCheckerTask<ConsoleOutputContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleOutputCheckerTask.class);
+    private static final String EOF_INDICATOR = "login:";
 
     @Override
     public boolean checkStatus(ConsoleOutputContext consoleOutputContext) {
@@ -21,7 +22,7 @@ public class ConsoleOutputCheckerTask extends StackBasedStatusCheckerTask<Consol
         LOGGER.info("Trying to retrieve console output of gateway instance, id: {}", instanceId);
         OSClient osClient = consoleOutputContext.getOsClient();
         String output = osClient.compute().servers().getConsoleOutput(instanceId, OpenStackConnector.CONSOLE_OUTPUT_LINES);
-        if (StringUtils.isEmpty(output)) {
+        if (StringUtils.isEmpty(output) || !output.contains(EOF_INDICATOR)) {
             LOGGER.info("Console output is not ready yet for gateway instance, id: {}", instanceId);
             return false;
         }
