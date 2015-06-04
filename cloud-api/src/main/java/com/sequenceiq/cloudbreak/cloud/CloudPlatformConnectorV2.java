@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Instance;
+import com.sequenceiq.cloudbreak.cloud.notification.ResourcePersistenceNotifier;
 
 
 public interface CloudPlatformConnectorV2 {
@@ -18,7 +19,7 @@ public interface CloudPlatformConnectorV2 {
 
     AuthenticatedContext authenticate(StackContext stackContext, CloudCredential cloudCredential);
 
-        List<CloudResourceStatus> launchStack(AuthenticatedContext authenticatedContext, CloudStack stack);
+    List<CloudResourceStatus> launchStack(AuthenticatedContext authenticatedContext, CloudStack stack, ResourcePersistenceNotifier notifier);
 
     List<CloudResourceStatus> checkResourcesState(AuthenticatedContext authenticatedContext, List<CloudResource> resources);
 
