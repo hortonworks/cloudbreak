@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 import net.schmizz.sshj.SSHClient;
-import net.schmizz.sshj.common.IOUtils;
 import net.schmizz.sshj.connection.channel.direct.Session;
 
 @Component
@@ -30,7 +29,7 @@ public class TlsSetupService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TlsSetupService.class);
 
     private static final int SSH_PORT = 22;
-    private static final int TLS_SETUP_TIMEOUT = 30;
+    private static final int TLS_SETUP_TIMEOUT = 60;
     private static final int REMOVE_SSH_KEY_TIMEOUT = 5;
 
     @Resource
@@ -51,32 +50,32 @@ public class TlsSetupService {
         try {
             ssh.connect(gateway.getPublicIp(), SSH_PORT);
             ssh.authPublickey(connector.getSSHUser(), (String) setupProperties.get(ProvisioningSetupService.SSH_PRIVATE_KEY_PATH));
-
             ssh.newSCPFileTransfer().upload(tlsCertificatePath, "/tmp/cb-client.pem");
-
             final Session tlsSetupSession = ssh.startSession();
-
             String tlsSetupScript = FileReaderUtils.readFileFromClasspath("init/tls-setup.sh");
             tlsSetupScript = tlsSetupScript.replace("$PUBLIC_IP", gateway.getPublicIp());
             final Session.Command tlsSetupCmd = tlsSetupSession.exec(tlsSetupScript);
             tlsSetupCmd.join(TLS_SETUP_TIMEOUT, TimeUnit.SECONDS);
-//            LOGGER.info("exit status: " + tlsSetupCmd.getExitStatus());
-            // TODO: check exit status
             tlsSetupSession.close();
-
             final Session changeSshKeySession = ssh.startSession();
             final Session.Command changeSshKeyCmd = changeSshKeySession.exec("echo '" + stack.getCredential().getPublicKey() + "' > ~/.ssh/authorized_keys");
-            LOGGER.info(IOUtils.readFully(changeSshKeyCmd.getInputStream()).toString());
             changeSshKeyCmd.join(REMOVE_SSH_KEY_TIMEOUT, TimeUnit.SECONDS);
-            LOGGER.info("Change SSH key command exit status: " + changeSshKeyCmd.getExitStatus());
-            // TODO: check exit status
             changeSshKeySession.close();
-
             ssh.newSCPFileTransfer().download("/tmp/server.pem", stack.getCertDir() + "/ca.pem");
-
-            ssh.disconnect();
+            if (changeSshKeyCmd.getExitStatus() != 0) {
+                throw new CloudbreakException(String.format("TLS setup script exited with error code: %s", changeSshKeyCmd.getExitStatus()));
+            }
+            if (tlsSetupCmd.getExitStatus() != 0) {
+                throw new CloudbreakException(String.format("Failed to remove temp SSH key. Error code: %s", changeSshKeyCmd.getExitStatus()));
+            }
         } catch (IOException e) {
-            throw new CloudbreakException("Failed to setup TLS through temporary SSH.");
+            throw new CloudbreakException("Failed to setup TLS through temporary SSH.", e);
+        } finally {
+            try {
+                ssh.disconnect();
+            } catch (IOException e) {
+                throw new CloudbreakException(String.format("Couldn't disconnect temp SSH session"), e);
+            }
         }
     }
 }
