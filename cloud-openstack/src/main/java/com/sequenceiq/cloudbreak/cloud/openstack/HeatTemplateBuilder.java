@@ -37,7 +37,7 @@ public class HeatTemplateBuilder {
     private String openStackHeatTemplatePath;
 
     @Inject
-    private OpenStackUtil openStackUtil;
+    private OpenStackHeatUtils openStackUtil;
     @Inject
     private Configuration freemarkerConfiguration;
 

@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Instance;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
-import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -76,13 +75,14 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
         Network network = new Network(subnet);
         network.putParameter("publicNetId", openStackNetwork.getPublicNetId());
 
-        Security security = new Security();
-        for (com.sequenceiq.cloudbreak.domain.Subnet cbSubNet : stack.getAllowedSubnets()) {
-            Subnet sn = new Subnet(cbSubNet.getCidr());
-            security.addAllowedSubnet(sn);
-        }
+        //FIXME
+        //Security security = new Security();
+        //for (com.sequenceiq.cloudbreak.domain.Subnet cbSubNet : stack.getAllowedSubnets()) {
+        //    Subnet sn = new Subnet(cbSubNet.getCidr());
+        //    security.addAllowedSubnet(sn);
+        //}
 
-        CloudStack cloudStack = new CloudStack(groups, network, security, image);
+        CloudStack cloudStack = new CloudStack(groups, network, null, image);
         Promise<LaunchStackResult> promise = Promises.prepare();
         LaunchStackRequest launchStackRequest = new LaunchStackRequest(stackContext, cloudCredential, cloudStack, promise);
 
@@ -148,13 +148,13 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
     }
 
     @Override
-    public boolean startAll(Stack stack) {
-        return false;
+    public void startAll(Stack stack) {
+
     }
 
     @Override
-    public boolean stopAll(Stack stack) {
-        return false;
+    public void stopAll(Stack stack) {
+
     }
 
     @Override
@@ -167,18 +167,32 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
 
     }
 
+    @Override
+    public String getSSHUser() {
+        return null;
+    }
+
+    @Override
+    public Set<String> getSSHFingerprints(Stack stack, String gateway) {
+        return null;
+    }
+
     public List<Group> getGroups(Stack stack) {
         List<Group> groups = new ArrayList<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            Group group = new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType());
-            OpenStackTemplate openStackTemplate = (OpenStackTemplate) instanceGroup.getTemplate();
-            Instance instance = new Instance(openStackTemplate.getInstanceType());
 
-            for (int i = 0; i < openStackTemplate.getVolumeCount(); i++) {
-                Volume volume = new Volume("/hadoop/fs" + i, "HDD", openStackTemplate.getVolumeSize());
-                instance.addVolume(volume);
+            Group group = new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType());
+
+            for (int nodeId = 0; nodeId < instanceGroup.getNodeCount(); nodeId++) {
+                OpenStackTemplate openStackTemplate = (OpenStackTemplate) instanceGroup.getTemplate();
+                Instance instance = new Instance(openStackTemplate.getInstanceType(), group.getName(), nodeId);
+
+                for (int i = 0; i < openStackTemplate.getVolumeCount(); i++) {
+                    Volume volume = new Volume("/hadoop/fs" + i, "HDD", openStackTemplate.getVolumeSize());
+                    instance.addVolume(volume);
+                }
+                group.addInstance(instance);
             }
-            group.addInstance(instance);
             groups.add(group);
         }
         return groups;

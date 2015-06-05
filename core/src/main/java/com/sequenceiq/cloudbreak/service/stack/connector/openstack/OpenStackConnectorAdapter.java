@@ -67,13 +67,13 @@ public class OpenStackConnectorAdapter implements CloudPlatformConnector {
     }
 
     @Override
-    public boolean startAll(Stack stack) {
-        return openStackConnector.startAll(stack);
+    public void startAll(Stack stack) {
+        openStackConnector.startAll(stack);
     }
 
     @Override
-    public boolean stopAll(Stack stack) {
-        return openStackConnector.stopAll(stack);
+    public void stopAll(Stack stack) {
+        openStackConnector.stopAll(stack);
     }
 
     @Override
@@ -84,5 +84,15 @@ public class OpenStackConnectorAdapter implements CloudPlatformConnector {
     @Override
     public void updateAllowedSubnets(Stack stack, String gateWayUserData, String coreUserData) {
         openStackConnector.updateAllowedSubnets(stack, gateWayUserData, coreUserData);
+    }
+
+    @Override
+    public String getSSHUser() {
+        return openStackConnector.getSSHUser();
+    }
+
+    @Override
+    public Set<String> getSSHFingerprints(Stack stack, String gateway) {
+        return openStackConnector.getSSHFingerprints(stack, gateway);
     }
 }

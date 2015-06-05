@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.flow.FingerprintParserUtil;
 
@@ -59,20 +58,28 @@ public class OpenStackConnector {
 
     @Inject
     private OpenStackUtil openStackUtil;
+
     @Inject
     private HeatTemplateBuilder heatTemplateBuilder;
+
     @Inject
     private StackUpdater stackUpdater;
+
     @Inject
     private UserDataBuilder userDataBuilder;
+
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
+
     @Inject
     private PollingService<OpenStackContext> pollingService;
+
     @Inject
     private OpenStackHeatStackStatusCheckerTask openStackHeatStackStatusCheckerTask;
+
     @Inject
     private OpenStackHeatStackDeleteStatusCheckerTask openStackHeatStackDeleteStatusCheckerTask;
+
     @Inject
     private OpenStackInstanceStatusCheckerTask openStackInstanceStatusCheckerTask;
     @Inject
@@ -165,8 +172,7 @@ public class OpenStackConnector {
     public void startAll(Stack stack) {
         setStackState(stack, false);
     }
-    
-    
+
     public void stopAll(Stack stack) {
         setStackState(stack, true);
     }

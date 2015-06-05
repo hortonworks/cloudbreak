@@ -18,12 +18,10 @@ public class OpenStackGroupView {
 
         List<NovaInstanceView> novaInstances = new ArrayList<>();
         for (Group group : groups) {
-            int index = 0;
             for (Instance instance : group.getInstances()) {
-                NovaInstanceView novaInstance = new NovaInstanceView(instance, group.getType(), group.getName(), index);
+                NovaInstanceView novaInstance = new NovaInstanceView(instance, group.getType());
                 novaInstances.add(novaInstance);
             }
-            index++;
         }
         return novaInstances;
     }
