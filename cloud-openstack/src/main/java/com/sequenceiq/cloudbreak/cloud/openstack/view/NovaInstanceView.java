@@ -9,7 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.cloud.model.Instance;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackUtil;
+import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackHeatUtils;
 import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 
 public class NovaInstanceView {
@@ -18,15 +18,9 @@ public class NovaInstanceView {
 
     private InstanceGroupType type;
 
-    private String groupName;
-
-    private int privateId;
-
-    public NovaInstanceView(Instance instance, InstanceGroupType type, String groupName, int privateId) {
+    public NovaInstanceView(Instance instance, InstanceGroupType type) {
         this.instance = instance;
         this.type = type;
-        this.groupName = groupName;
-        this.privateId = privateId;
     }
 
     public String getFlavor() {
@@ -38,11 +32,11 @@ public class NovaInstanceView {
     }
 
     public String getInstanceId() {
-        return groupName.replaceAll("_", "") + "_" + privateId;
+        return instance.getGroupName().replaceAll("_", "") + "_" + instance.getPrivateId();
     }
 
     public int getPrivateId() {
-        return privateId;
+        return instance.getPrivateId();
     }
 
     public List<CinderVolumeView> getVolumes() {
@@ -66,8 +60,8 @@ public class NovaInstanceView {
 
     private Map<String, String> generateMetadata() {
         Map<String, String> metadata = new HashMap<>();
-        metadata.put(OpenStackUtil.CB_INSTANCE_GROUP_NAME, groupName);
-        metadata.put(OpenStackUtil.CB_INSTANCE_PRIVATE_ID, "" + privateId);
+        metadata.put(OpenStackHeatUtils.CB_INSTANCE_GROUP_NAME, instance.getGroupName());
+        metadata.put(OpenStackHeatUtils.CB_INSTANCE_PRIVATE_ID, Integer.toString(instance.getPrivateId()));
         return metadata;
     }
 

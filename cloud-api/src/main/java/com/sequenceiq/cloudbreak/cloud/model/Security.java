@@ -68,7 +68,6 @@ public class Security {
         for (Subnet net : allowedSubnets) {
             rules.add(new EndpointRule(EndpointRule.Action.PERMIT.getText(), net.getCidr()));
         }
-        rules.add(EndpointRule.INTERNAL_RULE);
         rules.add(EndpointRule.DENY_RULE);
         return rules;
     }
