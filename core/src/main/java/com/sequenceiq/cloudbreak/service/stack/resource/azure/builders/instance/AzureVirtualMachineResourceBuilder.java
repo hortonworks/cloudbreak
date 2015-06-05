@@ -307,11 +307,11 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
 
     private class SshKey {
         private String fingerPrint;
-        private String PublicKeyPath;
+        private String publicKeyPath;
 
         public SshKey(String fingerPrint, String publicKeyPath) {
             this.fingerPrint = fingerPrint;
-            this.PublicKeyPath = publicKeyPath;
+            this.publicKeyPath = publicKeyPath;
         }
 
         public String getFingerPrint() {
@@ -319,7 +319,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         }
 
         public String getPublicKeyPath() {
-            return PublicKeyPath;
+            return publicKeyPath;
         }
     }
 

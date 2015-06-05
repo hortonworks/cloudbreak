@@ -31,8 +31,10 @@ public class UserDataBuilderTest {
 
     @Test
     public void testBuildUserDataAzure() throws IOException {
+        String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-init.sh");
         String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-init.sh");
-        Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(CloudPlatform.AZURE, null, null);
+        Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(CloudPlatform.AZURE, "ssh-rsa test", "cloudbreak");
+        Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
         Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
     }
 

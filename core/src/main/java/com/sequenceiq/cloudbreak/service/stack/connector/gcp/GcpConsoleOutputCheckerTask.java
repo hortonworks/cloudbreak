@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.gcp;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -17,10 +18,12 @@ public class GcpConsoleOutputCheckerTask extends StackBasedStatusCheckerTask<Gcp
         try {
             SerialPortOutput execute = consoleOutputContext.getSerialPortOutput().execute();
             if (execute != null) {
-                String[] split = execute.getContents().split("cb: -----BEGIN SSH HOST KEY FINGERPRINTS-----|cb: -----END SSH HOST KEY FINGERPRINTS-----");
-                if (split.length > 3) {
-                    return true;
+                String consoleOutput = execute.getContents();
+                if (StringUtils.isEmpty(consoleOutput) || !consoleOutput.contains("cb: -----END SSH HOST KEY FINGERPRINTS-----")) {
+                    LOGGER.info("Console output is not ready yet for gateway instance");
+                    return false;
                 }
+                return true;
             }
         } catch (Exception e) {
             LOGGER.warn("Console output is not yet available.");

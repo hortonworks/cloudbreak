@@ -4,8 +4,8 @@ set -x
 START_LABEL=98
 PLATFORM_DISK_PREFIX=sd
 
-start_proxy() {
-  docker run --name gateway -d --net=host --restart=always sequenceiq/cb-gateway-nginx:0.1
+setup_tmp_ssh() {
+  echo "ssh-rsa test" >> /home/cloudbreak/.ssh/authorized_keys
 }
 
 get_ip() {
@@ -28,6 +28,12 @@ configure_docker() {
   service docker restart
 }
 
+print_ssh_fingerprint() {
+    echo "cb: -----BEGIN SSH HOST KEY FINGERPRINTS-----"
+    echo "cb: $(ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub)"
+    echo "cb: -----END SSH HOST KEY FINGERPRINTS-----"
+}
+
 format_disks() {
   mkdir /hadoopfs
   for (( i=1; i<=24; i++ )); do
@@ -46,13 +52,11 @@ main() {
     shift
     eval "$@"
   elif [ ! -f "/var/cb-init-executed" ]; then
+    print_ssh_fingerprint
     format_disks
     fix_hostname
     configure_docker
-    MAX_RETRIES=60
-    retries=0
-    while ((retries++ < MAX_RETRIES)) && ! docker info &> /dev/null; do echo "Docker is not running yet."; sleep 5; done
-    start_proxy
+    setup_tmp_ssh
     touch /var/cb-init-executed
     echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/cb-init-executed
   fi

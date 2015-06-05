@@ -61,7 +61,7 @@ main() {
     fix_hostname
     configure_docker
     <#if gateway>
-      setup_tmp_ssh
+    setup_tmp_ssh
     </#if>
     touch /var/cb-init-executed
     echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/cb-init-executed

@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.orchestrator;
 
 public class GatewayConfig {
-    
-    String address;
-    String certificateDir;
+
+    private String address;
+    private String certificateDir;
 
     public GatewayConfig(String address, String certificateDir) {
         this.address = address;

@@ -30,9 +30,9 @@ import com.sequenceiq.cloudbreak.service.stack.resource.gcp.builders.GcpResource
 
 @Service
 public class GcpConnector implements CloudPlatformConnector {
+    protected static final int POLLING_INTERVAL = 5000;
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpConnector.class);
     private static final int CONSOLE_OUTPUT_POLLING_ATTEMPTS = 120;
-    protected static final int POLLING_INTERVAL = 5000;
 
     @Inject
     private GcpResourceBuilderInit gcpResourceBuilderInit;
