@@ -151,7 +151,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
 
     private Optional<Port> getPortForService(ExposedService exposedService, List<Port> ports) {
         for (Port port : ports) {
-            if (port.getExposedService().getServiceName().equals(exposedService)) {
+            if (port.getExposedService().getServiceName().equals(exposedService.getServiceName())) {
                 return Optional.fromNullable(port);
             }
         }
