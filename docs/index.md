@@ -187,21 +187,21 @@ At high level the supported list of components can be grouped into main categori
 
 We provide a list of default Hadoop cluster Blueprints for your convenience, however you can always build and use your own Blueprint.
 
-1. hdp-small-default - HDP 2.2 blueprint
+* hdp-small-default - HDP 2.2 blueprint
 
 This is a complex [Blueprint](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/core/src/main/resources/defaults/blueprints/hdp-small-default.bp) which allows you to launch a multi node, fully distributed HDP 2.2 Cluster in the cloud.
 
 It allows you to use the following services: HDFS, YARN, MAPREDUCE2, KNOX, HBASE, HIVE, HCATALOG, WEBHCAT, SLIDER, OOZIE, PIG, SQOOP, METRICS, TEZ, FALCON, ZOOKEEPER.
 
-2. hdp-streaming-cluster - HDP 2.2 blueprint
+* hdp-streaming-cluster - HDP 2.2 blueprint
 
 This is a streaming [Blueprint](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/core/src/main/resources/defaults/blueprints/hdp-streaming-cluster.bp) which allows you to launch a multi node, fully distributed HDP 2.2 Cluster in the cloud, optimized for streaming jobs.
 
 It allows you to use the following services: HDFS, YARN, MAPREDUCE2, STORM, KNOX, HBASE, HIVE, HCATALOG, WEBHCAT, SLIDER, OOZIE, PIG, SQOOP, METRICS, TEZ, FALCON, ZOOKEEPER.
 
-3. hdp-spark-cluster - HDP 2.2 blueprint
+* hdp-spark-cluster - HDP 2.2 blueprint
 
-This is an analytics [Blueprint]https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/core/src/main/resources/defaults/blueprints/hdp-spark-cluster.bp) which allows you to launch a multi node, fully distributed HDP 2.2 Cluster in the cloud, optimized for analytic jobs.
+This is an analytics [Blueprint](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/core/src/main/resources/defaults/blueprints/hdp-spark-cluster.bp) which allows you to launch a multi node, fully distributed HDP 2.2 Cluster in the cloud, optimized for analytic jobs.
 
 It allows you to use the following services: HDFS, YARN, MAPREDUCE2, SPARK, ZEPPELIN, KNOX, HBASE, HIVE, HCATALOG, WEBHCAT, SLIDER, OOZIE, PIG, SQOOP, METRICS, TEZ, FALCON, ZOOKEEPER.
 
