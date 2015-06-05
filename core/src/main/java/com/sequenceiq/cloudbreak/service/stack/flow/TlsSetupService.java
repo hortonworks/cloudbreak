@@ -35,7 +35,7 @@ public class TlsSetupService {
     @Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
-    @Value("${cb.tls.cert.path:" + EnvironmentVariableConfig.CB_TLS_CERT_FILE + "}")
+    @Value("${cb.tls.cert.file:" + EnvironmentVariableConfig.CB_TLS_CERT_FILE + "}")
     private String tlsCertificatePath;
 
     public void setupTls(CloudPlatform cloudPlatform, Stack stack, Map<String, Object> setupProperties) throws CloudbreakException {
