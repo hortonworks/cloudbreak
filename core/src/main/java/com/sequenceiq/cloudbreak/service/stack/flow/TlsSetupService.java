@@ -52,6 +52,7 @@ public class TlsSetupService {
             ssh.authPublickey(connector.getSSHUser(), (String) setupProperties.get(ProvisioningSetupService.SSH_PRIVATE_KEY_PATH));
             ssh.newSCPFileTransfer().upload(tlsCertificatePath, "/tmp/cb-client.pem");
             final Session tlsSetupSession = ssh.startSession();
+            tlsSetupSession.allocateDefaultPTY();
             String tlsSetupScript = FileReaderUtils.readFileFromClasspath("init/tls-setup.sh");
             tlsSetupScript = tlsSetupScript.replace("$PUBLIC_IP", gateway.getPublicIp());
             final Session.Command tlsSetupCmd = tlsSetupSession.exec(tlsSetupScript);
