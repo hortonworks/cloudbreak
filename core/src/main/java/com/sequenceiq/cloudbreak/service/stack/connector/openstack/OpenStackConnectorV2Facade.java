@@ -68,8 +68,8 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
         List<Group> groups = getGroups(stack);
 
         Image image = new Image(stack.getImage());
-        image.putUserData(InstanceGroupType.CORE, "CORE");
-        image.putUserData(InstanceGroupType.GATEWAY, "GATEWAY");
+        image.putUserData(InstanceGroupType.CORE, coreUserData);
+        image.putUserData(InstanceGroupType.GATEWAY, gateWayUserData);
 
         OpenStackNetwork openStackNetwork = (OpenStackNetwork) stack.getNetwork();
         Subnet subnet = new Subnet(openStackNetwork.getSubnetCIDR());

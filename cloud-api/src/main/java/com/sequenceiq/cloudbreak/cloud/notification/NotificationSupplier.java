@@ -17,18 +17,18 @@ import reactor.rx.Promise;
 import reactor.rx.Promises;
 
 @Component
-public class NotificationSupplier implements ResourcePersistenceNotifier {
-
+public class NotificationSupplier implements ResourcePersistenceNotifier<ResourceAllocationPersisted> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationSupplier.class);
 
     @Inject
     private EventBus eventBus;
 
-
     @Override
     public Promise<ResourceAllocationPersisted> notifyResourceAllocation(CloudResource cloudResource, StackContext stackContext) {
+        LOGGER.info("Assembling resource allocation notification. resource: {}, stack context: {}", cloudResource, stackContext);
         Promise<ResourceAllocationPersisted> promise = Promises.prepare();
         ResourceAllocationNotification notification = new ResourceAllocationNotification(cloudResource, stackContext.getStackId(), promise);
+        LOGGER.info("Fireing notification: {}", notification);
         eventBus.notify("ResourceAllocationPersisted", Event.wrap(notification));
         return promise;
     }
