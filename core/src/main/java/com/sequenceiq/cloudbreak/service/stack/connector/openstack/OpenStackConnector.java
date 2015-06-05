@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
+import com.sequenceiq.cloudbreak.service.stack.flow.FingerprintParserUtil;
 
 @Service
 public class OpenStackConnector implements CloudPlatformConnector {
@@ -200,14 +201,11 @@ public class OpenStackConnector implements CloudPlatformConnector {
             throw new OpenStackResourceException("Operation timed out: Couldn't get console output of gateway instance.");
         }
         String consoleOutput = osClient.compute().servers().getConsoleOutput(instanceId, CONSOLE_OUTPUT_LINES);
-        String[] fingerprints = consoleOutput.split("\ncb: -----BEGIN SSH HOST KEY FINGERPRINTS-----|\ncb: -----END SSH HOST KEY FINGERPRINTS-----")[1]
-                .split("\n");
-        for (String fingerprint : fingerprints) {
-            if (fingerprint.contains("(RSA)") && fingerprint.trim().startsWith("cb:")) {
-                return fingerprint.split(" ")[2];
-            }
+        String result = FingerprintParserUtil.parseFingerprint(consoleOutput);
+        if (result == null) {
+            throw new OpenStackResourceException("Couldn't parse SSH fingerprint from console output.");
         }
-        throw new OpenStackResourceException("Couldn't parse SSH fingerprint from console output.");
+        return result;
     }
 
     private PollingResult updateHeatStack(Stack stack, String heatTemplate) {

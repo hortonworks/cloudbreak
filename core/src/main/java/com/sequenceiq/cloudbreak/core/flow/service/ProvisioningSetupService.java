@@ -12,10 +12,10 @@ import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -51,7 +51,7 @@ public class ProvisioningSetupService {
     @Value("${cb.tls.private.key.file:" + CB_TLS_PRIVATE_KEY_FILE + "}")
     private String clientPrivateKey;
 
-    @Autowired
+    @Inject
     private StackRepository stackRepository;
 
     @Resource

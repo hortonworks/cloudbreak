@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +18,7 @@ public class ConsoleOutputCheckerTask extends StackBasedStatusCheckerTask<Consol
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleOutputCheckerTask.class);
 
-    @Autowired
+    @Inject
     private AwsStackUtil awsStackUtil;
 
     @Override
