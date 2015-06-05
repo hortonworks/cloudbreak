@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.service.stack.resource.azure.builders.AzureReso
 public class AzureConnector implements CloudPlatformConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureConnector.class);
     private static final int AZURE_THUMBPRINT_POLLING_ATTEMPTS = 120;
-    protected static final int POLLING_INTERVAL = 5000;
+    protected static final int POLLING_INTERVAL = 8000;
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Inject

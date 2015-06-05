@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,6 +13,7 @@ import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
 public class AzureThumbprintChecker extends StackBasedStatusCheckerTask<AzureThumbprintCheckerContext> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureThumbprintChecker.class);
 
     @Inject
     private AzureStackUtil azureStackUtil;
@@ -24,10 +27,12 @@ public class AzureThumbprintChecker extends StackBasedStatusCheckerTask<AzureThu
             JsonNode actualObj = azureThumbprintCheckerContext.getMapper().readValue((String) virtualMachine, JsonNode.class);
             String tmpFingerPrint = actualObj.get("Deployment").get("RoleInstanceList").get("RoleInstance").get("RemoteAccessCertificateThumbprint").asText();
             if (tmpFingerPrint == null) {
+                LOGGER.warn("Azure thumbprint not found on {} instance", azureThumbprintCheckerContext.getResource().getResourceName());
                 return false;
             }
             return true;
         } catch (Exception ex) {
+            LOGGER.warn("Azure thumbprint not found on {} instance", azureThumbprintCheckerContext.getResource().getResourceName());
             return false;
         }
     }
