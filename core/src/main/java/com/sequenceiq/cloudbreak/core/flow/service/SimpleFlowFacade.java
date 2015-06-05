@@ -114,7 +114,7 @@ public class SimpleFlowFacade implements FlowFacade {
         try {
             return stackFacade.setupConsulMetadata(context);
         } catch (Exception e) {
-            LOGGER.error("Exception during Consul metadata setup.", e);
+            LOGGER.error("Exception during Consul metadata setup.", e.getMessage());
             throw new CloudbreakException(e);
         }
     }
@@ -125,7 +125,7 @@ public class SimpleFlowFacade implements FlowFacade {
         try {
             return clusterFacade.runClusterContainers(context);
         } catch (Exception e) {
-            LOGGER.error("Exception while setting up cluster containers.", e);
+            LOGGER.error("Exception while setting up cluster containers.", e.getMessage());
             throw new CloudbreakException(e);
         }
     }
@@ -136,7 +136,7 @@ public class SimpleFlowFacade implements FlowFacade {
         try {
             return clusterFacade.startAmbari(context);
         } catch (Exception e) {
-            LOGGER.error("Exception while starting Ambari :", e);
+            LOGGER.error("Exception while starting Ambari :", e.getMessage());
             throw new CloudbreakException(e);
         }
     }
@@ -149,7 +149,7 @@ public class SimpleFlowFacade implements FlowFacade {
             LOGGER.debug("Building ambari cluster DONE");
             return context;
         } catch (Exception e) {
-            LOGGER.error("Exception during the cluster build process: ", e);
+            LOGGER.error("Exception during the cluster build process: ", e.getMessage());
             throw new CloudbreakException(e);
         }
     }

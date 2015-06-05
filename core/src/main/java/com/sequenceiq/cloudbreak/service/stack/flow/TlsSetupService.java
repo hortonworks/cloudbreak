@@ -29,7 +29,7 @@ public class TlsSetupService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TlsSetupService.class);
 
     private static final int SSH_PORT = 22;
-    private static final int TLS_SETUP_TIMEOUT = 60;
+    private static final int TLS_SETUP_TIMEOUT = 180;
     private static final int REMOVE_SSH_KEY_TIMEOUT = 5;
 
     @Resource
