@@ -50,6 +50,8 @@ public abstract class AzureResourceStatusCheckerTask extends SimpleStatusChecker
                     LOGGER.warn("{}: {} happened during operation status check, the polling result will be false.", ex.getClass(), ex.getMessage());
                     result = false;
                     break;
+                } else {
+                    throw ex;
                 }
             }
         }
