@@ -88,7 +88,7 @@
                         </form>
                         <div class="panel panel-default" >
                                 <div class="panel-heading">
-                                    <h5><a data-toggle="collapse" data-target="#cluster-exposed-ports-collapse01"><i class="fa fa-link fa-fw"></i>Hadoop services</a></h5>
+                                    <h5><a data-toggle="collapse" data-target="#cluster-exposed-ports-collapse01"><i class="fa fa-link fa-fw"></i>Services</a></h5>
                                 </div>
 
                                 <div id="cluster-exposed-ports-collapse01" class="panel-collapse collapse">
