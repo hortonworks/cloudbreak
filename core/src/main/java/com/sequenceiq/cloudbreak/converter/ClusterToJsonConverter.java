@@ -107,8 +107,10 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                     collectServicePorts(result, ports, next, componentDescriptor);
                 }
             }
-            collectLoggingPorts(ambariIp, result, ports);
-            collectAdditionalPorts(ambariIp, result, ports);
+            if (ambariIp != null) {
+                collectLoggingPorts(ambariIp, result, ports);
+                collectAdditionalPorts(ambariIp, result, ports);
+            }
         } catch (Exception ex) {
             return result;
         }
