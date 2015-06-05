@@ -5,6 +5,9 @@ import java.util.regex.Pattern;
 
 public class FingerprintParserUtil {
 
+    private FingerprintParserUtil() {
+    }
+
     public static String parseFingerprint(String log) {
         String[] fingerprints = log.split("cb: -----BEGIN SSH HOST KEY FINGERPRINTS-----|cb: -----END SSH HOST KEY FINGERPRINTS-----")[2].split("\n");
         for (String fingerprint : fingerprints) {
