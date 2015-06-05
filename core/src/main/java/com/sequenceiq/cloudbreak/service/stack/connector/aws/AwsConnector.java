@@ -102,6 +102,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstances;
+import com.sequenceiq.cloudbreak.service.stack.flow.FingerprintParserUtil;
 
 @Service
 public class AwsConnector implements CloudPlatformConnector {
@@ -348,14 +349,11 @@ public class AwsConnector implements CloudPlatformConnector {
         }
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(consoleOutputContext.getStack());
         String consoleOutput = amazonEC2Client.getConsoleOutput(new GetConsoleOutputRequest().withInstanceId(gatewayId)).getDecodedOutput();
-        String[] fingerprints = consoleOutput.split("\ncb: -----BEGIN SSH HOST KEY FINGERPRINTS-----|\ncb: -----END SSH HOST KEY FINGERPRINTS-----")[1]
-                .split("\n");
-        for (String fingerprint : fingerprints) {
-            if (fingerprint.contains("(RSA)") && fingerprint.trim().startsWith("cb:")) {
-                return fingerprint.split(" ")[2];
-            }
+        String result = FingerprintParserUtil.parseFingerprint(consoleOutput);
+        if (result == null) {
+            throw new AwsResourceException("Couldn't parse SSH fingerprint from console output.");
         }
-        throw new AwsResourceException("Couldn't parse SSH fingerprint from console output.");
+        return result;
     }
 
     @Override

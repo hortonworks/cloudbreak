@@ -4,8 +4,6 @@ import static com.sequenceiq.cloudbreak.domain.ResourceType.GCP_INSTANCE;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -27,6 +25,7 @@ import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.ParallelCloudResourceManager;
+import com.sequenceiq.cloudbreak.service.stack.flow.FingerprintParserUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.builders.GcpResourceBuilderInit;
 
 @Service
@@ -105,7 +104,6 @@ public class GcpConnector implements CloudPlatformConnector {
 
     @Override
     public String getSSHFingerprint(Stack stack, String gateway) {
-        String result = "";
         try {
             GcpCredential credential = (GcpCredential) stack.getCredential();
             Compute compute = gcpStackUtil.buildCompute(credential, stack);
@@ -121,21 +119,15 @@ public class GcpConnector implements CloudPlatformConnector {
             } else if (PollingResult.isTimeout(pollingResult)) {
                 throw new GcpResourceException("Operation timed out: Couldn't get console output of gateway instance.");
             }
-            String[] fingerprints = instanceGet.execute().getContents()
-                    .split("cb: -----BEGIN SSH HOST KEY FINGERPRINTS-----|cb: -----END SSH HOST KEY FINGERPRINTS-----")[2]
-                    .split("\n");
-            for (String fingerprint : fingerprints) {
-                Pattern fingerprintPattern = Pattern.compile("([a-f0-9]{2}:){15,}[a-f0-9]{2}");
-                Matcher m = fingerprintPattern.matcher(fingerprint);
-                if (m.find()) {
-                    result = m.group(0);
-                    break;
-                }
+            String consoleOutput = instanceGet.execute().getContents();
+            String result = FingerprintParserUtil.parseFingerprint(consoleOutput);
+            if (result == null) {
+                throw new GcpResourceException("Couldn't parse SSH fingerprint from console output.");
             }
+            return result;
         } catch (Exception e) {
-            throw new GcpResourceException("Couldn't parse SSH fingerprint from console output.");
+            throw new GcpResourceException("Couldn't parse SSH fingerprint from console output.", e);
         }
-        return result;
     }
 
 }
