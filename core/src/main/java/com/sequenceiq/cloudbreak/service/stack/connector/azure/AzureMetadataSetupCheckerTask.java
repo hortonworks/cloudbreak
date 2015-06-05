@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
+import groovyx.net.http.HttpResponseException;
+
 @Component
 public class AzureMetadataSetupCheckerTask extends StackBasedStatusCheckerTask<AzureMetadataSetupCheckerTaskContext> {
 
@@ -17,6 +19,16 @@ public class AzureMetadataSetupCheckerTask extends StackBasedStatusCheckerTask<A
             azureMetadataSetupCheckerTaskContext.getAzureClient().getVirtualMachine(azureMetadataSetupCheckerTaskContext.getProps());
             return true;
         } catch (Exception ex) {
+            if (ex instanceof HttpResponseException) {
+                HttpResponseException e = (HttpResponseException) ex;
+                String message = "";
+                if (e.getResponse() != null && e.getResponse().getData() != null) {
+                    message = e.getResponse().getData().toString();
+                }
+                LOGGER.warn("Virtual machine is not yet available: {}, status code: {}, message: {}", e.getMessage(), e.getStatusCode(), message);
+            } else {
+                LOGGER.warn("Virtual machine is not yet available: {}", ex.getMessage());
+            }
             return false;
         }
     }
