@@ -149,7 +149,7 @@ public class SimpleStackFacade implements StackFacade {
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
 
         } catch (Exception e) {
-            LOGGER.error("Exception during the consul metadata setup process.", e);
+            LOGGER.error("Exception during the consul metadata setup process.", e.getMessage());
             throw new CloudbreakException(e);
         }
         return context;
@@ -167,7 +167,7 @@ public class SimpleStackFacade implements StackFacade {
             logAfter(actualContext.getStackId(), context, "Starting infrastructure", AVAILABLE);
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
         } catch (Exception e) {
-            LOGGER.error("Exception during the stack start process.", e);
+            LOGGER.error("Exception during the stack start process.", e.getMessage());
             throw new CloudbreakException(e);
         }
         return context;
@@ -446,7 +446,7 @@ public class SimpleStackFacade implements StackFacade {
                 msg = String.format("Failed to update security constraints with allowed subnets: %s; stack is already in deletion phase.",
                         stack.getAllowedSubnets());
             }
-            LOGGER.error(msg, e);
+            LOGGER.error(msg, e.getMessage());
             throw new CloudbreakException(e);
         }
         return context;
