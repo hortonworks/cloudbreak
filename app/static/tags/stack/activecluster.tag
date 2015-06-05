@@ -321,7 +321,7 @@
                             <button type="button" class="btn btn-block btn-default" data-dismiss="modal">cancel</button>
                         </div>
                         <div class="col-xs-6">
-                            <button type="button" class="btn btn-block btn-success" data-dismiss="modal" id="stackStackBtn" ng-click="syncCluster(activeCluster)"><i class="fa fa-play fa-fw"></i>sync</button>
+                            <button type="button" class="btn btn-block btn-info" data-dismiss="modal" id="stackStackBtn" ng-click="syncCluster(activeCluster)"><i class="fa fa-refresh fa-fw"></i>sync</button>
                         </div>
                     </div>
                 </div>
