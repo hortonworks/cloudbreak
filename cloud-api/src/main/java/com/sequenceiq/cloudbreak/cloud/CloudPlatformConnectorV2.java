@@ -17,13 +17,20 @@ public interface CloudPlatformConnectorV2 {
 
     String getCloudPlatform();
 
+    // Resources
+
     AuthenticatedContext authenticate(StackContext stackContext, CloudCredential cloudCredential);
 
-    List<CloudResourceStatus> launchStack(AuthenticatedContext authenticatedContext, CloudStack stack, ResourcePersistenceNotifier notifier);
+    List<CloudResourceStatus> launchResources(AuthenticatedContext authenticatedContext, CloudStack stack, ResourcePersistenceNotifier notifier);
 
     List<CloudResourceStatus> checkResourcesState(AuthenticatedContext authenticatedContext, List<CloudResource> resources);
 
-    List<CloudResourceStatus> terminateStack(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources);
+    List<CloudResourceStatus> terminateResources(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources);
+
+    //e.g. security rules
+    List<CloudResourceStatus> updateResources(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources);
+
+    // VM
 
     List<CloudVmInstanceStatus> collectVmMetadata(AuthenticatedContext authenticatedContext, List<CloudResource> resources);
 
@@ -35,7 +42,5 @@ public interface CloudPlatformConnectorV2 {
 
     List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, List<Instance> vms);
 
-    //e.g. security rules
-    List<CloudResourceStatus> updateResources(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources);
 
 }

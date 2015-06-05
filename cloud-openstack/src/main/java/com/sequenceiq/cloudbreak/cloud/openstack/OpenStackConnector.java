@@ -57,7 +57,7 @@ public class OpenStackConnector implements CloudPlatformConnectorV2 {
 
 
     @Override
-    public List<CloudResourceStatus> launchStack(AuthenticatedContext authenticatedContext, CloudStack stack, ResourcePersistenceNotifier notifier) {
+    public List<CloudResourceStatus> launchResources(AuthenticatedContext authenticatedContext, CloudStack stack, ResourcePersistenceNotifier notifier) {
         String stackName = authenticatedContext.getStackContext().getStackName();
         String heatTemplate = heatTemplateBuilder.build(stackName, stack.getGroups(), stack.getNetwork(),
                 stack.getSecurity(), stack.getImage());
@@ -78,7 +78,7 @@ public class OpenStackConnector implements CloudPlatformConnectorV2 {
             promise.await();
         } catch (Exception e) {
             //Rollback
-            terminateStack(authenticatedContext, Arrays.asList(cloudResource));
+            terminateResources(authenticatedContext, Arrays.asList(cloudResource));
         }
 
         List<CloudResourceStatus> resources = checkResourcesState(authenticatedContext, Arrays.asList(cloudResource));
@@ -110,7 +110,7 @@ public class OpenStackConnector implements CloudPlatformConnectorV2 {
     }
 
     @Override
-    public List<CloudResourceStatus> terminateStack(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
+    public List<CloudResourceStatus> terminateResources(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
 
         for (CloudResource resource : resources) {
             switch (resource.getType()) {
