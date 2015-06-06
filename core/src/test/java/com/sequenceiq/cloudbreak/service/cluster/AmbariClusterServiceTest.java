@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -35,6 +36,8 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -88,6 +91,9 @@ public class AmbariClusterServiceTest {
     @Mock
     private InstanceMetaDataRepository instanceMetadataRepository;
 
+    @Mock
+    private SimpleSecurityService simpleSecurityService;
+
     @Captor
     private ArgumentCaptor<Event<UpdateAmbariHostsRequest>> eventCaptor;
 
@@ -103,7 +109,7 @@ public class AmbariClusterServiceTest {
     private Cluster cluster;
 
     @Before
-    public void setUp() {
+    public void setUp() throws CloudbreakSecuritySetupException {
         underTest = new AmbariClusterService();
         MockitoAnnotations.initMocks(this);
         cluster = createCluster();
@@ -113,6 +119,7 @@ public class AmbariClusterServiceTest {
         given(stackRepository.findById(anyLong())).willReturn(stack);
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(stackRepository.findOne(anyLong())).willReturn(stack);
+        given(simpleSecurityService.buildTLSClientConfig(anyLong(), anyString())).willReturn(new TLSClientConfig("", "/tmp"));
     }
 
     @Test(expected = BadRequestException.class)
@@ -125,7 +132,7 @@ public class AmbariClusterServiceTest {
     }
 
     @Test(expected = BadRequestException.class)
-    public void testUpdateHostsDoesntAcceptZeroScalingAdjustments() throws HttpResponseException {
+    public void testUpdateHostsDoesntAcceptZeroScalingAdjustments() throws Exception {
         // GIVEN
         HostGroupAdjustmentJson hga1 = new HostGroupAdjustmentJson();
         hga1.setHostGroup("slave_1");
@@ -135,7 +142,7 @@ public class AmbariClusterServiceTest {
     }
 
     @Test(expected = BadRequestException.class)
-    public void testUpdateHostsDoesntAcceptScalingAdjustmentsWithDifferentSigns() throws HttpResponseException {
+    public void testUpdateHostsDoesntAcceptScalingAdjustmentsWithDifferentSigns() throws Exception {
         // GIVEN
         HostGroupAdjustmentJson hga1 = new HostGroupAdjustmentJson();
         hga1.setHostGroup("slave_1");
@@ -145,7 +152,7 @@ public class AmbariClusterServiceTest {
     }
 
     @Test
-    public void testUpdateHostsForDownscaleFilterAllHosts() throws ConnectException {
+    public void testUpdateHostsForDownscaleFilterAllHosts() throws ConnectException, CloudbreakSecuritySetupException {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
@@ -175,7 +182,7 @@ public class AmbariClusterServiceTest {
     }
 
     @Test
-    public void testUpdateHostsForDownscaleCannotGoBelowReplication() throws ConnectException {
+    public void testUpdateHostsForDownscaleCannotGoBelowReplication() throws ConnectException, CloudbreakSecuritySetupException {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
@@ -207,7 +214,7 @@ public class AmbariClusterServiceTest {
 
     @Test
     @Ignore("Rewrite the test not to use reactor!")
-    public void testUpdateHostsForDownscaleFilterOneHost() throws ConnectException {
+    public void testUpdateHostsForDownscaleFilterOneHost() throws ConnectException, CloudbreakSecuritySetupException {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
@@ -260,7 +267,7 @@ public class AmbariClusterServiceTest {
 
     @Test
     @Ignore("Rewrite test not to use reactor!")
-    public void testUpdateHostsForDownscaleSelectNodesWithLessData() throws ConnectException {
+    public void testUpdateHostsForDownscaleSelectNodesWithLessData() throws ConnectException, CloudbreakSecuritySetupException {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
@@ -308,7 +315,7 @@ public class AmbariClusterServiceTest {
 
     @Test
     @Ignore("Not to use reactor")
-    public void testUpdateHostsForDownscaleSelectMultipleNodesWithLessData() throws ConnectException {
+    public void testUpdateHostsForDownscaleSelectMultipleNodesWithLessData() throws Exception {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-2);
@@ -362,7 +369,7 @@ public class AmbariClusterServiceTest {
     }
 
     @Test
-    public void testUpdateHostsForDownscaleWhenRemainingSpaceIsNotEnough() throws ConnectException {
+    public void testUpdateHostsForDownscaleWhenRemainingSpaceIsNotEnough() throws Exception {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);

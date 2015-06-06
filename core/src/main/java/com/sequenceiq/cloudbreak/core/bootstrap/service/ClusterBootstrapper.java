@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.orchestrator.Node;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
 
 @Component
 public class ClusterBootstrapper {
@@ -62,6 +63,9 @@ public class ClusterBootstrapper {
     @Inject
     private ContainerOrchestratorResolver containerOrchestratorResolver;
 
+    @Inject
+    private SimpleSecurityService simpleSecurityService;
+
     public void bootstrapCluster(ProvisioningContext provisioningContext) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
@@ -72,7 +76,7 @@ public class ClusterBootstrapper {
             nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp()));
         }
         try {
-            GatewayConfig gatewayConfig = new GatewayConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
+            GatewayConfig gatewayConfig = simpleSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIp());
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
             bootstrapApiPollingService.pollWithTimeout(
                     bootstrapApiCheckerTask,
@@ -122,7 +126,7 @@ public class ClusterBootstrapper {
             }
         }
         try {
-            GatewayConfig gatewayConfig = new GatewayConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
+            GatewayConfig gatewayConfig = simpleSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIp());
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
             List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIp());
             for (int i = 0; i < nodeMap.size(); i++) {

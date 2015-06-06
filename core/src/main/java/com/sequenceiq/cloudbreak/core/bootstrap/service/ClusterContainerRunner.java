@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
 import com.sequenceiq.cloudbreak.orchestrator.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.Node;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
 
 @Component
@@ -72,6 +73,9 @@ public class ClusterContainerRunner {
     @Inject
     private ContainerOrchestratorResolver containerOrchestratorResolver;
 
+    @Inject
+    private SimpleSecurityService simpleSecurityService;
+
     public void runClusterContainers(ProvisioningContext provisioningContext) throws CloudbreakException {
         ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
         String cloudPlatform = provisioningContext.getCloudPlatform().name();
@@ -79,7 +83,7 @@ public class ClusterContainerRunner {
         Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        GatewayConfig gatewayConfig = new GatewayConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
+        GatewayConfig gatewayConfig = simpleSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIp());
 
         Set<Node> nodes = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
@@ -120,7 +124,7 @@ public class ClusterContainerRunner {
         Stack stack = stackRepository.findOneWithLists(context.getStackId());
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        GatewayConfig gatewayConfig = new GatewayConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
+        GatewayConfig gatewayConfig = simpleSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIp());
 
         Set<Node> nodes = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
