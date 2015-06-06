@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -31,6 +32,9 @@ public class TerminationService {
 
     @Inject
     private StackRepository stackRepository;
+
+    @Inject
+    private ClusterRepository clusterRepository;
 
     @Inject
     private RetryingStackUpdater retryingStackUpdater;
@@ -57,6 +61,7 @@ public class TerminationService {
             if (cluster != null) {
                 cluster.setName(terminatedName);
                 cluster.setBlueprint(null);
+                clusterRepository.save(cluster);
                 for (HostGroup hostGroup : hostGroupRepository.findHostGroupsInCluster(cluster.getId())) {
                     hostGroup.getRecipes().clear();
                     hostGroupRepository.save(hostGroup);
