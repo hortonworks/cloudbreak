@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -55,7 +56,7 @@ public class AmbariClusterStatusUpdaterTest {
     }
 
     @Test
-    public void testUpdateClusterStatusShouldDoNothingWhenStatusCheckIsNotNecessary() {
+    public void testUpdateClusterStatusShouldDoNothingWhenStatusCheckIsNotNecessary() throws CloudbreakSecuritySetupException {
         // GIVEN
         Stack stack = createStack(Status.STOP_IN_PROGRESS, Status.STOP_REQUESTED);
         // WHEN
@@ -71,7 +72,7 @@ public class AmbariClusterStatusUpdaterTest {
     }
 
     @Test
-    public void testUpdateClusterStatusShouldDoNothingWhenNoClusterGivenInStack() {
+    public void testUpdateClusterStatusShouldDoNothingWhenNoClusterGivenInStack() throws CloudbreakSecuritySetupException {
         // GIVEN
         Stack stack = createStack(Status.AVAILABLE);
         // WHEN
@@ -87,7 +88,7 @@ public class AmbariClusterStatusUpdaterTest {
     }
 
     @Test
-    public void testUpdateClusterStatusShouldDoNothingWhenClusterStatusFactoryReturnsNull() {
+    public void testUpdateClusterStatusShouldDoNothingWhenClusterStatusFactoryReturnsNull() throws CloudbreakSecuritySetupException {
         // GIVEN
         Stack stack = createStack(Status.AVAILABLE, Status.AVAILABLE);
         BDDMockito.given(ambariClientProvider.getAmbariClient(any(TLSClientConfig.class), any(String.class), any(String.class))).willReturn(ambariClient);
@@ -105,7 +106,7 @@ public class AmbariClusterStatusUpdaterTest {
     }
 
     @Test
-    public void testUpdateClusterStatusShouldUpdateStackStatusWhenStackStatusChanged() {
+    public void testUpdateClusterStatusShouldUpdateStackStatusWhenStackStatusChanged() throws CloudbreakSecuritySetupException {
         // GIVEN
         Stack stack = createStack(Status.AVAILABLE, Status.STOPPED);
         AmbariClusterStatus clusterStatus = new AmbariClusterStatus(ClusterStatus.INSTALLED, Status.STOPPED, Status.STOPPED, TEST_REASON);
@@ -122,7 +123,7 @@ public class AmbariClusterStatusUpdaterTest {
     }
 
     @Test
-    public void testUpdateClusterStatusShouldUpdateClusterStatusWhenClusterStatusChanged() {
+    public void testUpdateClusterStatusShouldUpdateClusterStatusWhenClusterStatusChanged() throws CloudbreakSecuritySetupException {
         // GIVEN
         Stack stack = createStack(Status.AVAILABLE, Status.AVAILABLE);
         AmbariClusterStatus clusterStatus = new AmbariClusterStatus(ClusterStatus.INSTALLED, Status.AVAILABLE, Status.STOPPED, TEST_REASON);
@@ -139,7 +140,7 @@ public class AmbariClusterStatusUpdaterTest {
     }
 
     @Test
-    public void testUpdateClusterStatusShouldUpdateStackAndClusterStatusWhenBothChanged() {
+    public void testUpdateClusterStatusShouldUpdateStackAndClusterStatusWhenBothChanged() throws CloudbreakSecuritySetupException {
         // GIVEN
         Stack stack = createStack(Status.AVAILABLE, Status.AVAILABLE);
         AmbariClusterStatus clusterStatus = new AmbariClusterStatus(ClusterStatus.INSTALLED, Status.STOPPED, Status.STOPPED, TEST_REASON);

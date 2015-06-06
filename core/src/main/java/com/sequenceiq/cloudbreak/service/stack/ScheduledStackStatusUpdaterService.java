@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.flow.status.AmbariClusterStatusUpdater;
@@ -25,7 +26,7 @@ public class ScheduledStackStatusUpdaterService {
     private AmbariClusterStatusUpdater clusterStatusUpdater;
 
     @Scheduled(fixedDelayString = "${cb.stack.statuscheck.delay:300000}")
-    public void updateStackStasuses() {
+    public void updateStackStasuses() throws CloudbreakSecuritySetupException {
         Iterable<Stack> stacks = stackRepository.findAll();
         for (Stack stack : stacks) {
             clusterStatusUpdater.updateClusterStatus(stack);

@@ -21,6 +21,8 @@ import com.ecwid.consul.v1.event.model.EventParams;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
@@ -29,8 +31,8 @@ import com.sequenceiq.cloudbreak.orchestrator.DockerContainer;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.PluginFailureException;
-import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
+import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 @Component
 public class ConsulPluginManager implements PluginManager {
@@ -51,6 +53,9 @@ public class ConsulPluginManager implements PluginManager {
 
     @Inject
     private HostMetadataRepository hostMetadataRepository;
+
+    @Inject
+    private SimpleSecurityService simpleSecurityService;
 
     @Override
     public void prepareKeyValues(TLSClientConfig clientConfig, Map<String, String> keyValues) {
@@ -109,9 +114,10 @@ public class ConsulPluginManager implements PluginManager {
     }
 
     @Override
-    public void waitForEventFinish(Stack stack, Collection<InstanceMetaData> instanceMetaData, Map<String, Set<String>> eventIds, Integer timeout) {
+    public void waitForEventFinish(Stack stack, Collection<InstanceMetaData> instanceMetaData, Map<String, Set<String>> eventIds, Integer timeout)
+            throws CloudbreakSecuritySetupException {
         InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
-        TLSClientConfig clientConfig = new TLSClientConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
+        TLSClientConfig clientConfig = simpleSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
         ConsulClient client = ConsulUtils.createClient(clientConfig);
         List<String> keys = generateKeys(eventIds);
         int calculatedMaxAttempt = (timeout * ONE_THOUSAND * SECONDS_IN_MINUTE) / POLLING_INTERVAL;
@@ -123,20 +129,21 @@ public class ConsulPluginManager implements PluginManager {
     }
 
     @Override
-    public void triggerAndWaitForPlugins(Stack stack, ConsulPluginEvent event, Integer timeout, DockerContainer container) {
+    public void triggerAndWaitForPlugins(Stack stack, ConsulPluginEvent event, Integer timeout, DockerContainer container)
+            throws CloudbreakSecuritySetupException {
         triggerAndWaitForPlugins(stack, event, timeout, container, Collections.<String>emptyList(), null);
     }
 
     @Override
     public void triggerAndWaitForPlugins(Stack stack, ConsulPluginEvent event, Integer timeout, DockerContainer container,
-            List<String> payload, Set<String> hosts) {
+            List<String> payload, Set<String> hosts) throws CloudbreakSecuritySetupException {
         Set<InstanceMetaData> instances = stack.getRunningInstanceMetaData();
         Set<String> targetHosts = hosts;
         if (hosts == null || hosts.isEmpty()) {
             targetHosts = getHostnames(hostMetadataRepository.findHostsInCluster(stack.getCluster().getId()));
         }
         InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
-        TLSClientConfig clientConfig = new TLSClientConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
+        TLSClientConfig clientConfig = simpleSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
         Map<String, Set<String>> triggerEventIds =
                 triggerPlugins(clientConfig, event, container, payload, targetHosts);
         Map<String, Set<String>> eventIdMap = new HashMap<>();

@@ -54,6 +54,11 @@ import javax.persistence.Version;
                         + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE c.id= :id"),
         @NamedQuery(
+                name = "Stack.findByIdWithSecurityConfig",
+                query = "SELECT s FROM Stack s "
+                        + "LEFT JOIN FETCH s.securityConfig "
+                        + "WHERE s.id= :id"),
+        @NamedQuery(
                 name = "Stack.findAllStackForTemplate",
                 query = "SELECT c FROM Stack c inner join c.instanceGroups tg "
                         + "LEFT JOIN FETCH c.resources "
@@ -189,7 +194,6 @@ public class Stack implements ProvisionEntity {
     private String statusReason;
     @Enumerated(EnumType.STRING)
     private Status status;
-    private String certDir;
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "key")
     @Column(name = "value", columnDefinition = "TEXT", length = 100000)
@@ -204,6 +208,8 @@ public class Stack implements ProvisionEntity {
     private OnFailureAction onFailureActionAction = OnFailureAction.ROLLBACK;
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private FailurePolicy failurePolicy;
+    @OneToOne(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
+    private SecurityConfig securityConfig;
     @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<InstanceGroup> instanceGroups = new HashSet<>();
     @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -285,14 +291,6 @@ public class Stack implements ProvisionEntity {
         this.credential = credential;
     }
 
-    public String getCertDir() {
-        return certDir;
-    }
-
-    public void setCertDir(String certDir) {
-        this.certDir = certDir;
-    }
-
     public Status getStatus() {
         return status;
     }
@@ -363,6 +361,14 @@ public class Stack implements ProvisionEntity {
 
     public void setFailurePolicy(FailurePolicy failurePolicy) {
         this.failurePolicy = failurePolicy;
+    }
+
+    public SecurityConfig getSecurityConfig() {
+        return securityConfig;
+    }
+
+    public void setSecurityConfig(SecurityConfig securityConfig) {
+        this.securityConfig = securityConfig;
     }
 
     public List<Resource> getResourcesByType(ResourceType resourceType) {
