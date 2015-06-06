@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupJson;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.json.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -120,7 +121,7 @@ public class ClusterController {
     @ApiOperation(value = ClusterOpDescription.PUT_BY_STACK_ID, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES)
     @RequestMapping(value = "/stacks/{stackId}/cluster", method = RequestMethod.PUT)
     @ResponseBody
-    public ResponseEntity<String> updateCluster(@PathVariable Long stackId, @RequestBody UpdateClusterJson updateJson) {
+    public ResponseEntity<String> updateCluster(@PathVariable Long stackId, @RequestBody UpdateClusterJson updateJson) throws CloudbreakSecuritySetupException {
         Stack stack = stackService.get(stackId);
         MDCBuilder.buildMdcContext(stack);
         if (updateJson.getStatus() != null) {

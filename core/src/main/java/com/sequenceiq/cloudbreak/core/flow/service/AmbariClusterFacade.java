@@ -26,6 +26,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterContainerRunner;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
@@ -100,6 +102,9 @@ public class AmbariClusterFacade implements ClusterFacade {
     @Inject
     private ClusterContainerRunner containerRunner;
 
+    @Inject
+    private SimpleSecurityService simpleSecurityService;
+
     @Override
     public FlowContext startAmbari(FlowContext context) throws Exception {
         ProvisioningContext actualContext = (ProvisioningContext) context;
@@ -112,14 +117,8 @@ public class AmbariClusterFacade implements ClusterFacade {
             MDCBuilder.buildMdcContext(cluster);
             stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Ambari cluster is now starting.");
             clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
-<<<<<<< HEAD
-            AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(actualContext.getAmbariIp());
-=======
-
-            logBefore(actualContext.getStackId(), context, "Start ambari cluster", UPDATE_IN_PROGRESS);
-            TLSClientConfig clientConfig = new TLSClientConfig(actualContext.getAmbariIp(), stack.getCertDir());
+            TLSClientConfig clientConfig = simpleSecurityService.buildTLSClientConfig(stack.getId(), actualContext.getAmbariIp());
             AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(clientConfig);
->>>>>>> access ambari through tls
             AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, actualContext.getAmbariIp(), ambariClient);
             PollingResult pollingResult = ambariStartupPollerObjectPollingService
                     .pollWithTimeout(ambariStartupListenerTask, ambariStartupPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -131,15 +130,7 @@ public class AmbariClusterFacade implements ClusterFacade {
                 throw new CloudbreakException(String.format("Could not start Ambari. polling result: '%s',  Context: '%s'", pollingResult, context));
             }
             clusterService.updateAmbariIp(cluster.getId(), actualContext.getAmbariIp());
-<<<<<<< HEAD
-            changeAmbariCredentials(actualContext.getAmbariIp(), cluster);
-=======
-            logAfter(actualContext.getStackId(), context, "Update ambari ip", UPDATE_IN_PROGRESS);
-
-            logBefore(actualContext.getStackId(), context, "Changing ambari credentials", UPDATE_IN_PROGRESS);
             changeAmbariCredentials(actualContext.getAmbariIp(), stack);
-            logAfter(actualContext.getStackId(), context, "Changing ambari credentials", UPDATE_IN_PROGRESS);
->>>>>>> access ambari through tls
         }
         return context;
     }
@@ -428,12 +419,12 @@ public class AmbariClusterFacade implements ClusterFacade {
         return context;
     }
 
-    private void changeAmbariCredentials(String ambariIp, Stack stack) {
+    private void changeAmbariCredentials(String ambariIp, Stack stack) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
         LOGGER.info("Changing ambari credentials for cluster: {}, ambari ip: {}", cluster.getName(), ambariIp);
         String userName = cluster.getUserName();
         String password = cluster.getPassword();
-        TLSClientConfig clientConfig = new TLSClientConfig(cluster.getAmbariIp(), stack.getCertDir());
+        TLSClientConfig clientConfig = simpleSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(clientConfig);
         if (ADMIN.equals(userName)) {
             if (!ADMIN.equals(password)) {

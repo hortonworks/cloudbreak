@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.ecwid.consul.v1.ConsulClient;
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
@@ -52,20 +54,21 @@ public class StackScalingService {
     @Inject
     private AmbariHostsRemover ambariHostsRemover;
     @Inject
+    private InstanceGroupRepository instanceGroupRepository;
+    @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
     @Inject
-    private InstanceGroupRepository instanceGroupRepository;
-
+    private SimpleSecurityService simpleSecurityService;
     @javax.annotation.Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
     public Set<Resource> addInstances(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
-        Set<Resource> resources;
         Stack stack = stackService.getById(stackId);
-        Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(stack.cloudPlatform(), null, null);
-        resources = cloudPlatformConnectors.get(stack.cloudPlatform()).addInstances(stack, userdata.get(InstanceGroupType.GATEWAY),
+        CloudPlatformConnector connector = cloudPlatformConnectors.get(stack.cloudPlatform());
+        Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(stack.cloudPlatform(),
+                simpleSecurityService.readPublicSshKey(stack.getId()), connector.getSSHUser());
+        return connector.addInstances(stack, userdata.get(InstanceGroupType.GATEWAY),
                 userdata.get(InstanceGroupType.CORE), scalingAdjustment, instanceGroupName);
-        return resources;
     }
 
     public void downscaleStack(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
@@ -92,22 +95,23 @@ public class StackScalingService {
         return instanceIds;
     }
 
-    private void deleteHostsFromAmbari(Stack stack, Map<String, String> unregisteredHostNamesByInstanceId) {
+    private void deleteHostsFromAmbari(Stack stack, Map<String, String> unregisteredHostNamesByInstanceId) throws CloudbreakSecuritySetupException {
         if (stack.getCluster() == null) {
             List<String> hostList = new ArrayList<>(unregisteredHostNamesByInstanceId.values());
             ambariHostsRemover.deleteHosts(stack, hostList, new ArrayList<String>());
         }
     }
 
-    private void updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) {
+    private void updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) throws CloudbreakSecuritySetupException {
         int nodeCount = instanceGroup.getNodeCount() - instanceIds.size();
         instanceGroup.setNodeCount(nodeCount);
         instanceGroupRepository.save(instanceGroup);
 
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        TLSClientConfig clientConfig = new TLSClientConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
+        TLSClientConfig clientConfig = simpleSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
         ConsulClient client = ConsulUtils.createClient(clientConfig);
+
         for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
             if (instanceIds.contains(instanceMetaData.getInstanceId())) {
                 long timeInMillis = Calendar.getInstance().getTimeInMillis();

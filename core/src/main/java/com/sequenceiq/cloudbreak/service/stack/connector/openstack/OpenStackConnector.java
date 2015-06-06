@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.flow.FingerprintParserUtil;
@@ -77,6 +79,8 @@ public class OpenStackConnector implements CloudPlatformConnector {
     @Inject
     @Qualifier("openstack")
     private ConsoleOutputCheckerTask consoleOutputCheckerTask;
+    @Inject
+    private SimpleSecurityService simpleSecurityService;
 
     @Override
     public Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties) {
@@ -121,13 +125,18 @@ public class OpenStackConnector implements CloudPlatformConnector {
 
     @Override
     public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
-        Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(stack.cloudPlatform(), null, null);
-        String heatTemplate = heatTemplateBuilder.remove(stack, userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE),
-                instanceMetaDataRepository.findAllInStack(stack.getId()), instanceIds, instanceGroup);
-        PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
-        if (!isSuccess(pollingResult)) {
-            throw new OpenStackResourceException(
-                    String.format("Failed to update Heat stack while removing instances; polling reached an invalid end state: '%s'", pollingResult.name()));
+        try {
+            Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(stack.cloudPlatform(),
+                    simpleSecurityService.readPublicSshKey(stack.getId()), getSSHUser());
+            String heatTemplate = heatTemplateBuilder.remove(stack, userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE),
+                    instanceMetaDataRepository.findAllInStack(stack.getId()), instanceIds, instanceGroup);
+            PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
+            if (!isSuccess(pollingResult)) {
+                throw new OpenStackResourceException(
+                        String.format("Failed to update Heat stack while removing instances; polling reached an invalid end state: '%s'", pollingResult.name()));
+            }
+        } catch (CloudbreakSecuritySetupException e) {
+            throw new OpenStackResourceException("Failed to get temporary ssh public key", e);
         }
         return instanceIds;
     }

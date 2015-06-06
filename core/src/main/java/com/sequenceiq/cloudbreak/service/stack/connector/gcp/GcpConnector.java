@@ -15,9 +15,9 @@ import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.EnvironmentVariableConfig;
 import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.GcpCredential;
-import com.sequenceiq.cloudbreak.domain.GcpZone;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
@@ -110,7 +110,7 @@ public class GcpConnector implements CloudPlatformConnector {
             Resource instance = resourceRepository.findByStackIdAndNameAndType(stack.getId(), gateway, GCP_INSTANCE);
             Compute.Instances.GetSerialPortOutput instanceGet = compute.instances()
                     .getSerialPortOutput(credential.getProjectId(),
-                            GcpZone.valueOf(stack.getRegion()).getValue(), instance.getResourceName());
+                            CloudRegion.valueOf(stack.getRegion()).value(), instance.getResourceName());
             GcpConsoleOutputContext gcpConsoleOutputContext = new GcpConsoleOutputContext(stack, instanceGet);
             PollingResult pollingResult = consoleOutputPollingService
                     .pollWithTimeout(consoleOutputCheckerTask, gcpConsoleOutputContext, POLLING_INTERVAL, CONSOLE_OUTPUT_POLLING_ATTEMPTS);

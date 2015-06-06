@@ -22,6 +22,8 @@ import org.springframework.stereotype.Service;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.catalog.model.CatalogService;
 import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -50,13 +52,16 @@ public class ConsulMetadataSetup {
     @Inject
     private ConsulHostCheckerTask consulHostCheckerTask;
 
-    public void setupConsulMetadata(Long stackId) {
+    @Inject
+    private SimpleSecurityService simpleSecurityService;
+
+    public void setupConsulMetadata(Long stackId) throws CloudbreakSecuritySetupException {
         LOGGER.info("Setting up Consul metadata for the cluster.");
         Stack stack = stackService.getById(stackId);
         Set<InstanceMetaData> allInstanceMetaData = stack.getRunningInstanceMetaData();
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        TLSClientConfig clientConfig = new TLSClientConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
+        TLSClientConfig clientConfig = simpleSecurityService.buildTLSClientConfig(stackId, gatewayInstance.getPublicIp());
         PollingResult pollingResult = waitForConsulAgents(stack, clientConfig, allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
         if (!isSuccess(pollingResult)) {
             throw new WrongMetadataException("Connecting to consul hosts is interrupted.");
@@ -65,12 +70,12 @@ public class ConsulMetadataSetup {
         instanceMetaDataRepository.save(allInstanceMetaData);
     }
 
-    public void setupNewConsulMetadata(Long stackId, Set<String> newAddresses) {
+    public void setupNewConsulMetadata(Long stackId, Set<String> newAddresses) throws CloudbreakSecuritySetupException {
         LOGGER.info("Extending Consul metadata.");
         Stack stack = stackService.getById(stackId);
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        TLSClientConfig clientConfig = new TLSClientConfig(gatewayInstance.getPublicIp(), stack.getCertDir());
+        TLSClientConfig clientConfig = simpleSecurityService.buildTLSClientConfig(stackId, gatewayInstance.getPublicIp());
         Set<InstanceMetaData> newInstanceMetadata = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
             if (newAddresses.contains(instanceMetaData.getPrivateIp())) {
