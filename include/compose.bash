@@ -112,6 +112,38 @@ ambassador:
     image: progrium/ambassadord:$DOCKER_TAG_AMBASSADOR
     command: --omnimode
 
+logsink:
+    ports:
+        - 3333
+    environment:
+        - SERVICE_NAME=logsink
+    volumes:
+        - .:/tmp
+    image: sequenceiq/socat:latest
+    command: socat -u TCP-LISTEN:3333,reuseaddr,fork OPEN:/tmp/cbreak.log,creat,append
+
+logspout:
+    ports:
+        - 8000:80
+    environment:
+        - SERVICE_NAME=logspout
+        - DEBUG=true
+        - BACKEND_1111=logsink.service.consul
+        - LOGSPOUT=ignore
+        - ROUTE_URIS=tcp://backend:1111
+        #- ROUTE_URIS=tcp://backend:1111,file:///log/logspout.log
+        #- "RAW_FORMAT=[{{.Source}}] | {{.Time}} | {{.Container.Name}} | {{.Data}}\n"
+        - "RAW_FORMAT={{.Container.Name}} | {{.Data}}\n"
+    links:
+        - ambassador:backend
+    volumes:
+      - ./test.log:/tmp/logspout.log
+      - /var/run/docker.sock:/var/run/docker.sock
+      #- /Users/lpapp/go/src/github.com/gliderlabs/logspout/logspout-linux:/bin/logspout
+    image: gliderlabs/logspout:master
+    entrypoint: ["/bin/sh"]
+    command: -c 'sleep 1; /bin/logspout'
+
 ambassadorips:
     privileged: true
     net: container:ambassador
