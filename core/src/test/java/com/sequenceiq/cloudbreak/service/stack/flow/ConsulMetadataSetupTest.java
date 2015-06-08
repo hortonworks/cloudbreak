@@ -81,7 +81,7 @@ public class ConsulMetadataSetupTest {
         imd1.setInstanceGroup(instanceGroups.iterator().next());
         InstanceMetaData imd2 = new InstanceMetaData();
         imd2.setInstanceGroup(instanceGroups.iterator().next());
-        imd2.setPrivateIp(DUMMY_ADDRESS);
+        imd2.setPublicIp(DUMMY_ADDRESS);
         metaData.add(imd1);
         metaData.add(imd2);
         return metaData;

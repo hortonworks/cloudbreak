@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 
@@ -26,7 +26,7 @@ public class AmbariClusterStatusUpdater {
     private ClusterRepository clusterRepository;
 
     @Inject
-    private RetryingStackUpdater stackUpdater;
+    private StackUpdater stackUpdater;
 
     @Inject
     private AmbariClientProvider ambariClientProvider;

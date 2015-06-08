@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
@@ -61,7 +61,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
     private AzureStackUtil azureStackUtil;
 
     @Inject
-    private RetryingStackUpdater retryingStackUpdater;
+    private StackUpdater stackUpdater;
 
     @Inject
     private AzureCreateResourceStatusCheckerTask azureCreateResourceStatusCheckerTask;
@@ -184,7 +184,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
             Long total = Long.valueOf(copyStatusFromServer.get("totalBytes"));
             double copyPercentage = (long) ((float) copied / total * ONE_HUNDRED);
             LOGGER.info(String.format("copy progress=%s / %s percentage: %s%%.", copied, total, copyPercentage));
-            retryingStackUpdater.updateStackStatusReason(stack.getId(), String.format("The copy status is: %s%%.", copyPercentage));
+            stackUpdater.updateStackStatusReason(stack.getId(), String.format("The copy status is: %s%%.", copyPercentage));
             try {
                 Thread.sleep(MILLIS);
             } catch (InterruptedException e) {

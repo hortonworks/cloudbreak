@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 
@@ -24,9 +23,6 @@ public class StackStartService {
 
     @Inject
     private StackRepository stackRepository;
-
-    @Inject
-    private RetryingStackUpdater stackUpdater;
 
     @javax.annotation.Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;

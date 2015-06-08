@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -44,8 +43,6 @@ public class ClusterSecurityService {
     private AmbariClientProvider ambariClientProvider;
     @Inject
     private AmbariOperationService ambariOperationService;
-    @Inject
-    private RetryingStackUpdater stackUpdater;
     @Inject
     private CloudbreakEventService eventService;
     @Inject

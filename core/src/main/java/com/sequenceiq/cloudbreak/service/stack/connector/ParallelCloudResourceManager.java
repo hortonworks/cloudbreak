@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.FailureHandlerService;
 import com.sequenceiq.cloudbreak.service.stack.flow.FutureResult;
@@ -55,7 +55,7 @@ public class ParallelCloudResourceManager {
     @Inject
     private AsyncTaskExecutor resourceBuilderExecutor;
     @Inject
-    private RetryingStackUpdater stackUpdater;
+    private StackUpdater stackUpdater;
     @Inject
     private ProvisionUtil provisionUtil;
     @Inject

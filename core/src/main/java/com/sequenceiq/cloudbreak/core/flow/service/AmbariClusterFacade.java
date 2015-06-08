@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
@@ -70,7 +70,7 @@ public class AmbariClusterFacade implements ClusterFacade {
     private AmbariStartupListenerTask ambariStartupListenerTask;
 
     @Inject
-    private RetryingStackUpdater stackUpdater;
+    private StackUpdater stackUpdater;
 
     @Inject
     private AmbariClusterConnector ambariClusterConnector;

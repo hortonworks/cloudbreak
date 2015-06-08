@@ -46,7 +46,6 @@ import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
@@ -73,9 +72,6 @@ public class AmbariClusterService implements ClusterService {
 
     @Inject
     private ClusterRepository clusterRepository;
-
-    @Inject
-    private RetryingStackUpdater stackUpdater;
 
     @Inject
     private InstanceMetaDataRepository instanceMetadataRepository;

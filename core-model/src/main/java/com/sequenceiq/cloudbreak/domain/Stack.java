@@ -197,15 +197,15 @@ public class Stack implements ProvisionEntity {
     private Credential credential;
     @OneToOne(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Cluster cluster;
-    @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<Resource> resources = new HashSet<>();
     @Enumerated(EnumType.STRING)
     private OnFailureAction onFailureActionAction = OnFailureAction.ROLLBACK;
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private FailurePolicy failurePolicy;
-    @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<InstanceGroup> instanceGroups = new HashSet<>();
-    @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<Subnet> allowedSubnets = new HashSet<>();
     @Version
     private Long version;
