@@ -72,7 +72,8 @@ dependencies {
     compile project(':orchestrator-api')
 
     compile project(':cloud-api')
-    compile project(':cloud-openstack')
+    runtime project(':cloud-reactor')
+    runtime project(':cloud-openstack')
 
     runtime     group: 'activation',                name: 'activation',                     version: '1.0.2'
 
