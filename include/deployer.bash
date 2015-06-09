@@ -262,6 +262,7 @@ main() {
         cmd-export util-cloudbreak-shell-quiet
         cmd-export util-token
         cmd-export util-local-dev
+        cmd-export util-cleanup
     fi
 
     if [[ "$DEBUG" ]]; then

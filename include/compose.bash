@@ -57,6 +57,55 @@ compose-kill() {
     dockerCompose rm -f
 }
 
+util-cleanup() {
+    declare desc="Removes all exited containers and old cloudbreak related images"
+
+    if [ ! -f docker-compose.yml ]; then
+      error "docker-compose.yml file does not exists"
+      exit 126
+    fi
+
+    compose-remove-exited-containers
+
+    local all_images=$(docker images | sed "s/ \+/ /g"|cut -d' ' -f 1,2|tr ' ' : | tail -n +2)
+    local keep_images=$(sed -n "s/.*image://p" docker-compose.yml)
+    local images_to_delete=$(compose-get-old-images <(echo $all_images) <(echo $keep_images))
+    if [ -n "$images_to_delete" ]; then
+      info "Found old/different versioned images based on docker-compose.yml file: $images_to_delete"
+      docker rmi $images_to_delete
+    else
+      info "Not found any different versioned images (based on docker-compose.yml). Skip cleanup"
+    fi
+}
+
+compose-get-old-images() {
+    declare desc="Retrieve old images"
+    declare all_images="${1:? required: all images}"
+    declare keep_images="${2:? required: keep images}"
+    local all_imgs=$(cat $all_images) keep_imgs=$(cat $keep_images)
+    contentsarray=()
+    for versionedImage in $keep_imgs
+      do
+        image=(`echo $versionedImage | tr ":" " "`)
+        image_name=${image[0]}
+        image_version=${image[1]}
+        remove_images=$(echo $all_imgs | tr ' ' "\n" | grep "$image_name:" | grep -v "$image_version")
+        if [ -n "$remove_images" ]; then
+          contentsarray+="${remove_images[@]} "
+        fi
+    done
+    echo ${contentsarray%?}
+}
+
+compose-remove-exited-containers() {
+    declare desc="Remove exited containers"
+    local exited_containers=$(docker ps --all -q -f status=exited)
+    if [ -n "$exited_containers" ]; then
+      info "Remove exited docker containers"
+      docker rm $exited_containers;
+    fi
+}
+
 compose-get-container() {
     declare desc=""
     declare service="${1:? required: service name}"
@@ -92,9 +141,9 @@ compose-generate-yaml() {
 
 compose-generate-yaml-force() {
 
-    declare comoseFile=${1:? required: compose file path}
-    debug "Generating docker-compose yaml: ${comoseFile} ..."
-    cat > ${comoseFile} <<EOF
+    declare composeFile=${1:? required: compose file path}
+    debug "Generating docker-compose yaml: ${composeFile} ..."
+    cat > ${composeFile} <<EOF
 consul:
     privileged: true
     volumes:
