@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.conf.EventBusConfig;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
@@ -44,7 +43,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         CloudbreakEventData eventData = new CloudbreakEventData(stackId, eventType, eventMessage);
         LOGGER.info("Firing Cloudbreak event: {}", eventData);
         Event reactorEvent = Event.wrap(eventData);
-        reactor.notify(EventBusConfig.CLOUDBREAK_EVENT, reactorEvent);
+        reactor.notify(CLOUDBREAK_EVENT, reactorEvent);
     }
 
     @Override
@@ -52,7 +51,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         InstanceGroupEventData eventData = new InstanceGroupEventData(stackId, eventType, eventMessage, instanceGroupName);
         LOGGER.info("Fireing cloudbreak event: {}", eventData);
         Event reactorEvent = Event.wrap(eventData);
-        reactor.notify(EventBusConfig.CLOUDBREAK_EVENT, reactorEvent);
+        reactor.notify(CLOUDBREAK_EVENT, reactorEvent);
     }
 
     @Override

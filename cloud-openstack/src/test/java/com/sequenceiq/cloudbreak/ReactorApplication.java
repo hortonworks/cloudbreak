@@ -42,7 +42,6 @@ import reactor.rx.Promises;
 @ComponentScan
 public class ReactorApplication implements CommandLineRunner {
 
-    @Inject
     private static final Logger LOGGER = LoggerFactory.getLogger(ReactorApplication.class);
 
     @Inject
@@ -54,13 +53,13 @@ public class ReactorApplication implements CommandLineRunner {
     @Value("${userName:admin}")
     private String userName;
 
-    @Value("${password}")
+    //@Value("${password}")
     private String password;
 
     @Value("${tenantName:demo}")
     private String tenantName;
 
-    @Value("${endpoint}")
+    //@Value("${endpoint}")
     private String endpoint;
 
     public static void main(String[] args) throws InterruptedException {
@@ -71,7 +70,8 @@ public class ReactorApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        promiseTest();
+        //promiseTest();
+        errorHandlerTest();
     }
 
     private void asyncNotify(Promise<LaunchStackResult> promise) {
@@ -132,5 +132,9 @@ public class ReactorApplication implements CommandLineRunner {
         LOGGER.debug("Launchrequest: {}", lr);
         return lr;
 
+    }
+
+    private void errorHandlerTest() {
+        eventBus.notify("selector-no-consumer", Event.wrap("no consumer for me"));
     }
 }
