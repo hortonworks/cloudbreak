@@ -86,7 +86,7 @@ public class OpenStackMetadataSetup {
         }
         return instancesCoreMetadata;
     }
-    
+
     public ResourceType getInstanceResourceType() {
         return null;
     }

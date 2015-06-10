@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.StackContext;
+import com.sequenceiq.cloudbreak.cloud.handler.PollingHandlerFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -30,11 +31,16 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.notification.PollingNotifier;
+import com.sequenceiq.cloudbreak.cloud.polling.DummyPollingInfo;
+import com.sequenceiq.cloudbreak.cloud.polling.PollingInfo;
 import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 
 import reactor.Environment;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
+import reactor.fn.Pausable;
+import reactor.fn.timer.Timer;
 import reactor.rx.Promise;
 import reactor.rx.Promises;
 
@@ -42,8 +48,8 @@ import reactor.rx.Promises;
 @ComponentScan
 public class ReactorApplication implements CommandLineRunner {
 
-    @Inject
     private static final Logger LOGGER = LoggerFactory.getLogger(ReactorApplication.class);
+    private static final int DEFAULT_DELAY = 5;
 
     @Inject
     private Environment env;
@@ -54,14 +60,21 @@ public class ReactorApplication implements CommandLineRunner {
     @Value("${userName:admin}")
     private String userName;
 
-    @Value("${password}")
+    //@Value("${password}")
     private String password;
 
     @Value("${tenantName:demo}")
     private String tenantName;
 
-    @Value("${endpoint}")
+    //@Value("${endpoint}")
     private String endpoint;
+
+    @Inject
+    private PollingNotifier pollingNotifier;
+
+
+    @Inject
+    private Timer timer;
 
     public static void main(String[] args) throws InterruptedException {
         ApplicationContext app = SpringApplication.run(ReactorApplication.class, args);
@@ -71,7 +84,9 @@ public class ReactorApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        promiseTest();
+        //promiseTest();
+//        errorHandlerTest();
+        timerTest();
     }
 
     private void asyncNotify(Promise<LaunchStackResult> promise) {
@@ -133,4 +148,17 @@ public class ReactorApplication implements CommandLineRunner {
         return lr;
 
     }
+
+    private void errorHandlerTest() {
+        eventBus.notify("selector-no-consumer", Event.wrap("no consumer for me"));
+    }
+
+    private void timerTest() {
+        LOGGER.debug("submitted at: {}", System.nanoTime());
+        PollingInfo pollingInfo = new DummyPollingInfo();
+
+        Pausable pausable = timer.submit(PollingHandlerFactory.createStartPollingHandler(pollingInfo, pollingNotifier)
+                , DEFAULT_DELAY, TimeUnit.SECONDS);
+    }
+
 }

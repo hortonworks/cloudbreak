@@ -168,7 +168,7 @@ public class OpenStackConnector {
     public void rollback(Stack stack, Set<Resource> resourceSet) {
         deleteStack(stack, stack.getCredential());
     }
-    
+
     public void startAll(Stack stack) {
         setStackState(stack, false);
     }
