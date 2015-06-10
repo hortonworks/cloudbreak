@@ -35,7 +35,7 @@ public class InstanceGroup implements ProvisionEntity {
     private InstanceGroupType instanceGroupType = InstanceGroupType.CORE;
     @ManyToOne
     private Stack stack;
-    @OneToMany(mappedBy = "instanceGroup", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "instanceGroup", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<InstanceMetaData> instanceMetaData = new HashSet<>();
 
     public String getGroupName() {

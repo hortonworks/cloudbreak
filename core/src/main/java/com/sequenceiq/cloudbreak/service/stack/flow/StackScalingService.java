@@ -25,7 +25,8 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -40,24 +41,20 @@ public class StackScalingService {
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private RetryingStackUpdater stackUpdater;
-
     @Inject
     private UserDataBuilder userDataBuilder;
-
     @Inject
     private PollingService<ConsulContext> consulPollingService;
-
     @Inject
     private ConsulAgentLeaveCheckerTask consulAgentLeaveCheckerTask;
-
     @Inject
     private CloudbreakEventService eventService;
-
     @Inject
     private AmbariHostsRemover ambariHostsRemover;
+    @Inject
+    private InstanceMetaDataRepository instanceMetaDataRepository;
+    @Inject
+    private InstanceGroupRepository instanceGroupRepository;
 
     @javax.annotation.Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
@@ -104,9 +101,10 @@ public class StackScalingService {
 
     private void updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) {
         int nodeCount = instanceGroup.getNodeCount() - instanceIds.size();
-        stackUpdater.updateNodeCount(stack.getId(), nodeCount, instanceGroup.getGroupName());
-
+        instanceGroup.setNodeCount(nodeCount);
+        instanceGroupRepository.save(instanceGroup);
         List<ConsulClient> clients = createConsulClients(stack, instanceGroup.getGroupName());
+        List<InstanceMetaData> updatedInstances = new ArrayList<>();
         for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
             if (instanceIds.contains(instanceMetaData.getInstanceId())) {
                 long timeInMillis = Calendar.getInstance().getTimeInMillis();
@@ -115,8 +113,7 @@ public class StackScalingService {
                 removeAgentFromConsul(stack, clients, instanceMetaData);
             }
         }
-
-        stackUpdater.updateStackMetaData(stack.getId(), instanceGroup.getAllInstanceMetaData(), instanceGroup.getGroupName());
+        instanceMetaDataRepository.save(updatedInstances);
         LOGGER.info("Successfully terminated metadata of instances '{}' in stack.", instanceIds);
         eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
                 "Billing changed due to downscaling of cluster infrastructure.");

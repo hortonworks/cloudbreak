@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 
@@ -37,7 +37,7 @@ public class TerminationService {
     private ClusterRepository clusterRepository;
 
     @Inject
-    private RetryingStackUpdater retryingStackUpdater;
+    private StackUpdater stackUpdater;
 
     @Inject
     private HostGroupRepository hostGroupRepository;
@@ -71,7 +71,7 @@ public class TerminationService {
             stack.setNetwork(null);
             stack.setName(terminatedName);
             terminateMetaDataInstances(stack);
-            retryingStackUpdater.updateStack(stack);
+            stackRepository.save(stack);
         } catch (Exception ex) {
             LOGGER.error("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
             throw new TerminationFailedException(ex);

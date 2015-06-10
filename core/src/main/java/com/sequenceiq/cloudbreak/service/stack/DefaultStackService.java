@@ -39,9 +39,11 @@ import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.Subnet;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.repository.SubnetRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
@@ -57,24 +59,22 @@ public class DefaultStackService implements StackService {
 
     @Inject
     private StackRepository stackRepository;
-
     @Inject
-    private RetryingStackUpdater stackUpdater;
-
+    private StackUpdater stackUpdater;
     @Inject
     private ClusterRepository clusterRepository;
-
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
-
+    @Inject
+    private InstanceGroupRepository instanceGroupRepository;
     @Inject
     private FlowManager flowManager;
-
     @Resource
     private Map<CloudPlatform, ProvisionSetup> provisionSetups;
-
     @Inject
     private BlueprintValidator blueprintValidator;
+    @Inject
+    private SubnetRepository subnetRepository;
 
     @Override
     public Set<Stack> retrievePrivateStacks(CbUser user) {
@@ -154,6 +154,8 @@ public class DefaultStackService implements StackService {
         } else {
             try {
                 savedStack = stackRepository.save(stack);
+                subnetRepository.save(savedStack.getAllowedSubnets());
+                instanceGroupRepository.save(savedStack.getInstanceGroups());
                 MDCBuilder.buildMdcContext(savedStack);
                 flowManager.triggerProvisioning(new ProvisionRequest(savedStack.cloudPlatform(), savedStack.getId()));
             } catch (DataIntegrityViolationException ex) {

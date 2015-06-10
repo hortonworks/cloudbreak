@@ -91,7 +91,7 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
@@ -119,7 +119,7 @@ public class AwsConnector implements CloudPlatformConnector {
     @Inject
     private CloudFormationTemplateBuilder cfTemplateBuilder;
     @Inject
-    private RetryingStackUpdater stackUpdater;
+    private StackUpdater stackUpdater;
     @Inject
     private CloudFormationStackUtil cfStackUtil;
     @Inject

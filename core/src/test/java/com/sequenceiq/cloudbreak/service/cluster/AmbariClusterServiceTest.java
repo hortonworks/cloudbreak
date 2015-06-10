@@ -44,7 +44,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
@@ -63,9 +62,6 @@ public class AmbariClusterServiceTest {
 
     @Mock
     private ClusterRepository clusterRepository;
-
-    @Mock
-    private RetryingStackUpdater stackUpdater;
 
     @Mock
     private EventBus reactor;

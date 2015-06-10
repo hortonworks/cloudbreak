@@ -17,6 +17,7 @@ import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_IN_PROGRESS;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -52,7 +53,8 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.Subnet;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.repository.SubnetRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -69,51 +71,41 @@ import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 @Service
 public class SimpleStackFacade implements StackFacade {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleStackFacade.class);
+    private static final String UPDATED_SUBNETS = "updated";
+    private static final String REMOVED_SUBNETS = "removed";
 
     @Inject
     private StackService stackService;
-
     @javax.annotation.Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
-
     @Inject
     private CloudbreakEventService cloudbreakEventService;
-
     @Inject
     private TerminationService terminationService;
-
     @Inject
     private StackStartService stackStartService;
-
     @Inject
     private StackStopService stackStopService;
-
     @Inject
     private StackScalingService stackScalingService;
-
     @Inject
     private MetadataSetupService metadataSetupService;
-
     @Inject
     private UserDataBuilder userDataBuilder;
-
     @Inject
     private HostGroupService hostGroupService;
-
     @Inject
     private ClusterBootstrapper clusterBootstrapper;
-
     @Inject
     private ConsulMetadataSetup consulMetadataSetup;
-
     @Inject
     private ProvisioningService provisioningService;
-
     @Inject
     private ClusterService clusterService;
-
     @Inject
-    private RetryingStackUpdater stackUpdater;
+    private StackUpdater stackUpdater;
+    @Inject
+    private SubnetRepository subnetRepository;
 
     @Override
     public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
@@ -414,15 +406,16 @@ public class SimpleStackFacade implements StackFacade {
             Stack stack = stackService.getById(actualContext.getStackId());
             stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
             MDCBuilder.buildMdcContext(stack);
-
             logBefore(actualContext.getStackId(), context, "Update subnet on stack", UPDATE_IN_PROGRESS);
             Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(stack.cloudPlatform());
-            stack.setAllowedSubnets(getNewSubnetList(stack, actualContext.getAllowedSubnets()));
+            Map<String, Set<Subnet>> modifiedSubnets = getModifiedSubnetList(stack, actualContext.getAllowedSubnets());
+            Set<Subnet> newSubnets = modifiedSubnets.get(UPDATED_SUBNETS);
+            stack.setAllowedSubnets(newSubnets);
             cloudPlatformConnectors.get(stack.cloudPlatform())
                     .updateAllowedSubnets(stack, userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE));
-            stackUpdater.updateStack(stack);
+            subnetRepository.delete(modifiedSubnets.get(REMOVED_SUBNETS));
+            subnetRepository.save(newSubnets);
             logAfter(actualContext.getStackId(), context, "Update subnet on stack", UPDATE_IN_PROGRESS);
-
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Security update successfully finished");
         } catch (Exception e) {
             Stack stack = stackService.getById(actualContext.getStackId());
@@ -549,18 +542,24 @@ public class SimpleStackFacade implements StackFacade {
         return context;
     }
 
-    private Set<Subnet> getNewSubnetList(Stack stack, List<Subnet> subnetList) {
-        Set<Subnet> copy = new HashSet<>();
+    private Map<String, Set<Subnet>> getModifiedSubnetList(Stack stack, List<Subnet> subnetList) {
+        Map<String, Set<Subnet>> result = new HashMap<>();
+        Set<Subnet> removed = new HashSet<>();
+        Set<Subnet> updated = new HashSet<>();
         for (Subnet subnet : stack.getAllowedSubnets()) {
             if (!subnet.isModifiable()) {
-                copy.add(subnet);
+                updated.add(subnet);
                 removeFromNewSubnetList(subnet, subnetList);
+            } else {
+                removed.add(subnet);
             }
         }
         for (Subnet subnet : subnetList) {
-            copy.add(subnet);
+            updated.add(subnet);
         }
-        return copy;
+        result.put(UPDATED_SUBNETS, updated);
+        result.put(REMOVED_SUBNETS, removed);
+        return result;
     }
 
     private void removeFromNewSubnetList(Subnet subnet, List<Subnet> subnetList) {

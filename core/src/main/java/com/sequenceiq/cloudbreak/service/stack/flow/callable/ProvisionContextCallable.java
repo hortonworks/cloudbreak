@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.flow.FutureResult;
 import com.sequenceiq.cloudbreak.service.stack.flow.ResourceRequestResult;
@@ -33,13 +33,13 @@ public class ProvisionContextCallable implements Callable<ResourceRequestResult>
     private final Stack stack;
     private final InstanceGroup instanceGroup;
     private final ProvisionContextObject provisionContextObject;
-    private final RetryingStackUpdater stackUpdater;
+    private final StackUpdater stackUpdater;
     private final StackRepository stackRepository;
     private final Optional<String> userData;
     private final Map<String, String> mdcCtxMap;
 
     private ProvisionContextCallable(Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders, int index, Stack stack,
-            InstanceGroup instanceGroup, ProvisionContextObject provisionContextObject, RetryingStackUpdater stackUpdater,
+            InstanceGroup instanceGroup, ProvisionContextObject provisionContextObject, StackUpdater stackUpdater,
             StackRepository stackRepository, Optional<String> userData, Map<String, String> mdcCtxMap) {
         this.instanceResourceBuilders = instanceResourceBuilders;
         this.index = index;
@@ -93,7 +93,7 @@ public class ProvisionContextCallable implements Callable<ResourceRequestResult>
         private Stack stack;
         private InstanceGroup instanceGroup;
         private ProvisionContextObject provisionContextObject;
-        private RetryingStackUpdater stackUpdater;
+        private StackUpdater stackUpdater;
         private StackRepository stackRepository;
         private String userData;
         private Map<String, String> mdcCtxMap;
@@ -127,7 +127,7 @@ public class ProvisionContextCallable implements Callable<ResourceRequestResult>
             return this;
         }
 
-        public ProvisionContextCallableBuilder withStackUpdater(RetryingStackUpdater stackUpdater) {
+        public ProvisionContextCallableBuilder withStackUpdater(StackUpdater stackUpdater) {
             this.stackUpdater = stackUpdater;
             return this;
         }

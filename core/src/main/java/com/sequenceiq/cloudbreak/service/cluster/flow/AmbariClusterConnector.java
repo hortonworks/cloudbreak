@@ -54,7 +54,6 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
@@ -81,8 +80,6 @@ public class AmbariClusterConnector {
     private InstanceMetaDataRepository instanceMetadataRepository;
     @Inject
     private HostGroupRepository hostGroupRepository;
-    @Inject
-    private RetryingStackUpdater stackUpdater;
     @Inject
     private AmbariOperationService ambariOperationService;
     @Inject
@@ -328,15 +325,17 @@ public class AmbariClusterConnector {
         cluster.setCreationFinished(new Date().getTime());
         cluster.setUpSince(new Date().getTime());
         cluster = clusterRepository.save(cluster);
+        List<InstanceMetaData> updatedInstances = new ArrayList<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             Set<InstanceMetaData> instances = instanceGroup.getAllInstanceMetaData();
             for (InstanceMetaData instanceMetaData : instances) {
                 if (!instanceMetaData.isTerminated()) {
                     instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
+                    updatedInstances.add(instanceMetaData);
                 }
             }
-            stackUpdater.updateStackMetaData(stack.getId(), instances, instanceGroup.getGroupName());
         }
+        instanceMetadataRepository.save(updatedInstances);
         return cluster;
 
     }

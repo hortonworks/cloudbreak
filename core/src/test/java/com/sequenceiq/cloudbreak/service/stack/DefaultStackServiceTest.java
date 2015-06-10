@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 
@@ -48,7 +48,7 @@ public class DefaultStackServiceTest {
     private StackRepository stackRepository;
 
     @Mock
-    private RetryingStackUpdater stackUpdater;
+    private StackUpdater stackUpdater;
 
     @Mock
     private ClusterRepository clusterRepository;

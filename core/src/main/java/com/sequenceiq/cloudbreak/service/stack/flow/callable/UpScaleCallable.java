@@ -14,7 +14,7 @@ import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.flow.FutureResult;
 import com.sequenceiq.cloudbreak.service.stack.flow.ResourceRequestResult;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
@@ -29,13 +29,13 @@ public class UpScaleCallable implements Callable<ResourceRequestResult> {
     private final int index;
     private final Stack stack;
     private final ProvisionContextObject provisionContextObject;
-    private final RetryingStackUpdater stackUpdater;
+    private final StackUpdater stackUpdater;
     private final String instanceGroup;
     private final Optional<String> userData;
     private final Map<String, String> mdcCtxMap;
 
     private UpScaleCallable(Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders, int index, Stack stack, String instanceGroup,
-            ProvisionContextObject provisionContextObject, RetryingStackUpdater stackUpdater, Optional<String> userData, Map<String, String> mdcCtxMap) {
+            ProvisionContextObject provisionContextObject, StackUpdater stackUpdater, Optional<String> userData, Map<String, String> mdcCtxMap) {
         this.instanceResourceBuilders = instanceResourceBuilders;
         this.index = index;
         this.stack = stack;
@@ -86,7 +86,7 @@ public class UpScaleCallable implements Callable<ResourceRequestResult> {
         private Stack stack;
         private String instanceGroup;
         private ProvisionContextObject provisionContextObject;
-        private RetryingStackUpdater stackUpdater;
+        private StackUpdater stackUpdater;
         private String userData;
         private Map<String, String> mdcCtxMap;
 
@@ -119,7 +119,7 @@ public class UpScaleCallable implements Callable<ResourceRequestResult> {
             return this;
         }
 
-        public UpScaleCallableBuilder withStackUpdater(RetryingStackUpdater stackUpdater) {
+        public UpScaleCallableBuilder withStackUpdater(StackUpdater stackUpdater) {
             this.stackUpdater = stackUpdater;
             return this;
         }
