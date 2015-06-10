@@ -8,10 +8,11 @@ import org.springframework.context.annotation.Configuration;
 
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.sequenceiq.cloudbreak.cloud.handler.ConsumerNotFoundHandler;
 
 import reactor.Environment;
 import reactor.bus.EventBus;
-import reactor.core.dispatch.ThreadPoolExecutorDispatcher;
+import reactor.bus.spec.EventBusSpec;
 import reactor.fn.timer.Timer;
 
 @Configuration
@@ -27,7 +28,7 @@ public class EventBusConfig {
 
     @Bean
     public Environment env() {
-        return Environment.initializeIfEmpty().setDispatcher(Environment.THREAD_POOL, getEventBusDispatcher()).assignErrorJournal();
+        return Environment.initializeIfEmpty();
     }
 
     @Bean
@@ -37,10 +38,13 @@ public class EventBusConfig {
 
     @Bean
     public EventBus eventBus(Environment env) {
-        return EventBus.create(env, Environment.THREAD_POOL);
+        EventBus bus = new EventBusSpec()
+                .env(env)
+                .defaultDispatcher()
+                .traceEventPath()
+                .consumerNotFoundHandler(new ConsumerNotFoundHandler())
+                .get();
+        return bus;
     }
 
-    private ThreadPoolExecutorDispatcher getEventBusDispatcher() {
-        return new ThreadPoolExecutorDispatcher(eventBusThreadPoolSize, eventBusThreadPoolSize, "cloud");
-    }
 }
