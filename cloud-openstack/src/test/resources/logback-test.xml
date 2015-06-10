@@ -10,9 +10,9 @@
         </encoder>
     </appender>
 
-    <logger name="com.sequenceiq" level="debug"/>
+    <logger name="com.sequenceiq" level="trace"/>
 
-    <logger name="reactor" level="debug"/>
+    <logger name="reactor" level="trace"/>
 
     <root level="info">
         <appender-ref ref="stdout"/>

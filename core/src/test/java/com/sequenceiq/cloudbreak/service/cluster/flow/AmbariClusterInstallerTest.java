@@ -24,15 +24,16 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.conf.EventBusConfig;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
+
 @Ignore("Rewrite test cases!")
 public class AmbariClusterInstallerTest {
 
@@ -79,7 +80,7 @@ public class AmbariClusterInstallerTest {
         // WHEN
         underTest.buildAmbariCluster(stack);
         // THEN
-        verify(reactor, times(1)).notify(any(EventBusConfig.class), any(Event.class));
+        verify(reactor, times(1)).notify(any(CloudbreakEventService.class), any(Event.class));
     }
 
     @Test
@@ -93,7 +94,7 @@ public class AmbariClusterInstallerTest {
         // WHEN
         underTest.buildAmbariCluster(stack);
         // THEN
-        verify(reactor, times(1)).notify(any(EventBusConfig.class), any(Event.class));
+        verify(reactor, times(1)).notify(any(CloudbreakEventService.class), any(Event.class));
     }
 
     @Test
@@ -107,7 +108,7 @@ public class AmbariClusterInstallerTest {
         // WHEN
         underTest.buildAmbariCluster(stack);
         // THEN
-        verify(reactor, times(1)).notify(any(EventBusConfig.class), any(Event.class));
+        verify(reactor, times(1)).notify(any(CloudbreakEventService.class), any(Event.class));
     }
 
     @Test
@@ -121,7 +122,7 @@ public class AmbariClusterInstallerTest {
         // WHEN
         underTest.buildAmbariCluster(stack);
         // THEN
-        verify(reactor, times(1)).notify(any(EventBusConfig.class), any(Event.class));
+        verify(reactor, times(1)).notify(any(CloudbreakEventService.class), any(Event.class));
     }
 
     private Stack createStack(Cluster cluster) {

@@ -6,6 +6,8 @@ import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 
 public interface CloudbreakEventService {
 
+    String CLOUDBREAK_EVENT = "CLOUDBREAK_EVENT";
+
     void fireCloudbreakEvent(Long stackId, String eventType, String eventMessage);
 
     void fireCloudbreakInstanceGroupEvent(Long stackId, String eventType, String eventMessage, String instanceGroupName);
