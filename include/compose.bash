@@ -131,15 +131,11 @@ logspout:
         - BACKEND_1111=logsink.service.consul
         - LOGSPOUT=ignore
         - ROUTE_URIS=tcp://backend:1111
-        #- ROUTE_URIS=tcp://backend:1111,file:///log/logspout.log
-        #- "RAW_FORMAT=[{{.Source}}] | {{.Time}} | {{.Container.Name}} | {{.Data}}\n"
         - "RAW_FORMAT={{.Container.Name}} | {{.Data}}\n"
     links:
         - ambassador:backend
     volumes:
-      - ./test.log:/tmp/logspout.log
       - /var/run/docker.sock:/var/run/docker.sock
-      #- /Users/lpapp/go/src/github.com/gliderlabs/logspout/logspout-linux:/bin/logspout
     image: gliderlabs/logspout:master
     entrypoint: ["/bin/sh"]
     command: -c 'sleep 1; /bin/logspout'
