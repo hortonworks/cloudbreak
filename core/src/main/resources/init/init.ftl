@@ -35,10 +35,16 @@ format_disks() {
   mkdir /hadoopfs
   for (( i=1; i<=24; i++ )); do
     LABEL=$(printf "\x$(printf %x $((START_LABEL+i)))")
-    if [ -e /dev/${PLATFORM_DISK_PREFIX}"$LABEL" ]; then
-      mkfs -E lazy_itable_init=1 -O uninit_bg -F -t ext4 /dev/${PLATFORM_DISK_PREFIX}${LABEL}
+    DEVICE=/dev/${PLATFORM_DISK_PREFIX}${LABEL}
+    if [ -e $DEVICE ]; then
+      MOUNTPOINT=$(grep $DEVICE /etc/fstab | tr -s ' \t' ' ' | cut -d' ' -f 2)
+      if [ -n "$MOUNTPOINT" ]; then
+        umount "$MOUNTPOINT"
+        sed -i "\|^$DEVICE|d" /etc/fstab
+      fi
+      mkfs -E lazy_itable_init=1 -O uninit_bg -F -t ext4 $DEVICE
       mkdir /hadoopfs/fs${i}
-      echo /dev/${PLATFORM_DISK_PREFIX}${LABEL} /hadoopfs/fs${i} ext4  defaults 0 2 >> /etc/fstab
+      echo $DEVICE /hadoopfs/fs${i} ext4  defaults 0 2 >> /etc/fstab
       mount /hadoopfs/fs${i}
     fi
   done
