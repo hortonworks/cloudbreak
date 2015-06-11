@@ -7,10 +7,10 @@
 
         <div class="navbar-header">
                 <span class="navbar-brand">
-                    CLOUDBREAK
+                    {{msg.dashboard_title}}
                 </span>
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
-                <span class="sr-only">Toggle navigation</span>
+                <span class="sr-only">{{msg.dashboard_toogle_label}}</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
@@ -22,16 +22,16 @@
 
             <ul class="nav navbar-nav navbar-right">
 
-                <li ng-class="showManagement == true ? 'active' : ''" ng-disabled="showManagement"><a data-value="cred-002" ng-click="activateManagement()" ><i class="fa fa-cloud fa-fw"></i> dashboard</a></li>
+                <li ng-class="showManagement == true ? 'active' : ''" ng-disabled="showManagement"><a data-value="cred-002" ng-click="activateManagement()" ><i class="fa fa-cloud fa-fw"></i> {{msg.dashboard_board_panel_label}}</a></li>
 
-                <li ng-class="showAccountPanel == true ? 'active' : ''" ng-disabled="showAccountPanel"><a data-value="cred-003" ng-click="activateAccountPanel()" ><i class="fa fa-tasks fa-fw"></i> account</a></li>
+                <li ng-class="showAccountPanel == true ? 'active' : ''" ng-disabled="showAccountPanel"><a data-value="cred-003" ng-click="activateAccountPanel()" ><i class="fa fa-tasks fa-fw"></i> {{msg.dashboard_account_panel_label}}</a></li>
 
                 <!-- ........ CREDENTIALS DROPDOWN ......................................... -->
 
                 <li class="dropdown" id="menu-credential">
                     <a href="" class="dropdown-toggle" data-toggle="dropdown">
                         <i class="fa fa-tag fa-fw"></i>
-                        <span ng-class="$root.activeCredential === undefined ? 'text-danger' : 'text'">{{$root.activeCredential === undefined ? "select a credential" : $root.activeCredential.name}}</span>
+                        <span ng-class="$root.activeCredential === undefined ? 'text-danger' : 'text'">{{$root.activeCredential === undefined ? msg.dashboard_select_credential_label : $root.activeCredential.name}}</span>
                         <b class="caret"></b>
                     </a>
                     <ul class="dropdown-menu">
@@ -42,7 +42,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="" class="not-option" data-toggle="collapse" data-target="#panel-credentials-collapse"><i class="fa fa-edit fa-fw"></i>
-                                manage credentials</a>
+                                {{msg.credential_manage_title}}</a>
                         </li>
                     </ul>
                 </li>
@@ -52,7 +52,7 @@
                         <i class="fa fa-user fa-fw"></i> {{user.email}} <b class="caret"></b>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a href="/logout" data-value="cred-001"><i class="fa fa-sign-out fa-fw"></i> logout</a></li>
+                        <li><a href="/logout" data-value="cred-001"><i class="fa fa-sign-out fa-fw"></i> {{msg.dashboard_logout_label}}</a></li>
                     </ul>
                 </li>
             </ul>
@@ -84,15 +84,15 @@
         <div class="col-sm-2 col-xs-2">
             <div class="dropdown">
                 <button class="btn btn-info btn-block btn-collapse-title dropdown-toggle" type="button" id="sort-clusters-btn" data-toggle="dropdown">
-                    <i class="fa fa-sort-amount-asc fa-fw"></i><span class="sr-only">sorted by </span><span class="title"> name</span>
+                    <i class="fa fa-sort-amount-asc fa-fw"></i><span class="sr-only">{{msg.dashboard_sort_title}} </span><span class="title"> {{msg.dashboard_sort_name_label}}</span>
                     <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                    <li class="dropdown-header">Sort by</li>
+                    <li class="dropdown-header">{{msg.dashboard_sort_prefix}}</li>
                     <!-- <li class="disabled"><a href="" data-sort-by="state" data-sort-asc="true">state</a></li> -->
-                    <li><a id="orderByNameBtn" href="" ng-click="order('name',false)">name</a></li>
-                    <li><a href="" ng-click="order('nodeCount',false)">nodes</a></li>
-                    <li><a href="" ng-click="orderByUptime()">uptime</a></li>
+                    <li><a id="orderByNameBtn" href="" ng-click="order('name',false)">{{msg.dashboard_sort_name_label}}</a></li>
+                    <li><a href="" ng-click="order('nodeCount',false)">{{msg.dashboard_sort_nodes_label}}</a></li>
+                    <li><a href="" ng-click="orderByUptime()">{{msg.dashboard_sort_uptime_label}}</a></li>
                 </ul>
             </div>
             <!-- .dropdown -->
@@ -102,7 +102,7 @@
         <div class="col-sm-3 col-xs-2">
             <button id="create-cluster-btn" ng-disabled="activeCredential === undefined" class="btn btn-success btn-block btn-collapse-title" role="button">
                 <i class="fa fa-plus fa-fw"></i>
-                <span> create cluster</span>
+                <span> {{msg.dashboard_create_cluster_label}}</span>
             </button>
         </div>
 

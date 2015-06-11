@@ -20,11 +20,11 @@
                   </div>
                 </dl>
                 <dl class="mod-uptime">
-                    <dt>uptime</dt>
+                    <dt>{{msg.cluster_list_uptime_label}}</dt>
                     <dd class="big-numeral">{{cluster.hoursUp}}<sup>h</sup>{{cluster.minutesUp}}<sup>m</sup></dd>
                 </dl>
                 <dl class="mod-nodes">
-                    <dt>nodes</dt>
+                    <dt>{{msg.cluster_list_nodes_label}}</dt>
                     <dd class="big-numeral">{{cluster.nodeCount}}</dd>
                 </dl>
                 <!--TODO-->
@@ -47,17 +47,17 @@
        <div class="modal-content">
           <!-- .modal-header -->
           <div class="modal-body">
-               <div ng-show="selectedCluster.status === 'STOPPED'"><p>Start cluster <strong>{{selectedCluster.name}}</strong> and its stack?</p></div>
-               <div ng-show="selectedCluster.status === 'AVAILABLE'"><p>Stop cluster <strong>{{selectedCluster.name}}</strong> and its stack?</p></div>
+               <div ng-show="selectedCluster.status === 'STOPPED'"><p>{{msg.cluster_list_start_dialog_prefix}} <strong>{{selectedCluster.name}}</strong> {{msg.cluster_list_dialog_suffix}}</p></div>
+               <div ng-show="selectedCluster.status === 'AVAILABLE'"><p>{{msg.cluster_list_stop_dialog_prefix}} <strong>{{selectedCluster.name}}</strong> {{msg.cluster_list_dialog_suffix}}</p></div>
           </div>
           <div class="modal-footer">
              <div class="row">
                  <div class="col-xs-6">
-                    <button type="button" class="btn btn-block btn-default" data-dismiss="modal">cancel</button>
+                    <button type="button" class="btn btn-block btn-default" data-dismiss="modal">{{msg.cluster_list_cancel_command_label}}</button>
                  </div>
                  <div class="col-xs-6">
-                    <div ng-show="selectedCluster.status === 'STOPPED'"><button ng-show="selectedCluster.status === 'STOPPED'" type="button" class="btn btn-block btn-success" data-dismiss="modal" id="reqStatChangeBtn" ng-click="requestStatusChange(selectedCluster)"><i class="fa fa-play fa-fw"></i>start</button></div>
-                    <div ng-show="selectedCluster.status === 'AVAILABLE'"><button ng-show="selectedCluster.status === 'AVAILABLE'" type="button" class="btn btn-block btn-warning" data-dismiss="modal" id="reqStatChangeBtn" ng-click="requestStatusChange(selectedCluster)"><i class="fa fa-pause fa-fw"></i>stop</button></div>
+                    <div ng-show="selectedCluster.status === 'STOPPED'"><button ng-show="selectedCluster.status === 'STOPPED'" type="button" class="btn btn-block btn-success" data-dismiss="modal" id="reqStatChangeBtn" ng-click="requestStatusChange(selectedCluster)"><i class="fa fa-play fa-fw"></i>{{msg.cluster_list_start_command_label}}</button></div>
+                    <div ng-show="selectedCluster.status === 'AVAILABLE'"><button ng-show="selectedCluster.status === 'AVAILABLE'" type="button" class="btn btn-block btn-warning" data-dismiss="modal" id="reqStatChangeBtn" ng-click="requestStatusChange(selectedCluster)"><i class="fa fa-pause fa-fw"></i>{{msg.cluster_list_stop_command_label}}</button></div>
                  </div>
              </div>
           </div>

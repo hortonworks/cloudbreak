@@ -7,56 +7,56 @@
         <div id="cluster-details-panel-collapse">
             <div class="panel-body">
                 <ul class="nav nav-pills nav-justified" role="tablist">
-                  <li class="active"><a ng-click="showDetails()" role="tab" data-toggle="tab">details</a></li>
-                  <li><a role="tab" ng-click="showPeriscope()" role="tab" data-toggle="tab">autoscaling SLA policies</a></li>
+                  <li class="active"><a ng-click="showDetails()" role="tab" data-toggle="tab">{{msg.active_cluster_details_title}}</a></li>
+                  <li><a role="tab" ng-click="showPeriscope()" role="tab" data-toggle="tab">{{msg.active_cluster_periscope_title}}</a></li>
                 </ul>
                 <div class="tab-content">
                     <section id="cluster-details-pane" ng-class="{ 'active': detailsShow }" ng-show="detailsShow" class="tab-pane fade in">
                         <p class="text-right">
                             <a href="" class="btn btn-info" role="button" data-toggle="modal" data-target="#modal-sync-cluster">
-                                <i class="fa fa-refresh fa-fw"></i><span> sync</span>
+                                <i class="fa fa-refresh fa-fw"></i><span> {{msg.active_cluster_command_sync_label}}</span>
                             </a>
                             <a href="" class="btn btn-success" role="button" ng-show="activeCluster.cluster.status == 'CREATE_FAILED'" data-toggle="modal" data-target="#modal-reset-cluster">
-                                <i class="fa fa-undo fa-fw"></i><span> reinstall</span>
+                                <i class="fa fa-undo fa-fw"></i><span> {{msg.active_cluster_command_reinstall_label}}</span>
                             </a>
                             <a href="" class="btn btn-success" role="button" ng-show="activeCluster.status == 'STOPPED' || (activeCluster.cluster.status == 'START_REQUESTED' && activeCluster.status == 'AVAILABLE')" data-toggle="modal" data-target="#modal-start-cluster">
-                                <i class="fa fa-play fa-fw"></i><span> start</span>
+                                <i class="fa fa-play fa-fw"></i><span> {{msg.active_cluster_command_start_label}}</span>
                             </a>
                             <a href="" class="btn btn-warning" role="button" ng-show="(activeCluster.status == 'AVAILABLE' && activeCluster.cluster.status != 'START_REQUESTED') || (activeCluster.status == 'STOP_REQUESTED' && activeCluster.cluster.status == 'STOPPED')" data-toggle="modal" data-target="#modal-stop-cluster">
-                                <i class="fa fa-pause fa-fw"></i><span> stop</span>
+                                <i class="fa fa-pause fa-fw"></i><span> {{msg.active_cluster_command_stop_label}}</span>
                             </a>
                             <a href="" id="terminate-btn" class="btn btn-danger" role="button" data-toggle="modal" data-target="#modal-terminate">
-                                <i class="fa fa-trash-o fa-fw"></i><span> terminate</span>
+                                <i class="fa fa-trash-o fa-fw"></i><span> {{msg.active_cluster_command_terminate_label}}</span>
                             </a>
                         </p>
                         <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
                             <div class="form-group">
-                                <label class="col-sm-3 control-label" for="sl_ambariServerIp">Ambari server adress</label>
+                                <label class="col-sm-3 control-label" for="sl_ambariServerIp">{{msg.active_cluster_ambari_address_label}}</label>
                                 <div class="col-sm-9">
                                     <p id="sl_ambariServerIp" class="form-control-static">
                                         <div ng-if="activeCluster.cluster.ambariServerIp != null">
                                             <a ng-show="activeCluster.cluster.ambariServerIp != null" target="_blank" href="http://{{activeCluster.cluster.ambariServerIp}}:8080">http://{{activeCluster.cluster.ambariServerIp}}:8080</a>
                                         </div>
                                         <div ng-if="activeCluster.cluster.ambariServerIp == null">
-                                            <a ng-show="activeCluster.cluster.ambariServerIp == null" target="_blank" href="">Not Available</a>
+                                            <a ng-show="activeCluster.cluster.ambariServerIp == null" target="_blank" href="">{{msg.active_cluster_ambari_not_available_label}}</a>
                                         </div>
                                     </p>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="col-sm-3 control-label" for="sl_cloudPlatform">Platform</label>
+                                <label class="col-sm-3 control-label" for="sl_cloudPlatform">{{msg.active_cluster_platform_label}}</label>
                                 <div class="col-sm-9">
                                     <p id="sl_cloudPlatform" class="form-control-static">{{activeCluster.cloudPlatform}}</p>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="col-sm-3 control-label" for="sl_nodeCount">Number of nodes</label>
+                                <label class="col-sm-3 control-label" for="sl_nodeCount">{{msg.active_cluster_node_count_label}}</label>
                                 <div class="col-sm-9">
                                     <p id="sl_nodeCount" class="form-control-static">{{activeCluster.nodeCount}}</p>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="col-sm-3 control-label" for="sl_region">Region</label>
+                                <label class="col-sm-3 control-label" for="sl_region">{{msg.active_cluster_region_label}}</label>
                                 <div class="col-sm-9" ng-if="activeCluster.cloudPlatform == 'AWS' ">
                                     <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.AWS.awsRegions | filter:{key: activeCluster.region}:true">{{item.value}}</p>
                                 </div>
@@ -71,7 +71,7 @@
                                 </div>
                             </div>
                             <div class="form-group" ng-if="activeCluster.cluster.statusReason === null && (activeCluster.statusReason != null && activeCluster.statusReason != '')">
-                                <label class="col-sm-3 control-label" for="sl_cloudStatus">Cluster status</label>
+                                <label class="col-sm-3 control-label" for="sl_cloudStatus">{{msg.active_cluster_status_label}}</label>
                                 <div class="col-sm-9">
                                     <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.statusReason}}</p>
                                 </div>
@@ -80,7 +80,7 @@
                                 </div>
                             </div>
                             <div class="form-group" ng-if="activeCluster.cluster.statusReason != null && activeCluster.cluster.statusReason != ''">
-                                <label class="col-sm-3 control-label" for="sl_cloudStatus">Cluster status</label>
+                                <label class="col-sm-3 control-label" for="sl_cloudStatus">{{msg.active_cluster_status_label}}</label>
                                 <div class="col-sm-9">
                                     <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.cluster.statusReason}}2</p>
                                 </div>
@@ -88,7 +88,7 @@
                         </form>
                         <div class="panel panel-default" >
                                 <div class="panel-heading">
-                                    <h5><a data-toggle="collapse" data-target="#cluster-exposed-ports-collapse01"><i class="fa fa-link fa-fw"></i>Services</a></h5>
+                                    <h5><a data-toggle="collapse" data-target="#cluster-exposed-ports-collapse01"><i class="fa fa-link fa-fw"></i>{{msg.active_cluster_service_title_label}}</a></h5>
                                 </div>
 
                                 <div id="cluster-exposed-ports-collapse01" class="panel-collapse collapse">
@@ -100,10 +100,10 @@
                                                         <thead>
                                                             <tr>
                                                                 <th>
-                                                                    <span>ServiceName</span>
+                                                                    <span>{{msg.active_cluster_service_name_label}}</span>
                                                                 </th>
                                                                 <th>
-                                                                    <span>Address</span>
+                                                                    <span>{{msg.active_cluster_service_address_label}}</span>
                                                                 </th>
                                                             </tr>
                                                         </thead>
@@ -123,7 +123,7 @@
 
                         <div class="panel panel-default panel-cluster-history">
                             <div class="panel-heading">
-                                <h5><a data-toggle="collapse" data-target="#cluster-history-collapse01"><i class="fa fa-clock-o fa-fw"></i>Event history</a></h5>
+                                <h5><a data-toggle="collapse" data-target="#cluster-history-collapse01"><i class="fa fa-clock-o fa-fw"></i>{{msg.active_cluster_event_history_label}}</a></h5>
                             </div>
 
                             <div id="cluster-history-collapse01" class="panel-collapse collapse" style="height: auto;">
@@ -147,7 +147,7 @@
 
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <h5><a href="" data-toggle="collapse" data-target="#panel-collapse0002"><i class="fa fa-align-justify fa-fw"></i>Cloud stack description: {{activeCluster.name}}</a></h5>
+                                <h5><a href="" data-toggle="collapse" data-target="#panel-collapse0002"><i class="fa fa-align-justify fa-fw"></i>{{msg.active_cluster_stack_description_title_prefix_label}} {{activeCluster.name}}</a></h5>
                             </div>
                             <div id="panel-collapse0002" class="panel-collapse collapse">
                                 <div class="panel-body pagination">
@@ -161,16 +161,16 @@
                                             <thead>
                                               <tr>
                                                  <th>
-                                                 <span>Name</span>
+                                                 <span>{{msg.active_cluster_stack_description_name_label}}</span>
                                                  </th>
                                                  <th>
-                                                 <span>Public Address</span>
+                                                 <span>{{msg.active_cluster_stack_description_public_address_label}}</span>
                                                  </th>
                                                  <th>
-                                                 <span>Private Address</span>
+                                                 <span>{{msg.active_cluster_stack_description_private_address_label}}</span>
                                                  </th>
                                                  <th>
-                                                 <span>Hostgroup Name</span>
+                                                 <span>{{msg.active_cluster_stack_description_hostgroup_name_label}}</span>
                                                  </th>
                                                </tr>
                                             </thead>
@@ -190,7 +190,7 @@
                         </div>
                         <div class="panel panel-default" ng-repeat="group in $root.activeCluster.instanceGroups">
                             <div class="panel-heading">
-                                <h5><a href="" data-toggle="collapse" data-target='#panel-collapsetmp-{{$index}}-{{group.templateId}}'><span class="badge pull-right ng-binding">{{group.group}}: {{group.nodeCount}} node</span><i class="fa fa-file-o fa-fw"></i>Template: {{getSelectedTemplate(group.templateId).name}}</a></h5>
+                                <h5><a href="" data-toggle="collapse" data-target='#panel-collapsetmp-{{$index}}-{{group.templateId}}'><span class="badge pull-right ng-binding">{{group.group}}: {{group.nodeCount}} {{msg.active_cluster_instance_group_node_label}}</span><i class="fa fa-file-o fa-fw"></i>Template: {{getSelectedTemplate(group.templateId).name}}</a></h5>
                             </div>
                             <div id="panel-collapsetmp-{{$index}}-{{group.templateId}}" class="panel-collapse collapse">
                                 <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'AWS' ">
@@ -209,7 +209,7 @@
                         </div>
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <h5><a href="" data-toggle="collapse" data-target='#panel-collapsetmp-network-{{$root.activeCluster.networkId}}'><i class="fa fa-sitemap fa-fw"></i>Network: {{activeClusterNetwork.name}}</a></h5>
+                                <h5><a href="" data-toggle="collapse" data-target='#panel-collapsetmp-network-{{$root.activeCluster.networkId}}'><i class="fa fa-sitemap fa-fw"></i>{{msg.active_cluster_network_label}} {{activeClusterNetwork.name}}</a></h5>
                             </div>
                                 <div id="panel-collapsetmp-network-{{$root.activeCluster.networkId}}" class="panel-collapse collapse">
                                     <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'AWS' ">
@@ -228,7 +228,7 @@
                         </div>
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <h5><a href="" data-toggle="collapse" data-target="#panel-collapse02"><i class="fa fa-th fa-fw"></i>Blueprint: {{activeClusterBlueprint.name}}</a></h5>
+                                <h5><a href="" data-toggle="collapse" data-target="#panel-collapse02"><i class="fa fa-th fa-fw"></i>{{msg.active_cluster_blueprint_label}} {{activeClusterBlueprint.name}}</a></h5>
                             </div>
                             <div id="panel-collapse02" class="panel-collapse collapse">
                                 <div class="panel-body">
@@ -238,7 +238,7 @@
                         </div>
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <h5><a href="" data-toggle="collapse" data-target="#panel-collapse001"><i class="fa fa-tag fa-fw"></i>Credential: {{activeClusterCredential.name}}</a></h5>
+                                <h5><a href="" data-toggle="collapse" data-target="#panel-collapse001"><i class="fa fa-tag fa-fw"></i>{{msg.active_cluster_credential_label}} {{activeClusterCredential.name}}</a></h5>
                             </div>
                             <div id="panel-collapse001" class="panel-collapse collapse">
                                 <div class="panel-body" ng-if="activeClusterCredential.cloudPlatform == 'AWS' ">
@@ -271,15 +271,15 @@
             <div class="modal-content">
                 <!-- .modal-header -->
                 <div class="modal-body">
-                    <p>Terminate cluster <strong>{{activeCluster.name}}</strong> and its stack?</p>
+                    <p>{{msg.cluster_list_terminate_dialog_prefix}} <strong>{{activeCluster.name}}</strong> {{msg.cluster_list_dialog_suffix}}</p>
                 </div>
                 <div class="modal-footer">
                     <div class="row">
                         <div class="col-xs-6">
-                            <button type="button" class="btn btn-block btn-default" data-dismiss="modal">cancel</button>
+                            <button type="button" class="btn btn-block btn-default" data-dismiss="modal">{{msg.cluster_list_cancel_command_label}}</button>
                         </div>
                         <div class="col-xs-6">
-                            <button type="button" class="btn btn-block btn-danger" data-dismiss="modal" id="terminateStackBtn" ng-click="deleteCluster(activeCluster)"><i class="fa fa-trash-o fa-fw"></i>terminate</button>
+                            <button type="button" class="btn btn-block btn-danger" data-dismiss="modal" id="terminateStackBtn" ng-click="deleteCluster(activeCluster)"><i class="fa fa-trash-o fa-fw"></i>{{msg.active_cluster_command_terminate_label}}</button>
                         </div>
                     </div>
                 </div>
@@ -292,15 +292,15 @@
             <div class="modal-content">
                 <!-- .modal-header -->
                 <div class="modal-body">
-                    <p>Stop cluster <strong>{{activeCluster.name}}</strong> and its stack?</p>
+                    <p>{{msg.cluster_list_stop_dialog_prefix}} <strong>{{activeCluster.name}}</strong> {{msg.cluster_list_dialog_suffix}}</p>
                 </div>
                 <div class="modal-footer">
                     <div class="row">
                         <div class="col-xs-6">
-                            <button type="button" class="btn btn-block btn-default" data-dismiss="modal">cancel</button>
+                            <button type="button" class="btn btn-block btn-default" data-dismiss="modal">{{msg.cluster_list_cancel_command_label}}</button>
                         </div>
                         <div class="col-xs-6">
-                            <button type="button" class="btn btn-block btn-warning" data-dismiss="modal" id="stackStackBtn" ng-click="stopCluster(activeCluster)"><i class="fa fa-pause fa-fw"></i>stop</button>
+                            <button type="button" class="btn btn-block btn-warning" data-dismiss="modal" id="stackStackBtn" ng-click="stopCluster(activeCluster)"><i class="fa fa-pause fa-fw"></i>{{msg.cluster_list_stop_command_label}}</button>
                         </div>
                     </div>
                 </div>
@@ -313,15 +313,15 @@
             <div class="modal-content">
                 <!-- .modal-header -->
                 <div class="modal-body">
-                    <p>Sync cluster <strong>{{activeCluster.name}}</strong> and its stack?</p>
+                    <p>{{msg.cluster_list_sync_dialog_prefix}} <strong>{{activeCluster.name}}</strong> {{msg.cluster_list_dialog_suffix}}</p>
                 </div>
                 <div class="modal-footer">
                     <div class="row">
                         <div class="col-xs-6">
-                            <button type="button" class="btn btn-block btn-default" data-dismiss="modal">cancel</button>
+                            <button type="button" class="btn btn-block btn-default" data-dismiss="modal">{{msg.cluster_list_cancel_command_label}}</button>
                         </div>
                         <div class="col-xs-6">
-                            <button type="button" class="btn btn-block btn-info" data-dismiss="modal" id="stackStackBtn" ng-click="syncCluster(activeCluster)"><i class="fa fa-refresh fa-fw"></i>sync</button>
+                            <button type="button" class="btn btn-block btn-info" data-dismiss="modal" id="stackStackBtn" ng-click="syncCluster(activeCluster)"><i class="fa fa-refresh fa-fw"></i>{{msg.active_cluster_command_sync_label}}</button>
                         </div>
                     </div>
                 </div>
@@ -334,15 +334,15 @@
             <div class="modal-content">
                 <!-- .modal-header -->
                 <div class="modal-body">
-                    <p>Start cluster <strong>{{activeCluster.name}}</strong> and its stack?</p>
+                    <p>{{msg.cluster_list_start_dialog_prefix}} <strong>{{activeCluster.name}}</strong> {{msg.cluster_list_dialog_suffix}}</p>
                 </div>
                 <div class="modal-footer">
                     <div class="row">
                         <div class="col-xs-6">
-                            <button type="button" class="btn btn-block btn-default" data-dismiss="modal">cancel</button>
+                            <button type="button" class="btn btn-block btn-default" data-dismiss="modal">{{msg.cluster_list_cancel_command_label}}</button>
                         </div>
                         <div class="col-xs-6">
-                            <button type="button" class="btn btn-block btn-success" data-dismiss="modal" id="stackStackBtn" ng-click="startCluster(activeCluster)"><i class="fa fa-play fa-fw"></i>start</button>
+                            <button type="button" class="btn btn-block btn-success" data-dismiss="modal" id="stackStackBtn" ng-click="startCluster(activeCluster)"><i class="fa fa-play fa-fw"></i>{{msg.active_cluster_command_start_label}}</button>
                         </div>
                     </div>
                 </div>
@@ -355,11 +355,11 @@
             <div class="modal-content">
                 <!-- .modal-header -->
                 <div class="modal-body">
-                    <p>Reinstall cluster <strong>{{activeCluster.name}}</strong> with the selected blueprint?</p>
+                    <p>{{msg.cluster_list_reinstall_dialog_prefix}} <strong>{{activeCluster.name}}</strong> {{msg.cluster_list_reinstall_dialog_suffix}}</p>
                     <div class="form">
                           <div class="row">
                                 <div class="form-group">
-                                    <label class="col-sm-2 control-label" for="selectBlueprintreinstall">Blueprint</label>
+                                    <label class="col-sm-2 control-label" for="selectBlueprintreinstall">{{msg.active_cluster_reset_blueprint_label}}</label>
                                     <div class="col-sm-10">
                                         <select class="form-control" id="selectBlueprintreinstall" ng-model="reinstallClusterObject.blueprintId" required ng-change="selectBlueprintreinstallChange()" >
                                             <option ng-repeat="blueprint in $root.blueprints | orderBy:'name'" data-value="{{blueprint.id}}" value="{{blueprint.id}}" id="{{blueprint.id}}" ng-show="blueprint.ambariBlueprint.host_groups.length === $root.activeClusterBlueprint.ambariBlueprint.host_groups.length">{{blueprint.name}}
@@ -370,7 +370,7 @@
                           </div>
                           <div class="row" style="margin-top: 8px">
                             <div class="form-group">
-                                <label class="col-sm-3 control-label" for="validateBlueprintreinstall">Validate blueprint</label>
+                                <label class="col-sm-3 control-label" for="validateBlueprintreinstall">{{msg.active_cluster_reset_validate_blueprint_label}}</label>
                                 <div class="col-sm-6">
                                     <input type="checkbox" name="validateBlueprintreinstall" id="validateBlueprintreinstall" ng-model="reinstallClusterObject.validateBlueprint">
                                 </div>
@@ -381,11 +381,11 @@
                                 <div ng-repeat="newhostgroup in $root.reinstallClusterObject.hostgroups | orderBy:'instanceGroupName'" id="newhostgroups" ng-show="$root.reinstallClusterObject.hostgroups">
                                     <div class="panel panel-default" style="border-top-left-radius: 0.5em; border-top-right-radius: 0.5em;">
                                         <div class="panel-heading" style="border-top-left-radius: 0.5em; border-top-right-radius: 0.5em;">
-                                            <h3 class="panel-title">Please select a hostgroup for <kbd>{{newhostgroup.instanceGroupName}}</kbd> instancegroup</h3>
+                                            <h3 class="panel-title">{{msg.active_cluster_reset_hostgroup_message_prefix}} <kbd>{{newhostgroup.instanceGroupName}}</kbd> {{msg.active_cluster_reset_hostgroup_message_suffix}}</h3>
                                         </div>
                                         <div class="panel-body">
                                             <div class="form-group" name="templateNodeform{{$index}}" >
-                                                <label class="col-sm-3 control-label" for="templateNodeCount{{$index}}">Host group</label>
+                                                <label class="col-sm-3 control-label" for="templateNodeCount{{$index}}">{{msg.active_cluster_reset_hostgroup_label}}</label>
                                                 <div class="col-sm-9">
                                                     <select class="form-control" id="newhostgroupsdiv" ng-model="newhostgroup.name" required ng-options="hgvalue.name as hgvalue.name for hgvalue in $root.reinstallClusterObject.fullBp.ambariBlueprint.host_groups">
                                                     </select>
@@ -401,54 +401,54 @@
                                 <div id="ambariStackDetailsrestart">
                                     <div class="panel panel-default" style="border-top-left-radius: 0.5em; border-top-right-radius: 0.5em;">
                                         <div class="panel-heading" style="border-top-left-radius: 0.5em; border-top-right-radius: 0.5em;">
-                                            <h3 class="panel-title">Ambari stack details</h3>
+                                            <h3 class="panel-title">{{msg.active_cluster_ambari_details_title}}</h3>
                                         </div>
                                         <div class="panel-body">
                                             <div class="form-group" name="ambariStackDetailsreinstallpane">
                                                 <div class="form-group" name="ambari_stack1" >
-                                                    <label class="col-sm-3 control-label" for="ambari_stack">Stack</label>
+                                                    <label class="col-sm-3 control-label" for="ambari_stack">{{msg.cluster_form_ambari_repo_stack_label}}</label>
                                                     <div class="col-sm-9">
-                                                        <input type="string" name="ambari_stack" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.stack" id="ambari_stack" placeholder="HDP">
+                                                        <input type="string" name="ambari_stack" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.stack" id="ambari_stack" placeholder="{{msg.cluster_form_ambari_repo_stack_placeholder}}">
                                                     </div>
                                                 </div>
                                                 <div class="form-group" name="ambari_version1" >
-                                                    <label class="col-sm-3 control-label" for="ambari_version">Version</label>
+                                                    <label class="col-sm-3 control-label" for="ambari_version">{{msg.cluster_form_ambari_repo_version_label}}</label>
                                                     <div class="col-sm-9">
-                                                        <input type="string" name="ambari_version" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.version" id="ambari_version" placeholder="2.2">
+                                                        <input type="string" name="ambari_version" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.version" id="ambari_version" placeholder="{{msg.cluster_form_ambari_repo_version_placeholder}}">
                                                     </div>
                                                 </div>
                                                 <div class="form-group" name="ambari_os1" >
-                                                    <label class="col-sm-3 control-label" for="ambari_os">Os</label>
+                                                    <label class="col-sm-3 control-label" for="ambari_os">{{msg.cluster_form_ambari_repo_os_label}}</label>
                                                     <div class="col-sm-9">
-                                                        <input type="string" disabled name="ambari_os" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.os" id="ambari_os" placeholder="redhat6">
+                                                        <input type="string" disabled name="ambari_os" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.os" id="ambari_os" placeholder="{{msg.cluster_form_ambari_repo_os_placeholder}}">
                                                     </div>
                                                 </div>
                                                 <div class="form-group" name="ambari_stackRepoId1" >
-                                                    <label class="col-sm-3 control-label" for="ambari_stackRepoId">Stack Repo Id</label>
+                                                    <label class="col-sm-3 control-label" for="ambari_stackRepoId">{{msg.cluster_form_ambari_repo_stack_repoid_label}}</label>
                                                     <div class="col-sm-9">
-                                                        <input type="string" name="ambari_stackRepoId" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.stackRepoId" id="ambari_stackRepoId" placeholder="HDP-2.2">
+                                                        <input type="string" name="ambari_stackRepoId" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.stackRepoId" id="ambari_stackRepoId" placeholder="{{msg.cluster_form_ambari_repo_stack_repoid_placeholder}}">
                                                     </div>
                                                 </div>
                                                 <div class="form-group" name="ambari_stackBaseURL1" >
-                                                    <label class="col-sm-3 control-label" for="ambari_stackBaseURL">Base Url</label>
+                                                    <label class="col-sm-3 control-label" for="ambari_stackBaseURL">{{msg.cluster_form_ambari_repo_baseurl_label}}</label>
                                                     <div class="col-sm-9">
-                                                        <input type="string" name="ambari_stackBaseURL" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.stackBaseURL" id="ambari_stackBaseURL" placeholder="http://public-repo-1.hortonworks.com/HDP/centos6/2.x/GA/2.2.0.0">
+                                                        <input type="string" name="ambari_stackBaseURL" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.stackBaseURL" id="ambari_stackBaseURL" placeholder="{{msg.cluster_form_ambari_repo_baseurl_placeholder}}">
                                                     </div>
                                                 </div>
                                                 <div class="form-group" name="ambari_utilsRepoId1" >
-                                                    <label class="col-sm-3 control-label" for="ambari_utilsRepoId">Utils Repo Id</label>
+                                                    <label class="col-sm-3 control-label" for="ambari_utilsRepoId">{{msg.cluster_form_ambari_repo_utils_repoid_label}}</label>
                                                     <div class="col-sm-9">
-                                                        <input type="string" name="ambari_utilsRepoId" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.utilsRepoId" id="ambari_utilsRepoId" placeholder="HDP-UTILS-1.1.0.20">
+                                                        <input type="string" name="ambari_utilsRepoId" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.utilsRepoId" id="ambari_utilsRepoId" placeholder="{{msg.cluster_form_ambari_repo_utils_repoid_placeholder}}">
                                                     </div>
                                                 </div>
                                                 <div class="form-group" name="ambari_utilsBaseURL1" >
-                                                    <label class="col-sm-3 control-label" for="ambari_utilsBaseURL">Utils Base Url</label>
+                                                    <label class="col-sm-3 control-label" for="ambari_utilsBaseURL">{{msg.cluster_form_ambari_repo_utils_baseurl_label}}</label>
                                                     <div class="col-sm-9">
-                                                        <input type="string" name="ambari_utilsBaseURL" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.utilsBaseURL" id="ambari_utilsBaseURL" placeholder="http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/centos6">
+                                                        <input type="string" name="ambari_utilsBaseURL" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.utilsBaseURL" id="ambari_utilsBaseURL" placeholder="{{msg.cluster_form_ambari_repo_utils_baseurl_placeholder}}">
                                                     </div>
                                                 </div>
                                                 <div class="form-group" name="cluster_verify1" >
-                                                    <label class="col-sm-3 control-label" for="cluster_verify">Verify</label>
+                                                    <label class="col-sm-3 control-label" for="cluster_verify">{{msg.cluster_form_ambari_repo_verify_label}}</label>
                                                     <div class="col-sm-9">
                                                         <input type="checkbox" name="cluster_verify" id="cluster_verify" ng-model="reinstallClusterObject.ambariStackDetails.verify">
                                                     </div>
@@ -464,10 +464,10 @@
                 <div class="modal-footer">
                     <div class="row">
                         <div class="col-xs-6">
-                            <button type="button" class="btn btn-block btn-default" data-dismiss="modal">cancel</button>
+                            <button type="button" class="btn btn-block btn-default" data-dismiss="modal">{{msg.cluster_list_cancel_command_label}}</button>
                         </div>
                         <div class="col-xs-6">
-                            <button type="button" class="btn btn-block btn-success" data-dismiss="modal" id="stackStackBtn" ng-click="reinstallCluster(activeCluster)"><i class="fa fa-check fa-fw"></i>reinstall</button>
+                            <button type="button" class="btn btn-block btn-success" data-dismiss="modal" id="stackStackBtn" ng-click="reinstallCluster(activeCluster)"><i class="fa fa-check fa-fw"></i>{{msg.active_cluster_command_reinstall_label}}</button>
                         </div>
                     </div>
                 </div>

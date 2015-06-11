@@ -93,15 +93,15 @@ cloudbreakApp.config([ '$routeProvider', '$locationProvider', function($routePro
 
 cloudbreakApp.run(function ($rootScope, $http) {
     $http.get('messages.properties').then(function (messages) {
-        $rootScope.error_msg = messages.data
+        $rootScope.msg = messages.data
         $rootScope.titleStatus = {
-            "REQUESTED": $rootScope.error_msg.title_requested,
-            "CREATE_IN_PROGRESS": $rootScope.error_msg.title_create_in_progress,
-            "UPDATE_IN_PROGRESS": $rootScope.error_msg.title_update_in_progress,
-            "AVAILABLE": $rootScope.error_msg.title_create_completed,
-            "CREATE_FAILED": $rootScope.error_msg.title_create_failed,
-            "DELETE_IN_PROGRESS": $rootScope.error_msg.title_delete_in_progress,
-            "DELETE_COMPLETED": $rootScope.error_msg.title_delete_completed
+            "REQUESTED": $rootScope.msg.title_requested,
+            "CREATE_IN_PROGRESS": $rootScope.msg.title_create_in_progress,
+            "UPDATE_IN_PROGRESS": $rootScope.msg.title_update_in_progress,
+            "AVAILABLE": $rootScope.msg.title_create_completed,
+            "CREATE_FAILED": $rootScope.msg.title_create_failed,
+            "DELETE_IN_PROGRESS": $rootScope.msg.title_delete_in_progress,
+            "DELETE_COMPLETED": $rootScope.msg.title_delete_completed
         }
     });
 });

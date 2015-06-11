@@ -112,11 +112,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             var blueprint = $filter('filter')($rootScope.blueprints, {id: $scope.cluster.blueprintId}, true)[0];
 
             if (blueprint.hostGroupCount > $scope.cluster.nodeCount) {
-                $scope.showErrorMessage($rootScope.error_msg.hostgroup_invalid_node_count);
+                $scope.showErrorMessage($rootScope.msg.hostgroup_invalid_node_count);
                 return;
             }
             if (blueprint.hostGroupCount === 1 && $scope.cluster.nodeCount != 1) {
-                $scope.showErrorMessage($rootScope.error_msg.hostgroup_single_invalid);
+                $scope.showErrorMessage($rootScope.msg.hostgroup_single_invalid);
                 return;
             }
             if (!$scope.isUndefined($scope.cluster.ambariStackDetails)) {
@@ -133,7 +133,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     $scope.isUndefined($scope.cluster.ambariStackDetails.stackBaseURL) ||
                     $scope.isUndefined($scope.cluster.ambariStackDetails.utilsRepoId) ||
                     $scope.isUndefined($scope.cluster.ambariStackDetails.utilsBaseURL)) {
-                    $scope.showErrorMessage($rootScope.error_msg.ambari_repository_config_error);
+                    $scope.showErrorMessage($rootScope.msg.ambari_repository_config_error);
                     return;
                 } else {
                     $scope.cluster.ambariStackDetails.os = "redhat6";
@@ -174,7 +174,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     initCluster();
                 }
             }, function(failure) {
-                $scope.showError(failure, $rootScope.error_msg.cluster_failed);
+                $scope.showError(failure, $rootScope.msg.cluster_failed);
             });
         }
 
@@ -195,7 +195,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 actCluster.status = "DELETE_IN_PROGRESS";
                 $scope.$broadcast('DELETE_PERISCOPE_CLUSTER', cluster.id);
             }, function (failure){
-                $scope.showError(failure, $rootScope.error_msg.cluster_delete_failed);
+                $scope.showError(failure, $rootScope.msg.cluster_delete_failed);
             });
         }
 
@@ -283,11 +283,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 GlobalStack.update({id: activeCluster.id}, newStatus, function(result){
                   activeCluster.status = "STOP_REQUESTED";
                 }, function(error) {
-                  $scope.showError(error, $rootScope.error_msg.cluster_stop_failed);
+                  $scope.showError(error, $rootScope.msg.cluster_stop_failed);
                 });
 
             }, function(error) {
-              $scope.showError(error, $rootScope.error_msg.cluster_stop_failed);
+              $scope.showError(error, $rootScope.msg.cluster_stop_failed);
             });
         }
 
@@ -306,7 +306,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stackBaseURL) ||
                     $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.utilsRepoId) ||
                     $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.utilsBaseURL)) {
-                    $scope.showErrorMessage($rootScope.error_msg.ambari_repository_config_error);
+                    $scope.showErrorMessage($rootScope.msg.ambari_repository_config_error);
                     return;
                 } else {
                     $rootScope.reinstallClusterObject.ambariStackDetails.os = "redhat6";
@@ -327,7 +327,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                   $rootScope.activeCluster.blueprintId = $rootScope.reinstallClusterObject.blueprintId;
                   $rootScope.activeCluster.cluster.status = 'REQUESTED';
             }, function(error) {
-              $scope.showError(error, $rootScope.error_msg.cluster_reinstall_failed);
+              $scope.showError(error, $rootScope.msg.cluster_reinstall_failed);
             });
         }
 
@@ -338,11 +338,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 Cluster.update({id: activeCluster.id}, newStatus, function(success){
                     activeCluster.status = "START_REQUESTED";
                 }, function(error) {
-                  $scope.showError(error, $rootScope.error_msg.cluster_start_failed);
+                  $scope.showError(error, $rootScope.msg.cluster_start_failed);
                 });
 
             }, function(error) {
-              $scope.showError(error, $rootScope.error_msg.cluster_start_failed);
+              $scope.showError(error, $rootScope.msg.cluster_start_failed);
             });
         }
 
@@ -352,11 +352,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 Cluster.update({id: activeCluster.id}, newStatus, function(success){
                     activeCluster.status = "SYNC";
                 }, function(error) {
-                    $scope.showError(error, $rootScope.error_msg.cluster_sync_failed);
+                    $scope.showError(error, $rootScope.msg.cluster_sync_failed);
                 });
 
             }, function(error) {
-                $scope.showError(error, $rootScope.error_msg.cluster_sync_failed);
+                $scope.showError(error, $rootScope.msg.cluster_sync_failed);
             });
         }
 

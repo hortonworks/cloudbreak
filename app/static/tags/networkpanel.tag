@@ -6,7 +6,7 @@
         <div class="panel-heading panel-heading-nav">
             <a href="" id="network-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"
                data-target="#panel-network-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
-            <h4><span class="badge pull-right">{{$root.networks.length}}</span> manage networks</h4>
+            <h4><span class="badge pull-right">{{$root.networks.length}}</span> {{msg.network_manage_title}}</h4>
         </div>
 
         <div id="panel-network-collapse" class="panel-btn-in-header-collapse collapse">
@@ -14,7 +14,7 @@
 
                 <p class="btn-row-over-panel">
                     <a href="" id="panel-create-network-collapse-btn" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-network-collapse">
-                        <i class="fa fa-plus fa-fw"></i><span> create network</span>
+                        <i class="fa fa-plus fa-fw"></i><span> {{msg.network_form_create}}</span>
                     </a>
                 </p>
 
@@ -26,12 +26,12 @@
                             <div class="row " style="padding-bottom: 10px">
                                 <div class="btn-segmented-control" id="providerSelector2">
                                     <div class="btn-group btn-group-justified">
-                                        <a id="awsNetworkChange" type="button" class="btn btn-info" role="button" ng-click="createAwsNetworkRequest()">AWS</a>
-                                        <a id="azureNetworkChange" class="btn btn-default" role="button" ng-click="createAzureNetworkRequest()">Azure</a>
+                                        <a id="awsNetworkChange" type="button" class="btn btn-info" role="button" ng-click="createAwsNetworkRequest()">{{msg.aws_label}}</a>
+                                        <a id="azureNetworkChange" class="btn btn-default" role="button" ng-click="createAzureNetworkRequest()">{{msg.azure_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified">
-                                      <a id="gcpNetworkChange" class="btn btn-default" role="button" ng-click="createGcpNetworkRequest()">GCP</a>
-                                      <a id="openstackNetworkChange" class="btn btn-default" role="button" ng-click="createOpenstackNetworkRequest()">OpenStack</a>
+                                      <a id="gcpNetworkChange" class="btn btn-default" role="button" ng-click="createGcpNetworkRequest()">{{msg.gcp_label}}</a>
+                                      <a id="openstackNetworkChange" class="btn btn-default" role="button" ng-click="createOpenstackNetworkRequest()">{{msg.openstack_label}}</a>
                                     </div>
                                 </div>
                             </div>
@@ -74,7 +74,7 @@
 
                             <p class="btn-row-over-panel">
                                 <a href="" class="btn btn-danger" role="button" ng-click="deleteNetwork(network)">
-                                    <i class="fa fa-times fa-fw"></i><span> delete</span>
+                                    <i class="fa fa-times fa-fw"></i><span> {{msg.network_list_delete}}</span>
                                 </a>
                             </p>
 
