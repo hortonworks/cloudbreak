@@ -1,6 +1,7 @@
 compose-init() {
     deps-require docker-compose
     env-import CB_COMPOSE_PROJECT cbreak
+    env-import CBD_LOG_NAME cbreak
 }
 
 dockerCompose() {
@@ -24,11 +25,22 @@ compose-pull() {
     dockerCompose pull
 }
 
+create-logfile() {
+    
+    rm -f ${CBD_LOG_NAME}.log
+    export LOG=${CBD_LOG_NAME}-$(date +%Y%m%d-%H%M%S).log
+    touch $LOG
+    ln -s $LOG ${CBD_LOG_NAME}.log
+}
+
 compose-up() {
     declare desc="Starts containers with docker-compose"
     declare services="$@"
 
     deployer-generate
+
+    create-logfile
+
     dockerCompose up -d $services
 
     info "CloudBreak containers are started ..."
