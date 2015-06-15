@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
+import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_COMPLETE;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -17,17 +19,17 @@ import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.SimpleStatusCheckerTask;
 
 @Component
-public class CloudFormationStackStatusChecker extends StackBasedStatusCheckerTask<CloudFormationStackPollerObject> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloudFormationStackStatusChecker.class);
+public class CloudFormationStackDeleteStatusChecker extends SimpleStatusCheckerTask<CloudFormationStackDeletePollerObject> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudFormationStackDeleteStatusChecker.class);
 
     @Inject
     private StackRepository stackRepository;
 
     @Override
-    public boolean checkStatus(CloudFormationStackPollerObject context) {
+    public boolean checkStatus(CloudFormationStackDeletePollerObject context) {
         boolean result = false;
         Stack stack = context.getStack();
         StackStatus successStatus = context.getSuccessStatus();
@@ -58,6 +60,36 @@ public class CloudFormationStackStatusChecker extends StackBasedStatusCheckerTas
         return result;
     }
 
+    @Override
+    public void handleTimeout(CloudFormationStackDeletePollerObject context) {
+        Stack stack = context.getStack();
+        throw new AwsResourceException(String.format(
+                "AWS CloudFormation stack didn't reach the desired state in the given time frame, stack id: %s, name %s", stack.getId(), stack.getName()));
+    }
+
+    @Override
+    public String successMessage(CloudFormationStackDeletePollerObject context) {
+        Stack stack = context.getStack();
+        return String.format("AWS CloudFormation stack(%s) reached the desired state '%s'", stack.getId(), context.getSuccessStatus());
+    }
+
+    @Override
+    public boolean exitPolling(CloudFormationStackDeletePollerObject cloudFormationStackDeletePollerObject) {
+        if (!cloudFormationStackDeletePollerObject.getSuccessStatus().equals(DELETE_COMPLETE)) {
+            try {
+                Stack stack = stackRepository.findById(cloudFormationStackDeletePollerObject.getStack().getId());
+                if (stack == null || stack.isDeleteInProgress()) {
+                    return true;
+                }
+                return false;
+            } catch (Exception ex) {
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
     private String getErrorCauseStatusReason(List<StackEvent> stackEvents, StackStatus errorStatus) {
         StackEvent cause = null;
         for (StackEvent event : stackEvents) {
@@ -70,17 +102,5 @@ public class CloudFormationStackStatusChecker extends StackBasedStatusCheckerTas
             }
         }
         return cause.getResourceStatusReason();
-    }
-
-    @Override
-    public void handleTimeout(CloudFormationStackPollerObject cloudFormationStackPollerObject) {
-        throw new AwsResourceException(String.format(
-                "AWS CloudFormation stack didn't reach the desired state in the given time frame, stack id: %s, name %s",
-                cloudFormationStackPollerObject.getStack().getId(), cloudFormationStackPollerObject.getStack().getName()));
-    }
-
-    @Override
-    public String successMessage(CloudFormationStackPollerObject cloudFormationStackPollerObject) {
-        return String.format("AWS CloudFormation stack(%s) reached the desired state '%s'", cloudFormationStackPollerObject.getStack().getId());
     }
 }

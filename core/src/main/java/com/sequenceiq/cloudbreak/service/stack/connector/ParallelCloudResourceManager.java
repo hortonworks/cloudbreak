@@ -30,8 +30,8 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.FailureHandlerService;
 import com.sequenceiq.cloudbreak.service.stack.flow.FutureResult;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisionUtil;
@@ -263,6 +263,7 @@ public class ParallelCloudResourceManager {
             for (int i = networkResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
                 for (Resource resource : stack.getResourcesByType(networkResourceBuilders.get(cloudPlatform).get(i).resourceType())) {
                     networkResourceBuilders.get(cloudPlatform).get(i).delete(resource, dCO, stack.getRegion());
+                    stackUpdater.removeStackResources(stack.getId(), Arrays.asList(resource));
                 }
             }
         } catch (Exception e) {

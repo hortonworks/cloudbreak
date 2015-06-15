@@ -427,6 +427,8 @@ The ssh username is cloudbreak.
 
 `Public in account:` share it with others in the account
 
+You can download our OpenStack image here: <a href=https://s3-eu-west-1.amazonaws.com/cb-openstack-images/cb-centos66-amb200-2015-05-25.img>link</a>
+
 ###Manage resources
 Using manage resources you can create infrastructure templates.
 
