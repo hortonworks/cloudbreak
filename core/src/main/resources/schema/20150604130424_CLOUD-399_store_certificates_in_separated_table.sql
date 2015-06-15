@@ -15,7 +15,10 @@ ALTER TABLE ONLY securityconfig ADD CONSTRAINT securityconfig_pkey PRIMARY KEY (
 
 ALTER TABLE ONLY securityconfig ADD CONSTRAINT fk_securityconfig_stack_id FOREIGN KEY (stack_id) REFERENCES stack(id);
 
+CREATE SEQUENCE securityconfig_table START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
+
 -- //@UNDO
 -- SQL to undo the change goes here.
 
 DROP TABLE securityconfig;
+DROP SEQUENCE securityconfig_table;
