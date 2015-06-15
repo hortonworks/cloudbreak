@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.util.Base64;
 import com.sequenceiq.cloudbreak.EnvironmentVariableConfig;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
@@ -84,7 +85,7 @@ public class TlsSetupService {
             }
             Stack stackWithSecurity = stackRepository.findByIdWithSecurityConfig(stack.getId());
             SecurityConfig securityConfig = stackWithSecurity.getSecurityConfig();
-            securityConfig.setServerCert(simpleSecurityService.readServerCert(stack.getId()));
+            securityConfig.setServerCert(Base64.encodeAsString(simpleSecurityService.readServerCert(stack.getId()).getBytes()));
             securityConfigRepository.save(securityConfig);
         } catch (IOException e) {
             throw new CloudbreakException("Failed to setup TLS through temporary SSH.", e);

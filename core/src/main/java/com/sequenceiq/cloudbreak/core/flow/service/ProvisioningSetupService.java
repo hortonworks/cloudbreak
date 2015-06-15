@@ -10,12 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
-import com.sequenceiq.cloudbreak.domain.SecurityConfig;
+import com.amazonaws.util.Base64;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 
@@ -42,10 +43,10 @@ public class ProvisioningSetupService {
         simpleSecurityService.copyClientKeys(Paths.get(simpleSecurityService.getCertDir(stack.getId())));
         simpleSecurityService.generateTempSshKeypair(stack.getId());
         SecurityConfig securityConfig = new SecurityConfig();
-        securityConfig.setClientKey(simpleSecurityService.readClientKey(stack.getId()));
-        securityConfig.setClientCert(simpleSecurityService.readClientCert(stack.getId()));
-        securityConfig.setTemporarySshPrivateKey(simpleSecurityService.readPrivateSshKey(stack.getId()));
-        securityConfig.setTemporarySshPublicKey(simpleSecurityService.readPublicSshKey(stack.getId()));
+        securityConfig.setClientKey(Base64.encodeAsString(simpleSecurityService.readClientKey(stack.getId()).getBytes()));
+        securityConfig.setClientCert(Base64.encodeAsString(simpleSecurityService.readClientCert(stack.getId()).getBytes()));
+        securityConfig.setTemporarySshPrivateKey(Base64.encodeAsString(simpleSecurityService.readPrivateSshKey(stack.getId()).getBytes()));
+        securityConfig.setTemporarySshPublicKey(Base64.encodeAsString(simpleSecurityService.readPublicSshKey(stack.getId()).getBytes()));
         securityConfig.setStack(stack);
         securityConfigRepository.save(securityConfig);
         return setupComplete;
