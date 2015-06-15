@@ -129,6 +129,8 @@ public class AwsConnector implements CloudPlatformConnector {
     @Inject
     private PollingService<AutoScalingGroupReady> autoScalingGroupReadyPollingService;
     @Inject
+    private PollingService<CloudFormationStackDeletePollerObject> cloudFormationDeletePollingService;
+    @Inject
     private PollingService<CloudFormationStackPollerObject> cloudFormationPollingService;
     @Inject
     private PollingService<EbsVolumeStatePollerObject> ebsVolumeStatePollingService;
@@ -140,6 +142,8 @@ public class AwsConnector implements CloudPlatformConnector {
     private StackRepository stackRepository;
     @Inject
     private AwsInstanceStatusCheckerTask awsInstanceStatusCheckerTask;
+    @Inject
+    private CloudFormationStackDeleteStatusChecker cloudFormationStackDeleteStatusChecker;
     @Inject
     private CloudFormationStackStatusChecker cloudFormationStackStatusChecker;
     @Inject
@@ -359,10 +363,10 @@ public class AwsConnector implements CloudPlatformConnector {
             DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(cFStackName);
             client.deleteStack(deleteStackRequest);
             List<StackStatus> errorStatuses = Arrays.asList(DELETE_FAILED);
-            CloudFormationStackPollerObject stackPollerContext = new CloudFormationStackPollerObject(client, DELETE_COMPLETE,
+            CloudFormationStackDeletePollerObject stackPollerContext = new CloudFormationStackDeletePollerObject(client, DELETE_COMPLETE,
                     DELETE_FAILED, errorStatuses, stack);
-            PollingResult pollingResult = cloudFormationPollingService
-                    .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
+            PollingResult pollingResult = cloudFormationDeletePollingService
+                    .pollWithTimeout(cloudFormationStackDeleteStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
             if (!isSuccess(pollingResult)) {
                 LOGGER.error(String.format("Failed to delete CloudFormation stack: %s, id:%s", cFStackName, stack.getId()));
                 throw new AwsResourceException(String.format("Failed to delete CloudFormation stack; polling result: '%s'.", pollingResult));
