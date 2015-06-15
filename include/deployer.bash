@@ -251,6 +251,8 @@ main() {
         cmd-export migrate-startdb startdb
         cmd-export migrate-cmd migrate
 
+        cmd-export aws-show-role aws-role
+
     fi
 
     if [[ "$DEBUG" ]]; then
