@@ -99,7 +99,7 @@ public class StackFailureHandlerService implements FailureHandlerService {
     private void handleExceptions(Stack stack, List<ResourceRequestResult> failedResourceRequestResult) {
         for (ResourceRequestResult exception : failedResourceRequestResult) {
             List<Resource> resourceList = new ArrayList<>();
-            LOGGER.error("Error was occurred which is: " + exception.getException().orNull().getMessage());
+            LOGGER.error("Error was occurred which is: " + exception.getException().orNull().getMessage(), exception.getException());
             for (Resource resource : exception.getResources()) {
                 Resource newResource = resourceRepository.findByStackIdAndNameAndType(stack.getId(), resource.getResourceName(), resource.getResourceType());
                 if (newResource != null) {

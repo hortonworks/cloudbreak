@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.repository.TlsCertificateRepository;
+import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -40,7 +40,7 @@ public class TlsSetupService {
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
     @Inject
-    private TlsCertificateRepository tlsCertificateRepository;
+    private SecurityConfigRepository securityConfigRepository;
 
     @Inject
     private SimpleSecurityService simpleSecurityService;
@@ -85,7 +85,7 @@ public class TlsSetupService {
             Stack stackWithSecurity = stackRepository.findByIdWithSecurityConfig(stack.getId());
             SecurityConfig securityConfig = stackWithSecurity.getSecurityConfig();
             securityConfig.setServerCert(simpleSecurityService.readServerCert(stack.getId()));
-            tlsCertificateRepository.save(securityConfig);
+            securityConfigRepository.save(securityConfig);
         } catch (IOException e) {
             throw new CloudbreakException("Failed to setup TLS through temporary SSH.", e);
         } finally {

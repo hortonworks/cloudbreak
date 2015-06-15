@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.repository.TlsCertificateRepository;
+import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 
@@ -28,7 +28,7 @@ public class ProvisioningSetupService {
     private StackRepository stackRepository;
 
     @Inject
-    private TlsCertificateRepository tlsCertificateRepository;
+    private SecurityConfigRepository securityConfigRepository;
 
     @Inject
     private SimpleSecurityService simpleSecurityService;
@@ -47,7 +47,7 @@ public class ProvisioningSetupService {
         securityConfig.setTemporarySshPrivateKey(simpleSecurityService.readPrivateSshKey(stack.getId()));
         securityConfig.setTemporarySshPublicKey(simpleSecurityService.readPublicSshKey(stack.getId()));
         securityConfig.setStack(stack);
-        tlsCertificateRepository.save(securityConfig);
+        securityConfigRepository.save(securityConfig);
         return setupComplete;
     }
 
