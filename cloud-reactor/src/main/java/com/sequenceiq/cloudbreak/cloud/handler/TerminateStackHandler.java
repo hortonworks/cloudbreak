@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.CloudPlatformConnectorV2;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.event.TerminateStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.TerminateStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
@@ -42,9 +42,9 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
         TerminateStackRequest terminateStackRequest = terminateStackRequestEvent.getData();
         try {
             String platform = terminateStackRequest.getStackContext().getPlatform();
-            CloudPlatformConnectorV2 connector = cloudPlatformConnectors.get(platform);
+            CloudConnector connector = cloudPlatformConnectors.get(platform);
             AuthenticatedContext ac = connector.authenticate(terminateStackRequest.getStackContext(), terminateStackRequest.getCloudCredential());
-            List<CloudResourceStatus> resourceStatus = connector.terminateResources(ac, terminateStackRequest.getCloudResources());
+            List<CloudResourceStatus> resourceStatus = connector.resources().terminate(ac, terminateStackRequest.getCloudResources());
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
 
             terminateStackRequest.getResult().onNext(new TerminateStackResult("Stack terminated"));

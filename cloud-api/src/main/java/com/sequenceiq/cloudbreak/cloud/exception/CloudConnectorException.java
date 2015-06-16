@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.connector;
+package com.sequenceiq.cloudbreak.cloud.exception;
 
 /**
  * Base for cloud provider specific errors.

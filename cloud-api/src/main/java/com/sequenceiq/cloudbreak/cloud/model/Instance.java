@@ -7,17 +7,18 @@ public class Instance {
 
     private String flavor;
 
+    private String groupName;
+
+    private int privateId;
+
     private InstanceMetaData metaData;
 
     private List<Volume> volumes;
 
-    public Instance(String flavor) {
-        this(flavor, null);
-    }
-
-    public Instance(String flavor, InstanceMetaData metaData) {
-        this.metaData = metaData;
+    public Instance(String flavor, String groupName, int privateId) {
         this.flavor = flavor;
+        this.groupName = groupName;
+        this.privateId = privateId;
         volumes = new ArrayList<>();
     }
 
@@ -33,8 +34,20 @@ public class Instance {
         return volumes;
     }
 
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public int getPrivateId() {
+        return privateId;
+    }
+
     public void addVolume(Volume volume) {
         volumes.add(volume);
+    }
+
+    public void addMetaData(InstanceMetaData metaData) {
+        this.metaData = metaData;
     }
 
     //BEGIN GENERATED CODE

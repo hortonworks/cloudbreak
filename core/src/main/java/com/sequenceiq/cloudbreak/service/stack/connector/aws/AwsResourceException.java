@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
-import com.sequenceiq.cloudbreak.cloud.connector.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
 public class AwsResourceException extends CloudConnectorException {
 

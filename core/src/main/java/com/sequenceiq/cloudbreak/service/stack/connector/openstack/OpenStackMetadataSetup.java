@@ -16,24 +16,21 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
 @Component
-public class OpenStackMetadataSetup implements MetadataSetup {
+public class OpenStackMetadataSetup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackMetadataSetup.class);
 
     @Inject
     private OpenStackUtil openStackUtil;
 
-    @Override
     public Set<CoreInstanceMetaData> collectMetadata(Stack stack) {
         OSClient osClient = openStackUtil.createOSClient(stack);
         Resource heatResource = stack.getResourceByType(ResourceType.HEAT_STACK);
@@ -51,7 +48,6 @@ public class OpenStackMetadataSetup implements MetadataSetup {
         return instancesCoreMetadata;
     }
 
-    @Override
     public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, final String instanceGroupName) {
         OSClient osClient = openStackUtil.createOSClient(stack);
         Resource heatResource = stack.getResourceByType(ResourceType.HEAT_STACK);
@@ -81,11 +77,6 @@ public class OpenStackMetadataSetup implements MetadataSetup {
             }
         }
         return instancesCoreMetadata;
-    }
-
-    @Override
-    public CloudPlatform getCloudPlatform() {
-        return CloudPlatform.OPENSTACK;
     }
 
     private CoreInstanceMetaData createCoreMetaData(Stack stack, Server server, String instanceGroupName, String instanceId) {

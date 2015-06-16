@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.cloud.CloudPlatformConnectorV2;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.event.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.transform.ResourceStatusLists;
 
 public class PollResourcesStateTask implements PollTask<LaunchStackResult> {
 
-    private CloudPlatformConnectorV2 connector;
+    private CloudConnector connector;
 
     private AuthenticatedContext authenticatedContext;
 
@@ -22,7 +22,7 @@ public class PollResourcesStateTask implements PollTask<LaunchStackResult> {
 
 
     @Inject
-    public PollResourcesStateTask(AuthenticatedContext authenticatedContext, CloudPlatformConnectorV2 connector,
+    public PollResourcesStateTask(AuthenticatedContext authenticatedContext, CloudConnector connector,
             List<CloudResource> cloudResource) {
         this.authenticatedContext = authenticatedContext;
         this.connector = connector;
@@ -31,7 +31,7 @@ public class PollResourcesStateTask implements PollTask<LaunchStackResult> {
 
     @Override
     public LaunchStackResult call() throws Exception {
-        List<CloudResourceStatus> results = connector.checkResourcesState(authenticatedContext, cloudResource);
+        List<CloudResourceStatus> results = connector.resources().check(authenticatedContext, cloudResource);
         CloudResourceStatus status = ResourceStatusLists.aggregate(results);
         return new LaunchStackResult(authenticatedContext.getStackContext(), status.getStatus(), status.getStatusReason(), results);
 

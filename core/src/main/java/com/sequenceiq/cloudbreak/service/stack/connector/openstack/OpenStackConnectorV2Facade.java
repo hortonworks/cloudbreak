@@ -170,15 +170,19 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
     public List<Group> getGroups(Stack stack) {
         List<Group> groups = new ArrayList<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            Group group = new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType());
-            OpenStackTemplate openStackTemplate = (OpenStackTemplate) instanceGroup.getTemplate();
-            Instance instance = new Instance(openStackTemplate.getInstanceType());
 
-            for (int i = 0; i < openStackTemplate.getVolumeCount(); i++) {
-                Volume volume = new Volume("/hadoop/fs" + i, "HDD", openStackTemplate.getVolumeSize());
-                instance.addVolume(volume);
+            Group group = new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType());
+
+            for (int nodeId = 0; nodeId < instanceGroup.getNodeCount(); nodeId++) {
+                OpenStackTemplate openStackTemplate = (OpenStackTemplate) instanceGroup.getTemplate();
+                Instance instance = new Instance(openStackTemplate.getInstanceType(), group.getName(), nodeId);
+
+                for (int i = 0; i < openStackTemplate.getVolumeCount(); i++) {
+                    Volume volume = new Volume("/hadoop/fs" + i, "HDD", openStackTemplate.getVolumeSize());
+                    instance.addVolume(volume);
+                }
+                group.addInstance(instance);
             }
-            group.addInstance(instance);
             groups.add(group);
         }
         return groups;

@@ -9,26 +9,26 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.CloudPlatformConnectorV2;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 
 @Component("CloudPlatformConnectorsV2")
 public class CloudPlatformConnectors {
 
     @Inject
-    private List<CloudPlatformConnectorV2> connectors;
+    private List<CloudConnector> connectors;
 
-    private Map<String, CloudPlatformConnectorV2> map;
+    private Map<String, CloudConnector> map;
 
 
     @PostConstruct
     public void cloudPlatformConnectors() {
         map = new HashMap<>();
-        for (CloudPlatformConnectorV2 connector : connectors) {
-            map.put(connector.getCloudPlatform(), connector);
+        for (CloudConnector connector : connectors) {
+            map.put(connector.platform(), connector);
         }
     }
 
-    public CloudPlatformConnectorV2 get(String key) {
+    public CloudConnector get(String key) {
         return map.get(key);
     }
 

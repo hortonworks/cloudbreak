@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.gcp;
 
-import com.sequenceiq.cloudbreak.cloud.connector.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 
 public class GcpResourceException extends CloudConnectorException {

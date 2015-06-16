@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.CloudPlatformConnectorV2;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.event.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
@@ -57,10 +57,11 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
         LaunchStackRequest launchStackRequest = launchStackRequestEvent.getData();
         try {
             String platform = launchStackRequest.getStackContext().getPlatform();
-            CloudPlatformConnectorV2 connector = cloudPlatformConnectors.get(platform);
+            CloudConnector connector = cloudPlatformConnectors.get(platform);
             AuthenticatedContext ac = connector.authenticate(launchStackRequest.getStackContext(), launchStackRequest.getCloudCredential());
 
-            List<CloudResourceStatus> resourceStatus = connector.launchResources(ac, launchStackRequest.getCloudStack(), resourcePersistenceNotifier);
+            List<CloudResourceStatus> resourceStatus = connector.resources().launch(ac, launchStackRequest.getCloudStack(),
+                    resourcePersistenceNotifier);
 
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
 
