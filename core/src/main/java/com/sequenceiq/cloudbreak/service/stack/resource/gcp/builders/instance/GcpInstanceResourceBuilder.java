@@ -27,11 +27,11 @@ import com.google.api.services.compute.model.Tags;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.GcpCredential;
 import com.sequenceiq.cloudbreak.domain.GcpDiskMode;
 import com.sequenceiq.cloudbreak.domain.GcpDiskType;
 import com.sequenceiq.cloudbreak.domain.GcpTemplate;
-import com.sequenceiq.cloudbreak.domain.GcpZone;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -79,12 +79,12 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
         final GcpInstanceCreateRequest gICR = (GcpInstanceCreateRequest) createResourceRequest;
         Stack stack = stackRepository.findById(gICR.getStackId());
         Compute.Instances.Insert ins =
-                gICR.getCompute().instances().insert(gICR.getProjectId(), GcpZone.valueOf(stack.getRegion()).getValue(), gICR.getInstance());
+                gICR.getCompute().instances().insert(gICR.getProjectId(), CloudRegion.valueOf(stack.getRegion()).value(), gICR.getInstance());
         ins.setPrettyPrint(Boolean.TRUE);
         Operation execute = ins.execute();
         if (execute.getHttpErrorStatusCode() == null) {
             Compute.ZoneOperations.Get zoneOperations = createZoneOperations(gICR.getCompute(), gICR.getGcpCredential(), execute,
-                    GcpZone.valueOf(stack.getRegion()));
+                    CloudRegion.valueOf(stack.getRegion()));
             GcpResourceReadyPollerObject instReady =
                     new GcpResourceReadyPollerObject(zoneOperations, stack, gICR.getInstance().getName(), execute.getName(), ResourceType.GCP_INSTANCE);
             gcpInstanceReadyPollerObjectPollingService.pollWithTimeout(gcpResourceCheckerStatus, instReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -94,7 +94,7 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
         }
     }
 
-    private List<AttachedDisk> getAttachedDisks(List<Resource> resources, GcpCredential gcpCredential, GcpZone zone) {
+    private List<AttachedDisk> getAttachedDisks(List<Resource> resources, GcpCredential gcpCredential, CloudRegion zone) {
         List<AttachedDisk> listOfDisks = new ArrayList<>();
         for (Resource resource : filterResourcesByType(resources, ResourceType.GCP_ATTACHED_DISK)) {
             AttachedDisk attachedDisk = new AttachedDisk();
@@ -104,13 +104,13 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
             attachedDisk.setMode(GcpDiskMode.READ_WRITE.getValue());
             attachedDisk.setDeviceName(resource.getResourceName());
             attachedDisk.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s",
-                    gcpCredential.getProjectId(), zone.getValue(), resource.getResourceName()));
+                    gcpCredential.getProjectId(), zone.value(), resource.getResourceName()));
             listOfDisks.add(attachedDisk);
         }
         return listOfDisks;
     }
 
-    private List<AttachedDisk> getBootDiskList(List<Resource> resources, GcpCredential gcpCredential, GcpZone zone) {
+    private List<AttachedDisk> getBootDiskList(List<Resource> resources, GcpCredential gcpCredential, CloudRegion zone) {
         List<AttachedDisk> listOfDisks = new ArrayList<>();
         for (Resource resource : filterResourcesByType(resources, ResourceType.GCP_DISK)) {
             AttachedDisk attachedDisk = new AttachedDisk();
@@ -120,7 +120,7 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
             attachedDisk.setMode(GcpDiskMode.READ_WRITE.getValue());
             attachedDisk.setDeviceName(resource.getResourceName());
             attachedDisk.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s",
-                    gcpCredential.getProjectId(), zone.getValue(), resource.getResourceName()));
+                    gcpCredential.getProjectId(), zone.value(), resource.getResourceName()));
             listOfDisks.add(attachedDisk);
         }
         return listOfDisks;
@@ -132,9 +132,9 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
         try {
             GcpCredential gcpCredential = (GcpCredential) stack.getCredential();
             Operation operation = deleteContextObject.getCompute().instances()
-                    .delete(gcpCredential.getProjectId(), GcpZone.valueOf(region).getValue(), resource.getResourceName()).execute();
+                    .delete(gcpCredential.getProjectId(), CloudRegion.valueOf(region).value(), resource.getResourceName()).execute();
             Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(),
-                    gcpCredential, operation, GcpZone.valueOf(region));
+                    gcpCredential, operation, CloudRegion.valueOf(region));
             Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(), gcpCredential, operation);
             GcpRemoveReadyPollerObject gcpRemoveReady =
                     new GcpRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName(), resourceType());
@@ -165,15 +165,15 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
         GcpTemplate gcpTemplate = (GcpTemplate) instanceGroup.orNull().getTemplate();
 
         List<AttachedDisk> listOfDisks = new ArrayList<>();
-        listOfDisks.addAll(getBootDiskList(resources, gcpCredential, GcpZone.valueOf(stack.getRegion())));
-        listOfDisks.addAll(getAttachedDisks(resources, gcpCredential, GcpZone.valueOf(stack.getRegion())));
+        listOfDisks.addAll(getBootDiskList(resources, gcpCredential, CloudRegion.valueOf(stack.getRegion())));
+        listOfDisks.addAll(getAttachedDisks(resources, gcpCredential, CloudRegion.valueOf(stack.getRegion())));
 
         Instance instance = new Instance();
         instance.setMachineType(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/%s",
-                provisionContextObject.getProjectId(), GcpZone.valueOf(stack.getRegion()).getValue(), gcpTemplate.getGcpInstanceType().getValue()));
+                provisionContextObject.getProjectId(), CloudRegion.valueOf(stack.getRegion()).value(), gcpTemplate.getGcpInstanceType().getValue()));
         instance.setName(buildResources.get(0).getResourceName());
         instance.setCanIpForward(Boolean.TRUE);
-        instance.setNetworkInterfaces(getNetworkInterface(provisionContextObject, stack.getResources(), GcpZone.valueOf(stack.getRegion()), instanceGroup));
+        instance.setNetworkInterfaces(getNetworkInterface(provisionContextObject, stack.getResources(), CloudRegion.valueOf(stack.getRegion()), instanceGroup));
         instance.setDisks(listOfDisks);
         Tags tags = new Tags();
         tags.setItems(Arrays.asList(instanceGroup.orNull().getGroupName().toLowerCase().toString().replaceAll("[^A-Za-z0-9 ]", "")));
@@ -196,14 +196,14 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
                 provisionContextObject.getCompute(), gcpTemplate, gcpCredential, buildResources);
     }
 
-    public Instance describe(Stack stack, Compute compute, Resource resource, GcpZone region) throws IOException {
+    public Instance describe(Stack stack, Compute compute, Resource resource, CloudRegion region) throws IOException {
         GcpCredential gcpCredential = (GcpCredential) stack.getCredential();
-        Compute.Instances.Get getVm = compute.instances().get(gcpCredential.getProjectId(), region.getValue(),
+        Compute.Instances.Get getVm = compute.instances().get(gcpCredential.getProjectId(), region.value(),
                 resource.getResourceName());
         return getVm.execute();
     }
 
-    private List<NetworkInterface> getNetworkInterface(GcpProvisionContextObject contextObject, Set<Resource> resources, GcpZone gcpZone,
+    private List<NetworkInterface> getNetworkInterface(GcpProvisionContextObject contextObject, Set<Resource> resources, CloudRegion gcpZone,
             Optional<InstanceGroup> instanceGroup) throws IOException {
         NetworkInterface iface = new NetworkInterface();
         String networkName = filterResourcesByType(resources, ResourceType.GCP_NETWORK).get(0).getResourceName();
@@ -212,7 +212,7 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
         accessConfig.setName(networkName);
         accessConfig.setType("ONE_TO_ONE_NAT");
         if (instanceGroup.isPresent() && isGateway(instanceGroup.orNull().getInstanceGroupType())) {
-            Compute.Addresses.Get getReservedIp = contextObject.getCompute().addresses().get(contextObject.getProjectId(), gcpZone.getRegion(),
+            Compute.Addresses.Get getReservedIp = contextObject.getCompute().addresses().get(contextObject.getProjectId(), gcpZone.region(),
                     filterResourcesByType(resources, ResourceType.GCP_RESERVED_IP).get(0).getResourceName());
             accessConfig.setNatIP(getReservedIp.execute().getAddress());
         }
@@ -231,10 +231,10 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
         GcpCredential credential = (GcpCredential) startStopContextObject.getStack().getCredential();
         try {
             Compute.Instances.Get get = startStopContextObject.getCompute().instances()
-                    .get(credential.getProjectId(), GcpZone.valueOf(region).getValue(), resource.getResourceName());
+                    .get(credential.getProjectId(), CloudRegion.valueOf(region).value(), resource.getResourceName());
             if ("RUNNING".equals(get.execute().getStatus())) {
                 Compute.Instances.Stop stop = startStopContextObject.getCompute().instances()
-                        .stop(credential.getProjectId(), GcpZone.valueOf(region).getValue(), resource.getResourceName());
+                        .stop(credential.getProjectId(), CloudRegion.valueOf(region).value(), resource.getResourceName());
                 stop.setPrettyPrint(Boolean.TRUE);
                 return setInstanceState(stop.execute(), startStopContextObject, resource, credential, false);
             } else {
@@ -251,10 +251,10 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
         GcpCredential credential = (GcpCredential) startStopContextObject.getStack().getCredential();
         try {
             Compute.Instances.Get get = startStopContextObject.getCompute().instances()
-                    .get(credential.getProjectId(), GcpZone.valueOf(region).getValue(), resource.getResourceName());
+                    .get(credential.getProjectId(), CloudRegion.valueOf(region).value(), resource.getResourceName());
             if ("TERMINATED".equals(get.execute().getStatus())) {
                 Compute.Instances.Start start = startStopContextObject.getCompute().instances()
-                        .start(credential.getProjectId(), GcpZone.valueOf(region).getValue(), resource.getResourceName());
+                        .start(credential.getProjectId(), CloudRegion.valueOf(region).value(), resource.getResourceName());
                 start.setPrettyPrint(Boolean.TRUE);
                 return setInstanceState(start.execute(), startStopContextObject, resource, credential, true);
             } else {
@@ -273,7 +273,7 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
                     startStopContextObject.getCompute(),
                     credential,
                     operation,
-                    GcpZone.valueOf(startStopContextObject.getStack().getRegion()));
+                    CloudRegion.valueOf(startStopContextObject.getStack().getRegion()));
             GcpResourceReadyPollerObject instReady = new GcpResourceReadyPollerObject(zoneOperations, startStopContextObject.getStack(),
                     resource.getResourceName(), operation.getName(), ResourceType.GCP_INSTANCE);
             gcpInstanceReadyPollerObjectPollingService.pollWithTimeout(gcpResourceCheckerStatus, instReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);

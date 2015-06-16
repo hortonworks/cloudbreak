@@ -19,9 +19,9 @@ import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.base.Optional;
+import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.GcpCredential;
 import com.sequenceiq.cloudbreak.domain.GcpTemplate;
-import com.sequenceiq.cloudbreak.domain.GcpZone;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -65,11 +65,11 @@ public class GcpAttachedDiskResourceBuilder extends GcpSimpleInstanceResourceBui
                 public Boolean call() throws Exception {
                     MDC.setContextMap(mdcCtxMap);
                     Compute.Disks.Insert insDisk = gADCR.getCompute().disks().insert(gADCR.getProjectId(),
-                            GcpZone.valueOf(stack.getRegion()).getValue(), disk);
+                            CloudRegion.valueOf(stack.getRegion()).value(), disk);
                     Operation execute = insDisk.execute();
                     if (execute.getHttpErrorStatusCode() == null) {
                         Compute.ZoneOperations.Get zoneOperations =
-                                createZoneOperations(gADCR.getCompute(), gADCR.getGcpCredential(), execute, GcpZone.valueOf(stack.getRegion()));
+                                createZoneOperations(gADCR.getCompute(), gADCR.getGcpCredential(), execute, CloudRegion.valueOf(stack.getRegion()));
                         GcpResourceReadyPollerObject gcpDiskReady =
                                 new GcpResourceReadyPollerObject(zoneOperations, stack, disk.getName(), execute.getName(), ResourceType.GCP_ATTACHED_DISK);
                         gcpDiskReadyPollerObjectPollingService.pollWithTimeout(gcpResourceCheckerStatus, gcpDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -115,7 +115,7 @@ public class GcpAttachedDiskResourceBuilder extends GcpSimpleInstanceResourceBui
             Disk disk = new Disk();
             disk.setSizeGb(instanceGroup.orNull().getTemplate().getVolumeSize().longValue());
             disk.setName(buildName.getResourceName());
-            disk.setKind(gcpTemplate.getGcpRawDiskType().getUrl(provisionContextObject.getProjectId(), GcpZone.valueOf(stack.getRegion())));
+            disk.setKind(gcpTemplate.getGcpRawDiskType().getUrl(provisionContextObject.getProjectId(), CloudRegion.valueOf(stack.getRegion())));
             disks.add(disk);
         }
         return new GcpAttachedDiskCreateRequest(provisionContextObject.getStackId(), resources, disks, provisionContextObject.getProjectId(),

@@ -14,8 +14,8 @@ import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Address;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.base.Optional;
+import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.GcpCredential;
-import com.sequenceiq.cloudbreak.domain.GcpZone;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -54,7 +54,7 @@ public class GcpReservedIpResourceBuilder extends GcpSimpleNetworkResourceBuilde
         Compute.Addresses.Insert networkInsert = reservedIpCreateRequest
                 .getCompute()
                 .addresses()
-                .insert(reservedIpCreateRequest.getProjectId(), reservedIpCreateRequest.getGcpZone().getRegion(), reservedIpCreateRequest.getAddress());
+                .insert(reservedIpCreateRequest.getProjectId(), reservedIpCreateRequest.getGcpZone().region(), reservedIpCreateRequest.getAddress());
         Operation execute = networkInsert.execute();
         if (execute.getHttpErrorStatusCode() == null) {
             Compute.RegionOperations.Get regionOperations = createRegionOperations(reservedIpCreateRequest.getCompute(),
@@ -83,13 +83,13 @@ public class GcpReservedIpResourceBuilder extends GcpSimpleNetworkResourceBuilde
             Operation operation = deleteContextObject
                     .getCompute()
                     .addresses()
-                    .delete(gcpCredential.getProjectId(), GcpZone.valueOf(region).getRegion(), resource.getResourceName())
+                    .delete(gcpCredential.getProjectId(), CloudRegion.valueOf(region).region(), resource.getResourceName())
                     .execute();
             Compute.RegionOperations.Get regionOperations = createRegionOperations(
                     deleteContextObject.getCompute(),
                     gcpCredential,
                     operation,
-                    GcpZone.valueOf(region)
+                    CloudRegion.valueOf(region)
             );
             Compute.GlobalOperations.Get globalOperations = createGlobalOperations(
                     deleteContextObject.getCompute(),
@@ -125,11 +125,11 @@ public class GcpReservedIpResourceBuilder extends GcpSimpleNetworkResourceBuilde
             int index, Optional<InstanceGroup> instanceGroup, Optional<String> userData) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         Address address = new Address();
-        address.setRegion(GcpZone.valueOf(stack.getRegion()).getRegion());
+        address.setRegion(CloudRegion.valueOf(stack.getRegion()).region());
         address.setName(buildResources.get(0).getResourceName());
         return new GcpReservedIpCreateRequest(provisionContextObject.getStackId(), address,
                 provisionContextObject.getProjectId(), provisionContextObject.getCompute(),
-                GcpZone.valueOf(stack.getRegion()), buildResources, (GcpCredential) stack.getCredential());
+                CloudRegion.valueOf(stack.getRegion()), buildResources, (GcpCredential) stack.getCredential());
     }
 
     @Override
@@ -142,10 +142,10 @@ public class GcpReservedIpResourceBuilder extends GcpSimpleNetworkResourceBuilde
         private Long stackId;
         private String projectId;
         private Compute compute;
-        private GcpZone gcpZone;
+        private CloudRegion gcpZone;
         private GcpCredential gcpCredential;
 
-        public GcpReservedIpCreateRequest(Long stackId, Address address, String projectId, Compute compute, GcpZone gcpZone, List<Resource> buildNames,
+        public GcpReservedIpCreateRequest(Long stackId, Address address, String projectId, Compute compute, CloudRegion gcpZone, List<Resource> buildNames,
                 GcpCredential gcpCredential) {
             super(buildNames);
             this.stackId = stackId;
@@ -164,7 +164,7 @@ public class GcpReservedIpResourceBuilder extends GcpSimpleNetworkResourceBuilde
             return address;
         }
 
-        public GcpZone getGcpZone() {
+        public CloudRegion getGcpZone() {
             return gcpZone;
         }
 

@@ -83,6 +83,7 @@ import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsNetwork;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -215,7 +216,7 @@ public class AwsConnector implements CloudPlatformConnector {
         DescribeSnapshotsResult describeSnapshotsResult = client.describeSnapshots(describeSnapshotsRequest);
         if (describeSnapshotsResult.getSnapshots().isEmpty()) {
             DescribeAvailabilityZonesResult availabilityZonesResult = client.describeAvailabilityZones(new DescribeAvailabilityZonesRequest()
-                    .withFilters(new Filter().withName("region-name").withValues(Regions.valueOf(stack.getRegion()).getName())));
+                    .withFilters(new Filter().withName("region-name").withValues(CloudRegion.valueOf(stack.getRegion()).value())));
             CreateVolumeResult volumeResult = client.createVolume(new CreateVolumeRequest()
                     .withSize(SNAPSHOT_VOLUME_SIZE)
                     .withAvailabilityZone(availabilityZonesResult.getAvailabilityZones().get(0).getZoneName())

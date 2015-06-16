@@ -104,16 +104,15 @@ public class StackScalingService {
         instanceGroup.setNodeCount(nodeCount);
         instanceGroupRepository.save(instanceGroup);
         List<ConsulClient> clients = createConsulClients(stack, instanceGroup.getGroupName());
-        List<InstanceMetaData> updatedInstances = new ArrayList<>();
         for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
             if (instanceIds.contains(instanceMetaData.getInstanceId())) {
                 long timeInMillis = Calendar.getInstance().getTimeInMillis();
                 instanceMetaData.setTerminationDate(timeInMillis);
                 instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
                 removeAgentFromConsul(stack, clients, instanceMetaData);
+                instanceMetaDataRepository.save(instanceMetaData);
             }
         }
-        instanceMetaDataRepository.save(updatedInstances);
         LOGGER.info("Successfully terminated metadata of instances '{}' in stack.", instanceIds);
         eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
                 "Billing changed due to downscaling of cluster infrastructure.");

@@ -10,8 +10,8 @@ public enum GcpRawDiskType {
         this.value = value;
     }
 
-    public String getUrl(String projectId, GcpZone zone) {
-        return String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/diskTypes/%s", projectId, zone.getValue(), value);
+    public String getUrl(String projectId, CloudRegion zone) {
+        return String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/diskTypes/%s", projectId, zone.value(), value);
     }
 
 }

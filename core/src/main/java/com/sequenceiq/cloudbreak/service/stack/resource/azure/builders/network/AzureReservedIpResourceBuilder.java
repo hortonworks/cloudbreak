@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureLocation;
+import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -102,7 +102,7 @@ public class AzureReservedIpResourceBuilder extends AzureSimpleNetworkResourceBu
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();
         props.put(NAME, buildResources.get(0).getResourceName());
-        props.put(LOCATION, AzureLocation.valueOf(stack.getRegion()).region());
+        props.put(LOCATION, CloudRegion.valueOf(stack.getRegion()).region());
         return new AzureReservedIpCreateRequest(buildResources.get(0).getResourceName(), stack, props,
                 azureStackUtil.createAzureClient(azureCredential), resources, buildResources);
     }

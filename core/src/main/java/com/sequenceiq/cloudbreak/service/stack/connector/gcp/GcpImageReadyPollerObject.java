@@ -1,28 +1,28 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.gcp;
 
 import com.google.api.services.compute.Compute;
+import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.StackContext;
-import com.sequenceiq.cloudbreak.domain.GcpZone;
 
 public class GcpImageReadyPollerObject extends StackContext {
 
     private String name;
     private Compute compute;
-    private GcpZone gcpZone;
+    private CloudRegion gcpZone;
 
-    public GcpImageReadyPollerObject(Compute compute, Stack stack, String name, GcpZone gcpZone) {
+    public GcpImageReadyPollerObject(Compute compute, Stack stack, String name, CloudRegion gcpZone) {
         super(stack);
         this.compute = compute;
         this.name = name;
         this.gcpZone = gcpZone;
     }
 
-    public GcpZone getGcpZone() {
+    public CloudRegion getGcpZone() {
         return gcpZone;
     }
 
-    public void setGcpZone(GcpZone gcpZone) {
+    public void setGcpZone(CloudRegion gcpZone) {
         this.gcpZone = gcpZone;
     }
 

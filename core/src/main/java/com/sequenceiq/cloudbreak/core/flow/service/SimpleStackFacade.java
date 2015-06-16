@@ -189,11 +189,10 @@ public class SimpleStackFacade implements StackFacade {
 
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_STOPPED.name(),
                     "Billing stopped, the cluster and its infrastructure have been terminated.");
-            terminationService.finalizeTermination(stack.getId());
-            clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
             stackUpdater.updateStackStatus(actualContext.getStackId(), DELETE_COMPLETED,
                     "The cluster and its infrastructure have successfully been terminated.");
-
+            terminationService.finalizeTermination(stack.getId());
+            clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
         } catch (Exception e) {
             LOGGER.error("Exception during the stack termination process: {}", e.getMessage());
             throw new CloudbreakException(e);
@@ -322,7 +321,7 @@ public class SimpleStackFacade implements StackFacade {
             Date endDate = new Date();
 
             long seconds = (endDate.getTime() - startDate.getTime()) / DateUtils.MILLIS_PER_SECOND;
-            fireEventAndLog(stack.getId(), context, String.format("The creation of infrastructure took %ss.", seconds), AVAILABLE);
+            fireEventAndLog(stack.getId(), context, String.format("The creation of infrastructure took %s seconds.", seconds), AVAILABLE);
             context = new ProvisioningContext.Builder()
                     .setDefaultParams(provisionResult.getStackId(), provisionResult.getCloudPlatform())
                     .setProvisionedResources(provisionResult.getResources())

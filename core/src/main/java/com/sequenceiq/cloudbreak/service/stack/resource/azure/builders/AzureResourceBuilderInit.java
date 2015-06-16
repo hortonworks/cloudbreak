@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -36,7 +36,7 @@ public class AzureResourceBuilderInit implements
     @Override
     public AzureProvisionContextObject provisionInit(Stack stack) throws Exception {
         AzureCredential credential = (AzureCredential) stack.getCredential();
-        AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
+        CloudRegion azureLocation = CloudRegion.valueOf(stack.getRegion());
         int numStorageAccount = azureStackUtil.getNumOfStorageAccounts(stack);
         if (numStorageAccount == AzureStackUtil.GLOBAL_STORAGE) {
             return new AzureProvisionContextObject(stack.getId(),

@@ -14,9 +14,9 @@ import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.base.Optional;
+import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.GcpCredential;
 import com.sequenceiq.cloudbreak.domain.GcpTemplate;
-import com.sequenceiq.cloudbreak.domain.GcpZone;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -50,12 +50,12 @@ public class GcpDiskResourceBuilder extends GcpSimpleInstanceResourceBuilder {
     public Boolean create(final CreateResourceRequest createResourceRequest, String region) throws Exception {
         final GcpDiskCreateRequest gDCR = (GcpDiskCreateRequest) createResourceRequest;
         Stack stack = stackRepository.findById(gDCR.getStackId());
-        Compute.Disks.Insert insDisk = gDCR.getCompute().disks().insert(gDCR.getProjectId(), GcpZone.valueOf(stack.getRegion()).getValue(), gDCR.getDisk());
+        Compute.Disks.Insert insDisk = gDCR.getCompute().disks().insert(gDCR.getProjectId(), CloudRegion.valueOf(stack.getRegion()).value(), gDCR.getDisk());
         insDisk.setSourceImage(gcpStackUtil.getAmbariUbuntu(gDCR.getProjectId(), stack.getImage()));
         Operation execute = insDisk.execute();
         if (execute.getHttpErrorStatusCode() == null) {
             Compute.ZoneOperations.Get zoneOperations = createZoneOperations(gDCR.getCompute(),
-                    gDCR.getGcpCredential(), execute, GcpZone.valueOf(stack.getRegion()));
+                    gDCR.getGcpCredential(), execute, CloudRegion.valueOf(stack.getRegion()));
             GcpResourceReadyPollerObject gcpDiskReady =
                     new GcpResourceReadyPollerObject(zoneOperations, stack, gDCR.getDisk().getName(), execute.getName(), ResourceType.GCP_DISK);
             gcpDiskReadyPollerObjectPollingService.pollWithTimeout(gcpResourceCheckerStatus, gcpDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -88,7 +88,7 @@ public class GcpDiskResourceBuilder extends GcpSimpleInstanceResourceBuilder {
         Disk disk = new Disk();
         disk.setSizeGb(SIZE);
         disk.setName(buildResources.get(0).getResourceName());
-        disk.setKind(gcpTemplate.getGcpRawDiskType().getUrl(provisionContextObject.getProjectId(), GcpZone.valueOf(stack.getRegion())));
+        disk.setKind(gcpTemplate.getGcpRawDiskType().getUrl(provisionContextObject.getProjectId(), CloudRegion.valueOf(stack.getRegion())));
         return new GcpDiskCreateRequest(provisionContextObject.getStackId(), resources, disk, provisionContextObject.getProjectId(),
                 provisionContextObject.getCompute(), gcpTemplate, gcpCredential, buildResources);
     }
