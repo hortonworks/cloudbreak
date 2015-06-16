@@ -104,9 +104,4 @@ EOF
 
 }
 
-aws-test() {
-    aws-show-role ${1:-list-cbr-archives}
-    #aws-assume-role arn:aws:iam::755047402263:role/list-cbr-archives jeno list-1
-}
-
 
