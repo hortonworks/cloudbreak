@@ -15,7 +15,7 @@ import reactor.bus.EventBus;
 import reactor.bus.spec.EventBusSpec;
 import reactor.fn.timer.Timer;
 
-@Configuration
+@Configuration("testEventBusConfig")
 public class EventBusConfig {
 
     @Value("${cb.eventbus.threadpool.core.size:10}")

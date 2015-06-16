@@ -21,7 +21,7 @@ import javax.persistence.NamedQuery;
                 query = "SELECT r FROM Resource r "
                         + "WHERE r.stack.id = :stackId AND r.resourceName = :name")
 })
-public class Resource {
+public class Resource implements ProvisionEntity {
 
     @Id
     @GeneratedValue

@@ -10,7 +10,7 @@ import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
 @Configuration
-public class CloudApiConfiguration {
+public class CloudReactorConfiguration {
 
     @Value("${cb.cloud.api.executorservice.pool.size:10}")
     private int executorServicePoolSize;
