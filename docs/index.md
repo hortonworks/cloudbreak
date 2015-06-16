@@ -427,8 +427,6 @@ The ssh username is cloudbreak.
 
 `Public in account:` share it with others in the account
 
-You can download our OpenStack image here: <a href=https://s3-eu-west-1.amazonaws.com/cb-openstack-images/cb-centos66-amb200-2015-05-25.img>link</a>
-
 ###Manage resources
 Using manage resources you can create infrastructure templates.
 
@@ -527,21 +525,34 @@ Manage networks allows you to create or reuse existing networks and configure th
 
 ###Create cluster
 Using the create cluster functionality you will create a cloud Stack and a Hadoop Cluster. In order to create a cluster you will have to select a credential first.
+
 _Note: Cloudbreak can maintain multiple cloud credentials (even for the same provider)._
 
 `Cluster name:` your cluster name
 
-`Region`: the region where the cluster is started
+`Region:` the region where the cluster is started
 
-`Blueprint:` your Hadoop cluster blueprint
+`Network:` the network template
 
-Once the blueprint is selected we parse it and give you the option to select the followings for each **hostgroup**.
+`Blueprint:` your Hadoop cluster blueprint. Once the blueprint is selected we parse it and give you the option to select the followings for each **hostgroup**.
 
-`Group size:` the number of instances to be started
+`Hostgroup configuration`
 
-`Template:` the stack template associated to the hostgroup
+  `Group size:` the number of instances to be started
+
+  `Template:` the stack template associated to the hostgroup
 
 `Public in account:` share it with others in the account
+
+**Advanced features**:
+
+`Consul server count:` the number of Consul servers (odd number), by default is 3. It varies with the cluster size.
+
+`Minimum cluster size:` the provisioning strategy in case of the cloud provider can't allocate all the requested nodes
+
+`Validate blueprint:` feature to validate or not the Ambari blueprint. By default is switched on.
+
+`Ambari Repository config:` you can take the stack RPM's from a custom stack repository
 
 Once you have launched the cluster creation you can track the progress either on Cloudbreak UI or your cloud provider management UI.
 
@@ -575,7 +586,7 @@ In order to understand the state of your Hadoop as a Servie stack and the potent
 
 We provide you two different ways to start using Cloudbreak. The simplest and easiest solution is hosted by SequenceIQ, however we encourage you to get Cloudbreak and deployed it on-premise or on your favorite cloud provider. The hosted solution is for demo purposes only and not recommended for production systems.
 
-###Hosted - Cloudbreak 
+###Hosted - Cloudbreak
 
 The easiest way to start your own Hadoop cluster in your favorite cloud provider is to use our hosted solution. We host, maintain and support [Cloudbreak](https://cloudbreak.sequenceiq.com/) for you.
 
@@ -586,12 +597,20 @@ Though Cloudbreak controls your Hadoop cluster lifecycle (start, stop, pause), w
 
 ###DIY - Deploying Cloudbreak
 
-**This is the recommended way to use Cloudbreak**. 
+**This is the recommended way to use Cloudbreak**.
 Cloudbreak is deployed as orchestrated Docker containers. We have created a project which guides you through the self deployment. Use the following [link](https://github.com/sequenceiq/cloudbreak-deployer).
 
 
 <!--quickstart.md-->
 
+<!--security.md-->
+
+##Gateway node  
+
+All communication with the provisioned cluster goes through a `gateway` node. The communication is over TLS. The cluster is provisioned in a locked down VPC with all the access towards externally accessible Hadoop services closed. In order to access the services (Cloudbreak lists all the available services) the ports will have to be opened using the cloud provider's specific `security group` configuration.
+
+
+<!--security.md-->
 
 <!--releases.md-->
 
