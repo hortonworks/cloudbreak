@@ -6,13 +6,11 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.regions.Regions;
 import com.sequenceiq.cloudbreak.controller.json.CloudbreakUsageJson;
-import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import com.sequenceiq.cloudbreak.domain.GcpZone;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
@@ -48,13 +46,13 @@ public class CloudbreakUsageToJsonConverter extends AbstractConversionServiceAwa
     private String getZoneNameByProvider(String cloud, String zoneFromUsage) {
         String zone = "";
         if (zoneFromUsage != null && CloudPlatform.AWS.name().equals(cloud)) {
-            Regions transformedZone = Regions.valueOf(zoneFromUsage);
+            CloudRegion transformedZone = CloudRegion.valueOf(zoneFromUsage);
             zone = transformedZone.name();
         } else if (zoneFromUsage != null && CloudPlatform.GCP.name().equals(cloud)) {
-            GcpZone transformedZone = GcpZone.valueOf(zoneFromUsage);
+            CloudRegion transformedZone = CloudRegion.valueOf(zoneFromUsage);
             zone = transformedZone.name();
         } else if (zoneFromUsage != null && CloudPlatform.AZURE.name().equals(cloud)) {
-            AzureLocation transformedZone = AzureLocation.valueOf(zoneFromUsage);
+            CloudRegion transformedZone = CloudRegion.valueOf(zoneFromUsage);
             zone = transformedZone.name();
         }
         return zone;

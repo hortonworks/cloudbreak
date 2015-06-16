@@ -22,8 +22,8 @@ import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.StorageObject;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.GcpCredential;
-import com.sequenceiq.cloudbreak.domain.GcpZone;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
@@ -85,7 +85,7 @@ public class GcpProvisionSetup implements ProvisionSetup {
                 Compute.Images.Insert ins1 = compute.images().insert(credential.getProjectId(), image);
                 ins1.execute();
                 GcpImageReadyPollerObject gcpImageReadyPollerObject = new GcpImageReadyPollerObject(compute,
-                        stack, image.getName(), GcpZone.valueOf(stack.getRegion()));
+                        stack, image.getName(), CloudRegion.valueOf(stack.getRegion()));
                 pollingResult = gcpImageReadyPollerObjectPollingService
                         .pollWithTimeout(gcpImageCheckerStatus, gcpImageReadyPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             }

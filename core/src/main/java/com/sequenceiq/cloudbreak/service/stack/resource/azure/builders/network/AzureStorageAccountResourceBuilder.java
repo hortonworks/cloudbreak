@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureLocation;
+import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -117,7 +117,7 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
     public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources,
             Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        AzureLocation location = AzureLocation.valueOf(stack.getRegion());
+        CloudRegion location = CloudRegion.valueOf(stack.getRegion());
         List<Resource> accounts = new ArrayList<>();
         int storageAccountNum = azureStackUtil.getNumOfStorageAccounts(stack);
         if (storageAccountNum == AzureStackUtil.GLOBAL_STORAGE) {

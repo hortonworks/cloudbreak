@@ -29,10 +29,10 @@ import com.google.api.services.compute.model.DiskList;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
+import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.GcpCredential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.GcpZone;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
 @Component
@@ -69,9 +69,9 @@ public class GcpStackUtil {
 
     public List<Disk> listDisks(Compute compute, GcpCredential gcpCredential) throws IOException {
         List<Disk> disks = new ArrayList<>();
-        for (GcpZone gcpZone : GcpZone.values()) {
+        for (CloudRegion gcpZone : CloudRegion.gcpRegions()) {
             try {
-                Compute.Disks.List list = compute.disks().list(gcpCredential.getProjectId(), gcpZone.getValue());
+                Compute.Disks.List list = compute.disks().list(gcpCredential.getProjectId(), gcpZone.value());
                 DiskList execute = list.execute();
                 disks.addAll(execute.getItems());
             } catch (NullPointerException ex) {
@@ -102,7 +102,7 @@ public class GcpStackUtil {
         try {
             GcpCredential credential = (GcpCredential) stack.getCredential();
             Compute.Instances.Get instanceGet = compute.instances().get(credential.getProjectId(),
-                    GcpZone.valueOf(stack.getRegion()).getValue(), resource.getResourceName());
+                    CloudRegion.valueOf(stack.getRegion()).value(), resource.getResourceName());
             return instanceGet.execute();
         } catch (IOException e) {
             LOGGER.error("Instance {} is not reachable: {}", resource, e.getMessage(), e);

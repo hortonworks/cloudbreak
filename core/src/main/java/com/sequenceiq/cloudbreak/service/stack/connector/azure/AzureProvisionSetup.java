@@ -20,8 +20,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloud.azure.client.AzureClientUtil;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -72,7 +72,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
     @Override
     public ProvisionEvent setupProvisioning(Stack stack) throws Exception {
         Credential credential = stack.getCredential();
-        AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
+        CloudRegion azureLocation = CloudRegion.valueOf(stack.getRegion());
         AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) credential);
 
         String affinityGroupName = ((AzureCredential) credential).getAffinityGroupName(azureLocation);
@@ -106,7 +106,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
         return CloudPlatform.AZURE;
     }
 
-    private Map<Integer, String[]> createImages(Stack stack, AzureLocation azureLocation, AzureClient azureClient, String affinityGroupName) {
+    private Map<Integer, String[]> createImages(Stack stack, CloudRegion azureLocation, AzureClient azureClient, String affinityGroupName) {
         Map<Integer, String[]> accountIndexKeys = new HashMap<>();
         int numStorageAccounts = azureStackUtil.getNumOfStorageAccounts(stack);
         if (numStorageAccounts == AzureStackUtil.GLOBAL_STORAGE) {
@@ -119,7 +119,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
         return accountIndexKeys;
     }
 
-    private Map<Integer, String[]> prepareStorageAccounts(Stack stack, AzureLocation azureLocation,
+    private Map<Integer, String[]> prepareStorageAccounts(Stack stack, CloudRegion azureLocation,
             final AzureClient azureClient, String affinityGroupName, int storageAccountIndex) {
         Map<Integer, String[]> accountIndexKeys = new HashMap<>();
         final String osImageName = azureStackUtil.getOsImageName(stack, azureLocation, storageAccountIndex);
@@ -156,7 +156,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
         return accountIndexKeys;
     }
 
-    private void createImageLinks(Stack stack, AzureLocation azureLocation, AzureClient azureClient, Map<Integer, String[]> accountIndexKeys) {
+    private void createImageLinks(Stack stack, CloudRegion azureLocation, AzureClient azureClient, Map<Integer, String[]> accountIndexKeys) {
         for (int storageIndex : accountIndexKeys.keySet()) {
             String[] accountKeys = accountIndexKeys.get(storageIndex);
             String targetImageUri = accountKeys[1];
@@ -165,7 +165,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
         }
     }
 
-    private void createOsImageLink(Stack stack, int storageIndex, AzureClient azureClient, String targetImageUri, AzureLocation location) {
+    private void createOsImageLink(Stack stack, int storageIndex, AzureClient azureClient, String targetImageUri, CloudRegion location) {
         LOGGER.info("Starting to create a new Os image LINK on Azure for image: {}", targetImageUri);
         Map<String, String> params;
         params = new HashMap<>();
@@ -249,7 +249,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
                 Map<String, String> params = new HashMap<>();
                 params.put(AzureStackUtil.NAME, affinityGroupName);
                 params.put(DESCRIPTION, VM_COMMON_NAME);
-                params.put(LOCATION, AzureLocation.valueOf(stack.getRegion()).region());
+                params.put(LOCATION, CloudRegion.valueOf(stack.getRegion()).region());
                 createAffinityGroup(azureClient, params);
                 LOGGER.info("Affinity group creation was success with {} name", affinityGroupName);
             } else {

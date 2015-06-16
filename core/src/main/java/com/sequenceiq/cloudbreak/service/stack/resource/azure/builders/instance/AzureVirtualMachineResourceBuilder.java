@@ -24,8 +24,8 @@ import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.connector.CloudConnectorException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
+import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -109,7 +109,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             String resourceName = buildResources.get(0).getResourceName();
             byte[] encoded = Base64.encodeBase64(resourceName.getBytes());
             String label = new String(encoded);
-            AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
+            CloudRegion azureLocation = CloudRegion.valueOf(stack.getRegion());
             int storageIndex = provisionContextObject.isUseGlobalStorageAccount() ? AzureStackUtil.GLOBAL_STORAGE
                     : provisionContextObject.setAndGetStorageAccountIndex(azureTemplate.getVolumeCount() + AzureStackUtil.ROOTFS_COUNT);
             LOGGER.info("Storage index selected: {} for {}", storageIndex, resourceName);

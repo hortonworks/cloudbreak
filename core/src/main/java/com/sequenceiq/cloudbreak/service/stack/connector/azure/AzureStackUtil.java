@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.validation.StackParam;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureLocation;
+import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -68,7 +68,7 @@ public class AzureStackUtil {
     @Inject
     private UserDetailsService userDetailsService;
 
-    public String getOsImageName(Stack stack, AzureLocation location, int storageIndex) {
+    public String getOsImageName(Stack stack, CloudRegion location, int storageIndex) {
         return getOsImageName(stack, getOSStorageName(stack, location, storageIndex));
     }
 
@@ -77,7 +77,7 @@ public class AzureStackUtil {
         return format("%s-%s-%s", storageName, IMAGE_NAME, split[split.length - 1].replaceAll(".vhd", ""));
     }
 
-    public String getOSStorageName(Stack stack, AzureLocation location, int index) {
+    public String getOSStorageName(Stack stack, CloudRegion location, int index) {
         AzureCredential azureCred = (AzureCredential) stack.getCredential();
         String affinityGroupName = azureCred.getAffinityGroupName(location);
         String result = index == GLOBAL_STORAGE ? azureCred.getAffinityGroupName(location)
