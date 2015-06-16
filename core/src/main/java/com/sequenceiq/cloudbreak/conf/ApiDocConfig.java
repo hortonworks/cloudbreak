@@ -40,7 +40,7 @@ public class ApiDocConfig {
         return new SwaggerSpringMvcPlugin(this.springSwaggerConfig)
                 .apiInfo(apiInfo())
                 .includePatterns(".*stack.*", ".*cluster.*", ".*blueprint.*", ".*template.*",
-                        ".*credential.*", ".*recipe.*", ".*usage.*", ".*event.*", ".*network.*")
+                        ".*credential.*", ".*recipe.*", ".*usage.*", ".*event.*", ".*network.*", ".*users.*")
                 .ignoredParameterTypes(CbUser.class, ModelMap.class, View.class, ModelAndView.class)
                 .apiListingReferenceOrdering(new ResourceListingPositionalOrdering())
                 .directModelSubstitute(ModelAndView.class, OutputStream.class)
