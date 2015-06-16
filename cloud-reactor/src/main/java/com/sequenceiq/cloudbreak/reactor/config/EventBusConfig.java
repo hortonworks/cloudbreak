@@ -10,12 +10,18 @@ import reactor.Environment;
 import reactor.bus.EventBus;
 import reactor.bus.spec.EventBusSpec;
 import reactor.core.dispatch.ThreadPoolExecutorDispatcher;
+import reactor.fn.timer.Timer;
 
 @Configuration
 public class EventBusConfig {
 
     @Value("${cb.eventbus.threadpool.core.size:100}")
     private int eventBusThreadPoolSize;
+
+    @Bean
+    public Timer timer(Environment env) {
+        return env.getTimer();
+    }
 
     @Bean
     public Environment env() {
@@ -30,7 +36,6 @@ public class EventBusConfig {
                 .traceEventPath()
                 .consumerNotFoundHandler(new ConsumerNotFoundHandler())
                 .get();
-
     }
 
     private ThreadPoolExecutorDispatcher getEventBusDispatcher() {
