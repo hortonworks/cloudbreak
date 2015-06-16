@@ -6,7 +6,6 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
 function ($scope, $rootScope, $filter, Cluster, GlobalStack) {
     var successEvents = [ "REQUESTED",
                           "CREATE_IN_PROGRESS",
-                          "UPDATE_IN_PROGRESS",
                           "START_REQUESTED",
                           "START_IN_PROGRESS",
                           "STOPPED",
@@ -45,6 +44,9 @@ function ($scope, $rootScope, $filter, Cluster, GlobalStack) {
           case "UPTIME_NOTIFICATION":
             handleUptimeNotification(notification);
             break;
+          case "UPDATE_IN_PROGRESS":
+            handleUpdateInProgressNotification(notification);
+            break;
         }
       }
 
@@ -62,11 +64,6 @@ function ($scope, $rootScope, $filter, Cluster, GlobalStack) {
     function handleAvailableNotification(notification) {
       var actCluster = $filter('filter')($rootScope.clusters, { id: notification.stackId })[0];
       var msg = notification.eventMessage;
-      var indexOfAmbariIp = msg.indexOf("AMBARI_IP:");
-      if (msg != null && msg != undefined && indexOfAmbariIp > -1) {
-        actCluster.ambariServerIp = msg.split(':')[1];
-        msg = msg.substr(0, indexOfAmbariIp);
-      }
       var nodeCount = notification.nodeCount;
       if (nodeCount != null && nodeCount != undefined) {
         actCluster.nodeCount = nodeCount;
@@ -91,21 +88,38 @@ function ($scope, $rootScope, $filter, Cluster, GlobalStack) {
       }
     }
 
+    function handleUpdateInProgressNotification(notification) {
+      var actCluster = $filter('filter')($rootScope.clusters, { id: notification.stackId })[0];
+      var msg = notification.eventMessage;
+      var indexOfAmbariIp = msg.indexOf("Ambari ip:");
+      if (actCluster != undefined && msg != null && msg != undefined && indexOfAmbariIp > -1) {
+        if (actCluster.cluster == undefined) {
+          actCluster.cluster = {};
+        }
+        actCluster.cluster.ambariServerIp = msg.split(':')[1];
+      }
+      $scope.showSuccess(notification.eventMessage, notification.stackName);
+      handleStatusChange(notification);
+    }
+
     function addNotificationToGlobalEvents(item) {
       item.customTimeStamp =  new Date(item.eventTimestamp).toLocaleDateString() + " " + new Date(item.eventTimestamp).toLocaleTimeString();
       $rootScope.events.push(item);
     }
 
     function refreshMetadata(notification) {
-       GlobalStack.get({ id: notification.stackId }, function(success) {
+      if($rootScope.activeCluster.id != undefined && $rootScope.activeCluster.id == notification.stackId) {
+        GlobalStack.get({ id: notification.stackId }, function(success) {
           var metadata = []
           angular.forEach(success.instanceGroups, function(item) {
-             angular.forEach(item.metadata, function(item1) {
-               metadata.push(item1)
-             });
+              angular.forEach(item.metadata, function(item1) {
+              metadata.push(item1)
+              $rootScope.activeCluster.metadata = metadata // trigger activeCluster.metadata
+            });
           });
-          $rootScope.activeCluster.metadata = metadata // trigger activeCluster.metadata
-       });
+        });
+      }
     }
+
   }
 ]);
