@@ -19,7 +19,7 @@ compose-pull() {
 
     [ -f docker-compose.yml ] || deployer-generate
 
-    # parallell pull 
+    # parallell pull
     # sed -n "s/.*image: //p" docker-compose.yml | sort -u | xargs -I@ -n1 bash -c "docker pull @ &"
     dockerCompose pull
 }
@@ -162,6 +162,7 @@ cloudbreak:
         - CB_CLIENT_ID=$UAA_CLOUDBREAK_ID
         - CB_CLIENT_SECRET=$UAA_CLOUDBREAK_SECRET
         - CB_BLUEPRINT_DEFAULTS=$CB_BLUEPRINT_DEFAULTS
+        - CB_TEMPLATE_DEFAULTS=$CB_TEMPLATE_DEFAULTS
         - CB_AZURE_IMAGE_URI=$CB_AZURE_IMAGE_URI
         - CB_GCP_SOURCE_IMAGE_PATH=$CB_GCP_SOURCE_IMAGE_PATH
         - CB_AWS_AMI_MAP=$CB_AWS_AMI_MAP
@@ -173,6 +174,8 @@ cloudbreak:
         - CB_SMTP_SENDER_HOST=$CLOUDBREAK_SMTP_SENDER_HOST
         - CB_SMTP_SENDER_PORT=$CLOUDBREAK_SMTP_SENDER_PORT
         - CB_SMTP_SENDER_FROM=$CLOUDBREAK_SMTP_SENDER_FROM
+        - CB_BAYWATCH_ENABLED=$CB_BAYWATCH_ENABLED
+        - CB_BAYWATCH_EXTERN_LOCATION=$CB_BAYWATCH_EXTERN_LOCATION
         - ENDPOINTS_AUTOCONFIG_ENABLED=false
         - ENDPOINTS_DUMP_ENABLED=false
         - ENDPOINTS_TRACE_ENABLED=false
@@ -186,6 +189,7 @@ cloudbreak:
         - CB_DB_PORT_5432_TCP_PORT=5432
         - BACKEND_5432=cbdb.service.consul
         - BACKEND_8089=identity.service.consul
+        - SECURE_RANDOM=$SECURE_RANDOM
     links:
         - ambassador:backend
     ports:
@@ -276,6 +280,7 @@ periscope:
         - BACKEND_8080=cloudbreak.service.consul
         - BACKEND_5433=pcdb.service.consul
         - BACKEND_8089=identity.service.consul
+        - SECURE_RANDOM=$SECURE_RANDOM
     links:
         - ambassador:backend
     ports:

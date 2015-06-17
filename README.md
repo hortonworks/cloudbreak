@@ -35,16 +35,6 @@ It will create a `Profile` in the current directory. The only required
 configuration is the `PUBLIC_IP`. This ip will be used for Cloudbreak UI
 (called Uluwatu). In some case cbd can guess it, if not it will give you a hint.
 
-### Generate Configuration
-
-If you use cbd 0.1.0 release, you have to issue:
-```
-cbd generate
-```
-
-It will create:
-- **docker-compose.yml**: Full confirguration of containers needed for Cloudbreak deployment.
-- **uaa.yml**: Identity Server configuration. (For example default user/password in the last line)
 
 ### Deploy Cloudbreak
 
@@ -53,8 +43,17 @@ To start all the containers run:
 ```
 cbd start
 ```
-If one of the container is already running, it won’t be started again.
 
+For the first it will take more time, as it does additional steps:
+- download all the docker images, neded by cloudbreak.
+- create **docker-compose.yml**: Full confirguration of containers needed for Cloudbreak deployment.
+- create **uaa.yml**: Identity Server configuration. (For example default user/password in the last line)
+
+### Watch the logs
+
+```
+cbd logs
+```
 
 ### Pull Docker images
 
@@ -66,13 +65,6 @@ cbd pull
 ```
 
 It will take some time, depending on your network connection, so you can grab a cup of coffee.
-
-
-### Watch the logs
-
-```
-cbd logs
-```
 
 
 ## Default Credentials

@@ -53,36 +53,35 @@ export CLOUDBREAK_SMTP_SENDER_FROM=
 
 ### List of configurations
 
-- **CB_AWS_AMI_MAP** : tbd 
-- **CB_AZURE_IMAGE_URI** : tbd 
-- **CB_BLUEPRINT_DEFAULTS** : tbd 
-- **CB_DB_ENV_DB** : tbd 
-- **CB_DB_ENV_PASS** : tbd 
-- **CB_DB_ENV_USER** : tbd 
-- **CB_GCP_SOURCE_IMAGE_PATH** : tbd 
-- **CB_HBM2DDL_STRATEGY** : tbd 
-- **CB_OPENSTACK_IMAGE** : tbd 
-- **DOCKER_TAG_ALPINE** : tbd 
-- **DOCKER_TAG_CBSHELL** : tbd 
-- **DOCKER_TAG_CLOUDBREAK** : tbd 
-- **DOCKER_TAG_CONSUL** : tbd 
-- **DOCKER_TAG_PERISCOPE** : tbd 
-- **DOCKER_TAG_POSTGRES** : tbd 
-- **DOCKER_TAG_REGISTRATOR** : tbd 
-- **DOCKER_TAG_SULTANS** : tbd 
-- **DOCKER_TAG_UAA** : tbd 
-- **DOCKER_TAG_ULUWATU** : tbd 
-- **PERISCOPE_DB_HBM2DDL_STRATEGY** : tbd 
+- **CB_AWS_AMI_MAP** : tbd
+- **CB_AZURE_IMAGE_URI** : tbd
+- **CB_BLUEPRINT_DEFAULTS** : tbd
+- **CB_TEMPLATE_DEFAULTS** : tbd 
+- **CB_DB_ENV_DB** : tbd
+- **CB_DB_ENV_PASS** : tbd
+- **CB_DB_ENV_USER** : tbd
+- **CB_GCP_SOURCE_IMAGE_PATH** : tbd
+- **CB_HBM2DDL_STRATEGY** : tbd
+- **CB_OPENSTACK_IMAGE** : tbd
+- **DOCKER_TAG_ALPINE** : tbd
+- **DOCKER_TAG_CBSHELL** : tbd
+- **DOCKER_TAG_CLOUDBREAK** : tbd
+- **DOCKER_TAG_CONSUL** : tbd
+- **DOCKER_TAG_PERISCOPE** : tbd
+- **DOCKER_TAG_POSTGRES** : tbd
+- **DOCKER_TAG_REGISTRATOR** : tbd
+- **DOCKER_TAG_SULTANS** : tbd
+- **DOCKER_TAG_UAA** : tbd
+- **DOCKER_TAG_ULUWATU** : tbd
+- **PERISCOPE_DB_HBM2DDL_STRATEGY** : tbd
 
 ## Caveats
 
 The **Cloudbreak Deployer** tool opens a clean bash subshell, without inheriting environment vars.
-Actually the foolowing environment vars _are_ inherited: 
+Actually the foolowing environment vars _are_ inherited:
 
 - `HOME`
 - `DEBUG`
 - `TRACE`
 - `CBD_DEFAULT_PROFILE`
 - all `DOCKER_XXX`
-
-

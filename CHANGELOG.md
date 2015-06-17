@@ -4,6 +4,24 @@
 
 ### Added
 
+- Baywatch default parameters added: `CB_BAYWATCH_ENABLED` and`CB_BAYWATCH_EXTERN_LOCATION`
+
+### Removed
+
+### Changed
+
+## [v0.5.3] - 2015-06-03
+
+### Fixed
+
+- One-liner installer fixed, to work if previous cbd exists on path.
+- `cbd update` upstream changes on go-bahser broke the selfupdate functionality
+- In some environment cloudbreak starts really slow. See: [details](http://stackoverflow.com/questions/137212/how-to-solve-performance-problem-with-java-securerandom), see: [commit](https://github.com/sequenceiq/docker-cloudbreak/commit/e00581d04fb14f28f778cf71253f2c8fa0d704ae)
+
+### Added
+
+- New release proposal can be done by `make release-next-ver`
+
 ### Removed
 
 ### Changed
@@ -21,6 +39,10 @@
 - Command `doctor` hints to run boot2docker shellinit if env is unset
 - Command `init` in case of OSX, DOCKER_XXX envs are initialized in local profile (Profile)
 - Default docker images are updated to:
+    - sequenceiq/cloudbreak:0.5.93
+    - sequenceiq/cbdb:0.5.92
+    - sequenceiq/uluwatu:0.5.28
+    - sequenceiq/sultans:0.5.3
     - sequenceiq/periscope:0.5.5
 
 

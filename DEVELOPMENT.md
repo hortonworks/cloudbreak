@@ -37,41 +37,27 @@ make tests
 The master branch is always built on [CircleCI](https://circleci.com/gh/sequenceiq/cloudbreak-deployer).
 When you wan’t a new release, all you have to do:
 
+```
+make release-next-ver
+```
+
+`make release-next-ver` performs the following steps:
+
 - on the `master` branch:
-  - make sure you change the `VERSION` file
-  - update `CHANGELOG.md` with the release date
-  - create a new **Unreleased** section in top of `CHANGELOG.md`
+  - Updates the `VERSION` file by increasing the **patch** version number (for example from 0.5.2 to 0.5.3)
+  - Updates `CHANGELOG.md` with the release date
+  - Creates a new **Unreleased** section in top of `CHANGELOG.md`
   
-- create a PullRequest for the release branch:
+- Creates a PullRequest for the release branch:
   - create a new branch with a name like `release-0.5.x`
   - this branch should be the same as `origin/master`
   - create a pull request into `release` branch
-  
+
+### Acceptance
+
+Now you should test this release. You can get it by `cbd update release-x.y.z`. Comment with LGTM (Looking Good To Me).
+
 Once the PR is merged, CircleCI will:
 - create a new release on [GitHub releases tab](https://github.com/sequenceiq/cloudbreak-deployer/releases), with the help of [gh-release](https://github.com/progrium/gh-release).
 - it will create the git tag with `v` prefix like: `v0.0.3`
-
-Commands of the 0.0.3 release:
-
-```
-git checkout master
-git fetch
-git reset --hard origin/master
-
-export OLD_VER=$(cat VERSION)
-export VER="${OLD_VER%.*}.$((${OLD_VER##*.}+1))"
-export REL_DATE="[v${VER}] - $(date +%Y-%m-%d)"
-echo $VER > VERSION
-
-# edit CHANGELOG.md
-sed -i "s/## Unreleased/## $REL_DATE/" CHANGELOG.md
-echo -e '## Unreleased\n\n### Fixed\n\n### Added\n\n### Removed\n\n### Changed\n'| cat - CHANGELOG.md | tee CHANGELOG.md
-
-git commit -m "prepare for release $VER" VERSION CHANGELOG.md
-git push origin master
-
-checkout -b release-${VER} origin/master
-git push origin release-$VER
-hub pull-request -b release -m "release $VER"
-```
 

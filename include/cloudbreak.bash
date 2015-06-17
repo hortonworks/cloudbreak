@@ -9,6 +9,8 @@ cloudbreak-config() {
   cloudbreak-conf-smtp
   cloudbreak-conf-cloud-provider
   cloudbreak-conf-ui
+  cloudbreak-conf-java
+  cloudbreak-conf-baywatch
 }
 
 cloudbreak-conf-tags() {
@@ -18,15 +20,15 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_CONSUL v0.5.0-v3
     env-import DOCKER_TAG_REGISTRATOR v5
     env-import DOCKER_TAG_POSTGRES 9.4.1
-    env-import DOCKER_TAG_CLOUDBREAK 0.5.49
-    env-import DOCKER_TAG_CBDB 0.5.49
+    env-import DOCKER_TAG_CLOUDBREAK 0.5.105
+    env-import DOCKER_TAG_CBDB 0.5.103
     env-import DOCKER_TAG_PERISCOPE 0.5.5
-    env-import DOCKER_TAG_PCDB 0.5.3
+    env-import DOCKER_TAG_PCDB 0.5.5
     env-import DOCKER_TAG_UAA 1.8.1-v2
-    env-import DOCKER_TAG_ULUWATU 0.5.16
-    env-import DOCKER_TAG_SULTANS 0.5.2
+    env-import DOCKER_TAG_ULUWATU 0.5.33
+    env-import DOCKER_TAG_SULTANS 0.5.4
     env-import DOCKER_TAG_AMBASSADOR latest
-    env-import DOCKER_TAG_CLOUDBREAK_SHELL 0.4.4
+    env-import DOCKER_TAG_CLOUDBREAK_SHELL 0.4.8
 }
 
 cloudbreak-conf-images() {
@@ -106,7 +108,8 @@ cloudbreak-conf-defaults() {
     env-import PUBLIC_IP
 
     env-import CB_HOST_ADDR $PUBLIC_IP
-    env-import CB_BLUEPRINT_DEFAULTS "multi-node-hdfs-yarn,hdp-multinode-default"
+    env-import CB_BLUEPRINT_DEFAULTS "hdp-small-default,hdp-spark-cluster,hdp-streaming-cluster"
+    env-import CB_TEMPLATE_DEFAULTS "minviable-gcp,minviable-azure,minviable-aws"
 }
 
 cloudbreak-conf-cloud-provider() {
@@ -124,6 +127,17 @@ cloudbreak-conf-ui() {
     env-import ULU_OAUTH_REDIRECT_URI  "$ULU_HOST_ADDRESS/authorize"
     env-import ULU_SULTANS_ADDRESS  "http://$PUBLIC_IP:3001"
 
+}
+
+cloudbreak-conf-java() {
+    env-import SECURE_RANDOM "false"
+}
+
+cloudbreak-conf-baywatch() {
+  declare desc="Defines Baywatch related parameters"
+
+  env-import CB_BAYWATCH_ENABLED "false"
+  env-import CB_BAYWATCH_EXTERN_LOCATION ""
 }
 
 cloudbreak-shell() {
