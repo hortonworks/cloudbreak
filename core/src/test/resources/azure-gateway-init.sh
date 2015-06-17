@@ -59,11 +59,11 @@ main() {
     shift
     eval "$@"
   elif [ ! -f "/var/cb-init-executed" ]; then
+    setup_tmp_ssh
     print_ssh_fingerprint
     format_disks
     fix_hostname
     configure_docker
-    setup_tmp_ssh
     touch /var/cb-init-executed
     echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/cb-init-executed
   fi
