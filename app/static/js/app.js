@@ -81,7 +81,7 @@ cloudbreakApp.config([ '$routeProvider', '$locationProvider', function($routePro
             var block = false
             if (config.url.match(/^(.*)templates($|\/).*/) || config.url.match(/^(.*)blueprints($|\/).*/)
             || config.url.match(/^(.*)credentials($|\/).*/) || config.url.match(/^(.*)users($|\?).*/)
-            || config.url.match(/^(.*)permission($|\?).*/) || config.url.match(/^stacks(\/(\d+)\/cluster($|\/).*)?/)
+            || config.url.match(/^(.*)permission($|\?).*/) || config.url.match(/^(.*)stacks($|\/).*/)
             || config.url.match(/^periscope\/clusters($|\/).*/) || config.url.match(/^(.*)usages($|\?).*/)){
                 block = true
             }
