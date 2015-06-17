@@ -17,7 +17,7 @@ error() {
 }
 
 cbd-version() {
-    declare desc="Displays the version of Cloudbrek Deployer"
+    declare desc="Displays the version of Cloudbreak Deployer"
     echo -n "local version:"
     local localVer=$(bin-version)
     echo "$localVer" | green
