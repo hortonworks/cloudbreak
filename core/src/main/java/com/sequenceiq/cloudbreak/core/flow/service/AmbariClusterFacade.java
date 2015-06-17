@@ -178,7 +178,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         Cluster cluster = clusterService.retrieveClusterByStackId(actualContext.getStackId());
         MDCBuilder.buildMdcContext(cluster);
         Status stackStatus = stack.getStatus();
-        stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Stopping Ambari cluster.");
+        fireEventAndLog(stack.getId(), context, "Stopping Ambari cluster.", UPDATE_IN_PROGRESS);
         clusterService.updateClusterStatusByStackId(stack.getId(), STOP_IN_PROGRESS);
         ambariClusterConnector.stopCluster(stack);
         stack = stackService.getById(actualContext.getStackId());
@@ -195,7 +195,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         ClusterScalingContext actualContext = (ClusterScalingContext) context;
         Stack stack = stackService.getById(actualContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
-        stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Adding new containers to the ambari cluster.");
+        stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Adding new containers to the cluster.");
         containerRunner.addClusterContainers(actualContext);
         return context;
     }
