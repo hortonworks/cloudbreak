@@ -173,7 +173,7 @@ cbd-find-root() {
 }
 
 deployer-delete() {
-    declare desc="Deletes yaml files, and all dbs"
+    declare desc="Deletes yaml files, and all dbs and certificate files"
     cloudbreak-delete-dbs
     deployer-delete-yamls
 }
@@ -185,6 +185,7 @@ deployer-delete-yamls() {
 deployer-generate() {
     declare desc="Generates docker-compose.yml and uaa.yml"
 
+    generate-cert
     compose-generate-yaml
     generate_uaa_config
 }
@@ -193,6 +194,7 @@ deployer-regenerate() {
     declare desc="Deletes and generates docker-compose.yml and uaa.yml"
 
     deployer-delete-yamls
+    generate-cert
     compose-generate-yaml
     generate_uaa_config
 }

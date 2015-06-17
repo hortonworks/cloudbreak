@@ -3,6 +3,7 @@ cloudbreak-config() {
   env-import PRIVATE_IP $(docker run --rm alpine sh -c 'ip ro | grep default | cut -d" " -f 3')
   cloudbreak-conf-tags
   cloudbreak-conf-images
+  cloudbreak-conf-cert
   cloudbreak-conf-db
   cloudbreak-conf-defaults
   cloudbreak-conf-uaa
@@ -67,6 +68,11 @@ cloudbreak-conf-db() {
     env-import PERISCOPE_DB_HBM2DDL_STRATEGY "validate"
 }
 
+cloudbreak-conf-cert() {
+    declare desc="Declares cloudbreak cert config"
+    env-import CB_CERT_ROOT_PATH "${PWD}/certs"
+}
+
 cloudbreak-delete-dbs() {
     declare desc="deletes all cloudbreak related dbs: cbdb,pcdb,uaadb"
 
@@ -77,6 +83,11 @@ cloudbreak-delete-dbs() {
         # this is for linux
         rm -rf /var/lib/cloudbreak/*
     fi
+}
+
+cloudbreak-delete-certs() {
+    declare desc="deletes all cloudbreak related certificates"
+    rm -rf ${PWD}/certs
 }
 
 cloudbreak-conf-uaa() {
@@ -156,6 +167,20 @@ cloudbreak-shell() {
 
 gen-password() {
     date +%s | checksum sha1 | head -c 10
+}
+
+generate-cert() {
+    cloudbreak-config
+    if [ -f "${CB_CERT_ROOT_PATH}/client.pem" ] && [ -f "${CB_CERT_ROOT_PATH}/client-key.pem" ]; then
+      debug "Cloudbreak certificate and private key already exist, won't generate new ones."
+    else
+      info "generating Cloudbreak client certificate and private key in ${CB_CERT_ROOT_PATH}"
+      docker run --rm -v ${CB_CERT_ROOT_PATH}:/certs ehazlett/cert-tool:0.0.3 -d /certs -o=local &> /dev/null
+      cat "${CB_CERT_ROOT_PATH}/ca.pem" >> "${CB_CERT_ROOT_PATH}/client.pem"
+      mv "${CB_CERT_ROOT_PATH}/ca.pem" "${CB_CERT_ROOT_PATH}/client-ca.pem"
+      mv "${CB_CERT_ROOT_PATH}/ca-key.pem" "${CB_CERT_ROOT_PATH}/client-ca-key.pem"
+      debug "certificates successfully generated"
+    fi
 }
 
 generate_uaa_config() {

@@ -216,6 +216,9 @@ cloudbreak:
         - CB_SMTP_SENDER_FROM=$CLOUDBREAK_SMTP_SENDER_FROM
         - CB_BAYWATCH_ENABLED=$CB_BAYWATCH_ENABLED
         - CB_BAYWATCH_EXTERN_LOCATION=$CB_BAYWATCH_EXTERN_LOCATION
+        - CB_CERT_DIR=/certs
+        - CB_TLS_PRIVATE_KEY_FILE=/certs/client-key.pem
+        - CB_TLS_CERT_FILE=/certs/client.pem
         - ENDPOINTS_AUTOCONFIG_ENABLED=false
         - ENDPOINTS_DUMP_ENABLED=false
         - ENDPOINTS_TRACE_ENABLED=false
@@ -234,6 +237,8 @@ cloudbreak:
         - ambassador:backend
     ports:
         - 8080:8080
+    volumes:
+        - "$CB_CERT_ROOT_PATH:/certs"
     image: sequenceiq/cloudbreak:$DOCKER_TAG_CLOUDBREAK
     command: bash
 
