@@ -54,7 +54,7 @@
                         </div>
                         <div id="panel-user-collapse{{actualuser.idx}}" class="panel-collapse collapse">
                             <p class="btn-row-over-panel pull-right"><a class="btn btn-danger" ng-click="activateUser(false, actualuser.username)" role="button"><i class="fa fa-circle-o fa-fw"></i><span> {{msg.users_form_deactivate_command_label}}</span></a></p>
-                            <p class="btn-row-over-panel pull-right" ng-hide="actualuser.admin"><a class="btn btn-info" ng-click="makeAdmin(actualuser.id, actualuser.idx)" role="button"><i class="fa fa-plus fa-fw"></i>{{msg.users_form_make_admin_command_label}}</a></p>
+                            <p class="btn-row-over-panel pull-right" ng-hide="actualuser.admin"><a class="btn btn-info" ng-click="makeAdmin(actualuser.id, actualuser.username, actualuser.idx)" role="button"><i class="fa fa-plus fa-fw"></i>{{msg.users_form_make_admin_command_label}}</a></p>
                             <div class="panel-body">
                                 <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
                                     <div class="form-group">
