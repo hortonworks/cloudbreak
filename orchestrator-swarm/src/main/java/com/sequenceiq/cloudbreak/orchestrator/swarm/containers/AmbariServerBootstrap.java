@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.orchestrator.swarm.containers;
 
 import static com.sequenceiq.cloudbreak.orchestrator.DockerContainer.AMBARI_SERVER;
 
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,12 +27,14 @@ public class AmbariServerBootstrap implements ContainerBootstrap {
     private final String imageName;
     private final String cloudPlatform;
     private final String node;
+    private final Set<String> dataVolumes;
 
-    public AmbariServerBootstrap(DockerClient docker, String imageName, String node, String cloudPlatform) {
+    public AmbariServerBootstrap(DockerClient docker, String imageName, String node, Set<String> dataVolumes, String cloudPlatform) {
         this.docker = docker;
         this.imageName = imageName;
         this.cloudPlatform = cloudPlatform;
         this.node = node;
+        this.dataVolumes = dataVolumes;
     }
 
     @Override
@@ -57,8 +61,7 @@ public class AmbariServerBootstrap implements ContainerBootstrap {
                 .withNetworkMode("host")
                 .withRestartPolicy(RestartPolicy.alwaysRestart())
                 .withPrivileged(true)
-                .withBinds(new Bind("/var/log/containers/ambari-server", new Volume("/var/log/ambari-server")),
-                    new Bind("/var/log/containers/consul-watch", new Volume("/var/log/consul-watch"))));
+                .withBinds(new Bind("/hadoopfs/fs1/logs/", new Volume("/var/log/"))));
         LOGGER.info("Ambari server started successfully");
         return true;
     }

@@ -63,8 +63,7 @@ public class AmbariAgentBootstrap implements ContainerBootstrap {
             List<Bind> binds = new ArrayList<>();
             binds.add(new Bind("/usr/local/public_host_script.sh", new Volume("/etc/ambari-agent/conf/public-hostname.sh")));
             binds.add(new Bind("/data/jars", new Volume("/data/jars")));
-            binds.add(new Bind("/var/log/containers/ambari-agent", new Volume("/var/log/ambari-agent")));
-            binds.add(new Bind("/var/log/containers/consul-watch", new Volume("/var/log/consul-watch")));
+            binds.add(new Bind("/hadoopfs/fs1/logs/", new Volume("/var/log/")));
             for (String volume : dataVolumes) {
                 binds.add(new Bind(volume, new Volume(volume)));
             }
