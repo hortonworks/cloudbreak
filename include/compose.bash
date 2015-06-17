@@ -1,6 +1,7 @@
 compose-init() {
     deps-require docker-compose
     env-import CB_COMPOSE_PROJECT cbreak
+    env-import CBD_LOG_NAME cbreak
 }
 
 dockerCompose() {
@@ -24,11 +25,22 @@ compose-pull() {
     dockerCompose pull
 }
 
+create-logfile() {
+    
+    rm -f ${CBD_LOG_NAME}.log
+    export LOG=${CBD_LOG_NAME}-$(date +%Y%m%d-%H%M%S).log
+    touch $LOG
+    ln -s $LOG ${CBD_LOG_NAME}.log
+}
+
 compose-up() {
     declare desc="Starts containers with docker-compose"
     declare services="$@"
 
     deployer-generate
+
+    create-logfile
+
     dockerCompose up -d $services
 
     info "CloudBreak containers are started ..."
@@ -111,6 +123,34 @@ ambassador:
     dns: $PRIVATE_IP
     image: progrium/ambassadord:$DOCKER_TAG_AMBASSADOR
     command: --omnimode
+
+logsink:
+    ports:
+        - 3333
+    environment:
+        - SERVICE_NAME=logsink
+    volumes:
+        - .:/tmp
+    image: sequenceiq/socat:latest
+    command: socat -u TCP-LISTEN:3333,reuseaddr,fork OPEN:/tmp/cbreak.log,creat,append
+
+logspout:
+    ports:
+        - 8000:80
+    environment:
+        - SERVICE_NAME=logspout
+        - DEBUG=true
+        - BACKEND_1111=logsink.service.consul
+        - LOGSPOUT=ignore
+        - ROUTE_URIS=tcp://backend:1111
+        - "RAW_FORMAT={{.Container.Name}} | {{.Data}}\n"
+    links:
+        - ambassador:backend
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    image: gliderlabs/logspout:master
+    entrypoint: ["/bin/sh"]
+    command: -c 'sleep 1; /bin/logspout'
 
 ambassadorips:
     privileged: true

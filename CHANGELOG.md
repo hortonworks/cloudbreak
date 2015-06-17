@@ -5,6 +5,7 @@
 ### Added
 
 - Baywatch default parameters added: `CB_BAYWATCH_ENABLED` and`CB_BAYWATCH_EXTERN_LOCATION`
+- Logs are saved via lospout
 
 ### Removed
 
