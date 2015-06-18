@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -41,13 +41,13 @@ public class AmbariClusterStatusUpdater {
     private AmbariClusterStatusFactory clusterStatusFactory;
 
     @Inject
-    private SimpleSecurityService simpleSecurityService;
+    private TlsSecurityService tlsSecurityService;
 
     public void updateClusterStatus(Stack stack) throws CloudbreakSecuritySetupException {
         if (isClusterStatusCheckNecessary(stack)) {
             Cluster cluster = stack.getCluster();
             String blueprintName = cluster != null ? cluster.getBlueprint().getBlueprintName() : null;
-            TLSClientConfig clientConfig = simpleSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+            TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
             AmbariClusterStatus clusterStatus = clusterStatusFactory.createClusterStatus(ambariClientProvider.getAmbariClient(
                     clientConfig, cluster.getUserName(), cluster.getPassword()), blueprintName);
             updateClusterStatus(stack, clusterStatus);

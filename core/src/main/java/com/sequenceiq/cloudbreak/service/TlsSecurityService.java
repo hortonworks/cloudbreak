@@ -25,18 +25,20 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.GatewayConfig;
+import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Component
-public class SimpleSecurityService {
+public class TlsSecurityService {
 
     public static final String SSH_PUBLIC_KEY_EXTENSION = ".pub";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleSecurityService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TlsSecurityService.class);
     private static final String SSH_PUBLIC_KEY_COMMENT = "cloudbreak";
     private static final int DEFAULT_KEY_SIZE = 2048;
     private static final String SSH_KEY_PREFIX = "/cb-ssh-key-";
@@ -52,6 +54,24 @@ public class SimpleSecurityService {
 
     @Inject
     private StackRepository stackRepository;
+
+    @Inject
+    private SecurityConfigRepository securityConfigRepository;
+
+    public void setupSSHKeys(Stack stack) throws CloudbreakSecuritySetupException {
+        try {
+            generateTempSshKeypair(stack.getId());
+            SecurityConfig securityConfig = new SecurityConfig();
+            securityConfig.setClientKey(com.amazonaws.util.Base64.encodeAsString(readClientKey(stack.getId()).getBytes()));
+            securityConfig.setClientCert(com.amazonaws.util.Base64.encodeAsString(readClientCert(stack.getId()).getBytes()));
+            securityConfig.setTemporarySshPrivateKey(com.amazonaws.util.Base64.encodeAsString(readPrivateSshKey(stack.getId()).getBytes()));
+            securityConfig.setTemporarySshPublicKey(com.amazonaws.util.Base64.encodeAsString(readPublicSshKey(stack.getId()).getBytes()));
+            securityConfig.setStack(stack);
+            securityConfigRepository.save(securityConfig);
+        } catch (IOException | JSchException e) {
+            throw new CloudbreakSecuritySetupException("Failed to generate temporary SSH key pair.", e);
+        }
+    }
 
     public String getCertDir(Long stackId) {
         return Paths.get(certDir + "/stack-" + stackId).toString();
@@ -74,14 +94,14 @@ public class SimpleSecurityService {
     }
 
     private void prepareFiles(Long stackId) throws CloudbreakSecuritySetupException {
-            Stack stack = stackRepository.findById(stackId);
-            if (stack != null) {
-                readServerCert(stack.getId());
-                readClientCert(stack.getId());
-                readClientKey(stack.getId());
-                readPrivateSshKey(stack.getId());
-                readPublicSshKey(stack.getId());
-            }
+        Stack stack = stackRepository.findById(stackId);
+        if (stack != null) {
+            readServerCert(stack.getId());
+            readClientCert(stack.getId());
+            readClientKey(stack.getId());
+            readPrivateSshKey(stack.getId());
+            readPublicSshKey(stack.getId());
+        }
     }
 
     public String getSshPrivateFileLocation(Long stackId) {
@@ -132,13 +152,19 @@ public class SimpleSecurityService {
         return true;
     }
 
-    public void copyClientKeys(Path stackCertDir) throws IOException {
-        File file = new File(stackCertDir.toString());
-        if (!file.exists()) {
-            Files.createDirectories(stackCertDir);
+    public void copyClientKeys(Long stackId) throws CloudbreakSecuritySetupException {
+        try {
+            Path stackCertDir = Paths.get(getCertDir(stackId));
+            File file = new File(stackCertDir.toString());
+            if (!file.exists()) {
+                Files.createDirectories(stackCertDir);
+            }
+            Files.copy(Paths.get(clientPrivateKey), Paths.get(stackCertDir + "/key.pem"), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(Paths.get(clientCert), Paths.get(stackCertDir + "/cert.pem"), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new CloudbreakSecuritySetupException(String.format("Failed to copy client certificate to certificate directory."
+                    + " Check if '%s' and '%s' exist.", clientCert, clientPrivateKey), e);
         }
-        Files.copy(Paths.get(clientPrivateKey), Paths.get(stackCertDir + "/key.pem"), StandardCopyOption.REPLACE_EXISTING);
-        Files.copy(Paths.get(clientCert), Paths.get(stackCertDir + "/cert.pem"), StandardCopyOption.REPLACE_EXISTING);
     }
 
     public String getPublicSshKeyFileName(Long stackId) {

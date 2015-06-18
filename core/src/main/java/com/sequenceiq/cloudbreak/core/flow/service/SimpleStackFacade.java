@@ -56,7 +56,7 @@ import com.sequenceiq.cloudbreak.domain.Subnet;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.repository.SubnetRepository;
-import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -115,7 +115,7 @@ public class SimpleStackFacade implements StackFacade {
     @Inject
     private TlsSetupService tlsSetupService;
     @Inject
-    private SimpleSecurityService simpleSecurityService;
+    private TlsSecurityService tlsSecurityService;
 
     @Override
     public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
@@ -392,7 +392,7 @@ public class SimpleStackFacade implements StackFacade {
             MDCBuilder.buildMdcContext(stack);
             CloudPlatformConnector connector = cloudPlatformConnectors.get(stack.cloudPlatform());
             Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(stack.cloudPlatform(),
-                    simpleSecurityService.readPublicSshKey(stack.getId()), connector.getSSHUser());
+                    tlsSecurityService.readPublicSshKey(stack.getId()), connector.getSSHUser());
             Map<String, Set<Subnet>> modifiedSubnets = getModifiedSubnetList(stack, actualContext.getAllowedSubnets());
             Set<Subnet> newSubnets = modifiedSubnets.get(UPDATED_SUBNETS);
             stack.setAllowedSubnets(newSubnets);

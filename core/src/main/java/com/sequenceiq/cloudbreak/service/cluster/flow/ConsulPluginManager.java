@@ -22,7 +22,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
@@ -55,7 +55,7 @@ public class ConsulPluginManager implements PluginManager {
     private HostMetadataRepository hostMetadataRepository;
 
     @Inject
-    private SimpleSecurityService simpleSecurityService;
+    private TlsSecurityService tlsSecurityService;
 
     @Override
     public void prepareKeyValues(TLSClientConfig clientConfig, Map<String, String> keyValues) {
@@ -117,7 +117,7 @@ public class ConsulPluginManager implements PluginManager {
     public void waitForEventFinish(Stack stack, Collection<InstanceMetaData> instanceMetaData, Map<String, Set<String>> eventIds, Integer timeout)
             throws CloudbreakSecuritySetupException {
         InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
-        TLSClientConfig clientConfig = simpleSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
         ConsulClient client = ConsulUtils.createClient(clientConfig);
         List<String> keys = generateKeys(eventIds);
         int calculatedMaxAttempt = (timeout * ONE_THOUSAND * SECONDS_IN_MINUTE) / POLLING_INTERVAL;
@@ -143,7 +143,7 @@ public class ConsulPluginManager implements PluginManager {
             targetHosts = getHostnames(hostMetadataRepository.findHostsInCluster(stack.getCluster().getId()));
         }
         InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
-        TLSClientConfig clientConfig = simpleSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
         Map<String, Set<String>> triggerEventIds =
                 triggerPlugins(clientConfig, event, container, payload, targetHosts);
         Map<String, Set<String>> eventIdMap = new HashMap<>();

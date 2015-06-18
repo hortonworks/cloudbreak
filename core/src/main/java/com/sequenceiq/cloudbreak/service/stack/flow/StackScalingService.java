@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
@@ -58,7 +58,7 @@ public class StackScalingService {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
     @Inject
-    private SimpleSecurityService simpleSecurityService;
+    private TlsSecurityService tlsSecurityService;
     @javax.annotation.Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
@@ -66,7 +66,7 @@ public class StackScalingService {
         Stack stack = stackService.getById(stackId);
         CloudPlatformConnector connector = cloudPlatformConnectors.get(stack.cloudPlatform());
         Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(stack.cloudPlatform(),
-                simpleSecurityService.readPublicSshKey(stack.getId()), connector.getSSHUser());
+                tlsSecurityService.readPublicSshKey(stack.getId()), connector.getSSHUser());
         return connector.addInstances(stack, userdata.get(InstanceGroupType.GATEWAY),
                 userdata.get(InstanceGroupType.CORE), scalingAdjustment, instanceGroupName);
     }
@@ -109,7 +109,7 @@ public class StackScalingService {
 
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        TLSClientConfig clientConfig = simpleSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
         ConsulClient client = ConsulUtils.createClient(clientConfig);
 
         for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {

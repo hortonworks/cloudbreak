@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.util.Base64;
 import com.sequenceiq.cloudbreak.EnvironmentVariableConfig;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -44,7 +44,7 @@ public class TlsSetupService {
     private SecurityConfigRepository securityConfigRepository;
 
     @Inject
-    private SimpleSecurityService simpleSecurityService;
+    private TlsSecurityService tlsSecurityService;
 
     @Inject
     private StackRepository stackRepository;
@@ -63,7 +63,7 @@ public class TlsSetupService {
         ssh.addHostKeyVerifier(sshFingerprint);
         try {
             ssh.connect(gateway.getPublicIp(), SSH_PORT);
-            ssh.authPublickey(connector.getSSHUser(), simpleSecurityService.getSshPrivateFileLocation(stack.getId()));
+            ssh.authPublickey(connector.getSSHUser(), tlsSecurityService.getSshPrivateFileLocation(stack.getId()));
             ssh.newSCPFileTransfer().upload(tlsCertificatePath, "/tmp/cb-client.pem");
             final Session tlsSetupSession = ssh.startSession();
             tlsSetupSession.allocateDefaultPTY();
@@ -76,7 +76,7 @@ public class TlsSetupService {
             final Session.Command changeSshKeyCmd = changeSshKeySession.exec("echo '" + stack.getCredential().getPublicKey() + "' > ~/.ssh/authorized_keys");
             changeSshKeyCmd.join(REMOVE_SSH_KEY_TIMEOUT, TimeUnit.SECONDS);
             changeSshKeySession.close();
-            ssh.newSCPFileTransfer().download("/tmp/server.pem", simpleSecurityService.getCertDir(stack.getId()) + "/ca.pem");
+            ssh.newSCPFileTransfer().download("/tmp/server.pem", tlsSecurityService.getCertDir(stack.getId()) + "/ca.pem");
             if (changeSshKeyCmd.getExitStatus() != 0) {
                 throw new CloudbreakException(String.format("TLS setup script exited with error code: %s", changeSshKeyCmd.getExitStatus()));
             }
@@ -85,7 +85,7 @@ public class TlsSetupService {
             }
             Stack stackWithSecurity = stackRepository.findByIdWithSecurityConfig(stack.getId());
             SecurityConfig securityConfig = stackWithSecurity.getSecurityConfig();
-            securityConfig.setServerCert(Base64.encodeAsString(simpleSecurityService.readServerCert(stack.getId()).getBytes()));
+            securityConfig.setServerCert(Base64.encodeAsString(tlsSecurityService.readServerCert(stack.getId()).getBytes()));
             securityConfigRepository.save(securityConfig);
         } catch (IOException e) {
             throw new CloudbreakException("Failed to setup TLS through temporary SSH.", e);

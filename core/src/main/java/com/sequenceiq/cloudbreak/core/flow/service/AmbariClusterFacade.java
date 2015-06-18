@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterContainerRunner;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
@@ -103,7 +103,7 @@ public class AmbariClusterFacade implements ClusterFacade {
     private ClusterContainerRunner containerRunner;
 
     @Inject
-    private SimpleSecurityService simpleSecurityService;
+    private TlsSecurityService tlsSecurityService;
 
     @Override
     public FlowContext startAmbari(FlowContext context) throws Exception {
@@ -117,7 +117,7 @@ public class AmbariClusterFacade implements ClusterFacade {
             MDCBuilder.buildMdcContext(cluster);
             stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Ambari cluster is now starting.");
             clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
-            TLSClientConfig clientConfig = simpleSecurityService.buildTLSClientConfig(stack.getId(), actualContext.getAmbariIp());
+            TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), actualContext.getAmbariIp());
             AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(clientConfig);
             AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, actualContext.getAmbariIp(), ambariClient);
             PollingResult pollingResult = ambariStartupPollerObjectPollingService
@@ -424,7 +424,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         LOGGER.info("Changing ambari credentials for cluster: {}, ambari ip: {}", cluster.getName(), ambariIp);
         String userName = cluster.getUserName();
         String password = cluster.getPassword();
-        TLSClientConfig clientConfig = simpleSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(clientConfig);
         if (ADMIN.equals(userName)) {
             if (!ADMIN.equals(password)) {

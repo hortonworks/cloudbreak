@@ -23,7 +23,7 @@ import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.catalog.model.CatalogService;
 import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -53,7 +53,7 @@ public class ConsulMetadataSetup {
     private ConsulHostCheckerTask consulHostCheckerTask;
 
     @Inject
-    private SimpleSecurityService simpleSecurityService;
+    private TlsSecurityService tlsSecurityService;
 
     public void setupConsulMetadata(Long stackId) throws CloudbreakSecuritySetupException {
         LOGGER.info("Setting up Consul metadata for the cluster.");
@@ -61,7 +61,7 @@ public class ConsulMetadataSetup {
         Set<InstanceMetaData> allInstanceMetaData = stack.getRunningInstanceMetaData();
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        TLSClientConfig clientConfig = simpleSecurityService.buildTLSClientConfig(stackId, gatewayInstance.getPublicIp());
+        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, gatewayInstance.getPublicIp());
         PollingResult pollingResult = waitForConsulAgents(stack, clientConfig, allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
         if (!isSuccess(pollingResult)) {
             throw new WrongMetadataException("Connecting to consul hosts is interrupted.");
@@ -75,7 +75,7 @@ public class ConsulMetadataSetup {
         Stack stack = stackService.getById(stackId);
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        TLSClientConfig clientConfig = simpleSecurityService.buildTLSClientConfig(stackId, gatewayInstance.getPublicIp());
+        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, gatewayInstance.getPublicIp());
         Set<InstanceMetaData> newInstanceMetadata = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
             if (newAddresses.contains(instanceMetaData.getPrivateIp())) {

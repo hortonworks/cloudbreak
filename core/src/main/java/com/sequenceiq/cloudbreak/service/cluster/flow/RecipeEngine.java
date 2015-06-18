@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -40,7 +40,7 @@ public class RecipeEngine {
     private PluginManager pluginManager;
 
     @Inject
-    private SimpleSecurityService simpleSecurityService;
+    private TlsSecurityService tlsSecurityService;
 
     public void setupRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakSecuritySetupException {
         Set<InstanceMetaData> instances = instanceMetadataRepository.findAllInStack(stack.getId());
@@ -65,7 +65,7 @@ public class RecipeEngine {
         LOGGER.info("Setting up recipe properties.");
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        TLSClientConfig clientConfig = simpleSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
         pluginManager.prepareKeyValues(clientConfig, getAllPropertiesFromRecipes(hostGroups));
     }
 
@@ -80,7 +80,7 @@ public class RecipeEngine {
             throws CloudbreakSecuritySetupException {
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        TLSClientConfig clientConfig = simpleSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
         for (Recipe recipe : recipes) {
             Map<String, PluginExecutionType> plugins = recipe.getPlugins();
             Map<String, Set<String>> eventIdMap =

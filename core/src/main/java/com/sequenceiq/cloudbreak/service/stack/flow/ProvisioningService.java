@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -33,7 +33,7 @@ public class ProvisioningService {
     private UserDataBuilder userDataBuilder;
 
     @Inject
-    private SimpleSecurityService simpleSecurityService;
+    private TlsSecurityService tlsSecurityService;
 
     public ProvisionComplete buildStack(final CloudPlatform cloudPlatform, Stack stack, Map<String, Object> setupProperties) throws Exception {
         ProvisionComplete provisionComplete = null;
@@ -41,7 +41,7 @@ public class ProvisioningService {
         if (stack.isRequested()) {
             CloudPlatformConnector cloudPlatformConnector = cloudPlatformConnectors.get(cloudPlatform);
             Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(cloudPlatform,
-                    simpleSecurityService.readPublicSshKey(stack.getId()),
+                    tlsSecurityService.readPublicSshKey(stack.getId()),
                     cloudPlatformConnector.getSSHUser());
             Set<Resource> resources = cloudPlatformConnector
                     .buildStack(stack, userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE), setupProperties);

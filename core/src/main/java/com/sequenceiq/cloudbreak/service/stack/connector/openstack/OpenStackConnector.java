@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.flow.FingerprintParserUtil;
@@ -80,7 +80,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
     @Qualifier("openstack")
     private ConsoleOutputCheckerTask consoleOutputCheckerTask;
     @Inject
-    private SimpleSecurityService simpleSecurityService;
+    private TlsSecurityService tlsSecurityService;
 
     @Override
     public Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties) {
@@ -127,7 +127,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
     public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
         try {
             Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(stack.cloudPlatform(),
-                    simpleSecurityService.readPublicSshKey(stack.getId()), getSSHUser());
+                    tlsSecurityService.readPublicSshKey(stack.getId()), getSSHUser());
             String heatTemplate = heatTemplateBuilder.remove(stack, userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE),
                     instanceMetaDataRepository.findAllInStack(stack.getId()), instanceIds, instanceGroup);
             PollingResult pollingResult = updateHeatStack(stack, heatTemplate);

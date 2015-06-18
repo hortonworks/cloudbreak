@@ -8,7 +8,7 @@ CREATE TABLE securityconfig (
     serverCert text,
     temporarySshPublicKey text,
     temporarySshPrivateKey text,
-    stack_id bigint
+    stack_id bigint NOT NULL
 );
 
 ALTER TABLE ONLY securityconfig ADD CONSTRAINT securityconfig_pkey PRIMARY KEY (id);

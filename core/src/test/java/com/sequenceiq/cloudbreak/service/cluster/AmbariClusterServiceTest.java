@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -92,7 +92,7 @@ public class AmbariClusterServiceTest {
     private InstanceMetaDataRepository instanceMetadataRepository;
 
     @Mock
-    private SimpleSecurityService simpleSecurityService;
+    private TlsSecurityService tlsSecurityService;
 
     @Captor
     private ArgumentCaptor<Event<UpdateAmbariHostsRequest>> eventCaptor;
@@ -119,7 +119,7 @@ public class AmbariClusterServiceTest {
         given(stackRepository.findById(anyLong())).willReturn(stack);
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(stackRepository.findOne(anyLong())).willReturn(stack);
-        given(simpleSecurityService.buildTLSClientConfig(anyLong(), anyString())).willReturn(new TLSClientConfig("", "/tmp"));
+        given(tlsSecurityService.buildTLSClientConfig(anyLong(), anyString())).willReturn(new TLSClientConfig("", "/tmp"));
     }
 
     @Test(expected = BadRequestException.class)

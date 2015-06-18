@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.orchestrator.Node;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.SimpleSecurityService;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 
 @Component
 public class ClusterBootstrapper {
@@ -64,7 +64,7 @@ public class ClusterBootstrapper {
     private ContainerOrchestratorResolver containerOrchestratorResolver;
 
     @Inject
-    private SimpleSecurityService simpleSecurityService;
+    private TlsSecurityService tlsSecurityService;
 
     public void bootstrapCluster(ProvisioningContext provisioningContext) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
@@ -76,7 +76,7 @@ public class ClusterBootstrapper {
             nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp()));
         }
         try {
-            GatewayConfig gatewayConfig = simpleSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIp());
+            GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIp());
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
             bootstrapApiPollingService.pollWithTimeout(
                     bootstrapApiCheckerTask,
@@ -126,7 +126,7 @@ public class ClusterBootstrapper {
             }
         }
         try {
-            GatewayConfig gatewayConfig = simpleSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIp());
+            GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIp());
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
             List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIp());
             for (int i = 0; i < nodeMap.size(); i++) {

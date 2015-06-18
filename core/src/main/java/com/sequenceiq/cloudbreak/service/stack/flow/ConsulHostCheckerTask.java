@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
-public class ConsulHostCheckerTask extends StackBasedStatusCheckerTask<ConsulContext> {
+public class    ConsulHostCheckerTask extends StackBasedStatusCheckerTask<ConsulContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsulHostCheckerTask.class);
 
