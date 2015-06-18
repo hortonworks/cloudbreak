@@ -42,38 +42,20 @@
             <div class="col-md-12"
                  style="box-sizing: border-box;color: rgb(64, 64, 64);display: block;float: left;font-family: 'Roboto Condensed', 'Arial Narrow', Helvetica, sans-serif;font-size: 16px;height: 193px;line-height: 26.0799999237061px;min-height: 1px;padding-left: 8px;padding-right: 8px;position: relative;">
                 <h2 style="box-sizing: border-box;color: rgb(64, 64, 64);display: block;font-family: 'Roboto Condensed', 'Arial Narrow', Helvetica, sans-serif;font-size: 34px;font-weight: 500;height: 37px;line-height: 37.4000015258789px;margin-bottom: 13px;margin-top: 26px;">
-                    Cluster Install Failed</h2>
+                    ${title}</h2>
 
                 <p style="box-sizing: border-box;color: rgb(64, 64, 64);display: block;font-family: 'Roboto Condensed', 'Arial Narrow', Helvetica, sans-serif;font-size: 16px;height: 26px;line-height: 26.0799999237061px;margin-bottom: 13px;margin-left: 0px;margin-right: 0px;margin-top: 0px;">
-                    Something went terribly wrong - we are happy to help, please let us know your cluster details, time, etc - and we will check the logs and
-                    get a fix for you.</p>
+                    ${text}</p>
                 </br>
                 Sorry for the inconvenience.
                 </br>
                 Regards,
                 </br>
-                The SequenceIQ Team
+                The Hortonworks Team
             </div>
         </div>
     </div>
 </section>
-<footer style="background-color: rgba(0, 0, 0, 0.74902);bottom: 0px;box-sizing: border-box;color: rgb(64, 64, 64);display: block;font-family: 'Roboto Condensed', 'Arial Narrow', Helvetica, sans-serif;font-size: 16px;height: 52px;left: 0px;line-height: 26.0799999237061px;overflow-x: hidden;overflow-y: hidden;padding-top: 8px;position: absolute;">
-    <div class="container"
-         style="box-sizing: border-box;color: rgb(64, 64, 64);display: block;font-family: 'Roboto Condensed', 'Arial Narrow', Helvetica, sans-serif;font-size: 16px;height: 31px;line-height: 26.0799999237061px;margin-left: 84.5px;margin-right: 84.5px;padding-left: 8px;padding-right: 8px;">
-        <div class="row"
-             style="box-sizing: border-box;color: rgb(64, 64, 64);display: block;font-family: 'Roboto Condensed', 'Arial Narrow', Helvetica, sans-serif;font-size: 16px;height: 31px;line-height: 26.0799999237061px;margin-left: -8px;margin-right: -8px;">
-            <div class="col-xs-3"
-                 style="box-sizing: border-box;color: rgb(64, 64, 64);display: block;float: left;font-family: 'Roboto Condensed', 'Arial Narrow', Helvetica, sans-serif;font-size: 16px;height: 1px;line-height: 26.0799999237061px;min-height: 1px;padding-left: 8px;padding-right: 8px;position: relative;">
-            </div>
-
-            <div class="col-xs-9"
-                 style="box-sizing: border-box;            color: rgb(64, 64, 64);            display: block;            float: left;            font-family: 'Roboto Condensed', 'Arial Narrow', Helvetica, sans-serif;            font-size: 16px;            height: 31px;            line-height: 26.0799999237061px;            min-height: 1px;            padding-left: 8px;            padding-right: 8px;            position: relative;            width: 867px;">
-                <p class="text-right"
-                   style="box-sizing: border-box;color: rgb(217, 217, 217);display: block;font-family: 'Roboto Condensed', 'Arial Narrow', Helvetica, sans-serif;font-size: 14px;height: 18px;line-height: 18.6200008392334px;margin-bottom: 13px;margin-left: 0px;margin-right: 0px;margin-top: 0px;text-align: right;">
-                    SequenceIQ Inc. 2014. All rights reserved. </p></div>
-        </div>
-    </div>
-</footer>
 </body>
 </html>
 
