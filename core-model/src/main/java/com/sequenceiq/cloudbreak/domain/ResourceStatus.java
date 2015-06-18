@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
-public enum NetworkStatus {
+public enum ResourceStatus {
     DEFAULT,
     DEFAULT_DELETED,
     USER_MANAGED

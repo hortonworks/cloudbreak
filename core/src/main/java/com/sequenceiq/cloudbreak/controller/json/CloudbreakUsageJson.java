@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.UsageModelDescription;
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.StackModelDescription;
 import com.wordnik.swagger.annotations.ApiModel;
@@ -7,13 +8,13 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 
 @ApiModel("CloudbreakUsage")
 public class CloudbreakUsageJson implements JsonEntity {
-    @ApiModelProperty(StackModelDescription.OWNER)
+    @ApiModelProperty(ModelDescriptions.OWNER)
     private String owner;
 
     @ApiModelProperty(StackModelDescription.USERNAME)
     private String username;
 
-    @ApiModelProperty(StackModelDescription.ACCOUNT)
+    @ApiModelProperty(ModelDescriptions.ACCOUNT)
     private String account;
 
     @ApiModelProperty(UsageModelDescription.DAY)

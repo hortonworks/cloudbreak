@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -9,6 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -19,74 +24,89 @@ import javax.persistence.UniqueConstraint;
 })
 @NamedQueries({
         @NamedQuery(
-                name = "Network.findOneById",
-                query = "SELECT r FROM Network r "
+                name = "SecurityGroup.findById",
+                query = "SELECT r FROM SecurityGroup r "
+                        + "LEFT JOIN FETCH r.securityRules "
                         + "WHERE r.id= :id"),
         @NamedQuery(
-                name = "Network.findOneByName",
-                query = "SELECT r FROM Network r "
+                name = "SecurityGroup.findOneById",
+                query = "SELECT r FROM SecurityGroup r "
+                        + "LEFT JOIN FETCH r.securityRules "
+                        + "WHERE r.id= :id"),
+        @NamedQuery(
+                name = "SecurityGroup.findOneByName",
+                query = "SELECT r FROM SecurityGroup r "
+                        + "LEFT JOIN FETCH r.securityRules "
                         + "WHERE r.name= :name "
                         + "AND r.status <> 'DEFAULT_DELETED' "),
         @NamedQuery(
-                name = "Network.findByNameForUser",
-                query = "SELECT r FROM Network r "
+                name = "SecurityGroup.findByNameForUser",
+                query = "SELECT r FROM SecurityGroup r "
+                        + "LEFT JOIN FETCH r.securityRules "
                         + "WHERE r.name= :name "
                         + "AND r.owner= :owner "
                         + "AND r.status <> 'DEFAULT_DELETED' "),
         @NamedQuery(
-                name = "Network.findByNameInAccount",
-                query = "SELECT r FROM Network r "
+                name = "SecurityGroup.findByNameInAccount",
+                query = "SELECT r FROM SecurityGroup r "
+                        + "LEFT JOIN FETCH r.securityRules "
                         + "WHERE r.name= :name "
                         + "AND r.account= :account "
                         + "AND r.status <> 'DEFAULT_DELETED' "),
         @NamedQuery(
-                name = "Network.findByName",
-                query = "SELECT r FROM Network r "
+                name = "SecurityGroup.findByName",
+                query = "SELECT r FROM SecurityGroup r "
+                        + "LEFT JOIN FETCH r.securityRules "
                         + "WHERE r.name= :name "),
         @NamedQuery(
-                name = "Network.findForUser",
-                query = "SELECT r FROM Network r "
+                name = "SecurityGroup.findForUser",
+                query = "SELECT r FROM SecurityGroup r "
+                        + "LEFT JOIN FETCH r.securityRules "
                         + "WHERE r.owner= :owner "
                         + "AND r.status <> 'DEFAULT_DELETED' "),
         @NamedQuery(
-                name = "Network.findPublicInAccountForUser",
-                query = "SELECT r FROM Network r "
+                name = "SecurityGroup.findPublicInAccountForUser",
+                query = "SELECT r FROM SecurityGroup r "
+                        + "LEFT JOIN FETCH r.securityRules "
                         + "WHERE ((r.account= :account AND r.publicInAccount= true) OR r.owner= :owner) "
                         + "AND r.status <> 'DEFAULT_DELETED' "),
         @NamedQuery(
-                name = "Network.findAllInAccount",
-                query = "SELECT r FROM Network r "
+                name = "SecurityGroup.findAllInAccount",
+                query = "SELECT r FROM SecurityGroup r "
+                        + "LEFT JOIN FETCH r.securityRules "
                         + "WHERE r.account= :account "
                         + "AND r.status <> 'DEFAULT_DELETED' "),
         @NamedQuery(
-                name = "Network.findAllDefaultInAccount",
-                query = "SELECT r FROM Network r "
+                name = "SecurityGroup.findAllDefaultInAccount",
+                query = "SELECT r FROM SecurityGroup r "
+                        + "LEFT JOIN FETCH r.securityRules "
                         + "WHERE r.account= :account "
                         + "AND (r.status = 'DEFAULT_DELETED' OR r.status = 'DEFAULT') ")
 })
-public abstract class Network {
+public class SecurityGroup {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "network_generator")
-    @SequenceGenerator(name = "network_generator", sequenceName = "network_table")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "security_group_sequence_generator")
+    @SequenceGenerator(name = "security_group_sequence_generator", sequenceName = "security_group_seq")
     private Long id;
 
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private String subnetCIDR;
-
-    @Column(length = 1000000, columnDefinition = "TEXT")
-    private String description;
-
     private String owner;
+
     private String account;
 
     private boolean publicInAccount;
 
+    @Column(length = 1000000, columnDefinition = "TEXT")
+    private String description;
+
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
+
+    @OneToMany(mappedBy = "securityGroup", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private Set<SecurityRule> securityRules = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -102,22 +122,6 @@ public abstract class Network {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getSubnetCIDR() {
-        return subnetCIDR;
-    }
-
-    public void setSubnetCIDR(String subnetCIDR) {
-        this.subnetCIDR = subnetCIDR;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public String getOwner() {
@@ -144,6 +148,14 @@ public abstract class Network {
         this.publicInAccount = publicInAccount;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public ResourceStatus getStatus() {
         return status;
     }
@@ -152,5 +164,11 @@ public abstract class Network {
         this.status = status;
     }
 
-    public abstract CloudPlatform cloudPlatform();
+    public Set<SecurityRule> getSecurityRules() {
+        return securityRules;
+    }
+
+    public void setSecurityRules(Set<SecurityRule> securityRules) {
+        this.securityRules = securityRules;
+    }
 }

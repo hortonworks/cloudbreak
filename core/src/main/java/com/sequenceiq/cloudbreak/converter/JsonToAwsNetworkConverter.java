@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.controller.json.NetworkJson;
 import com.sequenceiq.cloudbreak.controller.validation.AwsNetworkParam;
 import com.sequenceiq.cloudbreak.domain.AwsNetwork;
-import com.sequenceiq.cloudbreak.domain.NetworkStatus;
+import com.sequenceiq.cloudbreak.domain.ResourceStatus;
 
 @Component
 public class JsonToAwsNetworkConverter extends AbstractConversionServiceAwareConverter<NetworkJson, AwsNetwork> {
@@ -19,7 +19,7 @@ public class JsonToAwsNetworkConverter extends AbstractConversionServiceAwareCon
         network.setDescription(source.getDescription());
         network.setSubnetCIDR(source.getSubnetCIDR());
         network.setPublicInAccount(source.isPublicInAccount());
-        network.setStatus(NetworkStatus.USER_MANAGED);
+        network.setStatus(ResourceStatus.USER_MANAGED);
         Map<String, Object> parameters = source.getParameters();
         if (parameters.containsKey(AwsNetworkParam.VPC_ID.getName())) {
             String vpcId = (String) parameters.get(AwsNetworkParam.VPC_ID.getName());

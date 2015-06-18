@@ -50,13 +50,18 @@ import javax.persistence.Version;
                 query = "SELECT c FROM Stack c "
                         + "LEFT JOIN FETCH c.resources "
                         + "LEFT JOIN FETCH c.instanceGroups ig "
-                        + "LEFT JOIN FETCH c.allowedSubnets "
                         + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE c.id= :id"),
         @NamedQuery(
                 name = "Stack.findByIdWithSecurityConfig",
                 query = "SELECT s FROM Stack s "
                         + "LEFT JOIN FETCH s.securityConfig "
+                        + "WHERE s.id= :id"),
+        @NamedQuery(
+                name = "Stack.findByIdWithSecurityGroup",
+                query = "SELECT s FROM Stack s "
+                        + "LEFT JOIN FETCH s.securityGroup sg "
+                        + "LEFT JOIN FETCH sg.securityRules "
                         + "WHERE s.id= :id"),
         @NamedQuery(
                 name = "Stack.findAllStackForTemplate",
@@ -92,7 +97,6 @@ import javax.persistence.Version;
                 query = "SELECT c FROM Stack c "
                         + "LEFT JOIN FETCH c.resources "
                         + "LEFT JOIN FETCH c.instanceGroups ig "
-                        + "LEFT JOIN FETCH c.allowedSubnets "
                         + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE c.id= :id"),
         @NamedQuery(
@@ -172,7 +176,14 @@ import javax.persistence.Version;
                         + "LEFT JOIN FETCH t.resources "
                         + "LEFT JOIN FETCH t.instanceGroups ig "
                         + "LEFT JOIN FETCH ig.instanceMetaData "
-                        + "WHERE t.network.id= :networkId ")
+                        + "WHERE t.network.id= :networkId "),
+        @NamedQuery(
+                name = "Stack.findAllBySecurityGroup",
+                query = "SELECT t FROM Stack t "
+                        + "LEFT JOIN FETCH t.resources "
+                        + "LEFT JOIN FETCH t.instanceGroups ig "
+                        + "LEFT JOIN FETCH ig.instanceMetaData "
+                        + "WHERE t.securityGroup.id= :securityGroupId ")
 })
 public class Stack implements ProvisionEntity {
 
@@ -212,12 +223,12 @@ public class Stack implements ProvisionEntity {
     private SecurityConfig securityConfig;
     @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<InstanceGroup> instanceGroups = new HashSet<>();
-    @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private Set<Subnet> allowedSubnets = new HashSet<>();
     @Version
     private Long version;
     @ManyToOne
     private Network network;
+    @ManyToOne
+    private SecurityGroup securityGroup;
 
     public Set<InstanceGroup> getInstanceGroups() {
         return instanceGroups;
@@ -467,24 +478,6 @@ public class Stack implements ProvisionEntity {
         return cloudPlatform().isWithTemplate();
     }
 
-    public Set<Subnet> getAllowedSubnets() {
-        return allowedSubnets;
-    }
-
-    public void setAllowedSubnets(Set<Subnet> allowedSubnets) {
-        this.allowedSubnets = new HashSet<>(allowedSubnets);
-    }
-
-    public void addAllowedSubnets(Set<Subnet> allowedSubnets) {
-        for (Subnet subnet : allowedSubnets) {
-            addAllowedSubnet(subnet);
-        }
-    }
-
-    public void addAllowedSubnet(Subnet subnet) {
-        allowedSubnets.add(subnet);
-    }
-
     public Map<String, String> getParameters() {
         return parameters;
     }
@@ -500,6 +493,14 @@ public class Stack implements ProvisionEntity {
             }
         }
         return null;
+    }
+
+    public SecurityGroup getSecurityGroup() {
+        return securityGroup;
+    }
+
+    public void setSecurityGroup(SecurityGroup securityGroup) {
+        this.securityGroup = securityGroup;
     }
 
     public int getGateWayNodeCount() {

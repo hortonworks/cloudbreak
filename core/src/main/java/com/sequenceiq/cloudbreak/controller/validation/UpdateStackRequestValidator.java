@@ -28,9 +28,7 @@ public class UpdateStackRequestValidator implements ConstraintValidator<ValidUpd
                 return false;
             }
         }
-        if (value.getAllowedSubnets() != null) {
-            updateResources++;
-        }
+
         if (updateResources != 1) {
             addConstraintViolation(context, "Invalid PUT request on this resource. 1 update request is allowed at a time.");
             return false;

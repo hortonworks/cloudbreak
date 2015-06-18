@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
-import com.sequenceiq.cloudbreak.service.network.SecurityService;
+import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
 
 @Service
@@ -39,10 +39,10 @@ public class StackDecorator implements Decorator<Stack> {
     private CredentialRepository credentialRepository;
 
     @Inject
-    private SecurityService securityService;
+    private NetworkService networkService;
 
     @Inject
-    private NetworkService networkService;
+    private SecurityGroupService securityGroupService;
 
     @Value("${cb.azure.image.uri:}")
     private String azureImage;
@@ -59,12 +59,13 @@ public class StackDecorator implements Decorator<Stack> {
     private enum DecorationData {
         CREDENTIAL_ID,
         USR_CONSUL_SERVER_COUNT,
-        NETWORK_ID
+        NETWORK_ID,
+        SECURITY_GROUP_ID
     }
 
     @Override
     public Stack decorate(Stack subject, Object... data) {
-        subject.addAllowedSubnets(securityService.getCloudbreakSubnets(subject));
+        subject.setSecurityGroup(securityGroupService.getById((Long) data[DecorationData.SECURITY_GROUP_ID.ordinal()]));
         subject.setCredential(credentialRepository.findOne((Long) data[DecorationData.CREDENTIAL_ID.ordinal()]));
         int consulServers = getConsulServerCount((Integer) data[DecorationData.USR_CONSUL_SERVER_COUNT.ordinal()], subject.getFullNodeCount());
         subject.setConsulServers(consulServers);

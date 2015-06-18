@@ -12,6 +12,7 @@ public class ControllerDescription {
     public static final String EVENT_DESCRIPTION = "Operations on events";
     public static final String NETWORK_DESCRIPTION = "Operations on networks";
     public static final String USER_DESCRIPTION = "Operations on users";
+    public static final String SECURITY_GROUPS_DESCRIPTION = "Operations on security group resources";
 
     private ControllerDescription() {
     }

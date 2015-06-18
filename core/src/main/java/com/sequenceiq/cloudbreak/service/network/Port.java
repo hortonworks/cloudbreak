@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.network;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Port {
@@ -10,6 +11,10 @@ public class Port {
     private final String port;
     private final String protocol;
     private final List<EndpointRule> aclRules;
+
+    public Port(ExposedService exposedService, String port, String protocol) {
+        this(exposedService, port, port, protocol, new ArrayList<EndpointRule>());
+    }
 
     public Port(ExposedService exposedService, String port, String localPort, String protocol, List<EndpointRule> aclRules) {
         this.localPort = localPort;

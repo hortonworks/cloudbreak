@@ -110,4 +110,17 @@ public class OperationDescriptions {
         public static final String USER_DETAILS_EVICT = "remove user from cache (by username)";
         public static final String USER_DELETE_BY_ID = "delete account user by id";
     }
+
+    public static class SecurityGroupOpDescription {
+        public static final String POST_PRIVATE = "create security group as private resource";
+        public static final String POST_PUBLIC = "create security group as public resource";
+        public static final String GET_PRIVATE = "retrieve private security groups";
+        public static final String GET_PUBLIC = "retrieve public and private (owned) security groups";
+        public static final String GET_PRIVATE_BY_NAME = "retrieve a private security group by name";
+        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) security group by name";
+        public static final String GET_BY_ID = "retrieve security group by id";
+        public static final String DELETE_PRIVATE_BY_NAME = "delete private security group by name";
+        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private security group by name";
+        public static final String DELETE_BY_ID = "delete security group by id";
+    }
 }

@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.domain.ResourceType.GCP_FIREWALL_IN;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -22,11 +23,11 @@ import com.sequenceiq.cloudbreak.domain.GcpCredential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Subnet;
+import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpRemoveCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpRemoveReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceCheckerStatus;
@@ -52,6 +53,8 @@ public class GcpFireWallInResourceBuilder extends GcpSimpleNetworkResourceBuilde
     private PollingService<GcpResourceReadyPollerObject> gcpFirewallInternalReadyPollerObjectPollingService;
     @Inject
     private GcpResourceCheckerStatus gcpResourceCheckerStatus;
+    @Inject
+    private SecurityRuleRepository securityRuleRepository;
 
     @Override
     public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
@@ -110,15 +113,7 @@ public class GcpFireWallInResourceBuilder extends GcpSimpleNetworkResourceBuilde
         List<Firewall.Allowed> allowedRules = new ArrayList<>();
         allowedRules.add(new Firewall.Allowed().setIPProtocol("icmp"));
 
-        Firewall.Allowed tcp = createRule(stack, "tcp");
-        if (tcp != null) {
-            allowedRules.add(tcp);
-        }
-
-        Firewall.Allowed udp = createRule(stack, "udp");
-        if (udp != null) {
-            allowedRules.add(udp);
-        }
+        allowedRules.addAll(createRule(stack));
 
         firewall.setAllowed(allowedRules);
         firewall.setName(buildResources.get(0).getResourceName());
@@ -150,22 +145,26 @@ public class GcpFireWallInResourceBuilder extends GcpSimpleNetworkResourceBuilde
     }
 
     private List<String> getSourceRanges(Stack stack) {
-        List<String> sourceRanges = new ArrayList<>(stack.getAllowedSubnets().size());
-        for (Subnet subnet : stack.getAllowedSubnets()) {
-            sourceRanges.add(subnet.getCidr());
+        Long securityGroupId = stack.getSecurityGroup().getId();
+        List<SecurityRule> securityRules = securityRuleRepository.findAllBySecurityGroupId(securityGroupId);
+        List<String> sourceRanges = new ArrayList<>(securityRules.size());
+        for (SecurityRule securityRule : securityRules) {
+            sourceRanges.add(securityRule.getCidr());
         }
         return sourceRanges;
     }
 
-    private Firewall.Allowed createRule(Stack stack, String protocol) {
-        List<String> ports = NetworkUtils.getRawPorts(stack, protocol);
-        if (!ports.isEmpty()) {
+    private List<Firewall.Allowed> createRule(Stack stack) {
+        List<Firewall.Allowed> rules = new LinkedList<>();
+        Long securityGroupId = stack.getSecurityGroup().getId();
+        List<SecurityRule> securityRules = securityRuleRepository.findAllBySecurityGroupId(securityGroupId);
+        for (SecurityRule securityRule : securityRules) {
             Firewall.Allowed rule = new Firewall.Allowed();
-            rule.setIPProtocol(protocol);
-            rule.setPorts(ports);
-            return rule;
+            rule.setIPProtocol(securityRule.getProtocol());
+            rule.setPorts(Arrays.asList(securityRule.getPorts()));
+            rules.add(rule);
         }
-        return null;
+        return rules;
     }
 
     public class GcpFireWallInCreateRequest extends CreateResourceRequest {

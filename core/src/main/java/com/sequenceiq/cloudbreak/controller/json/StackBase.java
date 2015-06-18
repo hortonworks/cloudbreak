@@ -44,8 +44,8 @@ public abstract class StackBase implements JsonEntity {
     @Valid
     @ApiModelProperty(required = true)
     private List<InstanceGroupJson> instanceGroups = new ArrayList<>();
-    @ApiModelProperty(StackModelDescription.ALLOWED_SUBNETS)
-    private List<SubnetJson> allowedSubnets = new ArrayList<>();
+    @ApiModelProperty(value = StackModelDescription.SECURITY_GROUP_ID, required = true)
+    private Long securityGroupId;
     @NotNull
     @ApiModelProperty(value = StackModelDescription.NETWORK_ID, required = true)
     private Long networkId;
@@ -110,14 +110,6 @@ public abstract class StackBase implements JsonEntity {
         this.region = region;
     }
 
-    public List<SubnetJson> getAllowedSubnets() {
-        return allowedSubnets;
-    }
-
-    public void setAllowedSubnets(List<SubnetJson> allowedSubnets) {
-        this.allowedSubnets = allowedSubnets;
-    }
-
     public String getImage() {
         return image;
     }
@@ -140,5 +132,13 @@ public abstract class StackBase implements JsonEntity {
 
     public void setParameters(Map<String, String> parameters) {
         this.parameters = parameters;
+    }
+
+    public Long getSecurityGroupId() {
+        return securityGroupId;
+    }
+
+    public void setSecurityGroupId(Long securityGroupId) {
+        this.securityGroupId = securityGroupId;
     }
 }

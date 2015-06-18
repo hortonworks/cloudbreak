@@ -10,13 +10,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.controller.json.StackRequest;
-import com.sequenceiq.cloudbreak.controller.json.SubnetJson;
 import com.sequenceiq.cloudbreak.controller.validation.StackParam;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.Subnet;
 
 @Component
 public class JsonToStackConverter extends AbstractConversionServiceAwareConverter<StackRequest, Stack> {
@@ -27,9 +25,6 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         stack.setName(source.getName());
         stack.setRegion(source.getRegion());
         stack.setOnFailureActionAction(source.getOnFailureAction());
-        if (source.getAllowedSubnets() != null) {
-            stack.setAllowedSubnets(convertSubnets(source.getAllowedSubnets(), stack));
-        }
         stack.setStatus(Status.REQUESTED);
         stack.setInstanceGroups(convertInstanceGroups(source.getInstanceGroups(), stack));
         if (source.getImage() != null) {
@@ -53,16 +48,6 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
             }
         }
         return params;
-    }
-
-    private Set<Subnet> convertSubnets(List<SubnetJson> source, Stack stack) {
-        Set<Subnet> convertedSet = (Set<Subnet>) getConversionService().convert(source,
-                TypeDescriptor.forObject(source),
-                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(Subnet.class)));
-        for (Subnet subNet : convertedSet) {
-            subNet.setStack(stack);
-        }
-        return convertedSet;
     }
 
     private Set<InstanceGroup> convertInstanceGroups(List<InstanceGroupJson> instanceGroupJsons, Stack stack) {
