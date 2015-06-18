@@ -49,14 +49,16 @@ public abstract class AbstractFlowHandler<T extends DefaultFlowContext> implemen
             success = true;
         } catch (Exception t) {
             if (t instanceof FlowCancelledException || t.getCause() instanceof FlowCancelledException) {
-                LOGGER.warn("Flow was cancelled: {}", t.getMessage());
+                LOGGER.warn("The flow has been cancelled: {}", t.getMessage());
                 return;
             }
+            // entry point to the event's custom error handler (if any)
             consumeError(event, t);
             try {
+                // performing the error flow
                 result = handleErrorFlow(t, event.getData());
             } catch (Exception e) {
-                LOGGER.error("Error during error handling flow");
+                LOGGER.error("Exception during error handling flow, (propagating further!):", e);
                 throw new CloudbreakFlowException(e);
             }
         }
@@ -88,7 +90,7 @@ public abstract class AbstractFlowHandler<T extends DefaultFlowContext> implemen
      * @throws Exception if the error handling fails
      */
     protected Object handleErrorFlow(Throwable throwable, T data) throws Exception {
-        LOGGER.debug("Default error flow handling for {}", getClass());
+        LOGGER.debug("Registering error reason: {}", throwable.getMessage());
         data.setErrorReason(throwable.getMessage());
         return data;
     }
@@ -101,7 +103,7 @@ public abstract class AbstractFlowHandler<T extends DefaultFlowContext> implemen
      * @param event     the received data
      */
     protected void consumeError(Event<T> event, Throwable throwable) {
-        LOGGER.debug("Default error consumption logic for exception: ", throwable.getMessage());
+        LOGGER.debug("Delegating throwable to event's error handler. Event: {}, Exception message: {}", event, throwable);
         event.consumeError(throwable);
     }
 

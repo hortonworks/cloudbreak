@@ -18,17 +18,17 @@ public class CloudbreakErrorHandler implements Consumer<Throwable> {
 
     @Override
     public void accept(Throwable errorData) {
-        LOGGER.debug("Consuming error:", errorData.getMessage());
+        LOGGER.debug("Applying event specific error logic on error with message: {} ", errorData.getMessage());
         errorLogic(errorData);
     }
 
     /**
-     * Place for default error consumption logic. ()
+     * Place for default event specific error consumption logic. ()
      *
      * @param errorData the exception to be consumed
      */
     protected void errorLogic(Throwable errorData) {
-        LOGGER.info("Default error consumption logic: Do nothing. Exception message: {}", errorData.getMessage());
+        LOGGER.info("Default event specific error logic - logging the received trowable: ", errorData);
     }
 
 }
