@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.repository.SubnetRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -107,6 +108,8 @@ public class SimpleStackFacade implements StackFacade {
     private StackUpdater stackUpdater;
     @Inject
     private SubnetRepository subnetRepository;
+    @Inject
+    private EmailSenderService emailSenderService;
 
     @Override
     public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
@@ -167,6 +170,10 @@ public class SimpleStackFacade implements StackFacade {
                 context = stackStopService.stop(actualContext);
                 stackUpdater.updateStackStatus(stack.getId(), STOPPED, "Cluster infrastructure stopped successfully.");
                 cloudbreakEventService.fireCloudbreakEvent(stack.getId(), BILLING_STOPPED.name(), "Cluster infrastructure stopped successfully.");
+                if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
+                    emailSenderService.sendStopSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
+                    fireEventAndLog(actualContext.getStackId(), context, "Notification email has been sent about state of the cluster.", STOPPED);
+                }
             }
         } catch (Exception e) {
             LOGGER.error("Exception during the stack stop process: {}", e.getMessage());
@@ -191,6 +198,10 @@ public class SimpleStackFacade implements StackFacade {
                     "Billing stopped, the cluster and its infrastructure have been terminated.");
             stackUpdater.updateStackStatus(actualContext.getStackId(), DELETE_COMPLETED,
                     "The cluster and its infrastructure have successfully been terminated.");
+            if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
+                emailSenderService.sendTerminationSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
+                fireEventAndLog(actualContext.getStackId(), context, "Notification email has been sent about state of the cluster.", DELETE_COMPLETED);
+            }
             terminationService.finalizeTermination(stack.getId());
             clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
         } catch (Exception e) {
@@ -288,6 +299,10 @@ public class SimpleStackFacade implements StackFacade {
                     .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), String.format(statusMessage, actualContext.getScalingAdjustment()));
             stackScalingService.downscaleStack(stack.getId(), actualContext.getInstanceGroup(), actualContext.getScalingAdjustment());
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Downscale of the cluster infrastructure finished successfully.");
+            if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
+                emailSenderService.sendDownScaleSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
+                fireEventAndLog(actualContext.getStackId(), context, "Notification email has been sent about state of the cluster.", AVAILABLE);
+            }
         } catch (Exception e) {
             LOGGER.error("Exception during the downscaling of stack: {}", e.getMessage());
             throw new CloudbreakException(e);
@@ -457,6 +472,10 @@ public class SimpleStackFacade implements StackFacade {
         Stack stack = stackService.getById(actualContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
         stackUpdater.updateStackStatus(stack.getId(), DELETE_FAILED, "Termination failed: " + actualContext.getErrorReason());
+        if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
+            emailSenderService.sendTerminationFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
+            fireEventAndLog(actualContext.getStackId(), context, "Notification email has been sent about state of the cluster.", DELETE_FAILED);
+        }
         return context;
     }
 
@@ -469,11 +488,19 @@ public class SimpleStackFacade implements StackFacade {
             stackUpdater.updateStackStatus(context.getStackId(), START_FAILED, "Start failed: " + context.getErrorReason());
             if (stack.getCluster() != null) {
                 clusterService.updateClusterStatusByStackId(context.getStackId(), STOPPED);
+                if (stack.getCluster().getEmailNeeded()) {
+                    emailSenderService.sendStartFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
+                    fireEventAndLog(context.getStackId(), context, "Notification email has been sent about state of the cluster.", START_FAILED);
+                }
             }
         } else {
             stackUpdater.updateStackStatus(context.getStackId(), STOP_FAILED, "Stop failed: " + context.getErrorReason());
             if (stack.getCluster() != null) {
                 clusterService.updateClusterStatusByStackId(context.getStackId(), STOPPED);
+                if (stack.getCluster().getEmailNeeded()) {
+                    emailSenderService.sendStopFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
+                    fireEventAndLog(context.getStackId(), context, "Notification email has been sent about state of the cluster.", STOP_FAILED);
+                }
             }
         }
         return context;

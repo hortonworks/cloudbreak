@@ -50,16 +50,77 @@ public class EmailSenderService {
     private UserDetailsService userDetailsService;
 
     @Async
-    public void sendSuccessEmail(String email, String ambariServer) {
+    public void sendProvisioningSuccessEmail(String email, String ambariServer) {
         CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
         sendEmail(user, successClusterInstallerMailTemplatePath, getEmailModel(user.getGivenName(), "SUCCESS", ambariServer));
     }
 
     @Async
-    public void sendFailureEmail(String email) {
+    public void sendProvisioningFailureEmail(String email) {
         CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
         sendEmail(user, failedClusterInstallerMailTemplatePath, getEmailModel(user.getGivenName(), "FAILED", null));
     }
+
+    @Async
+    public void sendStartSuccessEmail(String email, String ambariServer) {
+        CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
+        sendEmail(user, successClusterInstallerMailTemplatePath, getEmailModel(user.getGivenName(), "SUCCESS", ambariServer));
+    }
+
+    @Async
+    public void sendStartFailureEmail(String email, String ambariServer) {
+        CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
+        sendEmail(user, successClusterInstallerMailTemplatePath, getEmailModel(user.getGivenName(), "SUCCESS", ambariServer));
+    }
+
+    @Async
+    public void sendStopSuccessEmail(String email, String ambariServer) {
+        CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
+        sendEmail(user, successClusterInstallerMailTemplatePath, getEmailModel(user.getGivenName(), "SUCCESS", ambariServer));
+    }
+
+    @Async
+    public void sendStopFailureEmail(String email, String ambariServer) {
+        CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
+        sendEmail(user, successClusterInstallerMailTemplatePath, getEmailModel(user.getGivenName(), "SUCCESS", ambariServer));
+    }
+
+    @Async
+    public void sendUpscaleSuccessEmail(String email, String ambariServer) {
+        CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
+        sendEmail(user, successClusterInstallerMailTemplatePath, getEmailModel(user.getGivenName(), "SUCCESS", ambariServer));
+    }
+
+    @Async
+    public void sendUpscaleFailureEmail(String email, String ambariServer) {
+        CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
+        sendEmail(user, successClusterInstallerMailTemplatePath, getEmailModel(user.getGivenName(), "SUCCESS", ambariServer));
+    }
+
+    @Async
+    public void sendDownScaleSuccessEmail(String email, String ambariServer) {
+        CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
+        sendEmail(user, successClusterInstallerMailTemplatePath, getEmailModel(user.getGivenName(), "SUCCESS", ambariServer));
+    }
+
+    @Async
+    public void sendDownScaleFailureEmail(String email, String ambariServer) {
+        CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
+        sendEmail(user, successClusterInstallerMailTemplatePath, getEmailModel(user.getGivenName(), "SUCCESS", ambariServer));
+    }
+
+    @Async
+    public void sendTerminationSuccessEmail(String email, String ambariServer) {
+        CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
+        sendEmail(user, successClusterInstallerMailTemplatePath, getEmailModel(user.getGivenName(), "SUCCESS", ambariServer));
+    }
+
+    @Async
+    public void sendTerminationFailureEmail(String email, String ambariServer) {
+        CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
+        sendEmail(user, successClusterInstallerMailTemplatePath, getEmailModel(user.getGivenName(), "SUCCESS", ambariServer));
+    }
+
 
     private void sendEmail(CbUser user, String template, Map<String, Object> model) {
         try {
