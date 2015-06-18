@@ -404,6 +404,18 @@ public class Stack implements ProvisionEntity {
         return nodeCount;
     }
 
+    public Integer getFullNodeCountWithoutDecommissionedAndUnRegisteredNodes() {
+        int nodeCount = 0;
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
+                if (instanceMetaData.getInstanceStatus().equals(InstanceStatus.REGISTERED)) {
+                    nodeCount++;
+                }
+            }
+        }
+        return nodeCount;
+    }
+
     public Set<InstanceMetaData> getRunningInstanceMetaData() {
         Set<InstanceMetaData> instanceMetadata = new HashSet<>();
         for (InstanceGroup instanceGroup : instanceGroups) {

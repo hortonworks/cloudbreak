@@ -45,6 +45,7 @@ format_disks() {
       mount /hadoopfs/fs${i}
     fi
   done
+  cd /hadoopfs/fs1 && mkdir logs logs/ambari-server logs/ambari-agent logs/consul-watch logs/consul-watch-db logs/consul-watch-main
 }
 
 main() {

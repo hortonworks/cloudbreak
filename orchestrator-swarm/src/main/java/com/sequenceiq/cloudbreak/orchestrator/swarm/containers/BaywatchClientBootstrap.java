@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.orchestrator.swarm.containers;
 
 import static com.sequenceiq.cloudbreak.orchestrator.DockerContainer.BAYWATCH_CLIENT;
 
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,9 +35,10 @@ public class BaywatchClientBootstrap implements ContainerBootstrap {
     private final String externLocation;
     private final Node node;
     private final String consulDomain;
+    private final Set<String> dataVolumes;
 
     public BaywatchClientBootstrap(DockerClient docker, String gatewayAddress, String imageName, String id,
-            Node node, String consulDomain, String externLocation) {
+            Node node, Set<String> dataVolumes, String consulDomain, String externLocation) {
         this.docker = docker;
         this.gatewayAddress = gatewayAddress;
         this.imageName = imageName;
@@ -43,6 +46,7 @@ public class BaywatchClientBootstrap implements ContainerBootstrap {
         this.node = node;
         this.consulDomain = consulDomain;
         this.externLocation = externLocation;
+        this.dataVolumes = dataVolumes;
     }
 
     @Override
@@ -62,10 +66,15 @@ public class BaywatchClientBootstrap implements ContainerBootstrap {
                             String.format("BAYWATCH_CLIENT_HOSTNAME=%s", node.getHostname() + consulDomain),
                             String.format("BAYWATCH_CLIENT_PRIVATE_IP=%s", node.getPrivateIp()),
                             String.format("BAYWATCH_CLIENT_PUBLIC_IP=%s", node.getPublicIp()))
-                            .withHostConfig(hostConfig));
+                    .withHostConfig(hostConfig));
             DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
                     .withPortBindings(new PortBinding(new Ports.Binding("0.0.0.0", PORT), new ExposedPort(PORT)))
-                    .withBinds(new Bind(DOCKER_LOG_LOCATION, new Volume(DOCKER_LOG_LOCATION)),
+                    .withBinds(
+                            new Bind("/hadoopfs/fs1/logs/ambari-agent", new Volume("/var/log/containers/ambari-agent")),
+                            new Bind("/hadoopfs/fs1/logs/ambari-server", new Volume("/var/log/containers/ambari-server")),
+                            new Bind("/hadoopfs/fs1/logs/consul-watch", new Volume("/var/log/containers/consul-watch")),
+                            new Bind("/hadoopfs/fs1/logs/consul-watch-db", new Volume("/var/log/containers/consul-watch")),
+                            new Bind("/hadoopfs/fs1/logs/consul-watch-main", new Volume("/var/log/containers/consul-watch")),
                             new Bind(LOCAL_SINCEDB_LOCATION, new Volume(SINCEDB_LOCATION)))
                     .withNetworkMode("host")
                     .withRestartPolicy(RestartPolicy.alwaysRestart()));

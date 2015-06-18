@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.orchestrator.swarm.containers;
 
 import static com.sequenceiq.cloudbreak.orchestrator.DockerContainer.AMBARI_DB;
 
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,11 +22,13 @@ public class AmbariServerDatabaseBootstrap implements ContainerBootstrap {
     private final DockerClient docker;
     private final String imageName;
     private final String node;
+    private final Set<String> dataVolumes;
 
-    public AmbariServerDatabaseBootstrap(DockerClient docker, String imageName, String node) {
+    public AmbariServerDatabaseBootstrap(DockerClient docker, String imageName, String node, Set<String> dataVolumes) {
         this.docker = docker;
         this.imageName = imageName;
         this.node = node;
+        this.dataVolumes = dataVolumes;
     }
 
     @Override
@@ -44,7 +48,7 @@ public class AmbariServerDatabaseBootstrap implements ContainerBootstrap {
                 .withRestartPolicy(RestartPolicy.alwaysRestart())
                 .withNetworkMode("host")
                 .withBinds(new Bind("/data/ambari-server/pgsql/data", new Volume("/var/lib/postgresql/data")),
-                    new Bind("/var/log/containers/consul-watch", new Volume("/var/log/consul-watch"))));
+                    new Bind("/hadoopfs/fs1/logs/consul-watch-db", new Volume("/var/log/consul-watch"))));
 
         LOGGER.info("Database container for Ambari server started successfully");
         return true;

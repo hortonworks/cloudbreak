@@ -123,9 +123,10 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(cluster.getApiAddress()))
                     .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
                     .build();
-            simpleContainerBootstrapRunner(new AmbariServerDatabaseBootstrap(swarmManagerClient, dbImageName, gateway.getHostname()),
+            simpleContainerBootstrapRunner(new AmbariServerDatabaseBootstrap(swarmManagerClient, dbImageName, gateway.getHostname(), gateway.getDataVolumes()),
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
-            simpleContainerBootstrapRunner(new AmbariServerBootstrap(swarmManagerClient, serverImageName, gateway.getHostname(), platform),
+            simpleContainerBootstrapRunner(new AmbariServerBootstrap(swarmManagerClient, serverImageName,
+                            gateway.getHostname(), gateway.getDataVolumes(), platform),
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
         } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {
             throw cloudbreakOrchestratorCancelledExceptionException;
@@ -240,7 +241,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
                 Node node = nodeIterator.next();
                 String time = String.valueOf(new Date().getTime()) + i;
                 BaywatchClientBootstrap runner =
-                        new BaywatchClientBootstrap(swarmManagerClient, gatewayPrivateIp, imageName, time, node,
+                        new BaywatchClientBootstrap(swarmManagerClient, gatewayPrivateIp, imageName, time, node, node.getDataVolumes(),
                                 consulDomain, externServerLocation);
                 futures.add(getParallelContainerRunner().submit(simpleContainerBootstrapRunner(runner, getExitCriteria(), exitCriteriaModel,
                         MDC.getCopyOfContextMap())));
