@@ -10,6 +10,20 @@ popUpAppender.setLayout(layout);
 
 var uluwatuControllers = angular.module('uluwatuControllers', ['cgNotify']);
 
+/*
+ usage:
+    - html: {{ "message : {0} {1}" | format:"0":"1"}}
+    - controller: $filter("format")("message: {0} {1}", "0", "1")
+ */
+uluwatuControllers.filter("format", function () {
+    return function (input) {
+      var args = arguments;
+      return input.replace(/\{(\d+)\}/g, function (match, capture) {
+          return args[1*capture + 1];
+      });
+    };
+});
+
 uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '$rootScope', '$filter', 'UserPermission', 'ErrorHandler', 'notify',
     function ($scope, $http, User, $rootScope, $filter, UserPermission, ErrorHandler, notify) {
         var orderBy = $filter('orderBy');

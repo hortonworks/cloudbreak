@@ -50,13 +50,13 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 AccountTemplate.save($scope.awsTemp, function (result) {
                     handleAwsTemplateSuccess(result)
                 }, function (error) {
-                    $scope.showError(error, $rootScope.error_msg.aws_template_failed)
+                    $scope.showError(error, $rootScope.msg.aws_template_failed)
                 });
             } else {
                 UserTemplate.save($scope.awsTemp, function (result) {
                     handleAwsTemplateSuccess(result)
                 }, function (error) {
-                    $scope.showError(error, $rootScope.error_msg.aws_template_failed)
+                    $scope.showError(error, $rootScope.msg.aws_template_failed)
                 });
             }
 
@@ -64,7 +64,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.awsTemp.id = result.id;
                 $rootScope.templates.push($scope.awsTemp);
                 initializeAwsTemp();
-                $scope.showSuccess($rootScope.error_msg.aws_template_success1 + result.id + $rootScope.error_msg.aws_template_success2);
+                $scope.showSuccess($filter("format")($rootScope.msg.aws_template_success, String(result.id)));
                 $scope.awsTemplateForm.$setPristine();
                 collapseCreateTemplateFormPanel();
             }
@@ -76,13 +76,13 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             AccountTemplate.save($scope.openstackTemp, function (result) {
               handleOpenstackTemplateSuccess(result)
             }, function (error) {
-              $scope.showError(error, $rootScope.error_msg.openstack_template_failed)
+              $scope.showError(error, $rootScope.msg.openstack_template_failed)
             });
           } else {
             UserTemplate.save($scope.openstackTemp, function (result) {
               handleOpenstackTemplateSuccess(result)
             }, function (error) {
-              $scope.showError(error, $rootScope.error_msg.openstack_template_failed)
+              $scope.showError(error, $rootScope.msg.openstack_template_failed)
             });
           }
 
@@ -90,7 +90,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             $scope.openstackTemp.id = result.id;
             $rootScope.templates.push($scope.openstackTemp);
             initializeOpenstackTemp();
-            $scope.showSuccess($rootScope.error_msg.openstack_template_success1 + result.id + $rootScope.error_msg.openstack_template_success2);
+            $scope.showSuccess($filter("format")($rootScope.msg.openstack_template_success, String(result.id)));
             $scope.openstackTemplateForm.$setPristine();
             collapseCreateTemplateFormPanel();
           }
@@ -103,13 +103,13 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 AccountTemplate.save($scope.gcpTemp, function (result) {
                     handleGcpTemplateSuccess(result)
                 }, function (error) {
-                    $scope.showError(error, $rootScope.error_msg.gcp_template_failed)
+                    $scope.showError(error, $rootScope.msg.gcp_template_failed)
                 });
             } else {
                 UserTemplate.save($scope.gcpTemp, function (result) {
                     handleGcpTemplateSuccess(result)
                 }, function (error) {
-                    $scope.showError(error, $rootScope.error_msg.gcp_template_failed)
+                    $scope.showError(error, $rootScope.msg.gcp_template_failed)
                 });
             }
 
@@ -117,7 +117,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.gcpTemp.id = result.id;
                 $rootScope.templates.push($scope.gcpTemp);
                 initializeGcpTemp();
-                $scope.showSuccess($rootScope.error_msg.gcp_template_success1 + result.id + $rootScope.error_msg.gcp_template_success2);
+                $scope.showSuccess($filter("format")($rootScope.msg.gcp_template_success, String(result.id)));
                 $scope.gcpTemplateForm.$setPristine();
                 collapseCreateTemplateFormPanel();
             }
@@ -129,13 +129,13 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 AccountTemplate.save($scope.azureTemp, function (result) {
                   handleAzureTemplateSuccess(result)
                }, function (error) {
-                  $scope.showError(error, $rootScope.error_msg.azure_template_failed)
+                  $scope.showError(error, $rootScope.msg.azure_template_failed)
                });
             } else {
                UserTemplate.save($scope.azureTemp, function (result) {
                   handleAzureTemplateSuccess(result)
                }, function (error) {
-                  $scope.showError(error, $rootScope.error_msg.azure_template_failed)
+                  $scope.showError(error, $rootScope.msg.azure_template_failed)
                });
             }
 
@@ -143,7 +143,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.azureTemp.id = result.id;
                 $rootScope.templates.push($scope.azureTemp);
                 initializeAzureTemp();
-                $scope.showSuccess($rootScope.error_msg.azure_template_success1 + result.id + $rootScope.error_msg.azure_template_success2);
+                $scope.showSuccess($filter("format")($rootScope.msg.azure_template_success, String(result.id)));
                 $scope.azureTemplateForm.$setPristine();
                 collapseCreateTemplateFormPanel();
             }
@@ -152,9 +152,9 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
         $scope.deleteTemplate = function (template) {
             GlobalTemplate.delete({ id: template.id }, function (success) {
                 $rootScope.templates.splice($rootScope.templates.indexOf(template), 1);
-                $scope.showSuccess($rootScope.error_msg.template_delete_success1 + template.id + $rootScope.error_msg.template_delete_success2);
+                $scope.showSuccess($filter("format")($rootScope.msg.template_delete_success, String(template.id)));
             }, function (error) {
-                $scope.showError(error, $rootScope.error_msg.template_delete_failed)
+                $scope.showError(error, $rootScope.msg.template_delete_failed)
             });
         }
 

@@ -2,8 +2,8 @@
 
 var log = log4javascript.getLogger("blueprintController-logger");
 
-angular.module('uluwatuControllers').controller('blueprintController', ['$scope', '$rootScope', 'UserBlueprint', 'AccountBlueprint', 'GlobalBlueprint', 'ErrorHandler',
-    function ($scope, $rootScope, UserBlueprint, AccountBlueprint, GlobalBlueprint, ErrorHandler) {
+angular.module('uluwatuControllers').controller('blueprintController', ['$scope', '$rootScope', '$filter','UserBlueprint', 'AccountBlueprint', 'GlobalBlueprint', 'ErrorHandler',
+    function ($scope, $rootScope, $filter, UserBlueprint, AccountBlueprint, GlobalBlueprint, ErrorHandler) {
         $rootScope.blueprints = AccountBlueprint.query();
         initializeBlueprint();
 
@@ -14,7 +14,7 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
                         handleBlueprintSuccess(success)
                     });
                 }, function (error) {
-                    $scope.showError(error, $rootScope.error_msg.blueprint_failed);
+                    $scope.showError(error, $rootScope.msg.blueprint_failed);
                 });
             } else {
                 UserBlueprint.save($scope.blueprint, function (result) {
@@ -22,14 +22,14 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
                         handleBlueprintSuccess(success)
                     });
                 }, function (error) {
-                    $scope.showError(error, $rootScope.error_msg.blueprint_failed);
+                    $scope.showError(error, $rootScope.msg.blueprint_failed);
                 });
             }
 
             function handleBlueprintSuccess(success) {
                 $rootScope.blueprints.push(success);
                 initializeBlueprint();
-                $scope.showSuccess($rootScope.error_msg.blueprint_success1 + success.id + $rootScope.error_msg.blueprint_success2);
+                $scope.showSuccess($filter("format")($rootScope.msg.blueprint_success, String(success.id)));
                 $scope.blueprintForm.$setPristine();
                 angular.element(document.querySelector('#panel-create-blueprints-collapse-btn')).click();
             }
@@ -49,9 +49,9 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
         $scope.deleteBlueprint = function (blueprint) {
             GlobalBlueprint.delete({ id: blueprint.id }, function (success) {
                 $rootScope.blueprints.splice($rootScope.blueprints.indexOf(blueprint), 1);
-                $scope.showSuccess($rootScope.error_msg.blueprint_delete_success1 + blueprint.id + $rootScope.error_msg.blueprint_delete_success2);
+                $scope.showSuccess($filter("format")($rootScope.msg.blueprint_delete_success, String(blueprint.id)));
             }, function (error) {
-                $scope.showError(error, $rootScope.error_msg.blueprint_delete_failed);
+                $scope.showError(error, $rootScope.msg.blueprint_delete_failed);
             });
         }
 

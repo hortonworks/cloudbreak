@@ -68,13 +68,13 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
                 AccountNetwork.save($scope.network, function(result) {
                     handleNetworkCreationSuccess(result)
                 }, function(error) {
-                    $scope.showError(error, $rootScope.error_msg.network_creation_failure + $scope.network.name)
+                    $scope.showError(error, $rootScope.msg.network_creation_failure + $scope.network.name)
                 });
             } else {
                 UserNetwork.save($scope.network, function(result) {
                     handleNetworkCreationSuccess(result)
                 }, function(error) {
-                    $scope.showError(error, $rootScope.error_msg.network_creation_failure + $scope.network.name)
+                    $scope.showError(error, $rootScope.msg.network_creation_failure + $scope.network.name)
                 });
             }
         }
@@ -82,7 +82,7 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
         function handleNetworkCreationSuccess(result) {
             $scope.network.id = result.id;
             $rootScope.networks.push($scope.network);
-            $scope.showSuccess($rootScope.error_msg.network_creation_success + $scope.network.name);
+            $scope.showSuccess($rootScope.msg.network_creation_success + $scope.network.name);
             collapseCreateNetworkFormPanel();
             initializeFormsAndScopeNetwork()
         }
@@ -93,9 +93,9 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
                 id: network.id
             }, function(success) {
                 $rootScope.networks.splice($rootScope.networks.indexOf(network), 1);
-                $scope.showSuccess($rootScope.error_msg.network_deletion_success + network.name);
+                $scope.showSuccess($rootScope.msg.network_deletion_success + network.name);
             }, function(error) {
-                $scope.showError(error, $rootScope.error_msg.network_deletion_failure + network.name)
+                $scope.showError(error, $rootScope.msg.network_deletion_failure + network.name)
             });
         }
 

@@ -8,7 +8,7 @@
                 <i class="fa fa-angle-down fa-2x fa-fw-forced"></i>
             </a>
             <h4>
-                <span class="badge pull-right">{{$root.credentials.length}}</span> manage credentials
+                <span class="badge pull-right">{{$root.credentials.length}}</span> {{msg.credential_manage_title}}
             </h4>
         </div>
 
@@ -17,7 +17,7 @@
 
                 <p class="btn-row-over-panel">
                     <a href="" id="panel-create-credentials-collapse-btn" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-credentials-collapse">
-                        <i class="fa fa-plus fa-fw"></i><span> create credential</span>
+                        <i class="fa fa-plus fa-fw"></i><span> {{msg.credential_manage_title}}</span>
                     </a>
                 </p>
 
@@ -29,17 +29,17 @@
                             <div class="row " style="padding-bottom: 10px">
                                 <div class="btn-segmented-control" id="providerSelector1">
                                     <div class="btn-group btn-group-justified">
-                                        <a id="awsChange" type="button" class="btn btn-info" ng-click="createAwsCredentialRequest()">AWS</a>
-                                        <a id="azureChange" type="button" class="btn btn-default" ng-click="createAzureCredentialRequest()">Azure</a>
+                                        <a id="awsChange" type="button" class="btn btn-info" ng-click="createAwsCredentialRequest()">{{msg.aws_label}}</a>
+                                        <a id="azureChange" type="button" class="btn btn-default" ng-click="createAzureCredentialRequest()">{{msg.azure_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified">
-                                      <a id="gcpChange" type="button" class="btn btn-default" ng-click="createGcpCredentialRequest()">GCP</a>
-                                      <a id="openstackChange" type="button" class="btn btn-default" ng-click="createOpenstackCredentialRequest()">OpenStack</a>
+                                      <a id="gcpChange" type="button" class="btn btn-default" ng-click="createGcpCredentialRequest()">{{msg.gcp_label}}</a>
+                                      <a id="openstackChange" type="button" class="btn btn-default" ng-click="createOpenstackCredentialRequest()">{{msg.openstack_label}}</a>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="alert alert-info" role="alert" ng-show="credentialInCreation"><b>Please wait!</b> creation in progress...</div>
+                            <div class="alert alert-info" role="alert" ng-show="credentialInCreation"><b>{{msg.credential_creation_wait_prefix}}</b> {{msg.credential_creation_wait_suffix}}</div>
                             <form class="form-horizontal" role="form" name="awsCredentialForm" ng-show="awsCredential  && !credentialInCreation" name="awsCredentialForm">
                               <div ng-include src="'tags/credential/awsform.tag'"></div>
                             </form>
@@ -80,7 +80,7 @@
                             <p class="btn-row-over-panel">
                                 <a href="" class="btn btn-danger" role="button" ng-click="deleteCredential(credential)">
                                     <i class="fa fa-times fa-fw"></i>
-                                    <span> delete</span>
+                                    <span> {{msg.credential_list_delete}}</span>
                                 </a>
                             </p>
 
