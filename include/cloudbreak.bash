@@ -30,6 +30,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_SULTANS 0.5.4
     env-import DOCKER_TAG_AMBASSADOR latest
     env-import DOCKER_TAG_CLOUDBREAK_SHELL 0.4.8
+    env-import DOCKER_TAG_CERT_TOOL 0.0.3
 }
 
 cloudbreak-conf-images() {
@@ -70,7 +71,7 @@ cloudbreak-conf-db() {
 
 cloudbreak-conf-cert() {
     declare desc="Declares cloudbreak cert config"
-    env-import CB_CERT_ROOT_PATH "${PWD}/certs"
+    env-import CBD_CERT_ROOT_PATH "${PWD}/certs"
 }
 
 cloudbreak-delete-dbs() {
@@ -169,17 +170,17 @@ gen-password() {
     date +%s | checksum sha1 | head -c 10
 }
 
-generate-cert() {
+cloudbreak-generate-cert() {
     cloudbreak-config
-    if [ -f "${CB_CERT_ROOT_PATH}/client.pem" ] && [ -f "${CB_CERT_ROOT_PATH}/client-key.pem" ]; then
+    if [ -f "${CBD_CERT_ROOT_PATH}/client.pem" ] && [ -f "${CBD_CERT_ROOT_PATH}/client-key.pem" ]; then
       debug "Cloudbreak certificate and private key already exist, won't generate new ones."
     else
-      info "generating Cloudbreak client certificate and private key in ${CB_CERT_ROOT_PATH}"
-      docker run --rm -v ${CB_CERT_ROOT_PATH}:/certs ehazlett/cert-tool:0.0.3 -d /certs -o=local &> /dev/null
-      cat "${CB_CERT_ROOT_PATH}/ca.pem" >> "${CB_CERT_ROOT_PATH}/client.pem"
-      mv "${CB_CERT_ROOT_PATH}/ca.pem" "${CB_CERT_ROOT_PATH}/client-ca.pem"
-      mv "${CB_CERT_ROOT_PATH}/ca-key.pem" "${CB_CERT_ROOT_PATH}/client-ca-key.pem"
-      debug "certificates successfully generated"
+      info "Generating Cloudbreak client certificate and private key in ${CBD_CERT_ROOT_PATH}."
+      docker run --rm -v ${CBD_CERT_ROOT_PATH}:/certs ehazlett/cert-tool:${DOCKER_TAG_CERT_TOOL} -d /certs -o=local &> /dev/null
+      cat "${CBD_CERT_ROOT_PATH}/ca.pem" >> "${CBD_CERT_ROOT_PATH}/client.pem"
+      mv "${CBD_CERT_ROOT_PATH}/ca.pem" "${CBD_CERT_ROOT_PATH}/client-ca.pem"
+      mv "${CBD_CERT_ROOT_PATH}/ca-key.pem" "${CBD_CERT_ROOT_PATH}/client-ca-key.pem"
+      debug "Certificates successfully generated."
     fi
 }
 
