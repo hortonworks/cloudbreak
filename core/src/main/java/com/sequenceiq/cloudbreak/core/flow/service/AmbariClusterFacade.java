@@ -143,7 +143,7 @@ public class AmbariClusterFacade implements ClusterFacade {
             clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Cluster creation finished.");
             if (cluster.getEmailNeeded()) {
-                emailSenderService.sendSuccessEmail(cluster.getOwner(), stack.getAmbariIp());
+                emailSenderService.sendProvisioningSuccessEmail(cluster.getOwner(), stack.getAmbariIp());
                 fireEventAndLog(actualContext.getStackId(), context, "Notification email has been sent about state of the cluster.", AVAILABLE);
             }
         }
@@ -165,6 +165,10 @@ public class AmbariClusterFacade implements ClusterFacade {
             clusterService.updateCluster(cluster);
             clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Ambari cluster started successfully.");
+            if (cluster.getEmailNeeded()) {
+                emailSenderService.sendStartSuccessEmail(cluster.getOwner(), stack.getAmbariIp());
+                fireEventAndLog(actualContext.getStackId(), context, "Notification email has been sent about state of the cluster.", AVAILABLE);
+            }
         } else {
             LOGGER.info("Cluster start has not been requested, start cluster later.");
         }
@@ -211,6 +215,10 @@ public class AmbariClusterFacade implements ClusterFacade {
         updateInstanceMetadataAfterScaling(false, hostNames, stack);
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Upscale of cluster finished successfully.");
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
+        if (cluster.getEmailNeeded()) {
+            emailSenderService.sendUpscaleSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
+            fireEventAndLog(actualContext.getStackId(), context, "Notification email has been sent about state of the cluster.", AVAILABLE);
+        }
         return context;
     }
 
@@ -335,6 +343,10 @@ public class AmbariClusterFacade implements ClusterFacade {
         MDCBuilder.buildMdcContext(cluster);
         clusterService.updateClusterStatusByStackId(stack.getId(), START_FAILED);
         stackUpdater.updateStackStatus(actualContext.getStackId(), AVAILABLE, "Cluster could not be started: " + actualContext.getErrorReason());
+        if (cluster.getEmailNeeded()) {
+            emailSenderService.sendStartFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
+            fireEventAndLog(actualContext.getStackId(), context, "Notification email has been sent about state of the cluster.", START_FAILED);
+        }
         return context;
     }
 
@@ -346,6 +358,10 @@ public class AmbariClusterFacade implements ClusterFacade {
         MDCBuilder.buildMdcContext(cluster);
         clusterService.updateClusterStatusByStackId(stack.getId(), STOP_FAILED);
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "The Ambari cluster could not be stopped: " + actualContext.getErrorReason());
+        if (cluster.getEmailNeeded()) {
+            emailSenderService.sendStopFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
+            fireEventAndLog(actualContext.getStackId(), context, "Notification email has been sent about state of the cluster.", STOP_FAILED);
+        }
         return context;
     }
 
@@ -359,7 +375,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
         fireEventAndLog(stack.getId(), context, "Ambari cluster could not be created: " + actualContext.getErrorReason(), CREATE_FAILED);
         if (cluster.getEmailNeeded()) {
-            emailSenderService.sendFailureEmail(cluster.getOwner());
+            emailSenderService.sendProvisioningFailureEmail(cluster.getOwner());
             fireEventAndLog(actualContext.getStackId(), context, "Notification email has been sent about the failure of cluster creation.", AVAILABLE);
         }
 
@@ -376,7 +392,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
         fireEventAndLog(stack.getId(), context, "Enabling security failed on Ambari cluster: " + actualContext.getErrorReason(), ENABLE_SECURITY_FAILED);
         if (cluster.getEmailNeeded()) {
-            emailSenderService.sendFailureEmail(cluster.getOwner());
+            emailSenderService.sendProvisioningFailureEmail(cluster.getOwner());
             fireEventAndLog(actualContext.getStackId(), context, "Notification email has been sent about the failure of cluster creation.", AVAILABLE);
         }
 

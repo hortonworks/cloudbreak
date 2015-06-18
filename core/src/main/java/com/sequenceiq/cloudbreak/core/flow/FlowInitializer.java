@@ -214,11 +214,11 @@ public class FlowInitializer implements InitializingBean {
     }
 
     private void registerDownscaleFlows() {
-        transitionKeyService.registerTransition(StackDownscaleHandler.class, TransitionFactory
-                .createTransition(FlowPhases.STACK_DOWNSCALE.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
-
         transitionKeyService.registerTransition(ClusterDownscaleHandler.class, TransitionFactory
                 .createTransition(FlowPhases.CLUSTER_DOWNSCALE.name(), FlowPhases.STACK_DOWNSCALE.name(), FlowPhases.NONE.name()));
+
+        transitionKeyService.registerTransition(StackDownscaleHandler.class, TransitionFactory
+                .createTransition(FlowPhases.STACK_DOWNSCALE.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerResetFlows() {
