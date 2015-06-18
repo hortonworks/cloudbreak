@@ -10,6 +10,8 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 
 public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaData, Long> {
 
+    Set<InstanceMetaData> findNotTerminatedForStack(@Param("stackId") Long stackId);
+
     Set<InstanceMetaData> findAllInStack(@Param("stackId") Long stackId);
 
     InstanceMetaData findByInstanceId(@Param("stackId") Long stackId, @Param("instanceId") String instanceId);
@@ -22,6 +24,6 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
 
     Set<InstanceMetaData> findRemovableInstances(@Param("stackId") Long stackId, @Param("groupName") String groupName);
 
-    InstanceMetaData findByPrivateAddress(@Param("stackId") Long stackId, @Param("privateAddress") String privateAddress);
+    InstanceMetaData findNotTerminatedByPrivateAddress(@Param("stackId") Long stackId, @Param("privateAddress") String privateAddress);
 
 }

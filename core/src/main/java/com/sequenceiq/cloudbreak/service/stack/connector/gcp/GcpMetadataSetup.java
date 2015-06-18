@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.gcp;
 
+import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.DELETED;
+import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.RUNNING;
+import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.STOPPED;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -13,12 +19,14 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.GcpCredential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
+import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 
 @Component
 public class GcpMetadataSetup implements MetadataSetup {
@@ -52,6 +60,24 @@ public class GcpMetadataSetup implements MetadataSetup {
             }
         }
         return collectMetaData(stack, resources);
+    }
+
+    @Override
+    public InstanceSyncState getState(Stack stack, String instanceId) {
+        GcpCredential credential = (GcpCredential) stack.getCredential();
+        InstanceSyncState instanceSyncState = IN_PROGRESS;
+        Compute compute = gcpStackUtil.buildCompute(credential);
+        try {
+            Compute.Instances.Get get = compute.instances().get(credential.getProjectId(), CloudRegion.valueOf(stack.getRegion()).value(), instanceId);
+            if ("RUNNING".equals(get.execute().getStatus())) {
+                instanceSyncState = RUNNING;
+            } else if ("TERMINATED".equals(get.execute().getStatus())) {
+                instanceSyncState = STOPPED;
+            }
+        } catch (IOException e) {
+            instanceSyncState = DELETED;
+        }
+        return instanceSyncState;
     }
 
     private CoreInstanceMetaData getMetadata(Stack stack, Compute compute, Resource resource) {

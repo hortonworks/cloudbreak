@@ -114,7 +114,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
         InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         group.setNodeCount(group.getNodeCount() + adjustment);
         String heatTemplate = heatTemplateBuilder.add(stack, gateWayUserData, coreUserData,
-                instanceMetaDataRepository.findAllInStack(stack.getId()), instanceGroup, adjustment, group);
+                instanceMetaDataRepository.findNotTerminatedForStack(stack.getId()), instanceGroup, adjustment, group);
         PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
         if (!isSuccess(pollingResult)) {
             throw new OpenStackResourceException(String.format("Failed to update Heat stack while adding instances; polling reached an invalid end state: '%s'",
@@ -129,7 +129,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
             Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(stack.cloudPlatform(),
                     tlsSecurityService.readPublicSshKey(stack.getId()), getSSHUser());
             String heatTemplate = heatTemplateBuilder.remove(stack, userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE),
-                    instanceMetaDataRepository.findAllInStack(stack.getId()), instanceIds, instanceGroup);
+                    instanceMetaDataRepository.findNotTerminatedForStack(stack.getId()), instanceIds, instanceGroup);
             PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
             if (!isSuccess(pollingResult)) {
                 throw new OpenStackResourceException(
@@ -183,7 +183,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
 
     @Override
     public void updateAllowedSubnets(Stack stack, String gateWayUserData, String coreUserData) {
-        Set<InstanceMetaData> metadata = instanceMetaDataRepository.findAllInStack(stack.getId());
+        Set<InstanceMetaData> metadata = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
         String heatTemplate = heatTemplateBuilder.update(stack, gateWayUserData, coreUserData, metadata);
         PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
         if (isExited(pollingResult)) {

@@ -3,6 +3,10 @@ package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
+import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.DELETED;
+import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.RUNNING;
+import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.STOPPED;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,6 +35,7 @@ import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
+import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 
 @Component
 public class AzureMetadataSetup implements MetadataSetup {
@@ -119,6 +124,31 @@ public class AzureMetadataSetup implements MetadataSetup {
     protected String getPrivateIP(String response) throws IOException {
         JsonNode actualObj = MAPPER.readValue(response, JsonNode.class);
         return actualObj.get("Deployment").get("RoleInstanceList").get("RoleInstance").get("IpAddress").asText();
+    }
+
+    @Override
+    public InstanceSyncState getState(Stack stack, String instanceId) {
+        Map<String, String> vmContext = createVMContext(instanceId);
+        AzureCredential credential = (AzureCredential) stack.getCredential();
+        AzureClient azureClient = azureStackUtil.createAzureClient(credential);
+        InstanceSyncState instanceSyncState = IN_PROGRESS;
+        try {
+            if ("Running".equals(azureClient.getVirtualMachineState(vmContext))) {
+                instanceSyncState = RUNNING;
+            } else if ("Suspended".equals(azureClient.getVirtualMachineState(vmContext))) {
+                instanceSyncState = STOPPED;
+            }
+        } catch (Exception ex) {
+            instanceSyncState = DELETED;
+        }
+        return instanceSyncState;
+    }
+
+    private Map<String, String> createVMContext(String vmName) {
+        Map<String, String> context = new HashMap<>();
+        context.put(SERVICENAME, vmName);
+        context.put(NAME, vmName);
+        return context;
     }
 
     @Override
