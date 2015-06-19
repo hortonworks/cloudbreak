@@ -107,6 +107,7 @@ public class SecurityConfig {
                     .and()
                     .addFilterAfter(new ScimAccountGroupReaderFilter(userDetailsService), AbstractPreAuthenticatedProcessingFilter.class)
                     .authorizeRequests()
+                    .antMatchers("/users/**").access("#oauth2.hasScope('openid')")
                     .antMatchers("/user/blueprints").access("#oauth2.hasScope('cloudbreak.blueprints')")
                     .antMatchers("/account/blueprints").access("#oauth2.hasScope('cloudbreak.blueprints')")
                     .antMatchers("/blueprints/**").access("#oauth2.hasScope('cloudbreak.blueprints')")

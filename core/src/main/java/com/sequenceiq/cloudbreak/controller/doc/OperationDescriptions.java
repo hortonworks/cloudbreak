@@ -105,4 +105,8 @@ public class OperationDescriptions {
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private network by name";
         public static final String DELETE_BY_ID = "delete network by id";
     }
+
+    public static class UserOpDescription {
+        public static final String USER_DETAILS_EVICT = "remove user from cache (by username)";
+    }
 }

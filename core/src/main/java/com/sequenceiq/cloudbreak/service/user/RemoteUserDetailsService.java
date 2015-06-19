@@ -11,8 +11,11 @@ import javax.inject.Inject;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -26,6 +29,8 @@ import com.sequenceiq.cloudbreak.domain.CbUserRole;
 
 @Service
 public class RemoteUserDetailsService implements UserDetailsService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RemoteUserDetailsService.class);
 
     private static final int ACCOUNT_PART = 2;
     private static final int ROLE_PART = 2;
@@ -44,7 +49,7 @@ public class RemoteUserDetailsService implements UserDetailsService {
     private RestOperations restTemplate;
 
     @Override
-    @Cacheable("userCache")
+    @Cacheable(value = "userCache", key = "#filterValue")
     public CbUser getDetails(String filterValue, UserFilterField filterField) {
 
         HttpHeaders tokenRequestHeaders = new HttpHeaders();
@@ -112,6 +117,13 @@ public class RemoteUserDetailsService implements UserDetailsService {
             throw new UserDetailsUnavailableException("User details cannot be retrieved from identity server.", e);
         }
     }
+
+    @Override
+    @CacheEvict(value = "userCache", key = "#filterValue")
+    public void evictUserDetails(String updatedUserId, String filterValue) {
+        LOGGER.info("Remove userid: {} / username: {} from user cache", updatedUserId, filterValue);
+    }
+
 
     private String getAuthorizationHeader(String clientId, String clientSecret) {
         String creds = String.format("%s:%s", clientId, clientSecret);
