@@ -2,8 +2,8 @@
 
 var log = log4javascript.getLogger("accountuserController-logger");
 
-angular.module('uluwatuControllers').controller('accountuserController', ['$scope', '$rootScope', '$filter', 'UserInvite', 'AccountUsers', 'ActivateAccountUsers', 'UserPermission', 'AccountDetails',
-    function ($scope, $rootScope, $filter, UserInvite, AccountUsers, ActivateAccountUsers, UserPermission, AccountDetails) {
+angular.module('uluwatuControllers').controller('accountuserController', ['$scope', '$rootScope', '$filter', 'UserInvite', 'AccountUsers', 'ActivateAccountUsers', 'UserPermission', 'AccountDetails', 'UserOperation',
+    function ($scope, $rootScope, $filter, UserInvite, AccountUsers, ActivateAccountUsers, UserPermission, AccountDetails, UserOperation) {
 
         initInvite();
         $rootScope.accountUsers = [];
@@ -40,8 +40,14 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
             })
         }
 
-        $scope.makeAdmin = function(userId, index) {
+        $scope.makeAdmin = function(userId, userName, index) {
             UserPermission.save({id: userId, role: 'admin'}, function(result) {
+                UserOperation.update({userId: userId}, {username: userName},
+                 function(cacheUpdateResult){
+                   $scope.showSuccess($filter("format")($rootScope.msg.user_form_admin_success, userName))
+                 }, function(cacheUpdateError) {
+                   $scope.showError(cacheUpdateError);
+                });
                 $scope.getUsers();
             }, function (error) {
                 $scope.showError(error);
