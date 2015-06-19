@@ -234,6 +234,8 @@ cloudbreak:
         - ambassador:backend
     ports:
         - 8080:8080
+    volumes:
+        - "$CBD_CERT_ROOT_PATH:/certs"
     image: sequenceiq/cloudbreak:$DOCKER_TAG_CLOUDBREAK
     command: bash
 

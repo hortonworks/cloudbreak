@@ -3,6 +3,7 @@ cloudbreak-config() {
   env-import PRIVATE_IP $(docker run --rm alpine sh -c 'ip ro | grep default | cut -d" " -f 3')
   cloudbreak-conf-tags
   cloudbreak-conf-images
+  cloudbreak-conf-cert
   cloudbreak-conf-db
   cloudbreak-conf-defaults
   cloudbreak-conf-uaa
@@ -29,6 +30,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_SULTANS 0.5.4
     env-import DOCKER_TAG_AMBASSADOR latest
     env-import DOCKER_TAG_CLOUDBREAK_SHELL 0.4.8
+    env-import DOCKER_TAG_CERT_TOOL 0.0.3
 }
 
 cloudbreak-conf-images() {
@@ -67,6 +69,11 @@ cloudbreak-conf-db() {
     env-import PERISCOPE_DB_HBM2DDL_STRATEGY "validate"
 }
 
+cloudbreak-conf-cert() {
+    declare desc="Declares cloudbreak cert config"
+    env-import CBD_CERT_ROOT_PATH "${PWD}/certs"
+}
+
 cloudbreak-delete-dbs() {
     declare desc="deletes all cloudbreak related dbs: cbdb,pcdb,uaadb"
 
@@ -77,6 +84,11 @@ cloudbreak-delete-dbs() {
         # this is for linux
         rm -rf /var/lib/cloudbreak/*
     fi
+}
+
+cloudbreak-delete-certs() {
+    declare desc="deletes all cloudbreak related certificates"
+    rm -rf ${PWD}/certs
 }
 
 cloudbreak-conf-uaa() {
@@ -156,6 +168,20 @@ cloudbreak-shell() {
 
 gen-password() {
     date +%s | checksum sha1 | head -c 10
+}
+
+cloudbreak-generate-cert() {
+    cloudbreak-config
+    if [ -f "${CBD_CERT_ROOT_PATH}/client.pem" ] && [ -f "${CBD_CERT_ROOT_PATH}/client-key.pem" ]; then
+      debug "Cloudbreak certificate and private key already exist, won't generate new ones."
+    else
+      info "Generating Cloudbreak client certificate and private key in ${CBD_CERT_ROOT_PATH}."
+      docker run --rm -v ${CBD_CERT_ROOT_PATH}:/certs ehazlett/cert-tool:${DOCKER_TAG_CERT_TOOL} -d /certs -o=local &> /dev/null
+      cat "${CBD_CERT_ROOT_PATH}/ca.pem" >> "${CBD_CERT_ROOT_PATH}/client.pem"
+      mv "${CBD_CERT_ROOT_PATH}/ca.pem" "${CBD_CERT_ROOT_PATH}/client-ca.pem"
+      mv "${CBD_CERT_ROOT_PATH}/ca-key.pem" "${CBD_CERT_ROOT_PATH}/client-ca-key.pem"
+      debug "Certificates successfully generated."
+    fi
 }
 
 generate_uaa_config() {

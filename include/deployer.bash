@@ -185,6 +185,7 @@ deployer-delete-yamls() {
 deployer-generate() {
     declare desc="Generates docker-compose.yml and uaa.yml"
 
+    cloudbreak-generate-cert
     compose-generate-yaml
     generate_uaa_config
 }
@@ -193,6 +194,7 @@ deployer-regenerate() {
     declare desc="Deletes and generates docker-compose.yml and uaa.yml"
 
     deployer-delete-yamls
+    cloudbreak-generate-cert
     compose-generate-yaml
     generate_uaa_config
 }
