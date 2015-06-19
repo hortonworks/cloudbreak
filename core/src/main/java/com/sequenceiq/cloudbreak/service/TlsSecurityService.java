@@ -46,10 +46,10 @@ public class TlsSecurityService {
     @Value("${cb.cert.dir:" + CB_CERT_DIR + "}")
     private String certDir;
 
-    @Value("${cb.tls.cert.file:" + CB_TLS_CERT_FILE + "}")
+    @Value("#{'${cb.cert.dir:" + CB_CERT_DIR + "}' + '/' + '${cb.tls.cert.file:" + CB_TLS_CERT_FILE + "}'}")
     private String clientCert;
 
-    @Value("${cb.tls.private.key.file:" + CB_TLS_PRIVATE_KEY_FILE + "}")
+    @Value("#{'${cb.cert.dir:" + CB_CERT_DIR + "}' + '/' + '${cb.tls.private.key.file:" + CB_TLS_PRIVATE_KEY_FILE + "}'}")
     private String clientPrivateKey;
 
     @Inject

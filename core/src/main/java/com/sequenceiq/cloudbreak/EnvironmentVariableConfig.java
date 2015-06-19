@@ -11,9 +11,9 @@ public class EnvironmentVariableConfig {
 
     public static final String CB_EVENTBUS_THREADPOOL_CORE_SIZE = "100";
 
-    public static final String CB_CERT_DIR = "/tmp/certs/";
-    public static final String CB_TLS_PRIVATE_KEY_FILE = "/tmp/certs/client-key.pem";
-    public static final String CB_TLS_CERT_FILE = "/tmp/certs/client.pem";
+    public static final String CB_CERT_DIR = "/certs/";
+    public static final String CB_TLS_PRIVATE_KEY_FILE = "client-key.pem";
+    public static final String CB_TLS_CERT_FILE = "client.pem";
 
     public static final String CB_SMTP_SENDER_HOST = "";
     public static final String CB_SMTP_SENDER_PORT = "25";
