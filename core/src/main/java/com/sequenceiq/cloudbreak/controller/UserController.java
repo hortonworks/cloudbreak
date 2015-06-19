@@ -38,4 +38,12 @@ public class UserController {
         return new ResponseEntity<>(userRequest.getUsername(), HttpStatus.OK);
     }
 
+    @ApiOperation(value = OperationDescriptions.UserOpDescription.USER_DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.USER_NOTES)
+    @RequestMapping(value = "/users/{userId}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity<String> deleteUser(@ModelAttribute("user") CbUser user, @PathVariable String userId) {
+        userDetailsService.deleteUser(user, userId);
+        return new ResponseEntity<>(userId, HttpStatus.OK);
+    }
+
 }

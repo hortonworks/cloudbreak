@@ -108,5 +108,6 @@ public class OperationDescriptions {
 
     public static class UserOpDescription {
         public static final String USER_DETAILS_EVICT = "remove user from cache (by username)";
+        public static final String USER_DELETE_BY_ID = "delete account user by id";
     }
 }

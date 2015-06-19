@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -20,12 +21,26 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestOperations;
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
+import com.sequenceiq.cloudbreak.repository.CredentialRepository;
+import com.sequenceiq.cloudbreak.repository.NetworkRepository;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 
 @Service
 public class RemoteUserDetailsService implements UserDetailsService {
@@ -48,21 +63,26 @@ public class RemoteUserDetailsService implements UserDetailsService {
     @Qualifier("restTemplate")
     private RestOperations restTemplate;
 
+    @Inject
+    private StackRepository stackRepository;
+
+    @Inject
+    private CredentialRepository credentialRepository;
+
+    @Inject
+    private TemplateRepository templateRepository;
+
+    @Inject
+    private BlueprintRepository blueprintRepository;
+
+    @Inject
+    private NetworkRepository networkRepository;
+
     @Override
     @Cacheable(value = "userCache", key = "#filterValue")
     public CbUser getDetails(String filterValue, UserFilterField filterField) {
 
-        HttpHeaders tokenRequestHeaders = new HttpHeaders();
-        tokenRequestHeaders.set("Authorization", getAuthorizationHeader(clientId, clientSecret));
-
-        Map<String, String> tokenResponse = restTemplate.exchange(
-                identityServerUrl + "/oauth/token?grant_type=client_credentials",
-                HttpMethod.POST,
-                new HttpEntity<>(tokenRequestHeaders),
-                Map.class).getBody();
-
-        HttpHeaders scimRequestHeaders = new HttpHeaders();
-        scimRequestHeaders.set("Authorization", "Bearer " + tokenResponse.get("access_token"));
+        HttpHeaders scimRequestHeaders = getScimRequestHeader();
 
         String scimResponse = null;
 
@@ -122,6 +142,64 @@ public class RemoteUserDetailsService implements UserDetailsService {
     @CacheEvict(value = "userCache", key = "#filterValue")
     public void evictUserDetails(String updatedUserId, String filterValue) {
         LOGGER.info("Remove userid: {} / username: {} from user cache", updatedUserId, filterValue);
+    }
+
+    @Override
+    public void deleteUser(CbUser admin, String userId) {
+        CbUser userToDelete = getDetails(userId, UserFilterField.USERID);
+        String accessDenidedMessage = null;
+        LOGGER.info("{} / {} tries to delete {}", admin.getUserId(), admin.getUsername(), userId);
+        if (!admin.getRoles().contains(CbUserRole.ADMIN)) {
+            accessDenidedMessage = "Forbidden: user is not authorized for delete operation on %s";
+        }
+        if (userToDelete.getRoles().contains(CbUserRole.ADMIN)) {
+            accessDenidedMessage = "Forbidden: admin user can not be deleted. (%s)";
+        }
+        if (!admin.getAccount().equals(userToDelete.getAccount())) {
+            accessDenidedMessage = "Forbidden: admin and user (%s) are not under the same account.";
+        }
+        if (hasResources(userToDelete)) {
+            accessDenidedMessage = "Delete owned resources first for user (%s)";
+        }
+        if (!Strings.isNullOrEmpty(accessDenidedMessage)) {
+            throw new AccessDeniedException(String.format(accessDenidedMessage, userToDelete.getUsername()));
+        }
+        HttpHeaders scimRequestHeaders = getScimRequestHeader();
+        HttpStatus statusResponse = restTemplate.exchange(
+                identityServerUrl + "/Users/" + userId,
+                HttpMethod.DELETE,
+                new HttpEntity<>(scimRequestHeaders),
+                String.class).getStatusCode();
+        if (!HttpStatus.OK.equals(statusResponse)) {
+            throw new BadRequestException(String.format("User deletion failed: %s - status code: %s",
+                    userToDelete.getUsername(), statusResponse.toString()));
+        }
+        LOGGER.info("User ({} - {}) deleted successfully.", userToDelete.getUserId(), userToDelete.getUsername());
+    }
+
+    private boolean hasResources(CbUser user) {
+        Set<Template> templates = templateRepository.findForUser(user.getUserId());
+        Set<Credential> credentials = credentialRepository.findForUser(user.getUserId());
+        Set<Blueprint> blueprints = blueprintRepository.findForUser(user.getUserId());
+        Set<Network> networks = networkRepository.findForUser(user.getUserId());
+        Set<Stack> stacks = stackRepository.findForUser(user.getUserId());
+        return !(stacks.isEmpty() && templates.isEmpty() && credentials.isEmpty()
+                && blueprints.isEmpty() && networks.isEmpty());
+    }
+
+    private HttpHeaders getScimRequestHeader() {
+        HttpHeaders tokenRequestHeaders = new HttpHeaders();
+        tokenRequestHeaders.set("Authorization", getAuthorizationHeader(clientId, clientSecret));
+
+        Map<String, String> tokenResponse = restTemplate.exchange(
+                identityServerUrl + "/oauth/token?grant_type=client_credentials",
+                HttpMethod.POST,
+                new HttpEntity<>(tokenRequestHeaders),
+                Map.class).getBody();
+
+        HttpHeaders scimRequestHeaders = new HttpHeaders();
+        scimRequestHeaders.set("Authorization", "Bearer " + tokenResponse.get("access_token"));
+        return scimRequestHeaders;
     }
 
 
