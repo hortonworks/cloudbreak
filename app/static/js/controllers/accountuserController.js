@@ -19,6 +19,8 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
                 $scope.inviteForm.$setPristine();
                 initInvite();
                 collapseInviteUsersFormPanel();
+                $scope.showSuccess($filter("format")($rootScope.msg.user_form_invite_success, $scope.invite.mail))
+                $scope.getUsers();
             }, function (error) {
                 $scope.showError(error);
             });
@@ -27,7 +29,7 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
         $scope.getUsers = function() {
             $rootScope.accountUsers =  AccountUsers.query(function (result) {
                 angular.forEach(result, function(item) {
-                    item.idx = item.username.toString().replace(/\./g, '').replace(/@/g, '');
+                    item.idx = item.username.toString().replace(/\./g, '-').replace(/@/g, '-');
                 });
             });
         }
@@ -35,6 +37,7 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
         $scope.activateUser = function(activate, email) {
             ActivateAccountUsers.save({ activate: activate, email: email },  function (result) {
                 $filter('filter')($scope.accountUsers, { username: email })[0].active = activate;
+                $scope.getUsers();
             }, function (error) {
                 $scope.showError(error);
             })
@@ -52,6 +55,17 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
             }, function (error) {
                 $scope.showError(error);
             })
+        }
+
+        $scope.removeUser = function(userName, userId) {
+            UserOperation.delete({userId: userId}, null,
+                function(deleteResult) {
+                    $scope.showSuccess($filter("format")($rootScope.msg.user_form_delete_success, userName))
+                    $scope.getUsers();
+                }, function(deleteError) {
+                    $scope.showError(deleteError)
+                }
+            );
         }
 
         function getUsersForAccount() {

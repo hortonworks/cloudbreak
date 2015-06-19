@@ -240,6 +240,30 @@ app.get('*/credentials/certificate/*', function(req, res){
   });
 });
 
+// delete user
+
+app.delete('/users/:userId', function(req, res){
+    var token = req.session.token
+    var userId = req.param('userId')
+    cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
+    proxyRestClient.get(cloudbreakAddress + req.url + "/resources", cbRequestArgs, function(data,response){
+        if (data === false) {
+            proxyRestClient.delete(sultansAddress + 'users/' + userId, cbRequestArgs, function(data, response){
+              res.status(response.statusCode).send(data);
+            }).on('error', function(err){
+              res.status(500).send("Uluwatu could not connect to Sultans.");
+            });
+        } else if (data === true){
+            res.status(500).send("Delete owned resources first for user.");
+        } else {
+           res.status(response.statusCode).send(data);
+        }
+    }).on('error', function(err){
+        res.status(500).send("Uluwatu could not connect to Cloudbreak.");
+    });
+
+})
+
 // wildcards should be proxied =================================================
 app.get('*/periscope/*', function(req,res){
   proxyPeriscopeRequest(req, res, proxyRestClient.get);
@@ -290,6 +314,7 @@ app.put('*/sultans/*', function(req,res){
 app.put('*', function(req,res){
   proxyCloudbreakRequest(req, res, proxyRestClient.put);
 });
+
 // proxy =======================================================================
 
 function proxyCloudbreakRequest(req, res, method){

@@ -111,6 +111,14 @@ uluwatuServices.factory('UserOperation', ['$resource',
         });
   }]);
 
+  uluwatuServices.factory('UserOperation', ['$resource',
+    function ($resource) {
+      return $resource('users/:userId', null,
+          {
+           'update': { method: 'PUT' }
+          });
+    }]);
+
 uluwatuServices.factory('UserInvite', ['$resource',
     function ($resource) {
         return $resource('sultans/invite');
