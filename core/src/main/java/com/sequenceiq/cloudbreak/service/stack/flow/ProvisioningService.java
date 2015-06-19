@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -31,14 +32,19 @@ public class ProvisioningService {
     @Inject
     private UserDataBuilder userDataBuilder;
 
+    @Inject
+    private TlsSecurityService tlsSecurityService;
+
     public ProvisionComplete buildStack(final CloudPlatform cloudPlatform, Stack stack, Map<String, Object> setupProperties) throws Exception {
         ProvisionComplete provisionComplete = null;
         stack = stackRepository.findOneWithLists(stack.getId());
         if (stack.isRequested()) {
-            Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(cloudPlatform);
             CloudPlatformConnector cloudPlatformConnector = cloudPlatformConnectors.get(cloudPlatform);
+            Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(cloudPlatform,
+                    tlsSecurityService.readPublicSshKey(stack.getId()),
+                    cloudPlatformConnector.getSSHUser());
             Set<Resource> resources = cloudPlatformConnector
-                    .buildStack(stack, userData.get(InstanceGroupType.GATEWAY), userData.get(InstanceGroupType.CORE), setupProperties);
+                    .buildStack(stack, userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE), setupProperties);
             provisionComplete = new ProvisionComplete(cloudPlatform, stack.getId(), resources);
         } else {
             LOGGER.info("CloudFormation stack creation was requested for a stack, that is not in REQUESTED status anymore. [stackId: '{}', status: '{}']",

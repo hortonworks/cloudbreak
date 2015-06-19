@@ -43,7 +43,7 @@ public final class NetworkUtils {
         }
         List<Port> ports = new ArrayList<>();
         ports.add(new Port(SSH, "22", "22", "tcp", aclRules));
-        ports.add(new Port(GATEWAY, "80", "80", "tcp", aclRules));
+        ports.add(new Port(GATEWAY, "443", "443", "tcp", aclRules));
         ports.add(new Port(AMBARI, "8080", "8080", "tcp", aclRules));
         ports.add(new Port(CONSUL, "8500", "8500", "tcp", aclRules));
         ports.add(new Port(NAMENODE, "50070", "50070", "tcp", aclRules));

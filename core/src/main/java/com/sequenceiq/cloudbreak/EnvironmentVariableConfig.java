@@ -11,6 +11,10 @@ public class EnvironmentVariableConfig {
 
     public static final String CB_EVENTBUS_THREADPOOL_CORE_SIZE = "100";
 
+    public static final String CB_CERT_DIR = "/tmp/certs/";
+    public static final String CB_TLS_PRIVATE_KEY_FILE = "/tmp/certs/client-key.pem";
+    public static final String CB_TLS_CERT_FILE = "/tmp/certs/client.pem";
+
     public static final String CB_SMTP_SENDER_HOST = "";
     public static final String CB_SMTP_SENDER_PORT = "25";
     public static final String CB_SMTP_SENDER_USERNAME = "";
@@ -50,10 +54,10 @@ public class EnvironmentVariableConfig {
     public static final String CB_BAYWATCH_ENABLED = "false";
     public static final String CB_BAYWATCH_EXTERN_LOCATION = "";
 
-    public static final String CB_AZURE_IMAGE_URI = "https://102589fae040d8westeurope.blob.core.windows.net/images/packer-cloudbreak-2015-06-06-centos6_2015-June-6_5-20-os-2015-06-06.vhd";
-    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-0eb16e0e,ap-southeast-1:ami-fe5268ac,ap-southeast-2:ami-a7e49c9d,eu-west-1:ami-ab86fadc,sa-east-1:ami-e74ecefa,us-east-1:ami-2d04ed46,us-west-1:ami-83947ec7,us-west-2:ami-47d8e177";
-    public static final String CB_OPENSTACK_IMAGE = "cb-centos66-amb200-2015-05-19";
-    public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos66-amb200-2015-06-06-0549.image.tar.gz";
+    public static final String CB_AZURE_IMAGE_URI = "https://102589fae040d8westeurope.blob.core.windows.net/images/packer-cloudbreak-2015-06-16-centos6-tls2_2015-June-16_15-17-os-2015-06-16.vhd";
+    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-6ce13b6c,ap-southeast-1:ami-9ebfbacc,ap-southeast-2:ami-4d2d5777,eu-west-1:ami-cb1962bc,sa-east-1:ami-330a892e,us-east-1:ami-07e7146c,us-west-1:ami-07e7146c,us-west-2:ami-cb162cfb";
+    public static final String CB_OPENSTACK_IMAGE = "cb-centos66-amb200-2015-06-18";
+    public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos66-amb200-2015-06-16-1933.image.tar.gz";
     public static final String CB_GCP_AND_AZURE_USER_NAME = "cloudbreak";
 
     private EnvironmentVariableConfig() {

@@ -28,7 +28,7 @@ public class CloudbreakErrorHandler implements Consumer<Throwable> {
      * @param errorData the exception to be consumed
      */
     protected void errorLogic(Throwable errorData) {
-        LOGGER.info("Default event specific error logic - logging the received trowable: ", errorData);
+        LOGGER.error("Default event specific error logic - logging the received throwable: ", errorData);
     }
 
 }

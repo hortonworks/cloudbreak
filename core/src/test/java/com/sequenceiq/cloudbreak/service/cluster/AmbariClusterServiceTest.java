@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -35,6 +36,8 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -47,6 +50,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
+import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 import groovyx.net.http.HttpResponseException;
 import reactor.bus.Event;
@@ -87,6 +91,9 @@ public class AmbariClusterServiceTest {
     @Mock
     private InstanceMetaDataRepository instanceMetadataRepository;
 
+    @Mock
+    private TlsSecurityService tlsSecurityService;
+
     @Captor
     private ArgumentCaptor<Event<UpdateAmbariHostsRequest>> eventCaptor;
 
@@ -102,7 +109,7 @@ public class AmbariClusterServiceTest {
     private Cluster cluster;
 
     @Before
-    public void setUp() {
+    public void setUp() throws CloudbreakSecuritySetupException {
         underTest = new AmbariClusterService();
         MockitoAnnotations.initMocks(this);
         cluster = createCluster();
@@ -112,19 +119,20 @@ public class AmbariClusterServiceTest {
         given(stackRepository.findById(anyLong())).willReturn(stack);
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(stackRepository.findOne(anyLong())).willReturn(stack);
+        given(tlsSecurityService.buildTLSClientConfig(anyLong(), anyString())).willReturn(new TLSClientConfig("", "/tmp"));
     }
 
     @Test(expected = BadRequestException.class)
     public void testRetrieveClusterJsonWhenClusterJsonIsNull() throws HttpResponseException {
         // GIVEN
-        doReturn(ambariClient).when(ambariClientProvider).getAmbariClient(any(String.class), any(String.class), any(String.class));
+        doReturn(ambariClient).when(ambariClientProvider).getAmbariClient(any(TLSClientConfig.class), any(String.class), any(String.class));
         given(ambariClient.getClusterAsJson()).willReturn(null);
         // WHEN
         underTest.getClusterJson("123.12.3.4", 1L);
     }
 
     @Test(expected = BadRequestException.class)
-    public void testUpdateHostsDoesntAcceptZeroScalingAdjustments() throws HttpResponseException {
+    public void testUpdateHostsDoesntAcceptZeroScalingAdjustments() throws Exception {
         // GIVEN
         HostGroupAdjustmentJson hga1 = new HostGroupAdjustmentJson();
         hga1.setHostGroup("slave_1");
@@ -134,7 +142,7 @@ public class AmbariClusterServiceTest {
     }
 
     @Test(expected = BadRequestException.class)
-    public void testUpdateHostsDoesntAcceptScalingAdjustmentsWithDifferentSigns() throws HttpResponseException {
+    public void testUpdateHostsDoesntAcceptScalingAdjustmentsWithDifferentSigns() throws Exception {
         // GIVEN
         HostGroupAdjustmentJson hga1 = new HostGroupAdjustmentJson();
         hga1.setHostGroup("slave_1");
@@ -144,7 +152,7 @@ public class AmbariClusterServiceTest {
     }
 
     @Test
-    public void testUpdateHostsForDownscaleFilterAllHosts() throws ConnectException {
+    public void testUpdateHostsForDownscaleFilterAllHosts() throws ConnectException, CloudbreakSecuritySetupException {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
@@ -158,7 +166,7 @@ public class AmbariClusterServiceTest {
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
         when(hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), "slave_1")).thenReturn(hostGroup);
-        when(ambariClientProvider.getAmbariClient(any(String.class), any(String.class), any(String.class))).thenReturn(ambariClient);
+        when(ambariClientProvider.getAmbariClient(any(TLSClientConfig.class), any(String.class), any(String.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "2"));
         when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData, "slave_1")).thenReturn(Collections.<HostMetadata>emptyList());
@@ -174,7 +182,7 @@ public class AmbariClusterServiceTest {
     }
 
     @Test
-    public void testUpdateHostsForDownscaleCannotGoBelowReplication() throws ConnectException {
+    public void testUpdateHostsForDownscaleCannotGoBelowReplication() throws ConnectException, CloudbreakSecuritySetupException {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
@@ -189,7 +197,7 @@ public class AmbariClusterServiceTest {
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
         when(hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), "slave_1")).thenReturn(hostGroup);
-        when(ambariClientProvider.getAmbariClient(any(String.class), any(String.class), any(String.class))).thenReturn(ambariClient);
+        when(ambariClientProvider.getAmbariClient(any(TLSClientConfig.class), any(String.class), any(String.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "2"));
         when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData, "slave_1")).thenReturn(asList(metadata2, metadata3));
@@ -206,7 +214,7 @@ public class AmbariClusterServiceTest {
 
     @Test
     @Ignore("Rewrite the test not to use reactor!")
-    public void testUpdateHostsForDownscaleFilterOneHost() throws ConnectException {
+    public void testUpdateHostsForDownscaleFilterOneHost() throws ConnectException, CloudbreakSecuritySetupException {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
@@ -238,7 +246,7 @@ public class AmbariClusterServiceTest {
         when(instanceMetaData3.getAmbariServer()).thenReturn(false);
         when(instanceMetaData4.getAmbariServer()).thenReturn(false);
         when(hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), "slave_1")).thenReturn(hostGroup);
-        when(ambariClientProvider.getAmbariClient(any(String.class), any(String.class), any(String.class))).thenReturn(ambariClient);
+        when(ambariClientProvider.getAmbariClient(any(TLSClientConfig.class), any(String.class), any(String.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
         when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData, "slave_1")).thenReturn(hostsMetadataList);
@@ -259,7 +267,7 @@ public class AmbariClusterServiceTest {
 
     @Test
     @Ignore("Rewrite test not to use reactor!")
-    public void testUpdateHostsForDownscaleSelectNodesWithLessData() throws ConnectException {
+    public void testUpdateHostsForDownscaleSelectNodesWithLessData() throws ConnectException, CloudbreakSecuritySetupException {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
@@ -287,7 +295,7 @@ public class AmbariClusterServiceTest {
         when(instanceMetaData2.getAmbariServer()).thenReturn(false);
         when(instanceMetaData3.getAmbariServer()).thenReturn(false);
         when(hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), "slave_1")).thenReturn(hostGroup);
-        when(ambariClientProvider.getAmbariClient(any(String.class), any(String.class), any(String.class))).thenReturn(ambariClient);
+        when(ambariClientProvider.getAmbariClient(any(TLSClientConfig.class), any(String.class), any(String.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
         when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData, "slave_1")).thenReturn(hostsMetadataList);
@@ -307,7 +315,7 @@ public class AmbariClusterServiceTest {
 
     @Test
     @Ignore("Not to use reactor")
-    public void testUpdateHostsForDownscaleSelectMultipleNodesWithLessData() throws ConnectException {
+    public void testUpdateHostsForDownscaleSelectMultipleNodesWithLessData() throws Exception {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-2);
@@ -340,7 +348,7 @@ public class AmbariClusterServiceTest {
         when(instanceMetaData3.getAmbariServer()).thenReturn(false);
         when(instanceMetaData4.getAmbariServer()).thenReturn(false);
         when(hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), "slave_1")).thenReturn(hostGroup);
-        when(ambariClientProvider.getAmbariClient(any(String.class), any(String.class), any(String.class))).thenReturn(ambariClient);
+        when(ambariClientProvider.getAmbariClient(any(TLSClientConfig.class), any(String.class), any(String.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
         when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData, "slave_1")).thenReturn(hostsMetadataList);
@@ -361,7 +369,7 @@ public class AmbariClusterServiceTest {
     }
 
     @Test
-    public void testUpdateHostsForDownscaleWhenRemainingSpaceIsNotEnough() throws ConnectException {
+    public void testUpdateHostsForDownscaleWhenRemainingSpaceIsNotEnough() throws Exception {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
@@ -389,7 +397,7 @@ public class AmbariClusterServiceTest {
         when(instanceMetaData2.getAmbariServer()).thenReturn(false);
         when(instanceMetaData3.getAmbariServer()).thenReturn(false);
         when(hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), "slave_1")).thenReturn(hostGroup);
-        when(ambariClientProvider.getAmbariClient(any(String.class), any(String.class), any(String.class))).thenReturn(ambariClient);
+        when(ambariClientProvider.getAmbariClient(any(TLSClientConfig.class), any(String.class), any(String.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
         when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData, "slave_1")).thenReturn(hostsMetadataList);

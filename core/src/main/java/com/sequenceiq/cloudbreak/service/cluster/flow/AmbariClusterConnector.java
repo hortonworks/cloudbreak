@@ -40,7 +40,9 @@ import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.ClusterException;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
 import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
@@ -64,6 +66,7 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -118,13 +121,16 @@ public class AmbariClusterConnector {
     private AmbariHealthCheckerTask ambariHealthCheckerTask;
     @Inject
     private AmbariHostsJoinStatusCheckerTask ambariHostsJoinStatusCheckerTask;
+    @Inject
+    private TlsSecurityService tlsSecurityService;
 
     public Cluster buildAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
         try {
             cluster.setCreationStarted(new Date().getTime());
             cluster = clusterRepository.save(cluster);
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
+            TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
             setBaseRepoURL(cluster, ambariClient);
             addBlueprint(stack, ambariClient, cluster.getBlueprint());
             int nodeCount = stack.getFullNodeCountWithoutDecommissionedNodes() - stack.getGateWayNodeCount();
@@ -167,11 +173,13 @@ public class AmbariClusterConnector {
         }
     }
 
-    public Set<String> installAmbariNode(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment, List<HostMetadata> hostMetadataNotUsed) {
+    public Set<String> installAmbariNode(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment, List<HostMetadata> hostMetadataNotUsed)
+            throws CloudbreakSecuritySetupException {
         Set<String> result = new HashSet<>();
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(cluster);
+        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
+        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
         int nodeCount = stack.getFullNodeCountWithoutDecommissionedAndUnRegisteredNodes() - stack.getGateWayNodeCount()
                 + hostGroupAdjustment.getScalingAdjustment();
         PollingResult pollingResult = waitForHosts(stack, ambariClient, nodeCount);
@@ -197,7 +205,7 @@ public class AmbariClusterConnector {
         return result;
     }
 
-    public Cluster resetAmbariCluster(Long stackId) {
+    public Cluster resetAmbariCluster(Long stackId) throws CloudbreakSecuritySetupException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         InstanceGroup instanceGroupByType = stack.getGatewayInstanceGroup();
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
@@ -213,7 +221,8 @@ public class AmbariClusterConnector {
         return cluster;
     }
 
-    public Set<String> decommissionAmbariNodes(Long stackId, HostGroupAdjustmentJson adjustmentRequest, List<HostMetadata> decommissionCandidates) {
+    public Set<String> decommissionAmbariNodes(Long stackId, HostGroupAdjustmentJson adjustmentRequest, List<HostMetadata> decommissionCandidates)
+            throws CloudbreakSecuritySetupException {
         Set<String> result = new HashSet<>();
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
@@ -223,7 +232,8 @@ public class AmbariClusterConnector {
         LOGGER.info("Decommissioning {} hosts from host group '{}'", adjustment, hostGroupName);
         String eventMsg = String.format("Removing '%s' node(s) from the '%s' hostgroup.", adjustment, hostGroupName);
         eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), eventMsg, hostGroupName);
-        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(cluster);
+        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
+        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
         String blueprintName = stack.getCluster().getBlueprint().getBlueprintName();
         Set<String> components = getHadoopComponents(cluster, ambariClient, hostGroupName, blueprintName);
         Map<String, HostMetadata> hostsToRemove = selectHostsToRemove(decommissionCandidates, stack, adjustment);
@@ -254,7 +264,8 @@ public class AmbariClusterConnector {
 
     public void stopCluster(Stack stack) throws CloudbreakException {
         Cluster cluster = stack.getCluster();
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
+        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
         try {
             if (!allServiceStopped(ambariClient.getHostComponentsStates())) {
                 stopAllServices(stack, ambariClient);
@@ -267,7 +278,8 @@ public class AmbariClusterConnector {
 
     public void startCluster(Stack stack) throws CloudbreakException {
         Cluster cluster = stack.getCluster();
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
+        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
         waitForAmbariToStart(stack);
         startAmbariAgents(stack);
         startAllServices(stack, ambariClient);
@@ -276,7 +288,8 @@ public class AmbariClusterConnector {
     public boolean isAmbariAvailable(Stack stack) throws CloudbreakException {
         Cluster cluster = stack.getCluster();
         if (cluster != null) {
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
+            TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
             try {
                 ambariClient.getHostNames();
             } catch (Exception ex) {
@@ -434,9 +447,10 @@ public class AmbariClusterConnector {
     private void waitForAmbariToStart(Stack stack) throws CloudbreakException {
         LOGGER.info("Checking if Ambari Server is available.");
         Cluster cluster = stack.getCluster();
+        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
         PollingResult ambariHealthCheckResult = ambariHealthChecker.pollWithTimeout(
                 ambariHealthCheckerTask,
-                new AmbariClientPollerObject(stack, ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword())),
+                new AmbariClientPollerObject(stack, ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword())),
                 AMBARI_POLLING_INTERVAL,
                 MAX_ATTEMPTS_FOR_HOSTS,
                 AmbariOperationService.MAX_FAILURE_COUNT);
@@ -474,9 +488,10 @@ public class AmbariClusterConnector {
         }
     }
 
-    private PollingResult waitForHostsToJoin(Stack stack) {
+    private PollingResult waitForHostsToJoin(Stack stack) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
-        AmbariHosts ambariHosts = new AmbariHosts(stack, ambariClientProvider.getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(),
+        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        AmbariHosts ambariHosts = new AmbariHosts(stack, ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(),
                 cluster.getPassword()), stack.getFullNodeCount());
         return ambariHostJoin.pollWithTimeout(
                 ambariHostsJoinStatusCheckerTask,

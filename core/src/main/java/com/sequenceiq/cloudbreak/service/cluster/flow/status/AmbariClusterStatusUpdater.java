@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -15,6 +17,7 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 @Component
 public class AmbariClusterStatusUpdater {
@@ -37,12 +40,16 @@ public class AmbariClusterStatusUpdater {
     @Inject
     private AmbariClusterStatusFactory clusterStatusFactory;
 
-    public void updateClusterStatus(Stack stack) {
+    @Inject
+    private TlsSecurityService tlsSecurityService;
+
+    public void updateClusterStatus(Stack stack) throws CloudbreakSecuritySetupException {
         if (isClusterStatusCheckNecessary(stack)) {
             Cluster cluster = stack.getCluster();
             String blueprintName = cluster != null ? cluster.getBlueprint().getBlueprintName() : null;
+            TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
             AmbariClusterStatus clusterStatus = clusterStatusFactory.createClusterStatus(ambariClientProvider.getAmbariClient(
-                    cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword()), blueprintName);
+                    clientConfig, cluster.getUserName(), cluster.getPassword()), blueprintName);
             updateClusterStatus(stack, clusterStatus);
         }
     }

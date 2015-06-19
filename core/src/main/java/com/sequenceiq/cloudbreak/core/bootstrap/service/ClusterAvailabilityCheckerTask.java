@@ -10,7 +10,7 @@ public class ClusterAvailabilityCheckerTask extends StackBasedStatusCheckerTask<
 
     @Override
     public boolean checkStatus(ContainerOrchestratorClusterContext context) {
-        return context.getContainerOrchestrator().areAllNodesAvailable(context.getApiAddress(), context.getNodes());
+        return context.getContainerOrchestrator().areAllNodesAvailable(context.getGatewayConfig(), context.getNodes());
     }
 
     @Override

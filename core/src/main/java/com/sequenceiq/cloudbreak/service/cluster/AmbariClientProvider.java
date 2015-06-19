@@ -4,35 +4,40 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 @Service
 public class AmbariClientProvider {
 
-    private static final String PORT = "80";
+    private static final String PORT = "443";
     private static final String ADMIN_PRINCIPAL = "/admin";
 
     /**
      * Create a new Ambari client. If the kerberos security is enabled
      * on the cluster this client won't be able to modify the cluster resources.
      *
-     * @param ambariServerIP address of the Ambari server
+     * @param clientConfig tls configuration holding the ip address and the certificate paths
      * @param ambariUserName username for the Ambari server
      * @param ambariPassword password for the Ambari server
      * @return client
      */
-    public AmbariClient getAmbariClient(String ambariServerIP, String ambariUserName, String ambariPassword) {
-        return new AmbariClient(ambariServerIP, PORT, ambariUserName, ambariPassword);
+    public AmbariClient getAmbariClient(TLSClientConfig clientConfig, String ambariUserName, String ambariPassword) {
+        return new AmbariClient(clientConfig.getApiAddress(), PORT,
+                ambariUserName, ambariPassword,
+                clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert());
     }
 
     /**
      * Create a new Ambari client with the default user and password. If the kerberos security is enabled
      * on the cluster this client won't be able to modify the cluster resources.
      *
-     * @param ambariAddress address of the Ambari server
+     * @param clientConfig tls configuration holding the ip address and the certificate paths
      * @return client
      */
-    public AmbariClient getDefaultAmbariClient(String ambariAddress) {
-        return new AmbariClient(ambariAddress, PORT);
+    public AmbariClient getDefaultAmbariClient(TLSClientConfig clientConfig) {
+        return new AmbariClient(clientConfig.getApiAddress(), PORT,
+                "admin", "admin",
+                clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert());
     }
 
     /**
@@ -43,8 +48,8 @@ public class AmbariClientProvider {
      * @param cluster Cloudbreak cluster
      * @return client
      */
-    public AmbariClient getSecureAmbariClient(Cluster cluster) {
-        AmbariClient ambariClient = getAmbariClient(cluster.getAmbariIp(), cluster.getUserName(), cluster.getPassword());
+    public AmbariClient getSecureAmbariClient(TLSClientConfig clientConfig, Cluster cluster) {
+        AmbariClient ambariClient = getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
         if (cluster.isSecure()) {
             setKerberosSession(ambariClient, cluster);
         }

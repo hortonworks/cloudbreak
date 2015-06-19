@@ -25,6 +25,12 @@ configure_docker() {
   service docker restart
 }
 
+print_ssh_fingerprint() {
+    echo "cb: -----BEGIN SSH HOST KEY FINGERPRINTS-----"
+    echo "cb: $(ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub)"
+    echo "cb: -----END SSH HOST KEY FINGERPRINTS-----"
+}
+
 format_disks() {
   mkdir /hadoopfs
   for (( i=1; i<=24; i++ )); do
@@ -50,6 +56,7 @@ main() {
     shift
     eval "$@"
   elif [ ! -f "/var/cb-init-executed" ]; then
+    print_ssh_fingerprint
     format_disks
     fix_hostname
     configure_docker

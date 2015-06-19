@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import reactor.bus.Event;
 
 /**
- * Even factory that registers an error handler into the event.
+ * Event factory that registers an error handler into the event.
  */
 @Service
 public class ErrorHandlerAwareFlowEventFactory implements FlowEventFactory<Object> {

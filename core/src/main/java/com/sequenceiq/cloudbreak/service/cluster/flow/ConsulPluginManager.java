@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,6 +21,8 @@ import com.ecwid.consul.v1.event.model.EventParams;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
@@ -29,6 +32,7 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.PluginFailureException;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
+import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 @Component
 public class ConsulPluginManager implements PluginManager {
@@ -50,20 +54,23 @@ public class ConsulPluginManager implements PluginManager {
     @Inject
     private HostMetadataRepository hostMetadataRepository;
 
+    @Inject
+    private TlsSecurityService tlsSecurityService;
+
     @Override
-    public void prepareKeyValues(Collection<InstanceMetaData> instanceMetaData, Map<String, String> keyValues) {
-        List<ConsulClient> clients = ConsulUtils.createClients(instanceMetaData);
+    public void prepareKeyValues(TLSClientConfig clientConfig, Map<String, String> keyValues) {
+        ConsulClient client = ConsulUtils.createClient(clientConfig);
         for (Map.Entry<String, String> kv : keyValues.entrySet()) {
-            if (!ConsulUtils.putKVValue(clients, kv.getKey(), kv.getValue(), null)) {
+            if (!ConsulUtils.putKVValue(Arrays.asList(client), kv.getKey(), kv.getValue(), null)) {
                 throw new PluginFailureException("Failed to put values in Consul's key-value store.");
             }
         }
     }
 
     @Override
-    public Map<String, Set<String>> installPlugins(Collection<InstanceMetaData> instanceMetaData, Map<String, PluginExecutionType> plugins, Set<String> hosts) {
+    public Map<String, Set<String>> installPlugins(TLSClientConfig clientConfig, Map<String, PluginExecutionType> plugins, Set<String> hosts) {
         Map<String, Set<String>> eventIdMap = new HashMap<>();
-        List<ConsulClient> clients = ConsulUtils.createClients(instanceMetaData);
+        ConsulClient client = ConsulUtils.createClient(clientConfig);
         for (Map.Entry<String, PluginExecutionType> plugin : plugins.entrySet()) {
             Set<String> installedHosts = new HashSet<>();
             if (PluginExecutionType.ONE_NODE.equals(plugin.getValue())) {
@@ -75,7 +82,7 @@ public class ConsulPluginManager implements PluginManager {
             for (Map.Entry<String, Set<String>> nodeFilter : getNodeFilters(installedHosts).entrySet()) {
                 EventParams eventParams = new EventParams();
                 eventParams.setNode(nodeFilter.getKey());
-                String eventId = ConsulUtils.fireEvent(clients, INSTALL_PLUGIN_EVENT, "TRIGGER_PLUGN " + plugin.getKey() + " " + getPluginName(plugin.getKey()),
+                String eventId = ConsulUtils.fireEvent(client, INSTALL_PLUGIN_EVENT, "TRIGGER_PLUGN " + plugin.getKey() + " " + getPluginName(plugin.getKey()),
                         eventParams, null);
                 if (eventId != null) {
                     eventIdMap.put(eventId, nodeFilter.getValue());
@@ -107,32 +114,38 @@ public class ConsulPluginManager implements PluginManager {
     }
 
     @Override
-    public void waitForEventFinish(Stack stack, Collection<InstanceMetaData> instanceMetaData, Map<String, Set<String>> eventIds, Integer timeout) {
-        List<ConsulClient> clients = ConsulUtils.createClients(stack.getGatewayInstanceGroup().getInstanceMetaData());
+    public void waitForEventFinish(Stack stack, Collection<InstanceMetaData> instanceMetaData, Map<String, Set<String>> eventIds, Integer timeout)
+            throws CloudbreakSecuritySetupException {
+        InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
+        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+        ConsulClient client = ConsulUtils.createClient(clientConfig);
         List<String> keys = generateKeys(eventIds);
         int calculatedMaxAttempt = (timeout * ONE_THOUSAND * SECONDS_IN_MINUTE) / POLLING_INTERVAL;
         keyValuePollingService.pollWithTimeout(
                 consulKVCheckerTask,
-                new ConsulKVCheckerContext(stack, clients, keys, FINISH_SIGNAL, FAILED_SIGNAL),
+                new ConsulKVCheckerContext(stack, client, keys, FINISH_SIGNAL, FAILED_SIGNAL),
                 POLLING_INTERVAL, calculatedMaxAttempt
         );
     }
 
     @Override
-    public void triggerAndWaitForPlugins(Stack stack, ConsulPluginEvent event, Integer timeout, DockerContainer container) {
+    public void triggerAndWaitForPlugins(Stack stack, ConsulPluginEvent event, Integer timeout, DockerContainer container)
+            throws CloudbreakSecuritySetupException {
         triggerAndWaitForPlugins(stack, event, timeout, container, Collections.<String>emptyList(), null);
     }
 
     @Override
     public void triggerAndWaitForPlugins(Stack stack, ConsulPluginEvent event, Integer timeout, DockerContainer container,
-            List<String> payload, Set<String> hosts) {
+            List<String> payload, Set<String> hosts) throws CloudbreakSecuritySetupException {
         Set<InstanceMetaData> instances = stack.getRunningInstanceMetaData();
         Set<String> targetHosts = hosts;
         if (hosts == null || hosts.isEmpty()) {
             targetHosts = getHostnames(hostMetadataRepository.findHostsInCluster(stack.getCluster().getId()));
         }
+        InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
+        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
         Map<String, Set<String>> triggerEventIds =
-                triggerPlugins(stack.getGatewayInstanceGroup().getInstanceMetaData(), event, container, payload, targetHosts);
+                triggerPlugins(clientConfig, event, container, payload, targetHosts);
         Map<String, Set<String>> eventIdMap = new HashMap<>();
         for (String eventId : triggerEventIds.keySet()) {
             Set<String> eventHosts = triggerEventIds.get(eventId);
@@ -144,23 +157,23 @@ public class ConsulPluginManager implements PluginManager {
         waitForEventFinish(stack, instances, eventIdMap, timeout);
     }
 
-    private Map<String, Set<String>> triggerPlugins(Collection<InstanceMetaData> instanceMetaData, ConsulPluginEvent event,
+    private Map<String, Set<String>> triggerPlugins(TLSClientConfig clientConfig, ConsulPluginEvent event,
             DockerContainer container, List<String> payload, Set<String> hosts) {
-        List<ConsulClient> clients = ConsulUtils.createClients(instanceMetaData);
+        ConsulClient client = ConsulUtils.createClient(clientConfig);
         if (hosts == null || hosts.isEmpty()) {
-            return Collections.singletonMap(fireEvent(clients, event, container, payload, null), Collections.<String>emptySet());
+            return Collections.singletonMap(fireEvent(client, event, container, payload, null), Collections.<String>emptySet());
         }
         Map<String, Set<String>> result = new HashMap<>();
         for (Map.Entry<String, Set<String>> nodeFilter : getNodeFilters(hosts).entrySet()) {
             EventParams eventParams = new EventParams();
             eventParams.setNode(nodeFilter.getKey());
-            result.put(fireEvent(clients, event, container, payload, eventParams), nodeFilter.getValue());
+            result.put(fireEvent(client, event, container, payload, eventParams), nodeFilter.getValue());
         }
         return result;
     }
 
-    private String fireEvent(List<ConsulClient> clients, ConsulPluginEvent event, DockerContainer container, List<String> payload, EventParams eventParams) {
-        String eventId = ConsulUtils.fireEvent(clients, event.getName(),
+    private String fireEvent(ConsulClient client, ConsulPluginEvent event, DockerContainer container, List<String> payload, EventParams eventParams) {
+        String eventId = ConsulUtils.fireEvent(Arrays.asList(client), event.getName(),
                 "TRIGGER_PLUGN_IN_CONTAINER " + container.getName() + " " + StringUtils.join(payload, " "), eventParams, null);
         if (eventId == null) {
             throw new PluginFailureException("Failed to trigger plugins, Consul client couldn't fire the "

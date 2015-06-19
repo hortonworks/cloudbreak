@@ -11,7 +11,7 @@ public class BootstrapApiCheckerTask extends StackBasedStatusCheckerTask<Bootstr
 
     @Override
     public boolean checkStatus(BootstrapApiContext bootstrapApiContext) {
-        return bootstrapApiContext.getContainerOrchestrator().isBootstrapApiAvailable(bootstrapApiContext.getGatewayAddress());
+        return bootstrapApiContext.getContainerOrchestrator().isBootstrapApiAvailable(bootstrapApiContext.getGatewayConfig());
     }
 
     @Override

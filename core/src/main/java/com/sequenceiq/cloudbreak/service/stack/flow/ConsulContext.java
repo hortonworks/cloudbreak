@@ -8,17 +8,17 @@ import com.sequenceiq.cloudbreak.service.StackContext;
 
 public class ConsulContext extends StackContext {
 
-    private final List<ConsulClient> consulClients;
+    private final ConsulClient consulClient;
     private final List<String> targets;
 
-    public ConsulContext(Stack stack, List<ConsulClient> consulClients, List<String> targets) {
+    public ConsulContext(Stack stack, ConsulClient consulClient, List<String> targets) {
         super(stack);
-        this.consulClients = consulClients;
+        this.consulClient = consulClient;
         this.targets = targets;
     }
 
-    public List<ConsulClient> getConsulClients() {
-        return consulClients;
+    public ConsulClient getConsulClient() {
+        return consulClient;
     }
 
     public List<String> getTargets() {

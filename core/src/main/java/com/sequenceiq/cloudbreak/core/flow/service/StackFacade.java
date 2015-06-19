@@ -5,6 +5,10 @@ import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 
 public interface StackFacade {
 
+    FlowContext provision(FlowContext context) throws CloudbreakException;
+
+    FlowContext setupTls(FlowContext context) throws CloudbreakException;
+
     FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException;
 
     FlowContext setupConsulMetadata(FlowContext context) throws CloudbreakException;
@@ -39,7 +43,6 @@ public interface StackFacade {
 
     FlowContext stopRequested(FlowContext context) throws CloudbreakException;
 
-    FlowContext provision(FlowContext context) throws CloudbreakException;
-
     FlowContext sync(FlowContext context) throws CloudbreakException;
+
 }

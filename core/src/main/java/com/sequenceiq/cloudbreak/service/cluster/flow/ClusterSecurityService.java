@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -28,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 @Service
 public class ClusterSecurityService {
@@ -47,12 +50,15 @@ public class ClusterSecurityService {
     private CloudbreakEventService eventService;
     @Inject
     private PluginManager pluginManager;
+    @Inject
+    private TlsSecurityService tlsSecurityService;
 
     public void enableKerberosSecurity(Stack stack) throws CloudbreakException {
         try {
             createAndStartKDC(stack);
             Cluster cluster = stack.getCluster();
-            AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(cluster);
+            TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+            AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
             ambariClient.addService(KERBEROS_SERVICE);
             ambariClient.addServiceComponent(KERBEROS_SERVICE, KERBEROS_CLIENT);
             ambariClient.addComponentsToHosts(ambariClient.getClusterHosts(), asList(KERBEROS_CLIENT));
@@ -80,7 +86,7 @@ public class ClusterSecurityService {
         }
     }
 
-    private void createAndStartKDC(Stack stack) {
+    private void createAndStartKDC(Stack stack) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         Set<String> gatewayHosts = new HashSet<>();

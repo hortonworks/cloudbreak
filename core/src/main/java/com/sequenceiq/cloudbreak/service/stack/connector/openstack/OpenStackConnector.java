@@ -20,8 +20,11 @@ import org.openstack4j.model.compute.ActionResponse;
 import org.openstack4j.model.heat.StackUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -36,44 +39,48 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
+import com.sequenceiq.cloudbreak.service.stack.flow.FingerprintParserUtil;
 
 @Service
 public class OpenStackConnector implements CloudPlatformConnector {
 
+    public static final int CONSOLE_OUTPUT_LINES = Integer.MAX_VALUE;
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackConnector.class);
 
     private static final int POLLING_INTERVAL = 10000;
+    private static final int CONSOLE_OUTPUT_POLLING_ATTEMPTS = 120;
     private static final int MAX_POLLING_ATTEMPTS = 1000;
     private static final long OPERATION_TIMEOUT = 60L;
+    private static final String DEFAULT_SSH_USER = "centos";
 
     @Inject
     private OpenStackUtil openStackUtil;
-
     @Inject
     private HeatTemplateBuilder heatTemplateBuilder;
-
     @Inject
     private StackUpdater stackUpdater;
-
     @Inject
     private UserDataBuilder userDataBuilder;
-
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
-
     @Inject
     private PollingService<OpenStackContext> pollingService;
-
     @Inject
     private OpenStackHeatStackStatusCheckerTask openStackHeatStackStatusCheckerTask;
-
     @Inject
     private OpenStackHeatStackDeleteStatusCheckerTask openStackHeatStackDeleteStatusCheckerTask;
-
     @Inject
     private OpenStackInstanceStatusCheckerTask openStackInstanceStatusCheckerTask;
+    @Inject
+    private PollingService<ConsoleOutputContext> consoleOutputPollingService;
+    @Inject
+    @Qualifier("openstack")
+    private ConsoleOutputCheckerTask consoleOutputCheckerTask;
+    @Inject
+    private TlsSecurityService tlsSecurityService;
 
     @Override
     public Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties) {
@@ -118,13 +125,18 @@ public class OpenStackConnector implements CloudPlatformConnector {
 
     @Override
     public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
-        Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(stack.cloudPlatform());
-        String heatTemplate = heatTemplateBuilder.remove(stack, userData.get(InstanceGroupType.GATEWAY), userData.get(InstanceGroupType.CORE),
-                instanceMetaDataRepository.findAllInStack(stack.getId()), instanceIds, instanceGroup);
-        PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
-        if (!isSuccess(pollingResult)) {
-            throw new OpenStackResourceException(
-                    String.format("Failed to update Heat stack while removing instances; polling reached an invalid end state: '%s'", pollingResult.name()));
+        try {
+            Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(stack.cloudPlatform(),
+                    tlsSecurityService.readPublicSshKey(stack.getId()), getSSHUser());
+            String heatTemplate = heatTemplateBuilder.remove(stack, userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE),
+                    instanceMetaDataRepository.findAllInStack(stack.getId()), instanceIds, instanceGroup);
+            PollingResult pollingResult = updateHeatStack(stack, heatTemplate);
+            if (!isSuccess(pollingResult)) {
+                throw new OpenStackResourceException(
+                        String.format("Failed to update Heat stack while removing instances; polling reached an invalid end state: '%s'", pollingResult.name()));
+            }
+        } catch (CloudbreakSecuritySetupException e) {
+            throw new OpenStackResourceException("Failed to get temporary ssh public key", e);
         }
         return instanceIds;
     }
@@ -178,6 +190,31 @@ public class OpenStackConnector implements CloudPlatformConnector {
             LOGGER.debug("polling exited during updating subnets. Failing the process; stack: {}", stack.getId());
             throw new OpenStackResourceException(String.format("Polling exited. Failed to update subnets. stackId '%s'", stack.getId()));
         }
+    }
+
+    @Override
+    public String getSSHUser() {
+        return DEFAULT_SSH_USER;
+    }
+
+    @Override
+    public String getSSHFingerprint(Stack stack, String gatewayId) {
+        String instanceId = gatewayId.split("_")[0];
+        OSClient osClient = openStackUtil.createOSClient((OpenStackCredential) stack.getCredential());
+        ConsoleOutputContext consoleOutputContext = new ConsoleOutputContext(osClient, stack, instanceId);
+        PollingResult pollingResult = consoleOutputPollingService
+                .pollWithTimeout(consoleOutputCheckerTask, consoleOutputContext, POLLING_INTERVAL, CONSOLE_OUTPUT_POLLING_ATTEMPTS);
+        if (PollingResult.isExited(pollingResult)) {
+            throw new FlowCancelledException("Operation cancelled.");
+        } else if (PollingResult.isTimeout(pollingResult)) {
+            throw new OpenStackResourceException("Operation timed out: Couldn't get console output of gateway instance.");
+        }
+        String consoleOutput = osClient.compute().servers().getConsoleOutput(instanceId, CONSOLE_OUTPUT_LINES);
+        String result = FingerprintParserUtil.parseFingerprint(consoleOutput);
+        if (result == null) {
+            throw new OpenStackResourceException("Couldn't parse SSH fingerprint from console output.");
+        }
+        return result;
     }
 
     private PollingResult updateHeatStack(Stack stack, String heatTemplate) {

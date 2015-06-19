@@ -26,6 +26,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -69,6 +70,7 @@ import com.amazonaws.services.ec2.model.DescribeSnapshotsResult;
 import com.amazonaws.services.ec2.model.DisassociateAddressRequest;
 import com.amazonaws.services.ec2.model.DomainType;
 import com.amazonaws.services.ec2.model.Filter;
+import com.amazonaws.services.ec2.model.GetConsoleOutputRequest;
 import com.amazonaws.services.ec2.model.Image;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.ReleaseAddressRequest;
@@ -79,6 +81,7 @@ import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsNetwork;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
@@ -100,15 +103,19 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstances;
+import com.sequenceiq.cloudbreak.service.stack.flow.FingerprintParserUtil;
 
 @Service
 public class AwsConnector implements CloudPlatformConnector {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsConnector.class);
     private static final int MAX_POLLING_ATTEMPTS = 60;
+    private static final int CONSOLE_OUTPUT_POLLING_ATTEMPTS = 120;
     private static final int POLLING_INTERVAL = 5000;
     private static final int INFINITE_ATTEMPTS = -1;
     private static final String CLOUDBREAK_EBS_SNAPSHOT = "cloudbreak-ebs-snapshot";
     private static final int SNAPSHOT_VOLUME_SIZE = 10;
+    private static final String DEFAULT_SSH_USER = "ec2-user";
 
     @Value("${cb.aws.cf.template.path:" + CB_AWS_CF_TEMPLATE_PATH + "}")
     private String awsCloudformationTemplatePath;
@@ -138,6 +145,8 @@ public class AwsConnector implements CloudPlatformConnector {
     @Inject
     private PollingService<SnapshotReadyPollerObject> snapshotReadyPollingService;
     @Inject
+    private PollingService<ConsoleOutputContext> consoleOutputPollingService;
+    @Inject
     private ClusterRepository clusterRepository;
     @Inject
     private StackRepository stackRepository;
@@ -151,6 +160,9 @@ public class AwsConnector implements CloudPlatformConnector {
     private EbsVolumeStateCheckerTask ebsVolumeStateCheckerTask;
     @Inject
     private SnapshotReadyCheckerTask snapshotReadyCheckerTask;
+    @Inject
+    @Qualifier("aws")
+    private ConsoleOutputCheckerTask consoleOutputCheckerTask;
 
     @Override
     public Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties) {
@@ -309,8 +321,8 @@ public class AwsConnector implements CloudPlatformConnector {
         UpdateStackRequest updateStackRequest = new UpdateStackRequest()
                 .withStackName(cFStackName)
                 .withTemplateBody(cfTemplateBuilder.build(stack, snapshotId, awsNetwork.isExistingVPC(), awsCloudformationTemplatePath))
-                .withParameters(getStackParameters(stack, coreUserData, gateWayUserData,
-                        (AwsCredential) stack.getCredential(), stack.getName(), awsNetwork.isExistingVPC()));
+                .withParameters(getStackParameters(stack, coreUserData, gateWayUserData, (AwsCredential) stack.getCredential(),
+                        stack.getName(), awsNetwork.isExistingVPC()));
         AmazonCloudFormationClient cloudFormationClient = awsStackUtil.createCloudFormationClient(stack);
         cloudFormationClient.updateStack(updateStackRequest);
         List<StackStatus> errorStatuses = Arrays.asList(UPDATE_ROLLBACK_COMPLETE, UPDATE_ROLLBACK_FAILED);
@@ -323,6 +335,30 @@ public class AwsConnector implements CloudPlatformConnector {
             throw new AwsResourceException(String.format("Cloud Formation update failed. polling result: '%s', stack id: '%' ",
                     pollingResult, stack.getId()));
         }
+    }
+
+    @Override
+    public String getSSHUser() {
+        return DEFAULT_SSH_USER;
+    }
+
+    @Override
+    public String getSSHFingerprint(Stack stack, String gatewayId) {
+        ConsoleOutputContext consoleOutputContext = new ConsoleOutputContext(stack, gatewayId);
+        PollingResult pollingResult = consoleOutputPollingService
+                .pollWithTimeout(consoleOutputCheckerTask, consoleOutputContext, POLLING_INTERVAL, CONSOLE_OUTPUT_POLLING_ATTEMPTS);
+        if (PollingResult.isExited(pollingResult)) {
+            throw new FlowCancelledException("Operation cancelled.");
+        } else if (PollingResult.isTimeout(pollingResult)) {
+            throw new AwsResourceException("Operation timed out: Couldn't get console output of gateway instance.");
+        }
+        AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(consoleOutputContext.getStack());
+        String consoleOutput = amazonEC2Client.getConsoleOutput(new GetConsoleOutputRequest().withInstanceId(gatewayId)).getDecodedOutput();
+        String result = FingerprintParserUtil.parseFingerprint(consoleOutput);
+        if (result == null) {
+            throw new AwsResourceException("Couldn't parse SSH fingerprint from console output.");
+        }
+        return result;
     }
 
     @Override
