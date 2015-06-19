@@ -1,3 +1,8 @@
+aws-init() {
+    env-import CB_AWS_EXTERNAL_ID provision-ambari
+    env-import AWS_ROLE_NAME cloudbreak
+}
+
 aws-show-policy() {
     declare policyArn=$1
 
@@ -104,4 +109,91 @@ EOF
 
 }
 
+aws-get-user-arn() {
+    aws iam get-user --query User.Arn --out text
+}
 
+aws-get-account-id() {
+    declare desc="Prints the 12 digit long AWS account id"
+
+    local userArn=$(aws-get-user-arn)
+    debug userArn=$userArn
+
+    cut -d: -f 5 <<< "$userArn"
+}
+
+aws-generate-assume-role-policy() {
+    cat << EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "AWS": "arn:aws:iam::$(aws-get-account-id):root"
+      },
+      "Effect": "Allow",
+      "Condition": {
+        "StringEquals": {
+          "sts:ExternalId": "$CB_AWS_EXTERNAL_ID"
+        }
+      }
+    }
+  ]
+}
+EOF
+}
+
+aws-generate-inline-role-policy() {
+    cat << EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [ "cloudformation:*" ],
+      "Resource": [ "*" ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [ "ec2:*" ],
+      "Resource": [ "*" ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [ "iam:PassRole" ],
+      "Resource": [ "*" ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [ "autoscaling:*" ],
+      "Resource": [ "*" ]
+    }
+  ]
+}
+EOF
+}
+
+aws-generate-role() {
+    aws-generate-role-files <(aws-generate-assume-role-policy) <(aws-generate-inline-role-policy)
+}
+
+aws-generate-role-files() {
+    declare assumePolicyFile=$1 inlinePolicyFile=$2
+    
+    local roleResp=$(aws iam create-role \
+        --output text \
+        --query Role.Arn \
+        --role-name $AWS_ROLE_NAME \
+        --assume-role-policy-document file://${assumePolicyFile} \
+    )
+    debug create role resp: $roleResp
+    
+    local putPolicyResp=$(aws iam put-role-policy \
+        --role-name $AWS_ROLE_NAME \
+        --policy-name cb-policy \
+        --policy-document file://${inlinePolicyFile}
+    )
+    debug put policy resp: $putPolicyResp
+
+}

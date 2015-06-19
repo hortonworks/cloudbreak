@@ -224,6 +224,7 @@ main() {
 
     circle-init
     compose-init
+    aws-init
 
     debug "CloudBreak Deployer $(bin-version)"
 
