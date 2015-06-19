@@ -73,8 +73,6 @@ public class BaywatchClientBootstrap implements ContainerBootstrap {
                             new Bind("/hadoopfs/fs1/logs/ambari-agent", new Volume("/var/log/containers/ambari-agent")),
                             new Bind("/hadoopfs/fs1/logs/ambari-server", new Volume("/var/log/containers/ambari-server")),
                             new Bind("/hadoopfs/fs1/logs/consul-watch", new Volume("/var/log/containers/consul-watch")),
-                            new Bind("/hadoopfs/fs1/logs/consul-watch-db", new Volume("/var/log/containers/consul-watch")),
-                            new Bind("/hadoopfs/fs1/logs/consul-watch-main", new Volume("/var/log/containers/consul-watch")),
                             new Bind(LOCAL_SINCEDB_LOCATION, new Volume(SINCEDB_LOCATION)))
                     .withNetworkMode("host")
                     .withRestartPolicy(RestartPolicy.alwaysRestart()));
