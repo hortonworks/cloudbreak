@@ -51,7 +51,7 @@ public class ConsulWatchBootstrap implements ContainerBootstrap {
                     .withNetworkMode("host")
                     .withRestartPolicy(RestartPolicy.alwaysRestart())
                     .withBinds(new Bind("/var/run/docker.sock", new Volume("/var/run/docker.sock")),
-                            new Bind("/hadoopfs/fs1/logs/consul-watch-main", new Volume("/var/log/consul-watch"))));
+                            new Bind("/hadoopfs/fs1/logs/consul-watch", new Volume("/var/log/consul-watch"))));
             LOGGER.info("Consul watch container started successfully");
         } catch (Exception ex) {
             LOGGER.info("Consul watch container failed to start on node %s.");
