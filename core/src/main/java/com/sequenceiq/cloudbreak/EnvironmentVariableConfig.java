@@ -48,7 +48,7 @@ public class EnvironmentVariableConfig {
     public static final String CB_DOCKER_CONTAINER_REGISTRATOR = "sequenceiq/registrator:v5.2";
     public static final String CB_DOCKER_CONTAINER_DOCKER_CONSUL_WATCH_PLUGN = "sequenceiq/docker-consul-watch-plugn:2.0.0-consul";
     public static final String CB_DOCKER_CONTAINER_AMBARI_DB = "postgres:9.4.1";
-    public static final String CB_DOCKER_CONTAINER_BAYWATCH_SERVER = "sequenceiq/baywatch:v0.5.0";
+    public static final String CB_DOCKER_CONTAINER_BAYWATCH_SERVER = "sequenceiq/baywatch:v0.5.1";
     public static final String CB_DOCKER_CONTAINER_BAYWATCH_CLIENT = "sequenceiq/baywatch-client:v0.5.0";
 
     public static final String CB_BAYWATCH_ENABLED = "false";
