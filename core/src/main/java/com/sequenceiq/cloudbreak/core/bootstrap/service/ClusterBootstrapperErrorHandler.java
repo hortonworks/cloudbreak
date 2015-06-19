@@ -71,7 +71,7 @@ public class ClusterBootstrapperErrorHandler {
             eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), message);
             for (Node missingNode : missingNodes) {
                 InstanceMetaData instanceMetaData =
-                        instanceMetaDataRepository.findByPrivateAddress(stack.getId(), missingNode.getPrivateIp());
+                        instanceMetaDataRepository.findNotTerminatedByPrivateAddress(stack.getId(), missingNode.getPrivateIp());
                 Resource resource = resourceRepository.findByStackIdAndName(stack.getId(), instanceMetaData.getInstanceId());
                 InstanceGroup ig = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceMetaData.getInstanceGroup().getGroupName());
                 ig.setNodeCount(ig.getNodeCount() - 1);

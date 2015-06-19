@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.openstack;
 
+import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.DELETED;
+import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.RUNNING;
+import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.STOPPED;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
+import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 
 @Component
 public class OpenStackMetadataSetup implements MetadataSetup {
@@ -124,6 +130,41 @@ public class OpenStackMetadataSetup implements MetadataSetup {
         );
 
         return md;
+    }
+
+    @Override
+    public InstanceSyncState getState(Stack stack, String instanceId) {
+        OSClient osClient = openStackUtil.createOSClient(stack);
+        Resource heatResource = stack.getResourceByType(ResourceType.HEAT_STACK);
+        String heatStackId = heatResource.getResourceName();
+        InstanceSyncState instanceSyncState = IN_PROGRESS;
+        org.openstack4j.model.heat.Stack heatStack = osClient.heat().stacks().getDetails(stack.getName(), heatStackId);
+        List<Map<String, Object>> outputs = heatStack.getOutputs();
+        boolean contains = false;
+        for (Map<String, Object> map : outputs) {
+            String instanceUUID = (String) map.get("output_value");
+            Server server = osClient.compute().servers().get(instanceUUID);
+            Map<String, String> metadata = server.getMetadata();
+            if (instanceId.equals(openStackUtil.getInstanceId(instanceUUID, metadata))) {
+                if ("ACTIVE".equals(server.getStatus().toString())) {
+                    instanceSyncState = RUNNING;
+                    contains = true;
+                    break;
+                } else if ("SUSPENDED".equals(server.getStatus().toString())) {
+                    instanceSyncState = STOPPED;
+                    contains = true;
+                    break;
+                } else {
+                    instanceSyncState = IN_PROGRESS;
+                    contains = true;
+                    break;
+                }
+            }
+        }
+        if (!contains) {
+            instanceSyncState = DELETED;
+        }
+        return instanceSyncState;
     }
 }
 

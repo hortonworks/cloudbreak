@@ -15,7 +15,11 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
         @NamedQuery(
                 name = "HostMetadata.findHostsInCluster",
                 query = "SELECT h FROM HostMetadata h "
-                        + "WHERE h.hostGroup.cluster.id= :clusterId")
+                        + "WHERE h.hostGroup.cluster.id= :clusterId"),
+        @NamedQuery(
+                name = "HostMetadata.findHostsInClusterByName",
+                query = "SELECT h FROM HostMetadata h "
+                        + "WHERE h.hostGroup.cluster.id= :clusterId AND h.hostName = :hostName")
 })
 public class HostMetadata {
 

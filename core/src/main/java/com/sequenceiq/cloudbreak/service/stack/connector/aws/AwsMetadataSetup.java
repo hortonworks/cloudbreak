@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
+import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.DELETED;
+import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.RUNNING;
+import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.STOPPED;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +22,7 @@ import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
@@ -30,6 +36,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
+import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 
 @Component
 public class AwsMetadataSetup implements MetadataSetup {
@@ -128,6 +135,24 @@ public class AwsMetadataSetup implements MetadataSetup {
             }
         }
         return coreInstanceMetadata;
+    }
+
+    @Override
+    public InstanceSyncState getState(Stack stack, String instanceId) {
+        InstanceSyncState instanceSyncState = IN_PROGRESS;
+        AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
+        DescribeInstancesResult describeInstances = amazonEC2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceId));
+        try {
+            Instance instance = describeInstances.getReservations().iterator().next().getInstances().iterator().next();
+            if ("Stopped".equals(instance.getState().getName())) {
+                instanceSyncState = STOPPED;
+            } else if ("Running".equals(instance.getState().getName())) {
+                instanceSyncState = RUNNING;
+            }
+        } catch (Exception ex) {
+            instanceSyncState = DELETED;
+        }
+        return instanceSyncState;
     }
 
     @Override

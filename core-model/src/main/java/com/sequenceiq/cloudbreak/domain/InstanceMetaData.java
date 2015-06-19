@@ -23,10 +23,14 @@ import javax.persistence.NamedQuery;
                         + "WHERE i.instanceGroup.id= :instanceGroupId "
                         + "AND i.instanceStatus = 'UNREGISTERED'"),
         @NamedQuery(
-                name = "InstanceMetaData.findAllInStack",
+                name = "InstanceMetaData.findNotTerminatedForStack",
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.stack.id= :stackId "
                         + "AND i.instanceStatus <> 'TERMINATED' "),
+        @NamedQuery(
+                name = "InstanceMetaData.findAllInStack",
+                query = "SELECT i FROM InstanceMetaData i "
+                        + "WHERE i.instanceGroup.stack.id= :stackId"),
         @NamedQuery(
                 name = "InstanceMetaData.findByInstanceId",
                 query = "SELECT i FROM InstanceMetaData i "
@@ -43,7 +47,7 @@ import javax.persistence.NamedQuery;
                         + "AND i.instanceGroup.groupName= :groupName "
                         + "AND (i.instanceStatus= 'DECOMMISSIONED' OR i.instanceStatus= 'UNREGISTERED')"),
         @NamedQuery(
-                name = "InstanceMetaData.findByPrivateAddress",
+                name = "InstanceMetaData.findNotTerminatedByPrivateAddress",
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.stack.id= :stackId "
                         + "AND i.privateIp= :privateAddress "
@@ -158,14 +162,6 @@ public class InstanceMetaData implements ProvisionEntity {
         this.instanceStatus = instanceStatus;
     }
 
-    public boolean isDecommissioned() {
-        return InstanceStatus.DECOMMISSIONED.equals(instanceStatus);
-    }
-
-    public boolean isUnRegistered() {
-        return InstanceStatus.UNREGISTERED.equals(instanceStatus);
-    }
-
     public Integer getContainerCount() {
         return containerCount;
     }
@@ -190,15 +186,27 @@ public class InstanceMetaData implements ProvisionEntity {
         this.terminationDate = terminationDate;
     }
 
-    public Boolean isTerminated() {
-        return InstanceStatus.TERMINATED.equals(instanceStatus);
-    }
-
     public Boolean getConsulServer() {
         return consulServer;
     }
 
     public void setConsulServer(Boolean consulServer) {
         this.consulServer = consulServer;
+    }
+
+    public boolean isDecommissioned() {
+        return InstanceStatus.DECOMMISSIONED.equals(instanceStatus);
+    }
+
+    public boolean isUnRegistered() {
+        return InstanceStatus.UNREGISTERED.equals(instanceStatus);
+    }
+
+    public boolean isTerminated() {
+        return InstanceStatus.TERMINATED.equals(instanceStatus);
+    }
+
+    public boolean isRegistered() {
+        return InstanceStatus.REGISTERED.equals(instanceStatus);
     }
 }

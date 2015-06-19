@@ -43,13 +43,13 @@ public class RecipeEngine {
     private TlsSecurityService tlsSecurityService;
 
     public void setupRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakSecuritySetupException {
-        Set<InstanceMetaData> instances = instanceMetadataRepository.findAllInStack(stack.getId());
+        Set<InstanceMetaData> instances = instanceMetadataRepository.findNotTerminatedForStack(stack.getId());
         setupProperties(stack, hostGroups);
         installPlugins(stack, hostGroups, instances);
     }
 
     public void setupRecipesOnHosts(Stack stack, Set<Recipe> recipes, Set<HostMetadata> hostMetadata) throws CloudbreakSecuritySetupException {
-        Set<InstanceMetaData> instances = instanceMetadataRepository.findAllInStack(stack.getId());
+        Set<InstanceMetaData> instances = instanceMetadataRepository.findNotTerminatedForStack(stack.getId());
         installPluginsOnHosts(stack, recipes, hostMetadata, instances);
     }
 
