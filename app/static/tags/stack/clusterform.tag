@@ -65,6 +65,14 @@
                             </select>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="select-cluster-securitygroup">{{msg.cluster_form_securitygroup_label}}</label>
+                        <div class="col-sm-9">
+                            <select class="form-control" id="select-cluster-securitygroup" ng-model="cluster.securityGroupId" required>
+                                <option ng-repeat="securitygroup in $root.securitygroups | orderBy:'name'" value="{{securitygroup.id}}">{{securitygroup.name}}</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="form-group" ng-show="showAdvancedOptionForm">
                       <label class="col-sm-3 control-label" for="consulServerCount">{{msg.cluster_form_consul_server_count_label}}</label>
                       <div class="col-sm-3">
