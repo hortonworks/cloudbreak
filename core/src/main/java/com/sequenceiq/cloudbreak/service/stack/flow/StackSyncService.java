@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.domain.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.domain.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.domain.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
@@ -110,6 +111,8 @@ public class StackSyncService {
             deregisterSuccess = true;
         } catch (Exception ex) {
             LOGGER.error("Terminated instance deregistration from ambari was unsuccess: ", ex);
+            eventService.fireCloudbreakEvent(stack.getId(), DELETE_FAILED.name(),
+                    String.format("Could not deregister host '%s' from ambari.", instanceMetaData.getInstanceId()));
         }
         if (deregisterSuccess) {
             instanceMetaDataRepository.save(instanceMetaData);
