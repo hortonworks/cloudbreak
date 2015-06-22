@@ -141,17 +141,23 @@ public class AwsMetadataSetup implements MetadataSetup {
     public InstanceSyncState getState(Stack stack, String instanceId) {
         InstanceSyncState instanceSyncState = IN_PROGRESS;
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
-        DescribeInstancesResult describeInstances = amazonEC2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceId));
         try {
-            Instance instance = describeInstances.getReservations().iterator().next().getInstances().iterator().next();
-            if ("Stopped".equals(instance.getState().getName())) {
-                instanceSyncState = STOPPED;
-            } else if ("Running".equals(instance.getState().getName())) {
-                instanceSyncState = RUNNING;
+            DescribeInstancesResult describeInstancesResult = amazonEC2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceId));
+            if (describeInstancesResult.getReservations().size() > 0) {
+                Instance instance = describeInstancesResult.getReservations().iterator().next().getInstances().iterator().next();
+                String instanceState = instance.getState().getName().toLowerCase();
+                if ("stopped".equals(instanceState)) {
+                    instanceSyncState = STOPPED;
+                } else if ("running".equals(instanceState)) {
+                    instanceSyncState = RUNNING;
+                } else if ("terminated".equals(instanceState)) {
+                    instanceSyncState = DELETED;
+                }
+            } else {
+                instanceSyncState = DELETED;
             }
-        } catch (Exception ex) {
-            // TODO: what if it was only a connection error? we'll delete the instance from our metadata although it is running
-            instanceSyncState = DELETED;
+        } catch (Exception e) {
+            throw new AwsResourceException("Failed to retrieve state of instance " + instanceId, e);
         }
         return instanceSyncState;
     }

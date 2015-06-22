@@ -17,7 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.model.Instance;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.GcpCredential;
@@ -32,6 +34,7 @@ import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 public class GcpMetadataSetup implements MetadataSetup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpMetadataSetup.class);
+    private static final int NOT_FOUND = 404;
 
     @Inject
     private GcpStackUtil gcpStackUtil;
@@ -68,14 +71,20 @@ public class GcpMetadataSetup implements MetadataSetup {
         InstanceSyncState instanceSyncState = IN_PROGRESS;
         Compute compute = gcpStackUtil.buildCompute(credential);
         try {
-            Compute.Instances.Get get = compute.instances().get(credential.getProjectId(), CloudRegion.valueOf(stack.getRegion()).value(), instanceId);
-            if ("RUNNING".equals(get.execute().getStatus())) {
+            Instance instance = compute.instances().get(credential.getProjectId(), CloudRegion.valueOf(stack.getRegion()).value(), instanceId).execute();
+            if ("RUNNING".equals(instance.getStatus())) {
                 instanceSyncState = RUNNING;
-            } else if ("TERMINATED".equals(get.execute().getStatus())) {
+            } else if ("TERMINATED".equals(instance.getStatus())) {
                 instanceSyncState = STOPPED;
             }
+        } catch (GoogleJsonResponseException e) {
+            if (e.getStatusCode() == NOT_FOUND) {
+                instanceSyncState = DELETED;
+            } else {
+                throw new GcpResourceException("Failed to retrieve state of instance " + instanceId, e);
+            }
         } catch (IOException e) {
-            instanceSyncState = DELETED;
+            throw new GcpResourceException("Failed to retrieve state of instance " + instanceId, e);
         }
         return instanceSyncState;
     }

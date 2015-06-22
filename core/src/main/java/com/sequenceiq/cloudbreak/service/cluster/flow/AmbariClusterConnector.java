@@ -327,6 +327,20 @@ public class AmbariClusterConnector {
         }
     }
 
+    public void deleteHostFromAmbari(Stack stack, HostMetadata data) throws CloudbreakSecuritySetupException {
+        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), stack.getCluster().getAmbariIp());
+        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, stack.getCluster());
+        Set<String> components = getHadoopComponents(stack.getCluster(), ambariClient, data.getHostGroup().getName(),
+                stack.getCluster().getBlueprint().getBlueprintName());
+        ambariHostsRemover.deleteHosts(stack, Arrays.asList(data.getHostName()), new ArrayList<>(components));
+        PollingResult result = restartHadoopServices(stack, ambariClient, true);
+        if (isTimeout(result)) {
+            throw new AmbariOperationFailedException("Timeout while restarting Hadoop services.");
+        } else if (isExited(result)) {
+            throw new FlowCancelledException("Flow cancelled while restarting Hadoop services.");
+        }
+    }
+
     private void stopAllServices(Stack stack, AmbariClient ambariClient) throws CloudbreakException {
         int requestId = ambariClient.stopAllServices();
         if (requestId != -1) {
@@ -357,7 +371,7 @@ public class AmbariClusterConnector {
         }
     }
 
-    public Set<String> getHadoopComponents(Cluster cluster, AmbariClient ambariClient, String hostGroupName, String blueprintName) {
+    private Set<String> getHadoopComponents(Cluster cluster, AmbariClient ambariClient, String hostGroupName, String blueprintName) {
         Set<String> components = new HashSet<>(ambariClient.getComponentsCategory(blueprintName, hostGroupName).keySet());
         if (cluster.isSecure()) {
             components.add(ClusterSecurityService.KERBEROS_CLIENT);
@@ -454,7 +468,7 @@ public class AmbariClusterConnector {
         }
     }
 
-    public PollingResult restartHadoopServices(Stack stack, AmbariClient ambariClient, boolean decommissioned) {
+    private PollingResult restartHadoopServices(Stack stack, AmbariClient ambariClient, boolean decommissioned) {
         Map<String, Integer> restartRequests = new HashMap<>();
         Map<String, Map<String, String>> serviceComponents = ambariClient.getServiceComponentsMap();
         if (decommissioned) {
