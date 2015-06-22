@@ -20,6 +20,8 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
         $scope.openstackCredentialForm = {};
         $scope.gcp = {};
         $scope.gcp.p12 = "";
+        $scope.showAlert = false;
+        $scope.alertMessage = "";
 
         $scope.createAwsCredentialRequest = function() {
             $scope.azureCredential = false;
@@ -65,6 +67,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 }, function (error) {
                     $scope.showError(error, $rootScope.msg.aws_credential_failed);
                     $scope.credentialInCreation = false;
+                    $scope.showErrorMessageAlert();
                 });
             } else {
                 UserCredential.save($scope.credentialAws, function(result) {
@@ -72,6 +75,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 }, function (error) {
                     $scope.showError(error, $rootScope.msg.aws_credential_failed);
                     $scope.credentialInCreation = false;
+                    $scope.showErrorMessageAlert();
                 });
             }
 
@@ -83,6 +87,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 $scope.awsCredentialForm.$setPristine();
                 collapseCreateCredentialFormPanel();
                 $scope.credentialInCreation = false;
+                $scope.unShowErrorMessageAlert();
             }
         }
 
@@ -96,6 +101,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             }, function (error) {
               $scope.showError(error, $rootScope.msg.openstack_credential_failed);
               $scope.credentialInCreation = false;
+              $scope.showErrorMessageAlert();
             });
           } else {
             UserCredential.save($scope.credentialOpenstack, function(result) {
@@ -103,6 +109,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             }, function (error) {
               $scope.showError(error, $rootScope.msg.openstack_credential_failed);
               $scope.credentialInCreation = false;
+              $scope.showErrorMessageAlert();
             });
           }
 
@@ -114,6 +121,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             $scope.openstackCredentialForm.$setPristine();
             collapseCreateCredentialFormPanel();
             $scope.credentialInCreation = false;
+            $scope.unShowErrorMessageAlert();
           }
         }
 
@@ -127,7 +135,8 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 }, function (error) {
                     $scope.showError(error, $rootScope.msg.azure_credential_failed);
                     $scope.credentialInCreation = false;
-                    $scope.credentialAzure.publicKey = $base64.decode($scope.credentialAzure.publicKey)
+                    $scope.credentialAzure.publicKey = $base64.decode($scope.credentialAzure.publicKey);
+                    $scope.showErrorMessageAlert();
                 });
             } else {
                 UserCredential.save($scope.credentialAzure, function(result){
@@ -135,7 +144,8 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 }, function (error) {
                     $scope.showError(error, $rootScope.msg.azure_credential_failed);
                     $scope.credentialInCreation = false;
-                    $scope.credentialAzure.publicKey = $base64.decode($scope.credentialAzure.publicKey)
+                    $scope.credentialAzure.publicKey = $base64.decode($scope.credentialAzure.publicKey);
+                    $scope.showErrorMessageAlert();
                 });
             }
 
@@ -147,6 +157,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 window.location.href = "credentials/certificate/" + result.id
                 $scope.azureCredentialForm.$setPristine();
                 collapseCreateCredentialFormPanel();
+                $scope.unShowErrorMessageAlert();
             }
 
         }
@@ -168,6 +179,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                     }, function (error) {
                       $scope.showError(error, $rootScope.msg.gcp_credential_failed);
                       $scope.credentialInCreation = false;
+                      $scope.showErrorMessageAlert();
                     });
                   } else {
                     UserCredential.save($scope.credentialGcp, function(result){
@@ -175,6 +187,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                     }, function (error) {
                       $scope.showError(error, $rootScope.msg.gcp_credential_failed);
                       $scope.credentialInCreation = false;
+                      $scope.showErrorMessageAlert();
                     });
                   }
                 }
@@ -188,6 +201,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                  $scope.credentialInCreation = false;
                  $scope.gcpCredentialForm.$setPristine();
                  collapseCreateCredentialFormPanel();
+                 $scope.unShowErrorMessageAlert();
             }
 
             var blob = p12File.slice(0, p12File.size);
@@ -203,6 +217,16 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 $scope.showError(error);
             });
 
+        }
+
+        $scope.unShowErrorMessageAlert = function() {
+            $scope.showAlert = false;
+            $scope.alertMessage = "";
+        }
+
+        $scope.showErrorMessageAlert = function() {
+            $scope.showAlert = true;
+            $scope.alertMessage = $scope.statusMessage;
         }
 
         function collapseCreateCredentialFormPanel() {

@@ -36,6 +36,8 @@
                                 </div>
                             </div>
 
+                            <div class="alert alert-danger" role="alert" ng-show="showAlert" ng-click="unShowErrorMessageAlert()">{{alertMessage}}</div>
+
                             <form class="form-horizontal" role="form" name="azureTemplateForm" ng-show="azureTemplate">
                                 <div ng-include src="'tags/template/azureform.tag'"></div>
                             </form>

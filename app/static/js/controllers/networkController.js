@@ -8,6 +8,8 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
         $rootScope.networks = AccountNetwork.query();
         $scope.network = {};
         $scope.awsNetwork = true;
+        $scope.showAlert = false;
+        $scope.alertMessage = "";
 
         $scope.createAwsNetworkRequest = function() {
             initializeFormsAndScopeNetwork()
@@ -68,13 +70,15 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
                 AccountNetwork.save($scope.network, function(result) {
                     handleNetworkCreationSuccess(result)
                 }, function(error) {
-                    $scope.showError(error, $rootScope.msg.network_creation_failure + $scope.network.name)
+                    $scope.showError(error, $rootScope.msg.network_creation_failure + $scope.network.name);
+                    $scope.showErrorMessageAlert();
                 });
             } else {
                 UserNetwork.save($scope.network, function(result) {
                     handleNetworkCreationSuccess(result)
                 }, function(error) {
-                    $scope.showError(error, $rootScope.msg.network_creation_failure + $scope.network.name)
+                    $scope.showError(error, $rootScope.msg.network_creation_failure + $scope.network.name);
+                    $scope.showErrorMessageAlert();
                 });
             }
         }
@@ -84,7 +88,8 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
             $rootScope.networks.push($scope.network);
             $scope.showSuccess($rootScope.msg.network_creation_success + $scope.network.name);
             collapseCreateNetworkFormPanel();
-            initializeFormsAndScopeNetwork()
+            initializeFormsAndScopeNetwork();
+            $scope.unShowErrorMessageAlert();
         }
 
 
@@ -109,6 +114,16 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
             $scope.azureNetworkForm.$setPristine();
             $scope.openstackNetworkForm.$setPristine();
             $scope.network = {};
+        }
+
+        $scope.unShowErrorMessageAlert = function() {
+            $scope.showAlert = false;
+            $scope.alertMessage = "";
+        }
+
+        $scope.showErrorMessageAlert = function() {
+            $scope.showAlert = true;
+            $scope.alertMessage = $scope.statusMessage;
         }
     }
 ]);

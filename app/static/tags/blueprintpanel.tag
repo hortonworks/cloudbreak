@@ -28,6 +28,8 @@
                                 </div>
                             </div>
 
+                            <div class="alert alert-danger" role="alert" ng-show="showAlert" ng-click="unShowErrorMessageAlert()">{{alertMessage}}</div>
+
                             <form class="form-horizontal" role="form" name="blueprintForm">
                                 <div ng-include src="'tags/blueprint/bpform.tag'"></div>
                             </form>

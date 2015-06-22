@@ -14,6 +14,8 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
         initializeAwsTemp();
         initializeGcpTemp();
         initializeOpenstackTemp();
+        $scope.showAlert = false;
+        $scope.alertMessage = "";
 
         $scope.createAwsTemplateRequest = function () {
             $scope.azureTemplate = false;
@@ -50,13 +52,15 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 AccountTemplate.save($scope.awsTemp, function (result) {
                     handleAwsTemplateSuccess(result)
                 }, function (error) {
-                    $scope.showError(error, $rootScope.msg.aws_template_failed)
+                    $scope.showErrorMessageAlert(error, $rootScope.msg.aws_template_failed);
+                    $scope.showErrorMessageAlert();
                 });
             } else {
                 UserTemplate.save($scope.awsTemp, function (result) {
                     handleAwsTemplateSuccess(result)
                 }, function (error) {
-                    $scope.showError(error, $rootScope.msg.aws_template_failed)
+                    $scope.showErrorMessageAlert(error, $rootScope.msg.aws_template_failed);
+                    $scope.showErrorMessageAlert();
                 });
             }
 
@@ -67,6 +71,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.showSuccess($filter("format")($rootScope.msg.aws_template_success, String(result.id)));
                 $scope.awsTemplateForm.$setPristine();
                 collapseCreateTemplateFormPanel();
+                $scope.unShowErrorMessageAlert();
             }
         }
 
@@ -76,13 +81,15 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             AccountTemplate.save($scope.openstackTemp, function (result) {
               handleOpenstackTemplateSuccess(result)
             }, function (error) {
-              $scope.showError(error, $rootScope.msg.openstack_template_failed)
+              $scope.showError(error, $rootScope.msg.openstack_template_failed);
+              $scope.showErrorMessageAlert();
             });
           } else {
             UserTemplate.save($scope.openstackTemp, function (result) {
               handleOpenstackTemplateSuccess(result)
             }, function (error) {
-              $scope.showError(error, $rootScope.msg.openstack_template_failed)
+              $scope.showError(error, $rootScope.msg.openstack_template_failed);
+              $scope.showErrorMessageAlert();
             });
           }
 
@@ -93,6 +100,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             $scope.showSuccess($filter("format")($rootScope.msg.openstack_template_success, String(result.id)));
             $scope.openstackTemplateForm.$setPristine();
             collapseCreateTemplateFormPanel();
+            $scope.unShowErrorMessageAlert()
           }
 
         }
@@ -103,13 +111,15 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 AccountTemplate.save($scope.gcpTemp, function (result) {
                     handleGcpTemplateSuccess(result)
                 }, function (error) {
-                    $scope.showError(error, $rootScope.msg.gcp_template_failed)
+                    $scope.showError(error, $rootScope.msg.gcp_template_failed);
+                    $scope.showErrorMessageAlert();
                 });
             } else {
                 UserTemplate.save($scope.gcpTemp, function (result) {
                     handleGcpTemplateSuccess(result)
                 }, function (error) {
-                    $scope.showError(error, $rootScope.msg.gcp_template_failed)
+                    $scope.showError(error, $rootScope.msg.gcp_template_failed);
+                    $scope.showErrorMessageAlert();
                 });
             }
 
@@ -120,6 +130,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.showSuccess($filter("format")($rootScope.msg.gcp_template_success, String(result.id)));
                 $scope.gcpTemplateForm.$setPristine();
                 collapseCreateTemplateFormPanel();
+                unShowErrorMessageAlert();
             }
         }
 
@@ -129,13 +140,15 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 AccountTemplate.save($scope.azureTemp, function (result) {
                   handleAzureTemplateSuccess(result)
                }, function (error) {
-                  $scope.showError(error, $rootScope.msg.azure_template_failed)
+                  $scope.showError(error, $rootScope.msg.azure_template_failed);
+                  $scope.showErrorMessageAlert();
                });
             } else {
                UserTemplate.save($scope.azureTemp, function (result) {
                   handleAzureTemplateSuccess(result)
                }, function (error) {
-                  $scope.showError(error, $rootScope.msg.azure_template_failed)
+                  $scope.showError(error, $rootScope.msg.azure_template_failed);
+                  $scope.showErrorMessageAlert();
                });
             }
 
@@ -146,6 +159,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.showSuccess($filter("format")($rootScope.msg.azure_template_success, String(result.id)));
                 $scope.azureTemplateForm.$setPristine();
                 collapseCreateTemplateFormPanel();
+                $scope.unShowErrorMessageAlert();
             }
         }
 
@@ -223,6 +237,16 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                     volumeType: "HDD"
                 }
             }
+        }
+
+        $scope.unShowErrorMessageAlert = function() {
+           $scope.showAlert = false;
+           $scope.alertMessage = "";
+        }
+
+        $scope.showErrorMessageAlert = function() {
+           $scope.showAlert = true;
+           $scope.alertMessage = $scope.statusMessage;
         }
     }
 ]);
