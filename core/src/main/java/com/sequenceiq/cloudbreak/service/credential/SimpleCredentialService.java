@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.credential;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -132,14 +133,20 @@ public class SimpleCredentialService implements CredentialService {
         List<Stack> stacks = stackRepository.findByCredential(credential.getId());
         if (stacks.isEmpty()) {
             credentialHandlers.get(credential.cloudPlatform()).delete(credential);
-            credentialRepository.delete(credential);
+            archiveCredential(credential);
         } else {
-            if (stacks.isEmpty()) {
-                credentialHandlers.get(credential.cloudPlatform()).delete(credential);
-                credentialRepository.delete(credential);
-            } else {
-                throw new BadRequestException(String.format("Credential '%d' is in use, cannot be deleted.", credential.getId()));
-            }
+            throw new BadRequestException(String.format("Credential '%d' is in use, cannot be deleted.", credential.getId()));
         }
+    }
+
+    private String generateArchiveName(String name) {
+        //generate new name for the archived credential to by pass unique constraint
+        return new StringBuilder().append(name).append("_").append(UUID.randomUUID()).toString();
+    }
+
+    private void archiveCredential(Credential credential) {
+        credential.setName(generateArchiveName(credential.getName()));
+        credential.setArchived(true);
+        credentialRepository.save(credential);
     }
 }
