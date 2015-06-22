@@ -19,14 +19,18 @@ import com.sequenceiq.cloudbreak.controller.json.StackValidationRequest;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
+import com.sequenceiq.cloudbreak.repository.NetworkRepository;
 
 @Component
 public class JsonToStackValidationConverter extends AbstractConversionServiceAwareConverter<StackValidationRequest, StackValidation> {
 
     @Inject
     private BlueprintRepository blueprintRepository;
+    @Inject
+    private NetworkRepository networkRepository;
 
     @Override
     public StackValidation convert(StackValidationRequest stackValidationRequest) {
@@ -40,6 +44,13 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(
                     String.format("Access to blueprint '%s' is denied or blueprint doesn't exist.", stackValidationRequest.getBlueprintId()), e);
+        }
+        try {
+            Network network = networkRepository.findOne(stackValidationRequest.getNetworkId());
+            stackValidation.setNetwork(network);
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedException(
+                    String.format("Access to network '%s' is denied or network doesn't exist.", stackValidationRequest.getNetworkId()), e);
         }
         return stackValidation;
     }

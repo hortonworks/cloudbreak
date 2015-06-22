@@ -22,6 +22,7 @@ import org.springframework.util.DigestUtils;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.InstanceGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.controller.validation.NetworkConfigurationValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.core.flow.FlowManager;
 import com.sequenceiq.cloudbreak.domain.APIResourceType;
@@ -41,8 +42,8 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.repository.SubnetRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
@@ -75,6 +76,8 @@ public class DefaultStackService implements StackService {
     private BlueprintValidator blueprintValidator;
     @Inject
     private SubnetRepository subnetRepository;
+    @Inject
+    private NetworkConfigurationValidator networkConfigurationValidator;
 
     @Override
     public Set<Stack> retrievePrivateStacks(CbUser user) {
@@ -266,6 +269,7 @@ public class DefaultStackService implements StackService {
 
     @Override
     public void validateStack(StackValidation stackValidation) {
+        networkConfigurationValidator.validateNetworkForStack(stackValidation.getNetwork(), stackValidation.getInstanceGroups());
         blueprintValidator.validateBlueprintForStack(stackValidation.getBlueprint(), stackValidation.getHostGroups(), stackValidation.getInstanceGroups());
     }
 

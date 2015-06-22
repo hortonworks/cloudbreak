@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.StackModelDescription;
-import com.wordnik.swagger.annotations.ApiModel;
-import com.wordnik.swagger.annotations.ApiModelProperty;
-
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.validation.constraints.NotNull;
+
+import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.StackModelDescription;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 public class StackValidationRequest implements JsonEntity {
@@ -18,6 +18,9 @@ public class StackValidationRequest implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = StackModelDescription.BLUEPRINT_ID, required = true)
     private Long blueprintId;
+    @NotNull
+    @ApiModelProperty(value = StackModelDescription.NETWORK_ID, required = true)
+    private Long networkId;
 
     public Set<HostGroupJson> getHostGroups() {
         return hostGroups;
@@ -41,5 +44,13 @@ public class StackValidationRequest implements JsonEntity {
 
     public void setBlueprintId(Long blueprintId) {
         this.blueprintId = blueprintId;
+    }
+
+    public Long getNetworkId() {
+        return networkId;
+    }
+
+    public void setNetworkId(Long netWorkId) {
+        this.networkId = netWorkId;
     }
 }
