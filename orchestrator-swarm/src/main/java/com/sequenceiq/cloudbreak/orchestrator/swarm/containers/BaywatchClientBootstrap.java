@@ -64,8 +64,7 @@ public class BaywatchClientBootstrap implements ContainerBootstrap {
                             String.format("BAYWATCH_IP=%s", baywatchIp),
                             String.format("BAYWATCH_CLUSTER_NAME=%s", BaywatchServerBootstrap.CLUSTER_NAME),
                             String.format("BAYWATCH_CLIENT_HOSTNAME=%s", node.getHostname() + consulDomain),
-                            String.format("BAYWATCH_CLIENT_PRIVATE_IP=%s", node.getPrivateIp()),
-                            String.format("BAYWATCH_CLIENT_PUBLIC_IP=%s", node.getPublicIp()))
+                            String.format("BAYWATCH_CLIENT_PRIVATE_IP=%s", node.getPrivateIp()))
                     .withHostConfig(hostConfig));
             DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
                     .withPortBindings(new PortBinding(new Ports.Binding("0.0.0.0", PORT), new ExposedPort(PORT)))
