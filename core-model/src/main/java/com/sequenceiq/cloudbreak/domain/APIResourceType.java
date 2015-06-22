@@ -7,5 +7,6 @@ public enum APIResourceType {
     CLUSTER,
     CREDENTIAL,
     RECIPE,
-    NETWORK
+    NETWORK,
+    SECURITY_GROUP
 }

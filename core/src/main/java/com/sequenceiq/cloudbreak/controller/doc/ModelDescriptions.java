@@ -7,6 +7,8 @@ public class ModelDescriptions {
     public static final String DESCRIPTION = "description of the resource";
     public static final String PUBLIC_IN_ACCOUNT = "resource is visible in account";
     public static final String CLOUD_PLATFORM = "type of cloud provider";
+    public static final String OWNER = "id of the resource owner that is provided by OAuth provider";
+    public static final String ACCOUNT = "account id of the resource owner that is provided by OAuth provider";
 
     private ModelDescriptions() {
     }
@@ -40,13 +42,11 @@ public class ModelDescriptions {
         public static final String CONSUL_SERVER_COUNT = "consul server count";
         public static final String CONSUL_SERVER_COUNT_BY_USER = "user defined consul server count";
         public static final String PARAMETERS = "additional cloud specific parameters for stack";
-        public static final String ALLOWED_SUBNETS = "allowed subnets";
+        public static final String SECURITY_GROUP_ID = "security group resource id for the stack";
         public static final String FAILURE_ACTION = "action on failure";
         public static final String FAILURE_POLICY = "failure policy in case of failures";
         public static final String STATUS = "status of the stack";
         public static final String STATUS_REASON = "status message of the stack";
-        public static final String OWNER = "userId of the stack owner";
-        public static final String ACCOUNT = "user account of the stack";
         public static final String AMBARI_IP = "public ambari ip of the stack";
         public static final String HASH = "unique hash identifier for stack";
         public static final String BLUEPRINT_ID = "id of the referenced blueprint";
@@ -137,5 +137,16 @@ public class ModelDescriptions {
     public static class NetworkModelDescription {
         public static final String PARAMETERS = "provider specific parameters of the specified network";
         public static final String SUBNET_CIDR = "the subnet definition of the network in CIDR format";
+    }
+
+    public static class SecurityGroupModelDescription {
+        public static final String SECURITY_RULES = "list of security rules that relates to the security group";
+    }
+
+    public static class SecurityRuleModelDescription {
+        public static final String SUBNET = "definition of allowed subnet in CIDR format";
+        public static final String PORTS = "comma separated list of accessible ports";
+        public static final String PROTOCOL = "protocol of the rule";
+        public static final String MODIFIABLE = "flag for making the rule modifiable";
     }
 }

@@ -10,9 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
+import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -26,12 +25,15 @@ public class CloudFormationTemplateBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
+    @Inject
+    private SecurityRuleRepository securityRuleRepository;
+
     public String build(Stack stack, String snapshotId, boolean existingVPC, String templatePath) {
         Map<String, Object> model = new HashMap<>();
+        Long securityGroupId = stack.getSecurityGroup().getId();
         model.put("instanceGroups", stack.getInstanceGroupsAsList());
         model.put("existingVPC", existingVPC);
-        model.put("subnets", stack.getAllowedSubnets());
-        model.put("ports", NetworkUtils.getPorts(Optional.fromNullable(stack)));
+        model.put("securityRules", securityRuleRepository.findAllBySecurityGroupId(securityGroupId));
         model.put("cbSubnet", stack.getNetwork().getSubnetCIDR());
         model.put("dedicatedInstances", awsStackUtil.areDedicatedInstancesRequested(stack));
         if (snapshotId != null) {

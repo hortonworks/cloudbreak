@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.NetworkStatus;
+import com.sequenceiq.cloudbreak.domain.ResourceStatus;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
@@ -119,10 +119,10 @@ public class SimpleNetworkService implements NetworkService {
             if (!user.getUserId().equals(network.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
                 throw new BadRequestException("Public networks can only be deleted by owners or account admins.");
             } else {
-                if (NetworkStatus.USER_MANAGED.equals(network.getStatus())) {
+                if (ResourceStatus.USER_MANAGED.equals(network.getStatus())) {
                     networkRepository.delete(network);
                 } else {
-                    network.setStatus(NetworkStatus.DEFAULT_DELETED);
+                    network.setStatus(ResourceStatus.DEFAULT_DELETED);
                     networkRepository.save(network);
                 }
             }

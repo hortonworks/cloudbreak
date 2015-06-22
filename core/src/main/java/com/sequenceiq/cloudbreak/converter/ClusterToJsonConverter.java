@@ -78,7 +78,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         clusterResponse.setPassword(source.getPassword());
         clusterResponse.setDescription(source.getDescription() == null ? "" : source.getDescription());
         clusterResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
-        clusterResponse.setServiceEndPoints(prepareServiceEnpointsMap(source.getHostGroups(), source.getBlueprint(), source.getAmbariIp()));
+        clusterResponse.setServiceEndPoints(prepareServiceEndpointsMap(source.getHostGroups(), source.getBlueprint(), source.getAmbariIp()));
         return clusterResponse;
     }
 
@@ -90,8 +90,9 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         return jsons;
     }
 
-    private Map<String, String> prepareServiceEnpointsMap(Set<HostGroup> hostGroups, Blueprint blueprint, String ambariIp) {
+    private Map<String, String> prepareServiceEndpointsMap(Set<HostGroup> hostGroups, Blueprint blueprint, String ambariIp) {
         Map<String, String> result = new HashMap<>();
+
         List<Port> ports = NetworkUtils.getPorts(Optional.<Stack>absent());
         try {
             JsonNode hostGroupsNode = blueprintValidator.getHostGroupNode(blueprint);

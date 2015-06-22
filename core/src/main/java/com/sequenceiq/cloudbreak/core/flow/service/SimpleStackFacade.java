@@ -50,17 +50,19 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.OnFailureAction;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.SecurityGroup;
+import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.Subnet;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
-import com.sequenceiq.cloudbreak.repository.SubnetRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
@@ -110,7 +112,7 @@ public class SimpleStackFacade implements StackFacade {
     @Inject
     private StackUpdater stackUpdater;
     @Inject
-    private SubnetRepository subnetRepository;
+    private SecurityRuleRepository securityRuleRepository;
     @Inject
     private EmailSenderService emailSenderService;
     @Inject
@@ -119,6 +121,8 @@ public class SimpleStackFacade implements StackFacade {
     private TlsSecurityService tlsSecurityService;
     @Inject
     private StackSyncService stackSyncService;
+    @Inject
+    private SecurityGroupService securityGroupService;
 
     @Override
     public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
@@ -385,20 +389,21 @@ public class SimpleStackFacade implements StackFacade {
             CloudPlatformConnector connector = cloudPlatformConnectors.get(stack.cloudPlatform());
             Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(stack.cloudPlatform(),
                     tlsSecurityService.readPublicSshKey(stack.getId()), connector.getSSHUser());
-            Map<String, Set<Subnet>> modifiedSubnets = getModifiedSubnetList(stack, actualContext.getAllowedSubnets());
-            Set<Subnet> newSubnets = modifiedSubnets.get(UPDATED_SUBNETS);
-            stack.setAllowedSubnets(newSubnets);
+            Map<String, Set<SecurityRule>> modifiedSubnets = getModifiedSubnetList(stack, actualContext.getAllowedSecurityRules());
+            Set<SecurityRule> newSecurityRules = modifiedSubnets.get(UPDATED_SUBNETS);
+            stack.getSecurityGroup().setSecurityRules(newSecurityRules);
             cloudPlatformConnectors.get(stack.cloudPlatform()).updateAllowedSubnets(stack,
                     userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE));
-            subnetRepository.delete(modifiedSubnets.get(REMOVED_SUBNETS));
-            subnetRepository.save(newSubnets);
+            securityRuleRepository.delete(modifiedSubnets.get(REMOVED_SUBNETS));
+            securityRuleRepository.save(newSecurityRules);
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Updating of allowed subnets successfully finished.");
         } catch (Exception e) {
             Stack stack = stackService.getById(actualContext.getStackId());
-            String msg = String.format("Failed to update security constraints with allowed subnets: %s", stack.getAllowedSubnets());
+            SecurityGroup securityGroup = stack.getSecurityGroup();
+            String msg = String.format("Failed to update security group with allowed subnets: %s", securityGroup);
             if (stack != null && stack.isStackInDeletionPhase()) {
-                msg = String.format("Failed to update security constraints with allowed subnets: %s; stack is already in deletion phase.",
-                        stack.getAllowedSubnets());
+                msg = String.format("Failed to update security group with allowed subnets: %s; stack is already in deletion phase.",
+                        securityGroup);
             }
             LOGGER.error(msg, e.getMessage());
             throw new CloudbreakException(e);
@@ -514,31 +519,33 @@ public class SimpleStackFacade implements StackFacade {
         return context;
     }
 
-    private Map<String, Set<Subnet>> getModifiedSubnetList(Stack stack, List<Subnet> subnetList) {
-        Map<String, Set<Subnet>> result = new HashMap<>();
-        Set<Subnet> removed = new HashSet<>();
-        Set<Subnet> updated = new HashSet<>();
-        for (Subnet subnet : stack.getAllowedSubnets()) {
-            if (!subnet.isModifiable()) {
-                updated.add(subnet);
-                removeFromNewSubnetList(subnet, subnetList);
+    private Map<String, Set<SecurityRule>> getModifiedSubnetList(Stack stack, List<SecurityRule> securityRuleList) {
+        Map<String, Set<SecurityRule>> result = new HashMap<>();
+        Set<SecurityRule> removed = new HashSet<>();
+        Set<SecurityRule> updated = new HashSet<>();
+        Long securityGroupId = stack.getSecurityGroup().getId();
+        Set<SecurityRule> securityRules = securityGroupService.get(securityGroupId).getSecurityRules();
+        for (SecurityRule securityRule : securityRules) {
+            if (!securityRule.isModifiable()) {
+                updated.add(securityRule);
+                removeFromNewSubnetList(securityRule, securityRuleList);
             } else {
-                removed.add(subnet);
+                removed.add(securityRule);
             }
         }
-        for (Subnet subnet : subnetList) {
-            updated.add(subnet);
+        for (SecurityRule securityRule : securityRuleList) {
+            updated.add(securityRule);
         }
         result.put(UPDATED_SUBNETS, updated);
         result.put(REMOVED_SUBNETS, removed);
         return result;
     }
 
-    private void removeFromNewSubnetList(Subnet subnet, List<Subnet> subnetList) {
-        Iterator<Subnet> iterator = subnetList.iterator();
-        String cidr = subnet.getCidr();
+    private void removeFromNewSubnetList(SecurityRule securityRule, List<SecurityRule> securityRuleList) {
+        Iterator<SecurityRule> iterator = securityRuleList.iterator();
+        String cidr = securityRule.getCidr();
         while (iterator.hasNext()) {
-            Subnet next = iterator.next();
+            SecurityRule next = iterator.next();
             if (next.getCidr().equals(cidr)) {
                 iterator.remove();
             }

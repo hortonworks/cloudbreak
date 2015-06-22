@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
-import com.sequenceiq.cloudbreak.domain.Subnet;
+import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
 public interface StackService {
 
@@ -40,7 +40,7 @@ public interface StackService {
 
     void updateNodeCount(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustmentJson);
 
-    void updateAllowedSubnets(Long stackId, List<Subnet> subnetList);
+    void updateAllowedSubnets(Long stackId, List<SecurityRule> securityRuleList);
 
     void validateStack(StackValidation stackValidation);
 }

@@ -18,9 +18,9 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 public class StackResponse extends StackBase {
     @ApiModelProperty(StackModelDescription.STACK_ID)
     private Long id;
-    @ApiModelProperty(StackModelDescription.OWNER)
+    @ApiModelProperty(ModelDescriptions.OWNER)
     private String owner;
-    @ApiModelProperty(StackModelDescription.ACCOUNT)
+    @ApiModelProperty(ModelDescriptions.ACCOUNT)
     private String account;
     @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount;

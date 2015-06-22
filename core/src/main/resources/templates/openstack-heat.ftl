@@ -119,12 +119,12 @@ ${core_user_data}
       description: Cloudbreak security group
       name: cb-sec-group_${cb_stack_name}
       rules: [
-        <#list subnets as s>
-        <#list ports as p>
-        {remote_ip_prefix: ${s.cidr},
-        protocol: ${p.protocol},
-        port_range_min: ${p.localPort},
-        port_range_max: ${p.localPort}},
+        <#list securityRules as r>
+        <#list r.getPorts() as p>
+        {remote_ip_prefix: ${r.cidr},
+        protocol: ${r.protocol},
+        port_range_min: ${p},
+        port_range_max: ${p}},
         </#list>
         </#list>
         {remote_ip_prefix: { get_param: app_net_cidr },

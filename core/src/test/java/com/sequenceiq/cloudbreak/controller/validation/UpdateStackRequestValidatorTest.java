@@ -82,7 +82,6 @@ public class UpdateStackRequestValidatorTest {
         UpdateStackJson updateStackJson = new UpdateStackJson();
         updateStackJson.setInstanceGroupAdjustment(null);
         updateStackJson.setStatus(null);
-        updateStackJson.setAllowedSubnets(null);
         boolean valid = underTest.isValid(updateStackJson, constraintValidatorContext);
         assertFalse(valid);
     }

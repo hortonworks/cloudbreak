@@ -2,10 +2,12 @@ package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -21,7 +23,10 @@ import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AwsVolumeType;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.SecurityGroup;
+import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 
 import freemarker.template.Configuration;
 
@@ -40,6 +45,12 @@ public class CloudFormationTemplateBuilderTest {
     @Mock
     private AwsStackUtil awsStackUtil;
 
+    @Mock
+    private SecurityGroup securityGroup;
+
+    @Mock
+    private SecurityRuleRepository securityRuleRepository;
+
     @Before
     public void setUp() throws Exception {
         underTest = new CloudFormationTemplateBuilder();
@@ -52,6 +63,9 @@ public class CloudFormationTemplateBuilderTest {
         underTest.setFreemarkerConfiguration(freemarkerConfiguration);
         when(stack.getNetwork()).thenReturn(network);
         when(network.getSubnetCIDR()).thenReturn("10.0.0.0/16");
+        when(stack.getSecurityGroup()).thenReturn(securityGroup);
+        when(securityGroup.getId()).thenReturn(1L);
+        when(securityRuleRepository.findAllBySecurityGroupId(anyLong())).thenReturn(new LinkedList<SecurityRule>());
     }
 
     @Test

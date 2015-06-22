@@ -18,9 +18,9 @@ public class CloudbreakEventsJson implements JsonEntity {
     private long eventTimestamp;
     @ApiModelProperty(EventModelDescription.MESSAGE)
     private String eventMessage;
-    @ApiModelProperty(StackModelDescription.OWNER)
+    @ApiModelProperty(ModelDescriptions.OWNER)
     private String owner;
-    @ApiModelProperty(StackModelDescription.ACCOUNT)
+    @ApiModelProperty(ModelDescriptions.ACCOUNT)
     private String account;
     @ApiModelProperty(ModelDescriptions.CLOUD_PLATFORM)
     private String cloud;

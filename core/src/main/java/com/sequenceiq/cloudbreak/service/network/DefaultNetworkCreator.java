@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.domain.AzureNetwork;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.GcpNetwork;
 import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.NetworkStatus;
+import com.sequenceiq.cloudbreak.domain.ResourceStatus;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
 
 @Service
@@ -60,7 +60,7 @@ public class DefaultNetworkCreator {
         network.setSubnetCIDR(subnet);
         network.setOwner(user.getUserId());
         network.setAccount(user.getAccount());
-        network.setStatus(NetworkStatus.DEFAULT);
+        network.setStatus(ResourceStatus.DEFAULT);
         network.setPublicInAccount(true);
     }
 

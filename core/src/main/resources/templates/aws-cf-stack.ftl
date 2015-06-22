@@ -2,7 +2,7 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
 
-  "Description" : "CloudFormation template to create a VPC with a public subnet on EC2",
+  "Description" : "CloudFormation template to create a VPC with a public securityRule on EC2",
 
   "Parameters" : {
   
@@ -23,7 +23,7 @@
     },
 
     "SubnetCIDR" : {
-      "Description" : "IP address range in the subnet specified as CIDR notation",
+      "Description" : "IP address range in the securityRule specified as CIDR notation",
       "Type" : "String",
       "MinLength": "9",
       "MaxLength": "18",
@@ -265,9 +265,9 @@
         "VpcId" : { "Ref" : "VPC" },
         </#if>
         "SecurityGroupIngress" : [
-          <#list subnets as s>
-            <#list ports as p>
-                { "IpProtocol" : "${p.protocol}", "FromPort" : "${p.localPort}", "ToPort" : "${p.port}", "CidrIp" : "${s.cidr}"} ,
+          <#list securityRules as r>
+            <#list r.getPorts() as p>
+                { "IpProtocol" : "${r.protocol}", "FromPort" : "${p}", "ToPort" : "${p}", "CidrIp" : "${r.cidr}"} ,
             </#list>
 		  </#list>
 		  { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : "${cbSubnet}"} ,

@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.NetworkJson;
 import com.sequenceiq.cloudbreak.controller.validation.AzureNetworkParam;
 import com.sequenceiq.cloudbreak.domain.AzureNetwork;
-import com.sequenceiq.cloudbreak.domain.NetworkStatus;
+import com.sequenceiq.cloudbreak.domain.ResourceStatus;
 
 @Component
 public class JsonToAzureNetworkConverter extends AbstractConversionServiceAwareConverter<NetworkJson, AzureNetwork> {
@@ -20,7 +20,7 @@ public class JsonToAzureNetworkConverter extends AbstractConversionServiceAwareC
         network.setDescription(source.getDescription());
         network.setSubnetCIDR(source.getSubnetCIDR());
         network.setPublicInAccount(source.isPublicInAccount());
-        network.setStatus(NetworkStatus.USER_MANAGED);
+        network.setStatus(ResourceStatus.USER_MANAGED);
         Map<String, Object> parameters = source.getParameters();
         if (parameters.containsKey(AzureNetworkParam.ADDRESS_PREFIX_CIDR.getName())) {
             String addressPrefix = (String) parameters.get(AzureNetworkParam.ADDRESS_PREFIX_CIDR.getName());

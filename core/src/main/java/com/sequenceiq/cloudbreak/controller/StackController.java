@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,7 +33,6 @@ import com.sequenceiq.cloudbreak.controller.json.UpdateStackJson;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
-import com.sequenceiq.cloudbreak.domain.Subnet;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -170,23 +168,9 @@ public class StackController {
         if (updateRequest.getStatus() != null) {
             stackService.updateStatus(id, updateRequest.getStatus());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else if (updateRequest.getInstanceGroupAdjustment() != null) {
+        } else {
             stackService.updateNodeCount(id, updateRequest.getInstanceGroupAdjustment());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            List<Subnet> subnetList = (List<Subnet>) conversionService.convert(updateRequest.getAllowedSubnets(),
-                    TypeDescriptor.forObject(updateRequest.getAllowedSubnets()),
-                    TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Subnet.class)));
-            decorateSubnetEntities(subnetList, stackService.get(id));
-            stackService.updateAllowedSubnets(id, subnetList);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-    }
-
-    @ApiOperation(value = StackOpDescription.GET_METADATA, produces = ContentType.JSON, notes = "")
-    private void decorateSubnetEntities(List<Subnet> subnetList, Stack stack) {
-        for (Subnet subnet : subnetList) {
-            subnet.setStack(stack);
         }
     }
 
@@ -211,7 +195,8 @@ public class StackController {
     private ResponseEntity<IdJson> createStack(CbUser user, StackRequest stackRequest, boolean publicInAccount) {
         Stack stack = conversionService.convert(stackRequest, Stack.class);
         MDCBuilder.buildMdcContext(stack);
-        stack = stackDecorator.decorate(stack, stackRequest.getCredentialId(), stackRequest.getConsulServerCount(), stackRequest.getNetworkId());
+        stack = stackDecorator.decorate(stack, stackRequest.getCredentialId(), stackRequest.getConsulServerCount(), stackRequest.getNetworkId(),
+                stackRequest.getSecurityGroupId());
         stack.setPublicInAccount(publicInAccount);
         stack = stackService.create(user, stack);
         return new ResponseEntity<>(new IdJson(stack.getId()), HttpStatus.CREATED);
