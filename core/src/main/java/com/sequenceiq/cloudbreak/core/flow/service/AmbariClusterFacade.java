@@ -338,7 +338,7 @@ public class AmbariClusterFacade implements ClusterFacade {
                 status = STOPPED;
             }
         }
-        fireEventAndLog(stack.getId(), context, "Cluster's state has been synchronized.", status);
+        fireEventAndLog(stack.getId(), context, "Synced cluster state with Ambari.", status);
         return context;
     }
 
