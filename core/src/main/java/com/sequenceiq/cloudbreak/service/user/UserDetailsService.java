@@ -13,6 +13,6 @@ public interface UserDetailsService {
     @CacheEvict(value = "userCache", key = "#filterValue")
     void evictUserDetails(String updatedUserId, String filterValue);
 
-    void deleteUser(CbUser adminUser, String userId);
+    boolean hasResources(CbUser adminUser, String userId);
 
 }
