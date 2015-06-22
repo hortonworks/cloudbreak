@@ -145,7 +145,7 @@ public class ModelDescriptions {
 
     public static class SecurityRuleModelDescription {
         public static final String SUBNET = "definition of allowed subnet in CIDR format";
-        public static final String PORTS = "coma separated list of accessible ports";
+        public static final String PORTS = "comma separated list of accessible ports";
         public static final String PROTOCOL = "protocol of the rule";
         public static final String MODIFIABLE = "flag for making the rule modifiable";
     }

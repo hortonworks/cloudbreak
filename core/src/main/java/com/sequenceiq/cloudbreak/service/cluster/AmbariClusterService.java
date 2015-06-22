@@ -267,9 +267,11 @@ public class AmbariClusterService implements ClusterService {
     public Cluster updateClusterStatusByStackId(Long stackId, Status status, String statusReason) {
         LOGGER.debug("Updating cluster status. stackId: {}, status: {}, statusReason: {}", stackId, status, statusReason);
         Cluster cluster = stackRepository.findById(stackId).getCluster();
-        cluster.setStatus(status);
-        cluster.setStatusReason(statusReason);
-        cluster = clusterRepository.save(cluster);
+        if (cluster != null) {
+            cluster.setStatus(status);
+            cluster.setStatusReason(statusReason);
+            cluster = clusterRepository.save(cluster);
+        }
         return cluster;
     }
 

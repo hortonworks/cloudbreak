@@ -44,6 +44,7 @@ public abstract class StackBase implements JsonEntity {
     @Valid
     @ApiModelProperty(required = true)
     private List<InstanceGroupJson> instanceGroups = new ArrayList<>();
+    @NotNull
     @ApiModelProperty(value = StackModelDescription.SECURITY_GROUP_ID, required = true)
     private Long securityGroupId;
     @NotNull
