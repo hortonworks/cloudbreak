@@ -336,24 +336,18 @@ public class SimpleStackFacade implements StackFacade {
     @Override
     public FlowContext provision(FlowContext context) throws CloudbreakException {
         ProvisioningContext actualContext = (ProvisioningContext) context;
-        try {
-            Date startDate = new Date();
-            Stack stack = stackService.getById(actualContext.getStackId());
-
-            stackUpdater.updateStackStatus(stack.getId(), CREATE_IN_PROGRESS, "Creating infrastructure");
-            ProvisionComplete provisionResult = provisioningService.buildStack(actualContext.getCloudPlatform(), stack, actualContext.getSetupProperties());
-            Date endDate = new Date();
-            long seconds = (endDate.getTime() - startDate.getTime()) / DateUtils.MILLIS_PER_SECOND;
-            fireEventAndLog(stack.getId(), context, String.format("The creation of infrastructure took %s seconds.", seconds), AVAILABLE);
-            context = new ProvisioningContext.Builder()
-                    .setDefaultParams(provisionResult.getStackId(), provisionResult.getCloudPlatform())
-                    .setProvisionSetupProperties(actualContext.getSetupProperties())
-                    .setProvisionedResources(provisionResult.getResources())
-                    .build();
-        } catch (Exception e) {
-            LOGGER.error("Exception during the stack stop requested process: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
+        Date startDate = new Date();
+        Stack stack = stackService.getById(actualContext.getStackId());
+        stackUpdater.updateStackStatus(stack.getId(), CREATE_IN_PROGRESS, "Creating infrastructure");
+        ProvisionComplete provisionResult = provisioningService.buildStack(actualContext.getCloudPlatform(), stack, actualContext.getSetupProperties());
+        Date endDate = new Date();
+        long seconds = (endDate.getTime() - startDate.getTime()) / DateUtils.MILLIS_PER_SECOND;
+        fireEventAndLog(stack.getId(), context, String.format("The creation of infrastructure took %s seconds.", seconds), AVAILABLE);
+        context = new ProvisioningContext.Builder()
+                .setDefaultParams(provisionResult.getStackId(), provisionResult.getCloudPlatform())
+                .setProvisionSetupProperties(actualContext.getSetupProperties())
+                .setProvisionedResources(provisionResult.getResources())
+                .build();
         return context;
     }
 

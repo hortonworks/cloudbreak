@@ -54,7 +54,7 @@ public class AwsMetadataSetup implements MetadataSetup {
     private CloudFormationStackUtil cfStackUtil;
 
     @Inject
-    private PollingService<AutoScalingGroupReady> pollingService;
+    private PollingService<AutoScalingGroupReadyContext> pollingService;
 
     @Inject
     private ASGroupStatusCheckerTask asGroupStatusCheckerTask;
@@ -71,8 +71,8 @@ public class AwsMetadataSetup implements MetadataSetup {
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             // wait until all instances are up
             String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, instanceGroup.getGroupName());
-            AutoScalingGroupReady asGroupReady = new AutoScalingGroupReady(stack, amazonEC2Client, amazonASClient, asGroupName, instanceGroup.getNodeCount());
-            LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
+            AutoScalingGroupReadyContext asGroupReady = new AutoScalingGroupReadyContext(stack, asGroupName, instanceGroup.getNodeCount());
+            LOGGER.info("Polling Auto Scaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
             if (((AwsTemplate) instanceGroup.getTemplate()).getSpotPrice() == null) {
                 pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             } else {
@@ -150,6 +150,7 @@ public class AwsMetadataSetup implements MetadataSetup {
                 instanceSyncState = RUNNING;
             }
         } catch (Exception ex) {
+            // TODO: what if it was only a connection error? we'll delete the instance from our metadata although it is running
             instanceSyncState = DELETED;
         }
         return instanceSyncState;
