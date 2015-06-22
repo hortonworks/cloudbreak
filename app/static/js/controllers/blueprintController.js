@@ -6,6 +6,8 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
     function ($scope, $rootScope, $filter, UserBlueprint, AccountBlueprint, GlobalBlueprint, ErrorHandler) {
         $rootScope.blueprints = AccountBlueprint.query();
         initializeBlueprint();
+        $scope.showAlert = false;
+        $scope.alertMessage = "";
 
         $scope.createBlueprint = function () {
             if ($scope.blueprint.public) {
@@ -15,6 +17,7 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
                     });
                 }, function (error) {
                     $scope.showError(error, $rootScope.msg.blueprint_failed);
+                    $scope.showErrorMessageAlert();
                 });
             } else {
                 UserBlueprint.save($scope.blueprint, function (result) {
@@ -23,6 +26,7 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
                     });
                 }, function (error) {
                     $scope.showError(error, $rootScope.msg.blueprint_failed);
+                    $scope.showErrorMessageAlert();
                 });
             }
 
@@ -32,6 +36,7 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
                 $scope.showSuccess($filter("format")($rootScope.msg.blueprint_success, String(success.id)));
                 $scope.blueprintForm.$setPristine();
                 angular.element(document.querySelector('#panel-create-blueprints-collapse-btn')).click();
+                $scope.unShowErrorMessageAlert();
             }
         }
 
@@ -70,6 +75,16 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
 
         function initializeBlueprint() {
             $scope.blueprint = {}
+        }
+
+        $scope.unShowErrorMessageAlert = function() {
+            $scope.showAlert = false;
+            $scope.alertMessage = "";
+        }
+
+        $scope.showErrorMessageAlert = function() {
+            $scope.showAlert = true;
+            $scope.alertMessage = $scope.statusMessage;
         }
     }
 ]);
