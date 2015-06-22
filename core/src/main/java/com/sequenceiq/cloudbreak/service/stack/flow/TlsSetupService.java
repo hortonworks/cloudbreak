@@ -59,36 +59,46 @@ public class TlsSetupService {
         CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
 
         LOGGER.info("SSH into gateway node to setup certificates on gateway.");
-        final SSHClient ssh = new SSHClient();
         String sshFingerprint = connector.getSSHFingerprint(stack, gateway.getInstanceId());
-        ssh.addHostKeyVerifier(sshFingerprint);
+        LOGGER.info("Fingerprint has been determined: {}", sshFingerprint);
+        setupTls(stack.getId(), gateway.getPublicIp(), connector.getSSHUser(), stack.getCredential().getPublicKey(), sshFingerprint);
+
+    }
+
+    private void setupTls(Long stackId, String publicIp, String user, String publicKey, String sshFingerprint) throws CloudbreakException {
+        LOGGER.info("SSHClient parameters: stackId: {}, publicIp: {},  user: {}", stackId, publicIp, user);
+        final SSHClient ssh = new SSHClient();
         try {
-            ssh.connect(gateway.getPublicIp(), SSH_PORT);
-            ssh.authPublickey(connector.getSSHUser(), tlsSecurityService.getSshPrivateFileLocation(stack.getId()));
-            ssh.newSCPFileTransfer().upload(tlsCertificatePath, "/tmp/cb-client.pem");
+            ssh.addHostKeyVerifier(sshFingerprint);
+            ssh.connect(publicIp, SSH_PORT);
+            ssh.authPublickey(user, tlsSecurityService.getSshPrivateFileLocation(stackId));
+            String remoteTlsCertificatePath = "/tmp/cb-client.pem";
+            ssh.newSCPFileTransfer().upload(tlsCertificatePath, remoteTlsCertificatePath);
+            LOGGER.info("Upload to server: {}", remoteTlsCertificatePath);
             final Session tlsSetupSession = ssh.startSession();
             tlsSetupSession.allocateDefaultPTY();
             String tlsSetupScript = FileReaderUtils.readFileFromClasspath("init/tls-setup.sh");
-            tlsSetupScript = tlsSetupScript.replace("$PUBLIC_IP", gateway.getPublicIp());
+            tlsSetupScript = tlsSetupScript.replace("$PUBLIC_IP", publicIp);
             final Session.Command tlsSetupCmd = tlsSetupSession.exec(tlsSetupScript);
+            LOGGER.info("Execute tls-setup.sh: {}", tlsSetupScript);
             tlsSetupCmd.join(SETUP_TIMEOUT, TimeUnit.SECONDS);
             tlsSetupSession.close();
             final Session changeSshKeySession = ssh.startSession();
             changeSshKeySession.allocateDefaultPTY();
             String removeScript = "sudo sed -i '/#tmpssh_start/,/#tmpssh_end/{s/./ /g}' /home/%s/.ssh/authorized_keys";
-            final Session.Command tmpSshRemoveCmd = changeSshKeySession.exec(String.format(removeScript, connector.getSSHUser()));
+            final Session.Command tmpSshRemoveCmd = changeSshKeySession.exec(String.format(removeScript, user));
             tmpSshRemoveCmd.join(SETUP_TIMEOUT, TimeUnit.SECONDS);
             changeSshKeySession.close();
-            ssh.newSCPFileTransfer().download("/tmp/server.pem", tlsSecurityService.getCertDir(stack.getId()) + "/ca.pem");
+            ssh.newSCPFileTransfer().download("/tmp/server.pem", tlsSecurityService.getCertDir(stackId) + "/ca.pem");
             if (tlsSetupCmd.getExitStatus() != 0) {
                 throw new CloudbreakException(String.format("TLS setup script exited with error code: %s", tlsSetupCmd.getExitStatus()));
             }
             if (tmpSshRemoveCmd.getExitStatus() != 0) {
                 throw new CloudbreakException(String.format("Failed to remove temp SSH key. Error code: %s", tmpSshRemoveCmd.getExitStatus()));
             }
-            Stack stackWithSecurity = stackRepository.findByIdWithSecurityConfig(stack.getId());
+            Stack stackWithSecurity = stackRepository.findByIdWithSecurityConfig(stackId);
             SecurityConfig securityConfig = stackWithSecurity.getSecurityConfig();
-            securityConfig.setServerCert(Base64.encodeAsString(tlsSecurityService.readServerCert(stack.getId()).getBytes()));
+            securityConfig.setServerCert(Base64.encodeAsString(tlsSecurityService.readServerCert(stackId).getBytes()));
             securityConfigRepository.save(securityConfig);
         } catch (IOException e) {
             throw new CloudbreakException("Failed to setup TLS through temporary SSH.", e);
@@ -100,4 +110,5 @@ public class TlsSetupService {
             }
         }
     }
+
 }

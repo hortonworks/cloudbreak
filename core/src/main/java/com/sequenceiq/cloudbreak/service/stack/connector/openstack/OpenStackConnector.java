@@ -55,7 +55,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
     private static final int CONSOLE_OUTPUT_POLLING_ATTEMPTS = 120;
     private static final int MAX_POLLING_ATTEMPTS = 1000;
     private static final long OPERATION_TIMEOUT = 60L;
-    private static final String DEFAULT_SSH_USER = "centos";
+    private static final String DEFAULT_SSH_USER = "ec2-user";
 
     @Inject
     private OpenStackUtil openStackUtil;

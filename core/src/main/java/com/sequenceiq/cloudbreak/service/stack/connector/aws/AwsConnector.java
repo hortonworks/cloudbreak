@@ -119,7 +119,7 @@ public class AwsConnector implements CloudPlatformConnector {
     private static final int INFINITE_ATTEMPTS = -1;
     private static final String CLOUDBREAK_EBS_SNAPSHOT = "cloudbreak-ebs-snapshot";
     private static final int SNAPSHOT_VOLUME_SIZE = 10;
-    private static final String DEFAULT_SSH_USER = "ec2-user";
+    private static final String DEFAULT_SSH_USER = "centos";
 
     @Value("${cb.aws.cf.template.path:" + CB_AWS_CF_TEMPLATE_PATH + "}")
     private String awsCloudformationTemplatePath;
@@ -180,10 +180,12 @@ public class AwsConnector implements CloudPlatformConnector {
         stack = stackUpdater.addStackResources(stackId, Arrays.asList(reservedIp));
         String snapshotId = getEbsSnapshotIdIfNeeded(stack);
         AwsNetwork network = (AwsNetwork) stack.getNetwork();
+        String cfTemplate = cfTemplateBuilder.build(stack, snapshotId, network.isExistingVPC(), awsCloudformationTemplatePath);
+        LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
         CreateStackRequest createStackRequest = new CreateStackRequest()
                 .withStackName(cFStackName)
                 .withOnFailure(OnFailure.valueOf(stack.getOnFailureActionAction().name()))
-                .withTemplateBody(cfTemplateBuilder.build(stack, snapshotId, network.isExistingVPC(), awsCloudformationTemplatePath))
+                .withTemplateBody(cfTemplate)
                 .withParameters(getStackParameters(stack, coreUserData, gateWayUserData, awsCredential, cFStackName, network.isExistingVPC()));
         client.createStack(createStackRequest);
         Resource cloudFormationStackResource = new Resource(ResourceType.CLOUDFORMATION_STACK, cFStackName, stack, null);
