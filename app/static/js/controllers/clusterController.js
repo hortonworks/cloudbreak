@@ -204,6 +204,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, { id: $rootScope.activeCluster.blueprintId})[0];
             $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {id: $rootScope.activeCluster.credentialId}, true)[0];
             $rootScope.activeClusterNetwork = $filter('filter')($rootScope.networks, {id: $rootScope.activeCluster.networkId})[0];
+            $rootScope.activeClusterSecurityGroup = $filter('filter')($rootScope.securitygroups, {id: $rootScope.activeCluster.securityGroupId})[0];
             $rootScope.activeCluster.cloudPlatform =  $rootScope.activeClusterCredential.cloudPlatform;
             $rootScope.activeCluster.metadata = [];
             $rootScope.reinstallClusterObject = {

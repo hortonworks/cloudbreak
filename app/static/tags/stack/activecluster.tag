@@ -209,6 +209,16 @@
                         </div>
                         <div class="panel panel-default">
                             <div class="panel-heading">
+                                <h5><a href="" data-toggle="collapse" data-target='#panel-collapsetmp-securitygroup-{{$root.activeCluster.securityGroupId}}'><i class="fa fa-lock fa-fw"></i>{{msg.active_cluster_securitygroup_label}}: {{activeClusterSecurityGroup.name}}</a></h5>
+                            </div>
+                                <div id="panel-collapsetmp-securitygroup-{{$root.activeCluster.securityGroupId}}" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <div ng-include="'tags/securitygroup/securitygrouplist.tag'" ng-repeat="securitygroup in [activeClusterSecurityGroup]"></div>
+                                    </div>
+                                </div>
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
                                 <h5><a href="" data-toggle="collapse" data-target='#panel-collapsetmp-network-{{$root.activeCluster.networkId}}'><i class="fa fa-sitemap fa-fw"></i>{{msg.active_cluster_network_label}} {{activeClusterNetwork.name}}</a></h5>
                             </div>
                                 <div id="panel-collapsetmp-network-{{$root.activeCluster.networkId}}" class="panel-collapse collapse">
