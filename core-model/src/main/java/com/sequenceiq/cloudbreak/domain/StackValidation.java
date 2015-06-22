@@ -6,6 +6,7 @@ public class StackValidation implements ProvisionEntity {
     private Set<HostGroup> hostGroups;
     private Set<InstanceGroup> instanceGroups;
     private Blueprint blueprint;
+    private Network network;
 
     public Set<HostGroup> getHostGroups() {
         return hostGroups;
@@ -29,5 +30,13 @@ public class StackValidation implements ProvisionEntity {
 
     public void setBlueprint(Blueprint blueprint) {
         this.blueprint = blueprint;
+    }
+
+    public Network getNetwork() {
+        return network;
+    }
+
+    public void setNetwork(Network network) {
+        this.network = network;
     }
 }
