@@ -91,6 +91,8 @@ public class StackSyncService {
             stackUpdater.updateStackStatus(stack.getId(), STOPPED, statusReason);
         } else if (Status.availableStatusesForUpdate().contains(stack.getStatus())) {
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, statusReason);
+        } else {
+            stackUpdater.updateStackStatus(stack.getId(), stack.getStatus(), statusReason);
         }
     }
 
