@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.core.flow.FlowManager;
 import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
@@ -51,9 +50,11 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
@@ -99,6 +100,9 @@ public class AmbariClusterService implements ClusterService {
 
     @Inject
     private TlsSecurityService tlsSecurityService;
+
+    @Inject
+    private CloudbreakEventService eventService;
 
     @Override
     public Cluster create(CbUser user, Long stackId, Cluster cluster) {
@@ -232,30 +236,38 @@ public class AmbariClusterService implements ClusterService {
             retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest, stack.cloudPlatform());
             flowManager.triggerClusterStartRequested(retVal);
         } else {
-            if (!cluster.isClusterReadyForStart() && !cluster.isStartFailed()) {
+            if (cluster.isAvailable()) {
+                String statusDesc = "Cluster start request is ignored, because the cluster is already available.";
+                LOGGER.info(statusDesc);
+                eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), statusDesc);
+            } else if (!cluster.isClusterReadyForStart() && !cluster.isStartFailed()) {
                 throw new BadRequestException(
                         String.format("Cannot update the status of cluster '%s' to STARTED, because it isn't in STOPPED state.", cluster.getId()));
             } else if (!stack.isAvailable() && !cluster.isStartFailed()) {
                 throw new BadRequestException(
                         String.format("Cannot update the status of cluster '%s' to STARTED, because the stack is not AVAILABLE", cluster.getId()));
+            } else {
+                updateClusterStatusByStackId(stack.getId(), START_REQUESTED);
+                retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest, stack.cloudPlatform());
+                flowManager.triggerClusterStart(retVal);
             }
-            updateClusterStatusByStackId(stack.getId(), START_REQUESTED);
-            retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest, stack.cloudPlatform());
-            flowManager.triggerClusterStart(retVal);
         }
         return retVal;
     }
 
     private ClusterStatusUpdateRequest stop(Stack stack, Cluster cluster, StatusRequest statusRequest) {
         ClusterStatusUpdateRequest retVal = null;
-        if (!cluster.isClusterReadyForStop() && !cluster.isStopFailed()) {
+        if (cluster.isStopped()) {
+            String statusDesc = "Cluster stop request is ignored, because the cluster is already stopped.";
+            LOGGER.info(statusDesc);
+            eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), statusDesc);
+        } else if (!cluster.isClusterReadyForStop() && !cluster.isStopFailed()) {
             throw new BadRequestException(
                     String.format("Cannot update the status of cluster '%s' to STOPPED, because it isn't in AVAILABLE state.", cluster.getId()));
         } else if (!stack.isStackReadyForStop() && !stack.isStopFailed()) {
             throw new BadRequestException(
                     String.format("Cannot update the status of cluster '%s' to STARTED, because the stack is not AVAILABLE", cluster.getId()));
-        }
-        if (cluster.isAvailable() || cluster.isStopFailed()) {
+        } else if (cluster.isAvailable() || cluster.isStopFailed()) {
             updateClusterStatusByStackId(stack.getId(), STOP_REQUESTED);
             retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest, stack.cloudPlatform());
             flowManager.triggerClusterStop(retVal);

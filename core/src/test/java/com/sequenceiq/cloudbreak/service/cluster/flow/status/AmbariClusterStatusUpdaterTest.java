@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.status;
 
-import static org.mockito.Matchers.any;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,9 +14,9 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
@@ -30,22 +28,16 @@ public class AmbariClusterStatusUpdaterTest {
 
     @InjectMocks
     private AmbariClusterStatusUpdater underTest;
-
     @Mock
-    private ClusterRepository clusterRepository;
-
-    @Mock
-    private StackUpdater stackUpdater;
-
+    private ClusterService clusterService;
     @Mock
     private AmbariClientProvider ambariClientProvider;
-
     @Mock
     private CloudbreakEventService cloudbreakEventService;
-
     @Mock
-    private AmbariClusterStatusFactory clusterStatusFactoy;
-
+    private AmbariClusterStatusFactory clusterStatusFactory;
+    @Mock
+    private TlsSecurityService tlsSecurityService;
     @Mock
     private AmbariClient ambariClient;
 
@@ -56,104 +48,52 @@ public class AmbariClusterStatusUpdaterTest {
     }
 
     @Test
-    public void testUpdateClusterStatusShouldDoNothingWhenStatusCheckIsNotNecessary() throws CloudbreakSecuritySetupException {
-        // GIVEN
-        Stack stack = createStack(Status.STOP_IN_PROGRESS, Status.STOP_REQUESTED);
-        // WHEN
-        underTest.updateClusterStatus(stack);
-        // THEN
-        Assert.assertEquals(Status.STOP_IN_PROGRESS, stack.getStatus());
-        Assert.assertEquals(Status.STOP_REQUESTED, stack.getCluster().getStatus());
-        BDDMockito.verify(clusterRepository, BDDMockito.times(0)).save(BDDMockito.any(Cluster.class));
-        BDDMockito.verify(stackUpdater, BDDMockito.times(0)).updateStackStatus(BDDMockito.any(Long.class), BDDMockito.any(Status.class),
-                BDDMockito.any(String.class));
-        BDDMockito.verify(cloudbreakEventService, BDDMockito.times(0)).fireCloudbreakEvent(BDDMockito.any(Long.class), BDDMockito.any(String.class),
-                BDDMockito.any(String.class));
-    }
-
-    @Test
-    public void testUpdateClusterStatusShouldDoNothingWhenNoClusterGivenInStack() throws CloudbreakSecuritySetupException {
-        // GIVEN
-        Stack stack = createStack(Status.AVAILABLE);
-        // WHEN
-        underTest.updateClusterStatus(stack);
-        // THEN
-        Assert.assertEquals(Status.AVAILABLE, stack.getStatus());
-        Assert.assertNull(stack.getCluster());
-        BDDMockito.verify(clusterRepository, BDDMockito.times(0)).save(BDDMockito.any(Cluster.class));
-        BDDMockito.verify(stackUpdater, BDDMockito.times(0)).updateStackStatus(BDDMockito.any(Long.class), BDDMockito.any(Status.class),
-                BDDMockito.any(String.class));
-        BDDMockito.verify(cloudbreakEventService, BDDMockito.times(0)).fireCloudbreakEvent(BDDMockito.any(Long.class), BDDMockito.any(String.class),
-                BDDMockito.any(String.class));
-    }
-
-    @Test
-    public void testUpdateClusterStatusShouldDoNothingWhenClusterStatusFactoryReturnsNull() throws CloudbreakSecuritySetupException {
+    public void testUpdateClusterStatusShouldSendAmbiguousNotificationWhenClusterStatusFactoryReturnsNull() throws CloudbreakSecuritySetupException {
         // GIVEN
         Stack stack = createStack(Status.AVAILABLE, Status.AVAILABLE);
-        BDDMockito.given(ambariClientProvider.getAmbariClient(any(TLSClientConfig.class), any(String.class), any(String.class))).willReturn(ambariClient);
-        BDDMockito.given(clusterStatusFactoy.createClusterStatus(ambariClient, TEST_BLUEPRINT)).willReturn(null);
+        BDDMockito.given(ambariClientProvider.getAmbariClient(BDDMockito.any(TLSClientConfig.class), BDDMockito.any(String.class),
+                BDDMockito.any(String.class))).willReturn(ambariClient);
+        BDDMockito.given(clusterStatusFactory.createClusterStatus(ambariClient, TEST_BLUEPRINT)).willReturn(null);
         // WHEN
-        underTest.updateClusterStatus(stack);
+        underTest.updateClusterStatus(stack, stack.getCluster());
         // THEN
         Assert.assertEquals(Status.AVAILABLE, stack.getStatus());
         Assert.assertEquals(Status.AVAILABLE, stack.getCluster().getStatus());
-        BDDMockito.verify(clusterRepository, BDDMockito.times(0)).save(BDDMockito.any(Cluster.class));
-        BDDMockito.verify(stackUpdater, BDDMockito.times(0)).updateStackStatus(BDDMockito.any(Long.class), BDDMockito.any(Status.class),
-                BDDMockito.any(String.class));
-        BDDMockito.verify(cloudbreakEventService, BDDMockito.times(0)).fireCloudbreakEvent(BDDMockito.any(Long.class), BDDMockito.any(String.class),
-                BDDMockito.any(String.class));
+        BDDMockito.verify(clusterService, BDDMockito.times(0)).updateClusterStatusByStackId(BDDMockito.any(Long.class), BDDMockito.any(Status.class));
+        BDDMockito.verify(cloudbreakEventService, BDDMockito.times(1)).fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(),
+                "Synced cluster state with Ambari: There are stopped and running Ambari services as well. Restart or stop all of them and try syncing later.");
     }
 
     @Test
     public void testUpdateClusterStatusShouldUpdateStackStatusWhenStackStatusChanged() throws CloudbreakSecuritySetupException {
         // GIVEN
-        Stack stack = createStack(Status.AVAILABLE, Status.STOPPED);
+        Stack stack = createStack(Status.AVAILABLE, Status.AVAILABLE);
         AmbariClusterStatus clusterStatus = new AmbariClusterStatus(ClusterStatus.INSTALLED, Status.STOPPED, Status.STOPPED, TEST_REASON);
-        BDDMockito.given(ambariClientProvider.getAmbariClient(any(TLSClientConfig.class), any(String.class), any(String.class))).willReturn(ambariClient);
-        BDDMockito.given(clusterStatusFactoy.createClusterStatus(ambariClient, TEST_BLUEPRINT)).willReturn(clusterStatus);
+        BDDMockito.given(ambariClientProvider.getAmbariClient(BDDMockito.any(TLSClientConfig.class), BDDMockito.any(String.class),
+                BDDMockito.any(String.class))).willReturn(ambariClient);
+        BDDMockito.given(clusterStatusFactory.createClusterStatus(ambariClient, TEST_BLUEPRINT)).willReturn(clusterStatus);
         // WHEN
-        underTest.updateClusterStatus(stack);
+        underTest.updateClusterStatus(stack, stack.getCluster());
         // THEN
-        Assert.assertEquals(Status.STOPPED, stack.getCluster().getStatus());
-        BDDMockito.verify(stackUpdater, BDDMockito.times(0)).updateStackStatus(stack.getId(), Status.STOPPED, TEST_REASON);
-        BDDMockito.verify(clusterRepository, BDDMockito.times(0)).save(BDDMockito.any(Cluster.class));
-        BDDMockito.verify(cloudbreakEventService, BDDMockito.times(0)).fireCloudbreakEvent(BDDMockito.any(Long.class), BDDMockito.any(String.class),
-                BDDMockito.any(String.class));
+        BDDMockito.verify(clusterService, BDDMockito.times(1)).updateClusterStatusByStackId(stack.getId(), Status.STOPPED);
+        BDDMockito.verify(cloudbreakEventService, BDDMockito.times(1)).fireCloudbreakEvent(stack.getId(), Status.STOPPED.name(),
+                "Synced cluster state with Ambari: " + TEST_REASON);
     }
 
     @Test
-    public void testUpdateClusterStatusShouldUpdateClusterStatusWhenClusterStatusChanged() throws CloudbreakSecuritySetupException {
+    public void testUpdateClusterStatusShouldOnlyNotifyWhenStackStatusNotChanged() throws CloudbreakSecuritySetupException {
         // GIVEN
         Stack stack = createStack(Status.AVAILABLE, Status.AVAILABLE);
-        AmbariClusterStatus clusterStatus = new AmbariClusterStatus(ClusterStatus.INSTALLED, Status.AVAILABLE, Status.STOPPED, TEST_REASON);
-        BDDMockito.given(ambariClientProvider.getAmbariClient(any(TLSClientConfig.class), any(String.class), any(String.class))).willReturn(ambariClient);
-        BDDMockito.given(clusterStatusFactoy.createClusterStatus(ambariClient, TEST_BLUEPRINT)).willReturn(clusterStatus);
+        AmbariClusterStatus clusterStatus = new AmbariClusterStatus(ClusterStatus.STARTED, Status.AVAILABLE, Status.AVAILABLE, TEST_REASON);
+        BDDMockito.given(ambariClientProvider.getAmbariClient(BDDMockito.any(TLSClientConfig.class), BDDMockito.any(String.class),
+                BDDMockito.any(String.class))).willReturn(ambariClient);
+        BDDMockito.given(clusterStatusFactory.createClusterStatus(ambariClient, TEST_BLUEPRINT)).willReturn(clusterStatus);
         // WHEN
-        underTest.updateClusterStatus(stack);
+        underTest.updateClusterStatus(stack, stack.getCluster());
         // THEN
-        Assert.assertEquals(Status.AVAILABLE, stack.getCluster().getStatus());
-        BDDMockito.verify(clusterRepository, BDDMockito.times(0)).save(stack.getCluster());
-        BDDMockito.verify(cloudbreakEventService, BDDMockito.times(0)).fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(), TEST_REASON);
-        BDDMockito.verify(stackUpdater, BDDMockito.times(0)).updateStackStatus(BDDMockito.any(Long.class), BDDMockito.any(Status.class),
-                BDDMockito.any(String.class));
-    }
-
-    @Test
-    public void testUpdateClusterStatusShouldUpdateStackAndClusterStatusWhenBothChanged() throws CloudbreakSecuritySetupException {
-        // GIVEN
-        Stack stack = createStack(Status.AVAILABLE, Status.AVAILABLE);
-        AmbariClusterStatus clusterStatus = new AmbariClusterStatus(ClusterStatus.INSTALLED, Status.STOPPED, Status.STOPPED, TEST_REASON);
-        BDDMockito.given(ambariClientProvider.getAmbariClient(any(TLSClientConfig.class), any(String.class), any(String.class))).willReturn(ambariClient);
-        BDDMockito.given(clusterStatusFactoy.createClusterStatus(ambariClient, TEST_BLUEPRINT)).willReturn(clusterStatus);
-        // WHEN
-        underTest.updateClusterStatus(stack);
-        // THEN
-        Assert.assertEquals(Status.AVAILABLE, stack.getCluster().getStatus());
-        BDDMockito.verify(clusterRepository, BDDMockito.times(0)).save(stack.getCluster());
-        BDDMockito.verify(stackUpdater, BDDMockito.times(0)).updateStackStatus(stack.getId(), Status.STOPPED, TEST_REASON);
-        BDDMockito.verify(cloudbreakEventService, BDDMockito.times(0)).fireCloudbreakEvent(BDDMockito.any(Long.class), BDDMockito.any(String.class),
-                BDDMockito.any(String.class));
+        BDDMockito.verify(clusterService, BDDMockito.times(0)).updateClusterStatusByStackId(BDDMockito.any(Long.class), BDDMockito.any(Status.class));
+        BDDMockito.verify(cloudbreakEventService, BDDMockito.times(1)).fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(),
+                "Synced cluster state with Ambari: The cluster's state is up to date.");
     }
 
     private Stack createStack(Status stackStatus) {
