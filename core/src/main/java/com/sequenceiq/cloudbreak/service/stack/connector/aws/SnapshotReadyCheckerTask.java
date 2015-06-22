@@ -1,32 +1,39 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeSnapshotsRequest;
 import com.amazonaws.services.ec2.model.DescribeSnapshotsResult;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
-public class SnapshotReadyCheckerTask extends StackBasedStatusCheckerTask<SnapshotReadyPollerObject> {
+public class SnapshotReadyCheckerTask extends StackBasedStatusCheckerTask<SnapshotReadyContext> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SnapshotReadyCheckerTask.class);
+
+    @Inject
+    private AwsStackUtil awsStackUtil;
 
     @Override
-    public boolean checkStatus(SnapshotReadyPollerObject object) {
-        DescribeSnapshotsResult result = object.getClient().describeSnapshots(new DescribeSnapshotsRequest().withSnapshotIds(object.getSnapshotId()));
-        if (result.getSnapshots() != null && !result.getSnapshots().isEmpty()) {
-            return "completed".equals(result.getSnapshots().get(0).getState()) ? true : false;
-        }
-        return false;
+    public boolean checkStatus(SnapshotReadyContext context) {
+        LOGGER.info("Checking if AWS EBS snapshot '{}' is ready.", context.getSnapshotId());
+        AmazonEC2Client ec2Client = awsStackUtil.createEC2Client(context.getStack());
+        DescribeSnapshotsResult result = ec2Client.describeSnapshots(new DescribeSnapshotsRequest().withSnapshotIds(context.getSnapshotId()));
+        return result.getSnapshots() != null && !result.getSnapshots().isEmpty() && "completed".equals(result.getSnapshots().get(0).getState());
     }
 
     @Override
-    public void handleTimeout(SnapshotReadyPollerObject object) {
-        throw new AwsResourceException(String.format(
-                "AWS Ebs disk snapshot creation didn't reach the desired state in the given time frame, stack id: %s, name %s",
-                object.getStack().getId(), object.getStack().getName()));
+    public void handleTimeout(SnapshotReadyContext context) {
+        throw new AwsResourceException(String.format("Timeout while polling AWS EBS snapshot creation. SnapshotID: %s", context.getSnapshotId()));
     }
 
     @Override
-    public String successMessage(SnapshotReadyPollerObject object) {
-        return String.format("AWS Ebs disk snapshot creation success on  stack(%s)", object.getStack().getId());
+    public String successMessage(SnapshotReadyContext context) {
+        return String.format("AWS EBS snapshot created successfully. SnapshotID: %s", context.getSnapshotId());
     }
 }

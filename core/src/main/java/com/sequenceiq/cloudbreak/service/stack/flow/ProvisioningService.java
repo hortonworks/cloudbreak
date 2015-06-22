@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
@@ -35,21 +36,13 @@ public class ProvisioningService {
     @Inject
     private TlsSecurityService tlsSecurityService;
 
-    public ProvisionComplete buildStack(final CloudPlatform cloudPlatform, Stack stack, Map<String, Object> setupProperties) throws Exception {
-        ProvisionComplete provisionComplete = null;
+    public ProvisionComplete buildStack(final CloudPlatform cloudPlatform, Stack stack, Map<String, Object> setupProperties)
+            throws CloudbreakSecuritySetupException {
         stack = stackRepository.findOneWithLists(stack.getId());
-        if (stack.isRequested()) {
-            CloudPlatformConnector cloudPlatformConnector = cloudPlatformConnectors.get(cloudPlatform);
-            Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(cloudPlatform,
-                    tlsSecurityService.readPublicSshKey(stack.getId()),
-                    cloudPlatformConnector.getSSHUser());
-            Set<Resource> resources = cloudPlatformConnector
-                    .buildStack(stack, userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE), setupProperties);
-            provisionComplete = new ProvisionComplete(cloudPlatform, stack.getId(), resources);
-        } else {
-            LOGGER.info("CloudFormation stack creation was requested for a stack, that is not in REQUESTED status anymore. [stackId: '{}', status: '{}']",
-                    stack.getId(), stack.getStatus());
-        }
-        return provisionComplete;
+        CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
+        Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(cloudPlatform, tlsSecurityService.readPublicSshKey(stack.getId()),
+                connector.getSSHUser());
+        Set<Resource> resources = connector.buildStack(stack, userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE), setupProperties);
+        return new ProvisionComplete(cloudPlatform, stack.getId(), resources);
     }
 }

@@ -20,19 +20,22 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
-public class CloudFormationStackStatusChecker extends StackBasedStatusCheckerTask<CloudFormationStackPollerObject> {
+public class CloudFormationStackStatusChecker extends StackBasedStatusCheckerTask<CloudFormationStackContext> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudFormationStackStatusChecker.class);
+
+    @Inject
+    private AwsStackUtil awsStackUtil;
 
     @Inject
     private StackRepository stackRepository;
 
     @Override
-    public boolean checkStatus(CloudFormationStackPollerObject context) {
+    public boolean checkStatus(CloudFormationStackContext context) {
         boolean result = false;
         Stack stack = context.getStack();
         StackStatus successStatus = context.getSuccessStatus();
         StackStatus errorStatus = context.getErrorStatus();
-        AmazonCloudFormationClient client = context.getCloudFormationClient();
+        AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(stack);
         String cloudFormationStackName = stack.getResourceByType(ResourceType.CLOUDFORMATION_STACK).getResourceName();
         DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cloudFormationStackName);
         DescribeStackEventsRequest stackEventsRequest = new DescribeStackEventsRequest().withStackName(cloudFormationStackName);
@@ -52,10 +55,33 @@ public class CloudFormationStackStatusChecker extends StackBasedStatusCheckerTas
                 }
             }
         } catch (AmazonServiceException e) {
-            LOGGER.info("Could not get the description of CloudFormation stack (CB stackId:{}) {}.", stack.getId(), e.getErrorMessage());
+            LOGGER.warn("Could not get the description of CloudFormation stack: {}", e.getErrorMessage());
             result = true;
         }
         return result;
+    }
+
+    @Override
+    public void handleTimeout(CloudFormationStackContext context) {
+        throw new AwsResourceException(String.format("Timeout while polling AWS CloudFormation stack '%s'", context.getStack().getId()));
+    }
+
+    @Override
+    public String successMessage(CloudFormationStackContext context) {
+        return String.format("CloudFormation stack reached the requested state: %s", context.getSuccessStatus().name());
+    }
+
+    @Override
+    public boolean exitPolling(CloudFormationStackContext context) {
+        if (context.getSuccessStatus().equals(StackStatus.DELETE_COMPLETE)) {
+            return false;
+        }
+        try {
+            Stack stack = stackRepository.findById(context.getStack().getId());
+            return stack == null || stack.isDeleteInProgress() || stack.isDeleteCompleted();
+        } catch (Exception e) {
+            return true;
+        }
     }
 
     private String getErrorCauseStatusReason(List<StackEvent> stackEvents, StackStatus errorStatus) {
@@ -70,18 +96,5 @@ public class CloudFormationStackStatusChecker extends StackBasedStatusCheckerTas
             }
         }
         return cause.getResourceStatusReason();
-    }
-
-    @Override
-    public void handleTimeout(CloudFormationStackPollerObject cloudFormationStackPollerObject) {
-        throw new AwsResourceException(String.format(
-                "AWS CloudFormation stack didn't reach the desired state in the given time frame, stack id: %s, name %s",
-                cloudFormationStackPollerObject.getStack().getId(), cloudFormationStackPollerObject.getStack().getName()));
-    }
-
-    @Override
-    public String successMessage(CloudFormationStackPollerObject cloudFormationStackPollerObject) {
-        return String.format("AWS CloudFormation stack(%s) reached the desired state '%s'", cloudFormationStackPollerObject.getStack().getId(),
-                cloudFormationStackPollerObject.getSuccessStatus().name());
     }
 }

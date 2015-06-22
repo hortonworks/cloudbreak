@@ -12,7 +12,9 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.UPDATE_ROL
 import static com.amazonaws.services.cloudformation.model.StackStatus.UPDATE_ROLLBACK_FAILED;
 import static com.amazonaws.services.cloudformation.model.StackStatus.UPDATE_ROLLBACK_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AWS_CF_TEMPLATE_PATH;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isTimeout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -135,15 +137,13 @@ public class AwsConnector implements CloudPlatformConnector {
     @Inject
     private PollingService<AwsInstances> awsPollingService;
     @Inject
-    private PollingService<AutoScalingGroupReady> autoScalingGroupReadyPollingService;
+    private PollingService<AutoScalingGroupReadyContext> autoScalingGroupReadyPollingService;
     @Inject
-    private PollingService<CloudFormationStackDeletePollerObject> cloudFormationDeletePollingService;
+    private PollingService<CloudFormationStackContext> cloudFormationPollingService;
     @Inject
-    private PollingService<CloudFormationStackPollerObject> cloudFormationPollingService;
+    private PollingService<EbsVolumeContext> ebsVolumeStatePollingService;
     @Inject
-    private PollingService<EbsVolumeStatePollerObject> ebsVolumeStatePollingService;
-    @Inject
-    private PollingService<SnapshotReadyPollerObject> snapshotReadyPollingService;
+    private PollingService<SnapshotReadyContext> snapshotReadyPollingService;
     @Inject
     private PollingService<ConsoleOutputContext> consoleOutputPollingService;
     @Inject
@@ -152,8 +152,6 @@ public class AwsConnector implements CloudPlatformConnector {
     private StackRepository stackRepository;
     @Inject
     private AwsInstanceStatusCheckerTask awsInstanceStatusCheckerTask;
-    @Inject
-    private CloudFormationStackDeleteStatusChecker cloudFormationStackDeleteStatusChecker;
     @Inject
     private CloudFormationStackStatusChecker cloudFormationStackStatusChecker;
     @Inject
@@ -188,11 +186,13 @@ public class AwsConnector implements CloudPlatformConnector {
         stack = stackUpdater.addStackResources(stackId, Arrays.asList(cloudFormationStackResource));
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, stackId);
         List<StackStatus> errorStatuses = Arrays.asList(CREATE_FAILED, ROLLBACK_IN_PROGRESS, ROLLBACK_FAILED, ROLLBACK_COMPLETE);
-        CloudFormationStackPollerObject stackPollerContext = new CloudFormationStackPollerObject(client, CREATE_COMPLETE, CREATE_FAILED, errorStatuses, stack);
+        CloudFormationStackContext cfStackContext = new CloudFormationStackContext(CREATE_COMPLETE, CREATE_FAILED, errorStatuses, stack);
 
         PollingResult pollingResult = cloudFormationPollingService
-                .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
-        if (!isSuccess(pollingResult)) {
+                .pollWithTimeout(cloudFormationStackStatusChecker, cfStackContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
+        if (isExited(pollingResult)) {
+            throw new FlowCancelledException("Stack creation cancelled.");
+        } else if (isTimeout(pollingResult)) {
             throw new AwsResourceException(String.format("Failed to create CloudFormation stack: %s, polling result '%s'",
                     stackId, pollingResult));
         }
@@ -233,17 +233,16 @@ public class AwsConnector implements CloudPlatformConnector {
                     .withSize(SNAPSHOT_VOLUME_SIZE)
                     .withAvailabilityZone(availabilityZonesResult.getAvailabilityZones().get(0).getZoneName())
                     .withEncrypted(true));
-            EbsVolumeStatePollerObject ebsVolumeStateObject =
-                    new EbsVolumeStatePollerObject(stack, volumeResult, volumeResult.getVolume().getVolumeId(), client);
+            EbsVolumeContext ebsVolumeContext = new EbsVolumeContext(stack, volumeResult.getVolume().getVolumeId());
             PollingResult pollingResult = ebsVolumeStatePollingService
-                    .pollWithTimeout(ebsVolumeStateCheckerTask, ebsVolumeStateObject, POLLING_INTERVAL, INFINITE_ATTEMPTS);
+                    .pollWithTimeout(ebsVolumeStateCheckerTask, ebsVolumeContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
             if (PollingResult.isSuccess(pollingResult)) {
                 CreateSnapshotResult snapshotResult = client.createSnapshot(
                         new CreateSnapshotRequest().withVolumeId(volumeResult.getVolume().getVolumeId()).withDescription("Encrypted snapshot"));
-                SnapshotReadyPollerObject snapshotReadyPollerObject =
-                        new SnapshotReadyPollerObject(stack, snapshotResult, snapshotResult.getSnapshot().getSnapshotId(), client);
+                SnapshotReadyContext snapshotReadyContext =
+                        new SnapshotReadyContext(stack, snapshotResult, snapshotResult.getSnapshot().getSnapshotId());
                 pollingResult = snapshotReadyPollingService
-                        .pollWithTimeout(snapshotReadyCheckerTask, snapshotReadyPollerObject, POLLING_INTERVAL, INFINITE_ATTEMPTS);
+                        .pollWithTimeout(snapshotReadyCheckerTask, snapshotReadyContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
                 if (PollingResult.isSuccess(pollingResult)) {
                     CreateTagsRequest createTagsRequest = new CreateTagsRequest()
                             .withTags(ImmutableList.of(new Tag().withKey(CLOUDBREAK_EBS_SNAPSHOT).withValue(CLOUDBREAK_EBS_SNAPSHOT)))
@@ -283,7 +282,7 @@ public class AwsConnector implements CloudPlatformConnector {
         LOGGER.info("Updated AutoScaling group's desiredCapacity: [stack: '{}', from: '{}', to: '{}']", stack.getId(),
                 instanceGroupByInstanceGroupName.getNodeCount(),
                 instanceGroupByInstanceGroupName.getNodeCount() + instanceCount);
-        AutoScalingGroupReady asGroupReady = new AutoScalingGroupReady(stack, amazonEC2Client, amazonASClient, asGroupName, requiredInstances);
+        AutoScalingGroupReadyContext asGroupReady = new AutoScalingGroupReadyContext(stack, asGroupName, requiredInstances);
         LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
         PollingResult pollingResult = autoScalingGroupReadyPollingService
                 .pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -326,13 +325,12 @@ public class AwsConnector implements CloudPlatformConnector {
         AmazonCloudFormationClient cloudFormationClient = awsStackUtil.createCloudFormationClient(stack);
         cloudFormationClient.updateStack(updateStackRequest);
         List<StackStatus> errorStatuses = Arrays.asList(UPDATE_ROLLBACK_COMPLETE, UPDATE_ROLLBACK_FAILED);
-        CloudFormationStackPollerObject stackPollerContext = new CloudFormationStackPollerObject(cloudFormationClient, UPDATE_COMPLETE,
-                UPDATE_ROLLBACK_IN_PROGRESS, errorStatuses, stack);
+        CloudFormationStackContext cfStackContext = new CloudFormationStackContext(UPDATE_COMPLETE, UPDATE_ROLLBACK_IN_PROGRESS, errorStatuses, stack);
         PollingResult pollingResult = cloudFormationPollingService
-                .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
+                .pollWithTimeout(cloudFormationStackStatusChecker, cfStackContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
         if (!isSuccess(pollingResult)) {
             LOGGER.info("Cloud Formation Stack status check result: {} . ", pollingResult);
-            throw new AwsResourceException(String.format("Cloud Formation update failed. polling result: '%s', stack id: '%' ",
+            throw new AwsResourceException(String.format("CloudFormation update failed. polling result: '%s', stack id: '%s' ",
                     pollingResult, stack.getId()));
         }
     }
@@ -400,10 +398,9 @@ public class AwsConnector implements CloudPlatformConnector {
             DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(cFStackName);
             client.deleteStack(deleteStackRequest);
             List<StackStatus> errorStatuses = Arrays.asList(DELETE_FAILED);
-            CloudFormationStackDeletePollerObject stackPollerContext = new CloudFormationStackDeletePollerObject(client, DELETE_COMPLETE,
-                    DELETE_FAILED, errorStatuses, stack);
-            PollingResult pollingResult = cloudFormationDeletePollingService
-                    .pollWithTimeout(cloudFormationStackDeleteStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
+            CloudFormationStackContext cfStackContext = new CloudFormationStackContext(DELETE_COMPLETE, DELETE_FAILED, errorStatuses, stack);
+            PollingResult pollingResult = cloudFormationPollingService
+                    .pollWithTimeout(cloudFormationStackStatusChecker, cfStackContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
             if (!isSuccess(pollingResult)) {
                 LOGGER.error(String.format("Failed to delete CloudFormation stack: %s, id:%s", cFStackName, stack.getId()));
                 throw new AwsResourceException(String.format("Failed to delete CloudFormation stack; polling result: '%s'.", pollingResult));
@@ -563,7 +560,7 @@ public class AwsConnector implements CloudPlatformConnector {
                     }
                 }
             } catch (AmazonServiceException e) {
-                if (e.getErrorMessage().matches("Resource.*does not exist for stack.*")) {
+                if (e.getErrorMessage().matches("Resource.*does not exist for stack.*") || e.getErrorMessage().matches("Stack '.*' does not exist.*")) {
                     LOGGER.info(e.getMessage());
                 } else {
                     throw e;

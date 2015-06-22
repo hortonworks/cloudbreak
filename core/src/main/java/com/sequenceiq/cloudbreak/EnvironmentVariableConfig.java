@@ -55,7 +55,7 @@ public class EnvironmentVariableConfig {
     public static final String CB_BAYWATCH_EXTERN_LOCATION = "";
 
     public static final String CB_AZURE_IMAGE_URI = "https://102589fae040d8westeurope.blob.core.windows.net/images/packer-cloudbreak-2015-06-16-centos6-tls2_2015-June-16_15-17-os-2015-06-16.vhd";
-    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-6ce13b6c,ap-southeast-1:ami-9ebfbacc,ap-southeast-2:ami-4d2d5777,eu-west-1:ami-cb1962bc,sa-east-1:ami-330a892e,us-east-1:ami-07e7146c,us-west-1:ami-07e7146c,us-west-2:ami-cb162cfb";
+    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-6ce13b6c,ap-southeast-1:ami-9ebfbacc,ap-southeast-2:ami-4d2d5777,eu-west-1:ami-cb1962bc,sa-east-1:ami-330a892e,us-east-1:ami-07e7146c,us-west-1:ami-3bc93d7f,us-west-2:ami-cb162cfb";
     public static final String CB_OPENSTACK_IMAGE = "cb-centos66-amb200-2015-06-18";
     public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos66-amb200-2015-06-16-1933.image.tar.gz";
     public static final String CB_GCP_AND_AZURE_USER_NAME = "cloudbreak";
