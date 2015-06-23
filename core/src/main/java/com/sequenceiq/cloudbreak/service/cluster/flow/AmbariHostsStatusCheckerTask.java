@@ -10,12 +10,12 @@ import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 
 @Component
-public class AmbariHostsStatusCheckerTask extends StackBasedStatusCheckerTask<AmbariHosts> {
+public class AmbariHostsStatusCheckerTask extends StackBasedStatusCheckerTask<AmbariHostsCheckerContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariHostsStatusCheckerTask.class);
 
     @Override
-    public boolean checkStatus(AmbariHosts t) {
+    public boolean checkStatus(AmbariHostsCheckerContext t) {
         Map<String, String> hostNames = t.getAmbariClient().getHostNamesByState("HEALTHY");
         int hostsFound = hostNames.size();
         LOGGER.info("Ambari client found {} hosts ({} needed). [Stack: '{}']", hostsFound, t.getHostCount(), t.getStack().getId());
@@ -26,13 +26,13 @@ public class AmbariHostsStatusCheckerTask extends StackBasedStatusCheckerTask<Am
     }
 
     @Override
-    public void handleTimeout(AmbariHosts t) {
+    public void handleTimeout(AmbariHostsCheckerContext t) {
         throw new AmbariHostsUnavailableException(String.format("Operation timed out. Failed to find all '%s' Ambari hosts. Stack: '%s'",
                 t.getHostCount(), t.getStack().getId()));
     }
 
     @Override
-    public String successMessage(AmbariHosts t) {
+    public String successMessage(AmbariHostsCheckerContext t) {
         return String.format("Ambari client found all %s hosts for stack '%s'", t.getHostCount(), t.getStack().getId());
     }
 

@@ -10,12 +10,12 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
-public class AmbariHostsJoinStatusCheckerTask extends StackBasedStatusCheckerTask<AmbariHosts> {
+public class AmbariHostsJoinStatusCheckerTask extends StackBasedStatusCheckerTask<AmbariHostsCheckerContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariHostsJoinStatusCheckerTask.class);
 
     @Override
-    public boolean checkStatus(AmbariHosts hosts) {
+    public boolean checkStatus(AmbariHostsCheckerContext hosts) {
         try {
             AmbariClient ambariClient = hosts.getAmbariClient();
             List<String> hostNames = ambariClient.getClusterHosts();
@@ -33,12 +33,12 @@ public class AmbariHostsJoinStatusCheckerTask extends StackBasedStatusCheckerTas
     }
 
     @Override
-    public void handleTimeout(AmbariHosts t) {
+    public void handleTimeout(AmbariHostsCheckerContext t) {
         LOGGER.error("Operation timed out. Failed to find all '{}' Ambari hosts. Stack: '{}'", t.getHostCount(), t.getStack().getId());
     }
 
     @Override
-    public String successMessage(AmbariHosts t) {
+    public String successMessage(AmbariHostsCheckerContext t) {
         return String.format("Ambari client found all %s hosts for stack '%s'", t.getHostCount(), t.getStack().getId());
     }
 

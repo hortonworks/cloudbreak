@@ -99,6 +99,10 @@ public class ModelDescriptions {
         public static final String HOST_GROUP_NAME = "name of the host group";
     }
 
+    public static class HostMetadataModelDescription {
+        public static final String STATE = "state of the host";
+    }
+
     public static class HostGroupAdjustmentModelDescription {
         public static final String SCALING_ADJUSTMENT = "scaling adjustment of the host groups";
         public static final String WITH_STACK_UPDATE = "on cluster update, update stack too";

@@ -13,12 +13,14 @@ import com.sequenceiq.cloudbreak.core.flow.TransitionKeyService;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
+import com.sequenceiq.cloudbreak.core.flow.context.StackInstanceUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
+import com.sequenceiq.cloudbreak.service.stack.event.RemoveInstanceRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateAllowedSubnetsRequest;
@@ -143,6 +145,13 @@ public class ReactorFlowManager implements FlowManager {
         UpdateInstancesRequest updateRequest = (UpdateInstancesRequest) object;
         StackScalingContext context = new StackScalingContext(updateRequest);
         reactor.notify(FlowPhases.STACK_DOWNSCALE.name(), eventFactory.createEvent(context, FlowPhases.STACK_DOWNSCALE.name()));
+    }
+
+    @Override
+    public void triggerStackRemoveInstance(Object object) {
+        RemoveInstanceRequest removeInstanceRequest = (RemoveInstanceRequest) object;
+        StackInstanceUpdateContext context = new StackInstanceUpdateContext(removeInstanceRequest);
+        reactor.notify(FlowPhases.REMOVE_INSTANCE.name(), eventFactory.createEvent(context, FlowPhases.REMOVE_INSTANCE.name()));
     }
 
     @Override
