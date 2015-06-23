@@ -360,13 +360,13 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public boolean startAll(Stack stack) {
-        return setStackState(stack, false);
+    public void startAll(Stack stack) {
+        setStackState(stack, false);
     }
 
     @Override
-    public boolean stopAll(Stack stack) {
-        return setStackState(stack, true);
+    public void stopAll(Stack stack) {
+        setStackState(stack, true);
     }
 
     /**
@@ -467,8 +467,7 @@ public class AwsConnector implements CloudPlatformConnector {
         return image.getRootDeviceName();
     }
 
-    private boolean setStackState(Stack stack, boolean stopped) {
-        boolean result = true;
+    private void setStackState(Stack stack, boolean stopped) {
         Regions region = Regions.valueOf(stack.getRegion());
         AwsCredential credential = (AwsCredential) stack.getCredential();
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(region, credential);
@@ -507,11 +506,9 @@ public class AwsConnector implements CloudPlatformConnector {
                     updateInstanceMetadata(stack, amazonEC2Client, stack.getRunningInstanceMetaData(), instances);
                 }
             } catch (Exception e) {
-                LOGGER.error(String.format("Failed to %s AWS instances on stack: %s", stopped ? "stop" : "start", stack.getId()), e);
-                result = false;
+                throw new AwsResourceException(String.format("Failed to %s AWS instances on stack: %s", stopped ? "stop" : "start", stack.getId()), e);
             }
         }
-        return result;
     }
 
     private Collection<String> removeInstanceIdsWhichAreNotInCorrectState(Collection<String> instances, AmazonEC2Client amazonEC2Client, String state) {

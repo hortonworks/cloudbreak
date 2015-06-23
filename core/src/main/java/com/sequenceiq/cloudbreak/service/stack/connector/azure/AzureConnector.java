@@ -107,17 +107,17 @@ public class AzureConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public boolean startAll(Stack stack) {
+    public void startAll(Stack stack) {
         StartStopOperation startOperation = buildAzureOperation(new StartStopOperation.Builder(), stack)
                 .withStarted(true).build();
-        return startOperation.execute();
+        startOperation.execute();
     }
 
     @Override
-    public boolean stopAll(Stack stack) {
+    public void stopAll(Stack stack) {
         StartStopOperation stopOperation = buildAzureOperation(new StartStopOperation.Builder(), stack)
                 .withStarted(false).build();
-        return stopOperation.execute();
+        stopOperation.execute();
     }
 
     @Override

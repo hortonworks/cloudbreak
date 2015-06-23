@@ -30,10 +30,7 @@ public class StackStartService {
     public FlowContext start(FlowContext context) throws CloudbreakException {
         StackStatusUpdateContext stackStatusUpdateContext = (StackStatusUpdateContext) context;
         Stack stack = stackRepository.findOneWithLists(stackStatusUpdateContext.getStackId());
-        CloudPlatformConnector connector = cloudPlatformConnectors.get(stack.cloudPlatform());
-        if (!connector.startAll(stack)) {
-            throw new CloudbreakException("The cluster infrastructure cannot be started.");
-        }
+        cloudPlatformConnectors.get(stack.cloudPlatform()).startAll(stack);
         return stackStatusUpdateContext;
     }
 }

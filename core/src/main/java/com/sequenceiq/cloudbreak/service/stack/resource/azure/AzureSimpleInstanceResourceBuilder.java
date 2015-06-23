@@ -91,13 +91,13 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
     }
 
     @Override
-    public Boolean start(AzureStartStopContextObject startStopContextObject, Resource resource, String region) {
-        return true;
+    public void start(AzureStartStopContextObject startStopContextObject, Resource resource, String region) {
+        LOGGER.debug("Instance start requested - nothing to do.");
     }
 
     @Override
-    public Boolean stop(AzureStartStopContextObject startStopContextObject, Resource resource, String region) {
-        return true;
+    public void stop(AzureStartStopContextObject startStopContextObject, Resource resource, String region) {
+        LOGGER.debug("Instance stop requested - nothing to do.");
     }
 
     @Override

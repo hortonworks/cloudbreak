@@ -310,7 +310,7 @@ public class ParallelCloudResourceManager {
         }
     }
 
-    public boolean startStopResources(Stack stack, final boolean start, ResourceBuilderInit resourceBuilderInit) {
+    public void startStopResources(Stack stack, final boolean start, ResourceBuilderInit resourceBuilderInit) {
         boolean finished = true;
         CloudPlatform cloudPlatform = stack.cloudPlatform();
         final Map<String, String> mdcCtxMap = MDC.getCopyOfContextMap();
@@ -326,34 +326,48 @@ public class ParallelCloudResourceManager {
                     }
                 }
             }
-            List<Future<Boolean>> futures = new ArrayList<>();
+            List<Future<Void>> futures = new ArrayList<>();
             for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
                 List<Resource> resourceByType = stack.getResourcesByType(resourceBuilder.resourceType());
                 for (final Resource resource : resourceByType) {
                     final Stack finalStack = stack;
-                    Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
+                    Future<Void> submit = resourceBuilderExecutor.submit(new Callable<Void>() {
                         @Override
-                        public Boolean call() throws Exception {
+                        public Void call() throws Exception {
                             MDC.setContextMap(mdcCtxMap);
                             if (start) {
-                                return resourceBuilder.start(sSCO, resource, finalStack.getRegion());
+                                resourceBuilder.start(sSCO, resource, finalStack.getRegion());
+                                return null;
                             } else {
-                                return resourceBuilder.stop(sSCO, resource, finalStack.getRegion());
+                                resourceBuilder.stop(sSCO, resource, finalStack.getRegion());
+                                return null;
                             }
                         }
                     });
                     futures.add(submit);
                 }
             }
-            for (Future<Boolean> future : futures) {
-                if (!future.get()) {
-                    finished = false;
-                }
-            }
-        } catch (Exception ex) {
-            finished = false;
+            processResults(futures);
+        } catch (Exception e) {
+            throw new CloudConnectorException(String.format("Failed to %s resources.", start ? "start" : "stop"), e);
         }
-        return finished;
+    }
+
+    private void processResults(List<Future<Void>> futures) {
+        Set<String> exceptions = new HashSet<>();
+        Exception lastException = null;
+        for (Future<Void> future : futures) {
+            try {
+                future.get();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+                exceptions.add(e.getMessage());
+                lastException = e;
+            }
+        }
+        if (!exceptions.isEmpty()) {
+            throw new CloudConnectorException(exceptions.toString(), lastException);
+        }
     }
 
     public void updateAllowedSubnets(Stack stack, ResourceBuilderInit resourceBuilderInit) {

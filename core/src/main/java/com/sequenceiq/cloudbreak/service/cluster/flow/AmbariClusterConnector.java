@@ -327,18 +327,29 @@ public class AmbariClusterConnector {
         }
     }
 
-    public void deleteHostFromAmbari(Stack stack, HostMetadata data) throws CloudbreakSecuritySetupException {
+    public boolean deleteHostFromAmbari(Stack stack, HostMetadata data) throws CloudbreakSecuritySetupException {
+        boolean hostDeleted = false;
         TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), stack.getCluster().getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, stack.getCluster());
         Set<String> components = getHadoopComponents(stack.getCluster(), ambariClient, data.getHostGroup().getName(),
                 stack.getCluster().getBlueprint().getBlueprintName());
-        ambariHostsRemover.deleteHosts(stack, Arrays.asList(data.getHostName()), new ArrayList<>(components));
-        PollingResult result = restartHadoopServices(stack, ambariClient, true);
-        if (isTimeout(result)) {
-            throw new AmbariOperationFailedException("Timeout while restarting Hadoop services.");
-        } else if (isExited(result)) {
-            throw new FlowCancelledException("Flow cancelled while restarting Hadoop services.");
+        if (ambariClient.getClusterHosts().contains(data.getHostName())) {
+            String hostState = ambariClient.getHostState(data.getHostName());
+            if ("UNKNOWN".equals(hostState)) {
+                ambariHostsRemover.deleteHosts(stack, Arrays.asList(data.getHostName()), new ArrayList<>(components));
+                PollingResult result = restartHadoopServices(stack, ambariClient, true);
+                if (isTimeout(result)) {
+                    throw new AmbariOperationFailedException("Timeout while restarting Hadoop services.");
+                } else if (isExited(result)) {
+                    throw new FlowCancelledException("Cluster was terminated while restarting Hadoop services.");
+                }
+                hostDeleted = true;
+            }
+        } else {
+            LOGGER.debug("Host is already deleted.");
+            hostDeleted = true;
         }
+        return hostDeleted;
     }
 
     private void stopAllServices(Stack stack, AmbariClient ambariClient) throws CloudbreakException {

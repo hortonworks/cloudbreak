@@ -201,61 +201,51 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     }
 
     @Override
-    public Boolean start(AzureStartStopContextObject aSSCO, Resource resource, String region) {
+    public void start(AzureStartStopContextObject aSSCO, Resource resource, String region) {
         Stack stack = stackRepository.findById(aSSCO.getStack().getId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
-        boolean started = setStackState(aSSCO.getStack().getId(), resource, azureStackUtil.createAzureClient(credential), false);
-        if (started) {
-            azurePollingService.pollWithTimeout(
-                    azureInstanceStatusCheckerTask,
-                    new AzureInstances(aSSCO.getStack(), azureStackUtil.createAzureClient(credential), Arrays.asList(resource.getResourceName()), "Running"),
-                    POLLING_INTERVAL,
-                    MAX_ATTEMPTS_FOR_AMBARI_OPS,
-                    MAX_FAILURE_COUNT);
-            return true;
-        }
-        return false;
+        setStackState(aSSCO.getStack().getId(), resource, azureStackUtil.createAzureClient(credential), false);
+        azurePollingService.pollWithTimeout(
+                azureInstanceStatusCheckerTask,
+                new AzureInstances(aSSCO.getStack(), azureStackUtil.createAzureClient(credential), Arrays.asList(resource.getResourceName()), "Running"),
+                POLLING_INTERVAL,
+                MAX_ATTEMPTS_FOR_AMBARI_OPS,
+                MAX_FAILURE_COUNT);
+
     }
 
     @Override
-    public Boolean stop(AzureStartStopContextObject aSSCO, Resource resource, String region) {
+    public void stop(AzureStartStopContextObject aSSCO, Resource resource, String region) {
         Stack stack = stackRepository.findById(aSSCO.getStack().getId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
-        boolean stopped = setStackState(aSSCO.getStack().getId(), resource, azureStackUtil.createAzureClient(credential), true);
-        if (stopped) {
-            azurePollingService.pollWithTimeout(
-                    new AzureInstanceStatusCheckerTask(),
-                    new AzureInstances(aSSCO.getStack(), azureStackUtil.createAzureClient(credential), Arrays.asList(resource.getResourceName()), "Suspended"),
-                    POLLING_INTERVAL,
-                    MAX_ATTEMPTS_FOR_AMBARI_OPS);
-            return true;
-        }
-        return false;
+        setStackState(aSSCO.getStack().getId(), resource, azureStackUtil.createAzureClient(credential), true);
+        azurePollingService.pollWithTimeout(
+                new AzureInstanceStatusCheckerTask(),
+                new AzureInstances(aSSCO.getStack(), azureStackUtil.createAzureClient(credential), Arrays.asList(resource.getResourceName()), "Suspended"),
+                POLLING_INTERVAL,
+                MAX_ATTEMPTS_FOR_AMBARI_OPS);
+
     }
 
-    private boolean setStackState(Long stackId, Resource resource, AzureClient azureClient, boolean stopped) {
-        boolean result = true;
+    private void setStackState(Long stackId, Resource resource, AzureClient azureClient, boolean stopped) {
         try {
             Map<String, String> vmContext = createVMContext(resource.getResourceName());
             if (stopped) {
                 if ("Running".equals(azureClient.getVirtualMachineState(vmContext))) {
                     azureClient.stopVirtualMachine(vmContext);
                 } else {
-                    return true;
+                    LOGGER.info("Instance is not in Running state - won't stop it.");
                 }
             } else {
                 if ("Suspended".equals(azureClient.getVirtualMachineState(vmContext))) {
                     azureClient.startVirtualMachine(vmContext);
                 } else {
-                    return true;
+                    LOGGER.info("Instance is not in Suspended state - won't start it.");
                 }
             }
-
         } catch (Exception e) {
-            LOGGER.error(String.format("Failed to %s AZURE instances on stack: %s", stopped ? "stop" : "start", stackId));
-            result = false;
+            throw new AzureResourceException(String.format("Failed to %s AZURE instances on stack: %s", stopped ? "stop" : "start", stackId), e);
         }
-        return result;
     }
 
     private Map<String, String> createVMContext(String vmName) {

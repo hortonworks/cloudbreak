@@ -21,9 +21,9 @@ public interface ResourceBuilder<P extends ProvisionContextObject,
 
     ResourceBuilderType resourceBuilderType();
 
-    Boolean start(SSCO startStopContextObject, Resource resource, String region);
+    void start(SSCO startStopContextObject, Resource resource, String region);
 
-    Boolean stop(SSCO startStopContextObject, Resource resource, String region);
+    void stop(SSCO startStopContextObject, Resource resource, String region);
 
     List<Resource> buildResources(P provisionContextObject, int index, List<Resource> resources,
             Optional<InstanceGroup> instanceGroup);

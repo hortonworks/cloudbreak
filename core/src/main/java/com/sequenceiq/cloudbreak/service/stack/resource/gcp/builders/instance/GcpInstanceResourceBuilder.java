@@ -231,7 +231,7 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
     }
 
     @Override
-    public Boolean stop(GcpStartStopContextObject startStopContextObject, Resource resource, String region) {
+    public void stop(GcpStartStopContextObject startStopContextObject, Resource resource, String region) {
         GcpCredential credential = (GcpCredential) startStopContextObject.getStack().getCredential();
         try {
             Compute.Instances.Get get = startStopContextObject.getCompute().instances()
@@ -240,18 +240,17 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
                 Compute.Instances.Stop stop = startStopContextObject.getCompute().instances()
                         .stop(credential.getProjectId(), CloudRegion.valueOf(region).value(), resource.getResourceName());
                 stop.setPrettyPrint(Boolean.TRUE);
-                return setInstanceState(stop.execute(), startStopContextObject, resource, credential, false);
+                setInstanceState(stop.execute(), startStopContextObject, resource, credential, false);
             } else {
-                return true;
+                LOGGER.info("Instance is not in RUNNING state - won't stop it.");
             }
         } catch (IOException e) {
-            LOGGER.error(String.format("There was an error in the vm stop [%s]: %s", resource.getResourceName(), e.getMessage()));
-            return false;
+            throw new GcpResourceException(String.format("An error occurred while stopping the vm '%s'", resource.getResourceName()), e);
         }
     }
 
     @Override
-    public Boolean start(GcpStartStopContextObject startStopContextObject, Resource resource, String region) {
+    public void start(GcpStartStopContextObject startStopContextObject, Resource resource, String region) {
         GcpCredential credential = (GcpCredential) startStopContextObject.getStack().getCredential();
         try {
             Compute.Instances.Get get = startStopContextObject.getCompute().instances()
@@ -260,17 +259,16 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
                 Compute.Instances.Start start = startStopContextObject.getCompute().instances()
                         .start(credential.getProjectId(), CloudRegion.valueOf(region).value(), resource.getResourceName());
                 start.setPrettyPrint(Boolean.TRUE);
-                return setInstanceState(start.execute(), startStopContextObject, resource, credential, true);
+                setInstanceState(start.execute(), startStopContextObject, resource, credential, true);
             } else {
-                return true;
+                LOGGER.info("Instance is not in TERMINATED state - won't start it.");
             }
         } catch (IOException e) {
-            LOGGER.error(String.format("There was an error in the vm start [%s]: %s", resource.getResourceName(), e.getMessage()));
-            return false;
+            throw new GcpResourceException(String.format("An error occurred while starting the vm '%s'", resource.getResourceName()), e);
         }
     }
 
-    private Boolean setInstanceState(Operation operation, GcpStartStopContextObject startStopContextObject, Resource resource,
+    private void setInstanceState(Operation operation, GcpStartStopContextObject startStopContextObject, Resource resource,
             GcpCredential credential, boolean start) throws IOException {
         if (operation.getHttpErrorStatusCode() == null) {
             Compute.ZoneOperations.Get zoneOperations = createZoneOperations(
@@ -284,9 +282,9 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
             if (start) {
                 updateInstanceMetadata(startStopContextObject, resource);
             }
-            return true;
         } else {
-            return false;
+            throw new GcpResourceException(String.format("Gcp operation returned an error code: %s, message: %s",
+                    operation.getHttpErrorStatusCode(), operation.getHttpErrorMessage()));
         }
     }
 
