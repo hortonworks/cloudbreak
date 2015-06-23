@@ -31,10 +31,8 @@ public class AmbariHostsRemover {
         TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
         for (String hostName : hosts) {
-            if (cluster != null) {
-                ambariClient.deleteHostComponents(hostName, components);
-                ambariClient.deleteHost(hostName);
-            }
+            ambariClient.deleteHostComponents(hostName, components);
+            ambariClient.deleteHost(hostName);
             unregisterHost(ambariClient, hostName, UNREGISTER_RETRY);
         }
     }

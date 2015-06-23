@@ -209,4 +209,9 @@ public class InstanceMetaData implements ProvisionEntity {
     public boolean isRegistered() {
         return InstanceStatus.REGISTERED.equals(instanceStatus);
     }
+
+    public boolean isRunning() {
+        return InstanceStatus.REGISTERED.equals(instanceStatus) || InstanceStatus.UNREGISTERED.equals(instanceStatus);
+    }
+
 }

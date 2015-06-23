@@ -179,10 +179,13 @@ public class DefaultStackService implements StackService {
     @Override
     public void updateStatus(Long stackId, StatusRequest status) {
         Stack stack = stackRepository.findOne(stackId);
-        Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
+        Cluster cluster = null;
+        if (stack.getCluster() != null) {
+            cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
+        }
         switch (status) {
             case SYNC:
-                sync(stack, cluster, status);
+                sync(stack, status);
                 break;
             case STOPPED:
                 stop(stack, cluster, status);
@@ -195,19 +198,19 @@ public class DefaultStackService implements StackService {
         }
     }
 
-    private void sync(Stack stack, Cluster cluster, StatusRequest statusRequest) {
+    private void sync(Stack stack, StatusRequest statusRequest) {
         flowManager.triggerStackSync(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), statusRequest));
     }
 
     private void stop(Stack stack, Cluster cluster, StatusRequest statusRequest) {
-        if (cluster.isStopInProgress()) {
+        if (cluster != null && cluster.isStopInProgress()) {
             flowManager.triggerStackStopRequested(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), statusRequest));
         } else {
             if (!stack.isAvailable() && !stack.isStopFailed()) {
                 throw new BadRequestException(
                         String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getId()));
             }
-            if (!cluster.isStopped() && !stack.isStopFailed()) {
+            if ((cluster != null && !cluster.isStopped()) && !stack.isStopFailed()) {
                 throw new BadRequestException(
                         String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.", stack.getId()));
             }
@@ -217,7 +220,7 @@ public class DefaultStackService implements StackService {
     }
 
     private void start(Stack stack, Cluster cluster, StatusRequest statusRequest) {
-        if ((!stack.isStopped() || !cluster.isStopped()) && !stack.isStartFailed()) {
+        if ((!stack.isStopped() || (cluster != null && !cluster.isStopped())) && !stack.isStartFailed()) {
             throw new BadRequestException(
                     String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stack.getId()));
         }
