@@ -735,7 +735,7 @@ app.delete('/users/:userId', function(req, res){
                 isUserAdmin(req, res, adminUserData, function(companyId) {
                     getUserById(req, res, token, userId, function(userData) {
                         var userCompanyId = null
-                        var isAdmin = true
+                        var isAdmin = false
                         var groups = userData.groups
                         for (var i = 0; i < groups.length; i++ ){
                             if (groups[i].display.lastIndexOf('sequenceiq.account', 0) === 0) {
