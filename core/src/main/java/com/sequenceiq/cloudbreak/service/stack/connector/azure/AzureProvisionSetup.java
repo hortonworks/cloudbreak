@@ -48,7 +48,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
     private static final String VM_COMMON_NAME = "cloudbreak";
     private static final String OS = "os";
     private static final String MEDIALINK = "mediaLink";
-    private static final int MILLIS = 5000;
+    private static final int MILLIS = 30000;
     private static final String PENDING = "pending";
     private static final String SUCCESS = "success";
     private static final int ONE_HUNDRED = 100;

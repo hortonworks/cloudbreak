@@ -28,7 +28,6 @@ public class ProvisioningSetupService {
 
     public ProvisionSetupComplete setup(Stack stack) throws Exception {
         ProvisionSetupComplete setupComplete = (ProvisionSetupComplete) provisionSetups.get(stack.cloudPlatform()).setupProvisioning(stack);
-        stackRepository.save(stack);
         tlsSecurityService.copyClientKeys(stack.getId());
         tlsSecurityService.setupSSHKeys(stack);
         return setupComplete;
