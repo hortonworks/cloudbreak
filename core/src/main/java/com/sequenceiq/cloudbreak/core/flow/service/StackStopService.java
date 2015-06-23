@@ -47,12 +47,8 @@ public class StackStopService {
         StackStatusUpdateContext stackStatusUpdateContext = (StackStatusUpdateContext) context;
         long stackId = stackStatusUpdateContext.getStackId();
         Stack stack = stackRepository.findOneWithLists(stackId);
-        CloudPlatformConnector connector = cloudPlatformConnectors.get(stack.cloudPlatform());
-        if (connector.stopAll(stack)) {
-            return stackStatusUpdateContext;
-        } else {
-            throw new CloudbreakException("The cluster infrastructure could not be stopped.");
-        }
+        cloudPlatformConnectors.get(stack.cloudPlatform()).stopAll(stack);
+        return stackStatusUpdateContext;
     }
 
 }

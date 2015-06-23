@@ -92,7 +92,6 @@ public class StackSyncService {
                 instanceStateCounts.put(InstanceSyncState.UNKNOWN, instanceStateCounts.get(InstanceSyncState.UNKNOWN) + 1);
             }
         }
-
         handleSyncResult(stack, instanceStateCounts);
     }
 
@@ -127,13 +126,22 @@ public class StackSyncService {
         try {
             HostMetadata hostMetadata = hostMetadataRepository.findHostsInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN());
             if (hostMetadata != null) {
-                ambariClusterConnector.deleteHostFromAmbari(stack, hostMetadata);
-                hostMetadataRepository.delete(hostMetadata);
+                if (ambariClusterConnector.deleteHostFromAmbari(stack, hostMetadata)) {
+                    hostMetadataRepository.delete(hostMetadata.getId());
+                    eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+                            String.format("Deleted host '%s' from Ambari because it is marked as terminated by the cloud provider.",
+                                    instanceMetaData.getDiscoveryFQDN()));
+                } else {
+                    eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), String.format(
+                            "Instance '%s' is terminated but couldn't remove host from Ambari because it still reports the host as healthy. Try syncing later.",
+                            instanceMetaData.getDiscoveryFQDN()));
+                }
             }
         } catch (Exception e) {
             LOGGER.error("Host cannot be deleted from cluster: ", e);
-            eventService.fireCloudbreakEvent(stack.getId(), DELETE_FAILED.name(),
-                    String.format("Could not delete host '%s' from ambari.", instanceMetaData.getInstanceId()));
+            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+                    String.format("Instance '%s' is marked as terminated by the cloud provider, but couldn't delete the host from Ambari.",
+                            instanceMetaData.getDiscoveryFQDN()));
         }
     }
 
@@ -144,7 +152,7 @@ public class StackSyncService {
         instanceGroupRepository.save(instanceGroup);
         eventService.fireCloudbreakEvent(stackId, AVAILABLE.name(),
                 String.format("Deleted instance '%s' from Cloudbreak metadata because it couldn't be found on the cloud provider.",
-                        instanceMetaData.getInstanceId()));
+                        instanceMetaData.getDiscoveryFQDN()));
     }
 
     private void updateMetaDataToRunning(Long stackId, Cluster cluster, InstanceMetaData instanceMetaData, InstanceGroup instanceGroup) {

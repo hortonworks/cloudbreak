@@ -20,9 +20,9 @@ public interface CloudPlatformConnector {
 
     void rollback(Stack stack, Set<Resource> resourceSet);
 
-    boolean startAll(Stack stack);
+    void startAll(Stack stack);
 
-    boolean stopAll(Stack stack);
+    void stopAll(Stack stack);
 
     CloudPlatform getCloudPlatform();
 

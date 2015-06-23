@@ -36,6 +36,10 @@ public class HostMetadata {
 
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public String getHostName() {
         return hostName;
     }

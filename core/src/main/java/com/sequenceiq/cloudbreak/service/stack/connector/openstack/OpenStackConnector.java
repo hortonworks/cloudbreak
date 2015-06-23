@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack.connector.openstack;
 
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isTimeout;
 import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
@@ -167,13 +168,13 @@ public class OpenStackConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public boolean startAll(Stack stack) {
-        return setStackState(stack, false);
+    public void startAll(Stack stack) {
+        setStackState(stack, false);
     }
 
     @Override
-    public boolean stopAll(Stack stack) {
-        return setStackState(stack, true);
+    public void stopAll(Stack stack) {
+        setStackState(stack, true);
     }
 
     @Override
@@ -238,8 +239,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
     }
 
 
-    private boolean setStackState(Stack stack, boolean stopped) {
-        boolean result = true;
+    private void setStackState(Stack stack, boolean stopped) {
         OSClient osClient = openStackUtil.createOSClient(stack);
         Resource heatResource = stack.getResourceByType(ResourceType.HEAT_STACK);
         String heatStackId = heatResource.getResourceName();
@@ -251,37 +251,26 @@ public class OpenStackConnector implements CloudPlatformConnector {
             String instanceId = (String) map.get("output_value");
             instances.add(instanceId);
             if (stopped) {
-                if (!executeAction(osClient, instanceId, Action.STOP)) {
-                    result = false;
-                    break;
-                }
+                executeAction(osClient, instanceId, Action.STOP);
             } else {
-                if (!executeAction(osClient, instanceId, Action.START)) {
-                    result = false;
-                    break;
-                }
+                executeAction(osClient, instanceId, Action.START);
             }
-        }
-        if (!result) {
-            return result;
         }
         String desiredState = stopped ? OpenStackInstanceStatus.STOPPED.getStatus() : OpenStackInstanceStatus.STARTED.getStatus();
         PollingResult pollingResult = pollingService.pollWithTimeout(openStackInstanceStatusCheckerTask,
                 new OpenStackContext(stack, instances, osClient, desiredState),
                 POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-        if (isSuccess(pollingResult)) {
-            return result;
-        } else {
-            return false;
+        if (isExited(pollingResult)) {
+            throw new FlowCancelledException("Flow was cancelled while polling instance states.");
+        } else if (isTimeout(pollingResult)) {
+            throw new OpenStackResourceException("Timeout while polling instance states.");
         }
     }
 
-    private boolean executeAction(OSClient osClient, String instanceId, Action action) {
+    private void executeAction(OSClient osClient, String instanceId, Action action) {
         ActionResponse actionResponse = osClient.compute().servers().action(instanceId, action);
         if (!actionResponse.isSuccess()) {
-            LOGGER.info("Failed to execute the action: {}", actionResponse.getFault());
-            return false;
+            throw new OpenStackResourceException(String.format("Failed to execute the action: %s", actionResponse.getFault()));
         }
-        return true;
     }
 }

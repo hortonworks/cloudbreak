@@ -75,13 +75,13 @@ public abstract class AzureSimpleNetworkResourceBuilder implements
     }
 
     @Override
-    public Boolean start(AzureStartStopContextObject aSSCO, Resource resource, String region) {
-        return true;
+    public void start(AzureStartStopContextObject aSSCO, Resource resource, String region) {
+        LOGGER.debug("Network start requested - nothing to do.");
     }
 
     @Override
-    public Boolean stop(AzureStartStopContextObject aSSCO, Resource resource, String region) {
-        return true;
+    public void stop(AzureStartStopContextObject aSSCO, Resource resource, String region) {
+        LOGGER.debug("Network stop requested - nothing to do.");
     }
 
     @Override

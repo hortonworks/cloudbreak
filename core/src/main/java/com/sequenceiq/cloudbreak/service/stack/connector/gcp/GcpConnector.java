@@ -78,13 +78,13 @@ public class GcpConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public boolean startAll(Stack stack) {
-        return cloudResourceManager.startStopResources(stack, true, gcpResourceBuilderInit);
+    public void startAll(Stack stack) {
+        cloudResourceManager.startStopResources(stack, true, gcpResourceBuilderInit);
     }
 
     @Override
-    public boolean stopAll(Stack stack) {
-        return cloudResourceManager.startStopResources(stack, false, gcpResourceBuilderInit);
+    public void stopAll(Stack stack) {
+        cloudResourceManager.startStopResources(stack, false, gcpResourceBuilderInit);
     }
 
     @Override

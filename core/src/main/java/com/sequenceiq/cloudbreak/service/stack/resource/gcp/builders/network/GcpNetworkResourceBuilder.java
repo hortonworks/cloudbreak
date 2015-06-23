@@ -88,13 +88,13 @@ public class GcpNetworkResourceBuilder extends GcpSimpleNetworkResourceBuilder {
     }
 
     @Override
-    public Boolean start(GcpStartStopContextObject startStopContextObject, Resource resource, String region) {
-        return true;
+    public void start(GcpStartStopContextObject startStopContextObject, Resource resource, String region) {
+        LOGGER.debug("Network start requested - nothing to do.");
     }
 
     @Override
-    public Boolean stop(GcpStartStopContextObject startStopContextObject, Resource resource, String region) {
-        return true;
+    public void stop(GcpStartStopContextObject startStopContextObject, Resource resource, String region) {
+        LOGGER.debug("Network stop requested - nothing to do.");
     }
 
     @Override

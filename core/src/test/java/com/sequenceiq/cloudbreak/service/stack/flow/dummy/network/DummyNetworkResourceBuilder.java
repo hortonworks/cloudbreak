@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -20,6 +23,8 @@ import com.sequenceiq.cloudbreak.service.stack.resource.UpdateContextObject;
 
 public class DummyNetworkResourceBuilder
         implements ResourceBuilder<DummyProvisionContextObject, DummyDeleteContextObject, DummyStartStopContextObject, UpdateContextObject> {
+
+    protected static final Logger LOGGER = LoggerFactory.getLogger(DummyNetworkResourceBuilder.class);
 
     @Override
     public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
@@ -46,13 +51,13 @@ public class DummyNetworkResourceBuilder
     }
 
     @Override
-    public Boolean start(DummyStartStopContextObject startStopContextObject, Resource resource, String region) {
-        return true;
+    public void start(DummyStartStopContextObject startStopContextObject, Resource resource, String region) {
+        LOGGER.debug("Network start requested - nothing to do.");
     }
 
     @Override
-    public Boolean stop(DummyStartStopContextObject startStopContextObject, Resource resource, String region) {
-        return true;
+    public void stop(DummyStartStopContextObject startStopContextObject, Resource resource, String region) {
+        LOGGER.debug("Network stop requested - nothing to do.");
     }
 
     @Override

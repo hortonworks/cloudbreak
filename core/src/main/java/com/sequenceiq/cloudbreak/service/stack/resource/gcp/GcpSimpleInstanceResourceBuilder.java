@@ -48,7 +48,7 @@ public abstract class GcpSimpleInstanceResourceBuilder implements
 
     protected void exceptionHandler(GoogleJsonResponseException ex, String name, Stack stack) {
         if (ex.getDetails().get("code").equals(NOT_FOUND)) {
-            LOGGER.info(String.format("Resource was delete with name: %s", name));
+            LOGGER.info(String.format("Resource was deleted with name: %s", name));
         } else {
             throw new GcpResourceException("Error while creating instances", ex);
         }
@@ -69,13 +69,13 @@ public abstract class GcpSimpleInstanceResourceBuilder implements
     }
 
     @Override
-    public Boolean start(GcpStartStopContextObject startStopContextObject, Resource resource, String region) {
-        return true;
+    public void start(GcpStartStopContextObject startStopContextObject, Resource resource, String region) {
+        LOGGER.debug("Instance start requested - nothing to do.");
     }
 
     @Override
-    public Boolean stop(GcpStartStopContextObject startStopContextObject, Resource resource, String region) {
-        return true;
+    public void stop(GcpStartStopContextObject startStopContextObject, Resource resource, String region) {
+        LOGGER.debug("Instance stop requested - nothing to do.");
     }
 
     @Override
