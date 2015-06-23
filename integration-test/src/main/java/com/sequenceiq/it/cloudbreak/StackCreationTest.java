@@ -19,6 +19,7 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class), "Template id is mandatory.");
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID), "Credential id is mandatory.");
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID), "Network id is mandatory.");
+        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID), "Security group id is mandatory.");
     }
 
     @Test
@@ -34,9 +35,10 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         }
         String credentialId = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID);
         String networkId = itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID);
+        String securityGroupId = itContext.getContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID);
         // WHEN
         String stackId = getClient().postStack(stackName, credentialId, region, false, igMap, onFailureAction, threshold,
-                adjustmentType, null, networkId);
+                adjustmentType, null, networkId, securityGroupId);
         // THEN
         Assert.assertNotNull(stackId);
         itContext.putCleanUpParam(CloudbreakITContextConstants.STACK_ID, stackId);
