@@ -47,7 +47,7 @@ public class DefaultSecurityGroupCreator {
         Set<SecurityGroup> securityGroups = new HashSet<>();
 
         //create default strict security group
-        SecurityGroup onlySshAndSsl = createSecurityGroup(user, "only-ssh-and-ssl", "Only the 22 and 443 ports could be reached from any IP.");
+        SecurityGroup onlySshAndSsl = createSecurityGroup(user, "only-ssh-and-ssl", "Open ports: 22 (SSH) 443 (HTTPS)");
         SecurityRule sshAndSslRule = createSecurityRule("22,443", onlySshAndSsl);
         onlySshAndSsl.setSecurityRules(new HashSet<>(Arrays.asList(sshAndSslRule)));
         groupRepository.save(onlySshAndSsl);
@@ -55,7 +55,10 @@ public class DefaultSecurityGroupCreator {
         securityGroups.add(onlySshAndSsl);
 
         //create default security group which opens all of the known services' ports
-        SecurityGroup allServicesPort = createSecurityGroup(user, "all-services-port", "All the known services' ports could be reached from any IP.");
+        String allPortsOpenDesc = "Open ports: 8080 (Ambari) 8500 (Consul) 50070 (NN) 8088 (RM Web) 8030(RM Scheduler) 8050(RM IPC) "
+                + "19888(Job history server) 60010(HBase master) 15000(Falcon) 8744(Storm) 11000(Oozie) 18080(Spark HS) 8042(NM Web) "
+                + "9996(Zeppelin WebSocket) 9995(Zeppelin UI) 3080(Kibana) 9200(Elasticsearch)";
+        SecurityGroup allServicesPort = createSecurityGroup(user, "all-services-port", allPortsOpenDesc);
         SecurityRule allPortsRule = createSecurityRule(concatenateAllPortsKnownByCloudbreak(), allServicesPort);
         allServicesPort.setSecurityRules(new HashSet<>(Arrays.asList(allPortsRule)));
         groupRepository.save(allServicesPort);

@@ -16,8 +16,8 @@ public enum ExposedService {
     OOZIE("Oozie", "OOZIE_SERVER", "/oozie"),
     SPARK_HISTORY_SERVER("Spark History server", "SPARK_JOBHISTORYSERVER"),
     CONTAINER_LOGS("Container logs"),
-    ZEPPELI_WEB_SOCKET("Zeppelin web socket"),
-    ZEPPELI_UI("Zeppelin ui", "ZEPPELIN_MASTER"),
+    ZEPPELIN_WEB_SOCKET("Zeppelin web socket"),
+    ZEPPELIN_UI("Zeppelin ui", "ZEPPELIN_MASTER"),
     KIBANA("Kibana", "KIBANA"),
     ELASTIC_SEARCH("Elastic Search", "ELASTIC_SEARCH");
 
