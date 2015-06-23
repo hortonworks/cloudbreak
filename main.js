@@ -727,6 +727,44 @@ app.get('/permission', function(req, res){
         });
 });
 
+app.delete('/users/:userId', function(req, res){
+    var userId = req.param('userId')
+    getUserName(req, res, function(userName){
+        getToken(req, res, function(token){
+            getUserByName(req, res, token, userName, 'id,userName,groups', function(adminUserData) {
+                isUserAdmin(req, res, adminUserData, function(companyId) {
+                    getUserById(req, res, token, userId, function(userData) {
+                        var userCompanyId = null
+                        var isAdmin = true
+                        var groups = userData.groups
+                        for (var i = 0; i < groups.length; i++ ){
+                            if (groups[i].display.lastIndexOf('sequenceiq.account', 0) === 0) {
+                                userCompanyId = groups[i].display
+                            }
+                            if (groups[i].display.lastIndexOf('sequenceiq.cloudbreak.admin', 0) === 0){
+                                isAdmin = true
+                            }
+                        }
+                        if (isAdmin) {
+                            res.statusCode = 400
+                            console.log("User (" + userData.userName + ") is an admin. Can not be deleted by (" + userName + ")")
+                            res.json({message: 'User is an admin. Can not be deleted.'})
+                        }
+                        if (companyId != userCompanyId) {
+                            res.statusCode = 400
+                            console.log("User (" + userData.userName + ") and admin (" + userName + ") are not in the same account.")
+                            res.json({message: 'Admin and user are not in the same account.'})
+                        }
+                        deleteUserById(req, res, token, userId, userData.meta.version, function(deleteSuccess){
+                            res.json({'deleteSuccess' : 'true'})
+                        })
+                    });
+                });
+            });
+        });
+    });
+})
+
 // service methods
 
 getToken = function(req, res, callback) {
@@ -790,6 +828,24 @@ getUserById = function(req, res, token, userId, callback) {
            console.log('Cannot retrieve user by id - bad request.')
            res.statusCode = 400
            res.json({message: 'Cannot retrieve user by id - bad request.'})
+         }
+    });
+}
+
+deleteUserById = function(req, res, token, userId, version, callback) {
+    var usrOptions = {
+         headers: {
+           'Authorization' : 'Bearer ' + token,
+           'If-Match' : version
+         }
+    }
+    needle.delete(uaaAddress + '/Users/' + userId, null, usrOptions, function(err, userResp) {
+         if (userResp.statusCode == 200) {
+            callback(userResp.body)
+         } else {
+           console.log('Cannot delete user by id.')
+           res.statusCode = 400
+           res.json({message: 'Cannot delete user by id - bad request.'})
          }
     });
 }
