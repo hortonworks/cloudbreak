@@ -12,6 +12,7 @@ public class ITProps {
     private Map<String, List<String>> testSuites;
     private List<String> testTypes;
     private List<String> suiteFiles;
+    private String defaultSecurityGroup;
 
     public void setCredentialNames(Map<String, String> credentialNames) {
         this.credentialNames = credentialNames;
@@ -63,5 +64,13 @@ public class ITProps {
 
     public void setSuiteFiles(List<String> suiteFiles) {
         this.suiteFiles = suiteFiles;
+    }
+
+    public String getDefaultSecurityGroup() {
+        return defaultSecurityGroup;
+    }
+
+    public void setDefaultSecurityGroup(String defaultSecurityGroup) {
+        this.defaultSecurityGroup = defaultSecurityGroup;
     }
 }

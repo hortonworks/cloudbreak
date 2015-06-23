@@ -20,7 +20,7 @@ dependencies {
     compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
         exclude group: 'org.slf4j';
     }
-    compile ("com.sequenceiq:cloudbreak-rest-client:0.4.6") {
+    compile ("com.sequenceiq:cloudbreak-rest-client:0.4.9") {
         exclude group: "org.slf4j";
     }
     compile "org.springframework.boot:spring-boot-starter:${springBootVersion}"

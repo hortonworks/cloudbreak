@@ -44,6 +44,7 @@ integrationtest:
        GCP: default-gcp-network
        AWS: default-aws-network
        AZURE: default-azure-network
+    defaultSecurityGroup: all-services-port
     testSuites:
         # Full smoke tests with cluster creation, stop-start, upscale-downscale
         FULL_SMOKE_TEST:

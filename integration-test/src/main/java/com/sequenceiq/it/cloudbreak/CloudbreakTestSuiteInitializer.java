@@ -63,10 +63,11 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     }
 
     @BeforeSuite(dependsOnMethods = "initContext")
-    @Parameters({ "cloudbreakServer", "cloudProvider", "credentialName", "instanceGroups", "hostGroups", "blueprintName", "stackName", "networkName" })
+    @Parameters({ "cloudbreakServer", "cloudProvider", "credentialName", "instanceGroups", "hostGroups", "blueprintName",
+            "stackName", "networkName", "securityGroupName" })
     public void initCloudbreakSuite(@Optional("") String cloudbreakServer, @Optional("") String cloudProvider, @Optional("") String credentialName,
             @Optional("") String instanceGroups, @Optional("") String hostGroups, @Optional("") String blueprintName, @Optional("") String stackName,
-            @Optional("") String networkName) throws Exception {
+            @Optional("") String networkName, @Optional("") String securityGroupName) throws Exception {
         cloudbreakServer = StringUtils.hasLength(cloudbreakServer) ? cloudbreakServer : defaultCloudbreakServer;
         itContext.putContextParam(CloudbreakITContextConstants.SKIP_REMAINING_SUITETEST_AFTER_ONE_FAILED, skipRemainingSuiteTestsAfterOneFailed);
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER, cloudbreakServer);
@@ -74,6 +75,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, client);
         putBlueprintToContextIfExist(client, blueprintName);
         putNetworkToContext(client, cloudProvider, networkName);
+        putSecurityGroupToContext(client, securityGroupName);
         putCredentialToContext(client, cloudProvider, credentialName);
         putStackToContextIfExist(client, stackName);
         if (StringUtils.hasLength(instanceGroups)) {
@@ -109,6 +111,20 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             String resourceId = getId(client.getNetworkByName(networkName));
             if (resourceId != null) {
                 itContext.putContextParam(CloudbreakITContextConstants.NETWORK_ID, resourceId);
+            }
+        }
+    }
+
+    private void putSecurityGroupToContext(CloudbreakClient client, String securityGroupName) throws Exception {
+        client.getAccountSecurityGroups();
+        if (StringUtils.isEmpty(securityGroupName)) {
+            String defaultSecurityGroupName =  itProps.getDefaultSecurityGroup();
+            securityGroupName = defaultSecurityGroupName;
+        }
+        if (StringUtils.hasLength(securityGroupName)) {
+            String resourceId = getId(client.getSecurityGroupByName(securityGroupName));
+            if (resourceId != null) {
+                itContext.putContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID, resourceId);
             }
         }
     }
