@@ -26,7 +26,7 @@ compose-pull() {
 }
 
 create-logfile() {
-    
+
     rm -f ${CBD_LOG_NAME}.log
     export LOG=${CBD_LOG_NAME}-$(date +%Y%m%d-%H%M%S).log
     touch $LOG
@@ -161,7 +161,7 @@ ambassadorips:
 uaadb:
     privileged: true
     ports:
-        - 5432
+        - "$PRIVATE_IP:5434:5432"
     environment:
       - SERVICE_NAME=uaadb
         #- SERVICE_CHECK_CMD=bash -c 'psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
@@ -185,7 +185,7 @@ identity:
 
 cbdb:
     ports:
-        - 5432
+        - "$PRIVATE_IP:5432:5432"
     environment:
       - SERVICE_NAME=cbdb
         #- SERVICE_CHECK_CMD=bash -c 'psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
@@ -289,7 +289,7 @@ pcdb:
         - SERVICE_NAME=pcdb
      #- SERVICE_NAMEE_CHECK_CMD='psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
     ports:
-        - 5432
+        - "$PRIVATE_IP:5433:5432"
     volumes:
         - "$CB_DB_ROOT_PATH/periscopedb:/var/lib/postgresql/data"
     image: sequenceiq/pcdb:$DOCKER_TAG_PCDB
