@@ -69,6 +69,7 @@ public class TerminationService {
             }
             stack.setCredential(null);
             stack.setNetwork(null);
+            stack.setSecurityGroup(null);
             stack.setName(terminatedName);
             terminateMetaDataInstances(stack);
             stackRepository.save(stack);

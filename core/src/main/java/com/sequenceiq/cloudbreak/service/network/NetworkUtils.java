@@ -17,8 +17,8 @@ import static com.sequenceiq.cloudbreak.service.network.ExposedService.RESOURCEM
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.SPARK_HISTORY_SERVER;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.SSH;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.STORM;
-import static com.sequenceiq.cloudbreak.service.network.ExposedService.ZEPPELI_UI;
-import static com.sequenceiq.cloudbreak.service.network.ExposedService.ZEPPELI_WEB_SOCKET;
+import static com.sequenceiq.cloudbreak.service.network.ExposedService.ZEPPELIN_UI;
+import static com.sequenceiq.cloudbreak.service.network.ExposedService.ZEPPELIN_WEB_SOCKET;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -48,8 +48,8 @@ public final class NetworkUtils {
         ports.add(new Port(OOZIE, "11000", "tcp"));
         ports.add(new Port(SPARK_HISTORY_SERVER, "18080", "tcp"));
         ports.add(new Port(CONTAINER_LOGS, "8042", "tcp"));
-        ports.add(new Port(ZEPPELI_WEB_SOCKET, "9996", "tcp"));
-        ports.add(new Port(ZEPPELI_UI, "9995", "tcp"));
+        ports.add(new Port(ZEPPELIN_WEB_SOCKET, "9996", "tcp"));
+        ports.add(new Port(ZEPPELIN_UI, "9995", "tcp"));
         ports.add(new Port(KIBANA, "3080", "tcp"));
         ports.add(new Port(ELASTIC_SEARCH, "9200", "tcp"));
     }
