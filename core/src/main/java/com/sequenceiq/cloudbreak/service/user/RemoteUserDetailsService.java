@@ -21,14 +21,12 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestOperations;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
@@ -82,7 +80,17 @@ public class RemoteUserDetailsService implements UserDetailsService {
     @Cacheable(value = "userCache", key = "#filterValue")
     public CbUser getDetails(String filterValue, UserFilterField filterField) {
 
-        HttpHeaders scimRequestHeaders = getScimRequestHeader();
+        HttpHeaders tokenRequestHeaders = new HttpHeaders();
+        tokenRequestHeaders.set("Authorization", getAuthorizationHeader(clientId, clientSecret));
+
+        Map<String, String> tokenResponse = restTemplate.exchange(
+                identityServerUrl + "/oauth/token?grant_type=client_credentials",
+                HttpMethod.POST,
+                new HttpEntity<>(tokenRequestHeaders),
+                Map.class).getBody();
+
+        HttpHeaders scimRequestHeaders = new HttpHeaders();
+        scimRequestHeaders.set("Authorization", "Bearer " + tokenResponse.get("access_token"));
 
         String scimResponse = null;
 
@@ -145,39 +153,19 @@ public class RemoteUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public void deleteUser(CbUser admin, String userId) {
-        CbUser userToDelete = getDetails(userId, UserFilterField.USERID);
-        String accessDenidedMessage = null;
-        LOGGER.info("{} / {} tries to delete {}", admin.getUserId(), admin.getUsername(), userId);
+    public boolean hasResources(CbUser admin, String userId) {
+        CbUser user = getDetails(userId, UserFilterField.USERID);
+        LOGGER.info("{} / {} checks resources of {}", admin.getUserId(), admin.getUsername(), userId);
+        String errorMessage = null;
         if (!admin.getRoles().contains(CbUserRole.ADMIN)) {
-            accessDenidedMessage = "Forbidden: user is not authorized for delete operation on %s";
+            errorMessage = "Forbidden: user (%s) is not authorized for this operation on %s";
         }
-        if (userToDelete.getRoles().contains(CbUserRole.ADMIN)) {
-            accessDenidedMessage = "Forbidden: admin user can not be deleted. (%s)";
+        if (!admin.getAccount().equals(user.getAccount())) {
+            errorMessage = "Forbidden: admin (%s) and user (%s) are not under the same account.";
         }
-        if (!admin.getAccount().equals(userToDelete.getAccount())) {
-            accessDenidedMessage = "Forbidden: admin and user (%s) are not under the same account.";
+        if (!Strings.isNullOrEmpty(errorMessage)) {
+            throw new AccessDeniedException(String.format(errorMessage, admin.getUsername(), user.getUsername()));
         }
-        if (hasResources(userToDelete)) {
-            accessDenidedMessage = "Delete owned resources first for user (%s)";
-        }
-        if (!Strings.isNullOrEmpty(accessDenidedMessage)) {
-            throw new AccessDeniedException(String.format(accessDenidedMessage, userToDelete.getUsername()));
-        }
-        HttpHeaders scimRequestHeaders = getScimRequestHeader();
-        HttpStatus statusResponse = restTemplate.exchange(
-                identityServerUrl + "/Users/" + userId,
-                HttpMethod.DELETE,
-                new HttpEntity<>(scimRequestHeaders),
-                String.class).getStatusCode();
-        if (!HttpStatus.OK.equals(statusResponse)) {
-            throw new BadRequestException(String.format("User deletion failed: %s - status code: %s",
-                    userToDelete.getUsername(), statusResponse.toString()));
-        }
-        LOGGER.info("User ({} - {}) deleted successfully.", userToDelete.getUserId(), userToDelete.getUsername());
-    }
-
-    private boolean hasResources(CbUser user) {
         Set<Template> templates = templateRepository.findForUser(user.getUserId());
         Set<Credential> credentials = credentialRepository.findForUser(user.getUserId());
         Set<Blueprint> blueprints = blueprintRepository.findForUser(user.getUserId());
@@ -185,21 +173,6 @@ public class RemoteUserDetailsService implements UserDetailsService {
         Set<Stack> stacks = stackRepository.findForUser(user.getUserId());
         return !(stacks.isEmpty() && templates.isEmpty() && credentials.isEmpty()
                 && blueprints.isEmpty() && networks.isEmpty());
-    }
-
-    private HttpHeaders getScimRequestHeader() {
-        HttpHeaders tokenRequestHeaders = new HttpHeaders();
-        tokenRequestHeaders.set("Authorization", getAuthorizationHeader(clientId, clientSecret));
-
-        Map<String, String> tokenResponse = restTemplate.exchange(
-                identityServerUrl + "/oauth/token?grant_type=client_credentials",
-                HttpMethod.POST,
-                new HttpEntity<>(tokenRequestHeaders),
-                Map.class).getBody();
-
-        HttpHeaders scimRequestHeaders = new HttpHeaders();
-        scimRequestHeaders.set("Authorization", "Bearer " + tokenResponse.get("access_token"));
-        return scimRequestHeaders;
     }
 
 
