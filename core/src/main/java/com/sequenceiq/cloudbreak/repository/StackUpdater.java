@@ -86,6 +86,7 @@ public class StackUpdater {
         Stack stack = stackRepository.findById(stackId);
         if (statusReason != null) {
             stack.setStatusReason(statusReason);
+            cloudbreakEventService.fireCloudbreakEvent(stackId, stack.getStatus().name(), statusReason);
         }
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack: [statusReason: '{}'].", statusReason);
