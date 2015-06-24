@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.stack.resource.azure.builders.instance
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +54,7 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
     @Inject
     private CloudbreakEventService eventService;
 
+
     @Override
     public Boolean create(final CreateResourceRequest createResourceRequest, String region) throws Exception {
         AzureCloudServiceCreateRequest aCSCR = (AzureCloudServiceCreateRequest) createResourceRequest;
@@ -87,13 +87,9 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
     public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources,
             Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        String vmName = getVmName(provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName(), index);
-        vmName = vmName + instanceGroup.get().getGroupName().replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
-        String newVmName = vmName + String.valueOf(new Date().getTime());
-        if (newVmName.length() > MAX_NAME_LENGTH) {
-            newVmName = newVmName.substring(newVmName.length() - MAX_NAME_LENGTH, newVmName.length());
-        }
-        return Arrays.asList(new Resource(resourceType(), newVmName, stack, instanceGroup.orNull().getGroupName()));
+        String networkName = provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName();
+        String cloudServiceResourceName = getResourceNameService().resourceName(resourceType(), networkName, index, instanceGroup.get().getGroupName());
+        return Arrays.asList(new Resource(resourceType(), cloudServiceResourceName, stack, instanceGroup.orNull().getGroupName()));
     }
 
     @Override

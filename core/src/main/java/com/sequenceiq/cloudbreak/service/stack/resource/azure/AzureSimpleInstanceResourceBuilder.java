@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.service.stack.resource.azure;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +15,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureResourceException;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceNameService;
 import com.sequenceiq.cloudbreak.service.stack.resource.UpdateContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
@@ -47,6 +50,9 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
     protected static final String DATA = "data";
     protected static final String PRODUCTION = "production";
 
+    @Inject
+    private ResourceNameService resourceNameService;
+
     public CloudPlatform cloudPlatform() {
         return CloudPlatform.AZURE;
     }
@@ -74,10 +80,6 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
         }
     }
 
-    protected String getVmName(String azureTemplate, int i) {
-        return String.format("%s-%s", azureTemplate, i);
-    }
-
     protected void httpResponseExceptionHandler(HttpResponseException ex, String resourceName, String user, Stack stack) {
         if (ex.getStatusCode() != NOT_FOUND) {
             throw new AzureResourceException(ex.getResponse().getData().toString());
@@ -103,5 +105,9 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
     @Override
     public Boolean rollback(Resource resource, AzureDeleteContextObject deleteContextObject, String region) throws Exception {
         return delete(resource, deleteContextObject, region);
+    }
+
+    protected ResourceNameService getResourceNameService() {
+        return resourceNameService;
     }
 }
