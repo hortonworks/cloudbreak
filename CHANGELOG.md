@@ -15,6 +15,8 @@
 
 ### Changed
 
+- AWS authentication env varibale is fixed to use the correct AWS_SECRET_ACCESS_KEY (instead the old AWS_SECRET_KEY)
+
 ## [v0.5.3] - 2015-06-03
 
 ### Fixed

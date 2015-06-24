@@ -128,7 +128,7 @@ cloudbreak-conf-cloud-provider() {
     declare desc="Defines cloud provider related parameters"
 
     env-import AWS_ACCESS_KEY_ID ""
-    env-import AWS_SECRET_KEY ""
+    env-import AWS_SECRET_ACCESS_KEY ""
 
 }
 
