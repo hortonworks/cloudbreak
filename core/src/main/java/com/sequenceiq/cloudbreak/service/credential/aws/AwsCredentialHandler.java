@@ -5,6 +5,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import com.amazonaws.AmazonClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -114,6 +115,14 @@ public class AwsCredentialHandler implements CredentialHandler<AwsCredential> {
         try {
             crossAccountCredentialsProvider.retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
                     crossAccountCredentialsProvider.getExternalId(), awsCredential);
+        } catch (AmazonClientException ae) {
+            if (ae.getMessage().contains("Unable to load AWS credentials")) {
+
+                String errorMessage =
+                        String.format("Unable to load AWS credentials: please make sure the deployer defined AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY");
+                LOGGER.error(errorMessage, ae);
+                throw new BadRequestException(errorMessage, ae);
+            }
         } catch (Exception e) {
             String errorMessage = String.format("Could not assume role '%s': check if the role exists and if it's created with the correct external ID: '%s' ",
                     awsCredential.getRoleArn(), crossAccountCredentialsProvider.getExternalId());
