@@ -1,6 +1,7 @@
 aws-init() {
     env-import CB_AWS_EXTERNAL_ID provision-ambari
-    env-import AWS_ROLE_NAME cloudbreak
+    env-import AWS_ROLE_NAME cbreak-deployer
+
     deps-require aws
     AWS=.deps/bin/aws
 }
@@ -11,17 +12,17 @@ aws-show-policy() {
     local policyName=${policyArn#*/}
     debug show policy document for: $policyName
     
-    #local defVersion=$(aws iam list-policy-versions \
+    #local defVersion=$($AWS iam list-policy-versions \
     #    --policy-arn $policyArn \
     #    --query 'Versions[?IsDefaultVersion].VersionId' \
     #    --out text)
 
-    local defVersion=$(aws iam get-policy \
+    local defVersion=$($AWS iam get-policy \
         --policy-arn $policyArn \
         --query Policy.DefaultVersionId \
         --out text)
 
-    aws iam get-policy-version \
+    $AWS iam get-policy-version \
         --policy-arn $policyArn \
         --version-id $defVersion \
         --query 'PolicyVersion.Document.Statement'
@@ -31,7 +32,7 @@ aws-show-role-assumers() {
     declare roleName=$1
 
     info "Assumers for role: $roleName"
-    aws iam get-role \
+    $AWS iam get-role \
         --role-name $roleName \
         --query Role.AssumeRolePolicyDocument.Statement[0].Principal \
         --out text
@@ -40,7 +41,7 @@ aws-show-role-assumers() {
 aws-show-role-inline-policies() {
      declare roleName=$1
     
-     inlinePolicies=$(aws iam list-role-policies --role-name $roleName --query PolicyNames --out text)
+     inlinePolicies=$($AWS iam list-role-policies --role-name $roleName --query PolicyNames --out text)
 
      if ! [[ "$inlinePolicies" ]];then
         info NO Inline policies for role: $roleName
@@ -50,7 +51,7 @@ aws-show-role-inline-policies() {
     info Inline policies for role: $roleName
     for p in ${inlinePolicies}; do
         debug "inline policy: $p"
-        aws iam get-role-policy \
+        $AWS iam get-role-policy \
             --role-name $roleName \
             --policy-name $p \
             --query "PolicyDocument.Statement[][Effect,Action[0],Resource[0]]" --out text
@@ -60,7 +61,7 @@ aws-show-role-inline-policies() {
 aws-show-role-managed-policies() {
      declare roleName=$1
     
-     attachedPolicies=$(aws iam list-attached-role-policies --role-name $roleName --query 'AttachedPolicies[].PolicyArn' --out text)
+     attachedPolicies=$($AWS iam list-attached-role-policies --role-name $roleName --query 'AttachedPolicies[].PolicyArn' --out text)
 
      if ! [[ "$attachedPolicies" ]];then
          info NO attached policies for: $roleName
@@ -87,7 +88,7 @@ aws-show-role() {
 aws-assume-role() {
     declare roleArn=$1 externalId=$2 roleSession=$3
 
-    local roleResp=$(aws sts assume-role \
+    local roleResp=$($AWS sts assume-role \
         --role-arn $roleArn \
         --role-session-name $roleSession \
         --external-id $externalId)
@@ -112,7 +113,7 @@ EOF
 }
 
 aws-get-user-arn() {
-    aws iam get-user --query User.Arn --out text
+    $AWS iam get-user --query User.Arn --out text
 }
 
 aws-get-account-id() {
@@ -132,7 +133,7 @@ aws-generate-assume-role-policy() {
     {
       "Action": "sts:AssumeRole",
       "Principal": {
-        "AWS": "arn:aws:iam::$(aws-get-account-id):root"
+        "AWS": "$(aws-get-account-id)"
       },
       "Effect": "Allow",
       "Condition": {
@@ -198,21 +199,23 @@ aws-delete-role() {
 }
 
 aws-generate-role() {
+    declare desc="Generates an aws iam role for cloudbreak provisioning on AWS"
+
     aws-generate-role-files <(aws-generate-assume-role-policy) <(aws-generate-inline-role-policy)
 }
 
 aws-generate-role-files() {
     declare assumePolicyFile=$1 inlinePolicyFile=$2
     
-    local roleResp=$(aws iam create-role \
+    local roleResp=$($AWS iam create-role \
         --output text \
         --query Role.Arn \
         --role-name $AWS_ROLE_NAME \
         --assume-role-policy-document file://${assumePolicyFile} \
     )
-    debug create role resp: $roleResp
+    info "role created: $roleResp"
     
-    local putPolicyResp=$(aws iam put-role-policy \
+    local putPolicyResp=$($AWS iam put-role-policy \
         --role-name $AWS_ROLE_NAME \
         --policy-name cb-policy \
         --policy-document file://${inlinePolicyFile}

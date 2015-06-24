@@ -252,8 +252,10 @@ main() {
         cmd-export migrate-startdb startdb
         cmd-export migrate-cmd migrate
 
-        cmd-export aws-show-role aws-role
-
+        cmd-export-ns aws "Amazon Webservice namespace"
+        cmd-export aws-show-role
+        cmd-export aws-generate-role
+        cmd-export aws-delete-role
     fi
 
     if [[ "$DEBUG" ]]; then
