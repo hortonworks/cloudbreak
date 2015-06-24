@@ -155,4 +155,9 @@ public class AzureMetadataSetup implements MetadataSetup {
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AZURE;
     }
+
+    @Override
+    public ResourceType getInstanceResourceType() {
+        return ResourceType.AZURE_VIRTUAL_MACHINE;
+    }
 }

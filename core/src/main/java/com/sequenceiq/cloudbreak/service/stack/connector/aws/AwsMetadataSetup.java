@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
@@ -165,6 +166,11 @@ public class AwsMetadataSetup implements MetadataSetup {
     @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AWS;
+    }
+
+    @Override
+    public ResourceType getInstanceResourceType() {
+        return null;
     }
 
 }

@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
@@ -18,4 +19,5 @@ public interface MetadataSetup {
 
     CloudPlatform getCloudPlatform();
 
+    ResourceType getInstanceResourceType();
 }
