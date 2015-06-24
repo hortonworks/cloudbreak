@@ -97,4 +97,9 @@ public class GcpMetadataSetup implements MetadataSetup {
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.GCP;
     }
+
+    @Override
+    public ResourceType getInstanceResourceType() {
+        return ResourceType.GCP_INSTANCE;
+    }
 }

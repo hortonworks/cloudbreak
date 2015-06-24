@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -22,10 +21,13 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
+import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -51,8 +53,10 @@ public class StackSyncService {
     @Inject
     private HostMetadataRepository hostMetadataRepository;
     @Inject
+    private ResourceRepository resourceRepository;
+    @Inject
     private AmbariClusterConnector ambariClusterConnector;
-    @Resource
+    @javax.annotation.Resource
     private Map<CloudPlatform, MetadataSetup> metadataSetups;
 
     public void sync(Long stackId) {
@@ -68,18 +72,21 @@ public class StackSyncService {
                     deleteHostFromCluster(stack, instance);
                     if (!instance.isTerminated()) {
                         LOGGER.info("Instance '{}' is reported as deleted on the cloud provider, setting its state to TERMINATED.", instance.getInstanceId());
+                        deleteResourceIfNeeded(stackId, instance);
                         updateMetaDataToTerminated(stackId, instance, instanceGroup);
                     }
                 } else if (InstanceSyncState.RUNNING.equals(state)) {
                     instanceStateCounts.put(InstanceSyncState.RUNNING, instanceStateCounts.get(InstanceSyncState.RUNNING) + 1);
                     if (!instance.isRunning()) {
                         LOGGER.info("Instance '{}' is reported as running on the cloud provider, updating metadata.", instance.getInstanceId());
+                        createResourceIfNeeded(stack, instance, instanceGroup);
                         updateMetaDataToRunning(stackId, stack.getCluster(), instance, instanceGroup);
                     }
                 } else if (InstanceSyncState.STOPPED.equals(state)) {
                     instanceStateCounts.put(InstanceSyncState.STOPPED, instanceStateCounts.get(InstanceSyncState.STOPPED) + 1);
                     if (!instance.isTerminated()) {
                         LOGGER.info("Instance '{}' is reported as stopped on the cloud provider, setting its state to STOPPED.", instance.getInstanceId());
+                        deleteResourceIfNeeded(stackId, instance);
                         updateMetaDataToTerminated(stackId, instance, instanceGroup);
                     }
                 } else {
@@ -93,6 +100,21 @@ public class StackSyncService {
             }
         }
         handleSyncResult(stack, instanceStateCounts);
+    }
+
+    private void createResourceIfNeeded(Stack stack, InstanceMetaData instance, InstanceGroup instanceGroup) {
+        ResourceType resourceType = metadataSetups.get(stack.cloudPlatform()).getInstanceResourceType();
+        if (resourceType != null) {
+            Resource resource = new Resource(resourceType, instance.getInstanceId(), stack, instanceGroup.getGroupName());
+            resourceRepository.save(resource);
+        }
+    }
+
+    private void deleteResourceIfNeeded(Long stackId, InstanceMetaData instance) {
+        Resource resource = resourceRepository.findByStackIdAndName(stackId, instance.getInstanceId());
+        if (resource != null) {
+            resourceRepository.delete(resource.getId());
+        }
     }
 
     private void handleSyncResult(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts) {

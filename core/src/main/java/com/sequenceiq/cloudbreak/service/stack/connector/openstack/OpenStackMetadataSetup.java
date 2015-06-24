@@ -94,6 +94,11 @@ public class OpenStackMetadataSetup implements MetadataSetup {
         return CloudPlatform.OPENSTACK;
     }
 
+    @Override
+    public ResourceType getInstanceResourceType() {
+        return null;
+    }
+
     private CoreInstanceMetaData createCoreMetaData(Stack stack, Server server, String instanceGroupName, String instanceId) {
 
         String privateIp = null;
