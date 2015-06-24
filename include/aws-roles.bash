@@ -1,6 +1,8 @@
 aws-init() {
     env-import CB_AWS_EXTERNAL_ID provision-ambari
     env-import AWS_ROLE_NAME cloudbreak
+    deps-require aws
+    AWS=.deps/bin/aws
 }
 
 aws-show-policy() {
