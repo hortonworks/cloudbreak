@@ -176,6 +176,27 @@ aws-generate-inline-role-policy() {
 EOF
 }
 
+aws-delete-role() {
+    declare desc="Deletes an aws iam role, removes all inline policies"
+
+    declare roleName=$1
+    : ${roleName:? required}
+    
+    local inlinePolicies=$($AWS iam list-role-policies --role-name $roleName --query PolicyNames --out text)
+
+    for pol in $inlinePolicies; do
+        debug delete inlinePolicy: $pol
+        $AWS iam delete-role-policy --role-name $roleName --policy-name $pol
+    done
+
+    local attachedPolicies=$($AWS iam list-attached-role-policies --role-name $roleName --query AttachedPolicies[].PolicyArn --out text)
+    for pol in $attachedPolicies; do
+        debug detach policy: $pol
+        $AWS iam detach-role-policy --role-name $roleName --policy-arn $pol
+    done
+    $AWS iam delete-role --role-name $roleName
+}
+
 aws-generate-role() {
     aws-generate-role-files <(aws-generate-assume-role-policy) <(aws-generate-inline-role-policy)
 }
