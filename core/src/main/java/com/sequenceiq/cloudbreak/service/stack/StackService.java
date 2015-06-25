@@ -20,7 +20,7 @@ public interface StackService {
 
     Stack get(Long id);
 
-    byte[] getCertificate(Long id);
+    String getCertificate(Long id);
 
     Stack getById(Long id);
 
