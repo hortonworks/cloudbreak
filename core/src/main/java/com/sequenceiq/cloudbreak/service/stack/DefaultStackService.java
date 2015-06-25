@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateway;
+import static com.sequenceiq.cloudbreak.domain.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.domain.Status.START_REQUESTED;
+import static com.sequenceiq.cloudbreak.domain.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_REQUESTED;
 
@@ -46,6 +48,7 @@ import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
@@ -78,6 +81,8 @@ public class DefaultStackService implements StackService {
     private NetworkConfigurationValidator networkConfigurationValidator;
     @Inject
     private SecurityRuleRepository securityRuleRepository;
+    @Inject
+    private CloudbreakEventService eventService;
 
     @Override
     public Set<Stack> retrievePrivateStacks(CbUser user) {
@@ -206,25 +211,32 @@ public class DefaultStackService implements StackService {
         if (cluster != null && cluster.isStopInProgress()) {
             flowManager.triggerStackStopRequested(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), statusRequest));
         } else {
-            if (!stack.isAvailable() && !stack.isStopFailed()) {
+            if (stack.isStopped()) {
+                String statusDesc = "Stop request is ignored, because the cluster infrastructure is already stopped.";
+                LOGGER.info(statusDesc);
+                eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), statusDesc);
+            } else if (!stack.isAvailable() && !stack.isStopFailed()) {
                 throw new BadRequestException(
                         String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getId()));
-            }
-            if ((cluster != null && !cluster.isStopped()) && !stack.isStopFailed()) {
+            } else if ((cluster != null && !cluster.isStopped()) && !stack.isStopFailed()) {
                 throw new BadRequestException(
                         String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.", stack.getId()));
+            } else {
+                stackUpdater.updateStackStatus(stack.getId(), STOP_REQUESTED);
+                flowManager.triggerStackStop(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), statusRequest));
             }
-            stackUpdater.updateStackStatus(stack.getId(), STOP_REQUESTED);
-            flowManager.triggerStackStop(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), statusRequest));
         }
     }
 
     private void start(Stack stack, Cluster cluster, StatusRequest statusRequest) {
-        if ((!stack.isStopped() || (cluster != null && !cluster.isStopped())) && !stack.isStartFailed()) {
+        if (stack.isAvailable()) {
+            String statusDesc = "Start request is ignored, because the cluster infrastructure is already available.";
+            LOGGER.info(statusDesc);
+            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), statusDesc);
+        } else if ((!stack.isStopped() || (cluster != null && !cluster.isStopped())) && !stack.isStartFailed()) {
             throw new BadRequestException(
                     String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stack.getId()));
-        }
-        if (stack.isStopped() || stack.isStartFailed()) {
+        } else if (stack.isStopped() || stack.isStartFailed()) {
             stackUpdater.updateStackStatus(stack.getId(), START_REQUESTED);
             flowManager.triggerStackStart(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), statusRequest));
         }

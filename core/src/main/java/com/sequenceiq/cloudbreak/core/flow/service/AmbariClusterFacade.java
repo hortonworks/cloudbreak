@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterContainerRunner;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
@@ -45,11 +44,13 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.status.AmbariClusterStatusUpdater;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -104,6 +105,9 @@ public class AmbariClusterFacade implements ClusterFacade {
 
     @Inject
     private TlsSecurityService tlsSecurityService;
+
+    @Inject
+    private AmbariClusterStatusUpdater ambariClusterStatusUpdater;
 
     @Override
     public FlowContext startAmbari(FlowContext context) throws Exception {
@@ -326,19 +330,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         Stack stack = stackService.getById(actualContext.getStackId());
         Cluster cluster = clusterService.retrieveClusterByStackId(actualContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
-        Status status = UPDATE_IN_PROGRESS;
-        if (ambariClusterConnector.isAmbariAvailable(stack)) {
-            if (!cluster.isDeleteInProgress()) {
-                clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
-                status = AVAILABLE;
-            }
-        } else {
-            if (stack.getCluster() != null) {
-                clusterService.updateClusterStatusByStackId(stack.getId(), STOPPED);
-                status = STOPPED;
-            }
-        }
-        fireEventAndLog(stack.getId(), context, "Synced cluster state with Ambari.", status);
+        ambariClusterStatusUpdater.updateClusterStatus(stack, cluster);
         return context;
     }
 
