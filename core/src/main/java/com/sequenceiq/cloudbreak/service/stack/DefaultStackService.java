@@ -14,6 +14,7 @@ import java.util.Set;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
@@ -71,6 +73,8 @@ public class DefaultStackService implements StackService {
     private InstanceMetaDataRepository instanceMetaDataRepository;
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
+    @Inject
+    private SecurityConfigRepository securityConfigRepository;
     @Inject
     private FlowManager flowManager;
     @Resource
@@ -105,6 +109,15 @@ public class DefaultStackService implements StackService {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
         return stack;
+    }
+
+    @Override
+    public byte[] getCertificate(Long id) {
+        String cert = securityConfigRepository.getServerCertByStackId(id);
+        if (cert == null) {
+            throw new NotFoundException("Stack doesn't exist, or certificate was not found for stack.");
+        }
+        return Base64.decodeBase64(cert);
     }
 
     @Override

@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.controller.doc.Notes;
 import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions.StackOpDescription;
 import com.sequenceiq.cloudbreak.controller.json.AmbariAddressJson;
+import com.sequenceiq.cloudbreak.controller.json.CertificateResponse;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.StackRequest;
 import com.sequenceiq.cloudbreak.controller.json.StackResponse;
@@ -180,6 +181,14 @@ public class StackController {
     public ResponseEntity<StackResponse> getStackForAmbari(@RequestBody AmbariAddressJson json) {
         Stack stack = stackService.get(json.getAmbariAddress());
         return new ResponseEntity<>(conversionService.convert(stack, StackResponse.class), HttpStatus.OK);
+    }
+
+
+    @ApiOperation(value = StackOpDescription.GET_STACK_CERT, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
+    @RequestMapping(value = "stacks/{id}/certificate", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<CertificateResponse> getCertificate(@PathVariable Long id) {
+        return new ResponseEntity<>(new CertificateResponse(stackService.getCertificate(id)), HttpStatus.OK);
     }
 
     @ApiOperation(value = StackOpDescription.VALIDATE, produces = ContentType.JSON, notes = Notes.STACK_NOTES)

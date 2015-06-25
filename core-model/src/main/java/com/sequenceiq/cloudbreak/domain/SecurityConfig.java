@@ -5,12 +5,17 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "SecurityConfig")
+@NamedQuery(
+        name = "SecurityConfig.getServerCertByStackId",
+        query = "SELECT s.serverCert FROM SecurityConfig s "
+                + "WHERE s.stack.id= :stackId")
 public class SecurityConfig implements ProvisionEntity {
 
     @Id

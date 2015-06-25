@@ -120,6 +120,7 @@ public class SecurityConfig {
                     .antMatchers("/user/stacks/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers("/account/stacks/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers("/stacks/ambari").access("#oauth2.hasScope('cloudbreak.autoscale')")
+                    .antMatchers("/stacks/*/certificate").access("#oauth2.hasScope('cloudbreak.autoscale')")
                     .antMatchers("/stacks/*").access("#oauth2.hasScope('cloudbreak.stacks') or #oauth2.hasScope('cloudbreak.autoscale')")
                     .antMatchers("/stacks/*/cluster/**").access("#oauth2.hasScope('cloudbreak.stacks') or #oauth2.hasScope('cloudbreak.autoscale')")
                     .antMatchers("/events").access("#oauth2.hasScope('cloudbreak.events')")
