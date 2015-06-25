@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -19,33 +21,45 @@ import javax.persistence.UniqueConstraint;
         @NamedQuery(
                 name = "Template.findForUser",
                 query = "SELECT t FROM Template t "
-                        + "WHERE t.owner= :user AND deleted IS NOT TRUE "),
+                        + "WHERE t.owner= :user AND deleted IS NOT TRUE "
+                        + "AND t.status <> 'DEFAULT_DELETED' "),
         @NamedQuery(
                 name = "Template.findPublicInAccountForUser",
                 query = "SELECT t FROM Template t "
                         + "WHERE ((t.account= :account AND t.publicInAccount= true) "
-                        + "OR t.owner= :user) AND deleted IS NOT TRUE "),
+                        + "OR t.owner= :user) AND deleted IS NOT TRUE "
+                        + "AND t.status <> 'DEFAULT_DELETED' "),
         @NamedQuery(
                 name = "Template.findAllInAccount",
                 query = "SELECT t FROM Template t "
-                        + "WHERE t.account= :account AND deleted IS NOT TRUE "),
+                        + "WHERE t.account= :account AND deleted IS NOT TRUE "
+                        + "AND t.status <> 'DEFAULT_DELETED' "),
         @NamedQuery(
                 name = "Template.findOneByName",
                 query = "SELECT t FROM Template t "
-                        + "WHERE t.name= :name and t.account= :account AND deleted IS NOT TRUE "),
+                        + "WHERE t.name= :name and t.account= :account AND deleted IS NOT TRUE "
+                        + "AND t.status <> 'DEFAULT_DELETED' "),
         @NamedQuery(
                 name = "Template.findByIdInAccount",
                 query = "SELECT t FROM Template t "
-                        + "WHERE t.id= :id and t.account= :account AND deleted IS NOT TRUE "),
+                        + "WHERE t.id= :id and t.account= :account AND deleted IS NOT TRUE "
+                        + "AND t.status <> 'DEFAULT_DELETED' "),
         @NamedQuery(
                 name = "Template.findByNameInAccount",
                 query = "SELECT t FROM Template t "
                         + "WHERE t.name= :name and ((t.account= :account and t.publicInAccount=true) or t.owner= :owner) "
-                        + "AND deleted IS NOT TRUE "),
+                        + "AND deleted IS NOT TRUE "
+                        + "AND t.status <> 'DEFAULT_DELETED' "),
         @NamedQuery(
                 name = "Template.findByNameInUser",
                 query = "SELECT t FROM Template t "
-                        + "WHERE t.owner= :owner and t.name= :name AND deleted IS NOT TRUE ")
+                        + "WHERE t.owner= :owner and t.name= :name AND deleted IS NOT TRUE "
+                        + "AND t.status <> 'DEFAULT_DELETED' "),
+        @NamedQuery(
+                name = "Template.findAllDefaultInAccount",
+                query = "SELECT t FROM Template t "
+                        + "WHERE t.account= :account "
+                        + "AND (t.status = 'DEFAULT_DELETED' OR t.status = 'DEFAULT') ")
 })
 public abstract class Template {
 
@@ -68,6 +82,9 @@ public abstract class Template {
     private Integer volumeSize;
 
     private boolean deleted;
+
+    @Enumerated(EnumType.STRING)
+    private ResourceStatus status;
 
     public Template() {
         deleted = false;
@@ -145,5 +162,13 @@ public abstract class Template {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public ResourceStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ResourceStatus status) {
+        this.status = status;
     }
 }

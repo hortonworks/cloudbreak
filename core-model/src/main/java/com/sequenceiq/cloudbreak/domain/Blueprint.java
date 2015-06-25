@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -19,32 +21,44 @@ import javax.persistence.UniqueConstraint;
         @NamedQuery(
                 name = "Blueprint.findForUser",
                 query = "SELECT b FROM Blueprint b "
-                        + "WHERE b.owner= :user"),
+                        + "WHERE b.owner= :user "
+                        + "AND b.status <> 'DEFAULT_DELETED' "),
         @NamedQuery(
                 name = "Blueprint.findPublicInAccountForUser",
                 query = "SELECT b FROM Blueprint b "
                         + "WHERE (b.account= :account AND b.publicInAccount= true) "
-                        + "OR b.owner= :user"),
+                        + "OR b.owner= :user "
+                        + "AND b.status <> 'DEFAULT_DELETED' "),
         @NamedQuery(
                 name = "Blueprint.findAllInAccount",
                 query = "SELECT b FROM Blueprint b "
-                        + "WHERE b.account= :account "),
+                        + "WHERE b.account= :account "
+                        + "AND b.status <> 'DEFAULT_DELETED' "),
         @NamedQuery(
                 name = "Blueprint.findOneByName",
                 query = "SELECT b FROM Blueprint b "
-                        + "WHERE b.name= :name and b.account= :account"),
+                        + "WHERE b.name= :name and b.account= :account "
+                        + "AND b.status <> 'DEFAULT_DELETED' "),
         @NamedQuery(
                 name = "Blueprint.findByIdInAccount",
                 query = "SELECT b FROM Blueprint b "
-                        + "WHERE  b.id= :id and b.account= :account"),
+                        + "WHERE  b.id= :id and b.account= :account "
+                        + "AND b.status <> 'DEFAULT_DELETED' "),
         @NamedQuery(
                 name = "Blueprint.findByNameInAccount",
                 query = "SELECT b FROM Blueprint b "
-                        + "WHERE  b.name= :name and ((b.publicInAccount=true and b.account= :account) or b.owner= :owner)"),
+                        + "WHERE  b.name= :name and ((b.publicInAccount=true and b.account= :account) or b.owner= :owner) "
+                        + "AND b.status <> 'DEFAULT_DELETED' "),
         @NamedQuery(
                 name = "Blueprint.findByNameInUser",
                 query = "SELECT b FROM Blueprint b "
-                        + "WHERE b.owner= :owner and b.name= :name")
+                        + "WHERE b.owner= :owner and b.name= :name "
+                        + "AND b.status <> 'DEFAULT_DELETED' "),
+        @NamedQuery(
+                name = "Blueprint.findAllDefaultInAccount",
+                query = "SELECT b FROM Blueprint b "
+                        + "WHERE b.account= :account "
+                        + "AND (b.status = 'DEFAULT_DELETED' OR b.status = 'DEFAULT') ")
 })
 public class Blueprint implements ProvisionEntity {
 
@@ -69,6 +83,9 @@ public class Blueprint implements ProvisionEntity {
     private String account;
 
     private boolean publicInAccount;
+
+    @Enumerated(EnumType.STRING)
+    private ResourceStatus status;
 
     public Blueprint() {
 
@@ -144,5 +161,13 @@ public class Blueprint implements ProvisionEntity {
 
     public void setPublicInAccount(boolean publicInAccount) {
         this.publicInAccount = publicInAccount;
+    }
+
+    public ResourceStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ResourceStatus status) {
+        this.status = status;
     }
 }

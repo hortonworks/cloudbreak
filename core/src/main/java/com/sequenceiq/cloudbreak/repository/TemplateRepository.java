@@ -30,4 +30,6 @@ public interface TemplateRepository extends CrudRepository<Template, Long> {
 
     Template findByNameInUser(@Param("name") String name, @Param("owner") String owner);
 
+    Set<Template> findAllDefaultInAccount(@Param("account") String account);
+
 }

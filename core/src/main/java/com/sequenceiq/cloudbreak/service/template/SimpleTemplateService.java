@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
+import com.sequenceiq.cloudbreak.domain.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -110,13 +111,18 @@ public class SimpleTemplateService implements TemplateService {
     }
 
     private void delete(Template template, CbUser user) {
-        LOGGER.debug("Deleting template. {} - {}", new Object[] { template.getId(), template.getName() });
+        LOGGER.debug("Deleting template. {} - {}", new Object[]{template.getId(), template.getName()});
         List<Stack> allStackForTemplate = stackRepository.findAllStackForTemplate(template.getId());
         if (allStackForTemplate.isEmpty()) {
             if (!user.getUserId().equals(template.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
                 throw new BadRequestException("Templates can be deleted only by account admins or owners.");
             }
-            templateRepository.delete(template);
+            if (ResourceStatus.USER_MANAGED.equals(template.getStatus())) {
+                templateRepository.delete(template);
+            } else {
+                template.setStatus(ResourceStatus.DEFAULT_DELETED);
+                templateRepository.save(template);
+            }
         } else {
             if (isRunningStackReferToTemplate(allStackForTemplate)) {
                 throw new BadRequestException(String.format(
@@ -126,6 +132,9 @@ public class SimpleTemplateService implements TemplateService {
                 String terminatedName = template.getName() + DELIMITER + now.getTime();
                 template.setName(terminatedName);
                 template.setDeleted(true);
+                if (ResourceStatus.DEFAULT.equals(template.getStatus())) {
+                    template.setStatus(ResourceStatus.DEFAULT_DELETED);
+                }
                 templateRepository.save(template);
             }
         }

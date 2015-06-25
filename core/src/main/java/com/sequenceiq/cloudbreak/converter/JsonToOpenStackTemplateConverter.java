@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 import com.sequenceiq.cloudbreak.controller.validation.OpenStackTemplateParam;
 import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
+import com.sequenceiq.cloudbreak.domain.ResourceStatus;
 
 @Component
 public class JsonToOpenStackTemplateConverter extends AbstractConversionServiceAwareConverter<TemplateRequest, OpenStackTemplate> {
@@ -15,6 +16,7 @@ public class JsonToOpenStackTemplateConverter extends AbstractConversionServiceA
         template.setName(source.getName());
         template.setInstanceType(String.valueOf(source.getParameters().get(OpenStackTemplateParam.INSTANCE_TYPE.getName())));
         template.setDescription(source.getDescription());
+        template.setStatus(ResourceStatus.USER_MANAGED);
         template.setVolumeCount((source.getVolumeCount() == null) ? 0 : source.getVolumeCount());
         template.setVolumeSize((source.getVolumeSize() == null) ? 0 : source.getVolumeSize());
         return template;

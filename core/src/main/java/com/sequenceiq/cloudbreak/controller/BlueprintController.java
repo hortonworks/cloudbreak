@@ -111,12 +111,8 @@ public class BlueprintController {
     @ResponseBody
     public ResponseEntity<Set<BlueprintResponse>> getAccountBlueprints(@ApiIgnore @ModelAttribute("user") CbUser user) {
         MDCBuilder.buildMdcContext(user);
-        Set<Blueprint> blueprints = blueprintService.retrieveAccountBlueprints(user);
-        if (defaultBlueprintLoaderService.blueprintAdditionNeeded(blueprints)) {
-            Set<Blueprint> blueprintsList = defaultBlueprintLoaderService.loadBlueprints(user);
-            blueprints = new HashSet<>((ArrayList<Blueprint>) blueprintRepository.save(blueprintsList));
-        }
-        blueprints = blueprintService.retrieveAccountBlueprints(user);
+        Set<Blueprint> blueprints = defaultBlueprintLoaderService.loadBlueprints(user);
+        blueprints.addAll(blueprintService.retrieveAccountBlueprints(user));
         return new ResponseEntity<>(toJsonList(blueprints), HttpStatus.OK);
     }
 

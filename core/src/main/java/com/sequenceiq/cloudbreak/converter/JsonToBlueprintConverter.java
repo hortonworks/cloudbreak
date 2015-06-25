@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.BlueprintRequest;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ResourceStatus;
 
 @Component
 public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConverter<BlueprintRequest, Blueprint> {
@@ -44,6 +45,7 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
         validateBlueprint(blueprint.getBlueprintText());
         blueprint.setName(json.getName());
         blueprint.setDescription(json.getDescription());
+        blueprint.setStatus(ResourceStatus.USER_MANAGED);
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode root = mapper.readTree(blueprint.getBlueprintText());

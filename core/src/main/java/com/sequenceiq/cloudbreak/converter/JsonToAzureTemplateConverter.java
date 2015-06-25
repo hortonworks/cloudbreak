@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.AzureTemplateParam;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureVmType;
+import com.sequenceiq.cloudbreak.domain.ResourceStatus;
 
 @Component
 public class JsonToAzureTemplateConverter extends AbstractConversionServiceAwareConverter<TemplateRequest, AzureTemplate> {
@@ -17,6 +18,7 @@ public class JsonToAzureTemplateConverter extends AbstractConversionServiceAware
         azureTemplate.setName(source.getName());
         azureTemplate.setDescription(source.getDescription());
         azureTemplate.setName(String.valueOf(source.getName()));
+        azureTemplate.setStatus(ResourceStatus.USER_MANAGED);
         azureTemplate.setVmType(AzureVmType.valueOf(source.getParameters().get(AzureTemplateParam.VMTYPE.getName()).toString()));
         azureTemplate.setDescription(source.getDescription());
         azureTemplate.setVolumeCount((source.getVolumeCount() == null) ? 0 : source.getVolumeCount());
