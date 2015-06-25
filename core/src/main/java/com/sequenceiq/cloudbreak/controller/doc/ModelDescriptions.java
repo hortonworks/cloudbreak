@@ -51,6 +51,7 @@ public class ModelDescriptions {
         public static final String HASH = "unique hash identifier for stack";
         public static final String BLUEPRINT_ID = "id of the referenced blueprint";
         public static final String NETWORK_ID = "network resource id for the stack";
+        public static final String CERTIFICATE = "certificate used by the gateway";
     }
 
     public static class ClusterModelDescription {

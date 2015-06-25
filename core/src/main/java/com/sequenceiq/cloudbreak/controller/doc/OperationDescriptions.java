@@ -58,6 +58,7 @@ public class OperationDescriptions {
         public static final String PUT_BY_ID = "update stack by id";
         public static final String GET_METADATA = "retrieve stack metadata";
         public static final String GET_BY_AMBARI_ADDRESS = "retrieve stack by ambari address";
+        public static final String GET_STACK_CERT = "retrieves the TLS certificate used by the gateway";
         public static final String VALIDATE = "validate stack";
     }
 
