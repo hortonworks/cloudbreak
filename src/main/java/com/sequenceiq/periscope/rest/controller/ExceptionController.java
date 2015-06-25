@@ -14,6 +14,7 @@ import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
 import com.sequenceiq.periscope.rest.json.ExceptionMessageJson;
 import com.sequenceiq.periscope.rest.json.IdExceptionMessageJson;
 import com.sequenceiq.periscope.service.NotFoundException;
+import com.sequenceiq.periscope.service.security.TlsConfigurationException;
 
 @ControllerAdvice
 public class ExceptionController {
@@ -41,6 +42,11 @@ public class ExceptionController {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ExceptionMessageJson> handleNoScalingGroupException(AccessDeniedException e) {
         return createExceptionMessage(e.getMessage(), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(TlsConfigurationException.class)
+    public ResponseEntity<ExceptionMessageJson> handleTlsConfigurationException(TlsConfigurationException e) {
+        return createExceptionMessage(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     public static ResponseEntity<ExceptionMessageJson> createExceptionMessage(String message) {

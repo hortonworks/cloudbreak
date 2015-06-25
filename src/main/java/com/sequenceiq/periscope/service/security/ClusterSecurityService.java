@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
+import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.service.CloudbreakService;
 
@@ -16,6 +17,9 @@ public class ClusterSecurityService {
 
     @Autowired
     private CloudbreakService cloudbreakService;
+
+    @Autowired
+    private TlsSecurityService tlsSecurityService;
 
     public boolean hasAccess(PeriscopeUser user, Ambari ambari) {
         CloudbreakClient client = cloudbreakService.getClient();
@@ -35,11 +39,12 @@ public class ClusterSecurityService {
             String user = ambari.getUser();
             String pass = ambari.getPass();
             long id = client.resolveToStackId(host);
+            SecurityConfig securityConfig = tlsSecurityService.prepareSecurityConfig(id);
             if (user == null && pass == null) {
                 Map<String, String> stack = (Map<String, String>) client.getStack("" + id);
-                return new AmbariStack(new Ambari(host, ambari.getPort(), stack.get("userName"), stack.get("password")), id);
+                return new AmbariStack(new Ambari(host, ambari.getPort(), stack.get("userName"), stack.get("password")), id, securityConfig);
             } else {
-                return new AmbariStack(ambari, id);
+                return new AmbariStack(ambari, id, securityConfig);
             }
         } catch (Exception e) {
             return new AmbariStack(ambari);

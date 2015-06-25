@@ -16,6 +16,7 @@ import com.sequenceiq.periscope.log.Logger;
 import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.service.ClusterService;
+import com.sequenceiq.periscope.utils.AmbariClientProvider;
 import com.sequenceiq.periscope.utils.ClusterUtils;
 
 @Component
@@ -29,6 +30,8 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
     private ClusterService clusterService;
     @Autowired
     private ApplicationContext applicationContext;
+    @Autowired
+    private AmbariClientProvider ambariClientProvider;
 
     @Override
     public void onApplicationEvent(ScalingEvent event) {
@@ -41,7 +44,7 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
         long clusterId = cluster.getId();
         long remainingTime = getRemainingCooldownTime(cluster);
         if (remainingTime <= 0) {
-            int totalNodes = ClusterUtils.getTotalNodes(cluster);
+            int totalNodes = ClusterUtils.getTotalNodes(ambariClientProvider.createAmbariClient(cluster));
             int desiredNodeCount = getDesiredNodeCount(cluster, policy, totalNodes);
             if (totalNodes != desiredNodeCount) {
                 ScalingRequest scalingRequest = (ScalingRequest)

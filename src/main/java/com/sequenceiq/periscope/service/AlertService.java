@@ -19,6 +19,7 @@ import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.MetricAlertRepository;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
+import com.sequenceiq.periscope.utils.AmbariClientProvider;
 
 import freemarker.template.Configuration;
 
@@ -41,6 +42,8 @@ public class AlertService {
     private ClusterService clusterService;
     @Autowired
     private Configuration freemarker;
+    @Autowired
+    private AmbariClientProvider ambariClientProvider;
 
     public MetricAlert createMetricAlert(long clusterId, MetricAlert alert) {
         Cluster cluster = clusterService.findOneByUser(clusterId);
@@ -125,12 +128,12 @@ public class AlertService {
 
     public List<Map<String, String>> getAlertDefinitions(long clusterId) {
         Cluster cluster = clusterService.findOneByUser(clusterId);
-        return cluster.newAmbariClient().getAlertDefinitions();
+        return ambariClientProvider.createAmbariClient(cluster).getAlertDefinitions();
     }
 
     public void addPeriscopeAlerts(Cluster cluster) {
         long clusterId = cluster.getId();
-        AmbariClient client = cluster.newAmbariClient();
+        AmbariClient client = ambariClientProvider.createAmbariClient(cluster);
         try {
             createAlert(clusterId, client, getAlertDefinition(client, CONTAINER_ALERT), CONTAINER_ALERT);
             createAlert(clusterId, client, getAlertDefinition(client, APP_ALERT), APP_ALERT);

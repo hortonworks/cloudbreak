@@ -8,6 +8,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -19,7 +20,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
-import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.periscope.model.AmbariStack;
 
 @Entity
@@ -41,6 +41,9 @@ public class Cluster {
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Ambari ambari;
+
+    @OneToOne(mappedBy = "cluster", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    private SecurityConfig securityConfig;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -101,6 +104,14 @@ public class Cluster {
 
     public void setAmbari(Ambari ambari) {
         this.ambari = ambari;
+    }
+
+    public SecurityConfig getSecurityConfig() {
+        return securityConfig;
+    }
+
+    public void setSecurityConfig(SecurityConfig securityConfig) {
+        this.securityConfig = securityConfig;
     }
 
     public PeriscopeUser getUser() {
@@ -189,10 +200,6 @@ public class Cluster {
 
     public String getAmbariPass() {
         return ambari.getPass();
-    }
-
-    public AmbariClient newAmbariClient() {
-        return new AmbariClient(getHost(), getPort(), getAmbariUser(), getAmbariPass());
     }
 
     public synchronized void setLastScalingActivityCurrent() {

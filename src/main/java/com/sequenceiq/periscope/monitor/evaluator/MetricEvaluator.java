@@ -17,6 +17,7 @@ import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.repository.MetricAlertRepository;
 import com.sequenceiq.periscope.service.ClusterService;
+import com.sequenceiq.periscope.utils.AmbariClientProvider;
 import com.sequenceiq.periscope.utils.ClusterUtils;
 
 @Component("MetricEvaluator")
@@ -31,6 +32,8 @@ public class MetricEvaluator extends AbstractEventPublisher implements Evaluator
     private ClusterService clusterService;
     @Autowired
     private MetricAlertRepository alertRepository;
+    @Autowired
+    private AmbariClientProvider ambariClientProvider;
 
     private long clusterId;
 
@@ -42,7 +45,7 @@ public class MetricEvaluator extends AbstractEventPublisher implements Evaluator
     @Override
     public void run() {
         Cluster cluster = clusterService.find(clusterId);
-        AmbariClient ambariClient = cluster.newAmbariClient();
+        AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
         try {
             for (MetricAlert alert : alertRepository.findAllByCluster(clusterId)) {
                 String alertName = alert.getName();

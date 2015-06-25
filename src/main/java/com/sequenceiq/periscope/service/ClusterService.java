@@ -8,8 +8,10 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterState;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
+import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.repository.ClusterRepository;
+import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 import com.sequenceiq.periscope.repository.UserRepository;
 import com.sequenceiq.periscope.rest.json.ScalingConfigurationJson;
 
@@ -21,12 +23,19 @@ public class ClusterService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
+    private SecurityConfigRepository securityConfigRepository;
+    @Autowired
     private AlertService alertService;
 
     public Cluster create(PeriscopeUser user, AmbariStack stack) {
         PeriscopeUser periscopeUser = createUserIfAbsent(user);
         Cluster cluster = new Cluster(periscopeUser, stack);
         cluster = save(cluster);
+        if (stack.getSecurityConfig() != null) {
+            SecurityConfig securityConfig = stack.getSecurityConfig();
+            securityConfig.setCluster(cluster);
+            securityConfigRepository.save(securityConfig);
+        }
         alertService.addPeriscopeAlerts(cluster);
         return cluster;
     }
@@ -34,7 +43,14 @@ public class ClusterService {
     public Cluster update(long clusterId, AmbariStack stack) {
         Cluster cluster = findOneByUser(clusterId);
         cluster.update(stack);
-        return save(cluster);
+        cluster = save(cluster);
+        if (stack.getSecurityConfig() != null) {
+            SecurityConfig updatedConfig = stack.getSecurityConfig();
+            SecurityConfig securityConfig = securityConfigRepository.findByClusterId(clusterId);
+            securityConfig.update(updatedConfig);
+            securityConfigRepository.save(securityConfig);
+        }
+        return cluster;
     }
 
     public List<Cluster> findAllByUser(PeriscopeUser user) {
