@@ -7,17 +7,17 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 public class CertificateResponse {
 
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.CERTIFICATE)
-    private byte[] certificate;
+    private String certificate;
 
-    public CertificateResponse(byte[] certificate) {
+    public CertificateResponse(String certificate) {
         this.certificate = certificate;
     }
 
-    public byte[] getCertificate() {
+    public String getCertificate() {
         return certificate;
     }
 
-    public void setCertificate(byte[] certificate) {
+    public void setCertificate(String certificate) {
         this.certificate = certificate;
     }
 }

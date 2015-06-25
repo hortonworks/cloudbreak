@@ -112,12 +112,12 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
-    public byte[] getCertificate(Long id) {
+    public String getCertificate(Long id) {
         String cert = securityConfigRepository.getServerCertByStackId(id);
         if (cert == null) {
             throw new NotFoundException("Stack doesn't exist, or certificate was not found for stack.");
         }
-        return Base64.decodeBase64(cert);
+        return new String(Base64.decodeBase64(cert));
     }
 
     @Override
