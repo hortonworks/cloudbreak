@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UnknownFormatConversionException;
@@ -78,10 +77,6 @@ public class TemplateController {
     public ResponseEntity<Set<TemplateResponse>> getPrivateTemplates(@ModelAttribute("user") CbUser user) {
         MDCBuilder.buildMdcContext(user);
         Set<Template> templates = templateService.retrievePrivateTemplates(user);
-        if (templates.isEmpty()) {
-            Set<Template> templateList = templateLoaderService.loadTemplates(user);
-            templates = new HashSet<>((ArrayList<Template>) templateRepository.save(templateList));
-        }
         return new ResponseEntity<>(convert(templates), HttpStatus.OK);
     }
 
@@ -90,12 +85,8 @@ public class TemplateController {
     @ResponseBody
     public ResponseEntity<Set<TemplateResponse>> getAccountTemplates(@ModelAttribute("user") CbUser user) {
         MDCBuilder.buildMdcContext(user);
-        Set<Template> templates = templateService.retrieveAccountTemplates(user);
-        if (templateLoaderService.templateAdditionNeeded(templates)) {
-            Set<Template> templateList = templateLoaderService.loadTemplates(user);
-            templates = new HashSet<>((ArrayList<Template>) templateRepository.save(templateList));
-        }
-        templates = templateService.retrieveAccountTemplates(user);
+        Set<Template> templates = templateLoaderService.loadTemplates(user);
+        templates.addAll(templateService.retrieveAccountTemplates(user));
         return new ResponseEntity<>(convert(templates), HttpStatus.OK);
     }
 

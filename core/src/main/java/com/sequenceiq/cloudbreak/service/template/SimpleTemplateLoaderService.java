@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.GcpTemplate;
 import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
+import com.sequenceiq.cloudbreak.domain.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -47,6 +48,14 @@ public class SimpleTemplateLoaderService {
     private JsonHelper jsonHelper;
 
     public Set<Template> loadTemplates(CbUser user) {
+        Set<Template> templates = new HashSet<>();
+        if (templateRepository.findAllDefaultInAccount(user.getAccount()).isEmpty()) {
+            templates.addAll(createDefaultTemplates(user));
+        }
+        return templates;
+    }
+
+    private Set<Template> createDefaultTemplates(CbUser user) {
         Set<Template> templates = new HashSet<>();
         for (String templateName : templateArray) {
             Template oneByName = null;
@@ -82,30 +91,15 @@ public class SimpleTemplateLoaderService {
                     converted.setAccount(user.getAccount());
                     converted.setOwner(user.getUserId());
                     converted.setPublicInAccount(true);
+                    converted.setStatus(ResourceStatus.DEFAULT);
+                    templateRepository.save(converted);
                     templates.add(converted);
                 } catch (Exception e) {
                     LOGGER.error("Template is not available for '{}' user.", e, user);
                 }
             }
         }
-
         return templates;
     }
 
-
-    public boolean templateAdditionNeeded(Set<Template> templates) {
-        for (String act : templateArray) {
-            boolean contain = false;
-            for (Template template : templates) {
-                if (act.equals(template.getName())) {
-                    contain = true;
-                    break;
-                }
-            }
-            if (!contain) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

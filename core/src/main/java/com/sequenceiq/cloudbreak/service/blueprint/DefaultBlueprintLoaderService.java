@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.controller.json.BlueprintRequest;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.ResourceStatus;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -41,6 +42,14 @@ public class DefaultBlueprintLoaderService {
 
     public Set<Blueprint> loadBlueprints(CbUser user) {
         Set<Blueprint> blueprints = new HashSet<>();
+        if (blueprintRepository.findAllDefaultInAccount(user.getAccount()).isEmpty()) {
+            blueprints.addAll(createDefaultBlueprints(user));
+        }
+        return blueprints;
+    }
+
+    private Set<Blueprint> createDefaultBlueprints(CbUser user) {
+        Set<Blueprint> blueprints = new HashSet<>();
         for (String blueprintName : blueprintArray) {
             Blueprint oneByName = null;
             try {
@@ -60,6 +69,8 @@ public class DefaultBlueprintLoaderService {
                     bp.setOwner(user.getUserId());
                     bp.setAccount(user.getAccount());
                     bp.setPublicInAccount(true);
+                    bp.setStatus(ResourceStatus.DEFAULT);
+                    blueprintRepository.save(bp);
                     blueprints.add(bp);
                 } catch (Exception e) {
                     LOGGER.error("Blueprint is not available for '{}' user.", e, user);
@@ -69,19 +80,4 @@ public class DefaultBlueprintLoaderService {
         return blueprints;
     }
 
-    public boolean blueprintAdditionNeeded(Set<Blueprint> blueprints) {
-        for (String act : blueprintArray) {
-            boolean contain = false;
-            for (Blueprint blueprint : blueprints) {
-                if (act.equals(blueprint.getName())) {
-                    contain = true;
-                    break;
-                }
-            }
-            if (!contain) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

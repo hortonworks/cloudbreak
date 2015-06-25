@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.domain.AwsEncryption;
 import com.sequenceiq.cloudbreak.domain.AwsInstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AwsVolumeType;
+import com.sequenceiq.cloudbreak.domain.ResourceStatus;
 
 @Component
 public class JsonToAwsTemplateConverter extends AbstractConversionServiceAwareConverter<TemplateRequest, AwsTemplate> {
@@ -23,6 +24,7 @@ public class JsonToAwsTemplateConverter extends AbstractConversionServiceAwareCo
                 ? String.valueOf(source.getParameters().get(AwsTemplateParam.SSH_LOCATION.getName())) : DEFAULT_SSH_LOCATION;
         awsTemplate.setSshLocation(sshLocation);
         awsTemplate.setDescription(source.getDescription());
+        awsTemplate.setStatus(ResourceStatus.USER_MANAGED);
         awsTemplate.setVolumeCount(source.getVolumeCount() == null ? 0 : source.getVolumeCount());
         awsTemplate.setVolumeSize(source.getVolumeSize() == null ? 0 : source.getVolumeSize());
         awsTemplate.setVolumeType(AwsVolumeType.valueOf(String.valueOf(source.getParameters().get(AwsTemplateParam.VOLUME_TYPE.getName()))));

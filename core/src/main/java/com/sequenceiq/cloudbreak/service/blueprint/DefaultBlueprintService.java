@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
+import com.sequenceiq.cloudbreak.domain.ResourceStatus;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
@@ -108,7 +109,12 @@ public class DefaultBlueprintService implements BlueprintService {
             if (!user.getUserId().equals(blueprint.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
                 throw new BadRequestException("Blueprints can only be deleted by account admins or owners.");
             }
-            blueprintRepository.delete(blueprint);
+            if (ResourceStatus.USER_MANAGED.equals(blueprint.getStatus())) {
+                blueprintRepository.delete(blueprint);
+            } else {
+                blueprint.setStatus(ResourceStatus.DEFAULT_DELETED);
+                blueprintRepository.save(blueprint);
+            }
         } else {
             throw new BadRequestException(String.format(
                     "There are clusters associated with blueprint '%s'. Please remove these before deleting the blueprint.", blueprint.getId()));
