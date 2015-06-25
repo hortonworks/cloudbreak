@@ -494,8 +494,6 @@ Using manage resources you can create infrastructure templates.
 
 `Public in account:` share it with others in the account
 
-You can download our OpenStack image here: <a href=https://s3-eu-west-1.amazonaws.com/cb-openstack-images/cb-centos66-amb200-2015-05-25.img>link</a>
-
 ###Manage blueprints
 Blueprints are your declarative definition of a Hadoop cluster.
 
@@ -524,6 +522,12 @@ Manage networks allows you to create or reuse existing networks and configure th
 
 `Public in account:` share it with others in the account
 
+###Manage security groups
+Security groups allows confoguration of traffic/access to the cluster. Currently there are two default groups, and leter versions will allow setup of new groups.
+
+`only-ssh-and-ssl:` all ports are locked down (you can't access Hadoop servives outside of the VPN) but SSH (22) and HTTPS (443)
+
+`all-services-port:` all Hadoop services + SSH/HTTP are accessible by default
 
 ###Create cluster
 Using the create cluster functionality you will create a cloud Stack and a Hadoop Cluster. In order to create a cluster you will have to select a credential first.
@@ -535,6 +539,8 @@ _Note: Cloudbreak can maintain multiple cloud credentials (even for the same pro
 `Region:` the region where the cluster is started
 
 `Network:` the network template
+
+`Security Group:" the security group
 
 `Blueprint:` your Hadoop cluster blueprint. Once the blueprint is selected we parse it and give you the option to select the followings for each **hostgroup**.
 
