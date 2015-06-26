@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.DEL
 import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.RUNNING;
 import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.STOPPED;
+import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.UNKNOWN;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -131,15 +132,26 @@ public class AzureMetadataSetup implements MetadataSetup {
         Map<String, String> vmContext = createVMContext(instanceId);
         AzureCredential credential = (AzureCredential) stack.getCredential();
         AzureClient azureClient = azureStackUtil.createAzureClient(credential);
-        InstanceSyncState instanceSyncState = IN_PROGRESS;
+        InstanceSyncState instanceSyncState;
         try {
-            if ("Running".equals(azureClient.getVirtualMachineState(vmContext))) {
+            String virtualMachineState = azureClient.getVirtualMachineState(vmContext);
+            if ("Running".equals(virtualMachineState)) {
                 instanceSyncState = RUNNING;
-            } else if ("Suspended".equals(azureClient.getVirtualMachineState(vmContext))) {
+            } else if ("Suspended".equals(virtualMachineState)) {
                 instanceSyncState = STOPPED;
+            } else if (isActualStatusDesired(virtualMachineState, "RunningTransitioning", "SuspendedTransitioning",
+                    "Starting", "Suspending", "Deploying", "Deleting")) {
+                instanceSyncState = IN_PROGRESS;
+            } else {
+                instanceSyncState = UNKNOWN;
             }
         } catch (Exception ex) {
-            instanceSyncState = DELETED;
+            if (ex.getMessage().contains("Not Found")) {
+                LOGGER.info("The instance({}) could not be found by Azure.", instanceId);
+                instanceSyncState = DELETED;
+            } else {
+                throw new AzureResourceException(String.format("Failed to retrieve status of instance(%s) from Azure.", instanceId), ex);
+            }
         }
         return instanceSyncState;
     }
@@ -149,6 +161,16 @@ public class AzureMetadataSetup implements MetadataSetup {
         context.put(SERVICENAME, vmName);
         context.put(NAME, vmName);
         return context;
+    }
+
+    private boolean isActualStatusDesired(String actualStatus, String... desiredStatuses) {
+        boolean result = false;
+        for (String desiredStatus : desiredStatuses) {
+            if (actualStatus.equals(desiredStatus)) {
+                result = true;
+            }
+        }
+        return result;
     }
 
     @Override

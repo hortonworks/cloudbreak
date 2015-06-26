@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
@@ -156,6 +157,12 @@ public class AwsMetadataSetup implements MetadataSetup {
                 }
             } else {
                 instanceSyncState = DELETED;
+            }
+        } catch (AmazonServiceException e) {
+            if ("InvalidInstanceID.NotFound".equals(e.getErrorCode())) {
+                instanceSyncState = DELETED;
+            } else {
+                throw new AwsResourceException("Failed to retrieve state of instance " + instanceId, e);
             }
         } catch (Exception e) {
             throw new AwsResourceException("Failed to retrieve state of instance " + instanceId, e);

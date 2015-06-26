@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.DEL
 import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.RUNNING;
 import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.STOPPED;
+import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.UNKNOWN;
 
 import java.util.HashSet;
 import java.util.List;
@@ -15,6 +16,7 @@ import javax.inject.Inject;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.model.compute.Address;
 import org.openstack4j.model.compute.Server;
+import org.openstack4j.model.compute.Server.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -139,24 +141,46 @@ public class OpenStackMetadataSetup implements MetadataSetup {
 
     @Override
     public InstanceSyncState getState(Stack stack, String instanceId) {
-        OSClient osClient = openStackUtil.createOSClient(stack);
-        Resource heatResource = stack.getResourceByType(ResourceType.HEAT_STACK);
-        String heatStackId = heatResource.getResourceName();
-        InstanceSyncState instanceSyncState = IN_PROGRESS;
-        org.openstack4j.model.heat.Stack heatStack = osClient.heat().stacks().getDetails(stack.getName(), heatStackId);
-        List<Map<String, Object>> outputs = heatStack.getOutputs();
+        try {
+            InstanceSyncState result;
+            OSClient osClient = openStackUtil.createOSClient(stack);
+            Resource heatResource = stack.getResourceByType(ResourceType.HEAT_STACK);
+            String heatStackId = heatResource.getResourceName();
+            org.openstack4j.model.heat.Stack heatStack = osClient.heat().stacks().getDetails(stack.getName(), heatStackId);
+            if (heatStack != null) {
+                List<Map<String, Object>> outputs = heatStack.getOutputs();
+                result = getInstanceSyncState(instanceId, osClient, outputs);
+            } else {
+                result = DELETED;
+            }
+            return result;
+        } catch (Exception ex) {
+            throw new OpenStackResourceException("Failed to retrieve state of instance " + instanceId, ex);
+        }
+    }
+
+    private InstanceSyncState getInstanceSyncState(String instanceId, OSClient osClient, List<Map<String, Object>> outputs) {
         boolean contains = false;
+        InstanceSyncState instanceSyncState = IN_PROGRESS;
         for (Map<String, Object> map : outputs) {
             String instanceUUID = (String) map.get("output_value");
             Server server = osClient.compute().servers().get(instanceUUID);
             Map<String, String> metadata = server.getMetadata();
             if (instanceId.equals(openStackUtil.getInstanceId(instanceUUID, metadata))) {
-                if ("ACTIVE".equals(server.getStatus().toString())) {
+                if (isActualStatusDesired(server.getStatus(), Status.ACTIVE)) {
                     instanceSyncState = RUNNING;
                     contains = true;
                     break;
-                } else if ("SUSPENDED".equals(server.getStatus().toString())) {
+                } else if (isActualStatusDesired(server.getStatus(), Status.STOPPED, Status.SUSPENDED, Status.PAUSED)) {
                     instanceSyncState = STOPPED;
+                    contains = true;
+                    break;
+                } else if (isActualStatusDesired(server.getStatus(), Status.DELETED, Status.ERROR, Status.SHUTOFF)) {
+                    instanceSyncState = DELETED;
+                    contains = true;
+                    break;
+                } else if (isActualStatusDesired(server.getStatus(), Status.UNKNOWN, Status.UNRECOGNIZED)) {
+                    instanceSyncState = UNKNOWN;
                     contains = true;
                     break;
                 } else {
@@ -170,6 +194,16 @@ public class OpenStackMetadataSetup implements MetadataSetup {
             instanceSyncState = DELETED;
         }
         return instanceSyncState;
+    }
+
+    private boolean isActualStatusDesired(Status actualStatus, Status... desiredStatuses) {
+        boolean result = false;
+        for (Status status : desiredStatuses) {
+            if (actualStatus.equals(status)) {
+                result = true;
+            }
+        }
+        return result;
     }
 }
 
