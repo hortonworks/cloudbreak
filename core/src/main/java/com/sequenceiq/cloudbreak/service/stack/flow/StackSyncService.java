@@ -66,13 +66,15 @@ public class StackSyncService {
         for (InstanceMetaData instance : instances) {
             InstanceGroup instanceGroup = instance.getInstanceGroup();
             try {
-                InstanceSyncState state = metadataSetups.get(stack.cloudPlatform()).getState(stack, instance.getInstanceId());
+                MetadataSetup metadataSetup = metadataSetups.get(stack.cloudPlatform());
+                InstanceSyncState state = metadataSetup.getState(stack, instance.getInstanceId());
+                ResourceType instanceResourceType = metadataSetup.getInstanceResourceType();
                 if (InstanceSyncState.DELETED.equals(state)) {
                     instanceStateCounts.put(InstanceSyncState.DELETED, instanceStateCounts.get(InstanceSyncState.DELETED) + 1);
                     deleteHostFromCluster(stack, instance);
                     if (!instance.isTerminated()) {
                         LOGGER.info("Instance '{}' is reported as deleted on the cloud provider, setting its state to TERMINATED.", instance.getInstanceId());
-                        deleteResourceIfNeeded(stackId, instance);
+                        deleteResourceIfNeeded(stackId, instance, instanceResourceType);
                         updateMetaDataToTerminated(stackId, instance, instanceGroup);
                     }
                 } else if (InstanceSyncState.RUNNING.equals(state)) {
@@ -86,7 +88,7 @@ public class StackSyncService {
                     instanceStateCounts.put(InstanceSyncState.STOPPED, instanceStateCounts.get(InstanceSyncState.STOPPED) + 1);
                     if (!instance.isTerminated()) {
                         LOGGER.info("Instance '{}' is reported as stopped on the cloud provider, setting its state to STOPPED.", instance.getInstanceId());
-                        deleteResourceIfNeeded(stackId, instance);
+                        deleteResourceIfNeeded(stackId, instance, instanceResourceType);
                         updateMetaDataToTerminated(stackId, instance, instanceGroup);
                     }
                 } else {
@@ -110,10 +112,10 @@ public class StackSyncService {
         }
     }
 
-    private void deleteResourceIfNeeded(Long stackId, InstanceMetaData instance) {
-        Resource resource = resourceRepository.findByStackIdAndName(stackId, instance.getInstanceId());
+    private void deleteResourceIfNeeded(Long stackId, InstanceMetaData instance, ResourceType instanceResourceType) {
+        Resource resource = resourceRepository.findByStackIdAndNameAndType(stackId, instance.getInstanceId(), instanceResourceType);
         if (resource != null) {
-            resourceRepository.delete(resource.getId());
+            resourceRepository.delete(resource);
         }
     }
 

@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 
@@ -48,12 +49,13 @@ public class InstanceTerminationHandler {
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
     @Inject
     private CloudbreakEventService eventService;
+    @Inject
+    private Map<CloudPlatform, MetadataSetup> metadataSetups;
 
     public void terminateInstance(Stack stack, InstanceMetaData instanceMetaData) {
         String message = String.format("Terminate instance %s.", instanceMetaData.getInstanceId());
         LOGGER.info(message);
         eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), message);
-        Resource resource = resourceRepository.findByStackIdAndName(stack.getId(), instanceMetaData.getInstanceId());
         InstanceGroup ig = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceMetaData.getInstanceGroup().getGroupName());
         ig.setNodeCount(ig.getNodeCount() - 1);
         instanceGroupRepository.save(ig);
@@ -62,9 +64,7 @@ public class InstanceTerminationHandler {
         LOGGER.info(message);
         eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), message);
         deleteResourceAndDependencies(stack, instanceMetaData);
-        if (resourceRepository.findOne(resource.getId()) != null) {
-            resourceRepository.delete(resource.getId());
-        }
+        deleteInstanceResourceFromDatabase(stack, instanceMetaData);
         instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
         instanceMetaDataRepository.save(instanceMetaData);
         LOGGER.info("The status of instanceMetadata with {} id and {} name setted to TERMINATED.",
@@ -80,4 +80,15 @@ public class InstanceTerminationHandler {
         LOGGER.info("Instance deleted with {} id and {} name.", instanceMetaData.getId(), instanceMetaData.getInstanceId());
     }
 
+    private void deleteInstanceResourceFromDatabase(Stack stack, InstanceMetaData instanceMetaData) {
+        MetadataSetup metadataSetup = metadataSetups.get(stack.cloudPlatform());
+        String instanceId = instanceMetaData.getInstanceId();
+        Resource resource = resourceRepository.findByStackIdAndNameAndType(stack.getId(), instanceId,
+                metadataSetup.getInstanceResourceType());
+        if (resource != null) {
+            resourceRepository.delete(resource);
+        } else {
+            LOGGER.error("The terminated instance '{}' of stack '{}' could not be found in the database as resource!", instanceId, stack.getId());
+        }
+    }
 }
