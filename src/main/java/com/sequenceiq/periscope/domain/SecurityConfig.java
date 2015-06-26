@@ -82,9 +82,9 @@ public class SecurityConfig {
         this.cluster = cluster;
     }
 
-    public void update(SecurityConfig updatedConfig){
-        this.setClientCert(updatedConfig.getClientCert());
-        this.setClientKey(updatedConfig.getClientKey());
-        this.setServerCert(updatedConfig.getServerCert());
+    public void update(SecurityConfig updatedConfig) {
+        this.clientCert = updatedConfig.getClientCert();
+        this.clientKey = updatedConfig.getClientKey();
+        this.serverCert = updatedConfig.getServerCert();
     }
 }

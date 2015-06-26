@@ -38,7 +38,7 @@ public class DatabaseConfig {
     @Value("${periscope.db.tcp.port}")
     private String dbPort;
 
-    @Value("${periscope.db.hbm2ddl.strategy:update}")
+    @Value("${periscope.db.hbm2ddl.strategy:validate}")
     private String hbm2ddlStrategy;
 
     @Bean
