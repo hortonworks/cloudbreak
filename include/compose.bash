@@ -327,6 +327,8 @@ periscope:
         - ambassador:backend
     ports:
         - 8085:8080
+    volumes:
+        - "$CBD_CERT_ROOT_PATH:/certs"
     image: sequenceiq/periscope:$DOCKER_TAG_PERISCOPE
 
 EOF
