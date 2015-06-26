@@ -279,3 +279,27 @@ token() {
            | grep Location | cut -d'=' -f 2 | cut -d'&' -f 1)
     debug TOKEN=$TOKEN
 }
+
+local-dev() {
+    declare desc="Stops cloudbreak container, and starts an ambassador for cbreak in IntelliJ (def port:9090)"
+    declare port=${1:-9091}
+
+    debug stopping original cloudbreak container
+    dockerCompose stop cloudbreak
+
+    debug starting an ambassador to be registered as cloudbreak.service.consul.
+    debug "all traffic to ambassador will be proxied to localhost (192.168.59.3):$port"
+
+: << HINT
+sed -i  "s/cb.db.port.5432.tcp.addr=[^ ]*/cb.db.port.5432.tcp.addr=$(docker inspect -f '{{.NetworkSettings.IPAddress}}' cbreak_cbdb_1)/" \
+    ~/prj/cloudbreak.idea/runConfigurations/cloudbreak_remote.xml 
+HINT
+
+    docker run -d \
+        --name cloudbreak-proxy \
+        -p 8080:8080 \
+        -e PORT=8080 \
+        -e SERVICE_NAME=cloudbreak \
+        progrium/ambassadord 192.168.59.3:$port
+
+}
