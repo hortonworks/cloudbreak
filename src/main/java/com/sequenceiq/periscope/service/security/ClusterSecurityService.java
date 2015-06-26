@@ -41,8 +41,8 @@ public class ClusterSecurityService {
             long id = client.resolveToStackId(host);
             SecurityConfig securityConfig = tlsSecurityService.prepareSecurityConfig(id);
             if (user == null && pass == null) {
-                Map<String, String> stack = (Map<String, String>) client.getStack("" + id);
-                return new AmbariStack(new Ambari(host, ambari.getPort(), stack.get("userName"), stack.get("password")), id, securityConfig);
+                Map<String, String> cluster = (Map<String, String>) client.getCluster("" + id);
+                return new AmbariStack(new Ambari(host, ambari.getPort(), cluster.get("userName"), cluster.get("password")), id, securityConfig);
             } else {
                 return new AmbariStack(ambari, id, securityConfig);
             }
