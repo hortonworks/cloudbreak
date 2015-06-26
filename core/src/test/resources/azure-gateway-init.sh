@@ -5,7 +5,9 @@ START_LABEL=98
 PLATFORM_DISK_PREFIX=sd
 
 setup_tmp_ssh() {
+  echo "#tmpssh_start" >> /home/cloudbreak/.ssh/authorized_keys
   echo "ssh-rsa test" >> /home/cloudbreak/.ssh/authorized_keys
+  echo "#tmpssh_end" >> /home/cloudbreak/.ssh/authorized_keys
 }
 
 get_ip() {
