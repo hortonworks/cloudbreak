@@ -36,8 +36,7 @@ public class TlsSetupService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TlsSetupService.class);
 
     private static final int SSH_PORT = 22;
-    private static final int TLS_SETUP_TIMEOUT = 180;
-    private static final int REMOVE_SSH_KEY_TIMEOUT = 5;
+    private static final int SETUP_TIMEOUT = 180;
 
     @Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
@@ -72,18 +71,20 @@ public class TlsSetupService {
             String tlsSetupScript = FileReaderUtils.readFileFromClasspath("init/tls-setup.sh");
             tlsSetupScript = tlsSetupScript.replace("$PUBLIC_IP", gateway.getPublicIp());
             final Session.Command tlsSetupCmd = tlsSetupSession.exec(tlsSetupScript);
-            tlsSetupCmd.join(TLS_SETUP_TIMEOUT, TimeUnit.SECONDS);
+            tlsSetupCmd.join(SETUP_TIMEOUT, TimeUnit.SECONDS);
             tlsSetupSession.close();
             final Session changeSshKeySession = ssh.startSession();
-            final Session.Command changeSshKeyCmd = changeSshKeySession.exec("echo '" + stack.getCredential().getPublicKey() + "' > ~/.ssh/authorized_keys");
-            changeSshKeyCmd.join(REMOVE_SSH_KEY_TIMEOUT, TimeUnit.SECONDS);
+            changeSshKeySession.allocateDefaultPTY();
+            String removeScript = "sudo sed -i '/#tmpssh_start/,/#tmpssh_end/{s/./ /g}' /home/%s/.ssh/authorized_keys";
+            final Session.Command tmpSshRemoveCmd = changeSshKeySession.exec(String.format(removeScript, connector.getSSHUser()));
+            tmpSshRemoveCmd.join(SETUP_TIMEOUT, TimeUnit.SECONDS);
             changeSshKeySession.close();
             ssh.newSCPFileTransfer().download("/tmp/server.pem", tlsSecurityService.getCertDir(stack.getId()) + "/ca.pem");
-            if (changeSshKeyCmd.getExitStatus() != 0) {
-                throw new CloudbreakException(String.format("TLS setup script exited with error code: %s", changeSshKeyCmd.getExitStatus()));
-            }
             if (tlsSetupCmd.getExitStatus() != 0) {
-                throw new CloudbreakException(String.format("Failed to remove temp SSH key. Error code: %s", changeSshKeyCmd.getExitStatus()));
+                throw new CloudbreakException(String.format("TLS setup script exited with error code: %s", tlsSetupCmd.getExitStatus()));
+            }
+            if (tmpSshRemoveCmd.getExitStatus() != 0) {
+                throw new CloudbreakException(String.format("Failed to remove temp SSH key. Error code: %s", tmpSshRemoveCmd.getExitStatus()));
             }
             Stack stackWithSecurity = stackRepository.findByIdWithSecurityConfig(stack.getId());
             SecurityConfig securityConfig = stackWithSecurity.getSecurityConfig();

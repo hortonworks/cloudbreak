@@ -6,7 +6,9 @@ PLATFORM_DISK_PREFIX=${platformDiskPrefix}
 
 <#if gateway>
 setup_tmp_ssh() {
+  echo "#tmpssh_start" >> /home/${sshUser}/.ssh/authorized_keys
   echo "${tmpSshKey}" >> /home/${sshUser}/.ssh/authorized_keys
+  echo "#tmpssh_end" >> /home/${sshUser}/.ssh/authorized_keys
 }
 </#if>
 
