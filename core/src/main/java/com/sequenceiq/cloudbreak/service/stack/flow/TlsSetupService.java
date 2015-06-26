@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_TLS_CERT_FI
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
@@ -29,6 +30,8 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.connection.channel.direct.Session;
+import net.schmizz.sshj.transport.verification.HostKeyVerifier;
+import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 
 @Component
 public class TlsSetupService {
@@ -57,19 +60,25 @@ public class TlsSetupService {
 
         InstanceMetaData gateway = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
         CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
-
         LOGGER.info("SSH into gateway node to setup certificates on gateway.");
-        String sshFingerprint = connector.getSSHFingerprint(stack, gateway.getInstanceId());
-        LOGGER.info("Fingerprint has been determined: {}", sshFingerprint);
-        setupTls(stack.getId(), gateway.getPublicIp(), connector.getSSHUser(), stack.getCredential().getPublicKey(), sshFingerprint);
+        Set<String> sshFingerprints = connector.getSSHFingerprints(stack, gateway.getInstanceId());
+        LOGGER.info("Fingerprint has been determined: {}", sshFingerprints);
+        setupTls(cloudPlatform, stack.getId(), gateway.getPublicIp(), connector.getSSHUser(), stack.getCredential().getPublicKey(), sshFingerprints);
 
     }
 
-    private void setupTls(Long stackId, String publicIp, String user, String publicKey, String sshFingerprint) throws CloudbreakException {
+    private void setupTls(CloudPlatform cloudPlatform, Long stackId, String publicIp, String user, String publicKey, Set<String> sshFingerprints) throws
+            CloudbreakException {
         LOGGER.info("SSHClient parameters: stackId: {}, publicIp: {},  user: {}", stackId, publicIp, user);
         final SSHClient ssh = new SSHClient();
         try {
-            ssh.addHostKeyVerifier(sshFingerprint);
+            HostKeyVerifier hostKeyVerifier;
+            if (cloudPlatform == CloudPlatform.AWS) {
+                hostKeyVerifier = new PromiscuousVerifier();
+            } else {
+                hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints);
+            }
+            ssh.addHostKeyVerifier(hostKeyVerifier);
             ssh.connect(publicIp, SSH_PORT);
             ssh.authPublickey(user, tlsSecurityService.getSshPrivateFileLocation(stackId));
             String remoteTlsCertificatePath = "/tmp/cb-client.pem";

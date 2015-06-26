@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -132,8 +133,8 @@ public class AzureConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public String getSSHFingerprint(Stack stack, String gateway) {
-        String result = "";
+    public Set<String> getSSHFingerprints(Stack stack, String gateway) {
+        Set<String> results = new HashSet<>();
         try {
             Resource resource = resourceRepository.findByStackIdAndNameAndType(stack.getId(), gateway, AZURE_VIRTUAL_MACHINE);
             AzureCredential credential = (AzureCredential) stack.getCredential();
@@ -154,12 +155,13 @@ public class AzureConnector implements CloudPlatformConnector {
             Object virtualMachine = azureClient.getVirtualMachine(props);
             JsonNode actualObj = MAPPER.readValue((String) virtualMachine, JsonNode.class);
             String tmpFingerPrint = actualObj.get("Deployment").get("RoleInstanceList").get("RoleInstance").get("RemoteAccessCertificateThumbprint").asText();
-            result = formatFingerprint(tmpFingerPrint, ":", 2);
+            String result = formatFingerprint(tmpFingerPrint, ":", 2);
             result = result.substring(0, result.length() - 1);
+            results.add(result);
         } catch (Exception ex) {
             throw new AzureResourceException("Couldn't parse SSH fingerprint.");
         }
-        return result;
+        return results;
     }
 
     private String formatFingerprint(String text, String insert, int period) {

@@ -103,7 +103,7 @@ public class GcpConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public String getSSHFingerprint(Stack stack, String gateway) {
+    public Set<String> getSSHFingerprints(Stack stack, String gateway) {
         try {
             GcpCredential credential = (GcpCredential) stack.getCredential();
             Compute compute = gcpStackUtil.buildCompute(credential, stack);
@@ -120,8 +120,8 @@ public class GcpConnector implements CloudPlatformConnector {
                 throw new GcpResourceException("Operation timed out: Couldn't get console output of gateway instance.");
             }
             String consoleOutput = instanceGet.execute().getContents();
-            String result = FingerprintParserUtil.parseFingerprint(consoleOutput);
-            if (result == null) {
+            Set<String> result = FingerprintParserUtil.parseFingerprints(consoleOutput);
+            if (result.isEmpty()) {
                 throw new GcpResourceException("Couldn't parse SSH fingerprint from console output.");
             }
             return result;

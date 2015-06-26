@@ -19,7 +19,7 @@ public class GcpConsoleOutputCheckerTask extends StackBasedStatusCheckerTask<Gcp
             SerialPortOutput execute = consoleOutputContext.getSerialPortOutput().execute();
             if (execute != null) {
                 String consoleOutput = execute.getContents();
-                if (StringUtils.isEmpty(consoleOutput) || !consoleOutput.contains("cb: -----END SSH HOST KEY FINGERPRINTS-----")) {
+                if (StringUtils.isEmpty(consoleOutput) || !consoleOutput.contains("Finished running startup script")) {
                     LOGGER.info("Console output is not ready yet for gateway instance");
                     return false;
                 }

@@ -1,0 +1,136 @@
+Start bios (version 1.7.2-20150226_170051-google)
+Unable to unlock ram - bridge not found
+.....
+irtionet-irq-affinity: Setting /proc/irq/49/smp_affinity to 4 for device virtio1
+Jun 30 12:46:24 parsetest-cbgateway-1-1435668344385 virtionet-irq-affinity: Setting /proc/irq/50/smp_affinity to 4 for device virtio1
+Jun 30 12:46:24 parsetest-cbgateway-1-1435668344385 virtionet-irq-affinity: Setting /proc/irq/51/smp_affinity to 8 for device virtio1
+Jun 30 12:46:24 parsetest-cbgateway-1-1435668344385 virtionet-irq-affinity: Setting /proc/irq/52/smp_affinity to 8 for device virtio1
+Jun 30 12:46:24 parsetest-cbgateway-1-1435668344385 google: Checking for metadata server connection.
+[   18.055580] device-mapper: uevent: version 1.0.3
+Jun 30 12:46:24 [   18.056680] device-mapper: ioctl: 4.29.0-ioctl (2014-10-28) initialised: dm-devel@redhat.com
+parsetest-cbgateway-1-1435668344385 kernel: device-mapper: uevent: version 1.0.3
+Jun 30 12:46:24 parsetest-cbgateway-1-1435668344385 kernel: device-mapper: ioctl: 4.29.0-ioctl (2014-10-28) initialised: dm-devel@redhat.com
+[   18.105385] loop: module loaded
+Jun 30 12:46:24 parsetest-cbgateway-1-1435668344385 kernel: loop: module loaded
+Jun 30 12:46:24 parsetest-cbgateway-1-1435668344385 onboot: {"attributes":{"sshKeys":"cloudbreak:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kcUEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpjT7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh sequenceiq","startup-script":"#!/bin/bash\nset -x\n\nSTART_LABEL=97\nPLATFORM_DISK_PREFIX=sd\n\nsetup_tmp_ssh() {\n  echo \"#tmpssh_start\" >> /home/cloudbreak/.ssh/authorized_keys\n  echo \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCVHIE5hKUqt0gxRIpzWOQhpRDmnyrgaJ7QGoLmenPEZ6MI6LAFppSXmQ/PZl4tl0oKpz/Z7PMOJxXSK3v+qcUnugab4HcPzhKl0RNupnUcUlHmrGRb2lxW3ZKin0un7CcDrtP4jGdXAsdq6merX9YI1O5BiIFZ/9oxOJcPqGN5leE3KHYArJBpgRu4XOliO+YqBEdb5WksQFWm57DgtyyHBxtJGCKKDf+E/J7eEurlH9rpS6e7Hkk7LG+Z3tOA5wWrP80RP5+ht2Z/TYEjR+I/gf2p2fhrt+5o4VXKuyrzvekQ6c/+bnNVmLcQb/JAb3Gg2Qj+R6mERHoeqon+PqSD cloudbreak\n\" >> /home/cloudbreak/.ssh/authorized_keys\n  echo \"#tmpssh_end\" >> /home/cloudbreak/.ssh/authorized_keys\n}\n\nget_ip() {\n  ifconfig eth0 | awk '/inet addr/{print substr($2,6)}'\n}\n\nfix_hostname() {\n  if grep -q $(get_ip) /etc/hosts ;then\n    sed -i \"/$(get_ip)/d\" /etc/hosts\n  else\n    echo OK\n  fi\n}\n\nprint_ssh_fingerprint() {\n    echo \"cb: -----BEGIN SSH HOST KEY FINGERPRINTS-----\"\n    echo \"SSH-FINGERPRINT: $(ssh-keygen -lf /etc/ssh/ssh_host_ecdsa_key.pub)\"\n    echo \"SSH-FINGERPRINT: $(ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub)\"\n    echo \"cb: -----END SSH HOST KEY FINGERPRINTS-----\"\n}\n\nextend_rootfs() {\n  # Usable on GCP, does not harm anywhere else\n  root_fs_device=$(mount | grep ' / ' | cut -d' ' -f 1 | sed s/1//g)\n  growpart $root_fs_device 1\n  xfs_growfs /\n}\n\nformat_disks() {\n  mkdir /hadoopfs\n  for (( i=1; i<=24; i++ )); do\n    LABEL=$(printf \"\\x$(printf %x $((START_LABEL+i)))\")\n    DEVICE=/dev/${PLATFORM_DISK_PREFIX}${LABEL}\n    if [ -e $DEVICE ]; then\n      MOUNTPOINT=$(g
+Jun 30 12:46:24 parsetest-cbgateway-1-1435668344385 first-boot: Running first-boot
+Jun 30 12:46:24 parsetest-cbgateway-1-1435668344385 regenerate-host-keys: Regenerating SSH Host Keys for:  (previously ).
+Jun 30 12:46:24 parsetest-cbgateway-1-1435668344385 regenerate-host-keys: Regenerating sshd key /etc/ssh/ssh_host_ecdsa_key
+Jun 30 12:46:24 parsetest-cbgateway-1-1435668344385 regenerate-host-keys: Regenerating sshd key /etc/ssh/ssh_host_ed25519_key
+Jun 30 12:46:24 parsetest-cbgateway-1-1435668344385 regenerate-host-keys: Regenerating sshd key /etc/ssh/ssh_host_rsa_key
+Jun 30 12:46:24 parsetest-cbgateway-1-1435668344385 google: onboot initializing
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 regenerate-host-keys: starting sshd
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 regenerate-host-keys: reloading sshd
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 accounts-from-metadata: INFO Creating account cloudbreak
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 docker: time="2015-06-30T12:46:25.197098491Z" level=warning msg="Running modprobe bridge nf_nat failed with message: , error: exit status 1"
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): carrier is OFF
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): new Bridge device (driver: 'bridge' ifindex: 3)
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): exported as /org/freedesktop/NetworkManager/Devices/2
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 google: Running Boto setup script at /usr/share/google/boto/boot_setup.py
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 avahi-daemon[363]: Joining mDNS multicast group on interface docker0.IPv4 with address 172.17.42.1.
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 avahi-daemon[363]: New relevant interface docker0.IPv4 for mDNS.
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 avahi-daemon[363]: Registering new address record for 172.17.42.1 on docker0.IPv4.
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): device state change: unmanaged -> unavailable (reason 'connection-assumed') [10 20 41]
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 ntpd[1115]: 0.0.0.0 c614 04 freq_mode
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>      read connection 'docker0'
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): device state change: unavailable -> disconnected (reason 'connection-assumed') [20 30 41]
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): Activation: starting connection 'docker0'
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): Activation: Stage 1 of 5 (Device Prepare) scheduled...
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): Activation: Stage 1 of 5 (Device Prepare) started...
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): device state change: disconnected -> prepare (reason 'none') [30 40 0]
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): Activation: Stage 2 of 5 (Device Configure) scheduled...
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): Activation: Stage 1 of 5 (Device Prepare) complete.
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): Activation: Stage 2 of 5 (Device Configure) starting...
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): device state change: prepare -> config (reason 'none') [40 50 0]
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): Activation: Stage 2 of 5 (Device Configure) successful.
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): Activation: Stage 3 of 5 (IP Configure Start) scheduled.
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): Activation: Stage 2 of 5 (Device Configure) complete.
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): Activation: Stage 3 of 5 (IP Configure Start) started...
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): device state change: config -> ip-config (reason 'none') [50 70 0]
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): Activation: Stage 5 of 5 (IPv4 Configure Commit) scheduled...
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): Activation: Stage 3 of 5 (IP Configure Start) complete.
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): Activation: Stage 5 of 5 (IPv4 Commit) started...
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): device state change: ip-config -> ip-check (reason 'none') [70 80 0]
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): Activation: Stage 5 of 5 (IPv4 Commit) complete.
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): device state change: ip-check -> secondaries (reason 'none') [80 90 0]
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): device state change: secondaries -> activated (reason 'none') [90 100 0]
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 NetworkManager[460]: <info>  (docker0): Activation: successful, device activated.
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 avahi-daemon[363]: Registering new address record for fe80::4001:aff:fe00:20e9 on eth0.*.
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 nm-dispatcher: Dispatching action 'up' for docker0
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 google: SSH public key fingerprints
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 google: RSA public key
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 onboot: rep $DEVICE /etc/fstab | tr -s ' \\t' ' ' | cut -d' ' -f 2)\n      if [ -n \"$MOUNTPOINT\" ]; then\n        umount \"$MOUNTPOINT\"\n        sed -i \"\\|^$DEVICE|d\" /etc/fstab\n      fi\n      mkfs -E lazy_itable_init=1 -O uninit_bg -F -t ext4 $DEVICE\n      mkdir /hadoopfs/fs${i}\n      echo $DEVICE /hadoopfs/fs${i} ext4  defaults 0 2 >> /etc/fstab\n      mount /hadoopfs/fs${i}\n    fi\n  done\n  cd /hadoopfs/fs1 && mkdir logs logs/ambari-server logs/ambari-agent logs/consul-watch\n}\n\nmain() {\n  if [[ \"$1\" == \"::\" ]]; then\n    shift\n    eval \"$@\"\n  elif [ ! -f \"/var/cb-init-executed\" ]; then\n    setup_tmp_ssh\n    print_ssh_fingerprint\n    extend_rootfs\n    format_disks\n    fix_hostname\n    touch /var/cb-init-executed\n    echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/cb-init-executed\n  fi\n}\n\n[[ \"$0\" == \"$BASH_SOURCE\" ]] && main \"$@\""},"cpuPlatform":"Intel Sandy Bridge","description":"","disks":[{"deviceName":"parsetest-1-1435668331035","index":0,"mode":"READ_WRITE","type":"PERSISTENT"},{"deviceName":"parsetest-1-1435668337555-0","index":1,"mode":"READ_WRITE","type":"PERSISTENT"}],"hostname":"parsetest-cbgateway-1-1435668344385.c.siq-haas.internal","id":11167445392634025160,"image":"","machineType":"projects/58633556797/machineTypes/n1-standard-4","maintenanceEvent":"NONE","networkInterfaces":[{"accessConfigs":[{"externalIp":"104.197.66.108","type":"ONE_TO_ONE_NAT"}],"forwardedIps":[],"ip":"10.0.32.233","network":"projects/58633556797/networks/parsetest-1435668298045"}],"scheduling":{"automaticRestart":"TRUE","onHostMaintenance":"MIGRATE"},"serviceAccounts":{},"tags":["cbgateway"],"virtualClock":{"driftToken":"15738271630582059893"},"zone":"projects/58633556797/zones/us-central1-a"}2048 1b:42:16:09:65:e0:e4:39:31:5d:7d:29:6a:76:2b:87  root@parsetest-cbgateway-1-1435668344385 (RSA)
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 google: No DSA public key found.
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 google: ECDSA public key
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 onboot: 256 db:01:97:98:81:2a:25:a0:05:62:39:0b:3c:65:49:ac  root@parsetest-cbgateway-1-1435668344385 (ECDSA)
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 systemd: Started Google Compute Engine VM initialization.
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 systemd: Starting Google Compute Engine user scripts...
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 systemd: Starting OpenSSH server daemon...
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 systemd: Started OpenSSH server daemon.
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 systemd: Started Postfix Mail Transport Agent.
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 docker: time="2015-06-30T12:46:25.515055460Z" level=info msg="Loading containers: start."
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 docker: time="2015-06-30T12:46:25.515348743Z" level=info msg="Loading containers: done."
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 docker: time="2015-06-30T12:46:25.515382117Z" level=info msg="Daemon has completed initialization"
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 docker: time="2015-06-30T12:46:25.515406169Z" level=info msg="Docker daemon" commit=0baf609 execdriver=native-0.2 graphdriver=devicemapper version=1.7.0
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 docker: time="2015-06-30T12:46:25.515488633Z" level=info msg="Listening for HTTP on fd ()"
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 docker: time="2015-06-30T12:46:25.515565670Z" level=warning msg="/!\\ DON'T BIND ON ANY IP ADDRESS WITHOUT setting -tlsverify IF YOU DON'T KNOW WHAT YOU'RE DOING /!\\"
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 docker: time="2015-06-30T12:46:25.517730467Z" level=info msg="Listening for HTTP on tcp (0.0.0.0:2376)"
+Jun 30 12:46:25 parsetest-cbgateway-1-1435668344385 google: startup script found in metadata.
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: Running startup script /var/run/google.startup.script
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + START_LABEL=97
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + PLATFORM_DISK_PREFIX=sd
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + [[ /tmp/tmp.CN4MMpb3eN == \/\t\m\p\/\t\m\p\.\C\N\4\M\M\p\b\3\e\N ]]
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + main
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + [[ '' == \:\: ]]
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + '[' '!' -f /var/cb-init-executed ']'
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + setup_tmp_ssh
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + echo '#tmpssh_start'
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCVHIE5hKUqt0gxRIpzWOQhpRDmnyrgaJ7QGoLmenPEZ6MI6LAFppSXmQ/PZl4tl0oKpz/Z7PMOJxXSK3v+qcUnugab4HcPzhKl0RNupnUcUlHmrGRb2lxW3ZKin0un7CcDrtP4jGdXAsdq6merX9YI1O5BiIFZ/9oxOJcPqGN5leE3KHYArJBpgRu4XOliO+YqBEdb5WksQFWm57DgtyyHBxtJGCKKDf+E/J7eEurlH9rpS6e7Hkk7LG+Z3tOA5wWrP80RP5+ht2Z/TYEjR+I/gf2p2fhrt+5o4VXKuyrzvekQ6c/+bnNVmLcQb/JAb3Gg2Qj+R6mERHoeqon+PqSD cloudbreak
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: '
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + echo '#tmpssh_end'
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + extend_rootfs
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: ++ mount
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: ++ grep ' / '
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: ++ sed s/1//g
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: ++ cut '-d ' -f 1
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + root_fs_device=/dev/sda
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + growpart /dev/sda 1
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: CHANGED: partition=1 start=2048 old: size=20967425 end=20969473 new: size=104855552,end=104857600
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + xfs_growfs /
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: meta-data=/dev/sda1              isize=256    agcount=4, agsize=655232 blks
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: =                       sectsz=512   attr=2, projid32bit=1
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: =                       crc=0        finobt=0
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: data     =                       bsize=4096   blocks=2620928, imaxpct=25
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: =                       sunit=0      swidth=0 blks
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: naming   =version 2              bsize=4096   ascii-ci=0 ftype=0
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: log      =internal               bsize=4096   blocks=2560, version=2
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: =                       sectsz=512   sunit=0 blks, lazy-count=1
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: realtime =none                   extsz=4096   blocks=0, rtextents=0
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: data blocks changed from 2620928 to 13106944
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + format_disks
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + mkdir /hadoopfs
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + (( i=1 ))
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + (( i<=24 ))
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: +++ printf %x 98
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: ++ printf '\x62'
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + LABEL=b
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + DEVICE=/dev/sdb
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + '[' -e /dev/sdb ']'
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: ++ grep /dev/sdb /etc/fstab
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: ++ tr -s ' \t' ' '
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: ++ cut '-d ' -f 2
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + MOUNTPOINT=
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + '[' -n '' ']'
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: + mkfs -E lazy_itable_init=1 -O uninit_bg -F -t ext4 /dev/sdb
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: mke2fs 1.42.9 (28-Dec-2013)
+Jun 30 12:46:26 parsetest-cbgateway-1-1435668344385 startupscript: Discarding device blocks:    4096/2621440               done
+Jun 30 12:46:28 parsetest-cbgateway-1-1435668344385 startupscript: ++ printf '\x6a'
+Jun 30 12:46:28 parsetest-cbgateway-1-1435668344385 startupscript: + LABEL=j
+Jun 30 12:46:28 parsetest-cbgateway-1-1435668344385 startupscript: + DEVICE=/dev/sdj
+Jun 30 12:46:28 parsetest-cbgateway-1-1435668344385 startupscript: + '[' -e /dev/sdj ']'
+Jun 30 12:46:28 parsetest-cbgateway-1-1435668344385 startupscript: + (( i++  ))
+Jun 30 12:46:28 parsetest-cbgateway-1-1435668344385 startupscript: + (( i<=24 ))
+Jun 30 12:46:28 parsetest-cbgateway-1-1435668344385 startupscript: +++ printf %x 107
+Jun 30 12:46:28 parsetest-cbgateway-1-1435668344385 startupscript: ++ printf '\x6b'
+Jun 30 12:46:28 parsetest-cbgateway-1-1435668344385 startupscript: + LABEL=k
+Jun 30 12:46:28 parsetest-cbgateway-1-1435668344385 startupscript: + DEVICE=/dev/sdk

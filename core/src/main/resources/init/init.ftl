@@ -25,12 +25,6 @@ fix_hostname() {
   fi
 }
 
-print_ssh_fingerprint() {
-    echo "cb: -----BEGIN SSH HOST KEY FINGERPRINTS-----"
-    echo "cb: $(ssh-keygen -lf /etc/ssh/ssh_host_ecdsa_key.pub)"
-    echo "cb: -----END SSH HOST KEY FINGERPRINTS-----"
-}
-
 extend_rootfs() {
   # Usable on GCP, does not harm anywhere else
   root_fs_device=$(mount | grep ' / ' | cut -d' ' -f 1 | sed s/1//g)
@@ -67,7 +61,6 @@ main() {
     <#if gateway>
     setup_tmp_ssh
     </#if>
-    print_ssh_fingerprint
     extend_rootfs
     format_disks
     fix_hostname
