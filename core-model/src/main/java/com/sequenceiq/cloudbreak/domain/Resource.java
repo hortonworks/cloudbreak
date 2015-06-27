@@ -15,11 +15,7 @@ import javax.persistence.NamedQuery;
         @NamedQuery(
                 name = "Resource.findByStackIdAndNameAndType",
                 query = "SELECT r FROM Resource r "
-                        + "WHERE r.stack.id = :stackId AND r.resourceName = :name AND r.resourceType = :type"),
-        @NamedQuery(
-                name = "Resource.findByStackIdAndName",
-                query = "SELECT r FROM Resource r "
-                        + "WHERE r.stack.id = :stackId AND r.resourceName = :name")
+                        + "WHERE r.stack.id = :stackId AND r.resourceName = :name AND r.resourceType = :type")
 })
 public class Resource {
 

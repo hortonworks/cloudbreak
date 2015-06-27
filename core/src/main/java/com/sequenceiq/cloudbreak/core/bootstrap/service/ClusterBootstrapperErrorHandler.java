@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorFailedException;
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 
@@ -60,6 +62,9 @@ public class ClusterBootstrapperErrorHandler {
     @Inject
     private CloudbreakEventService eventService;
 
+    @Inject
+    private Map<CloudPlatform, MetadataSetup> metadataSetups;
+
     public void terminateFailedNodes(ContainerOrchestrator orchestrator, Stack stack, GatewayConfig gatewayConfig, Set<Node> nodes)
             throws CloudbreakOrchestratorFailedException {
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
@@ -72,7 +77,6 @@ public class ClusterBootstrapperErrorHandler {
             for (Node missingNode : missingNodes) {
                 InstanceMetaData instanceMetaData =
                         instanceMetaDataRepository.findNotTerminatedByPrivateAddress(stack.getId(), missingNode.getPrivateIp());
-                Resource resource = resourceRepository.findByStackIdAndName(stack.getId(), instanceMetaData.getInstanceId());
                 InstanceGroup ig = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceMetaData.getInstanceGroup().getGroupName());
                 ig.setNodeCount(ig.getNodeCount() - 1);
                 if (ig.getNodeCount() < 1) {
@@ -85,9 +89,7 @@ public class ClusterBootstrapperErrorHandler {
                 LOGGER.info(message);
                 eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), message);
                 deleteResourceAndDependencies(stack, instanceMetaData);
-                if (resourceRepository.findOne(resource.getId()) != null) {
-                    resourceRepository.delete(resource.getId());
-                }
+                deleteInstanceResourceFromDatabase(stack, instanceMetaData);
                 instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
                 instanceMetaDataRepository.save(instanceMetaData);
                 LOGGER.info(String.format("The status of instanceMetadata with %s id and %s name setted to TERMINATED.",
@@ -120,5 +122,14 @@ public class ClusterBootstrapperErrorHandler {
         instanceIds.add(instanceMetaData.getInstanceId());
         cloudPlatformConnector.removeInstances(stack, instanceIds, instanceMetaData.getInstanceGroup().getGroupName());
         LOGGER.info(String.format("Instance deleted with %s id and %s name.", instanceMetaData.getId(), instanceMetaData.getInstanceId()));
+    }
+
+    private void deleteInstanceResourceFromDatabase(Stack stack, InstanceMetaData instanceMetaData) {
+        MetadataSetup metadataSetup = metadataSetups.get(stack.cloudPlatform());
+        ResourceType instanceResourceType = metadataSetup.getInstanceResourceType();
+        Resource resource = resourceRepository.findByStackIdAndNameAndType(stack.getId(), instanceMetaData.getInstanceId(), instanceResourceType);
+        if (resource != null) {
+            resourceRepository.delete(resource.getId());
+        }
     }
 }
