@@ -62,7 +62,7 @@ public class ClusterBootstrapperErrorHandler {
     @Inject
     private CloudbreakEventService eventService;
 
-    @Inject
+    @javax.annotation.Resource
     private Map<CloudPlatform, MetadataSetup> metadataSetups;
 
     public void terminateFailedNodes(ContainerOrchestrator orchestrator, Stack stack, GatewayConfig gatewayConfig, Set<Node> nodes)

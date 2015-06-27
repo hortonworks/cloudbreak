@@ -49,7 +49,7 @@ public class InstanceTerminationHandler {
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
     @Inject
     private CloudbreakEventService eventService;
-    @Inject
+    @javax.annotation.Resource
     private Map<CloudPlatform, MetadataSetup> metadataSetups;
 
     public void terminateInstance(Stack stack, InstanceMetaData instanceMetaData) {
