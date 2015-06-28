@@ -152,11 +152,22 @@ cloudbreak-conf-baywatch() {
   env-import CB_BAYWATCH_EXTERN_LOCATION ""
 }
 
-cloudbreak-shell() {
+util-cloudbreak-shell() {
+    declare desc="Starts an interactive CloudbreakShell"
+
+    _cloudbreak-shell -it
+}
+
+util-cloudbreak-shell-quiet() {
+    declare desc="Starts a non-interactive CloudbreakShell, commands from stdin."
+    _cloudbreak-shell -i
+}
+
+_cloudbreak-shell() {
 
     cloudbreak-config
     
-    docker run -ti \
+    docker run "$@" \
         --rm \
         --link cbreak_ambassador_1:backend \
         -e BACKEND_9000=cloudbreak.service.consul \
@@ -270,7 +281,9 @@ scim:
 EOF
 }
 
-token() {
+util-token() {
+    declare desc="Generates an OAuth token with CloudbreakShell scopes"
+
     cloudbreak-config
     local TOKEN=$(curl -siX POST \
         -H "accept: application/x-www-form-urlencoded" \
@@ -280,7 +293,7 @@ token() {
     debug TOKEN=$TOKEN
 }
 
-local-dev() {
+util-local-dev() {
     declare desc="Stops cloudbreak container, and starts an ambassador for cbreak in IntelliJ (def port:9090)"
     declare port=${1:-9091}
 

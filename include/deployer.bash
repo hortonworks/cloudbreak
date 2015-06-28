@@ -256,6 +256,12 @@ main() {
         cmd-export aws-show-role
         cmd-export aws-generate-role
         cmd-export aws-delete-role
+
+        cmd-export-ns util "Util namespace"
+        cmd-export util-cloudbreak-shell
+        cmd-export util-cloudbreak-shell-quiet
+        cmd-export util-token
+        cmd-export util-local-dev
     fi
 
     if [[ "$DEBUG" ]]; then

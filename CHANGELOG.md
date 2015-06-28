@@ -10,6 +10,10 @@
 - Command `aws delete-role ` added
 - Command `aws generate-role` added
 - Command `aws show-role` added
+- Command `cloudbreak-shell` added
+- Command `cloudbreak-shell-quiet` added
+- Command `local-dev` added
+- Command `token` added
 
 ### Removed
 
