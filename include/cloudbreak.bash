@@ -29,8 +29,8 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_ULUWATU 0.5.33
     env-import DOCKER_TAG_SULTANS 0.5.4
     env-import DOCKER_TAG_AMBASSADOR latest
-    env-import DOCKER_TAG_CLOUDBREAK_SHELL 0.4.8
     env-import DOCKER_TAG_CERT_TOOL 0.0.3
+    env-import DOCKER_TAG_CLOUDBREAK_SHELL 0.4.11
 }
 
 cloudbreak-conf-images() {
@@ -128,7 +128,7 @@ cloudbreak-conf-cloud-provider() {
     declare desc="Defines cloud provider related parameters"
 
     env-import AWS_ACCESS_KEY_ID ""
-    env-import AWS_SECRET_KEY ""
+    env-import AWS_SECRET_ACCESS_KEY ""
 
 }
 
@@ -152,8 +152,22 @@ cloudbreak-conf-baywatch() {
   env-import CB_BAYWATCH_EXTERN_LOCATION ""
 }
 
-cloudbreak-shell() {
-    docker run -ti \
+util-cloudbreak-shell() {
+    declare desc="Starts an interactive CloudbreakShell"
+
+    _cloudbreak-shell -it
+}
+
+util-cloudbreak-shell-quiet() {
+    declare desc="Starts a non-interactive CloudbreakShell, commands from stdin."
+    _cloudbreak-shell -i
+}
+
+_cloudbreak-shell() {
+
+    cloudbreak-config
+    
+    docker run "$@" \
         --rm \
         --link cbreak_ambassador_1:backend \
         -e BACKEND_9000=cloudbreak.service.consul \
@@ -163,7 +177,7 @@ cloudbreak-shell() {
         -e SEQUENCEIQ_USER=admin@example.com \
         -e SEQUENCEIQ_PASSWORD=cloudbreak \
         -v $PWD:/data \
-        sequenceiq/cb-shell:0.4.4
+        sequenceiq/cb-shell:$DOCKER_TAG_CLOUDBREAK_SHELL
 }
 
 gen-password() {
@@ -267,12 +281,38 @@ scim:
 EOF
 }
 
-token() {
-    cloudbreak-init
+util-token() {
+    declare desc="Generates an OAuth token with CloudbreakShell scopes"
+
+    cloudbreak-config
     local TOKEN=$(curl -siX POST \
         -H "accept: application/x-www-form-urlencoded" \
         -d credentials='{"username":"'${UAA_DEFAULT_USER_EMAIL}'","password":"'${UAA_DEFAULT_USER_PW}'"}' \
-        "$(dhp identity)/oauth/authorize?response_type=token&client_id=cloudbreak_shell&scope.0=openid&source=login&redirect_uri=http://cloudbreak.shell" \
+        "$(boot2docker ip):8089/oauth/authorize?response_type=token&client_id=cloudbreak_shell&scope.0=openid&source=login&redirect_uri=http://cloudbreak.shell" \
            | grep Location | cut -d'=' -f 2 | cut -d'&' -f 1)
     debug TOKEN=$TOKEN
+}
+
+util-local-dev() {
+    declare desc="Stops cloudbreak container, and starts an ambassador for cbreak in IntelliJ (def port:9090)"
+    declare port=${1:-9091}
+
+    debug stopping original cloudbreak container
+    dockerCompose stop cloudbreak
+
+    debug starting an ambassador to be registered as cloudbreak.service.consul.
+    debug "all traffic to ambassador will be proxied to localhost (192.168.59.3):$port"
+
+: << HINT
+sed -i  "s/cb.db.port.5432.tcp.addr=[^ ]*/cb.db.port.5432.tcp.addr=$(docker inspect -f '{{.NetworkSettings.IPAddress}}' cbreak_cbdb_1)/" \
+    ~/prj/cloudbreak.idea/runConfigurations/cloudbreak_remote.xml 
+HINT
+
+    docker run -d \
+        --name cloudbreak-proxy \
+        -p 8080:8080 \
+        -e PORT=8080 \
+        -e SERVICE_NAME=cloudbreak \
+        progrium/ambassadord 192.168.59.3:$port
+
 }

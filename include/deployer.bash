@@ -224,6 +224,7 @@ main() {
 
     circle-init
     compose-init
+    aws-init
 
     debug "CloudBreak Deployer $(bin-version)"
 
@@ -251,6 +252,16 @@ main() {
         cmd-export migrate-startdb startdb
         cmd-export migrate-cmd migrate
 
+        cmd-export-ns aws "Amazon Webservice namespace"
+        cmd-export aws-show-role
+        cmd-export aws-generate-role
+        cmd-export aws-delete-role
+
+        cmd-export-ns util "Util namespace"
+        cmd-export util-cloudbreak-shell
+        cmd-export util-cloudbreak-shell-quiet
+        cmd-export util-token
+        cmd-export util-local-dev
     fi
 
     if [[ "$DEBUG" ]]; then
