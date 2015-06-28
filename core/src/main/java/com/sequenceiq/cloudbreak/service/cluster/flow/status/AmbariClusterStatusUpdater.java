@@ -43,7 +43,7 @@ public class AmbariClusterStatusUpdater {
             Long stackId = stack.getId();
             String blueprintName = cluster != null ? cluster.getBlueprint().getBlueprintName() : null;
             TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
-            AmbariClusterStatus clusterStatus = clusterStatusFactory.createClusterStatus(ambariClientProvider.getAmbariClient(
+            ClusterStatus clusterStatus = clusterStatusFactory.createClusterStatus(ambariClientProvider.getAmbariClient(
                     clientConfig, cluster.getUserName(), cluster.getPassword()), blueprintName);
             updateClusterStatus(stackId, stack.getStatus(), cluster, clusterStatus);
         }
@@ -56,18 +56,16 @@ public class AmbariClusterStatusUpdater {
                 || cluster.isModificationInProgress();
     }
 
-    private void updateClusterStatus(Long stackId, Status stackStatus, Cluster cluster, AmbariClusterStatus ambariClusterStatus) {
+    private void updateClusterStatus(Long stackId, Status stackStatus, Cluster cluster, ClusterStatus ambariClusterStatus) {
         Status statusInEvent = stackStatus;
-        String statusReason;
-        if (ambariClusterStatus != null && isUpdateEnabled(ambariClusterStatus.getStatus())) {
+        String statusReason = ambariClusterStatus.getStatusReason();
+        if (isUpdateEnabled(ambariClusterStatus)) {
             if (updateClusterStatus(stackId, cluster, ambariClusterStatus.getClusterStatus())) {
                 statusInEvent = ambariClusterStatus.getStackStatus();
                 statusReason = ambariClusterStatus.getStatusReason();
             } else {
                 statusReason = "The cluster's state is up to date.";
             }
-        } else {
-            statusReason = "There are stopped and running Ambari services as well. Restart or stop all of them and try syncing later.";
         }
         cloudbreakEventService.fireCloudbreakEvent(stackId, statusInEvent.name(), "Synced cluster state with Ambari: " + statusReason);
     }
