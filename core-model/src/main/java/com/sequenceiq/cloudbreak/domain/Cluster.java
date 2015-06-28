@@ -1,15 +1,18 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import static com.sequenceiq.cloudbreak.domain.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.domain.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.domain.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.START_FAILED;
+import static com.sequenceiq.cloudbreak.domain.Status.START_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_FAILED;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_REQUESTED;
+import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_IN_PROGRESS;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -316,5 +319,13 @@ public class Cluster implements ProvisionEntity {
 
     public boolean isClusterReadyForStart() {
         return STOPPED.equals(status) || START_REQUESTED.equals(status);
+    }
+
+    public boolean isModificationInProgress() {
+        return CREATE_IN_PROGRESS.equals(status)
+                || UPDATE_IN_PROGRESS.equals(status)
+                || STOP_IN_PROGRESS.equals(status)
+                || START_IN_PROGRESS.equals(status)
+                || DELETE_IN_PROGRESS.equals(status);
     }
 }

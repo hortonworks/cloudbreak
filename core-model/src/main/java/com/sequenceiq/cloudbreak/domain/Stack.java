@@ -12,6 +12,7 @@ import static com.sequenceiq.cloudbreak.domain.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_FAILED;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_REQUESTED;
+import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_IN_PROGRESS;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -466,16 +467,12 @@ public class Stack implements ProvisionEntity {
         return STOP_FAILED.equals(status);
     }
 
-    public boolean isStopInProgress() {
-        return STOP_IN_PROGRESS.equals(status);
+    public boolean isStackInStopPhase() {
+        return STOP_IN_PROGRESS.equals(status) || STOPPED.equals(status);
     }
 
     public boolean isStartFailed() {
         return START_FAILED.equals(status);
-    }
-
-    public Boolean isCloudPlatformUsedWithTemplate() {
-        return cloudPlatform().isWithTemplate();
     }
 
     public Map<String, String> getParameters() {
@@ -549,5 +546,13 @@ public class Stack implements ProvisionEntity {
 
     public boolean isStackReadyForStop() {
         return AVAILABLE.equals(status) || STOP_REQUESTED.equals(status);
+    }
+
+    public boolean isModificationInProgress() {
+        return CREATE_IN_PROGRESS.equals(status)
+                || UPDATE_IN_PROGRESS.equals(status)
+                || STOP_IN_PROGRESS.equals(status)
+                || START_IN_PROGRESS.equals(status)
+                || DELETE_IN_PROGRESS.equals(status);
     }
 }
