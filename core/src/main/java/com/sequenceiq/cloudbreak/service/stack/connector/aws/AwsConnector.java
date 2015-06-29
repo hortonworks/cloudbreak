@@ -26,6 +26,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -134,6 +136,8 @@ public class AwsConnector implements CloudPlatformConnector {
     private CloudFormationStackUtil cfStackUtil;
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
+    @Inject
+    private UserDetailsService userDetailsService;
     @Inject
     private PollingService<AwsInstances> awsPollingService;
     @Inject
@@ -443,7 +447,8 @@ public class AwsConnector implements CloudPlatformConnector {
                 new Parameter().withParameterKey("CBUserData").withParameterValue(coreGroupUserData),
                 new Parameter().withParameterKey("CBGateWayUserData").withParameterValue(gateWayUserData),
                 new Parameter().withParameterKey("StackName").withParameterValue(stackName),
-                new Parameter().withParameterKey("StackOwner").withParameterValue(awsCredential.getRoleArn()),
+                new Parameter().withParameterKey("StackOwner").withParameterValue(userDetailsService.getDetails(stack.getOwner(),
+                        UserFilterField.USERID).getUsername()),
                 new Parameter().withParameterKey("KeyName").withParameterValue(awsCredential.getKeyPairName()),
                 new Parameter().withParameterKey("AMI").withParameterValue(stack.getImage()),
                 new Parameter().withParameterKey("RootDeviceName").withParameterValue(getRootDeviceName(stack, awsCredential))
