@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureResourceException;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceNameService;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureCreateResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureDeleteResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourcePollerObject;
@@ -49,6 +50,9 @@ public class AzureReservedIpResourceBuilder extends AzureSimpleNetworkResourceBu
     private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
     @Inject
     private AzureDeleteResourceStatusCheckerTask azureDeleteResourceStatusCheckerTask;
+
+    @Inject
+    private ResourceNameService resourceNameService;
 
     @Override
     public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
@@ -92,7 +96,8 @@ public class AzureReservedIpResourceBuilder extends AzureSimpleNetworkResourceBu
     public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources,
             Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        return Arrays.asList(new Resource(resourceType(), "reservedip" + stack.getId(), stack, null));
+        String reservedIpResourceName = resourceNameService.resourceName(resourceType(), stack.getId());
+        return Arrays.asList(new Resource(resourceType(), reservedIpResourceName, stack, null));
     }
 
     @Override

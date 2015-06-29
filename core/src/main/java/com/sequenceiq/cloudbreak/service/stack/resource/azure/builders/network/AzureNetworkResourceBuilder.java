@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.service.network.Port;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureResourceException;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceNameService;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureCreateResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourcePollerObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleNetworkResourceBuilder;
@@ -59,6 +60,9 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     private InstanceMetaDataRepository instanceMetaDataRepository;
     @Inject
     private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
+
+    @Inject
+    private ResourceNameService resourceNameService;
 
     @Override
     public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
@@ -140,7 +144,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources,
             Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        String s = stack.getName().replaceAll("\\s+", "") + String.valueOf(new Date().getTime());
+        String s = resourceNameService.resourceName(resourceType(), stack.getName(), new Date());
         return asList(new Resource(resourceType(), s, stack, null));
     }
 
