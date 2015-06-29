@@ -387,7 +387,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             $scope.cluster = {
                 password: "admin",
                 userName: "admin",
-                onFailureAction: "ROLLBACK",
+                onFailureAction: "DO_NOTHING",
                 bestEffort: "BEST_EFFORT",
                 validateBlueprint: true,
                 consulServerCount: 3,
