@@ -65,7 +65,7 @@ function ($scope, $rootScope, $filter, Cluster, GlobalStack) {
       var actCluster = $filter('filter')($rootScope.clusters, { id: notification.stackId })[0];
       var msg = notification.eventMessage;
       var nodeCount = notification.nodeCount;
-      if (nodeCount != null && nodeCount != undefined) {
+      if (nodeCount != null && nodeCount != undefined && nodeCount != 0) {
         actCluster.nodeCount = nodeCount;
       }
       refreshMetadata(notification)
