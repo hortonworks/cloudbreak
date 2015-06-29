@@ -312,19 +312,19 @@ public class AmbariClusterConnector {
     }
 
     public boolean isAmbariAvailable(Stack stack) throws CloudbreakException {
+        boolean result = false;
         Cluster cluster = stack.getCluster();
         if (cluster != null) {
             TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
             AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
+            AmbariClientPollerObject ambariClientPollerObject = new AmbariClientPollerObject(stack, ambariClient);
             try {
-                ambariClient.getHostNames();
+                result = ambariHealthCheckerTask.checkStatus(ambariClientPollerObject);
             } catch (Exception ex) {
-                return false;
+                result = false;
             }
-            return true;
-        } else {
-            return false;
         }
+        return result;
     }
 
     public boolean deleteHostFromAmbari(Stack stack, HostMetadata data) throws CloudbreakSecuritySetupException {

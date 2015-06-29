@@ -36,12 +36,24 @@ public class AmbariClusterStatusUpdater {
     private TlsSecurityService tlsSecurityService;
 
     public void updateClusterStatus(Stack stack, Cluster cluster) throws CloudbreakSecuritySetupException {
-        Long stackId = stack.getId();
-        String blueprintName = cluster != null ? cluster.getBlueprint().getBlueprintName() : null;
-        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
-        AmbariClusterStatus clusterStatus = clusterStatusFactory.createClusterStatus(ambariClientProvider.getAmbariClient(
-                clientConfig, cluster.getUserName(), cluster.getPassword()), blueprintName);
-        updateClusterStatus(stackId, stack.getStatus(), cluster, clusterStatus);
+        if (isStackOrClusterStatusInvalid(stack, cluster)) {
+            LOGGER.warn("Cluster could not be synchronized while stack is in {} state and cluster is in {} state!",
+                    stack.getStatus(), cluster.getStatus());
+        } else {
+            Long stackId = stack.getId();
+            String blueprintName = cluster != null ? cluster.getBlueprint().getBlueprintName() : null;
+            TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
+            AmbariClusterStatus clusterStatus = clusterStatusFactory.createClusterStatus(ambariClientProvider.getAmbariClient(
+                    clientConfig, cluster.getUserName(), cluster.getPassword()), blueprintName);
+            updateClusterStatus(stackId, stack.getStatus(), cluster, clusterStatus);
+        }
+    }
+
+    private boolean isStackOrClusterStatusInvalid(Stack stack, Cluster cluster) {
+        return stack.isStackInDeletionPhase()
+                || stack.isStackInStopPhase()
+                || stack.isModificationInProgress()
+                || cluster.isModificationInProgress();
     }
 
     private void updateClusterStatus(Long stackId, Status stackStatus, Cluster cluster, AmbariClusterStatus ambariClusterStatus) {

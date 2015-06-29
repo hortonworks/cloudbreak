@@ -61,6 +61,15 @@ public class StackSyncService {
 
     public void sync(Long stackId) {
         Stack stack = stackService.getById(stackId);
+        if (stack.isStackInDeletionPhase() || stack.isModificationInProgress()) {
+            LOGGER.warn("Stack could not be synchronized in {} state!", stack.getStatus());
+        } else {
+            sync(stack);
+        }
+    }
+
+    private void sync(Stack stack) {
+        Long stackId = stack.getId();
         Set<InstanceMetaData> instances = instanceMetaDataRepository.findAllInStack(stackId);
         Map<InstanceSyncState, Integer> instanceStateCounts = initInstanceStateCounts();
         for (InstanceMetaData instance : instances) {
@@ -86,7 +95,7 @@ public class StackSyncService {
                     }
                 } else if (InstanceSyncState.STOPPED.equals(state)) {
                     instanceStateCounts.put(InstanceSyncState.STOPPED, instanceStateCounts.get(InstanceSyncState.STOPPED) + 1);
-                    if (!instance.isTerminated()) {
+                    if (!instance.isTerminated() && !stack.isStopped()) {
                         LOGGER.info("Instance '{}' is reported as stopped on the cloud provider, setting its state to STOPPED.", instance.getInstanceId());
                         deleteResourceIfNeeded(stackId, instance, instanceResourceType);
                         updateMetaDataToTerminated(stackId, instance, instanceGroup);
@@ -149,7 +158,7 @@ public class StackSyncService {
     private void deleteHostFromCluster(Stack stack, InstanceMetaData instanceMetaData) {
         try {
             HostMetadata hostMetadata = hostMetadataRepository.findHostsInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN());
-            if (hostMetadata != null) {
+            if (hostMetadata != null && ambariClusterConnector.isAmbariAvailable(stack)) {
                 if (ambariClusterConnector.deleteHostFromAmbari(stack, hostMetadata)) {
                     hostMetadataRepository.delete(hostMetadata.getId());
                     eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
