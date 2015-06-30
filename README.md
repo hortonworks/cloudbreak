@@ -26,14 +26,14 @@ cd cloudbreak-deployment
 ```
 
 ### Initialize Profile
-First lets initialize your directory by creating a `Profile`
+First initialize your directory by creating a `Profile` file:
 
 ```
 cbd init
 ```
-It will create a `Profile` in the current directory. The only required
-configuration is the `PUBLIC_IP`. This ip will be used for Cloudbreak UI
-(called Uluwatu). In some case cbd can guess it, if not it will give you a hint.
+It will create a `Profile` file in the current directory. The only required
+configuration is the `PUBLIC_IP`. This IP will be used for the Cloudbreak UI
+(called Uluwatu). In some case the `cbd` tool tries to guess it, if can't than will give a hint.
 
 
 ### Deploy Cloudbreak
@@ -44,8 +44,8 @@ To start all the containers run:
 cbd start
 ```
 
-For the first it will take more time, as it does additional steps:
-- download all the docker images, neded by cloudbreak.
+At the first time it will take more time, as it does additional steps:
+- download all the docker images, neded by Cloudbreak.
 - create **docker-compose.yml**: Full confirguration of containers needed for Cloudbreak deployment.
 - create **uaa.yml**: Identity Server configuration. (For example default user/password in the last line)
 
@@ -86,12 +86,13 @@ cbd generate
 ```
 
 ## Cloud Provider configuration
+
 In order to be able to assume roles on AWS you need to set up your AWS keys in the Profile file:
 ```
 export AWS_ACCESS_KEY_ID=AKIA**************W7SA
 export AWS_SECRET_ACCESS_KEY=RWCT4Cs8******************/*skiOkWD
 ```
-If you do not have plan to launch clusters in AWS, then you can safely skip these settings.
+If you do not have plans to launch clusters in AWS, then you can safely skip these settings.
 
 For more details regarding accounts please check [Cloudbreak documentation](http://sequenceiq.com/cloudbreak/#accounts).
 
