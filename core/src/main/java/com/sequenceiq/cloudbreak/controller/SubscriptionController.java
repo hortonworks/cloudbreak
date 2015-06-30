@@ -30,7 +30,7 @@ public class SubscriptionController {
     @ResponseBody
     public ResponseEntity<IdJson> subscribeClient(@ModelAttribute("user") CbUser user, @RequestBody @Valid SubscriptionRequest subscriptionRequest,
             @AuthenticationPrincipal String client) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         Subscription subscription = new Subscription(client, subscriptionRequest.getEndpointUrl());
         return new ResponseEntity<IdJson>(new IdJson(subscriptionService.subscribe(subscription)), HttpStatus.CREATED);
     }

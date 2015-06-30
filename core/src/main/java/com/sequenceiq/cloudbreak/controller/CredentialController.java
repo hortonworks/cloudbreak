@@ -62,7 +62,7 @@ public class CredentialController {
     @RequestMapping(value = "user/credentials", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> savePrivateCredential(@ModelAttribute("user") CbUser user, @Valid @RequestBody CredentialRequest credentialRequest) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         return createCredential(user, credentialRequest, false);
     }
 
@@ -70,7 +70,7 @@ public class CredentialController {
     @RequestMapping(value = "account/credentials", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> saveAccountCredential(@ModelAttribute("user") CbUser user, @Valid @RequestBody CredentialRequest credentialRequest) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         return createCredential(user, credentialRequest, true);
     }
 
@@ -78,7 +78,7 @@ public class CredentialController {
     @RequestMapping(value = "user/credentials", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<CredentialResponse>> getPrivateCredentials(@ModelAttribute("user") CbUser user) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         Set<Credential> credentials = credentialService.retrievePrivateCredentials(user);
         return new ResponseEntity<>(convertCredentials(credentials), HttpStatus.OK);
     }
@@ -87,7 +87,7 @@ public class CredentialController {
     @RequestMapping(value = "account/credentials", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<CredentialResponse>> getAccountCredentials(@ModelAttribute("user") CbUser user) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         Set<Credential> credentials = credentialService.retrieveAccountCredentials(user);
         return new ResponseEntity<>(convertCredentials(credentials), HttpStatus.OK);
     }
@@ -96,7 +96,7 @@ public class CredentialController {
     @RequestMapping(value = "user/credentials/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<CredentialResponse> getPrivateCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         Credential credentials = credentialService.getPrivateCredential(name, user);
         return new ResponseEntity<>(convert(credentials), HttpStatus.OK);
     }
@@ -105,7 +105,7 @@ public class CredentialController {
     @RequestMapping(value = "account/credentials/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<CredentialResponse> getAccountCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         Credential credentials = credentialService.getPublicCredential(name, user);
         return new ResponseEntity<>(convert(credentials), HttpStatus.OK);
     }
@@ -114,7 +114,7 @@ public class CredentialController {
     @RequestMapping(value = "credentials/{credentialId}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<CredentialResponse> getCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         Credential credential = credentialService.get(credentialId);
         return new ResponseEntity<>(convert(credential), HttpStatus.OK);
     }
@@ -123,7 +123,7 @@ public class CredentialController {
     @RequestMapping(value = "credentials/{credentialId}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<CredentialResponse> deleteCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         credentialService.delete(credentialId, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -132,7 +132,7 @@ public class CredentialController {
     @RequestMapping(value = "account/credentials/{name}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<CredentialResponse> deletePublicCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         credentialService.delete(name, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -141,7 +141,7 @@ public class CredentialController {
     @RequestMapping(value = "user/credentials/{name}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<CredentialResponse> deletePrivateCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         credentialService.delete(name, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -150,7 +150,7 @@ public class CredentialController {
     @RequestMapping(value = "credentials/certificate/{credentialId}", method = RequestMethod.GET)
     @ResponseBody
     public ModelAndView getJksFile(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         AzureCredential credential = (AzureCredential) credentialService.get(credentialId);
         File cerFile = azureStackUtil.buildAzureCerFile(credential);
         response.setContentType("application/octet-stream");
@@ -163,7 +163,7 @@ public class CredentialController {
     @RequestMapping(value = "credentials/certificate/{credentialId}", method = RequestMethod.PUT)
     @ResponseBody
     public ModelAndView refreshCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         Credential credential = credentialService.update(credentialId);
         if (credential instanceof AzureCredential) {
             File cerFile = azureStackUtil.buildAzureCerFile((AzureCredential) credential);
@@ -178,7 +178,7 @@ public class CredentialController {
     @RequestMapping(value = "credentials/{credentialId}/sshkey", method = RequestMethod.GET)
     @ResponseBody
     public ModelAndView getSshFile(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         AzureCredential credential = (AzureCredential) credentialService.get(credentialId);
         File cerFile = azureStackUtil.buildAzureSshCerFile(credential);
         response.setContentType("application/octet-stream");
