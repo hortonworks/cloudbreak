@@ -350,12 +350,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $scope.syncCluster = function (activeCluster) {
             var newStatus = {"status":"SYNC"};
             GlobalStack.update({id: activeCluster.id}, newStatus, function(result){
-                Cluster.update({id: activeCluster.id}, newStatus, function(success){
-                    activeCluster.status = "SYNC";
-                }, function(error) {
+                Cluster.update({id: activeCluster.id}, newStatus, function(success){}, function(error) {
                     $scope.showError(error, $rootScope.msg.cluster_sync_failed);
                 });
-
             }, function(error) {
                 $scope.showError(error, $rootScope.msg.cluster_sync_failed);
             });
