@@ -10,7 +10,8 @@ public enum DockerContainer {
     MUNCHAUSEN("munchausen"),
     CONSUL_WATCH("consul-watch"),
     BAYWATCH_SERVER("baywatch-server"),
-    BAYWATCH_CLIENT("baywatch-client");
+    BAYWATCH_CLIENT("baywatch-client"),
+    LOGROTATE("logrotate");
 
     private final String name;
 

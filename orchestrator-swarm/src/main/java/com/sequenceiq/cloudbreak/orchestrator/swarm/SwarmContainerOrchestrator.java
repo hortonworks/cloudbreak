@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariServerDatab
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.BaywatchClientBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.BaywatchServerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.ConsulWatchBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.LogrotateBootsrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.MunchausenBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.RegistratorBootstrap;
 
@@ -246,6 +247,38 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
                                 consulDomain, externServerLocation);
                 futures.add(getParallelContainerRunner().submit(simpleContainerBootstrapRunner(runner, getExitCriteria(), exitCriteriaModel,
                         MDC.getCopyOfContextMap())));
+            }
+            for (Future<Boolean> future : futures) {
+                future.get();
+            }
+        } catch (Exception exception) {
+            if (exception instanceof CloudbreakOrchestratorCancelledException) {
+                throw (CloudbreakOrchestratorCancelledException) exception;
+            } else if (exception instanceof CloudbreakOrchestratorFailedException) {
+                throw (CloudbreakOrchestratorFailedException) exception;
+            } else {
+                throw new CloudbreakOrchestratorFailedException(exception);
+            }
+        }
+    }
+
+    @Override
+    public void startLogrotate(ContainerOrchestratorCluster cluster, String imageName, int count, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+        if (count > cluster.getNodes().size()) {
+            throw new CloudbreakOrchestratorFailedException("Cannot orchestrate more Logrotate containers than the available nodes.");
+        }
+        try {
+            List<Future<Boolean>> futures = new ArrayList<>();
+            DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(cluster.getGatewayConfig()))
+                    .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
+                    .build();
+            for (int i = 0; i < count; i++) {
+                String time = String.valueOf(new Date().getTime()) + i;
+                SimpleContainerBootstrapRunner runner = simpleContainerBootstrapRunner(
+                        new LogrotateBootsrap(swarmManagerClient, imageName, time),
+                        getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap());
+                futures.add(getParallelContainerRunner().submit(runner));
             }
             for (Future<Boolean> future : futures) {
                 future.get();

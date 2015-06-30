@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONT
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_BAYWATCH_CLIENT;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_BAYWATCH_SERVER;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_DOCKER_CONSUL_WATCH_PLUGN;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_LOGROTATE;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_REGISTRATOR;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.StackDeletionBasedExitCriteriaModel.stackDeletionBasedExitCriteriaModel;
 
@@ -62,6 +63,9 @@ public class ClusterContainerRunner {
     @Value("${cb.docker.container.baywatch.client:" + CB_DOCKER_CONTAINER_BAYWATCH_CLIENT + "}")
     private String baywatchClientDockerImageName;
 
+    @Value("${cb.docker.container.logrotate:" + CB_DOCKER_CONTAINER_LOGROTATE + "}")
+    private String logrotateDockerImageName;
+
     @Value("${cb.baywatch.extern.location:" + CB_BAYWATCH_EXTERN_LOCATION + "}")
     private String baywatchServerExternLocation;
 
@@ -104,6 +108,8 @@ public class ClusterContainerRunner {
                     stackDeletionBasedExitCriteriaModel(stack.getId()));
             containerOrchestrator.startConsulWatches(cluster, consulWatchPlugnDockerImageName, cluster.getNodes().size(),
                     stackDeletionBasedExitCriteriaModel(stack.getId()));
+            containerOrchestrator.startLogrotate(cluster, logrotateDockerImageName, cluster.getNodes().size(),
+                    stackDeletionBasedExitCriteriaModel(stack.getId()));
             if (baywatchEnabled) {
                 if (StringUtils.isEmpty(baywatchServerExternLocation)) {
                     containerOrchestrator.startBaywatchServer(cluster, baywatchServerDockerImageName, stackDeletionBasedExitCriteriaModel(stack.getId()));
@@ -143,6 +149,8 @@ public class ClusterContainerRunner {
             containerOrchestrator.startAmbariAgents(cluster, getAmbariImageName(stack), cluster.getNodes().size(), cloudPlatform,
                     stackDeletionBasedExitCriteriaModel(stack.getId()));
             containerOrchestrator.startConsulWatches(cluster, consulWatchPlugnDockerImageName, cluster.getNodes().size(),
+                    stackDeletionBasedExitCriteriaModel(stack.getId()));
+            containerOrchestrator.startLogrotate(cluster, logrotateDockerImageName, cluster.getNodes().size(),
                     stackDeletionBasedExitCriteriaModel(stack.getId()));
             if (baywatchEnabled) {
                 containerOrchestrator.startBaywatchClients(cluster, baywatchClientDockerImageName, gatewayInstance.getPrivateIp(),

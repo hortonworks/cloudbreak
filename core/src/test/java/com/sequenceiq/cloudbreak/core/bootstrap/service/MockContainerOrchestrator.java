@@ -76,6 +76,12 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
+    public void startLogrotate(ContainerOrchestratorCluster cluster, String imageName, int count, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+        return;
+    }
+
+    @Override
     public boolean areAllNodesAvailable(GatewayConfig gatewayConfig, Set<Node> nodes) {
         return false;
     }
