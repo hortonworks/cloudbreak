@@ -170,7 +170,7 @@ ambassador:
     volumes:
         - "/var/run/docker.sock:/var/run/docker.sock"
     dns: $PRIVATE_IP
-    image: progrium/ambassadord:$DOCKER_TAG_AMBASSADOR
+    image: sequenceiq/ambassadord:$DOCKER_TAG_AMBASSADOR
     command: --omnimode
 
 logsink:
@@ -204,7 +204,7 @@ logspout:
 ambassadorips:
     privileged: true
     net: container:ambassador
-    image: progrium/ambassadord:$DOCKER_TAG_AMBASSADOR
+    image: sequenceiq/ambassadord:$DOCKER_TAG_AMBASSADOR
     command: --setup-iptables
 
 uaadb:

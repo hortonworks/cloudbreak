@@ -28,7 +28,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_UAA 1.8.1-v2
     env-import DOCKER_TAG_ULUWATU 0.5.33
     env-import DOCKER_TAG_SULTANS 0.5.4
-    env-import DOCKER_TAG_AMBASSADOR latest
+    env-import DOCKER_TAG_AMBASSADOR 0.5.0
     env-import DOCKER_TAG_CERT_TOOL 0.0.3
     env-import DOCKER_TAG_CLOUDBREAK_SHELL 0.4.11
 }
@@ -313,6 +313,6 @@ HINT
         -p 8080:8080 \
         -e PORT=8080 \
         -e SERVICE_NAME=cloudbreak \
-        progrium/ambassadord 192.168.59.3:$port
+        sequenceiq/ambassadord 192.168.59.3:$port
 
 }
