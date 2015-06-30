@@ -128,6 +128,8 @@ public class SimpleStackFacade implements StackFacade {
     public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
         ProvisioningContext actualContext = (ProvisioningContext) context;
         try {
+            Stack stack = stackService.getById(actualContext.getStackId());
+            MDCBuilder.buildMdcContext(stack);
             stackUpdater.updateStackStatus(actualContext.getStackId(), UPDATE_IN_PROGRESS);
             fireEventAndLog(actualContext.getStackId(), context, "Bootstrapping cluster on the infrastructure", UPDATE_IN_PROGRESS);
             clusterBootstrapper.bootstrapCluster(actualContext);
@@ -142,9 +144,9 @@ public class SimpleStackFacade implements StackFacade {
     public FlowContext setupConsulMetadata(FlowContext context) throws CloudbreakException {
         ProvisioningContext actualContext = (ProvisioningContext) context;
         try {
-            stackUpdater.updateStackStatus(actualContext.getStackId(), UPDATE_IN_PROGRESS);
             Stack stack = stackService.getById(actualContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
+            stackUpdater.updateStackStatus(actualContext.getStackId(), UPDATE_IN_PROGRESS);
             fireEventAndLog(actualContext.getStackId(), context, "Setting up metadata", UPDATE_IN_PROGRESS);
             consulMetadataSetup.setupConsulMetadata(stack.getId());
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
@@ -159,9 +161,9 @@ public class SimpleStackFacade implements StackFacade {
     public FlowContext start(FlowContext context) throws CloudbreakException {
         StackStatusUpdateContext actualContext = (StackStatusUpdateContext) context;
         try {
-            stackUpdater.updateStackStatus(actualContext.getStackId(), START_IN_PROGRESS, "Cluster infrastructure is now starting.");
             Stack stack = stackService.getById(actualContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
+            stackUpdater.updateStackStatus(actualContext.getStackId(), START_IN_PROGRESS, "Cluster infrastructure is now starting.");
             context = stackStartService.start(actualContext);
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Cluster infrastructure started successfully.");
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), BILLING_STARTED.name(), "Cluster infrastructure started successfully.");
@@ -177,9 +179,9 @@ public class SimpleStackFacade implements StackFacade {
         StackStatusUpdateContext actualContext = (StackStatusUpdateContext) context;
         try {
             if (stackStopService.isStopPossible(actualContext)) {
-                stackUpdater.updateStackStatus(actualContext.getStackId(), STOP_IN_PROGRESS, "Cluster infrastructure is now stopping.");
                 Stack stack = stackService.getById(actualContext.getStackId());
                 MDCBuilder.buildMdcContext(stack);
+                stackUpdater.updateStackStatus(actualContext.getStackId(), STOP_IN_PROGRESS, "Cluster infrastructure is now stopping.");
                 context = stackStopService.stop(actualContext);
                 stackUpdater.updateStackStatus(stack.getId(), STOPPED, "Cluster infrastructure stopped successfully.");
                 cloudbreakEventService.fireCloudbreakEvent(stack.getId(), BILLING_STOPPED.name(), "Cluster infrastructure stopped successfully.");
@@ -199,9 +201,9 @@ public class SimpleStackFacade implements StackFacade {
     public FlowContext terminateStack(FlowContext context) throws CloudbreakException {
         DefaultFlowContext actualContext = (DefaultFlowContext) context;
         try {
-            stackUpdater.updateStackStatus(actualContext.getStackId(), DELETE_IN_PROGRESS, "Terminating the cluster and its infrastructure.");
             Stack stack = stackService.getById(actualContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
+            stackUpdater.updateStackStatus(actualContext.getStackId(), DELETE_IN_PROGRESS, "Terminating the cluster and its infrastructure.");
 
             if (stack != null && stack.getCredential() != null) {
                 terminationService.terminateStack(stack.getId(), actualContext.getCloudPlatform());
@@ -228,10 +230,10 @@ public class SimpleStackFacade implements StackFacade {
     public FlowContext addInstances(FlowContext context) throws CloudbreakException {
         StackScalingContext actualContext = (StackScalingContext) context;
         try {
-            String statusReason = String.format("Add %s new instance(s) to the infrastructure.", actualContext.getScalingAdjustment());
-            stackUpdater.updateStackStatus(actualContext.getStackId(), UPDATE_IN_PROGRESS, statusReason);
             Stack stack = stackService.getById(actualContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
+            String statusReason = String.format("Add %s new instance(s) to the infrastructure.", actualContext.getScalingAdjustment());
+            stackUpdater.updateStackStatus(actualContext.getStackId(), UPDATE_IN_PROGRESS, statusReason);
             Set<Resource> resources = stackScalingService.addInstances(stack.getId(), actualContext.getInstanceGroup(), actualContext.getScalingAdjustment());
             context = new StackScalingContext(stack.getId(), actualContext.getCloudPlatform(), actualContext.getScalingAdjustment(),
                     actualContext.getInstanceGroup(), resources, actualContext.getScalingType(), null);
@@ -247,7 +249,7 @@ public class SimpleStackFacade implements StackFacade {
         StackScalingContext actualCont = (StackScalingContext) context;
         Stack stack = stackService.getById(actualCont.getStackId());
         Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
-        MDCBuilder.buildMdcContext(stackService.getById(stack.getId()));
+        MDCBuilder.buildMdcContext(stack);
         fireEventAndLog(actualCont.getStackId(), context, "Extending metadata with new instances.", UPDATE_IN_PROGRESS);
         Set<String> upscaleCandidateAddresses = metadataSetupService.setupNewMetadata(stack.getId(), actualCont.getResources(), actualCont.getInstanceGroup());
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
@@ -266,6 +268,7 @@ public class SimpleStackFacade implements StackFacade {
         StackScalingContext actualContext = (StackScalingContext) context;
         try {
             Stack stack = stackService.getById(actualContext.getStackId());
+            MDCBuilder.buildMdcContext(stack);
             fireEventAndLog(actualContext.getStackId(), context, "Bootstrapping new node(s).", UPDATE_IN_PROGRESS);
             clusterBootstrapper.bootstrapNewNodes(actualContext);
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Bootstrapping has been finished successfully.");
@@ -342,6 +345,7 @@ public class SimpleStackFacade implements StackFacade {
         ProvisioningContext actualContext = (ProvisioningContext) context;
         Date startDate = new Date();
         Stack stack = stackService.getById(actualContext.getStackId());
+        MDCBuilder.buildMdcContext(stack);
         stackUpdater.updateStackStatus(stack.getId(), CREATE_IN_PROGRESS, "Creating infrastructure");
         ProvisionComplete provisionResult = provisioningService.buildStack(actualContext.getCloudPlatform(), stack, actualContext.getSetupProperties());
         Date endDate = new Date();
@@ -359,6 +363,7 @@ public class SimpleStackFacade implements StackFacade {
     public FlowContext setupTls(FlowContext context) throws CloudbreakException {
         ProvisioningContext actualContext = (ProvisioningContext) context;
         Stack stack = stackService.getById(actualContext.getStackId());
+        MDCBuilder.buildMdcContext(stack);
         tlsSetupService.setupTls(actualContext.getCloudPlatform(), stack, actualContext.getSetupProperties());
         return actualContext;
     }
@@ -384,8 +389,8 @@ public class SimpleStackFacade implements StackFacade {
         UpdateAllowedSubnetsContext actualContext = (UpdateAllowedSubnetsContext) context;
         try {
             Stack stack = stackService.getById(actualContext.getStackId());
-            stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Updating allowed subnets.");
             MDCBuilder.buildMdcContext(stack);
+            stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Updating allowed subnets.");
             CloudPlatformConnector connector = cloudPlatformConnectors.get(stack.cloudPlatform());
             Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(stack.cloudPlatform(),
                     tlsSecurityService.readPublicSshKey(stack.getId()), connector.getSSHUser());
