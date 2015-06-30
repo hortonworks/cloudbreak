@@ -3,8 +3,8 @@
 var log = log4javascript.getLogger("clusterController-logger");
 var $jq = jQuery.noConflict();
 
-angular.module('uluwatuControllers').controller('clusterController', ['$scope', '$rootScope', '$filter', 'UluwatuCluster', 'GlobalStack', 'Cluster', '$interval', 'UserEvents',
-    function ($scope, $rootScope, $filter, UluwatuCluster, GlobalStack, Cluster, $interval, UserEvents) {
+angular.module('uluwatuControllers').controller('clusterController', ['$scope', '$rootScope', '$filter', 'UluwatuCluster', 'GlobalStack', 'Cluster', 'GlobalStackInstance', '$interval', 'UserEvents',
+    function ($scope, $rootScope, $filter, UluwatuCluster, GlobalStack, Cluster, GlobalStackInstance, $interval, UserEvents) {
 
         $rootScope.ledStyles = {
             "REQUESTED": "state2-run-blink",
@@ -189,6 +189,14 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }
         }
 
+        $scope.deleteStackInstance = function (stackId, instanceId) {
+            GlobalStackInstance.delete({ stackid: stackId, instanceid: instanceId }, null, function (result) {
+
+            }, function(failure){
+                $scope.showError(failure, $rootScope.msg.stack_instance_delete_failed);
+            });
+        }
+
         $scope.deleteCluster = function (cluster) {
             UluwatuCluster.delete(cluster, function (result) {
                 var actCluster = $filter('filter')($rootScope.clusters, { id: cluster.id }, true)[0];
@@ -256,10 +264,25 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.pagination.totalItems = $rootScope.activeCluster.metadata.length;
                 var begin = (($scope.pagination.currentPage - 1) * $scope.pagination.itemsPerPage),
                 end = begin + $scope.pagination.itemsPerPage;
-                $scope.filteredActiveClusterData = $rootScope.activeCluster.metadata.slice(begin, end);
+                $scope.filteredActiveClusterData = addStatesToMetadata($rootScope.activeCluster.metadata.slice(begin, end));
             } else {
                 $scope.filteredActiveClusterData = [];
             }
+        }
+
+        function addStatesToMetadata(filteredData) {
+            angular.forEach(filteredData, function(data){
+                if (data != null && data.discoveryFQDN != null) {
+                    var hostGroup = $filter('filter')($rootScope.activeCluster.cluster.hostGroups, {instanceGroupName: data.instanceGroup});
+                    if (hostGroup != null && hostGroup.length > 0) {
+                        var hostMetadata = $filter('filter')(hostGroup[0].metadata, {name: data.discoveryFQDN})
+                        if (hostMetadata != null && hostMetadata.length > 0) {
+                            data.state = hostMetadata[0].state
+                        }
+                    }
+                }
+            });
+            return filteredData;
         }
 
         $scope.getSelectedTemplate = function (templateId) {

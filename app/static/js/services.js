@@ -159,6 +159,11 @@ uluwatuServices.factory('GlobalStack', ['$resource',
         return $resource('stacks/:id', null, { 'update': { method:'PUT' } });
     }]);
 
+uluwatuServices.factory('GlobalStackInstance', ['$resource',
+    function ($resource) {
+        return $resource('stacks/:stackid/:instanceid');
+}]);
+
 uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'AccountStack', 'Cluster', 'GlobalStack',
     function (StackValidation, UserStack, AccountStack, Cluster, GlobalStack) {
         function AggregateCluster(UserStack, AccountStack, Cluster) {
