@@ -59,7 +59,7 @@ public class TemplateController {
     @ResponseBody
     @ApiOperation(value = TemplateOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES)
     public ResponseEntity<IdJson> createPrivateTemplate(@ModelAttribute("user") CbUser user, @RequestBody @Valid TemplateRequest templateRequest) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         return createTemplate(user, templateRequest, false);
     }
 
@@ -67,7 +67,7 @@ public class TemplateController {
     @ResponseBody
     @ApiOperation(value = TemplateOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES)
     public ResponseEntity<IdJson> createAccountTemplate(@ModelAttribute("user") CbUser user, @RequestBody @Valid TemplateRequest templateRequest) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         return createTemplate(user, templateRequest, true);
     }
 
@@ -75,7 +75,7 @@ public class TemplateController {
     @RequestMapping(value = "user/templates", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<TemplateResponse>> getPrivateTemplates(@ModelAttribute("user") CbUser user) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         Set<Template> templates = templateService.retrievePrivateTemplates(user);
         return new ResponseEntity<>(convert(templates), HttpStatus.OK);
     }
@@ -84,7 +84,7 @@ public class TemplateController {
     @RequestMapping(value = "account/templates", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<TemplateResponse>> getAccountTemplates(@ModelAttribute("user") CbUser user) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         Set<Template> templates = templateLoaderService.loadTemplates(user);
         templates.addAll(templateService.retrieveAccountTemplates(user));
         return new ResponseEntity<>(convert(templates), HttpStatus.OK);
@@ -94,7 +94,7 @@ public class TemplateController {
     @RequestMapping(value = "templates/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<TemplateResponse> getTemplate(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         Template template = templateService.get(id);
         TemplateResponse templateJson = convert(template);
         return new ResponseEntity<>(templateJson, HttpStatus.OK);
@@ -104,7 +104,7 @@ public class TemplateController {
     @RequestMapping(value = "user/templates/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<TemplateResponse> getTemplateInPrivate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         Template template = templateService.getPrivateTemplate(name, user);
         TemplateResponse templateJson = convert(template);
         return new ResponseEntity<>(templateJson, HttpStatus.OK);
@@ -114,7 +114,7 @@ public class TemplateController {
     @RequestMapping(value = "account/templates/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<TemplateResponse> getTemplateInAccount(@ModelAttribute("user") CbUser user, @PathVariable String name) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         Template template = templateService.getPublicTemplate(name, user);
         TemplateResponse templateJson = convert(template);
         return new ResponseEntity<>(templateJson, HttpStatus.OK);
@@ -124,7 +124,7 @@ public class TemplateController {
     @RequestMapping(value = "templates/{id}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<TemplateResponse> deleteTemplate(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         templateService.delete(id, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -133,7 +133,7 @@ public class TemplateController {
     @RequestMapping(value = "account/templates/{name}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<TemplateResponse> deletePublicTemplate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         templateService.delete(name, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -142,7 +142,7 @@ public class TemplateController {
     @RequestMapping(value = "user/templates/{name}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<TemplateResponse> deletePrivateTemplate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         templateService.delete(name, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }

@@ -30,7 +30,7 @@ public class MDCBuilder {
         }
     }
 
-    public static void buildMdcContext(CbUser user) {
+    public static void buildUserMdcContext(CbUser user) {
         if (user != null) {
             MDC.put(LoggerContextKey.OWNER_ID.toString(), user.getUserId());
         }

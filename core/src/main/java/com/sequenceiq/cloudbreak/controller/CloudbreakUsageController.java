@@ -42,7 +42,7 @@ public class CloudbreakUsageController {
             @RequestParam(value = "account", required = false) String accountId,
             @RequestParam(value = "cloud", required = false) String cloud,
             @RequestParam(value = "zone", required = false) String zone) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(accountId).setOwner(userId)
                 .setSince(since).setCloud(cloud).setRegion(zone).setFilterEndDate(filterEndDate).build();
         List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(params);
@@ -58,7 +58,7 @@ public class CloudbreakUsageController {
             @RequestParam(value = "user", required = false) String userId,
             @RequestParam(value = "cloud", required = false) String cloud,
             @RequestParam(value = "zone", required = false) String zone) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(user.getAccount()).setOwner(userId)
                 .setSince(since).setCloud(cloud).setRegion(zone).setFilterEndDate(filterEndDate).build();
         List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(params);
@@ -73,7 +73,7 @@ public class CloudbreakUsageController {
             @RequestParam(value = "filterenddate", required = false) Long filterEndDate,
             @RequestParam(value = "cloud", required = false) String cloud,
             @RequestParam(value = "zone", required = false) String zone) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(user.getAccount()).setOwner(user.getUserId())
                 .setSince(since).setCloud(cloud).setRegion(zone).setFilterEndDate(filterEndDate).build();
         List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(params);
@@ -84,7 +84,7 @@ public class CloudbreakUsageController {
     @RequestMapping(method = RequestMethod.GET, value = "/usages/generate")
     @ResponseBody
     public ResponseEntity<List<CloudbreakUsageJson>> generateUsages(@ModelAttribute("user") CbUser user) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         cloudbreakUsagesFacade.generateUserUsages();
         return new ResponseEntity<>(HttpStatus.OK);
     }

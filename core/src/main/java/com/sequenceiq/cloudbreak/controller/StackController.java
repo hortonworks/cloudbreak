@@ -58,7 +58,7 @@ public class StackController {
     @RequestMapping(value = "user/stacks", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createPrivateStack(@ModelAttribute("user") CbUser user, @RequestBody @Valid StackRequest stackRequest) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         return createStack(user, stackRequest, false);
     }
 
@@ -66,7 +66,7 @@ public class StackController {
     @RequestMapping(value = "account/stacks", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createAccountStack(@ModelAttribute("user") CbUser user, @RequestBody @Valid StackRequest stackRequest) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         return createStack(user, stackRequest, true);
     }
 
@@ -74,7 +74,7 @@ public class StackController {
     @RequestMapping(value = "user/stacks", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<StackResponse>> getPrivateStacks(@ModelAttribute("user") CbUser user) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         Set<Stack> stacks = stackService.retrievePrivateStacks(user);
         return new ResponseEntity<>(convertStacks(stacks), HttpStatus.OK);
     }
@@ -89,7 +89,7 @@ public class StackController {
     @RequestMapping(value = "account/stacks", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<StackResponse>> getAccountStacks(@ModelAttribute("user") CbUser user) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         Set<Stack> stacks = stackService.retrieveAccountStacks(user);
 
         return new ResponseEntity<>(convertStacks(stacks), HttpStatus.OK);
@@ -99,7 +99,7 @@ public class StackController {
     @RequestMapping(value = "stacks/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<StackResponse> getStack(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.get(id);
         StackResponse stackJson = conversionService.convert(stack, StackResponse.class);
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
@@ -109,7 +109,7 @@ public class StackController {
     @RequestMapping(value = "user/stacks/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<StackResponse> getStackInPrivate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.getPrivateStack(name, user);
         StackResponse stackJson = conversionService.convert(stack, StackResponse.class);
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
@@ -119,7 +119,7 @@ public class StackController {
     @RequestMapping(value = "account/stacks/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<StackResponse> getStackInPublic(@ModelAttribute("user") CbUser user, @PathVariable String name) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.getPublicStack(name, user);
         StackResponse stackJson = conversionService.convert(stack, StackResponse.class);
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
@@ -129,7 +129,7 @@ public class StackController {
     @RequestMapping(value = "stacks/{id}/status", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getStackStatus(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         Map<String, Object> statusMap = conversionService.convert(stackService.get(id), Map.class);
         return new ResponseEntity<>(statusMap, HttpStatus.OK);
     }
@@ -138,7 +138,7 @@ public class StackController {
     @RequestMapping(value = "stacks/{id}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<TemplateResponse> deleteStack(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         stackService.delete(id, user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -147,7 +147,7 @@ public class StackController {
     @RequestMapping(value = "user/stacks/{name}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<TemplateResponse> deletePrivateStack(@ModelAttribute("user") CbUser user, @PathVariable String name) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         stackService.delete(name, user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -156,7 +156,7 @@ public class StackController {
     @RequestMapping(value = "account/stacks/{name}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<TemplateResponse> deletePublicStack(@ModelAttribute("user") CbUser user, @PathVariable String name) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         stackService.delete(name, user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -165,7 +165,7 @@ public class StackController {
     @RequestMapping(value = "stacks/{id}", method = RequestMethod.PUT)
     @ResponseBody
     public ResponseEntity<String> updateStack(@ModelAttribute("user") CbUser user, @PathVariable Long id, @Valid @RequestBody UpdateStackJson updateRequest) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         if (updateRequest.getStatus() != null) {
             stackService.updateStatus(id, updateRequest.getStatus());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -195,7 +195,7 @@ public class StackController {
     @RequestMapping(value = "stacks/validate", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> validateStack(@ModelAttribute("user") CbUser user, @RequestBody @Valid StackValidationRequest stackValidationRequest) {
-        MDCBuilder.buildMdcContext(user);
+        MDCBuilder.buildUserMdcContext(user);
         StackValidation stackValidation = conversionService.convert(stackValidationRequest, StackValidation.class);
         stackService.validateStack(stackValidation);
         return new ResponseEntity<>(HttpStatus.OK);
