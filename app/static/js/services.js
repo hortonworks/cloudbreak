@@ -198,7 +198,7 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         credentialId: cluster.credentialId,
                         region: cluster.region,
                         failurePolicy: cluster.failurePolicy,
-                        onFailure: cluster.onFailure,
+                        onFailureAction: cluster.onFailureAction,
                         instanceGroups: cluster.instanceGroups,
                         parameters: cluster.parameters,
                         consulServerCount: cluster.consulServerCount,
