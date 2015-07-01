@@ -6,19 +6,33 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.AzureTemplate;
+import com.sequenceiq.cloudbreak.domain.AzureVmType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
+import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
+import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.InstanceStatus;
+import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.domain.Template;
 
 public class TestUtil {
 
@@ -86,24 +100,79 @@ public class TestUtil {
         return azureCredential;
     }
 
-    public static Stack stack(Status stackStatus, Status clusterStatus, Credential credential) {
+    public static Stack stack(Status stackStatus, Credential credential) {
         Stack stack = new Stack();
         stack.setStatus(stackStatus);
         stack.setCredential(credential);
         stack.setName("simplestack");
         stack.setOwner("userid");
         stack.setId(1L);
+        stack.setInstanceGroups(generateAzureInstanceGroups(3));
         return stack;
     }
 
+    public static Set<InstanceGroup> generateAzureInstanceGroups(int count) {
+        Set<InstanceGroup> instanceGroups = new HashSet<>();
+        instanceGroups.add(instanceGroup(1L, InstanceGroupType.GATEWAY, azureTemplate(1L)));
+        for (int i = 0; i < count - 1; i++) {
+            instanceGroups.add(instanceGroup(1L, InstanceGroupType.CORE, azureTemplate(1L)));
+        }
+        return instanceGroups;
+    }
+
+    public static InstanceGroup instanceGroup(Long id, InstanceGroupType instanceGroupType, Template template) {
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setNodeCount(1);
+        instanceGroup.setGroupName("is" + id);
+        instanceGroup.setInstanceGroupType(instanceGroupType);
+        instanceGroup.setTemplate(template);
+        instanceGroup.setInstanceMetaData(generateInstanceMetaDatas(1, id, instanceGroup));
+        return instanceGroup;
+    }
+
+    public static InstanceMetaData instanceMetaData(Long id, InstanceStatus instanceStatus, boolean ambariServer, InstanceGroup instanceGroup) {
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setInstanceStatus(instanceStatus);
+        instanceMetaData.setVolumeCount(1);
+        instanceMetaData.setAmbariServer(ambariServer);
+        instanceMetaData.setConsulServer(true);
+        instanceMetaData.setContainerCount(1);
+        instanceMetaData.setDiscoveryFQDN("test");
+        instanceMetaData.setInstanceId("test");
+        instanceMetaData.setPrivateIp("1.1.1." + (id + Math.abs(new Random().nextInt(255))));
+        instanceMetaData.setPublicIp("2.2.2." + (id + Math.abs(new Random().nextInt(255))));
+        instanceMetaData.setId(id);
+        instanceMetaData.setInstanceGroup(instanceGroup);
+        instanceMetaData.setStartDate(new Date().getTime());
+        return instanceMetaData;
+    }
+
+    public static Set<InstanceMetaData> generateInstanceMetaDatas(int count, Long instanceGroupId, InstanceGroup instanceGroup) {
+        Set<InstanceMetaData> instanceMetaDatas = new HashSet<>();
+        for (int i = 0; i < count; i++) {
+            instanceMetaDatas.add(instanceMetaData(Long.valueOf(i + instanceGroupId), InstanceStatus.REGISTERED,
+                    instanceGroup.getInstanceGroupType().equals(InstanceGroupType.GATEWAY) ? true : false, instanceGroup));
+        }
+        return instanceMetaDatas;
+    }
+
+    public static Template azureTemplate(Long id) {
+        AzureTemplate azureTemplate = new AzureTemplate();
+        azureTemplate.setVmType(AzureVmType.A5);
+        azureTemplate.setId(id);
+        azureTemplate.setVolumeCount(1);
+        azureTemplate.setVolumeSize(100);
+        return azureTemplate;
+    }
+
     public static Stack stack() {
-        return stack(AVAILABLE, AVAILABLE, azureCredential());
+        return stack(AVAILABLE, azureCredential());
     }
 
     public static List<Cluster> generateCluster(int count) {
         List<Cluster> clusters = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            clusters.add(cluster(TestUtil.blueprint(), stack(AVAILABLE, AVAILABLE, azureCredential()), (long) i));
+            clusters.add(cluster(TestUtil.blueprint(), stack(AVAILABLE, azureCredential()), (long) i));
         }
         return clusters;
     }
@@ -119,6 +188,24 @@ public class TestUtil {
         return cluster;
     }
 
+    public static List<Resource> generateAzureResources(int count) {
+        List<Resource> resources = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            resources.add(azureResource(Long.valueOf(i), "master"));
+        }
+        return resources;
+    }
+
+    public static Resource azureResource(Long id, String instanceGroup) {
+        Resource resource = new Resource();
+        resource.setId(id);
+        resource.setStack(stack());
+        resource.setInstanceGroup(instanceGroup);
+        resource.setResourceName("testResource");
+        resource.setResourceType(ResourceType.AZURE_VIRTUAL_MACHINE);
+        return resource;
+    }
+
     public static Blueprint blueprint() {
         Blueprint blueprint = new Blueprint();
         blueprint.setId(1L);
@@ -126,5 +213,50 @@ public class TestUtil {
         blueprint.setName("multi-node-yarn");
         blueprint.setBlueprintName("multi-node-yarn");
         return blueprint;
+    }
+
+    public static List<CloudbreakUsage> generateAzureCloudbreakUsages(int count) {
+        List<CloudbreakUsage> cloudbreakUsages = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            cloudbreakUsages.add(azureCloudbreakUsage(Long.valueOf(i)));
+        }
+        return cloudbreakUsages;
+    }
+
+    public static CloudbreakUsage azureCloudbreakUsage(Long id) {
+        CloudbreakUsage cloudbreakUsage = new CloudbreakUsage();
+        cloudbreakUsage.setId(id);
+        cloudbreakUsage.setInstanceGroup("master");
+        cloudbreakUsage.setAccount("account");
+        cloudbreakUsage.setCosts(2d);
+        cloudbreakUsage.setDay(new Date());
+        cloudbreakUsage.setInstanceHours(1L);
+        cloudbreakUsage.setInstanceType("xlarge");
+        cloudbreakUsage.setOwner("owner");
+        cloudbreakUsage.setProvider("azure");
+        cloudbreakUsage.setRegion("us");
+        cloudbreakUsage.setStackName("usagestack");
+        cloudbreakUsage.setStackId(1L);
+        return cloudbreakUsage;
+    }
+
+    public static List<CloudbreakEvent> generateAzureCloudbreakEvents(int count) {
+        List<CloudbreakEvent> cloudbreakEvents = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            cloudbreakEvents.add(azureCloudbreakEvent(Long.valueOf(i)));
+        }
+        return cloudbreakEvents;
+    }
+
+    public static CloudbreakEvent azureCloudbreakEvent(Long id) {
+        CloudbreakEvent cloudbreakEvent = new CloudbreakEvent();
+        cloudbreakEvent.setId(id);
+        cloudbreakEvent.setInstanceGroup("master");
+        cloudbreakEvent.setAccount("account");
+        cloudbreakEvent.setOwner("owner");
+        cloudbreakEvent.setRegion("us");
+        cloudbreakEvent.setStackName("usagestack");
+        cloudbreakEvent.setStackId(1L);
+        return cloudbreakEvent;
     }
 }

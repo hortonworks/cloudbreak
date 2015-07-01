@@ -35,10 +35,6 @@ public class StackUpdater {
         return doUpdateStackStatus(stackId, status, statusReason);
     }
 
-    public Stack updateStackStatusReason(Long stackId, String statusReason) {
-        return doUpdateStackStatusReason(stackId, statusReason);
-    }
-
     public Stack addStackResources(Long stackId, List<Resource> resources) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         for (Resource resource : resources) {
@@ -79,17 +75,6 @@ public class StackUpdater {
                 cloudbreakEventService.fireCloudbreakEvent(stackId, status.name(), statusReason);
             }
         }
-        return stack;
-    }
-
-    private Stack doUpdateStackStatusReason(Long stackId, String statusReason) {
-        Stack stack = stackRepository.findById(stackId);
-        if (statusReason != null) {
-            stack.setStatusReason(statusReason);
-            cloudbreakEventService.fireCloudbreakEvent(stackId, stack.getStatus().name(), statusReason);
-        }
-        stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack: [statusReason: '{}'].", statusReason);
         return stack;
     }
 

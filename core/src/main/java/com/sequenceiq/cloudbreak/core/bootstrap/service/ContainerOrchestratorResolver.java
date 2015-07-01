@@ -30,6 +30,6 @@ public class ContainerOrchestratorResolver {
             LOGGER.error("ContainerOrchestrator not found: {}, supported ContainerOrchestrators: {}", containerOrchestratorName, containerOrchestrators);
             throw new CloudbreakException("ContainerOrchestrator not found: " + containerOrchestratorName);
         }
-        return containerOrchestrators.get(containerOrchestratorName);
+        return co;
     }
 }

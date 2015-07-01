@@ -20,6 +20,15 @@ public class MDCBuilderTest {
     }
 
     @Test
+    public void buildSimpleContextWithNull() {
+        MDCBuilder.buildMdcContext();
+        assertEquals("cloudbreak", MDC.get(LoggerContextKey.OWNER_ID.toString()));
+        assertEquals("cloudbreakLog", MDC.get(LoggerContextKey.RESOURCE_TYPE.toString()));
+        assertEquals("undefined", MDC.get(LoggerContextKey.RESOURCE_ID.toString()));
+        assertEquals("cb", MDC.get(LoggerContextKey.RESOURCE_NAME.toString()));
+    }
+
+    @Test
     public void buildContextWithStack() {
         MDCBuilder.buildMdcContext(TestUtil.stack());
         assertEquals("userid", MDC.get(LoggerContextKey.OWNER_ID.toString()));

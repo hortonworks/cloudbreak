@@ -67,7 +67,6 @@ public class ClusterBootstrapperErrorHandler {
 
     public void terminateFailedNodes(ContainerOrchestrator orchestrator, Stack stack, GatewayConfig gatewayConfig, Set<Node> nodes)
             throws CloudbreakOrchestratorFailedException {
-        InstanceGroup gateway = stack.getGatewayInstanceGroup();
         List<String> allAvailableNode = orchestrator.getAvailableNodes(gatewayConfig, nodes);
         List<Node> missingNodes = selectMissingNodes(nodes, allAvailableNode);
         if (missingNodes.size() > 0) {
