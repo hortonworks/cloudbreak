@@ -15,16 +15,6 @@ public class CloudbreakUsageSpecifications {
     private CloudbreakUsageSpecifications() {
     }
 
-    public static Specification<CloudbreakUsage> usagesWithLongField(final String field, final Long value) {
-        return new Specification<CloudbreakUsage>() {
-            @Override
-            public Predicate toPredicate(final Root<CloudbreakUsage> cloudbreakUsageRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                return (value == null) ? cb.and() : cb.equal(cloudbreakUsageRoot.get(field), value);
-            }
-        };
-    }
-
     public static Specification<CloudbreakUsage> usagesSince(final Long since) {
         return new Specification<CloudbreakUsage>() {
             @Override

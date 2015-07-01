@@ -184,7 +184,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
             Long total = Long.valueOf(copyStatusFromServer.get("totalBytes"));
             double copyPercentage = (long) ((float) copied / total * ONE_HUNDRED);
             LOGGER.info(String.format("copy progress=%s / %s percentage: %s%%.", copied, total, copyPercentage));
-            stackUpdater.updateStackStatusReason(stack.getId(), String.format("The copy status is: %s%%.", copyPercentage));
+            stackUpdater.updateStackStatus(stack.getId(), stack.getStatus(), String.format("The copy status is: %s%%.", copyPercentage));
             try {
                 Thread.sleep(MILLIS);
             } catch (InterruptedException e) {

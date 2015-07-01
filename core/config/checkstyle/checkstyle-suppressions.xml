@@ -25,6 +25,8 @@
     <suppress checks="EmptyBlock" files="test"/>
     <suppress checks="HideUtilityClassConstructor" files=".*Application.java"/>
     <suppress checks="LineLength" files=".*VariableConfig.java"/>
+    <suppress checks="RedundantThrows" files=".*Test.java"/>
+    <suppress checks="RedundantThrows" files="Mock.*.java"/>
 
     <!-- -->
 
