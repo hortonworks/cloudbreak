@@ -25,18 +25,11 @@ fix_hostname() {
   fi
 }
 
-configure_docker() {
-  rm -rf /etc/docker/key.json
-  sed -i "/other_args=/d" /etc/sysconfig/docker
-  sh -c ' echo DOCKER_TLS_VERIFY=0 >> /etc/sysconfig/docker'
-  sh -c ' echo other_args=\"--storage-opt dm.basesize=30G --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2376\" >> /etc/sysconfig/docker'
-  service docker restart
-}
-
-print_ssh_fingerprint() {
-    echo "cb: -----BEGIN SSH HOST KEY FINGERPRINTS-----"
-    echo "cb: $(ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub)"
-    echo "cb: -----END SSH HOST KEY FINGERPRINTS-----"
+extend_rootfs() {
+  # Usable on GCP, does not harm anywhere else
+  root_fs_device=$(mount | grep ' / ' | cut -d' ' -f 1 | sed s/1//g)
+  growpart $root_fs_device 1
+  xfs_growfs /
 }
 
 format_disks() {
@@ -68,10 +61,9 @@ main() {
     <#if gateway>
     setup_tmp_ssh
     </#if>
-    print_ssh_fingerprint
+    extend_rootfs
     format_disks
     fix_hostname
-    configure_docker
     touch /var/cb-init-executed
     echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/cb-init-executed
   fi

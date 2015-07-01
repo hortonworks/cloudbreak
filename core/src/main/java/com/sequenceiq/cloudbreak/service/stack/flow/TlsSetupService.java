@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_TLS_CERT_FI
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
@@ -29,6 +30,8 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.connection.channel.direct.Session;
+import net.schmizz.sshj.transport.verification.HostKeyVerifier;
+import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 
 @Component
 public class TlsSetupService {
@@ -57,38 +60,54 @@ public class TlsSetupService {
 
         InstanceMetaData gateway = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
         CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
-
         LOGGER.info("SSH into gateway node to setup certificates on gateway.");
+        Set<String> sshFingerprints = connector.getSSHFingerprints(stack, gateway.getInstanceId());
+        LOGGER.info("Fingerprint has been determined: {}", sshFingerprints);
+        setupTls(cloudPlatform, stack.getId(), gateway.getPublicIp(), connector.getSSHUser(), stack.getCredential().getPublicKey(), sshFingerprints);
+
+    }
+
+    private void setupTls(CloudPlatform cloudPlatform, Long stackId, String publicIp, String user, String publicKey, Set<String> sshFingerprints) throws
+            CloudbreakException {
+        LOGGER.info("SSHClient parameters: stackId: {}, publicIp: {},  user: {}", stackId, publicIp, user);
         final SSHClient ssh = new SSHClient();
-        String sshFingerprint = connector.getSSHFingerprint(stack, gateway.getInstanceId());
-        ssh.addHostKeyVerifier(sshFingerprint);
         try {
-            ssh.connect(gateway.getPublicIp(), SSH_PORT);
-            ssh.authPublickey(connector.getSSHUser(), tlsSecurityService.getSshPrivateFileLocation(stack.getId()));
-            ssh.newSCPFileTransfer().upload(tlsCertificatePath, "/tmp/cb-client.pem");
+            HostKeyVerifier hostKeyVerifier;
+            if (cloudPlatform == CloudPlatform.AWS) {
+                hostKeyVerifier = new PromiscuousVerifier();
+            } else {
+                hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints);
+            }
+            ssh.addHostKeyVerifier(hostKeyVerifier);
+            ssh.connect(publicIp, SSH_PORT);
+            ssh.authPublickey(user, tlsSecurityService.getSshPrivateFileLocation(stackId));
+            String remoteTlsCertificatePath = "/tmp/cb-client.pem";
+            ssh.newSCPFileTransfer().upload(tlsCertificatePath, remoteTlsCertificatePath);
+            LOGGER.info("Upload to server: {}", remoteTlsCertificatePath);
             final Session tlsSetupSession = ssh.startSession();
             tlsSetupSession.allocateDefaultPTY();
             String tlsSetupScript = FileReaderUtils.readFileFromClasspath("init/tls-setup.sh");
-            tlsSetupScript = tlsSetupScript.replace("$PUBLIC_IP", gateway.getPublicIp());
+            tlsSetupScript = tlsSetupScript.replace("$PUBLIC_IP", publicIp);
             final Session.Command tlsSetupCmd = tlsSetupSession.exec(tlsSetupScript);
+            LOGGER.info("Execute tls-setup.sh: {}", tlsSetupScript);
             tlsSetupCmd.join(SETUP_TIMEOUT, TimeUnit.SECONDS);
             tlsSetupSession.close();
             final Session changeSshKeySession = ssh.startSession();
             changeSshKeySession.allocateDefaultPTY();
             String removeScript = "sudo sed -i '/#tmpssh_start/,/#tmpssh_end/{s/./ /g}' /home/%s/.ssh/authorized_keys";
-            final Session.Command tmpSshRemoveCmd = changeSshKeySession.exec(String.format(removeScript, connector.getSSHUser()));
+            final Session.Command tmpSshRemoveCmd = changeSshKeySession.exec(String.format(removeScript, user));
             tmpSshRemoveCmd.join(SETUP_TIMEOUT, TimeUnit.SECONDS);
             changeSshKeySession.close();
-            ssh.newSCPFileTransfer().download("/tmp/server.pem", tlsSecurityService.getCertDir(stack.getId()) + "/ca.pem");
+            ssh.newSCPFileTransfer().download("/tmp/server.pem", tlsSecurityService.getCertDir(stackId) + "/ca.pem");
             if (tlsSetupCmd.getExitStatus() != 0) {
                 throw new CloudbreakException(String.format("TLS setup script exited with error code: %s", tlsSetupCmd.getExitStatus()));
             }
             if (tmpSshRemoveCmd.getExitStatus() != 0) {
                 throw new CloudbreakException(String.format("Failed to remove temp SSH key. Error code: %s", tmpSshRemoveCmd.getExitStatus()));
             }
-            Stack stackWithSecurity = stackRepository.findByIdWithSecurityConfig(stack.getId());
+            Stack stackWithSecurity = stackRepository.findByIdWithSecurityConfig(stackId);
             SecurityConfig securityConfig = stackWithSecurity.getSecurityConfig();
-            securityConfig.setServerCert(Base64.encodeAsString(tlsSecurityService.readServerCert(stack.getId()).getBytes()));
+            securityConfig.setServerCert(Base64.encodeAsString(tlsSecurityService.readServerCert(stackId).getBytes()));
             securityConfigRepository.save(securityConfig);
         } catch (IOException e) {
             throw new CloudbreakException("Failed to setup TLS through temporary SSH.", e);
@@ -100,4 +119,5 @@ public class TlsSetupService {
             }
         }
     }
+
 }

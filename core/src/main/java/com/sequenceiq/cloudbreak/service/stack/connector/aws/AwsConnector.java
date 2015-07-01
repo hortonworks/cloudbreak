@@ -26,8 +26,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -99,8 +97,8 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
@@ -108,6 +106,8 @@ import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstances;
 import com.sequenceiq.cloudbreak.service.stack.flow.FingerprintParserUtil;
+import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
 @Service
 public class AwsConnector implements CloudPlatformConnector {
@@ -180,10 +180,12 @@ public class AwsConnector implements CloudPlatformConnector {
         stack = stackUpdater.addStackResources(stackId, Arrays.asList(reservedIp));
         String snapshotId = getEbsSnapshotIdIfNeeded(stack);
         AwsNetwork network = (AwsNetwork) stack.getNetwork();
+        String cfTemplate = cfTemplateBuilder.build(stack, snapshotId, network.isExistingVPC(), awsCloudformationTemplatePath);
+        LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
         CreateStackRequest createStackRequest = new CreateStackRequest()
                 .withStackName(cFStackName)
                 .withOnFailure(OnFailure.valueOf(stack.getOnFailureActionAction().name()))
-                .withTemplateBody(cfTemplateBuilder.build(stack, snapshotId, network.isExistingVPC(), awsCloudformationTemplatePath))
+                .withTemplateBody(cfTemplate)
                 .withParameters(getStackParameters(stack, coreUserData, gateWayUserData, awsCredential, cFStackName, network.isExistingVPC()));
         client.createStack(createStackRequest);
         Resource cloudFormationStackResource = new Resource(ResourceType.CLOUDFORMATION_STACK, cFStackName, stack, null);
@@ -345,7 +347,7 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public String getSSHFingerprint(Stack stack, String gatewayId) {
+    public Set<String> getSSHFingerprints(Stack stack, String gatewayId) {
         ConsoleOutputContext consoleOutputContext = new ConsoleOutputContext(stack, gatewayId);
         PollingResult pollingResult = consoleOutputPollingService
                 .pollWithTimeout(consoleOutputCheckerTask, consoleOutputContext, POLLING_INTERVAL, CONSOLE_OUTPUT_POLLING_ATTEMPTS);
@@ -356,10 +358,13 @@ public class AwsConnector implements CloudPlatformConnector {
         }
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(consoleOutputContext.getStack());
         String consoleOutput = amazonEC2Client.getConsoleOutput(new GetConsoleOutputRequest().withInstanceId(gatewayId)).getDecodedOutput();
-        String result = FingerprintParserUtil.parseFingerprint(consoleOutput);
-        if (result == null) {
-            throw new AwsResourceException("Couldn't parse SSH fingerprint from console output.");
-        }
+
+        Set<String> result = FingerprintParserUtil.parseFingerprints(consoleOutput);
+
+        // disabled fingerprint validation, since RHEL 7 and CentOS 7 does not return fingerprints on AWS
+        // if (result.isEmpty()) {
+        //    throw new AwsResourceException("Couldn't parse SSH fingerprint from console output.");
+        //}
         return result;
     }
 
@@ -465,6 +470,9 @@ public class AwsConnector implements CloudPlatformConnector {
     private String getRootDeviceName(Stack stack, AwsCredential awsCredential) {
         AmazonEC2Client ec2Client = awsStackUtil.createEC2Client(Regions.valueOf(stack.getRegion()), awsCredential);
         DescribeImagesResult images = ec2Client.describeImages(new DescribeImagesRequest().withImageIds(stack.getImage()));
+        if (images.getImages().isEmpty()) {
+            throw new AwsResourceException(String.format("AMI is not available: '%s'.", stack.getImage()));
+        }
         Image image = images.getImages().get(0);
         if (image == null) {
             throw new AwsResourceException(String.format("Couldn't describe AMI '%s'.", stack.getImage()));

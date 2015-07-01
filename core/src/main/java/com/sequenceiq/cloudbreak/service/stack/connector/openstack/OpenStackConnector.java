@@ -55,7 +55,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
     private static final int CONSOLE_OUTPUT_POLLING_ATTEMPTS = 120;
     private static final int MAX_POLLING_ATTEMPTS = 1000;
     private static final long OPERATION_TIMEOUT = 60L;
-    private static final String DEFAULT_SSH_USER = "centos";
+    private static final String DEFAULT_SSH_USER = "ec2-user";
 
     @Inject
     private OpenStackUtil openStackUtil;
@@ -199,7 +199,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public String getSSHFingerprint(Stack stack, String gatewayId) {
+    public Set<String> getSSHFingerprints(Stack stack, String gatewayId) {
         String instanceId = gatewayId.split("_")[0];
         OSClient osClient = openStackUtil.createOSClient((OpenStackCredential) stack.getCredential());
         ConsoleOutputContext consoleOutputContext = new ConsoleOutputContext(osClient, stack, instanceId);
@@ -211,8 +211,8 @@ public class OpenStackConnector implements CloudPlatformConnector {
             throw new OpenStackResourceException("Operation timed out: Couldn't get console output of gateway instance.");
         }
         String consoleOutput = osClient.compute().servers().getConsoleOutput(instanceId, CONSOLE_OUTPUT_LINES);
-        String result = FingerprintParserUtil.parseFingerprint(consoleOutput);
-        if (result == null) {
+        Set<String> result = FingerprintParserUtil.parseFingerprints(consoleOutput);
+        if (result.isEmpty()) {
             throw new OpenStackResourceException("Couldn't parse SSH fingerprint from console output.");
         }
         return result;

@@ -30,6 +30,6 @@ public interface CloudPlatformConnector {
 
     String getSSHUser();
 
-    String getSSHFingerprint(Stack stack, String gateway);
+    Set<String> getSSHFingerprints(Stack stack, String gateway);
 
 }

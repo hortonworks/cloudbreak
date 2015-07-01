@@ -398,7 +398,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         return DockerClientConfig.createDefaultConfigBuilder()
                 .withReadTimeout(READ_TIMEOUT)
                 .withDockerCertPath(gatewayConfig.getCertificateDir())
-                .withVersion("1.16")
+                .withVersion("1.19")
                 .withUri("https://" + gatewayConfig.getAddress() + "/swarm")
                 .build();
     }
@@ -407,7 +407,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         return DockerClientConfig.createDefaultConfigBuilder()
                 .withReadTimeout(READ_TIMEOUT)
                 .withDockerCertPath(gatewayConfig.getCertificateDir())
-                .withVersion("1.16")
+                .withVersion("1.19")
                 .withUri("https://" + gatewayConfig.getAddress() + "/docker")
                 .build();
     }

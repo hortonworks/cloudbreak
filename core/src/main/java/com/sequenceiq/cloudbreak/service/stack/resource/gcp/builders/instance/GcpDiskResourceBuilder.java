@@ -35,7 +35,8 @@ import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpProvisionCo
 @Component
 @Order(1)
 public class GcpDiskResourceBuilder extends GcpSimpleInstanceResourceBuilder {
-    private static final long SIZE = 30L;
+
+    private static final long SIZE = 50L;
 
     @Inject
     private StackRepository stackRepository;

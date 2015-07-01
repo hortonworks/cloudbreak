@@ -1,0 +1,200 @@
+[H[J[1;1H[?25l[m[H[J[1;1H[20;7H[mUse the ^ and v keys to change the selection.
+      Press 'e' to edit the selected item, or 'c' for a command prompt.   [4;80H [7m[4;1H      CentOS Linux, with Linux 3.10.0-229.el7.x86_64                           [m[4;79H[m[m[5;1H      CentOS Linux, with Linux 0-rescue-dae72fe0cc064eb0b7797f25bfaf69df       [m[5;79H[m[m[6;1H                                                                               [m[6;79H[m[m[7;1H                                                                               [m[7;79H[m[m[8;1H                                                                               [m[8;79H[m[m[9;1H                                                                               [m[9;79H[m[m[10;1H                                                                               [m[10;79H[m[m[11;1H                                                                               [m[11;79H[m[m[12;1H                                                                               [m[12;79H[m[m[13;1H                                                                               [m[13;79H[m[m[14;1H                                                                               [m[14;79H[m[m[15;1H                                                                               [m[15;79H[m[m[16;1H                                                                               [m[16;79H[m[m[17;1H                                                                               [m[17;79H[m[m[18;1H                                                                               [m[18;79H[m[18;80H [4;79H[22;1H   The selected entry will be started automatically in 1s.                     [4;79H[22;1H   The selected entry will be started automatically in 0s.                     [4;79H[?25h[H[J[1;1H[H[J[1;1H[    0.000000] Initializing cgroup subsys cpuset
+[    0.000000] Initializing cgroup subsys cpu
+[    0.000000] Initializing cgroup subsys cpuacct
+[    0.000000] Linux version 3.10.0-229.el7.x86_64 (builder@kbuilder.dev.centos.org) (gcc version 4.8.2 20140120 (Red Hat 4.8.2-16) (GCC) ) #1 SMP Fri Mar 6 11:36:42 UTC 2015
+[    0.000000] Command line: BOOT_IMAGE=/boot/vmlinuz-3.10.0-229.el7.x86_64 root=UUID=a78bb152-e525-4f0e-961a-bf6147ac7d3e ro vconsole.keymap=us console=tty0 console=ttyS0,115200n8 vconsole.font=latarcyrheb-sun16 console=ttyS0,115200 LANG=en_US.UTF-8
+[    0.000000] e820: BIOS-provided physical RAM map:
+[    4.189010] virtio-pci 0000:00:03.0: no hotplug settings from platform
+[    4.189730] virtio-pci 0000:00:03.0: using default PCI settings
+[    4.190400] virtio-pci 0000:00:04.0: no hotplug settings from platform
+[    4.191095] virtio-pci 0000:00:04.0: using default PCI settings
+[    4.191763] virtio-pci 0000:00:05.0: no hotplug settings from platform
+[    4.245284] uhci_hcd 0000:00:01.2: using default PCI settings
+[    4.246032] pci 0000:00:01.3: no hotplug settings from platform
+[    4.246647] pci 0000:00:01.3: using default PCI settings
+[    4.247299] pci 0000:00:02.0: no hotplug settings from platform
+[    4.248058] pci 0000:00:02.0: using default PCI settings
+[    4.248862] virtio-pci 0000:00:03.0: no hotplug settings from platform
+[    4.249635] virtio-pci 0000:00:03.0: using default PCI settings
+[    4.250423] virtio-pci 0000:00:04.0: no hotplug settings from platform
+[    4.251866] virtio-pci 0000:00:04.0: using default PCI settings
+[    4.252724] virtio-pci 0000:00:05.0: no hotplug settings from platform
+[    4.253484] virtio-pci 0000:00:05.0: using default PCI settings
+[    4.254196] virtio-pci 0000:00:06.0: no hotplug settings from platform
+[    4.254887] virtio-pci 0000:00:06.0: using default PCI settings
+[    4.291306] XFS (vda1): Starting recovery (logdev: internal)
+[[0m[31m*     [0m] A start job is running for /sysroot[K[[1;31m*[0m[31m*    [0m] A start job is running for /sysroot[K[[31m*[1;31m*[0m[31m*   [0m] A start job is running for /sysroot[K[ [31m*[1;31m*[0m[31m*  [0m] A start job is running for /sysroot[K[  [31m*[1;31m*[0m[31m* [0m] A start job is running for /sysroot[K[   [31m*[1;31m*[0m[31m*[0m] A start job is running for /sysroot[   12.163591] XFS (vda1): Ending recovery (logdev: internal)
+[K[[32m  OK  [0m] Mounted /sysroot.
+[[32m  OK  [0m] Reached target Initrd Root File System.
+         Starting Reload Configuration from the Real Root...
+[[32m  OK  [0m] Started Reload Configuration from the Real Root.
+[[32m  OK  [0m] Reached target Initrd File Systems.
+[[32m  OK  [0m] Reached target Initrd Default Target.
+[   12.391916] systemd-journald[90]: Received SIGTERM
+[   20.408064] type=1403 audit(1435672621.109:2): policy loaded auid=4294967295 ses=4294967295
+[   20.431813] systemd[1]: Successfully loaded SELinux policy in 592.095ms.
+[   20.699338] systemd[1]: Relabelled /dev and /run in 10.779ms.
+
+Welcome to [0;31mCentOS Linux 7 (Core)[0m!
+
+[[32m  OK  [0m] Stopped Switch Root.
+[[32m  OK  [0m] Stopped target Switch Root.
+[[32m  OK  [0m] Stopped target Initrd File Systems.
+         Stopping File System Check on /dev/disk/by-uuid/a78b...bf6147ac7d3e...
+[[32m  OK  [0m] Stopped File System Check on /dev/disk/by-uuid/a78bb...a-bf6147ac7d3e.
+[[32m  OK  [0m] Stopped target Initrd Root File System.
+[[32m  OK  [0m] Created slice User and Session Slice.
+[[32m  OK  [0m] Created slice system-serial\x2dgetty.slice.
+         Expecting device dev-ttyS0.device...
+[[32m  OK  [0m] Created slice system-getty.slice.
+[[32m  OK  [0m] Reached target Remote File Systems.
+[[32m  OK  [0m] Reached target Slices.
+[[32m  OK  [0m] Listening on Delayed Shutdown Socket.
+[[32m  OK  [0m] Listening on /dev/initctl Compatibility Named Pipe.
+[[32m  OK  [0m] Listening on Device-mapper event daemon FIFOs.
+         Starting Setup Virtual Console...
+[[32m  OK  [0m] Listening on udev Kernel Socket.
+[[32m  OK  [0m] Listening on udev Control Socket.
+         Starting udev Coldplug all Devices...
+         Starting Apply Kernel Variables...
+         Mounting Debug File System...
+[[32m  OK  [0m] Set up automount Arbitrary Executable File Formats F...utomount Point.
+         Starting Create list of required static device nodes...rrent kernel...
+         Mounting POSIX Message Queue File System...
+         Mounting Huge Pages File System...
+[[32m  OK  [0m] Reached target Encrypted Volumes.
+[[32m  OK  [0m] Reached target Swap.
+         Starting File System Check on Root Device...
+[[32m  OK  [0m] Started Apply Kernel Variables.
+[[32m  OK  [0m] Stopped Trigger Flushing of Journal to Persistent Storage.
+         Stopping Journal Service...
+[[32m  OK  [0m] Stopped Journal Service.
+         Starting Journal Service...
+[[32m  OK  [0m] Started Journal Service.
+[[32m  OK  [0m] Started udev Coldplug all Devices.
+[[32m  OK  [0m] Mounted Debug File System.
+[[32m  OK  [0m] Mounted POSIX Message Queue File System.
+[[32m  OK  [0m] Mounted Huge Pages File System.
+[[32m  OK  [0m] Started Create list of required static device nodes ...current kernel.
+         Starting Create static device nodes in /dev...
+[[32m  OK  [0m] Started Create static device nodes in /dev.
+         Starting udev Kernel Device Manager...
+[   22.436915] systemd-udevd[379]: starting version 208
+[[32m  OK  [0m] Started udev Kernel Device Manager.
+[[32m  OK  [0m] Started Setup Virtual Console.
+systemd-fsck[361]: /sbin/fsck.xfs: XFS file system.
+[[32m  OK  [0m] Started File System Check on Root Device.
+         Starting Remount Root and Kernel File Systems...
+[[32m  OK  [0m] Started Remount Root and Kernel File Systems.
+         Starting Load/Save Random Seed...
+[[32m  OK  [0m] Reached target Local File Systems (Pre).
+         Starting Configure read-only root support...
+[[32m  OK  [0m] Started Load/Save Random Seed.
+[[32m  OK  [0m] Started Configure read-only root support.
+[[32m  OK  [0m] Reached target Local File Systems.
+[[32m  OK  [0m] Reached target Network.
+         Starting Initial cloud-init job (metadata service crawler)...
+         Starting Postfix Mail Transport Agent...
+         Starting OpenSSH server daemon...
+[[32m  OK  [0m] Started OpenSSH server daemon.
+         Starting Docker Application Container Engine...
+[[32m  OK  [0m] Started Docker Application Container Engine.
+cloud-init[768]: Cloud-init v. 0.7.5 running 'init' at Tue, 30 Jun 2015 13:57:08 +0000. Up 27.63 seconds.
+cloud-init[768]: ci-info: +++++++++++++++++++++++++Net device info+++++++++++++++++++++++++
+cloud-init[768]: ci-info: +--------+------+-----------+---------------+-------------------+
+cloud-init[768]: ci-info: | Device |  Up  |  Address  |      Mask     |     Hw-Address    |
+cloud-init[768]: ci-info: +--------+------+-----------+---------------+-------------------+
+cloud-init[768]: ci-info: |  lo:   | True | 127.0.0.1 |   255.0.0.0   |         .         |
+cloud-init[768]: ci-info: | eth0:  | True |  10.0.0.4 | 255.255.255.0 | fa:16:3e:1d:38:71 |
+cloud-init[768]: ci-info: +--------+------+-----------+---------------+-------------------+
+cloud-init[768]: ci-info: ++++++++++++++++++++++++++++++Route info++++++++++++++++++++++++++++++
+cloud-init[768]: ci-info: +-------+-------------+----------+---------------+-----------+-------+
+cloud-init[768]: ci-info: | Route | Destination | Gateway  |    Genmask    | Interface | Flags |
+cloud-init[768]: ci-info: +-------+-------------+----------+---------------+-----------+-------+
+cloud-init[768]: ci-info: |   0   |   0.0.0.0   | 10.0.0.1 |    0.0.0.0    |    eth0   |   UG  |
+cloud-init[768]: ci-info: |   1   |   10.0.0.0  | 0.0.0.0  | 255.255.255.0 |    eth0   |   U   |
+cloud-init[768]: ci-info: +-------+-------------+----------+---------------+-----------+-------+
+[   28.046083] device-mapper: uevent: version 1.0.3
+[   28.047228] device-mapper: ioctl: 4.29.0-ioctl (2014-10-28) initialised: dm-devel@redhat.com
+[   28.096907] loop: module loaded
+
+CentOS Linux 7 (Core)
+Kernel 3.10.0-229.el7.x86_64 on an x86_64
+
+
+cloud-init[1001]: + DEVICE=/dev/vds
+cloud-init[1001]: + '[' -e /dev/vds ']'/dev/vdx ']'
+cloud-init[1001]: + (( i++  ))
+cloud-init[1001]: + (( i<=24 ))
+cloud-init[1001]: +++ printf %x 121
+cloud-init[1001]: ++ printf '\x79'
+cloud-init[1001]: + LABEL=y
+cloud-init[1001]: + DEVICE=/dev/vdy
+cloud-init[1001]: + '[' -e /dev/vdy ']'
+cloud-init[1001]: + (( i++  ))
+cloud-init[1001]: + (( i<=24 ))
+cloud-init[1001]: + cd /hadoopfs/fs1
+cloud-init[1001]: + mkdir logs logs/ambari-server logs/ambari-agent logs/consul-watch
+cloud-init[1001]: + fix_hostname
+cloud-init[1001]: ++ get_ip
+cloud-init[1001]: ++ ifconfig eth0
+cloud-init[1001]: ++ awk '/inet addr/{print substr($2,6)}'
+cloud-init[1001]: + grep -q /etc/hosts
+cloud-init[1001]: + echo OK
+cloud-init[1001]: OK
+cloud-init[1001]: + touch /var/cb-init-executed
+cloud-init[1001]: ++ date +%Y-%m-%d:%H:%M:%S
+cloud-init[1001]: + echo 2015-06-30:13:57:17
+ci-info: +++++Authorized keys from /home/ec2-user/.ssh/authorized_keys for user ec2-user++++++
+ci-info: +---------+-------------------------------------------------+---------+-------------+
+ci-info: | Keytype |                Fingerprint (md5)                | Options |   Comment   |
+ci-info: +---------+-------------------------------------------------+---------+-------------+
+ci-info: | ssh-rsa | b9:2e:e8:ab:e6:47:4f:03:1c:af:a5:13:bf:4d:5b:7c |    -    | sequence-eu |
+ci-info: | ssh-rsa | 5d:c0:6e:d7:72:f8:1f:79:83:6d:8e:67:1c:c0:32:7e |    -    |  cloudbreak |
+ci-info: +---------+-------------------------------------------------+---------+-------------+
+ec2:
+ec2: #############################################################
+ec2: -----BEGIN SSH HOST KEY FINGERPRINTS-----
+ec2: 256 0d:0f:d8:85:33:f5:e0:73:25:8f:d4:b3:52:ed:89:94   (ECDSA)
+ec2: 256 01:79:76:95:54:c4:66:89:6c:31:69:77:2f:39:64:ae   (ED25519)
+ec2: 2048 19:ff:09:ba:e1:72:7c:39:6f:82:0d:f5:21:01:4a:b4   (RSA)
+ec2: -----END SSH HOST KEY FINGERPRINTS-----
+ec2: #############################################################
+-----BEGIN SSH HOST KEY KEYS-----
+ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBAOVVLMPy6ZP5eVDdAMkjBnTVjMYY/w4xml7e3hb5zUAXgBgODgZlAbfDJp7fDn61Lu34UccjgxlL+co8PZGReg=
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINhN/kIambXJGHjZIj+5Sdw4+629vaQmq1EDf0LxKyQ3
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCjYu/+GCAg3XT5AP4lvFdDPdaARSN1VG9NPVy6wYxjjLxFe4Wtt+lxq9/UArKQrveqW/4juTm5IjGygObkHqMxG6P9cACmLXnQpJOo8JcWQ2nsGtocPSFF8Bfnabx1hINitTVbvAqeP8ure05kc3OBbSXgby+OU8KsQK+dSWl4NQKa6wJ6PeWrbpc7hjOEQK03sNhA4zMYvBYkKeWG8TU/ifZKUQ9iHvZ9kP/5YfRFdnpcXyrupvTmxRSsfafI1lCHeQmQaTSZMJYunVblLCEJHc+ApnXV0BzAvt67tE/bCIZGsXvkUDuuWJAOJ5/gausxJKHOxmBOlacFxQbVCp9r
+-----END SSH HOST KEY KEYS-----
+cloud-init[1001]: Cloud-init v. 0.7.5 finished at Tue, 30 Jun 2015 13:57:17 +0000. Datasource DataSourceConfigDriveNet [net,ver=2][source=/dev/sr0].  Up 36.58 seconds
+[  127.472945] EXT4-fs (dm-1): mounted filesystem with ordered data mode. Opts: (null)
+[  128.327643] EXT4-fs (dm-1): mounted filesystem with ordered data mode. Opts:
+[  128.547074] EXT4-fs (dm-1): mounted filesystem with ordered data mode. Opts:
+[  128.569403] IPv6: ADDRCONF(NETDEV_UP): vethea757c1: link is not ready
+[  128.570107] device vethea757c1 entered promiscuous mode
+[  128.570575] docker0: port 1(vethea757c1) entered forwarding state
+[  128.571160] docker0: port 1(vethea757c1) entered forwarding state
+[  128.572596] IPv6: ADDRCONF(NETDEV_CHANGE): vethea757c1: link becomes ready
+[  130.722500] docker0: port 1(vethea757c1) entered disabled state
+[  130.726253] device vethea757c1 left promiscuous mode
+[  130.727813] docker0: port 1(vethea757c1) entered disabled state
+[  133.424843] EXT4-fs (dm-1): mounted filesystem with ordered data mode. Opts: (null)
+[  134.137302] EXT4-fs (dm-1): mounted filesystem with ordered data mode. Opts:
+[  134.505761] EXT4-fs (dm-1): mounted filesystem with ordered data mode. Opts:
+[  156.091850] EXT4-fs (dm-2): mounted filesystem with ordered data mode. Opts: (null)
+[  156.940435] EXT4-fs (dm-2): mounted filesystem with ordered data mode. Opts: (null)
+[  157.405905] EXT4-fs (dm-2): mounted filesystem with ordered data mode. Opts:
+[  157.408005] IPv6: ADDRCONF(NETDEV_UP): vethe036709: link is not ready
+[  15te
+[  198.457576] IPv6: ADDRCONF(NETDEV_CHANGE): vethb0456b8: link becomes ready
+[  198.877817] docker0: port 2(vethc334cb3) entered disabled state
+[  198.880175] device vethc334cb3 left promiscuous mode
+[  198.881639] docker0: port 2(vethc334cb3) entered disabled state
+[  201.846158] docker0: port 1(vethe036709) entered disabled state
+[  201.870487] docker0: port 1(vethe036709) entered forwarding state
+[  201.873197] docker0: port 1(vethe036709) entered forwarding state
+[  201.882350] docker0: port 1(vethe036709) entered disabled state
+[  201.885564] device vethe036709 left promiscuous mode
+[  201.887721] docker0: port 1(vethe036709) entered disabled state
+[  206.304131] docker0: port 3(vethb6cf653) entered forwarding state
+[  213.472182] docker0: port 4(vethb0456b8) entered forwarding state
