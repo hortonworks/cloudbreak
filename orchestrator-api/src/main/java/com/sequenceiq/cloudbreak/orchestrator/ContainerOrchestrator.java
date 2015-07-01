@@ -35,6 +35,9 @@ public interface ContainerOrchestrator {
             int count, String consulDomain, String externServerLocation, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
+    void startLogrotate(ContainerOrchestratorCluster cluster, String imageName, int count, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
+
     boolean areAllNodesAvailable(GatewayConfig gatewayConfig, Set<Node> nodes);
 
     List<String> getAvailableNodes(GatewayConfig gatewayConfig, Set<Node> nodes);

@@ -80,6 +80,8 @@ public class ClusterContainerRunnerTest {
                 anyString(), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
                 anyString(), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
+                any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
                 anyInt(), anyString(), anyString(), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),
@@ -144,6 +146,8 @@ public class ClusterContainerRunnerTest {
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
                 any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
+                any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startRegistrator(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
     }
 
@@ -170,6 +174,8 @@ public class ClusterContainerRunnerTest {
         verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
+                any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startRegistrator(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
     }
@@ -198,6 +204,8 @@ public class ClusterContainerRunnerTest {
         verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
+                any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startRegistrator(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
     }
@@ -260,6 +268,8 @@ public class ClusterContainerRunnerTest {
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
                 any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
+                any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startRegistrator(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
     }
 
@@ -288,6 +298,8 @@ public class ClusterContainerRunnerTest {
         verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
+                any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startRegistrator(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
     }
