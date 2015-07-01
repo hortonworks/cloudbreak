@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
+import com.sequenceiq.cloudbreak.service.stack.event.RemoveInstanceRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateAllowedSubnetsRequest;
@@ -192,6 +193,19 @@ public class DefaultStackService implements StackService {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
         delete(stack, user);
+    }
+
+    @Override
+    public void removeInstance(CbUser user, Long stackId, String instanceId) {
+        Stack stack = get(stackId);
+        InstanceMetaData instanceMetaData = instanceMetaDataRepository.findByInstanceId(stackId, instanceId);
+        if (instanceMetaData == null) {
+            throw new NotFoundException(String.format("Metadata for instance %s not found.", instanceId));
+        }
+        if (!stack.isPublicInAccount() && !stack.getOwner().equals(user.getUserId())) {
+            throw new BadRequestException(String.format("Private stack (%s) only modifiable by the owner.", stackId));
+        }
+        flowManager.triggerStackRemoveInstance(new RemoveInstanceRequest(stack.cloudPlatform(), stack.getId(), instanceId));
     }
 
     @Override

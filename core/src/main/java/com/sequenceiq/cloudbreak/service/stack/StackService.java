@@ -30,6 +30,8 @@ public interface StackService {
 
     void delete(Long id, CbUser cbUser);
 
+    void removeInstance(CbUser user, Long stackId, String instanceId);
+
     InstanceMetaData updateMetaDataStatus(Long id, String hostName, InstanceStatus status);
 
     void updateStatus(Long stackId, StatusRequest status);

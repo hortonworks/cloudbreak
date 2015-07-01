@@ -15,9 +15,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.connector.CloudConnectorException;
+import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.HostMetadataState;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
@@ -158,7 +160,10 @@ public class StackSyncService {
     private void deleteHostFromCluster(Stack stack, InstanceMetaData instanceMetaData) {
         try {
             HostMetadata hostMetadata = hostMetadataRepository.findHostsInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN());
-            if (hostMetadata != null && ambariClusterConnector.isAmbariAvailable(stack)) {
+            if (hostMetadata == null) {
+                throw new NotFoundException(String.format("Host not found with id '%s'", instanceMetaData.getDiscoveryFQDN()));
+            }
+            if (ambariClusterConnector.isAmbariAvailable(stack)) {
                 if (ambariClusterConnector.deleteHostFromAmbari(stack, hostMetadata)) {
                     hostMetadataRepository.delete(hostMetadata.getId());
                     eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
@@ -169,6 +174,11 @@ public class StackSyncService {
                             "Instance '%s' is terminated but couldn't remove host from Ambari because it still reports the host as healthy. Try syncing later.",
                             instanceMetaData.getDiscoveryFQDN()));
                 }
+            } else {
+                hostMetadata.setHostMetadataState(HostMetadataState.UNHEALTHY);
+                hostMetadataRepository.save(hostMetadata);
+                eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+                        String.format("Host (%s) state has been updated to: %s", instanceMetaData.getDiscoveryFQDN(), HostMetadataState.UNHEALTHY.name()));
             }
         } catch (Exception e) {
             LOGGER.error("Host cannot be deleted from cluster: ", e);

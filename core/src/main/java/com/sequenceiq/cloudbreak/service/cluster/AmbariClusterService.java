@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import static com.sequenceiq.cloudbreak.domain.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.domain.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_REQUESTED;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.HostMetadataState;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.ScalingType;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -46,6 +48,7 @@ import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
+import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -76,6 +79,9 @@ public class AmbariClusterService implements ClusterService {
 
     @Inject
     private ClusterRepository clusterRepository;
+
+    @Inject
+    private HostMetadataRepository hostMetadataRepository;
 
     @Inject
     private InstanceMetaDataRepository instanceMetadataRepository;
@@ -297,6 +303,26 @@ public class AmbariClusterService implements ClusterService {
         LOGGER.debug("Updating cluster. clusterId: {}", cluster.getId());
         cluster = clusterRepository.save(cluster);
         return cluster;
+    }
+
+    @Override
+    public Cluster updateClusterMetadata(Long stackId) {
+        Stack stack = stackRepository.findById(stackId);
+        if (stack.getCluster() == null) {
+            throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stackId));
+        }
+        try {
+            TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, stack.getCluster().getAmbariIp());
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getCluster().getUserName(), stack.getCluster().getPassword());
+            Set<HostMetadata> hosts = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
+            for (HostMetadata host : hosts) {
+                Map<String, String> hostNames = ambariClient.getHostNames();
+                updateHostMetadataByHostState(stack, ambariClient, host.getHostName(), hostNames);
+            }
+        } catch (CloudbreakSecuritySetupException e) {
+            throw new CloudbreakServiceException(e);
+        }
+        return stack.getCluster();
     }
 
     @Override
@@ -540,6 +566,21 @@ public class AmbariClusterService implements ClusterService {
             }
         }
         return result;
+    }
+
+    private void updateHostMetadataByHostState(Stack stack, AmbariClient ambariClient, String hostName, Map<String, String> hostNames) {
+        if (hostNames.containsValue(hostName)) {
+            String hostState = ambariClient.getHostState(hostName);
+            HostMetadata hostMetadata = hostMetadataRepository.findHostsInClusterByName(stack.getCluster().getId(), hostName);
+            HostMetadataState oldState = hostMetadata.getHostMetadataState();
+            HostMetadataState newState = HostMetadataState.HEALTHY.name().equals(hostState) ? HostMetadataState.HEALTHY : HostMetadataState.UNHEALTHY;
+            if (!oldState.equals(newState)) {
+                hostMetadata.setHostMetadataState(newState);
+                hostMetadataRepository.save(hostMetadata);
+                eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+                        String.format("Host (%s) state has been updated to: %s", hostName, newState.name()));
+            }
+        }
     }
 
 }

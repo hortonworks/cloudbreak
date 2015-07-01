@@ -201,6 +201,16 @@ public class StackController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @ApiOperation(value = StackOpDescription.DELETE_INSTANCE_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
+    @RequestMapping(value = "stacks/{stackId}/{instanceId}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity<String> deleteInstance(@ModelAttribute("user") CbUser user, @PathVariable("stackId") Long stackId,
+            @PathVariable("instanceId") String instanceId) {
+        MDCBuilder.buildMdcContext(user);
+        stackService.removeInstance(user, stackId, instanceId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     private ResponseEntity<IdJson> createStack(CbUser user, StackRequest stackRequest, boolean publicInAccount) {
         Stack stack = conversionService.convert(stackRequest, Stack.class);
         MDCBuilder.buildMdcContext(stack);

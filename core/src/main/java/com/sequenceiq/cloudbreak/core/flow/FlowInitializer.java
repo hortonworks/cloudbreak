@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.ExtendMetadataHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.MetadataSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ProvisioningHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ProvisioningSetupHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.RemoveInstanceHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackCreationFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackDownscaleHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStartHandler;
@@ -90,6 +91,7 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.STACK_START.name()), getHandlerForClass(StackStartHandler.class));
         reactor.on($(FlowPhases.STACK_STOP.name()), getHandlerForClass(StackStopHandler.class));
         reactor.on($(FlowPhases.ADD_INSTANCES.name()), getHandlerForClass(AddInstancesHandler.class));
+        reactor.on($(FlowPhases.REMOVE_INSTANCE.name()), getHandlerForClass(RemoveInstanceHandler.class));
         reactor.on($(FlowPhases.EXTEND_METADATA.name()), getHandlerForClass(ExtendMetadataHandler.class));
         reactor.on($(FlowPhases.BOOTSTRAP_NEW_NODES.name()), getHandlerForClass(BootstrapNewNodesHandler.class));
         reactor.on($(FlowPhases.EXTEND_CONSUL_METADATA.name()), getHandlerForClass(ExtendConsulMetadataHandler.class));
@@ -224,6 +226,9 @@ public class FlowInitializer implements InitializingBean {
 
         transitionKeyService.registerTransition(StackDownscaleHandler.class, TransitionFactory
                 .createTransition(FlowPhases.STACK_DOWNSCALE.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
+
+        transitionKeyService.registerTransition(RemoveInstanceHandler.class, TransitionFactory
+                .createTransition(FlowPhases.REMOVE_INSTANCE.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerResetFlows() {

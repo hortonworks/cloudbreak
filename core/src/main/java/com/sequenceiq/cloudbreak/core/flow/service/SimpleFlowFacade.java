@@ -332,6 +332,21 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
+    public FlowContext removeInstance(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Remove instance from the stack. Context: {}", context);
+        try {
+            context = stackFacade.removeInstance(context);
+            LOGGER.debug("Removing instance from the stack is DONE");
+            return context;
+        } catch (CloudbreakException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Exception during removing instance from the stack: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
     public FlowContext extendMetadata(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Extending metadata with new instances. Context: {}", context);
         try {

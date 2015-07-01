@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -32,6 +34,9 @@ public class HostMetadata {
     @ManyToOne
     private HostGroup hostGroup;
 
+    @Enumerated(EnumType.STRING)
+    private HostMetadataState hostMetadataState = HostMetadataState.HEALTHY;
+
     public HostMetadata() {
 
     }
@@ -54,6 +59,14 @@ public class HostMetadata {
 
     public void setHostGroup(HostGroup hostGroup) {
         this.hostGroup = hostGroup;
+    }
+
+    public HostMetadataState getHostMetadataState() {
+        return hostMetadataState;
+    }
+
+    public void setHostMetadataState(HostMetadataState hostMetadataState) {
+        this.hostMetadataState = hostMetadataState;
     }
 
     @Override

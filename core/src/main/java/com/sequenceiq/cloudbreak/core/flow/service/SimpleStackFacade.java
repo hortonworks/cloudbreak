@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
+import com.sequenceiq.cloudbreak.core.flow.context.StackInstanceUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
@@ -239,6 +240,22 @@ public class SimpleStackFacade implements StackFacade {
                     actualContext.getInstanceGroup(), resources, actualContext.getScalingType(), null);
         } catch (Exception e) {
             LOGGER.error("Exception during the upscaling of stack: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+        return context;
+    }
+
+    @Override
+    public FlowContext removeInstance(FlowContext context) throws CloudbreakException {
+        StackInstanceUpdateContext actualContext = (StackInstanceUpdateContext) context;
+        try {
+            Stack stack = stackService.getById(actualContext.getStackId());
+            MDCBuilder.buildMdcContext(stack);
+            if (!stack.isDeleteInProgress()) {
+                stackScalingService.removeInstance(actualContext.getStackId(), actualContext.getInstanceId());
+            }
+        } catch (Exception e) {
+            LOGGER.error("Exception during the removing instance from the stack: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
         return context;
