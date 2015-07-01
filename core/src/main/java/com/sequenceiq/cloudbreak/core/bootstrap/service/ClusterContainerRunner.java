@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
@@ -40,10 +41,10 @@ import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
 @Component
 public class ClusterContainerRunner {
 
-    @Value("${cb.docker.container.ambari.warm:" + CB_DOCKER_CONTAINER_AMBARI_WARMUP + "}")
+    @Value("${cb.docker.container.ambari.warm:}")
     private String warmAmbariDockerImageName;
 
-    @Value("${cb.docker.container.ambari:" + CB_DOCKER_CONTAINER_AMBARI + "}")
+    @Value("${cb.docker.container.ambari:}")
     private String ambariDockerImageName;
 
     @Value("${cb.docker.container.registrator:" + CB_DOCKER_CONTAINER_REGISTRATOR + "}")
@@ -155,6 +156,19 @@ public class ClusterContainerRunner {
     }
 
     private String getAmbariImageName(Stack stack) {
-        return stack.getCluster().getAmbariStackDetails() == null ? warmAmbariDockerImageName : ambariDockerImageName;
+        String imageName;
+        if (stack.getCluster().getAmbariStackDetails() == null) {
+            imageName = determineImageName(warmAmbariDockerImageName, CB_DOCKER_CONTAINER_AMBARI_WARMUP);
+        } else {
+            imageName = determineImageName(ambariDockerImageName, CB_DOCKER_CONTAINER_AMBARI);
+        }
+        return imageName;
+    }
+
+    private String determineImageName(String imageName, String defaultImageName) {
+        if (Strings.isNullOrEmpty(imageName)) {
+            return defaultImageName;
+        }
+        return imageName;
     }
 }
