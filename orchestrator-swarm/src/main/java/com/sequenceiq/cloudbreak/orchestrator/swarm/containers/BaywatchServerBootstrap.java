@@ -27,7 +27,7 @@ public class BaywatchServerBootstrap implements ContainerBootstrap {
     private static final int ES_TRANSPORT_PORT = 9200;
     private static final int KIBANA_PORT = 3080;
     private static final String ES_WORK_PATH = "/es-work";
-    private static final String ES_DATA_PATH = "/tmp/";
+    private static final String ES_DATA_PATH = "/es-data";
 
     private final DockerClient docker;
     private final String imageName;
