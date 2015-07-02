@@ -300,6 +300,8 @@ util-local-dev() {
     declare desc="Stops cloudbreak container, and starts an ambassador for cbreak in IntelliJ (def port:9090)"
     declare port=${1:-9091}
 
+    cloudbreak-config
+
     debug stopping original cloudbreak container
     dockerCompose stop cloudbreak
 
@@ -316,6 +318,6 @@ HINT
         -p 8080:8080 \
         -e PORT=8080 \
         -e SERVICE_NAME=cloudbreak \
-        sequenceiq/ambassadord 192.168.59.3:$port
+        sequenceiq/ambassadord:$DOCKER_TAG_AMBASSADOR 192.168.59.3:$port
 
 }
