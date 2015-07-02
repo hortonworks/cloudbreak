@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.StackSyncHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackTerminationHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.TlsSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.UpdateAllowedSubnetsHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.UpscaleStackSyncHandler;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -90,6 +91,7 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.TERMINATION.name()), getHandlerForClass(StackTerminationHandler.class));
         reactor.on($(FlowPhases.STACK_START.name()), getHandlerForClass(StackStartHandler.class));
         reactor.on($(FlowPhases.STACK_STOP.name()), getHandlerForClass(StackStopHandler.class));
+        reactor.on($(FlowPhases.UPSCALE_STACK_SYNC.name()), getHandlerForClass(UpscaleStackSyncHandler.class));
         reactor.on($(FlowPhases.ADD_INSTANCES.name()), getHandlerForClass(AddInstancesHandler.class));
         reactor.on($(FlowPhases.REMOVE_INSTANCE.name()), getHandlerForClass(RemoveInstanceHandler.class));
         reactor.on($(FlowPhases.EXTEND_METADATA.name()), getHandlerForClass(ExtendMetadataHandler.class));
@@ -201,6 +203,9 @@ public class FlowInitializer implements InitializingBean {
     }
 
     private void registerUpscaleFlows() {
+        transitionKeyService.registerTransition(UpscaleStackSyncHandler.class, TransitionFactory
+                .createTransition(FlowPhases.UPSCALE_STACK_SYNC.name(), FlowPhases.ADD_INSTANCES.name(), FlowPhases.NONE.name()));
+
         transitionKeyService.registerTransition(AddInstancesHandler.class, TransitionFactory
                 .createTransition(FlowPhases.ADD_INSTANCES.name(), FlowPhases.EXTEND_METADATA.name(), FlowPhases.NONE.name()));
 

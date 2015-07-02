@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack.connector;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -15,7 +16,7 @@ public interface MetadataSetup {
 
     Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup);
 
-    InstanceSyncState getState(Stack stack, String instanceId);
+    InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId);
 
     CloudPlatform getCloudPlatform();
 

@@ -23,6 +23,7 @@ import com.google.api.services.compute.model.Instance;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.GcpCredential;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -66,7 +67,7 @@ public class GcpMetadataSetup implements MetadataSetup {
     }
 
     @Override
-    public InstanceSyncState getState(Stack stack, String instanceId) {
+    public InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId) {
         GcpCredential credential = (GcpCredential) stack.getCredential();
         InstanceSyncState instanceSyncState = IN_PROGRESS;
         Compute compute = gcpStackUtil.buildCompute(credential);

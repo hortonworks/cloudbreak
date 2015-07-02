@@ -78,10 +78,11 @@ public class StackSyncService {
             InstanceGroup instanceGroup = instance.getInstanceGroup();
             try {
                 MetadataSetup metadataSetup = metadataSetups.get(stack.cloudPlatform());
-                InstanceSyncState state = metadataSetup.getState(stack, instance.getInstanceId());
+                InstanceSyncState state = metadataSetup.getState(stack, instanceGroup, instance.getInstanceId());
                 ResourceType instanceResourceType = metadataSetup.getInstanceResourceType();
                 if (InstanceSyncState.DELETED.equals(state)) {
                     instanceStateCounts.put(InstanceSyncState.DELETED, instanceStateCounts.get(InstanceSyncState.DELETED) + 1);
+
                     deleteHostFromCluster(stack, instance);
                     if (!instance.isTerminated()) {
                         LOGGER.info("Instance '{}' is reported as deleted on the cloud provider, setting its state to TERMINATED.", instance.getInstanceId());
@@ -159,26 +160,29 @@ public class StackSyncService {
 
     private void deleteHostFromCluster(Stack stack, InstanceMetaData instanceMetaData) {
         try {
-            HostMetadata hostMetadata = hostMetadataRepository.findHostsInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN());
-            if (hostMetadata == null) {
-                throw new NotFoundException(String.format("Host not found with id '%s'", instanceMetaData.getDiscoveryFQDN()));
-            }
-            if (ambariClusterConnector.isAmbariAvailable(stack)) {
-                if (ambariClusterConnector.deleteHostFromAmbari(stack, hostMetadata)) {
-                    hostMetadataRepository.delete(hostMetadata.getId());
-                    eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                            String.format("Deleted host '%s' from Ambari because it is marked as terminated by the cloud provider.",
-                                    instanceMetaData.getDiscoveryFQDN()));
-                } else {
-                    eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), String.format(
-                            "Instance '%s' is terminated but couldn't remove host from Ambari because it still reports the host as healthy. Try syncing later.",
-                            instanceMetaData.getDiscoveryFQDN()));
+            if (stack.getCluster() != null) {
+                HostMetadata hostMetadata = hostMetadataRepository.findHostsInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN());
+                if (hostMetadata == null) {
+                    throw new NotFoundException(String.format("Host not found with id '%s'", instanceMetaData.getDiscoveryFQDN()));
                 }
-            } else {
-                hostMetadata.setHostMetadataState(HostMetadataState.UNHEALTHY);
-                hostMetadataRepository.save(hostMetadata);
-                eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                        String.format("Host (%s) state has been updated to: %s", instanceMetaData.getDiscoveryFQDN(), HostMetadataState.UNHEALTHY.name()));
+                if (ambariClusterConnector.isAmbariAvailable(stack)) {
+                    if (ambariClusterConnector.deleteHostFromAmbari(stack, hostMetadata)) {
+                        hostMetadataRepository.delete(hostMetadata.getId());
+                        eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+                                String.format("Deleted host '%s' from Ambari because it is marked as terminated by the cloud provider.",
+                                        instanceMetaData.getDiscoveryFQDN()));
+                    } else {
+                        eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), String.format(
+                                "Instance '%s' is terminated but couldn't remove host from Ambari because it still reports the host as healthy."
+                                        + " Try syncing later.",
+                                instanceMetaData.getDiscoveryFQDN()));
+                    }
+                } else {
+                    hostMetadata.setHostMetadataState(HostMetadataState.UNHEALTHY);
+                    hostMetadataRepository.save(hostMetadata);
+                    eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+                            String.format("Host (%s) state has been updated to: %s", instanceMetaData.getDiscoveryFQDN(), HostMetadataState.UNHEALTHY.name()));
+                }
             }
         } catch (Exception e) {
             LOGGER.error("Host cannot be deleted from cluster: ", e);

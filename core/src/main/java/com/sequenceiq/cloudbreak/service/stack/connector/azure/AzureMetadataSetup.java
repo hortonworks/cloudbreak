@@ -29,6 +29,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -128,7 +129,7 @@ public class AzureMetadataSetup implements MetadataSetup {
     }
 
     @Override
-    public InstanceSyncState getState(Stack stack, String instanceId) {
+    public InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId) {
         Map<String, String> vmContext = createVMContext(instanceId);
         AzureCredential credential = (AzureCredential) stack.getCredential();
         AzureClient azureClient = azureStackUtil.createAzureClient(credential);

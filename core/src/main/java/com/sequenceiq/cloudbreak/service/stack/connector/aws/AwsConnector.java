@@ -83,6 +83,7 @@ import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsNetwork;
@@ -120,6 +121,9 @@ public class AwsConnector implements CloudPlatformConnector {
     private static final String CLOUDBREAK_EBS_SNAPSHOT = "cloudbreak-ebs-snapshot";
     private static final int SNAPSHOT_VOLUME_SIZE = 10;
     private static final String DEFAULT_SSH_USER = "ec2-user";
+
+    private static final List<String> SUSPENDED_PROCESSES = Arrays.asList("Launch", "HealthCheck", "ReplaceUnhealthy", "AZRebalance", "AlarmNotification",
+            "ScheduledActions", "AddToLoadBalancer", "RemoveFromLoadBalancerLowPriority");
 
     @Value("${cb.aws.cf.template.path:" + CB_AWS_CF_TEMPLATE_PATH + "}")
     private String awsCloudformationTemplatePath;
@@ -171,13 +175,7 @@ public class AwsConnector implements CloudPlatformConnector {
         Long stackId = stack.getId();
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
         AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(Regions.valueOf(stack.getRegion()), awsCredential);
-        AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
-        AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(Regions.valueOf(stack.getRegion()), awsCredential);
         String cFStackName = cfStackUtil.getCfStackName(stack);
-        AllocateAddressRequest allocateAddressRequest = new AllocateAddressRequest().withDomain(DomainType.Vpc);
-        AllocateAddressResult allocateAddressResult = amazonEC2Client.allocateAddress(allocateAddressRequest);
-        Resource reservedIp = new Resource(ResourceType.AWS_RESERVED_IP, allocateAddressResult.getAllocationId(), stack, null);
-        stack = stackUpdater.addStackResources(stackId, Arrays.asList(reservedIp));
         String snapshotId = getEbsSnapshotIdIfNeeded(stack);
         AwsNetwork network = (AwsNetwork) stack.getNetwork();
         String cfTemplate = cfTemplateBuilder.build(stack, snapshotId, network.isExistingVPC(), awsCloudformationTemplatePath);
@@ -202,8 +200,14 @@ public class AwsConnector implements CloudPlatformConnector {
             throw new AwsResourceException(String.format("Failed to create CloudFormation stack: %s, polling result '%s'",
                     stackId, pollingResult));
         }
-        String gateWayGroupName = stack.getGatewayInstanceGroup().getGroupName();
 
+        AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
+        AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(Regions.valueOf(stack.getRegion()), awsCredential);
+        AllocateAddressRequest allocateAddressRequest = new AllocateAddressRequest().withDomain(DomainType.Vpc);
+        AllocateAddressResult allocateAddressResult = amazonEC2Client.allocateAddress(allocateAddressRequest);
+        Resource reservedIp = new Resource(ResourceType.AWS_RESERVED_IP, allocateAddressResult.getAllocationId(), stack, null);
+        stack = stackUpdater.addStackResources(stackId, Arrays.asList(reservedIp));
+        String gateWayGroupName = stack.getGatewayInstanceGroup().getGroupName();
         List<String> instanceIds = cfStackUtil.getInstanceIds(stack, amazonASClient, client, gateWayGroupName);
         if (!instanceIds.isEmpty()) {
             AssociateAddressRequest associateAddressRequest = new AssociateAddressRequest()
@@ -211,7 +215,26 @@ public class AwsConnector implements CloudPlatformConnector {
                     .withInstanceId(instanceIds.get(0));
             amazonEC2Client.associateAddress(associateAddressRequest);
         }
+        suspendAutoScaling(stack, stack.getInstanceGroups());
         return stack.getResources();
+    }
+
+    private void suspendAutoScaling(Stack stack, Set<InstanceGroup> instanceGroups) {
+        AwsCredential awsCredential = (AwsCredential) stack.getCredential();
+        AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(Regions.valueOf(stack.getRegion()), awsCredential);
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, instanceGroup.getGroupName());
+            amazonASClient.suspendProcesses(new SuspendProcessesRequest().withAutoScalingGroupName(asGroupName).withScalingProcesses(SUSPENDED_PROCESSES));
+        }
+    }
+
+    private void resumeAutoScaling(Stack stack, Set<InstanceGroup> instanceGroups) {
+        AwsCredential awsCredential = (AwsCredential) stack.getCredential();
+        AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(Regions.valueOf(stack.getRegion()), awsCredential);
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, instanceGroup.getGroupName());
+            amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName).withScalingProcesses(SUSPENDED_PROCESSES));
+        }
     }
 
     private String getEbsSnapshotIdIfNeeded(Stack stack) {
@@ -278,30 +301,30 @@ public class AwsConnector implements CloudPlatformConnector {
         Integer requiredInstances = instanceGroupByInstanceGroupName.getNodeCount() + instanceCount;
         Regions region = Regions.valueOf(stack.getRegion());
         AwsCredential credential = (AwsCredential) stack.getCredential();
+
+        resumeAutoScaling(stack, Sets.newHashSet(instanceGroupByInstanceGroupName));
+
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(region, credential);
-        AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(region, credential);
         String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, instanceGroup);
+
         amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
                 .withAutoScalingGroupName(asGroupName)
                 .withMaxSize(requiredInstances)
                 .withDesiredCapacity(requiredInstances));
-        LOGGER.info("Updated AutoScaling group's desiredCapacity: [stack: '{}', from: '{}', to: '{}']", stack.getId(),
+        LOGGER.info("Updated Auto Scaling group's desiredCapacity: [stack: '{}', from: '{}', to: '{}']", stack.getId(),
                 instanceGroupByInstanceGroupName.getNodeCount(),
                 instanceGroupByInstanceGroupName.getNodeCount() + instanceCount);
         AutoScalingGroupReadyContext asGroupReady = new AutoScalingGroupReadyContext(stack, asGroupName, requiredInstances);
-        LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
+        LOGGER.info("Polling Auto Scaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
         PollingResult pollingResult = autoScalingGroupReadyPollingService
                 .pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         if (!isSuccess(pollingResult)) {
             throw new AwsResourceException("Failed to create CloudFormation stack, because polling reached an invalid end state.");
         }
+        suspendAutoScaling(stack, Sets.newHashSet(instanceGroupByInstanceGroupName));
         return Collections.emptySet();
     }
 
-    /**
-     * If the AutoScaling group has some suspended scaling policies it causes that the CloudFormation stack delete won't be able to remove the ASG.
-     * In this case the ASG size is reduced to zero and the processes are resumed first.
-     */
     @Override
     public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
         Regions region = Regions.valueOf(stack.getRegion());
@@ -426,7 +449,7 @@ public class AwsConnector implements CloudPlatformConnector {
     private void releaseReservedIp(Stack stack, AmazonEC2Client client) {
         Resource elasticIpResource = stack.getResourceByType(ResourceType.AWS_RESERVED_IP);
         if (elasticIpResource != null && elasticIpResource.getResourceName() != null) {
-            Address address = null;
+            Address address;
             try {
                 DescribeAddressesResult describeResult = client.describeAddresses(
                         new DescribeAddressesRequest().withAllocationIds(elasticIpResource.getResourceName()));
@@ -483,10 +506,8 @@ public class AwsConnector implements CloudPlatformConnector {
     private void setStackState(Stack stack, boolean stopped) {
         Regions region = Regions.valueOf(stack.getRegion());
         AwsCredential credential = (AwsCredential) stack.getCredential();
-        AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(region, credential);
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(region, credential);
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, instanceGroup.getGroupName());
             Collection<String> instances = new ArrayList<>();
             for (InstanceMetaData instance : instanceGroup.getInstanceMetaData()) {
                 if (instance.getInstanceGroup().getGroupName().equals(instanceGroup.getGroupName())) {
@@ -496,7 +517,6 @@ public class AwsConnector implements CloudPlatformConnector {
             try {
                 if (stopped) {
                     instances = removeInstanceIdsWhichAreNotInCorrectState(instances, amazonEC2Client, "Stopped");
-                    amazonASClient.suspendProcesses(new SuspendProcessesRequest().withAutoScalingGroupName(asGroupName));
                     amazonEC2Client.stopInstances(new StopInstancesRequest().withInstanceIds(instances));
                     awsPollingService.pollWithTimeout(
                             awsInstanceStatusCheckerTask,
@@ -515,8 +535,7 @@ public class AwsConnector implements CloudPlatformConnector {
                         LOGGER.warn("Instances are not in Running state; polling result: {} ", pollingResult);
                         throw new AwsResourceException("Instances are not in running state!");
                     }
-                    amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
-                    updateInstanceMetadata(stack, amazonEC2Client, stack.getRunningInstanceMetaData(), instances);
+                    updateInstanceMetadata(amazonEC2Client, stack.getRunningInstanceMetaData(), instances);
                 }
             } catch (Exception e) {
                 throw new AwsResourceException(String.format("Failed to %s AWS instances on stack: %s", stopped ? "stop" : "start", stack.getId()), e);
@@ -537,7 +556,7 @@ public class AwsConnector implements CloudPlatformConnector {
         return instances;
     }
 
-    private void updateInstanceMetadata(Stack stack, AmazonEC2Client amazonEC2Client, Set<InstanceMetaData> instanceMetaData, Collection<String> instances) {
+    private void updateInstanceMetadata(AmazonEC2Client amazonEC2Client, Set<InstanceMetaData> instanceMetaData, Collection<String> instances) {
         DescribeInstancesResult describeResult = amazonEC2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instances));
         for (Reservation reservation : describeResult.getReservations()) {
             for (Instance instance : reservation.getInstances()) {
