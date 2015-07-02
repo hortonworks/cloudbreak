@@ -21,22 +21,24 @@ public class MunchausenBootstrap implements ContainerBootstrap {
     private final DockerClient docker;
     private final String[] cmd;
     private final String containerName;
+    private final DockerClientUtil dockerClientUtil;
 
-    public MunchausenBootstrap(DockerClient docker, String containerName, String[] cmd) {
+    public MunchausenBootstrap(DockerClient docker, String containerName, String[] cmd, DockerClientUtil dockerClientUtil) {
         this.docker = docker;
         this.cmd = cmd;
         this.containerName = containerName;
+        this.dockerClientUtil = dockerClientUtil;
     }
 
     @Override
     public Boolean call() throws Exception {
         HostConfig hostConfig = new HostConfig();
         hostConfig.setPrivileged(true);
-        String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(containerName)
+        String containerId = dockerClientUtil.createContainer(docker, docker.createContainerCmd(containerName)
                 .withName(MUNCHAUSEN.getName() + new Date().getTime())
                 .withHostConfig(hostConfig)
                 .withCmd(cmd));
-        DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
+        dockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
                 .withBinds(new Bind("/var/run/docker.sock", new Volume("/var/run/docker.sock"))));
         LOGGER.info("Munchausen bootstrap container started.");
         return true;

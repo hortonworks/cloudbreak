@@ -30,14 +30,17 @@ public class AmbariAgentBootstrap implements ContainerBootstrap {
     private final Set<String> dataVolumes;
     private final String id;
     private final String cloudPlatform;
+    private final DockerClientUtil dockerClientUtil;
 
-    public AmbariAgentBootstrap(DockerClient docker, String imageName, String node, Set<String> dataVolumes, String id, String cloudPlatform) {
+    public AmbariAgentBootstrap(DockerClient docker, String imageName, String node, Set<String> dataVolumes, String id,
+            String cloudPlatform, DockerClientUtil dockerClientUtil) {
         this.docker = docker;
         this.imageName = imageName;
         this.node = node;
         this.dataVolumes = dataVolumes;
         this.id = id;
         this.cloudPlatform = cloudPlatform;
+        this.dockerClientUtil = dockerClientUtil;
     }
 
     @Override
@@ -53,7 +56,7 @@ public class AmbariAgentBootstrap implements ContainerBootstrap {
             ports.add(new PortBinding(new Ports.Binding(PORT), new ExposedPort(PORT)));
             hostConfig.setPortBindings(ports);
 
-            String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
+            String containerId = dockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
                     .withHostConfig(hostConfig)
                     .withName(String.format("%s-%s", AMBARI_AGENT.getName(), id))
                     .withEnv(String.format("constraint:node==%s", node),
@@ -69,7 +72,7 @@ public class AmbariAgentBootstrap implements ContainerBootstrap {
             }
             Bind[] array = new Bind[binds.size()];
             binds.toArray(array);
-            DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
+            dockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
                     .withPortBindings(new PortBinding(new Ports.Binding("0.0.0.0", PORT), new ExposedPort(PORT)))
                     .withNetworkMode("host")
                     .withRestartPolicy(RestartPolicy.alwaysRestart())

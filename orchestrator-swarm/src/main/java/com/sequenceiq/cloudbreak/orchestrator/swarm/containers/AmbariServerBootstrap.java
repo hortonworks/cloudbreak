@@ -28,13 +28,16 @@ public class AmbariServerBootstrap implements ContainerBootstrap {
     private final String cloudPlatform;
     private final String node;
     private final Set<String> dataVolumes;
+    private final DockerClientUtil dockerClientUtil;
 
-    public AmbariServerBootstrap(DockerClient docker, String imageName, String node, Set<String> dataVolumes, String cloudPlatform) {
+    public AmbariServerBootstrap(DockerClient docker, String imageName, String node, Set<String> dataVolumes,
+            String cloudPlatform, DockerClientUtil dockerClientUtil) {
         this.docker = docker;
         this.imageName = imageName;
         this.cloudPlatform = cloudPlatform;
         this.node = node;
         this.dataVolumes = dataVolumes;
+        this.dockerClientUtil = dockerClientUtil;
     }
 
     @Override
@@ -47,7 +50,7 @@ public class AmbariServerBootstrap implements ContainerBootstrap {
         ports.add(new PortBinding(new Ports.Binding(PORT), new ExposedPort(PORT)));
         hostConfig.setPortBindings(ports);
 
-        String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
+        String containerId = dockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
                 .withHostConfig(hostConfig)
                 .withExposedPorts(new ExposedPort(PORT))
                 .withEnv(String.format("constraint:node==%s", node),
@@ -56,7 +59,7 @@ public class AmbariServerBootstrap implements ContainerBootstrap {
                         String.format("SERVICE_NAME=%s", "ambari-8080"))
                 .withName(AMBARI_SERVER.getName())
                 .withCmd("/start-server"));
-        DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
+        dockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
                 .withPortBindings(new PortBinding(new Ports.Binding("0.0.0.0", PORT), new ExposedPort(PORT)))
                 .withNetworkMode("host")
                 .withRestartPolicy(RestartPolicy.alwaysRestart())

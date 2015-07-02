@@ -23,11 +23,13 @@ public class ConsulWatchBootstrap implements ContainerBootstrap {
     private final DockerClient docker;
     private final String id;
     private final String imageName;
+    private final DockerClientUtil dockerClientUtil;
 
-    public ConsulWatchBootstrap(DockerClient docker, String imageName, String id) {
+    public ConsulWatchBootstrap(DockerClient docker, String imageName, String id, DockerClientUtil dockerClientUtil) {
         this.docker = docker;
         this.id = id;
         this.imageName = imageName;
+        this.dockerClientUtil = dockerClientUtil;
     }
 
     @Override
@@ -42,11 +44,11 @@ public class ConsulWatchBootstrap implements ContainerBootstrap {
         ports.add(new PortBinding(new Ports.Binding(PORT), new ExposedPort(PORT)));
         hostConfig.setPortBindings(ports);
         try {
-            String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
+            String containerId = dockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
                     .withHostConfig(hostConfig)
                     .withName(String.format("%s-%s", CONSUL_WATCH.getName(), id))
                     .withCmd("consul://127.0.0.1:8500"));
-            DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
+            dockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
                     .withPortBindings(new PortBinding(new Ports.Binding("0.0.0.0", PORT), new ExposedPort(PORT)))
                     .withNetworkMode("host")
                     .withRestartPolicy(RestartPolicy.alwaysRestart())
