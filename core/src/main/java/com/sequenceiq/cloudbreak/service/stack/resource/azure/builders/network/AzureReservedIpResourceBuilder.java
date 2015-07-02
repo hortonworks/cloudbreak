@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -52,6 +53,7 @@ public class AzureReservedIpResourceBuilder extends AzureSimpleNetworkResourceBu
     private AzureDeleteResourceStatusCheckerTask azureDeleteResourceStatusCheckerTask;
 
     @Inject
+    @Named("AzureResourceNameService")
     private ResourceNameService resourceNameService;
 
     @Override

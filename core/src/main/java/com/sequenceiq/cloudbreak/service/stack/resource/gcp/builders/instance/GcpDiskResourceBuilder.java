@@ -2,10 +2,10 @@ package com.sequenceiq.cloudbreak.service.stack.resource.gcp.builders.instance;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceExceptio
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceNameService;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.GcpSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpProvisionContextObject;
@@ -46,6 +47,9 @@ public class GcpDiskResourceBuilder extends GcpSimpleInstanceResourceBuilder {
     private PollingService<GcpResourceReadyPollerObject> gcpDiskReadyPollerObjectPollingService;
     @Inject
     private GcpStackUtil gcpStackUtil;
+    @Inject
+    @Named("GcpResourceNameService")
+    private ResourceNameService resourceNameService;
 
     @Override
     public Boolean create(final CreateResourceRequest createResourceRequest, String region) throws Exception {
@@ -75,8 +79,8 @@ public class GcpDiskResourceBuilder extends GcpSimpleInstanceResourceBuilder {
     public List<Resource> buildResources(GcpProvisionContextObject provisionContextObject, int index, List<Resource> resources,
             Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        Resource resource = new Resource(resourceType(),
-                String.format("%s-%s-%s", stack.getName(), index, new Date().getTime()), stack, instanceGroup.orNull().getGroupName());
+        String resourceName = resourceNameService.resourceName(resourceType(), stack.getName(), instanceGroup.orNull().getGroupName(), index);
+        Resource resource = new Resource(resourceType(), resourceName, stack, instanceGroup.orNull().getGroupName());
         return Arrays.asList(resource);
     }
 

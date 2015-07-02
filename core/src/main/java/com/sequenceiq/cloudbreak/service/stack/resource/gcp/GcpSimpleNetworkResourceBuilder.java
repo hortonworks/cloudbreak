@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.gcp;
 
 import java.io.IOException;
-import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,14 +54,6 @@ public abstract class GcpSimpleNetworkResourceBuilder implements
         } else {
             throw new GcpResourceException(ex.getMessage(), ex);
         }
-    }
-
-    protected String getTimestampedName(String name) {
-        String timeStampedName = name + "-" + String.valueOf(new Date().getTime());
-        if (timeStampedName.length() > MAX_NAME_LENGTH) {
-            timeStampedName = timeStampedName.substring(0, MAX_NAME_LENGTH);
-        }
-        return timeStampedName;
     }
 
     @Override

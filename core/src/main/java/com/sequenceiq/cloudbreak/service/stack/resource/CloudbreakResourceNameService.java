@@ -14,13 +14,16 @@ public abstract class CloudbreakResourceNameService implements ResourceNameServi
     private static final String DELIMITER = "-";
     private static final int MAX_PART_LENGTH = 20;
 
-    protected void checkArgs(Object... parts) {
-        if (null == parts) {
-            throw new IllegalStateException("No name parts provided for generating resource name!");
+    protected void checkArgs(int argCnt, Object... parts) {
+        if (null == parts && parts.length != argCnt) {
+            throw new IllegalStateException("No suitable name parts provided to generate resource name!");
         }
     }
 
     protected String trimHash(String part) {
+        if (part == null) {
+            throw new IllegalStateException("Resource name part must not be null!");
+        }
         LOGGER.debug("Trim the hash part from the end: {}", part);
         String[] parts = part.split(DELIMITER);
         String trimmed = part;
@@ -39,19 +42,25 @@ public abstract class CloudbreakResourceNameService implements ResourceNameServi
     }
 
     protected String adjustPartLength(String part) {
+        if (part == null) {
+            throw new IllegalStateException("Resource name part must not be null!");
+        }
         String shortPart = part;
         if (part.length() > MAX_PART_LENGTH) {
             LOGGER.debug("Shortening part name: {}", part);
             shortPart = String.copyValueOf(part.toCharArray(), 0, MAX_PART_LENGTH);
         } else {
-            LOGGER.debug("Part name length OK, no neet to shorten: {}", part);
+            LOGGER.debug("Part name length OK, no need to shorten: {}", part);
         }
         return shortPart;
     }
 
     protected String normalize(String part) {
+        if (part == null) {
+            throw new IllegalStateException("Resource name part must not be null!");
+        }
         LOGGER.debug("Normalizing resource name part: {}", part);
-        String normalized = part;
+        String normalized = part == null ? "null" : part;
 
         normalized = StringUtils.trimAllWhitespace(normalized);
         LOGGER.debug("Trimmed whitespaces: {}", part);

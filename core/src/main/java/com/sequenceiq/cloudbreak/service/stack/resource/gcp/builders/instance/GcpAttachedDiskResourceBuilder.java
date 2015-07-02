@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.gcp.builders.instance;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceCheckerS
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceNameService;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.GcpSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpProvisionContextObject;
@@ -52,6 +53,10 @@ public class GcpAttachedDiskResourceBuilder extends GcpSimpleInstanceResourceBui
     @Inject
     @Qualifier("intermediateBuilderExecutor")
     private AsyncTaskExecutor intermediateBuilderExecutor;
+
+    @Inject
+    @Named("GcpResourceNameService")
+    private ResourceNameService resourceNameService;
 
     @Override
     public Boolean create(final CreateResourceRequest createResourceRequest, final String region) throws Exception {
@@ -97,9 +102,9 @@ public class GcpAttachedDiskResourceBuilder extends GcpSimpleInstanceResourceBui
             Optional<InstanceGroup> instanceGroup) {
         List<Resource> names = new ArrayList<>();
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        String name = String.format("%s-%s-%s", stack.getName(), index, new Date().getTime());
         for (int i = 0; i < instanceGroup.orNull().getTemplate().getVolumeCount(); i++) {
-            names.add(new Resource(resourceType(), name + "-" + i, stack, instanceGroup.orNull().getGroupName()));
+            String resourceName = resourceNameService.resourceName(resourceType(), stack.getName(), instanceGroup.orNull().getGroupName(), index, i);
+            names.add(new Resource(resourceType(), resourceName, stack, instanceGroup.orNull().getGroupName()));
         }
         return names;
     }
