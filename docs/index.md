@@ -613,10 +613,21 @@ Cloudbreak is deployed as orchestrated Docker containers. We have created a proj
 
 <!--security.md-->
 
-##Gateway node  
+##Misc
+
+###Gateway node  
 
 All communication with the provisioned cluster goes through a `gateway` node. The communication is over TLS. The cluster is provisioned in a locked down VPC with all the access towards externally accessible Hadoop services closed. In order to access the services (Cloudbreak lists all the available services) the ports will have to be opened using the cloud provider's specific `security group` configuration.
 
+###Base images
+
+Cloudbreak comes with default base images - based on CentOS/RHEL 7. Should you want to use a different image please contact us.
+
+**AWS:** RHEL 7.1 https://aws.amazon.com/marketplace/pp/B00VIMU19E
+
+**Microsoft Azure**: Centos 7.1 Openlogic http://azure.microsoft.com/en-in/marketplace/partners/openlogic/centosbased71/
+
+**Google Cloud Platform:** centos-7-v20150603
 
 <!--security.md-->
 
