@@ -160,26 +160,38 @@
                                         <table id="metadataTable" class="table table-report table-sortable-cols table-with-pagination table-condensed" style="background-color: transparent;">
                                             <thead>
                                               <tr>
-                                                 <th>
+                                                 <th class="col-md-4">
                                                  <span>{{msg.active_cluster_stack_description_name_label}}</span>
                                                  </th>
-                                                 <th>
+                                                 <th class="col-md-2">
                                                  <span>{{msg.active_cluster_stack_description_public_address_label}}</span>
                                                  </th>
-                                                 <th>
+                                                 <th class="col-md-2">
                                                  <span>{{msg.active_cluster_stack_description_private_address_label}}</span>
                                                  </th>
-                                                 <th>
+                                                 <th class="col-md-2 text-center">
                                                  <span>{{msg.active_cluster_stack_description_hostgroup_name_label}}</span>
+                                                 </th>
+                                                 <th class="col-md-2 text-center">
+                                                 <span>{{msg.active_cluster_stack_description_host_status_label}}</span>
                                                  </th>
                                                </tr>
                                             </thead>
                                             <tbody>
-                                            <tr ng-repeat="instance in filteredActiveClusterData">
-                                                <td data-title="'name'" class="col-md-4">{{instance.instanceId}}</td>
-                                                <td data-title="'public IP'" class="col-md-3">{{instance.publicIp}}</td>
-                                                <td data-title="'private IP'" class="col-md-3">{{instance.privateIp}}</td>
-                                                <td data-title="'host group'" class="col-md-2"><span class="label label-default">{{instance.instanceGroup}}</span></td>
+                                            <tr ng-repeat="instance in filteredActiveClusterData | orderBy: 'instanceId'" ng-class="instance.state == 'UNHEALTHY' ? 'danger' : ''">
+                                                <td class="col-md-4" data-title="'name'" class="col-md-4">{{instance.instanceId}}</td>
+                                                <td class="col-md-2" data-title="'public IP'" class="col-md-3">{{instance.publicIp}}</td>
+                                                <td class="col-md-2" data-title="'private IP'" class="col-md-3">{{instance.privateIp}}</td>
+                                                <td class="col-md-2 text-center" data-title="'host group'" class="col-md-2"><span class="label label-default">{{instance.instanceGroup}}</span></td>
+                                                <td class="col-md-2 text-center" data-title="'state'" class="col-md-2" ng-switch on="instance.state">
+                                                    <div ng-switch-when="UNHEALTHY">
+                                                        <a ng-init="instance.unhealthyMessage=msg.active_cluster_stack_description_hostgroup_unhealthy_label" title="{{msg.active_cluster_stack_description_hostgroup_terminate_tooltip}}" href="" class="btn label label-block label-danger fa fa-trash-o fa-fw"
+                                                        ng-mouseover="activeCluster.instanceId=instance.instanceId; instance.unhealthyMessage=msg.active_cluster_stack_description_hostgroup_terminate_label" ng-mouseleave="instance.unhealthyMessage=msg.active_cluster_stack_description_hostgroup_unhealthy_label"
+                                                        role="button" style="font-size: 12px; width: 100px; display: inline-block; !important" data-toggle="modal" data-target="#modal-terminate-instance">
+                                                        {{instance.unhealthyMessage}}</a>
+                                                    </div>
+                                                    <span title="{{msg.active_cluster_stack_description_hostgroup_state_tooltip}}" class="label label-info" style="font-size: 12px;" ng-switch-default>{{msg.active_cluster_stack_description_hostgroup_healthy_label}}</span>
+                                                </td>
                                             </tr>
                                             </tbody>
                                         </table>
@@ -297,6 +309,26 @@
         </div>
     </div>
 
+    <div class="modal fade" id="modal-terminate-instance" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <!-- .modal-header -->
+                <div class="modal-body">
+                    <p>{{msg.cluster_list_terminate_instance_dialog_prefix}} <strong>{{activeCluster.instanceId}}</strong> {{msg.cluster_list_terminate_instance_dialog_suffix}}</p>
+                </div>
+                <div class="modal-footer">
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <button type="button" class="btn btn-block btn-default" data-dismiss="modal">{{msg.cluster_list_cancel_command_label}}</button>
+                        </div>
+                        <div class="col-xs-6">
+                            <button type="button" class="btn btn-block btn-danger" data-dismiss="modal" id="terminateStackInstanceBtn" ng-click="deleteStackInstance(activeCluster.id, activeCluster.instanceId)"><i class="fa fa-trash-o fa-fw"></i>{{msg.active_cluster_command_terminate_label}}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" id="modal-stop-cluster" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">

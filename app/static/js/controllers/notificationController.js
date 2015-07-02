@@ -110,6 +110,11 @@ function ($scope, $rootScope, $filter, Cluster, GlobalStack) {
     function refreshMetadata(notification) {
       if($rootScope.activeCluster.id != undefined && $rootScope.activeCluster.id == notification.stackId) {
         GlobalStack.get({ id: notification.stackId }, function(success) {
+          // refresh host metadata
+          if (success.cluster != null && success.cluster.hostGroups != null) {
+            $rootScope.activeCluster.cluster.hostGroups = success.cluster.hostGroups;
+          }
+          // refresh instance metadata
           var metadata = []
           angular.forEach(success.instanceGroups, function(item) {
               angular.forEach(item.metadata, function(item1) {
