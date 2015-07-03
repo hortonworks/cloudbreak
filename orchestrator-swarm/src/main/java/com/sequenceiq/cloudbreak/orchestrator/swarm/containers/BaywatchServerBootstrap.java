@@ -32,11 +32,13 @@ public class BaywatchServerBootstrap implements ContainerBootstrap {
     private final DockerClient docker;
     private final String imageName;
     private final String node;
+    private final DockerClientUtil dockerClientUtil;
 
-    public BaywatchServerBootstrap(DockerClient docker, String imageName, String node) {
+    public BaywatchServerBootstrap(DockerClient docker, String imageName, String node, DockerClientUtil dockerClientUtil) {
         this.docker = docker;
         this.imageName = imageName;
         this.node = node;
+        this.dockerClientUtil = dockerClientUtil;
     }
 
     @Override
@@ -51,7 +53,7 @@ public class BaywatchServerBootstrap implements ContainerBootstrap {
         ports.add(new PortBinding(new Ports.Binding(KIBANA_PORT), new ExposedPort(KIBANA_PORT)));
         hostConfig.setPortBindings(ports);
         try {
-            String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
+            String containerId = dockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
                     .withExposedPorts(new ExposedPort(ES_PORT), new ExposedPort(ES_TRANSPORT_PORT), new ExposedPort(KIBANA_PORT))
                     .withName(BAYWATCH_SERVER.getName())
                     .withEnv(String.format("constraint:node==%s", node),
@@ -59,7 +61,7 @@ public class BaywatchServerBootstrap implements ContainerBootstrap {
                             String.format("ES_DATA_PATH=%s", ES_DATA_PATH),
                             String.format("ES_WORK_PATH=%s", ES_WORK_PATH))
                     .withHostConfig(hostConfig));
-            DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
+            dockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
                     .withPortBindings(
                             new PortBinding(new Ports.Binding("0.0.0.0", ES_PORT), new ExposedPort(ES_PORT)),
                             new PortBinding(new Ports.Binding("0.0.0.0", ES_TRANSPORT_PORT), new ExposedPort(ES_TRANSPORT_PORT)),

@@ -36,9 +36,10 @@ public class BaywatchClientBootstrap implements ContainerBootstrap {
     private final Node node;
     private final String consulDomain;
     private final Set<String> dataVolumes;
+    private DockerClientUtil dockerClientUtil;
 
     public BaywatchClientBootstrap(DockerClient docker, String gatewayAddress, String imageName, String id,
-            Node node, Set<String> dataVolumes, String consulDomain, String externLocation) {
+            Node node, Set<String> dataVolumes, String consulDomain, String externLocation, DockerClientUtil dockerClientUtil) {
         this.docker = docker;
         this.gatewayAddress = gatewayAddress;
         this.imageName = imageName;
@@ -47,6 +48,7 @@ public class BaywatchClientBootstrap implements ContainerBootstrap {
         this.consulDomain = consulDomain;
         this.externLocation = externLocation;
         this.dataVolumes = dataVolumes;
+        this.dockerClientUtil = dockerClientUtil;
     }
 
     @Override
@@ -58,7 +60,7 @@ public class BaywatchClientBootstrap implements ContainerBootstrap {
         hostConfig.setRestartPolicy(RestartPolicy.alwaysRestart());
         try {
             String baywatchIp = Strings.isNullOrEmpty(externLocation) ? gatewayAddress : externLocation;
-            String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
+            String containerId = dockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
                     .withName(String.format("%s-%s", BAYWATCH_CLIENT.getName(), id))
                     .withEnv(String.format("constraint:node==%s", node.getHostname()),
                             String.format("BAYWATCH_IP=%s", baywatchIp),
@@ -66,7 +68,7 @@ public class BaywatchClientBootstrap implements ContainerBootstrap {
                             String.format("BAYWATCH_CLIENT_HOSTNAME=%s", node.getHostname() + consulDomain),
                             String.format("BAYWATCH_CLIENT_PRIVATE_IP=%s", node.getPrivateIp()))
                     .withHostConfig(hostConfig));
-            DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
+            dockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
                     .withPortBindings(new PortBinding(new Ports.Binding("0.0.0.0", PORT), new ExposedPort(PORT)))
                     .withBinds(
                             new Bind("/hadoopfs/fs1/logs/ambari-agent", new Volume("/var/log/containers/ambari-agent")),

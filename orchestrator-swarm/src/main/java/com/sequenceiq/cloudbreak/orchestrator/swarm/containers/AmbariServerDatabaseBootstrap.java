@@ -23,12 +23,14 @@ public class AmbariServerDatabaseBootstrap implements ContainerBootstrap {
     private final String imageName;
     private final String node;
     private final Set<String> dataVolumes;
+    private final DockerClientUtil dockerClientUtil;
 
-    public AmbariServerDatabaseBootstrap(DockerClient docker, String imageName, String node, Set<String> dataVolumes) {
+    public AmbariServerDatabaseBootstrap(DockerClient docker, String imageName, String node, Set<String> dataVolumes, DockerClientUtil dockerClientUtil) {
         this.docker = docker;
         this.imageName = imageName;
         this.node = node;
         this.dataVolumes = dataVolumes;
+        this.dockerClientUtil = dockerClientUtil;
     }
 
     @Override
@@ -38,13 +40,13 @@ public class AmbariServerDatabaseBootstrap implements ContainerBootstrap {
         hostConfig.setNetworkMode("host");
         hostConfig.setRestartPolicy(RestartPolicy.alwaysRestart());
 
-        String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
+        String containerId = dockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
                 .withEnv(String.format("POSTGRES_PASSWORD=%s", "bigdata"),
                         String.format("POSTGRES_USER=%s", "ambari"),
                         String.format("constraint:node==%s", node))
                 .withHostConfig(hostConfig)
                 .withName(AMBARI_DB.getName()));
-        DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
+        dockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
                 .withRestartPolicy(RestartPolicy.alwaysRestart())
                 .withNetworkMode("host")
                 .withBinds(new Bind("/data/ambari-server/pgsql/data", new Volume("/var/lib/postgresql/data")),

@@ -25,10 +25,10 @@ public class DockerClientUtil {
     private static final int MAX_WAIT_FOR_CONTAINER_RETRIES = 60;
     private static final int TIMEOUT = 3000;
 
-    private DockerClientUtil() {
+    public DockerClientUtil() {
     }
 
-    public static String createContainer(DockerClient client, CreateContainerCmd createContainerCmd) throws Exception {
+    public String createContainer(DockerClient client, CreateContainerCmd createContainerCmd) throws Exception {
         int attempts = 0;
         Exception cause = null;
         String response = null;
@@ -61,7 +61,7 @@ public class DockerClientUtil {
         return response;
     }
 
-    public static void removeContainerIfExist(DockerClient client, String name) throws Exception {
+    public void removeContainerIfExist(DockerClient client, String name) throws Exception {
         try {
             InspectContainerResponse inspectResponse = client.inspectContainerCmd(name).exec();
             if (inspectResponse != null && inspectResponse.getId() != null) {
@@ -75,7 +75,7 @@ public class DockerClientUtil {
         }
     }
 
-    public static void startContainer(DockerClient client, StartContainerCmd startContainerCmd) throws Exception {
+    public void startContainer(DockerClient client, StartContainerCmd startContainerCmd) throws Exception {
         int attempts = 0;
         boolean success = false;
         Exception cause = null;
@@ -103,7 +103,7 @@ public class DockerClientUtil {
         }
     }
 
-    public static InspectContainerResponse inspectContainer(InspectContainerCmd inspectContainerCmd) throws Exception {
+    public InspectContainerResponse inspectContainer(InspectContainerCmd inspectContainerCmd) throws Exception {
         int attempts = 0;
         Exception cause = null;
         InspectContainerResponse response = null;
@@ -126,7 +126,7 @@ public class DockerClientUtil {
         return response;
     }
 
-    public static InspectContainerResponse waitForContainer(InspectContainerCmd inspectContainerCmd) throws Exception {
+    public InspectContainerResponse waitForContainer(InspectContainerCmd inspectContainerCmd) throws Exception {
         int attempts = 0;
         InspectContainerResponse response = null;
         while (attempts < MAX_WAIT_FOR_CONTAINER_RETRIES && response == null) {
@@ -141,7 +141,7 @@ public class DockerClientUtil {
         return response;
     }
 
-    private static void sleep(int duration) {
+    private void sleep(int duration) {
         try {
             Thread.sleep(duration);
         } catch (InterruptedException e) {

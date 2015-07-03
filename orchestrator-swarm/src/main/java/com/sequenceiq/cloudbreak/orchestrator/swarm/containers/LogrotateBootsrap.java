@@ -24,11 +24,13 @@ public class LogrotateBootsrap implements ContainerBootstrap {
     private final DockerClient docker;
     private final String id;
     private final String imageName;
+    private final DockerClientUtil dockerClientUtil;
 
-    public LogrotateBootsrap(DockerClient docker, String imageName, String id) {
+    public LogrotateBootsrap(DockerClient docker, String imageName, String id, DockerClientUtil dockerClientUtil) {
         this.docker = docker;
         this.id = id;
         this.imageName = imageName;
+        this.dockerClientUtil = dockerClientUtil;
     }
 
     @Override
@@ -43,10 +45,10 @@ public class LogrotateBootsrap implements ContainerBootstrap {
         ports.add(new PortBinding(new Ports.Binding(PORT), new ExposedPort(PORT)));
         hostConfig.setPortBindings(ports);
         try {
-            String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
+            String containerId = dockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
                     .withHostConfig(hostConfig)
                     .withName(String.format("%s-%s", LOGROTATE.getName(), id)));
-            DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
+            dockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
                     .withPortBindings(new PortBinding(new Ports.Binding("0.0.0.0", PORT), new ExposedPort(PORT)))
                     .withNetworkMode("host")
                     .withRestartPolicy(RestartPolicy.alwaysRestart())

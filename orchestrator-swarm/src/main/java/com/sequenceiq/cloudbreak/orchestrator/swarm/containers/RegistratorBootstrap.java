@@ -24,12 +24,14 @@ public class RegistratorBootstrap implements ContainerBootstrap {
     private final String nodeName;
     private final String privateIp;
     private final String imageName;
+    private final DockerClientUtil dockerClientUtil;
 
-    public RegistratorBootstrap(DockerClient docker, String imageName, String nodeName, String privateIp) {
+    public RegistratorBootstrap(DockerClient docker, String imageName, String nodeName, String privateIp, DockerClientUtil dockerClientUtil) {
         this.docker = docker;
         this.nodeName = nodeName;
         this.privateIp = privateIp;
         this.imageName = imageName;
+        this.dockerClientUtil = dockerClientUtil;
     }
 
     @Override
@@ -41,12 +43,12 @@ public class RegistratorBootstrap implements ContainerBootstrap {
         Ports ports = new Ports();
         ports.add(new PortBinding(new Ports.Binding(PORT), new ExposedPort(PORT)));
         hostConfig.setPortBindings(ports);
-        String containerId = DockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
+        String containerId = dockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
                 .withEnv(String.format("constraint:node==%s", nodeName))
                 .withHostConfig(hostConfig)
                 .withName(REGISTRATOR.getName())
                 .withCmd(String.format("consul://%s:8500", privateIp)));
-        DockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
+        dockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
                 .withBinds(new Bind("/var/run/docker.sock", new Volume("/tmp/docker.sock")))
                 .withRestartPolicy(RestartPolicy.alwaysRestart())
                 .withPortBindings(new PortBinding(new Ports.Binding("0.0.0.0", PORT), new ExposedPort(PORT))));

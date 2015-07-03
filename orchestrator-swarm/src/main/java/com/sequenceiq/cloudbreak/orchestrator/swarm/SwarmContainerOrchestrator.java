@@ -65,11 +65,9 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             Set<String> consulServers = selectConsulServers(privateGatewayIp, privateAddressesWithoutGateway, consulServerCount);
             Set<String> result = prepareDockerAddressInventory(privateAddresses);
 
-            DockerClient dockerApiClient = DockerClientBuilder.getInstance(getDockerClientConfig(gatewayConfig))
-                    .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl()).build();
             String[] cmd = {"--debug", "bootstrap", "--wait", MUNCHAUSEN_WAIT, "--consulServers",
                     concatToString(consulServers), concatToString(result)};
-            new MunchausenBootstrap(dockerApiClient, MUNCHAUSEN_DOCKER_IMAGE, cmd).call();
+            munchausenBootstrap(gatewayConfig, cmd).call();
         } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {
                 throw cloudbreakOrchestratorCancelledExceptionException;
         } catch (CloudbreakOrchestratorFailedException cloudbreakOrchestratorFailedException) {
@@ -83,11 +81,10 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     public void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel)
         throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         try {
-            DockerClient dockerApiClient = DockerClientBuilder.getInstance(getDockerClientConfig(gatewayConfig)).build();
             Set<String> privateAddresses = getPrivateAddresses(nodes);
             Set<String> result = prepareDockerAddressInventory(privateAddresses);
             String[] cmd = {"--debug", "add", "--wait", MUNCHAUSEN_WAIT, "--join", getConsulJoinIp(gatewayConfig.getAddress()), concatToString(result)};
-            new MunchausenBootstrap(dockerApiClient, MUNCHAUSEN_DOCKER_IMAGE, cmd).call();
+            munchausenNewNodeBootstrap(gatewayConfig, cmd).call();
         } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {
             throw cloudbreakOrchestratorCancelledExceptionException;
         } catch (CloudbreakOrchestratorFailedException cloudbreakOrchestratorFailedException) {
@@ -102,11 +99,8 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         try {
             Node gateway = getGatewayNode(cluster.getGatewayConfig().getAddress(), cluster.getNodes());
-            DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(cluster.getGatewayConfig()))
-                    .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
-                    .build();
             simpleContainerBootstrapRunner(
-                    new RegistratorBootstrap(swarmManagerClient, imageName, gateway.getHostname(), gateway.getPrivateIp()),
+                    registratorBootstrap(cluster.getGatewayConfig(), imageName, gateway),
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
         } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {
             throw cloudbreakOrchestratorCancelledExceptionException;
@@ -122,13 +116,9 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         try {
             Node gateway = getGatewayNode(cluster.getGatewayConfig().getAddress(), cluster.getNodes());
-            DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(cluster.getGatewayConfig()))
-                    .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
-                    .build();
-            simpleContainerBootstrapRunner(new AmbariServerDatabaseBootstrap(swarmManagerClient, dbImageName, gateway.getHostname(), gateway.getDataVolumes()),
+            simpleContainerBootstrapRunner(ambariServerDatabaseBootstrap(cluster.getGatewayConfig(), dbImageName, gateway),
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
-            simpleContainerBootstrapRunner(new AmbariServerBootstrap(swarmManagerClient, serverImageName,
-                            gateway.getHostname(), gateway.getDataVolumes(), platform),
+            simpleContainerBootstrapRunner(ambariServerBootstrap(cluster.getGatewayConfig(), serverImageName, gateway, platform),
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
         } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {
             throw cloudbreakOrchestratorCancelledExceptionException;
@@ -147,16 +137,13 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         }
         try {
             List<Future<Boolean>> futures = new ArrayList<>();
-            DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(cluster.getGatewayConfig()))
-                    .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
-                    .build();
             Set<Node> nodes = getNodesWithoutGateway(cluster.getGatewayConfig().getAddress(), cluster.getNodes());
             Iterator<Node> nodeIterator = nodes.iterator();
             for (int i = 0; i < count; i++) {
                 Node node = nodeIterator.next();
                 String time = String.valueOf(new Date().getTime()) + i;
                 AmbariAgentBootstrap runner =
-                        new AmbariAgentBootstrap(swarmManagerClient, imageName, node.getHostname(), node.getDataVolumes(), time, platform);
+                        ambariAgentBootstrap(cluster.getGatewayConfig(), imageName, node, time, platform);
                 futures.add(getParallelContainerRunner()
                         .submit(simpleContainerBootstrapRunner(runner, getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap())));
             }
@@ -182,14 +169,10 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         }
         try {
             List<Future<Boolean>> futures = new ArrayList<>();
-            DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(cluster.getGatewayConfig()))
-                    .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
-                    .build();
             for (int i = 0; i < count; i++) {
                 String time = String.valueOf(new Date().getTime()) + i;
                 SimpleContainerBootstrapRunner runner = simpleContainerBootstrapRunner(
-                        new ConsulWatchBootstrap(swarmManagerClient, imageName, time),
-                        getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap());
+                        consulWatchBootstrap(cluster.getGatewayConfig(), imageName, time), getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap());
                 futures.add(getParallelContainerRunner().submit(runner));
             }
             for (Future<Boolean> future : futures) {
@@ -211,10 +194,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
         try {
             Node gateway = getGatewayNode(cluster.getGatewayConfig().getAddress(), cluster.getNodes());
-            DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(cluster.getGatewayConfig()))
-                    .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
-                    .build();
-            simpleContainerBootstrapRunner(new BaywatchServerBootstrap(swarmManagerClient, imageName, gateway.getHostname()),
+            simpleContainerBootstrapRunner(baywatchServerBootstrap(cluster.getGatewayConfig(), imageName, gateway),
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
         } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {
             throw cloudbreakOrchestratorCancelledExceptionException;
@@ -234,16 +214,13 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         }
         try {
             List<Future<Boolean>> futures = new ArrayList<>();
-            DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(cluster.getGatewayConfig()))
-                    .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
-                    .build();
             Set<Node> nodes = cluster.getNodes();
             Iterator<Node> nodeIterator = nodes.iterator();
             for (int i = 0; i < count; i++) {
                 Node node = nodeIterator.next();
                 String time = String.valueOf(new Date().getTime()) + i;
                 BaywatchClientBootstrap runner =
-                        new BaywatchClientBootstrap(swarmManagerClient, gatewayPrivateIp, imageName, time, node, node.getDataVolumes(),
+                        baywatchClientBootstrap(cluster.getGatewayConfig(), gatewayPrivateIp, imageName, time, node,
                                 consulDomain, externServerLocation);
                 futures.add(getParallelContainerRunner().submit(simpleContainerBootstrapRunner(runner, getExitCriteria(), exitCriteriaModel,
                         MDC.getCopyOfContextMap())));
@@ -270,13 +247,10 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         }
         try {
             List<Future<Boolean>> futures = new ArrayList<>();
-            DockerClient swarmManagerClient = DockerClientBuilder.getInstance(getSwarmClientConfig(cluster.getGatewayConfig()))
-                    .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
-                    .build();
             for (int i = 0; i < count; i++) {
                 String time = String.valueOf(new Date().getTime()) + i;
                 SimpleContainerBootstrapRunner runner = simpleContainerBootstrapRunner(
-                        new LogrotateBootsrap(swarmManagerClient, imageName, time),
+                        logrotateBootsrap(cluster.getGatewayConfig(), imageName, time),
                         getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap());
                 futures.add(getParallelContainerRunner().submit(runner));
             }
@@ -443,6 +417,81 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
                 .withVersion("1.19")
                 .withUri("https://" + gatewayConfig.getAddress() + "/docker")
                 .build();
+    }
+
+    @VisibleForTesting
+    private DockerClient dockerClient(GatewayConfig gatewayConfig) {
+        return DockerClientBuilder.getInstance(getDockerClientConfig(gatewayConfig))
+                .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl()).build();
+    }
+
+    @VisibleForTesting
+    private DockerClient swarmClient(GatewayConfig gatewayConfig) {
+        return DockerClientBuilder.getInstance(getSwarmClientConfig(gatewayConfig))
+                .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl()).build();
+    }
+
+    @VisibleForTesting
+    private MunchausenBootstrap munchausenBootstrap(GatewayConfig gatewayConfig, String[] cmd) {
+        DockerClient dockerApiClient = dockerClient(gatewayConfig);
+        return new MunchausenBootstrap(dockerApiClient, MUNCHAUSEN_DOCKER_IMAGE, cmd, new DockerClientUtil());
+    }
+
+    @VisibleForTesting
+    private MunchausenBootstrap munchausenNewNodeBootstrap(GatewayConfig gatewayConfig, String[] cmd) {
+        DockerClient dockerApiClient = swarmClient(gatewayConfig);
+        return new MunchausenBootstrap(dockerApiClient, MUNCHAUSEN_DOCKER_IMAGE, cmd, new DockerClientUtil());
+    }
+
+    @VisibleForTesting
+    private RegistratorBootstrap registratorBootstrap(GatewayConfig gatewayConfig, String imageName, Node gateway) {
+        DockerClient dockerApiClient = swarmClient(gatewayConfig);
+        return new RegistratorBootstrap(dockerApiClient, imageName, gateway.getHostname(), gateway.getPrivateIp(), new DockerClientUtil());
+    }
+
+    @VisibleForTesting
+    private ConsulWatchBootstrap consulWatchBootstrap(GatewayConfig gatewayConfig, String imageName, String time) {
+        DockerClient dockerApiClient = swarmClient(gatewayConfig);
+        return new ConsulWatchBootstrap(dockerApiClient, imageName, time, new DockerClientUtil());
+    }
+
+    @VisibleForTesting
+    private BaywatchServerBootstrap baywatchServerBootstrap(GatewayConfig gatewayConfig, String imageName, Node gateway) {
+        DockerClient dockerApiClient = swarmClient(gatewayConfig);
+        return new BaywatchServerBootstrap(dockerApiClient, imageName, gateway.getHostname(), new DockerClientUtil());
+    }
+
+    @VisibleForTesting
+    private BaywatchClientBootstrap baywatchClientBootstrap(GatewayConfig gatewayConfig, String gatewayPrivateIp, String imageName, String time, Node node,
+            String consulDomain, String externServerLocation) {
+        DockerClient dockerApiClient = swarmClient(gatewayConfig);
+        return new BaywatchClientBootstrap(dockerApiClient, gatewayPrivateIp, imageName, time, node, node.getDataVolumes(),
+                consulDomain, externServerLocation, new DockerClientUtil());
+    }
+
+    @VisibleForTesting
+    private LogrotateBootsrap logrotateBootsrap(GatewayConfig gatewayConfig, String imageName, String time) {
+        DockerClient dockerApiClient = swarmClient(gatewayConfig);
+        return new LogrotateBootsrap(dockerApiClient, imageName, time, new DockerClientUtil());
+    }
+
+    @VisibleForTesting
+    private AmbariAgentBootstrap ambariAgentBootstrap(GatewayConfig gatewayConfig, String imageName, Node node, String time, String platform) {
+        DockerClient dockerApiClient = swarmClient(gatewayConfig);
+        return new AmbariAgentBootstrap(dockerApiClient, imageName, node.getHostname(), node.getDataVolumes(), time,
+                platform, new DockerClientUtil());
+    }
+
+    @VisibleForTesting
+    private AmbariServerDatabaseBootstrap ambariServerDatabaseBootstrap(GatewayConfig gatewayConfig, String dbImageName, Node gateway) {
+        DockerClient dockerApiClient = swarmClient(gatewayConfig);
+        return new AmbariServerDatabaseBootstrap(dockerApiClient, dbImageName, gateway.getHostname(), gateway.getDataVolumes(), new DockerClientUtil());
+    }
+
+    @VisibleForTesting
+    private AmbariServerBootstrap ambariServerBootstrap(GatewayConfig gatewayConfig, String serverImageName, Node node, String platform) {
+        DockerClient dockerApiClient = swarmClient(gatewayConfig);
+        return new AmbariServerBootstrap(dockerApiClient, serverImageName, node.getHostname(), node.getDataVolumes(), platform, new DockerClientUtil());
     }
 
     private String getConsulJoinIp(String publicIp) {
