@@ -21,16 +21,16 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_CONSUL v0.5.0-v3
     env-import DOCKER_TAG_REGISTRATOR v5
     env-import DOCKER_TAG_POSTGRES 9.4.1
-    env-import DOCKER_TAG_CLOUDBREAK 0.5.105
-    env-import DOCKER_TAG_CBDB 0.5.103
-    env-import DOCKER_TAG_PERISCOPE 0.5.5
-    env-import DOCKER_TAG_PCDB 0.5.5
+    env-import DOCKER_TAG_CLOUDBREAK 0.5.177
+    env-import DOCKER_TAG_CBDB 0.5.177
+    env-import DOCKER_TAG_PERISCOPE 0.5.6
+    env-import DOCKER_TAG_PCDB 0.5.6
     env-import DOCKER_TAG_UAA 1.8.1-v2
-    env-import DOCKER_TAG_ULUWATU 0.5.33
-    env-import DOCKER_TAG_SULTANS 0.5.4
+    env-import DOCKER_TAG_ULUWATU 0.5.48
+    env-import DOCKER_TAG_SULTANS 0.5.6
     env-import DOCKER_TAG_AMBASSADOR 0.5.0
     env-import DOCKER_TAG_CERT_TOOL 0.0.3
-    env-import DOCKER_TAG_CLOUDBREAK_SHELL 0.4.11
+    env-import DOCKER_TAG_CLOUDBREAK_SHELL 0.5.1
 
     env-import CB_DOCKER_CONTAINER_AMBARI ""
     env-import CB_DOCKER_CONTAINER_AMBARI_WARM ""
@@ -169,7 +169,7 @@ util-cloudbreak-shell-quiet() {
 _cloudbreak-shell() {
 
     cloudbreak-config
-    
+
     docker run "$@" \
         --rm \
         --link cbreak_ambassador_1:backend \
@@ -310,7 +310,7 @@ util-local-dev() {
 
 : << HINT
 sed -i  "s/cb.db.port.5432.tcp.addr=[^ ]*/cb.db.port.5432.tcp.addr=$(docker inspect -f '{{.NetworkSettings.IPAddress}}' cbreak_cbdb_1)/" \
-    ~/prj/cloudbreak.idea/runConfigurations/cloudbreak_remote.xml 
+    ~/prj/cloudbreak.idea/runConfigurations/cloudbreak_remote.xml
 HINT
 
     docker run -d \
