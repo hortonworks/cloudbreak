@@ -137,6 +137,7 @@ func main() {
 		"browse":          OpenBrowser,
 		"version-compare": VersionCompare,
 	}, []string{
+		"include/aws-roles.bash",
 		"include/circle.bash",
 		"include/cloudbreak.bash",
 		"include/compose.bash",

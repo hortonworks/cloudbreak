@@ -1,6 +1,7 @@
 compose-init() {
     deps-require docker-compose
     env-import CB_COMPOSE_PROJECT cbreak
+    env-import CBD_LOG_NAME cbreak
 }
 
 dockerCompose() {
@@ -24,11 +25,22 @@ compose-pull() {
     dockerCompose pull
 }
 
+create-logfile() {
+
+    rm -f ${CBD_LOG_NAME}.log
+    export LOG=${CBD_LOG_NAME}-$(date +%Y%m%d-%H%M%S).log
+    touch $LOG
+    ln -s $LOG ${CBD_LOG_NAME}.log
+}
+
 compose-up() {
     declare desc="Starts containers with docker-compose"
     declare services="$@"
 
     deployer-generate
+
+    create-logfile
+
     dockerCompose up -d $services
 
     info "CloudBreak containers are started ..."
@@ -43,6 +55,55 @@ compose-kill() {
 
     dockerCompose kill
     dockerCompose rm -f
+}
+
+util-cleanup() {
+    declare desc="Removes all exited containers and old cloudbreak related images"
+
+    if [ ! -f docker-compose.yml ]; then
+      error "docker-compose.yml file does not exists"
+      exit 126
+    fi
+
+    compose-remove-exited-containers
+
+    local all_images=$(docker images | sed "s/ \+/ /g"|cut -d' ' -f 1,2|tr ' ' : | tail -n +2)
+    local keep_images=$(sed -n "s/.*image://p" docker-compose.yml)
+    local images_to_delete=$(compose-get-old-images <(echo $all_images) <(echo $keep_images))
+    if [ -n "$images_to_delete" ]; then
+      info "Found old/different versioned images based on docker-compose.yml file: $images_to_delete"
+      docker rmi $images_to_delete
+    else
+      info "Not found any different versioned images (based on docker-compose.yml). Skip cleanup"
+    fi
+}
+
+compose-get-old-images() {
+    declare desc="Retrieve old images"
+    declare all_images="${1:? required: all images}"
+    declare keep_images="${2:? required: keep images}"
+    local all_imgs=$(cat $all_images) keep_imgs=$(cat $keep_images)
+    contentsarray=()
+    for versionedImage in $keep_imgs
+      do
+        image=(`echo $versionedImage | tr ":" " "`)
+        image_name=${image[0]}
+        image_version=${image[1]}
+        remove_images=$(echo $all_imgs | tr ' ' "\n" | grep "$image_name:" | grep -v "$image_version")
+        if [ -n "$remove_images" ]; then
+          contentsarray+="${remove_images[@]} "
+        fi
+    done
+    echo ${contentsarray%?}
+}
+
+compose-remove-exited-containers() {
+    declare desc="Remove exited containers"
+    local exited_containers=$(docker ps --all -q -f status=exited)
+    if [ -n "$exited_containers" ]; then
+      info "Remove exited docker containers"
+      docker rm $exited_containers;
+    fi
 }
 
 compose-get-container() {
@@ -80,9 +141,9 @@ compose-generate-yaml() {
 
 compose-generate-yaml-force() {
 
-    declare comoseFile=${1:? required: compose file path}
-    debug "Generating docker-compose yaml: ${comoseFile} ..."
-    cat > ${comoseFile} <<EOF
+    declare composeFile=${1:? required: compose file path}
+    debug "Generating docker-compose yaml: ${composeFile} ..."
+    cat > ${composeFile} <<EOF
 consul:
     privileged: true
     volumes:
@@ -109,19 +170,47 @@ ambassador:
     volumes:
         - "/var/run/docker.sock:/var/run/docker.sock"
     dns: $PRIVATE_IP
-    image: progrium/ambassadord:$DOCKER_TAG_AMBASSADOR
+    image: sequenceiq/ambassadord:$DOCKER_TAG_AMBASSADOR
     command: --omnimode
+
+logsink:
+    ports:
+        - 3333
+    environment:
+        - SERVICE_NAME=logsink
+    volumes:
+        - .:/tmp
+    image: sequenceiq/socat:latest
+    command: socat -u TCP-LISTEN:3333,reuseaddr,fork OPEN:/tmp/cbreak.log,creat,append
+
+logspout:
+    ports:
+        - 8000:80
+    environment:
+        - SERVICE_NAME=logspout
+        - DEBUG=true
+        - BACKEND_1111=logsink.service.consul
+        - LOGSPOUT=ignore
+        - ROUTE_URIS=tcp://backend:1111
+        - "RAW_FORMAT={{.Container.Name}} | {{.Data}}\n"
+    links:
+        - ambassador:backend
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    image: gliderlabs/logspout:master
+    entrypoint: ["/bin/sh"]
+    command: -c 'sleep 1; /bin/logspout'
 
 ambassadorips:
     privileged: true
     net: container:ambassador
-    image: progrium/ambassadord:$DOCKER_TAG_AMBASSADOR
+    image: sequenceiq/ambassadord:$DOCKER_TAG_AMBASSADOR
     command: --setup-iptables
 
 uaadb:
     privileged: true
     ports:
-        - 5432
+        - "$PRIVATE_IP:5434:5432"
     environment:
       - SERVICE_NAME=uaadb
         #- SERVICE_CHECK_CMD=bash -c 'psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
@@ -145,7 +234,7 @@ identity:
 
 cbdb:
     ports:
-        - 5432
+        - "$PRIVATE_IP:5432:5432"
     environment:
       - SERVICE_NAME=cbdb
         #- SERVICE_CHECK_CMD=bash -c 'psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
@@ -156,7 +245,7 @@ cbdb:
 cloudbreak:
     environment:
         - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-        - AWS_SECRET_KEY=$AWS_SECRET_KEY
+        - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
         - SERVICE_NAME=cloudbreak
           #- SERVICE_CHECK_HTTP=/info
         - CB_CLIENT_ID=$UAA_CLOUDBREAK_ID
@@ -176,6 +265,8 @@ cloudbreak:
         - CB_SMTP_SENDER_FROM=$CLOUDBREAK_SMTP_SENDER_FROM
         - CB_BAYWATCH_ENABLED=$CB_BAYWATCH_ENABLED
         - CB_BAYWATCH_EXTERN_LOCATION=$CB_BAYWATCH_EXTERN_LOCATION
+        - CB_DOCKER_CONTAINER_AMBARI=$CB_DOCKER_CONTAINER_AMBARI
+        - CB_DOCKER_CONTAINER_AMBARI_WARM=$CB_DOCKER_CONTAINER_AMBARI_WARM
         - ENDPOINTS_AUTOCONFIG_ENABLED=false
         - ENDPOINTS_DUMP_ENABLED=false
         - ENDPOINTS_TRACE_ENABLED=false
@@ -194,6 +285,8 @@ cloudbreak:
         - ambassador:backend
     ports:
         - 8080:8080
+    volumes:
+        - "$CBD_CERT_ROOT_PATH:/certs"
     image: sequenceiq/cloudbreak:$DOCKER_TAG_CLOUDBREAK
     command: bash
 
@@ -247,7 +340,7 @@ pcdb:
         - SERVICE_NAME=pcdb
      #- SERVICE_NAMEE_CHECK_CMD='psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
     ports:
-        - 5432
+        - "$PRIVATE_IP:5433:5432"
     volumes:
         - "$CB_DB_ROOT_PATH/periscopedb:/var/lib/postgresql/data"
     image: sequenceiq/pcdb:$DOCKER_TAG_PCDB
@@ -285,6 +378,8 @@ periscope:
         - ambassador:backend
     ports:
         - 8085:8080
+    volumes:
+        - "$CBD_CERT_ROOT_PATH:/certs"
     image: sequenceiq/periscope:$DOCKER_TAG_PERISCOPE
 
 EOF

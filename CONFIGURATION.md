@@ -78,7 +78,7 @@ export CLOUDBREAK_SMTP_SENDER_FROM=
 ## Caveats
 
 The **Cloudbreak Deployer** tool opens a clean bash subshell, without inheriting environment vars.
-Actually the foolowing environment vars _are_ inherited:
+Actually the following environment vars _are_ inherited:
 
 - `HOME`
 - `DEBUG`

@@ -1,14 +1,37 @@
-## Unreleased
+-e ## Unreleased
 
 ### Fixed
 
 ### Added
 
+### Removed
+
+### Changed
+
+## [v0.5.4] - 2015-07-03
+
+### Fixed
+
+### Added
+
+- New `cbd-cleanup` command for removing old images or exited containers
 - Baywatch default parameters added: `CB_BAYWATCH_ENABLED` and`CB_BAYWATCH_EXTERN_LOCATION`
+- Logs are saved via lospout
+- TLS client certificate needed by Cloudbreak is generated with `cbd generate`
+- Command `aws delete-role ` added
+- Command `aws generate-role` added
+- Command `aws show-role` added
+- Command `cloudbreak-shell` added
+- Command `cloudbreak-shell-quiet` added
+- Command `local-dev` added
+- Command `token` added
 
 ### Removed
 
 ### Changed
+
+- AWS authentication env varibale is fixed to use the correct AWS_SECRET_ACCESS_KEY (instead the old AWS_SECRET_KEY)
+- Using sequenceiq/ambassadord:0.5.0 docker image instead of progrium/ambassadord:latest
 
 ## [v0.5.3] - 2015-06-03
 

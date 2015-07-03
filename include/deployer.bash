@@ -17,7 +17,7 @@ error() {
 }
 
 cbd-version() {
-    declare desc="Displays the version of Cloudbrek Deployer"
+    declare desc="Displays the version of Cloudbreak Deployer"
     echo -n "local version:"
     local localVer=$(bin-version)
     echo "$localVer" | green
@@ -185,6 +185,7 @@ deployer-delete-yamls() {
 deployer-generate() {
     declare desc="Generates docker-compose.yml and uaa.yml"
 
+    cloudbreak-generate-cert
     compose-generate-yaml
     generate_uaa_config
 }
@@ -193,6 +194,7 @@ deployer-regenerate() {
     declare desc="Deletes and generates docker-compose.yml and uaa.yml"
 
     deployer-delete-yamls
+    cloudbreak-generate-cert
     compose-generate-yaml
     generate_uaa_config
 }
@@ -222,6 +224,7 @@ main() {
 
     circle-init
     compose-init
+    aws-init
 
     debug "CloudBreak Deployer $(bin-version)"
 
@@ -249,6 +252,17 @@ main() {
         cmd-export migrate-startdb startdb
         cmd-export migrate-cmd migrate
 
+        cmd-export-ns aws "Amazon Webservice namespace"
+        cmd-export aws-show-role
+        cmd-export aws-generate-role
+        cmd-export aws-delete-role
+
+        cmd-export-ns util "Util namespace"
+        cmd-export util-cloudbreak-shell
+        cmd-export util-cloudbreak-shell-quiet
+        cmd-export util-token
+        cmd-export util-local-dev
+        cmd-export util-cleanup
     fi
 
     if [[ "$DEBUG" ]]; then
