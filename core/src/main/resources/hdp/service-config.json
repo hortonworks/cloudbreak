@@ -1,0 +1,233 @@
+{
+  "services": [
+    {
+      "name": "YARN",
+      "configurations": [
+        {
+          "type": "yarn-site",
+          "global": [
+            {
+              "name": "yarn.timeline-service.leveldb-timeline-store.path",
+              "prefix": "",
+              "directory": "timeline"
+            }
+          ],
+          "host": [
+            {
+              "name": "yarn.nodemanager.local-dirs",
+              "prefix": "",
+              "directory": "nodemanager"
+            },
+            {
+              "name": "yarn.nodemanager.log-dirs",
+              "prefix": "",
+              "directory": "nodemanager/log"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "HDFS",
+      "configurations": [
+        {
+          "type": "hdfs-site",
+          "global": [
+            {
+              "name": "dfs.namenode.checkpoint.dir",
+              "prefix": "",
+              "directory": "namesecondary"
+            },
+            {
+              "name": "dfs.namenode.name.dir",
+              "prefix": "",
+              "directory": "namenode"
+            },
+            {
+              "name": "dfs.journalnode.edits.dir",
+              "prefix": "",
+              "directory": "journalnode"
+            }
+          ],
+          "host": [
+            {
+              "name": "dfs.datanode.data.dir",
+              "prefix": "",
+              "directory": "datanode"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "HBASE",
+      "configurations": [
+        {
+          "type": "hbase-site",
+          "global": [
+            {
+              "name": "hbase.tmp.dir",
+              "prefix": "",
+              "directory": ""
+            }
+          ],
+          "host": []
+        }
+      ]
+    },
+    {
+      "name": "STORM",
+      "configurations": [
+        {
+          "type": "storm-site",
+          "global": [
+            {
+              "name": "storm.local.dir",
+              "prefix": "",
+              "directory": ""
+            }
+          ],
+          "host": []
+        }
+      ]
+    },
+    {
+      "name": "OOZIE",
+      "configurations": [
+        {
+          "type": "oozie-env",
+          "global": [
+            {
+              "name": "oozie_data_dir",
+              "prefix": "",
+              "directory": "data"
+            }
+          ],
+          "host": []
+        }
+      ]
+    },
+    {
+      "name": "ZOOKEEPER",
+      "configurations": [
+        {
+          "type": "zoo.cfg",
+          "global": [
+            {
+              "name": "dataDir",
+              "prefix": "",
+              "directory": ""
+            }
+          ],
+          "host": []
+        }
+      ]
+    },
+    {
+      "name": "FALCON",
+      "configurations": [
+        {
+          "type": "falcon-startup.properties",
+          "global": [
+            {
+              "name": "*.falcon.graph.serialize.path",
+              "prefix": "",
+              "directory": "data/lineage"
+            },
+            {
+              "name": "*.falcon.graph.storage.directory",
+              "prefix": "",
+              "directory": "data/lineage/graphdb"
+            },
+            {
+              "name": "*.config.store.uri",
+              "prefix": "file://",
+              "directory": "store"
+            }
+          ],
+          "host": []
+        },
+        {
+          "type": "falcon-env",
+          "global": [
+            {
+              "name": "falcon_local_dir",
+              "prefix": "",
+              "directory": ""
+            },
+            {
+              "name": "falcon_store_uri",
+              "prefix": "file://",
+              "directory": "store"
+            }
+          ],
+          "host": []
+        }
+      ]
+    },
+    {
+      "name": "ATLAS",
+      "configurations": [
+        {
+          "type": "application-properties",
+          "global": [
+            {
+              "name": "atlas.graph.index.search.directory",
+              "prefix": "",
+              "directory": "data/es"
+            },
+            {
+              "name": "atlas.graph.storage.directory",
+              "prefix": "",
+              "directory": "data/berkeley"
+            }
+          ],
+          "host": []
+        },
+        {
+          "type": "atlas-env",
+          "global": [
+            {
+              "name": "metadata_data_dir",
+              "prefix": "",
+              "directory": "metadata"
+            }
+          ],
+          "host": []
+        }
+      ]
+    },
+    {
+      "name": "METRICS",
+      "configurations": [
+        {
+          "type": "ams-site",
+          "global": [
+            {
+              "name": "timeline.metrics.aggregator.checkpoint.dir",
+              "prefix": "",
+              "directory": "checkpoint"
+            }
+          ],
+          "host": []
+        },
+        {
+          "type": "ams-hbase-site",
+          "global": [
+            {
+              "name": "hbase.tmp.dir",
+              "prefix": "",
+              "directory": "hbase-tmp"
+            },
+            {
+              "name": "hbase.rootdir",
+              "prefix": "file://",
+              "directory": "hbase"
+            }
+          ],
+          "host": []
+        }
+      ]
+    }
+  ]
+}

@@ -12,6 +12,7 @@ import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationServ
 import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
 import static java.util.Collections.singletonMap;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -626,9 +627,15 @@ public class AmbariClusterConnector {
 
     private void addBlueprint(Stack stack, AmbariClient ambariClient, Blueprint blueprint) {
         try {
-            ambariClient.addBlueprintWithHostgroupConfiguration(blueprint.getBlueprintText(), hadoopConfigurationService.getConfiguration(stack));
-            LOGGER.info("Blueprint added [Stack: {}, blueprint: '{}']", stack.getId(), blueprint.getId());
-        } catch (HttpResponseException e) {
+            Cluster cluster = stack.getCluster();
+            String blueprintText = blueprint.getBlueprintText();
+            Map<String, Map<String, Map<String, String>>> hostGroupConfig = hadoopConfigurationService.getHostGroupConfiguration(cluster);
+            blueprintText = ambariClient.extendBlueprintHostGroupConfiguration(blueprintText, hostGroupConfig);
+            Map<String, Map<String, String>> globalConfig = hadoopConfigurationService.getGlobalConfiguration(cluster);
+            blueprintText = ambariClient.extendBlueprintGlobalConfiguration(blueprintText, globalConfig);
+            ambariClient.addBlueprint(blueprintText);
+            LOGGER.info("Blueprint added [Stack: {}, blueprint id: {}]", stack.getId(), blueprint.getId());
+        } catch (IOException e) {
             if ("Conflict".equals(e.getMessage())) {
                 throw new BadRequestException("Ambari blueprint already exists.", e);
             } else if ("Bad Request".equals(e.getMessage())) {
