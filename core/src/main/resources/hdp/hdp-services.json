@@ -151,21 +151,21 @@
     },
     {
       "href": "http://108.59.81.195:8080/api/v1/stacks/HDP/versions/2.2/services/ZEPPELIN",
-      "StackServices" : {
-        "service_name" : "ZEPPELIN",
-        "stack_name" : "HDP",
-        "stack_version" : "2.2"
+      "StackServices": {
+        "service_name": "ZEPPELIN",
+        "stack_name": "HDP",
+        "stack_version": "2.2"
       },
-      "components" : [
+      "components": [
         {
-          "href" : "http://104.197.89.157:8080/api/v1/stacks/HDP/versions/2.2/services/ZEPPELIN/components/ZEPPELIN_MASTER",
-          "StackServiceComponents" : {
-            "component_name" : "ZEPPELIN_MASTER",
-            "service_name" : "ZEPPELIN",
+          "href": "http://104.197.89.157:8080/api/v1/stacks/HDP/versions/2.2/services/ZEPPELIN/components/ZEPPELIN_MASTER",
+          "StackServiceComponents": {
+            "component_name": "ZEPPELIN_MASTER",
+            "service_name": "ZEPPELIN",
             "cardinality": "1",
             "component_category": "MASTER",
-            "stack_name" : "HDP",
-            "stack_version" : "2.2"
+            "stack_name": "HDP",
+            "stack_version": "2.2"
           }
         }
       ]
@@ -972,6 +972,181 @@
             "service_name": "ZOOKEEPER",
             "stack_name": "HDP",
             "stack_version": "2.2"
+          }
+        }
+      ]
+    },
+    {
+      "href": "http://108.59.81.195:8080/api/v1/stacks/HDP/versions/2.3/services/ACCUMULO",
+      "StackServices": {
+        "service_name": "ACCUMULO",
+        "stack_name": "HDP",
+        "stack_version": "2.3"
+      },
+      "components": [
+        {
+          "href": "http://104.154.49.106:8080/api/v1/stacks/HDP/versions/2.3/services/ACCUMULO/components/ACCUMULO_CLIENT",
+          "StackServiceComponents": {
+            "cardinality": "1+",
+            "component_category": "CLIENT",
+            "component_name": "ACCUMULO_CLIENT",
+            "custom_commands": [],
+            "display_name": "Accumulo Client",
+            "is_client": true,
+            "is_master": false,
+            "service_name": "ACCUMULO",
+            "stack_name": "HDP",
+            "stack_version": "2.3"
+          }
+        },
+        {
+          "href": "http://104.155.28.108:8080/api/v1/stacks/HDP/versions/2.3/services/ACCUMULO/components/ACCUMULO_GC",
+          "StackServiceComponents": {
+            "cardinality": "1",
+            "component_category": "MASTER",
+            "component_name": "ACCUMULO_GC",
+            "custom_commands": [],
+            "display_name": "Accumulo GC",
+            "is_client": false,
+            "is_master": true,
+            "service_name": "ACCUMULO",
+            "stack_name": "HDP",
+            "stack_version": "2.3"
+          }
+        },
+        {
+          "href": "http://104.155.28.108:8080/api/v1/stacks/HDP/versions/2.3/services/ACCUMULO/components/ACCUMULO_MASTER",
+          "StackServiceComponents": {
+            "cardinality": "1",
+            "component_category": "MASTER",
+            "component_name": "ACCUMULO_MASTER",
+            "custom_commands": [],
+            "display_name": "Accumulo Master",
+            "is_client": false,
+            "is_master": true,
+            "service_name": "ACCUMULO",
+            "stack_name": "HDP",
+            "stack_version": "2.3"
+          }
+        },
+        {
+          "href": "http://104.155.28.108:8080/api/v1/stacks/HDP/versions/2.3/services/ACCUMULO/components/ACCUMULO_MONITOR",
+          "StackServiceComponents": {
+            "cardinality": "1",
+            "component_category": "MASTER",
+            "component_name": "ACCUMULO_MONITOR",
+            "custom_commands": [],
+            "display_name": "Accumulo Monitor",
+            "is_client": false,
+            "is_master": true,
+            "service_name": "ACCUMULO",
+            "stack_name": "HDP",
+            "stack_version": "2.3"
+          }
+        },
+        {
+          "href": "http://104.155.28.108:8080/api/v1/stacks/HDP/versions/2.3/services/ACCUMULO/components/ACCUMULO_TRACER",
+          "StackServiceComponents": {
+            "cardinality": "1",
+            "component_category": "MASTER",
+            "component_name": "ACCUMULO_TRACER",
+            "custom_commands": [],
+            "display_name": "Accumulo Tracer",
+            "is_client": false,
+            "is_master": true,
+            "service_name": "ACCUMULO",
+            "stack_name": "HDP",
+            "stack_version": "2.3"
+          }
+        },
+        {
+          "href": "http://104.155.28.108:8080/api/v1/stacks/HDP/versions/2.3/services/ACCUMULO/components/ACCUMULO_TSERVER",
+          "StackServiceComponents": {
+            "cardinality": "1+",
+            "component_category": "SLAVE",
+            "component_name": "ACCUMULO_TSERVER",
+            "custom_commands": [],
+            "display_name": "Accumulo TServer",
+            "is_client": false,
+            "is_master": false,
+            "service_name": "ACCUMULO",
+            "stack_name": "HDP",
+            "stack_version": "2.3"
+          }
+        }
+      ]
+    },
+    {
+      "href": "http://104.155.28.108:8080/api/v1/stacks/HDP/versions/2.3/services/ATLAS?fields=components/*",
+      "StackServices": {
+        "service_name": "ATLAS",
+        "stack_name": "HDP",
+        "stack_version": "2.3"
+      },
+      "components": [
+        {
+          "href": "http://104.155.28.108:8080/api/v1/stacks/HDP/versions/2.3/services/ATLAS/components/ATLAS_SERVER",
+          "StackServiceComponents": {
+            "cardinality": "1",
+            "component_category": "MASTER",
+            "component_name": "ATLAS_SERVER",
+            "custom_commands": [],
+            "display_name": "Atlas Metadata Server",
+            "is_client": false,
+            "is_master": true,
+            "service_name": "ATLAS",
+            "stack_name": "HDP",
+            "stack_version": "2.3"
+          }
+        }
+      ]
+    },
+    {
+      "href": "http://104.155.28.108:8080/api/v1/stacks/HDP/versions/2.3/services/MAHOUT?fields=components/*",
+      "StackServices": {
+        "service_name": "MAHOUT",
+        "stack_name": "HDP",
+        "stack_version": "2.3"
+      },
+      "components": [
+        {
+          "href": "http://104.155.28.108:8080/api/v1/stacks/HDP/versions/2.3/services/MAHOUT/components/MAHOUT",
+          "StackServiceComponents": {
+            "cardinality": "0+",
+            "component_category": "CLIENT",
+            "component_name": "MAHOUT",
+            "custom_commands": [],
+            "display_name": "Mahout",
+            "is_client": true,
+            "is_master": false,
+            "service_name": "MAHOUT",
+            "stack_name": "HDP",
+            "stack_version": "2.3"
+          }
+        }
+      ]
+    },
+    {
+      "href": "http://104.155.28.108:8080/api/v1/stacks/HDP/versions/2.3/services/RANGER_KMS?fields=components/*",
+      "StackServices": {
+        "service_name": "RANGER_KMS",
+        "stack_name": "HDP",
+        "stack_version": "2.3"
+      },
+      "components": [
+        {
+          "href": "http://104.155.28.108:8080/api/v1/stacks/HDP/versions/2.3/services/RANGER_KMS/components/RANGER_KMS_SERVER",
+          "StackServiceComponents": {
+            "cardinality": "1",
+            "component_category": "MASTER",
+            "component_name": "RANGER_KMS_SERVER",
+            "custom_commands": [],
+            "display_name": "Ranger KMS Server",
+            "is_client": false,
+            "is_master": true,
+            "service_name": "RANGER_KMS",
+            "stack_name": "HDP",
+            "stack_version": "2.3"
           }
         }
       ]
