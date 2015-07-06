@@ -565,6 +565,22 @@ _Note: Cloudbreak can maintain multiple cloud credentials (even for the same pro
 Once you have launched the cluster creation you can track the progress either on Cloudbreak UI or your cloud provider management UI.
 
 
+###Manage cluster
+
+The provisioned cluster can be managed from the Details tab. There are a few lifecycle management options available.
+
+`Termimate:` - terminates the infrastrucre and removes all cloud resources, including data
+
+`Stop:` - stops the infrastructure but keeps the data; a stopped cluster can be rebroight to the same state as previously been
+
+`Start:` - starts up the stopped cluster
+
+`Synch:` - resync the cluster state and metadata
+
+_Note: in a cloud based environment due to remote VM or Ambari service failures the `local` state of the cluster can be unsychronized from the remote cluster state - using the synch button the cluster is resynchronized and the right values are shown (e.g. number and types of instances, Ambari service health, etc)._
+
+`Reinstall:` - due to wrong Blueprints sometimes the cluster can't be provisioned. With re-install the stack provisionig can be restarted using the already provisioned cloud infrastructure
+
 _Note: Because Azure does not directly support third party public images we will have to copy the used image from VM Depot into your storage account. The steps below need to be finished once and only once before any stack is created for every affinity group:_
 
 _1. Get the VM image - http://vmdepot.msopentech.com/Vhd/Show?vhdId=42480&version=43564_
