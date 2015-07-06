@@ -69,7 +69,7 @@ public class SimpleContainerBootstrapRunner implements Callable<Boolean> {
         }
     }
 
-    public static SimpleContainerBootstrapRunner simpleContainerBootstrapRunner(ContainerBootstrap containerBootstrap, ExitCriteria exitCriteria,
+    public static Callable<Boolean> simpleContainerBootstrapRunner(ContainerBootstrap containerBootstrap, ExitCriteria exitCriteria,
             ExitCriteriaModel exitCriteriaModel, Map<String, String> mdcMap) {
         return new SimpleContainerBootstrapRunner(containerBootstrap, exitCriteria, exitCriteriaModel, mdcMap);
     }
