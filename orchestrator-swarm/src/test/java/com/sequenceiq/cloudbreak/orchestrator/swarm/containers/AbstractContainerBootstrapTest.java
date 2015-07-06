@@ -37,6 +37,7 @@ public abstract class AbstractContainerBootstrapTest {
     protected static final String DUMMY_NODE = "dummyNode";
     protected static final String DUMMY_GETAWAY_ADDRESS = "25.26.27.1";
     protected static final Set<String> DUMMY_VOLUMES = Sets.newHashSet("/var/path1", "/var/path2");
+    protected static final String[] CMD = new String[]{"cmd1", "cmd2"};
     private static final String DUMMY_CONTAINER_ID = "dummyContainerId";
 
     private ContainerBootstrap underTest;
@@ -118,6 +119,7 @@ public abstract class AbstractContainerBootstrapTest {
 
     public void mockCreateContainerCommand() {
         given(mockedCreateContainerCmd.withCmd(anyString())).willReturn(mockedCreateContainerCmd);
+        given(mockedCreateContainerCmd.withCmd(Matchers.<String>anyVararg())).willReturn(mockedCreateContainerCmd);
         given(mockedCreateContainerCmd.withName(anyString())).willReturn(mockedCreateContainerCmd);
         given(mockedCreateContainerCmd.withHostConfig(any(HostConfig.class))).willReturn(mockedCreateContainerCmd);
         given(mockedCreateContainerCmd.withEnv(Matchers.<String>anyVararg())).willReturn(mockedCreateContainerCmd);
@@ -130,6 +132,7 @@ public abstract class AbstractContainerBootstrapTest {
         given(mockedStartContainerCmd.withRestartPolicy(RestartPolicy.alwaysRestart())).willReturn(mockedStartContainerCmd);
         given(mockedStartContainerCmd.withBinds(Matchers.<Bind>anyVararg())).willReturn(mockedStartContainerCmd);
         given(mockedStartContainerCmd.withPrivileged(true)).willReturn(mockedStartContainerCmd);
+
     }
 
     public DockerClient getMockedDockerClient() {
