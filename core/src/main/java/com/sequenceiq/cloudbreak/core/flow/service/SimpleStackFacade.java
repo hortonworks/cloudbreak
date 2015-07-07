@@ -288,7 +288,6 @@ public class SimpleStackFacade implements StackFacade {
             MDCBuilder.buildMdcContext(stack);
             fireEventAndLog(actualContext.getStackId(), context, "Bootstrapping new node(s).", UPDATE_IN_PROGRESS);
             clusterBootstrapper.bootstrapNewNodes(actualContext);
-            stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Bootstrapping has been finished successfully.");
         } catch (Exception e) {
             LOGGER.error("Exception during the handling of munchausen setup: {}", e.getMessage());
             throw new CloudbreakException(e);
@@ -311,6 +310,7 @@ public class SimpleStackFacade implements StackFacade {
                 HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(cluster.getId(), actualContext.getInstanceGroup());
                 hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
             }
+            stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Stack upscale has been finished successfully.");
             context = new ClusterScalingContext(stack.getId(), actualContext.getCloudPlatform(),
                     hostGroupAdjustmentJson, actualContext.getUpscaleCandidateAddresses(), new ArrayList<HostMetadata>(), actualContext.getScalingType());
         } catch (Exception e) {
