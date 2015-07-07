@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 @Ignore("Rewrite test cases!")
-public class AmbariClusterInstallerTest {
+public class AmbariClusterConnectorTest {
 
     @InjectMocks
     @Spy
