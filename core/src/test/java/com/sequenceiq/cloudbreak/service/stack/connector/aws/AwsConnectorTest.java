@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -13,7 +15,6 @@ import java.util.Random;
 import java.util.Set;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -21,9 +22,14 @@ import org.mockito.MockitoAnnotations;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
+import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
+import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
+import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult;
+import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
@@ -38,8 +44,12 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.service.PollingResult;
+import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
+import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.connector.ConnectorTestUtil;
+import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstances;
 
 import reactor.bus.EventBus;
 
@@ -47,8 +57,6 @@ public class AwsConnectorTest {
     private static final String DUMMY_NUMBER_STR = "1";
     private static final int DUMMY_NUMBER = 1;
     private static final String DUMMY_SERVICE = "Dummy service";
-    @InjectMocks
-    private AwsConnector underTest;
 
     @Mock
     private AwsStackUtil awsStackUtil;
@@ -61,6 +69,39 @@ public class AwsConnectorTest {
 
     @Mock
     private AmazonEC2Client ec2Client;
+
+    @Mock
+    private CloudFormationStackUtil cloudFormationStackUtil;
+
+    @Mock
+    private AmazonAutoScalingClient amazonAutoScalingClient;
+
+    @Mock
+    private DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult;
+
+    @Mock
+    private PollingService<AwsInstances> awsPollingService;
+
+    @Mock
+    private PollingService<AutoScalingGroupReadyContext> autoScalingGroupReadyPollingService;
+
+    @Mock
+    private PollingService<CloudFormationStackContext> cloudFormationPollingService;
+
+    @Mock
+    private PollingService<EbsVolumeContext> ebsVolumeStatePollingService;
+
+    @Mock
+    private PollingService<SnapshotReadyContext> snapshotReadyPollingService;
+
+    @Mock
+    private PollingService<ConsoleOutputContext> consoleOutputPollingService;
+
+    @Mock
+    private CloudFormationStackStatusChecker cloudFormationStackStatusChecker;
+
+    @InjectMocks
+    private AwsConnector underTest;
 
     // Domain models
 
@@ -93,13 +134,20 @@ public class AwsConnectorTest {
     }
 
     @Test
-    @Ignore
     public void testDeleteStack() {
         // GIVEN
         instancesResult.setReservations(generateReservationsWithInstances());
         given(awsStackUtil.createEC2Client(Regions.DEFAULT_REGION, (AwsCredential) credential)).willReturn(ec2Client);
         given(ec2Client.describeInstances(any(DescribeInstancesRequest.class))).willReturn(instancesResult);
-        given(awsStackUtil.createCloudFormationClient(Regions.DEFAULT_REGION, (AwsCredential) credential)).willReturn(amazonCloudFormationClient);
+        given(awsStackUtil.createCloudFormationClient(any(Regions.class), any(AwsCredential.class))).willReturn(amazonCloudFormationClient);
+        given(amazonCloudFormationClient.describeStacks(any(DescribeStacksRequest.class))).willReturn(new DescribeStacksResult());
+        given(cloudFormationStackUtil.getAutoscalingGroupName(any(Stack.class), anyString())).willReturn("test");
+        given(cloudFormationStackUtil.getAutoscalingGroupName(any(Stack.class), any(AmazonCloudFormationClient.class), anyString())).willReturn("test");
+        given(awsStackUtil.createAutoScalingClient(any(Regions.class), any(AwsCredential.class))).willReturn(amazonAutoScalingClient);
+        given(amazonAutoScalingClient.describeAutoScalingGroups(any(DescribeAutoScalingGroupsRequest.class))).willReturn(describeAutoScalingGroupsResult);
+        given(describeAutoScalingGroupsResult.getAutoScalingGroups()).willReturn(new ArrayList<AutoScalingGroup>());
+        given(cloudFormationPollingService.pollWithTimeout(any(StatusCheckerTask.class), any(CloudFormationStackContext.class), anyInt(), anyInt()))
+                .willReturn(PollingResult.SUCCESS);
         doNothing().when(amazonCloudFormationClient).deleteStack(any(DeleteStackRequest.class));
         // WHEN
         underTest.deleteStack(stack, credential);
@@ -108,13 +156,20 @@ public class AwsConnectorTest {
     }
 
     @Test
-    @Ignore
     public void testDeleteStackWithoutInstanceResultReservations() {
         // GIVEN
         instancesResult.setReservations(new ArrayList<Reservation>());
         given(awsStackUtil.createEC2Client(Regions.DEFAULT_REGION, (AwsCredential) credential)).willReturn(ec2Client);
         given(ec2Client.describeInstances(any(DescribeInstancesRequest.class))).willReturn(instancesResult);
-        given(awsStackUtil.createCloudFormationClient(Regions.DEFAULT_REGION, (AwsCredential) credential)).willReturn(amazonCloudFormationClient);
+        given(awsStackUtil.createCloudFormationClient(any(Regions.class), any(AwsCredential.class))).willReturn(amazonCloudFormationClient);
+        given(amazonCloudFormationClient.describeStacks(any(DescribeStacksRequest.class))).willReturn(new DescribeStacksResult());
+        given(cloudFormationStackUtil.getAutoscalingGroupName(any(Stack.class), anyString())).willReturn("test");
+        given(cloudFormationStackUtil.getAutoscalingGroupName(any(Stack.class), any(AmazonCloudFormationClient.class), anyString())).willReturn("test");
+        given(awsStackUtil.createAutoScalingClient(any(Regions.class), any(AwsCredential.class))).willReturn(amazonAutoScalingClient);
+        given(amazonAutoScalingClient.describeAutoScalingGroups(any(DescribeAutoScalingGroupsRequest.class))).willReturn(describeAutoScalingGroupsResult);
+        given(describeAutoScalingGroupsResult.getAutoScalingGroups()).willReturn(new ArrayList<AutoScalingGroup>());
+        given(cloudFormationPollingService.pollWithTimeout(any(StatusCheckerTask.class), any(CloudFormationStackContext.class), anyInt(), anyInt()))
+                .willReturn(PollingResult.SUCCESS);
         doNothing().when(amazonCloudFormationClient).deleteStack(any(DeleteStackRequest.class));
         // WHEN
         underTest.deleteStack(stack, credential);

@@ -1,48 +1,55 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static org.mockito.BDDMockito.given;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyCollection;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.conf.EventBusConfig;
+import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
+import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.service.PollingResult;
+import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
+import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
-import reactor.bus.Event;
+import groovyx.net.http.HttpResponseException;
 import reactor.bus.EventBus;
-@Ignore("Rewrite test cases!")
+
+@RunWith(MockitoJUnitRunner.class)
 public class AmbariClusterConnectorTest {
 
-    @InjectMocks
-    @Spy
-    private AmbariClusterConnector underTest;
-
     @Mock
-    private ClusterRepository clusterRepository;
+    private TlsSecurityService tlsSecurityService;
 
     @Mock
     private EventBus reactor;
@@ -51,7 +58,35 @@ public class AmbariClusterConnectorTest {
     private AmbariClient ambariClient;
 
     @Mock
+    private TLSClientConfig tlsClientConfig;
+
+    @Mock
     private AmbariClientProvider ambariClientProvider;
+
+    @Mock
+    private HadoopConfigurationService hadoopConfigurationService;
+
+    @Mock
+    private PollingService<AmbariHostsCheckerContext> hostsPollingService;
+
+    @Mock
+    private AmbariHostsStatusCheckerTask ambariHostsStatusCheckerTask;
+
+    @Mock
+    private HostGroupRepository hostGroupRepository;
+
+    @Mock
+    private AmbariOperationService ambariOperationService;
+
+    @Mock
+    private ClusterRepository clusterRepository;
+
+    @Mock
+    private InstanceMetaDataRepository instanceMetadataRepository;
+
+    @InjectMocks
+    @Spy
+    private AmbariClusterConnector underTest = new AmbariClusterConnector();
 
     private Stack stack;
 
@@ -60,97 +95,45 @@ public class AmbariClusterConnectorTest {
     private Blueprint blueprint;
 
     @Before
-    public void setUp() {
-        underTest = new AmbariClusterConnector();
-        MockitoAnnotations.initMocks(this);
-        blueprint = createBlueprint();
-        cluster = createCluster(blueprint);
-        stack = createStack(cluster);
+    public void setUp() throws CloudbreakSecuritySetupException, HttpResponseException, InvalidHostGroupHostAssociation {
+        stack = TestUtil.stack();
+        blueprint = TestUtil.blueprint();
+        cluster = TestUtil.cluster(blueprint, stack, 1L);
+        stack.setCluster(cluster);
+        when(tlsSecurityService.buildTLSClientConfig(anyLong(), anyString())).thenReturn(tlsClientConfig);
+        when(ambariClient.extendBlueprintGlobalConfiguration(anyString(), anyMap())).thenReturn("");
+        when(ambariClient.extendBlueprintHostGroupConfiguration(anyString(), anyMap())).thenReturn("");
+        when(ambariClient.addBlueprint(anyString())).thenReturn("");
+        when(hadoopConfigurationService.getHostGroupConfiguration(any(Cluster.class))).thenReturn(new HashMap<String, Map<String, Map<String, String>>>());
+        when(ambariClientProvider.getAmbariClient(any(TLSClientConfig.class), anyString(), anyString())).thenReturn(ambariClient);
+        when(hostsPollingService.pollWithTimeout(any(AmbariHostsStatusCheckerTask.class), any(AmbariHostsCheckerContext.class), anyInt(), anyInt()))
+                .thenReturn(PollingResult.SUCCESS);
+        when(hostGroupRepository.findHostGroupsInCluster(anyLong())).thenReturn(cluster.getHostGroups());
+        when(ambariOperationService.waitForAmbariOperations(any(Stack.class), any(AmbariClient.class), anyMap())).thenReturn(PollingResult.SUCCESS);
+        when(ambariOperationService.waitForAmbariOperations(any(Stack.class), any(AmbariClient.class), any(StatusCheckerTask.class), anyMap()))
+                .thenReturn(PollingResult.SUCCESS);
+        when(clusterRepository.save(any(Cluster.class))).thenReturn(cluster);
+        when(instanceMetadataRepository.save(anyCollection())).thenReturn(stack.getRunningInstanceMetaData());
+        when(ambariClient.recommendAssignments(anyString())).thenReturn(createStringListMap());
+
     }
 
     @Test
     public void testInstallAmbari() throws Exception {
-        // GIVEN
-        Map<String, List<String>> strListMap = createStringListMap();
-        given(clusterRepository.save(cluster)).willReturn(cluster);
-        TLSClientConfig clientConfig = new TLSClientConfig(stack.getAmbariIp(), "/tmp/cert/stack-1");
-        doReturn(ambariClient).when(ambariClientProvider).getDefaultAmbariClient(clientConfig);
-        given(ambariClient.recommendAssignments(anyString())).willReturn(strListMap);
-        doNothing().when(ambariClient).createCluster(cluster.getName(), blueprint.getBlueprintName(), strListMap);
-        given(ambariClient.getRequestProgress()).willReturn(new BigDecimal(100.0));
-        // WHEN
-        underTest.buildAmbariCluster(stack);
-        // THEN
-        verify(reactor, times(1)).notify(any(EventBusConfig.class), any(Event.class));
+        Cluster result = underTest.buildAmbariCluster(stack);
+        assertEquals(cluster, result);
     }
 
-    @Test
-    public void testInstallAmbariWhenInstallFailed() throws Exception {
-        // GIVEN
-        Map<String, List<String>> strListMap = createStringListMap();
-        given(clusterRepository.save(cluster)).willReturn(cluster);
-        TLSClientConfig clientConfig = new TLSClientConfig(stack.getAmbariIp(), "/tmp/cert/stack-1");
-        doReturn(ambariClient).when(ambariClientProvider).getDefaultAmbariClient(clientConfig);
-        given(ambariClient.recommendAssignments(anyString())).willReturn(strListMap);
-        doNothing().when(ambariClient).createCluster(cluster.getName(), blueprint.getBlueprintName(), strListMap);
-        // WHEN
-        underTest.buildAmbariCluster(stack);
-        // THEN
-        verify(reactor, times(1)).notify(any(EventBusConfig.class), any(Event.class));
-    }
-
-    @Test
+    @Test(expected = AmbariOperationFailedException.class)
     public void testInstallAmbariWhenExceptionOccursShouldInstallationFailed() throws Exception {
-        // GIVEN
-        Map<String, List<String>> strListMap = createStringListMap();
-        given(clusterRepository.save(cluster)).willReturn(cluster);
-        TLSClientConfig clientConfig = new TLSClientConfig(stack.getAmbariIp(), "/tmp/cert/stack-1");
-        doReturn(ambariClient).when(ambariClientProvider).getDefaultAmbariClient(clientConfig);
-        given(ambariClient.recommendAssignments(anyString())).willReturn(strListMap);
-        doThrow(new IllegalArgumentException()).when(ambariClient).createCluster(cluster.getName(), blueprint.getBlueprintName(), strListMap);
-        // WHEN
+        doThrow(new IllegalArgumentException()).when(ambariClient).createCluster(anyString(), anyString(), anyMap());
         underTest.buildAmbariCluster(stack);
-        // THEN
-        verify(reactor, times(1)).notify(any(EventBusConfig.class), any(Event.class));
     }
 
-    @Test
+    @Test(expected = AmbariOperationFailedException.class)
     public void testInstallAmbariWhenReachedMaxPollingEventsShouldInstallationFailed() throws Exception {
-        // GIVEN
-        Map<String, List<String>> strListMap = createStringListMap();
-        // stack.setNodeCount(0);
-        given(clusterRepository.save(cluster)).willReturn(cluster);
-        TLSClientConfig clientConfig = new TLSClientConfig(stack.getAmbariIp(), "/tmp/cert/stack-1");
-        doReturn(ambariClient).when(ambariClientProvider).getDefaultAmbariClient(clientConfig);
-        given(ambariClient.recommendAssignments(anyString())).willReturn(strListMap);
-        // WHEN
+        when(ambariOperationService.waitForAmbariOperations(any(Stack.class), any(AmbariClient.class), anyMap())).thenReturn(PollingResult.TIMEOUT);
         underTest.buildAmbariCluster(stack);
-        // THEN
-        verify(reactor, times(1)).notify(any(EventBusConfig.class), any(Event.class));
-    }
-
-    private Stack createStack(Cluster cluster) {
-        Stack stack = new Stack();
-        stack.setId(1L);
-        //stack.setNodeCount(2);
-        stack.setCluster(cluster);
-        return stack;
-    }
-
-    private Cluster createCluster(Blueprint blueprint) {
-        Cluster cluster = new Cluster();
-        cluster.setId(1L);
-        cluster.setAmbariIp("172.17.0.2");
-        cluster.setName("dummyCluster");
-        cluster.setBlueprint(blueprint);
-        return cluster;
-    }
-
-    private Blueprint createBlueprint() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setId(1L);
-        blueprint.setBlueprintName("multi-node-yarn");
-        return blueprint;
     }
 
     private Map<String, List<String>> createStringListMap() {
