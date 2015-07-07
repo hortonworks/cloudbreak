@@ -18,7 +18,7 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
     private List<TemplateParam> requiredAWSParams = new ArrayList<>();
     private List<TemplateParam> requiredAzureParams = new ArrayList<>();
     private List<TemplateParam> requiredGcpParams = new ArrayList<>();
-
+    private List<TemplateParam> requiredOpenStackParams = new ArrayList<>();
 
     @Override
     public void initialize(ValidCredentialRequest constraintAnnotation) {
@@ -30,6 +30,9 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
         }
         for (GcpCredentialParam param : GcpCredentialParam.values()) {
             requiredGcpParams.add(param);
+        }
+        for (OpenStackCredentialParam param : OpenStackCredentialParam.values()) {
+            requiredOpenStackParams.add(param);
         }
     }
 
@@ -45,6 +48,9 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
                 break;
             case GCP:
                 valid = validateParams(request.getParameters(), context, requiredGcpParams);
+                break;
+            case OPENSTACK:
+                valid = validateParams(request.getParameters(), context, requiredOpenStackParams);
                 break;
             default:
                 break;
