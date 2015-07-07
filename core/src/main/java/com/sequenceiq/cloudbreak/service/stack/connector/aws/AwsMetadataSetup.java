@@ -19,6 +19,9 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
+import com.amazonaws.services.autoscaling.model.DescribeAutoScalingInstancesRequest;
+import com.amazonaws.services.autoscaling.model.DescribeAutoScalingInstancesResult;
+import com.amazonaws.services.autoscaling.model.DetachInstancesRequest;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
@@ -140,7 +143,7 @@ public class AwsMetadataSetup implements MetadataSetup {
     }
 
     @Override
-    public InstanceSyncState getState(Stack stack, String instanceId) {
+    public InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId) {
         InstanceSyncState instanceSyncState = IN_PROGRESS;
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
         try {
@@ -154,13 +157,16 @@ public class AwsMetadataSetup implements MetadataSetup {
                     instanceSyncState = RUNNING;
                 } else if ("terminated".equals(instanceState)) {
                     instanceSyncState = DELETED;
+                    detachInstance(stack, instanceGroup, instanceId);
                 }
             } else {
                 instanceSyncState = DELETED;
+                detachInstance(stack, instanceGroup, instanceId);
             }
         } catch (AmazonServiceException e) {
             if ("InvalidInstanceID.NotFound".equals(e.getErrorCode())) {
                 instanceSyncState = DELETED;
+                detachInstance(stack, instanceGroup, instanceId);
             } else {
                 throw new AwsResourceException("Failed to retrieve state of instance " + instanceId, e);
             }
@@ -179,5 +185,17 @@ public class AwsMetadataSetup implements MetadataSetup {
     public ResourceType getInstanceResourceType() {
         return null;
     }
+
+    private void detachInstance(Stack stack, InstanceGroup instanceGroup, String instanceId) {
+        AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(stack);
+        String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, instanceGroup.getGroupName());
+        DescribeAutoScalingInstancesResult result = amazonASClient.describeAutoScalingInstances(new DescribeAutoScalingInstancesRequest()
+                .withInstanceIds(instanceId));
+        if (!result.getAutoScalingInstances().isEmpty()) {
+            amazonASClient.detachInstances(new DetachInstancesRequest().withAutoScalingGroupName(asGroupName).withInstanceIds(instanceId)
+                    .withShouldDecrementDesiredCapacity(true));
+        }
+    }
+
 
 }

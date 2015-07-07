@@ -387,7 +387,7 @@ public class SimpleStackFacade implements StackFacade {
 
     @Override
     public FlowContext sync(FlowContext context) throws CloudbreakException {
-        StackStatusUpdateContext actualContext = (StackStatusUpdateContext) context;
+        DefaultFlowContext actualContext = (DefaultFlowContext) context;
         try {
             Stack stack = stackService.getById(actualContext.getStackId());
             MDCBuilder.buildMdcContext(stack);

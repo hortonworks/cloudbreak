@@ -140,7 +140,7 @@ public class OpenStackMetadataSetup implements MetadataSetup {
     }
 
     @Override
-    public InstanceSyncState getState(Stack stack, String instanceId) {
+    public InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId) {
         try {
             InstanceSyncState result;
             OSClient osClient = openStackUtil.createOSClient(stack);
