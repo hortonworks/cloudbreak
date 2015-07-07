@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.domain.Network;
 public class NetworkConfigurationValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkConfigurationValidator.class);
 
-    public void validateNetworkForStack(Network network, Set<InstanceGroup> instanceGroups) {
+    public boolean validateNetworkForStack(Network network, Set<InstanceGroup> instanceGroups) {
         SubnetUtils utils = new SubnetUtils(network.getSubnetCIDR());
         int addressCount = utils.getInfo().getAddressCount();
         int nodeCount = 0;
@@ -27,5 +27,6 @@ public class NetworkConfigurationValidator {
             throw new BadRequestException(
                     String.format("Cannot assign more than %s addresses in the selected subnet.", addressCount));
         }
+        return true;
     }
 }
