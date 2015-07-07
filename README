@@ -1,0 +1,32 @@
+<!---
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+Cloudbreak
+==========
+
+Cloudbreak is the tool to provision and manage Apache Hadoop clusters in the cloud. Cloudbreak can be used to launch clusters in public cloud infrastructure platforms such as Microsoft Azure, Amazon Web Services (AWS), and Google Cloud Platform. Cloudbreak uses Docker technology to deploy the requisite containers cloud-agnostically and uses Apache Ambari (via Ambari Blueprints) to install and manage the Hadoop cluster. Cloudbreak tool itself is delivered as a set of docker containers so installation of Cloudbreak involve downloading and running bunch of Docker containers which comprises the Cloudbreak tool.  
+
+## Requirements
+
+To run Cloudbreak, following systems requirements must be met:
+- RedHat / CentOS / Oracle Linux 6 (64-bit)
+- Docker 1.6.0 (or later)
+- Internet connectivity to access public docker registry or private docker registry in-house.
+
+
+## License
+
+Cloudbreak is released under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+

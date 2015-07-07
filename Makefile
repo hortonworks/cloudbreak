@@ -1,5 +1,6 @@
 NAME=cloudbreak-deployer
 BINARYNAME=cbd
+ARTIFACTS=LICENSE.txt NOTICE.txt VERSION README
 ARCH=$(shell uname -m)
 VERSION=$(shell cat VERSION)
 GIT_REV=$(shell git rev-parse --short HEAD)
@@ -45,8 +46,12 @@ install-test:
 
 release:
 	rm -rf release && mkdir release
-	tar -zcf release/$(NAME)_$(VERSION)_Linux_$(ARCH).tgz -C build/Linux $(BINARYNAME)
-	tar -zcf release/$(NAME)_$(VERSION)_Darwin_$(ARCH).tgz -C build/Darwin $(BINARYNAME)
+
+	cp $(ARTIFACTS) build/Linux/
+	tar -zcf release/$(NAME)_$(VERSION)_Linux_$(ARCH).tgz -C build/Linux $(ARTIFACTS) $(BINARYNAME)
+	cp $(ARTIFACTS) build/Darwin/
+	tar -zcf release/$(NAME)_$(VERSION)_Darwin_$(ARCH).tgz -C build/Darwin $(ARTIFACTS) $(BINARYNAME)
+
 	gh-release checksums sha256
 	gh-release create sequenceiq/$(NAME) $(VERSION) $(GIT_BRANCH) v$(VERSION)
 

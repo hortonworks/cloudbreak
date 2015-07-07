@@ -1,4 +1,4 @@
--e ## Unreleased
+## Unreleased
 
 ### Fixed
 
@@ -7,6 +7,9 @@
 ### Removed
 
 ### Changed
+
+- License changed from MIT to Apache v2
+- release artifact includes additional files: license/readme/notes
 
 ## [v0.5.4] - 2015-07-03
 
