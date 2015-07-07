@@ -1,55 +1,122 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import static com.sequenceiq.cloudbreak.service.stack.connector.DiskAttachUtils.buildDiskPathString;
+import static com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils.buildVolumePathString;
+import static com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils.getFirstVolume;
 
-import java.util.Collections;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Service
 public class HadoopConfigurationService {
 
-    public static final String YARN_SITE = "yarn-site";
-    public static final String HDFS_SITE = "hdfs-site";
-    public static final String YARN_NODEMANAGER_LOCAL_DIRS = "yarn.nodemanager.local-dirs";
-    public static final String YARN_NODEMANAGER_LOG_DIRS = "yarn.nodemanager.log-dirs";
-    public static final String HDFS_DATANODE_DATA_DIRS = "dfs.datanode.data.dir";
-
     @Inject
     private HostGroupRepository hostGroupRepository;
+    private Map<String, ServiceConfig> serviceConfigs = new HashMap<>();
+    private ObjectMapper objectMapper = new ObjectMapper();
 
-    public Map<String, Map<String, Map<String, String>>> getConfiguration(Stack stack) {
-        Set<HostGroup> hostGroups = hostGroupRepository.findHostGroupsInCluster(stack.getCluster().getId());
+    @PostConstruct
+    public void init() throws IOException {
+        String serviceConfigJson = FileReaderUtils.readFileFromClasspath("hdp/service-config.json");
+        JsonNode services = objectMapper.readTree(serviceConfigJson).get("services");
+        for (JsonNode service : services) {
+            String serviceName = service.get("name").asText();
+            JsonNode configurations = service.get("configurations");
+            Map<String, List<ConfigProperty>> globalConfig = new HashMap<>();
+            Map<String, List<ConfigProperty>> hostConfig = new HashMap<>();
+            for (JsonNode config : configurations) {
+                String type = config.get("type").asText();
+                List<ConfigProperty> global = toList(config.get("global"));
+                if (!global.isEmpty()) {
+                    globalConfig.put(type, global);
+                }
+                List<ConfigProperty> host = toList(config.get("host"));
+                if (!host.isEmpty()) {
+                    hostConfig.put(type, host);
+                }
+            }
+            serviceConfigs.put(serviceName, new ServiceConfig(serviceName, globalConfig, hostConfig));
+        }
+    }
+
+    public Map<String, Map<String, String>> getGlobalConfiguration(Cluster cluster) throws IOException {
+        Map<String, Map<String, String>> config = new HashMap<>();
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode blueprintNode = mapper.readTree(cluster.getBlueprint().getBlueprintText());
+        JsonNode hostGroups = blueprintNode.path("host_groups");
+        for (JsonNode hostGroup : hostGroups) {
+            JsonNode components = hostGroup.path("components");
+            for (JsonNode component : components) {
+                String name = component.path("name").asText();
+                config.putAll(getProperties(name, true, null));
+            }
+        }
+        return config;
+    }
+
+    public Map<String, Map<String, Map<String, String>>> getHostGroupConfiguration(Cluster cluster) {
+        Set<HostGroup> hostGroups = hostGroupRepository.findHostGroupsInCluster(cluster.getId());
         Map<String, Map<String, Map<String, String>>> hadoopConfig = new HashMap<>();
         for (HostGroup hostGroup : hostGroups) {
-            Map<String, Map<String, String>> tmpConfig = new HashMap<>();
             int volumeCount = hostGroup.getInstanceGroup().getTemplate().getVolumeCount();
-            if (volumeCount > 0) {
-                tmpConfig.put(YARN_SITE, getYarnSiteConfigs(buildDiskPathString(volumeCount, "nodemanager")));
-                tmpConfig.put(HDFS_SITE, getHDFSSiteConfigs(buildDiskPathString(volumeCount, "datanode")));
-                hadoopConfig.put(hostGroup.getName(), tmpConfig);
+            Map<String, Map<String, String>> componentConfig = new HashMap<>();
+            for (String serviceName : serviceConfigs.keySet()) {
+                componentConfig.putAll(getProperties(serviceName, false, volumeCount));
             }
+            hadoopConfig.put(hostGroup.getName(), componentConfig);
         }
         return hadoopConfig;
     }
 
-    private Map<String, String> getYarnSiteConfigs(String localDirs) {
-        Map<String, String> yarnConfigs = new HashMap<>();
-        yarnConfigs.put(YARN_NODEMANAGER_LOCAL_DIRS, localDirs);
-        yarnConfigs.put(YARN_NODEMANAGER_LOG_DIRS, localDirs);
-        return yarnConfigs;
+    private List<ConfigProperty> toList(JsonNode nodes) {
+        List<ConfigProperty> list = new ArrayList<>();
+        for (JsonNode node : nodes) {
+            list.add(new ConfigProperty(node.get("name").asText(), node.get("directory").asText(), node.get("prefix").asText()));
+        }
+        return list;
     }
 
-    private Map<String, String> getHDFSSiteConfigs(String localDirs) {
-        return Collections.singletonMap(HDFS_DATANODE_DATA_DIRS, localDirs);
+    private Map<String, Map<String, String>> getProperties(String name, boolean global, Integer volumeCount) {
+        Map<String, Map<String, String>> result = new HashMap<>();
+        String serviceName = getServiceName(name);
+        if (serviceName != null) {
+            ServiceConfig serviceConfig = serviceConfigs.get(serviceName);
+            Map<String, List<ConfigProperty>> config = global ? serviceConfig.getGlobalConfig() : serviceConfig.getHostGroupConfig();
+            for (String siteConfig : config.keySet()) {
+                Map<String, String> properties = new HashMap<>();
+                for (ConfigProperty property : config.get(siteConfig)) {
+                    String directory = serviceName.toLowerCase() + (property.getDirectory().isEmpty() ? "" : "/" + property.getDirectory());
+                    String value = global ? property.getPrefix() + getFirstVolume(directory) : buildVolumePathString(volumeCount, directory);
+                    properties.put(property.getName(), value);
+                }
+                result.put(siteConfig, properties);
+            }
+        }
+        return result;
     }
+
+    private String getServiceName(String componentName) {
+        for (String serviceName : serviceConfigs.keySet()) {
+            if (componentName.toLowerCase().startsWith(serviceName.toLowerCase())) {
+                return serviceName;
+            }
+        }
+        return null;
+    }
+
 }
