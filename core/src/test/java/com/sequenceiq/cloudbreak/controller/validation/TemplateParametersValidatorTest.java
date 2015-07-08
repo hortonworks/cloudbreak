@@ -19,7 +19,6 @@ import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
 import javax.validation.metadata.ConstraintDescriptor;
 
-import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 import org.hibernate.validator.internal.engine.constraintvalidation.ConstraintValidatorContextImpl;
 import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.junit.Before;
@@ -32,13 +31,18 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.google.common.collect.ImmutableList;
+import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
+import com.sequenceiq.cloudbreak.domain.AzureVmType;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.GcpDiskType;
+import com.sequenceiq.cloudbreak.domain.GcpInstanceType;
+import com.sequenceiq.cloudbreak.domain.GcpRawDiskType;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ProvisionParametersValidatorTest {
+public class TemplateParametersValidatorTest {
 
     @InjectMocks
-    private ProvisionParametersValidator underTest;
+    private TemplateParametersValidator underTest;
 
     @Mock
     private ConstraintValidatorContext constraintValidatorContext;
@@ -195,6 +199,193 @@ public class ProvisionParametersValidatorTest {
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
     }
+
+    @Test
+    public void azureTemplateJsonWithVmTypeMissingFails() {
+        TemplateRequest templateJson = new TemplateRequest();
+        templateJson.setCloudPlatform(CloudPlatform.AZURE);
+        templateJson.setDescription("description");
+        templateJson.setName("name");
+        Map<String, Object> parameters = new HashMap<>();
+        templateJson.setVolumeCount(1);
+        templateJson.setVolumeSize(30);
+        templateJson.setParameters(parameters);
+        assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
+    }
+
+    @Test
+    public void azureTemplateJsonWithInvalidVmTypeFails() {
+        TemplateRequest templateJson = new TemplateRequest();
+        templateJson.setCloudPlatform(CloudPlatform.AZURE);
+        templateJson.setDescription("description");
+        templateJson.setName("name");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(AzureTemplateParam.VMTYPE.getName(), "invalid");
+        templateJson.setVolumeCount(1);
+        templateJson.setVolumeSize(30);
+        templateJson.setParameters(parameters);
+        assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
+    }
+
+    @Test
+    public void azureTemplateJsonWithValidReturnTrue() {
+        TemplateRequest templateJson = new TemplateRequest();
+        templateJson.setCloudPlatform(CloudPlatform.AZURE);
+        templateJson.setDescription("description");
+        templateJson.setName("name");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(AzureTemplateParam.VMTYPE.getName(), AzureVmType.A6.name());
+        templateJson.setVolumeCount(3);
+        templateJson.setVolumeSize(100);
+        templateJson.setParameters(parameters);
+        assertEquals(underTest.isValid(templateJson, constraintValidatorContext), true);
+    }
+
+    @Test
+    public void gcpTemplateJsonWithInvalidDiskTypeFails() {
+        TemplateRequest templateJson = new TemplateRequest();
+        templateJson.setCloudPlatform(CloudPlatform.GCP);
+        templateJson.setDescription("description");
+        templateJson.setName("name");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(GcpTemplateParam.CONTAINERCOUNT.getName(), 1);
+        parameters.put(GcpTemplateParam.INSTANCETYPE.getName(), GcpInstanceType.G1_SMALL);
+        parameters.put(GcpTemplateParam.TYPE.getName(), "invalid");
+
+        templateJson.setVolumeCount(6);
+        templateJson.setVolumeSize(30);
+        templateJson.setParameters(parameters);
+        assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
+    }
+
+    @Test
+    public void gcpTemplateJsonWithInvalidInstanceTypeFails() {
+        TemplateRequest templateJson = new TemplateRequest();
+        templateJson.setCloudPlatform(CloudPlatform.GCP);
+        templateJson.setDescription("description");
+        templateJson.setName("name");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(GcpTemplateParam.CONTAINERCOUNT.getName(), 1);
+        parameters.put(GcpTemplateParam.INSTANCETYPE.getName(), "invalid");
+        parameters.put(GcpTemplateParam.TYPE.getName(), GcpDiskType.PERSISTENT.name());
+
+        templateJson.setVolumeCount(6);
+        templateJson.setVolumeSize(30);
+        templateJson.setParameters(parameters);
+        assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
+    }
+
+    @Test
+    public void gcpTemplateJsonWithMissingInstanceTypeFails() {
+        TemplateRequest templateJson = new TemplateRequest();
+        templateJson.setCloudPlatform(CloudPlatform.GCP);
+        templateJson.setDescription("description");
+        templateJson.setName("name");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(GcpTemplateParam.CONTAINERCOUNT.getName(), 1);
+        parameters.put(GcpTemplateParam.TYPE.getName(), GcpDiskType.PERSISTENT.name());
+
+        templateJson.setVolumeCount(6);
+        templateJson.setVolumeSize(30);
+        templateJson.setParameters(parameters);
+        assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
+    }
+
+    @Test
+    public void gcpTemplateJsonWithMissingDiskTypeReturnSuccess() {
+        TemplateRequest templateJson = new TemplateRequest();
+        templateJson.setCloudPlatform(CloudPlatform.GCP);
+        templateJson.setDescription("description");
+        templateJson.setName("name");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(GcpTemplateParam.CONTAINERCOUNT.getName(), 1);
+        parameters.put(GcpTemplateParam.INSTANCETYPE.getName(), GcpInstanceType.G1_SMALL.name());
+
+        templateJson.setVolumeCount(6);
+        templateJson.setVolumeSize(30);
+        templateJson.setParameters(parameters);
+        assertEquals(underTest.isValid(templateJson, constraintValidatorContext), true);
+    }
+
+    @Test
+    public void gcpTemplateJsonWithValidValuesMissingContainerCountSuccess() {
+        TemplateRequest templateJson = new TemplateRequest();
+        templateJson.setCloudPlatform(CloudPlatform.GCP);
+        templateJson.setDescription("description");
+        templateJson.setName("name");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(GcpTemplateParam.INSTANCETYPE.getName(), GcpInstanceType.G1_SMALL.name());
+        parameters.put(GcpTemplateParam.TYPE.getName(), GcpRawDiskType.HDD.name());
+
+        templateJson.setVolumeCount(6);
+        templateJson.setVolumeSize(30);
+        templateJson.setParameters(parameters);
+        assertEquals(underTest.isValid(templateJson, constraintValidatorContext), true);
+    }
+
+    @Test
+    public void gcpTemplateJsonWithValidValuesReturnTrue() {
+        TemplateRequest templateJson = new TemplateRequest();
+        templateJson.setCloudPlatform(CloudPlatform.GCP);
+        templateJson.setDescription("description");
+        templateJson.setName("name");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(GcpTemplateParam.CONTAINERCOUNT.getName(), 1);
+        parameters.put(GcpTemplateParam.INSTANCETYPE.getName(), GcpInstanceType.G1_SMALL.name());
+        parameters.put(GcpTemplateParam.TYPE.getName(), GcpRawDiskType.HDD.name());
+
+        templateJson.setVolumeCount(6);
+        templateJson.setVolumeSize(30);
+        templateJson.setParameters(parameters);
+        assertEquals(underTest.isValid(templateJson, constraintValidatorContext), true);
+    }
+
+    @Test
+    public void openStackTemplateJsonWithValidValuesReturnTrue() {
+        TemplateRequest templateJson = new TemplateRequest();
+        templateJson.setCloudPlatform(CloudPlatform.OPENSTACK);
+        templateJson.setDescription("description");
+        templateJson.setName("name");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(OpenStackTemplateParam.INSTANCE_TYPE.getName(), "small");
+        parameters.put(OpenStackTemplateParam.PUBLIC_NET_ID.getName(), "netid");
+
+        templateJson.setVolumeCount(6);
+        templateJson.setVolumeSize(30);
+        templateJson.setParameters(parameters);
+        assertEquals(underTest.isValid(templateJson, constraintValidatorContext), true);
+    }
+
+    @Test
+    public void openStackTemplateJsonWithMissingInstanceTypeFailes() {
+        TemplateRequest templateJson = new TemplateRequest();
+        templateJson.setCloudPlatform(CloudPlatform.OPENSTACK);
+        templateJson.setDescription("description");
+        templateJson.setName("name");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(OpenStackTemplateParam.PUBLIC_NET_ID.getName(), "netid");
+
+        templateJson.setVolumeCount(10);
+        templateJson.setVolumeSize(30);
+        templateJson.setParameters(parameters);
+        assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
+    }
+
+    @Test
+    public void openStackTemplateJsonWithMissingPublicNetIdReturnTrue() {
+        TemplateRequest templateJson = new TemplateRequest();
+        templateJson.setCloudPlatform(CloudPlatform.OPENSTACK);
+        templateJson.setDescription("description");
+        templateJson.setName("name");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(OpenStackTemplateParam.INSTANCE_TYPE.getName(), "small");
+
+        templateJson.setVolumeCount(6);
+        templateJson.setVolumeSize(30);
+        templateJson.setParameters(parameters);
+        assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
+    }
+
 
     private class DummyAnnotation implements Annotation {
 

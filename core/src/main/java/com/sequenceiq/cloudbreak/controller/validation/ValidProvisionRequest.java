@@ -10,7 +10,7 @@ import javax.validation.Payload;
 
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = ProvisionParametersValidator.class)
+@Constraint(validatedBy = TemplateParametersValidator.class)
 public @interface ValidProvisionRequest {
 
     String message() default "Failed to validate provision request parameters.";

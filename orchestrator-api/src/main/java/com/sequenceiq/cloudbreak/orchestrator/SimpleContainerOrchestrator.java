@@ -11,7 +11,7 @@ public abstract class SimpleContainerOrchestrator implements ContainerOrchestrat
         this.exitCriteria = exitCriteria;
     }
 
-    protected ParallelContainerRunner getParallelContainerRunner() {
+    public ParallelContainerRunner getParallelContainerRunner() {
         return parallelContainerRunner;
     }
 

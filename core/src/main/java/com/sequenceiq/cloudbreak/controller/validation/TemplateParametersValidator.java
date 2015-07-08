@@ -18,13 +18,15 @@ import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
  * format.
  */
 @Component
-public class ProvisionParametersValidator implements ConstraintValidator<ValidProvisionRequest, TemplateRequest> {
+public class TemplateParametersValidator implements ConstraintValidator<ValidProvisionRequest, TemplateRequest> {
 
     @Inject
     private List<ParameterValidator> parameterValidators;
 
     private List<TemplateParam> awsParams = new ArrayList<>();
     private List<TemplateParam> azureParams = new ArrayList<>();
+    private List<TemplateParam> gcpParams = new ArrayList<>();
+    private List<TemplateParam> openStackParams = new ArrayList<>();
 
     @Override
     public void initialize(ValidProvisionRequest constraintAnnotation) {
@@ -33,6 +35,12 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
         }
         for (AzureTemplateParam param : AzureTemplateParam.values()) {
             azureParams.add(param);
+        }
+        for (GcpTemplateParam param : GcpTemplateParam.values()) {
+            gcpParams.add(param);
+        }
+        for (OpenStackTemplateParam param : OpenStackTemplateParam.values()) {
+            openStackParams.add(param);
         }
     }
 
@@ -46,6 +54,12 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
             case AZURE:
                 valid = validateAzureParams(request, context);
                 break;
+            case GCP:
+                valid = validateGcpParams(request, context);
+                break;
+            case OPENSTACK:
+                valid = validateOpenStackParams(request, context);
+                break;
             default:
                 break;
         }
@@ -55,6 +69,24 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
     private boolean validateAzureParams(TemplateRequest request, ConstraintValidatorContext context) {
         for (ParameterValidator validator : parameterValidators) {
             if (!validator.validate(request.getParameters(), context, azureParams)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean validateGcpParams(TemplateRequest request, ConstraintValidatorContext context) {
+        for (ParameterValidator validator : parameterValidators) {
+            if (!validator.validate(request.getParameters(), context, gcpParams)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean validateOpenStackParams(TemplateRequest request, ConstraintValidatorContext context) {
+        for (ParameterValidator validator : parameterValidators) {
+            if (!validator.validate(request.getParameters(), context, openStackParams)) {
                 return false;
             }
         }

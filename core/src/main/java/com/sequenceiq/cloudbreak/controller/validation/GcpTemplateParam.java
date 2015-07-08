@@ -2,12 +2,13 @@ package com.sequenceiq.cloudbreak.controller.validation;
 
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.GcpInstanceType;
+import com.sequenceiq.cloudbreak.domain.GcpRawDiskType;
 
 public enum GcpTemplateParam implements TemplateParam {
 
     INSTANCETYPE("gcpInstanceType", true, GcpInstanceType.class, Optional.<String>absent()),
     CONTAINERCOUNT("containerCount", false, Integer.class, Optional.<String>absent()),
-    TYPE("volumeType", false, GcpInstanceType.class, Optional.<String>absent());
+    TYPE("volumeType", false, GcpRawDiskType.class, Optional.<String>absent());
 
     private final String paramName;
     private final Class clazz;

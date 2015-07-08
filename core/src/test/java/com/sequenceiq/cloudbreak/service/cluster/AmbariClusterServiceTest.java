@@ -7,9 +7,12 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,23 +25,23 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.core.flow.FlowManager;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
@@ -48,6 +51,7 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
@@ -55,11 +59,9 @@ import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 import groovyx.net.http.HttpResponseException;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-public class AmbariClusterServiceTest {
 
-    @InjectMocks
-    @Spy
-    private AmbariClusterService underTest;
+@RunWith(MockitoJUnitRunner.class)
+public class AmbariClusterServiceTest {
 
     @Mock
     private StackRepository stackRepository;
@@ -94,11 +96,18 @@ public class AmbariClusterServiceTest {
     @Mock
     private TlsSecurityService tlsSecurityService;
 
+    @Mock
+    private FlowManager flowManager;
+
     @Captor
     private ArgumentCaptor<Event<UpdateAmbariHostsRequest>> eventCaptor;
 
     @Captor
     private ArgumentCaptor<String> eventTypeCaptor;
+
+    @InjectMocks
+    @Spy
+    private AmbariClusterService underTest = new AmbariClusterService();
 
     private Stack stack;
 
@@ -110,15 +119,15 @@ public class AmbariClusterServiceTest {
 
     @Before
     public void setUp() throws CloudbreakSecuritySetupException {
-        underTest = new AmbariClusterService();
-        MockitoAnnotations.initMocks(this);
-        cluster = createCluster();
-        stack = createStack(cluster);
+        stack = TestUtil.stack();
+        cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
+        stack.setCluster(cluster);
         clusterRequest = new ClusterRequest();
         clusterResponse = new ClusterResponse();
-        given(stackRepository.findById(anyLong())).willReturn(stack);
-        given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
-        given(stackRepository.findOne(anyLong())).willReturn(stack);
+        when(stackRepository.findById(anyLong())).thenReturn(stack);
+        when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
+        when(stackRepository.findOne(anyLong())).thenReturn(stack);
+        when(clusterRepository.save(any(Cluster.class))).thenReturn(cluster);
         given(tlsSecurityService.buildTLSClientConfig(anyLong(), anyString())).willReturn(new TLSClientConfig("", "/tmp"));
     }
 
@@ -213,7 +222,6 @@ public class AmbariClusterServiceTest {
     }
 
     @Test
-    @Ignore("Rewrite the test not to use reactor!")
     public void testUpdateHostsForDownscaleFilterOneHost() throws ConnectException, CloudbreakSecuritySetupException {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
@@ -256,17 +264,14 @@ public class AmbariClusterServiceTest {
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node2")).thenReturn(instanceMetaData2);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node4")).thenReturn(instanceMetaData4);
+        doNothing().when(flowManager).triggerClusterDownscale(anyObject());
 
         underTest.updateHosts(stack.getId(), json);
 
-        verify(reactor).notify(eventCaptor.capture(), eventCaptor.capture());
-        List<HostMetadata> candidates = eventCaptor.getValue().getData().getDecommissionCandidates();
-        assertEquals(1, candidates.size());
-        assertEquals("node4", candidates.get(0).getHostName());
+        verify(flowManager, times(1)).triggerClusterDownscale(anyObject());
     }
 
     @Test
-    @Ignore("Rewrite test not to use reactor!")
     public void testUpdateHostsForDownscaleSelectNodesWithLessData() throws ConnectException, CloudbreakSecuritySetupException {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
@@ -304,17 +309,14 @@ public class AmbariClusterServiceTest {
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node1")).thenReturn(instanceMetaData1);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node2")).thenReturn(instanceMetaData2);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
+        doNothing().when(flowManager).triggerClusterDownscale(anyObject());
 
         underTest.updateHosts(stack.getId(), json);
 
-        verify(reactor).notify(eventCaptor.capture(), eventCaptor.capture());
-        List<HostMetadata> candidates = eventCaptor.getValue().getData().getDecommissionCandidates();
-        assertEquals(1, candidates.size());
-        assertEquals("node1", candidates.get(0).getHostName());
+        verify(flowManager, times(1)).triggerClusterDownscale(anyObject());
     }
 
     @Test
-    @Ignore("Not to use reactor")
     public void testUpdateHostsForDownscaleSelectMultipleNodesWithLessData() throws Exception {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
@@ -358,14 +360,11 @@ public class AmbariClusterServiceTest {
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node2")).thenReturn(instanceMetaData2);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node4")).thenReturn(instanceMetaData3);
+        doNothing().when(flowManager).triggerClusterDownscale(anyObject());
 
         underTest.updateHosts(stack.getId(), json);
 
-        verify(reactor).notify(eventCaptor.capture(), eventCaptor.capture());
-        List<HostMetadata> candidates = eventCaptor.getValue().getData().getDecommissionCandidates();
-        assertEquals(2, candidates.size());
-        assertEquals("node1", candidates.get(0).getHostName());
-        assertEquals("node4", candidates.get(1).getHostName());
+        verify(flowManager, times(1)).triggerClusterDownscale(anyObject());
     }
 
     @Test
@@ -415,25 +414,5 @@ public class AmbariClusterServiceTest {
         }
 
         assertEquals("Trying to move '10000' bytes worth of data to nodes with '11000' bytes of capacity is not allowed", result.getMessage());
-    }
-
-    private Stack createStack(Cluster cluster) {
-        Stack stack = new Stack();
-        stack.setId(1L);
-        stack.setCluster(cluster);
-        return stack;
-    }
-
-    private Cluster createCluster() {
-        Cluster cluster = new Cluster();
-        cluster.setId(1L);
-        cluster.setName("dummyCluster");
-        Blueprint blueprint = new Blueprint();
-        cluster.setAmbariIp("52.53.54.100");
-        blueprint.setId(1L);
-        blueprint.setBlueprintText("{\"host_groups\":[{\"name\":\"slave_1\",\"components\":[{\"name\":\"DATANODE\"}]}]}");
-        blueprint.setName("multi-node-yarn");
-        cluster.setBlueprint(blueprint);
-        return cluster;
     }
 }

@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.AzureNetwork;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureVmType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
+import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -120,14 +122,37 @@ public class TestUtil {
         return instanceGroups;
     }
 
+    public static Set<InstanceGroup> generateAzureInstanceGroupsByNodeCount(int ...count) {
+        Set<InstanceGroup> instanceGroups = new HashSet<>();
+        instanceGroups.add(instanceGroup(1L, InstanceGroupType.GATEWAY, azureTemplate(1L), count[0]));
+        for (int i = 1; i < count.length; i++) {
+            instanceGroups.add(instanceGroup(1L, InstanceGroupType.CORE, azureTemplate(1L), count[i]));
+        }
+        return instanceGroups;
+    }
+
     public static InstanceGroup instanceGroup(Long id, InstanceGroupType instanceGroupType, Template template) {
+        return instanceGroup(id, instanceGroupType, template, 1);
+    }
+
+    public static InstanceGroup instanceGroup(Long id, InstanceGroupType instanceGroupType, Template template, int nodeCount) {
         InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setNodeCount(1);
+        instanceGroup.setNodeCount(nodeCount);
         instanceGroup.setGroupName("is" + id);
         instanceGroup.setInstanceGroupType(instanceGroupType);
         instanceGroup.setTemplate(template);
         instanceGroup.setInstanceMetaData(generateInstanceMetaDatas(1, id, instanceGroup));
         return instanceGroup;
+    }
+
+    public static Network network() {
+        return network("10.0.0.1/16");
+    }
+
+    public static Network network(String subnet) {
+        Network network = new AzureNetwork();
+        network.setSubnetCIDR(subnet);
+        return network;
     }
 
     public static InstanceMetaData instanceMetaData(Long id, InstanceStatus instanceStatus, boolean ambariServer, InstanceGroup instanceGroup) {
