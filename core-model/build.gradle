@@ -7,6 +7,10 @@ repositories {
     mavenCentral()
 }
 
+
+apply plugin: 'jacoco'
+apply plugin: 'sonar-runner'
+
 jar {
     baseName = 'core-model'
 }
@@ -14,4 +18,40 @@ jar {
 dependencies {
     compile group: 'org.hibernate.javax.persistence',  name: 'hibernate-jpa-2.1-api',  version: '1.0.0.Final'
     compile group: 'org.apache.commons',               name: 'commons-lang3',  version: '3.3.2'
+}
+
+
+sonarRunner {
+    sonarProperties {
+        property "sonar.host.url", "$config.sonar_host_url"
+        property "sonar.jdbc.url", "$config.sonar_jdbc_url"
+        property "sonar.jdbc.driverClassName", "com.mysql.jdbc.Driver"
+        property "sonar.jdbc.username", "$System.env.SONAR_USERNAME"
+        property "sonar.jdbc.password", "$System.env.SONAR_PASSWORD"
+        property "project.reporting.outputEncoding", "UTF-8"
+        property "sonar.projectKey", "cloudbreak"
+        property "sonar.projectName", "cloudbreak"
+    }
+}
+
+jacoco {
+    toolVersion = "0.7.1.201405082137"
+    reportsDir = file("$buildDir/reports/jacoco")
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination "${buildDir}/jacocoHtml"
+    }
+}
+
+test {
+    jacoco {
+        append = false
+        destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
+        classDumpFile = file("$buildDir/jacoco/classpathdumps")
+        excludes = ['com/sequenceiq/cloudbreak/domain/**']
+    }
 }
