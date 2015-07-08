@@ -264,8 +264,15 @@ app.delete('/users/:userId', function(req, res){
 
 })
 
+function preventNoCachInResponse(res) {
+  res.header("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.header("Pragma", "no-cache");
+  res.header("Expires",0); 
+}
+
 // wildcards should be proxied =================================================
 app.get('*/periscope/*', function(req,res){
+  preventNoCachInResponse(res);
   proxyPeriscopeRequest(req, res, proxyRestClient.get);
 });
 
@@ -284,10 +291,12 @@ app.delete('*/periscope/*', function(req,res){
 
 
 app.get('*/sultans/*', function(req,res){
+    preventNoCachInResponse(res);
     proxySultansRequest(req, res, proxyRestClient.get);
 });
 
 app.get('*', function(req,res){
+  preventNoCachInResponse(res);
   proxyCloudbreakRequest(req, res, proxyRestClient.get);
 });
 
