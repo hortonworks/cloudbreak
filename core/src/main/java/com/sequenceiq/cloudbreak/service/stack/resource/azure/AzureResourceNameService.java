@@ -10,19 +10,18 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.service.stack.resource.CloudbreakResourceNameService;
 
-@Service
+@Service("AzureResourceNameService")
 public class AzureResourceNameService extends CloudbreakResourceNameService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureResourceNameService.class);
 
     private static final int CLOUDSERVICE_PART_COUNT = 3;
     private static final String RESERVED_IP_PREFIX = "reserved-ip";
 
-    @Value("${cb.max.resource.name.length:50}")
+    @Value("${cb.max.azure.resource.name.length:50}")
     private int maxResourceNameLength;
 
     @Override
     public String resourceName(ResourceType resourceType, Object... parts) {
-        checkArgs(parts);
         LOGGER.debug("Generating resource name from parts: {}", parts);
         String resourceName = null;
         switch (resourceType) {
@@ -60,10 +59,7 @@ public class AzureResourceNameService extends CloudbreakResourceNameService {
 
 
     private String cloudServiceResourceName(Object... parts) {
-        if (parts.length != CLOUDSERVICE_PART_COUNT) {
-            LOGGER.error("No valid parts provided for building cloud service resource name. Parts: {}", parts);
-            throw new IllegalStateException("No valid parts provided for building cloud service resource name: " + parts);
-        }
+        checkArgs(CLOUDSERVICE_PART_COUNT, parts);
         String networkName = String.valueOf(parts[0]);
         String index = String.valueOf(parts[1]);
         String instanceGroupName = String.valueOf(parts[2]);
@@ -77,19 +73,12 @@ public class AzureResourceNameService extends CloudbreakResourceNameService {
     }
 
     private String virtualMachineName(Object[] parts) {
-        if (parts.length != 1) {
-            LOGGER.error("No valid parts provided for building resource name. Parts: {}", parts);
-            throw new IllegalStateException("No valid parts provided for building resource name: " + parts);
-        }
+        checkArgs(1, parts);
         return String.valueOf(parts[0]);
     }
 
     private String networkResourceName(Object[] parts) {
-        if (parts.length != 2) {
-            LOGGER.error("No valid parts provided for building resource name. Parts: {}", parts);
-            throw new IllegalStateException("No valid parts provided for building resource name: " + parts);
-        }
-
+        checkArgs(2, parts);
         String cloudServiceName = String.valueOf(parts[0]);
         Date ts = (Date) parts[1];
 
@@ -101,10 +90,7 @@ public class AzureResourceNameService extends CloudbreakResourceNameService {
     }
 
     private String azureServiceCertificateName(Object[] parts) {
-        if (parts.length != 1) {
-            LOGGER.error("No valid parts provided for building resource name. Parts: {}", parts);
-            throw new IllegalStateException("No valid parts provided for building resource name: " + parts);
-        }
+        checkArgs(1, parts);
         return String.valueOf(parts[0]);
     }
 

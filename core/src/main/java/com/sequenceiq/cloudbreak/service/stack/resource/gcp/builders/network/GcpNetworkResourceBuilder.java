@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceCheckerS
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceNameService;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.GcpSimpleNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpProvisionContextObject;
@@ -49,6 +51,10 @@ public class GcpNetworkResourceBuilder extends GcpSimpleNetworkResourceBuilder {
     private PollingService<GcpResourceReadyPollerObject> gcpNetworkReadyPollerObjectPollingService;
     @Inject
     private GcpResourceCheckerStatus gcpResourceCheckerStatus;
+
+    @Inject
+    @Named("GcpResourceNameService")
+    private ResourceNameService gcpResourceNameService;
 
     @Override
     public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
@@ -101,7 +107,8 @@ public class GcpNetworkResourceBuilder extends GcpSimpleNetworkResourceBuilder {
     public List<Resource> buildResources(GcpProvisionContextObject provisionContextObject, int index, List<Resource> resources,
             Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        return Arrays.asList(new Resource(resourceType(), getTimestampedName(stack.getName()), stack, null));
+        String networkResourceName = gcpResourceNameService.resourceName(resourceType(), stack.getName());
+        return Arrays.asList(new Resource(resourceType(), networkResourceName, stack, null));
     }
 
     @Override

@@ -6,11 +6,11 @@ import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateway;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceExceptio
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceNameService;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.GcpSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpProvisionContextObject;
@@ -74,6 +75,9 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
     private PollingService<GcpRemoveReadyPollerObject> gcpRemoveReadyPollerObjectPollingService;
     @Inject
     private GcpStackUtil gcpStackUtil;
+    @Inject
+    @Named("GcpResourceNameService")
+    private ResourceNameService resourceNameService;
 
     @Override
     public Boolean create(final CreateResourceRequest createResourceRequest, String region) throws Exception {
@@ -152,12 +156,8 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
     public List<Resource> buildResources(GcpProvisionContextObject provisionContextObject, int index, List<Resource> resources,
             Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        String name = String.format("%s-%s-%s-%s", stack.getName(), instanceGroup.get().getGroupName().replaceAll("[^a-zA-Z0-9]", "").toLowerCase(),
-                index, new Date().getTime());
-        if (name.length() > END_INDEX) {
-            name = name.substring(name.length() - END_INDEX, name.length());
-        }
-        Resource resource = new Resource(resourceType(), name, stack, instanceGroup.orNull().getGroupName());
+        String resourceName = resourceNameService.resourceName(resourceType(), stack.getName(), instanceGroup.orNull().getGroupName(), index);
+        Resource resource = new Resource(resourceType(), resourceName, stack, instanceGroup.orNull().getGroupName());
         return Arrays.asList(resource);
     }
 
