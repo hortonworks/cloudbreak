@@ -68,7 +68,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             Set<String> consulServers = selectConsulServers(privateGatewayIp, privateAddressesWithoutGateway, consulServerCount);
             Set<String> result = prepareDockerAddressInventory(privateAddresses);
 
-            String[] cmd = {"--debug", "bootstrap", "--wait", MUNCHAUSEN_WAIT, "--consulServers",
+            String[] cmd = {"--debug", "bootstrap", "--wait", MUNCHAUSEN_WAIT, "--consulLogLocation", "/hadoopfs/fs1/logs/consul", "--consulServers",
                     concatToString(consulServers), concatToString(result)};
             munchausenBootstrap(gatewayConfig, cmd).call();
         } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {

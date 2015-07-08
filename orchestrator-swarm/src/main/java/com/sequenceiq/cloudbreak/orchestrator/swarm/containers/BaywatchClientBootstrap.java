@@ -53,7 +53,7 @@ public class BaywatchClientBootstrap implements ContainerBootstrap {
 
         Bind[] binds = new BindsBuilder()
                 .add(LOCAL_SINCEDB_LOCATION, SINCEDB_LOCATION)
-                .addLog("ambari-agent", "ambari-server", "consul-watch").build();
+                .addLog("ambari-agent", "ambari-server", "consul-watch", "consul").build();
 
         HostConfig hostConfig = new HostConfigBuilder().defaultConfig().binds(binds).build();
         try {
