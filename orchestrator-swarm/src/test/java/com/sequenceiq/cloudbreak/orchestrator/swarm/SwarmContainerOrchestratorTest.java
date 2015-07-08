@@ -290,7 +290,7 @@ public class SwarmContainerOrchestratorTest {
     @Test
     public void logRotateStartInClusterWhenEverythingWorksFine() throws Exception {
         when(logrotateBootsrap.call()).thenReturn(true);
-        doReturn(logrotateBootsrap).when(underTestSpy).logrotateBootsrap(any(GatewayConfig.class), anyString(), anyString());
+        doReturn(logrotateBootsrap).when(underTestSpy).logrotateBootsrap(any(GatewayConfig.class), anyString(), any(Node.class), anyString());
 
         underTestSpy.startLogrotate(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "rotate", FIX_NODE_COUNT,
                 exitCriteriaModel());
@@ -299,7 +299,7 @@ public class SwarmContainerOrchestratorTest {
     @Test(expected = CloudbreakOrchestratorFailedException.class)
     public void logRotateStartInClusterWhenOrchestratorCancelled() throws Exception {
         when(logrotateBootsrap.call()).thenThrow(new CloudbreakOrchestratorCancelledException("cancelled"));
-        doReturn(logrotateBootsrap).when(underTestSpy).logrotateBootsrap(any(GatewayConfig.class), anyString(), anyString());
+        doReturn(logrotateBootsrap).when(underTestSpy).logrotateBootsrap(any(GatewayConfig.class), anyString(), any(Node.class), anyString());
 
         underTestSpy.startLogrotate(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "rotate", FIX_NODE_COUNT,
                 exitCriteriaModel());
@@ -308,7 +308,7 @@ public class SwarmContainerOrchestratorTest {
     @Test(expected = CloudbreakOrchestratorFailedException.class)
     public void logRotateStartInClusterWhenOrchestratorFailed() throws Exception {
         when(logrotateBootsrap.call()).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
-        doReturn(logrotateBootsrap).when(underTestSpy).logrotateBootsrap(any(GatewayConfig.class), anyString(), anyString());
+        doReturn(logrotateBootsrap).when(underTestSpy).logrotateBootsrap(any(GatewayConfig.class), anyString(), any(Node.class), anyString());
 
         underTestSpy.startLogrotate(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "rotate", FIX_NODE_COUNT,
                 exitCriteriaModel());
@@ -317,7 +317,7 @@ public class SwarmContainerOrchestratorTest {
     @Test(expected = CloudbreakOrchestratorFailedException.class)
     public void logRotateStartInClusterWhenNullPointerOccurredAndOrchestratorFailedComes() throws Exception {
         when(logrotateBootsrap.call()).thenThrow(new NullPointerException("null"));
-        doReturn(logrotateBootsrap).when(underTestSpy).logrotateBootsrap(any(GatewayConfig.class), anyString(), anyString());
+        doReturn(logrotateBootsrap).when(underTestSpy).logrotateBootsrap(any(GatewayConfig.class), anyString(), any(Node.class), anyString());
 
         underTestSpy.startLogrotate(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "rotate", FIX_NODE_COUNT,
                 exitCriteriaModel());
@@ -326,7 +326,7 @@ public class SwarmContainerOrchestratorTest {
     @Test
     public void consulWatchStartInClusterWhenEverythingWorksFine() throws Exception {
         when(consulWatchBootstrap.call()).thenReturn(true);
-        doReturn(consulWatchBootstrap).when(underTestSpy).consulWatchBootstrap(any(GatewayConfig.class), anyString(), anyString());
+        doReturn(consulWatchBootstrap).when(underTestSpy).consulWatchBootstrap(any(GatewayConfig.class), anyString(), any(Node.class), anyString());
 
         underTestSpy.startConsulWatches(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "watch", FIX_NODE_COUNT,
                 exitCriteriaModel());
@@ -335,7 +335,7 @@ public class SwarmContainerOrchestratorTest {
     @Test(expected = CloudbreakOrchestratorFailedException.class)
     public void consulWatchStartInClusterWhenOrchestratorCancelled() throws Exception {
         when(consulWatchBootstrap.call()).thenThrow(new CloudbreakOrchestratorCancelledException("cancelled"));
-        doReturn(consulWatchBootstrap).when(underTestSpy).consulWatchBootstrap(any(GatewayConfig.class), anyString(), anyString());
+        doReturn(consulWatchBootstrap).when(underTestSpy).consulWatchBootstrap(any(GatewayConfig.class), anyString(), any(Node.class), anyString());
 
         underTestSpy.startConsulWatches(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "watch", FIX_NODE_COUNT,
                 exitCriteriaModel());
@@ -344,7 +344,7 @@ public class SwarmContainerOrchestratorTest {
     @Test(expected = CloudbreakOrchestratorFailedException.class)
     public void consulWatchStartInClusterWhenOrchestratorFailed() throws Exception {
         when(consulWatchBootstrap.call()).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
-        doReturn(consulWatchBootstrap).when(underTestSpy).consulWatchBootstrap(any(GatewayConfig.class), anyString(), anyString());
+        doReturn(consulWatchBootstrap).when(underTestSpy).consulWatchBootstrap(any(GatewayConfig.class), anyString(), any(Node.class), anyString());
 
         underTestSpy.startConsulWatches(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "watch", FIX_NODE_COUNT,
                 exitCriteriaModel());
@@ -353,7 +353,7 @@ public class SwarmContainerOrchestratorTest {
     @Test(expected = CloudbreakOrchestratorFailedException.class)
     public void consulWatchStartInClusterWhenNullPointerOccurredAndOrchestratorFailedComes() throws Exception {
         when(consulWatchBootstrap.call()).thenThrow(new NullPointerException("null"));
-        doReturn(consulWatchBootstrap).when(underTestSpy).consulWatchBootstrap(any(GatewayConfig.class), anyString(), anyString());
+        doReturn(consulWatchBootstrap).when(underTestSpy).consulWatchBootstrap(any(GatewayConfig.class), anyString(), any(Node.class),  anyString());
 
         underTestSpy.startConsulWatches(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "watch", FIX_NODE_COUNT,
                 exitCriteriaModel());

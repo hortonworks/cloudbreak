@@ -9,14 +9,11 @@ import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Bind;
-import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
-import com.github.dockerjava.api.model.PortBinding;
-import com.github.dockerjava.api.model.Ports;
-import com.github.dockerjava.api.model.RestartPolicy;
-import com.github.dockerjava.api.model.Volume;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil;
+import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.BindsBuilder;
+import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.HostConfigBuilder;
 
 public class AmbariServerBootstrap implements ContainerBootstrap {
 
@@ -26,45 +23,36 @@ public class AmbariServerBootstrap implements ContainerBootstrap {
     private final DockerClient docker;
     private final String imageName;
     private final String cloudPlatform;
-    private final String node;
+    private final String nodeName;
     private final Set<String> dataVolumes;
     private final DockerClientUtil dockerClientUtil;
 
-    public AmbariServerBootstrap(DockerClient docker, String imageName, String node, Set<String> dataVolumes,
+    public AmbariServerBootstrap(DockerClient docker, String imageName, String nodeName, Set<String> dataVolumes,
             String cloudPlatform, DockerClientUtil dockerClientUtil) {
         this.docker = docker;
         this.imageName = imageName;
         this.cloudPlatform = cloudPlatform;
-        this.node = node;
+        this.nodeName = nodeName;
         this.dataVolumes = dataVolumes;
         this.dockerClientUtil = dockerClientUtil;
     }
 
     @Override
     public Boolean call() throws Exception {
-        HostConfig hostConfig = new HostConfig();
-        hostConfig.setNetworkMode("host");
-        hostConfig.setPrivileged(true);
-        hostConfig.setRestartPolicy(RestartPolicy.alwaysRestart());
-        Ports ports = new Ports();
-        ports.add(new PortBinding(new Ports.Binding(PORT), new ExposedPort(PORT)));
-        hostConfig.setPortBindings(ports);
+
+        Bind[] binds = new BindsBuilder().addLog().build();
+        HostConfig hostConfig = new HostConfigBuilder().defaultConfig().expose(PORT).binds(binds).build();
 
         String containerId = dockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
                 .withHostConfig(hostConfig)
-                .withExposedPorts(new ExposedPort(PORT))
-                .withEnv(String.format("constraint:node==%s", node),
+                .withEnv(String.format("constraint:node==%s", nodeName),
                         String.format("POSTGRES_DB=localhost"),
                         String.format("CLOUD_PLATFORM=%s", cloudPlatform),
                         String.format("SERVICE_NAME=%s", "ambari-8080"))
                 .withName(AMBARI_SERVER.getName())
                 .withCmd("/start-server"));
-        dockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
-                .withPortBindings(new PortBinding(new Ports.Binding("0.0.0.0", PORT), new ExposedPort(PORT)))
-                .withNetworkMode("host")
-                .withRestartPolicy(RestartPolicy.alwaysRestart())
-                .withPrivileged(true)
-                .withBinds(new Bind("/hadoopfs/fs1/logs/", new Volume("/var/log/"))));
+
+        dockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId));
         LOGGER.info("Ambari server started successfully");
         return true;
     }

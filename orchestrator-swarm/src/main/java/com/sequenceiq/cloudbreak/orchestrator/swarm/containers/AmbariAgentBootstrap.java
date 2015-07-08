@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.orchestrator.swarm.containers;
 
 import static com.sequenceiq.cloudbreak.orchestrator.DockerContainer.AMBARI_AGENT;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -11,32 +9,28 @@ import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Bind;
-import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
-import com.github.dockerjava.api.model.PortBinding;
-import com.github.dockerjava.api.model.Ports;
-import com.github.dockerjava.api.model.RestartPolicy;
-import com.github.dockerjava.api.model.Volume;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil;
+import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.BindsBuilder;
+import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.HostConfigBuilder;
 
 public class AmbariAgentBootstrap implements ContainerBootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariAgentBootstrap.class);
 
-    private static final int PORT = 49991;
     private final DockerClient docker;
     private final String imageName;
-    private final String node;
+    private final String nodeName;
     private final Set<String> dataVolumes;
     private final String id;
     private final String cloudPlatform;
     private final DockerClientUtil dockerClientUtil;
 
-    public AmbariAgentBootstrap(DockerClient docker, String imageName, String node, Set<String> dataVolumes, String id,
+    public AmbariAgentBootstrap(DockerClient docker, String imageName, String nodeName, Set<String> dataVolumes, String id,
             String cloudPlatform, DockerClientUtil dockerClientUtil) {
         this.docker = docker;
         this.imageName = imageName;
-        this.node = node;
+        this.nodeName = nodeName;
         this.dataVolumes = dataVolumes;
         this.id = id;
         this.cloudPlatform = cloudPlatform;
@@ -47,36 +41,24 @@ public class AmbariAgentBootstrap implements ContainerBootstrap {
     public Boolean call() throws Exception {
         LOGGER.info("Creating Ambari agent container.");
         try {
-            HostConfig hostConfig = new HostConfig();
-            hostConfig.setNetworkMode("host");
-            hostConfig.setPrivileged(true);
-            hostConfig.setRestartPolicy(RestartPolicy.alwaysRestart());
+            Bind[] binds = new BindsBuilder()
+                    .add("/usr/local/public_host_script.sh", "/etc/ambari-agent/conf/public-hostname.sh")
+                    .add("/data/jars")
+                    .addLog()
+                    .add(dataVolumes).build();
 
-            Ports ports = new Ports();
-            ports.add(new PortBinding(new Ports.Binding(PORT), new ExposedPort(PORT)));
-            hostConfig.setPortBindings(ports);
+            HostConfig hostConfig = new HostConfigBuilder().defaultConfig().binds(binds).build();
 
             String containerId = dockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
                     .withHostConfig(hostConfig)
                     .withName(String.format("%s-%s", AMBARI_AGENT.getName(), id))
-                    .withEnv(String.format("constraint:node==%s", node),
+                    .withEnv(String.format("constraint:node==%s", nodeName),
                             String.format("CLOUD_PLATFORM=%s", cloudPlatform),
                             "HADOOP_CLASSPATH=/data/jars/*:/usr/lib/hadoop/lib/*")
                     .withCmd("/start-agent"));
-            List<Bind> binds = new ArrayList<>();
-            binds.add(new Bind("/usr/local/public_host_script.sh", new Volume("/etc/ambari-agent/conf/public-hostname.sh")));
-            binds.add(new Bind("/data/jars", new Volume("/data/jars")));
-            binds.add(new Bind("/hadoopfs/fs1/logs/", new Volume("/var/log/")));
-            for (String volume : dataVolumes) {
-                binds.add(new Bind(volume, new Volume(volume)));
-            }
-            Bind[] array = new Bind[binds.size()];
-            binds.toArray(array);
-            dockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
-                    .withPortBindings(new PortBinding(new Ports.Binding("0.0.0.0", PORT), new ExposedPort(PORT)))
-                    .withNetworkMode("host")
-                    .withRestartPolicy(RestartPolicy.alwaysRestart())
-                    .withBinds(array));
+
+            dockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId));
+
             LOGGER.info("Ambari agent container started successfully");
         } catch (Exception ex) {
             LOGGER.error("Ambari agent container failed to start.");
