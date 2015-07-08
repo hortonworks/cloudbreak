@@ -37,8 +37,11 @@ public class AmbariClusterStatusUpdater {
 
     public void updateClusterStatus(Stack stack, Cluster cluster) throws CloudbreakSecuritySetupException {
         if (isStackOrClusterStatusInvalid(stack, cluster)) {
-            LOGGER.warn("Cluster could not be synchronized while stack is in {} state and cluster is in {} state!",
-                    stack.getStatus(), cluster.getStatus());
+            LOGGER.warn(String.format("Cluster could not be synchronized while stack is in %s state and cluster is in %s state!",
+                    stack.getStatus(), cluster.getStatus()));
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(),
+                    String.format("Cluster could not be synchronized while stack is in %s state and cluster is in %s state!",
+                    stack.getStatus().normalizedStatusName(), cluster.getStatus().normalizedStatusName()));
         } else {
             Long stackId = stack.getId();
             String blueprintName = cluster != null ? cluster.getBlueprint().getBlueprintName() : null;

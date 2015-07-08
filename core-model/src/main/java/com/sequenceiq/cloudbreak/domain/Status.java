@@ -31,4 +31,8 @@ public enum Status {
         return Arrays.asList(REQUESTED, CREATE_IN_PROGRESS, UPDATE_IN_PROGRESS, UPDATE_REQUESTED,
                 UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, STOP_REQUESTED, STOP_IN_PROGRESS, STOP_FAILED);
     }
+
+    public String normalizedStatusName() {
+        return name().replaceAll("_", " ").toLowerCase();
+    }
 }
