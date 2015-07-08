@@ -171,7 +171,7 @@
 
     "PublicRoute" : {
       "Type" : "AWS::EC2::Route",
-      "DependsOn" : "PublicRouteTable",
+      "DependsOn" : [ "PublicRouteTable", "AttachGateway" ],
       "Properties" : {
         "RouteTableId" : { "Ref" : "PublicRouteTable" },
         "DestinationCidrBlock" : "0.0.0.0/0",
