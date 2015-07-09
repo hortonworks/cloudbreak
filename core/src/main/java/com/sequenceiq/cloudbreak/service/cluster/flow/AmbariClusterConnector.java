@@ -43,7 +43,6 @@ import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.ClusterException;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
 import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
@@ -63,6 +62,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
@@ -256,7 +256,7 @@ public class AmbariClusterConnector {
     }
 
     public Set<String> decommissionAmbariNodes(Long stackId, HostGroupAdjustmentJson adjustmentRequest, List<HostMetadata> decommissionCandidates)
-            throws CloudbreakSecuritySetupException {
+            throws CloudbreakException {
         Set<String> result = new HashSet<>();
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
@@ -269,25 +269,28 @@ public class AmbariClusterConnector {
         TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
         String blueprintName = stack.getCluster().getBlueprint().getBlueprintName();
-        Set<String> components = getHadoopComponents(cluster, ambariClient, hostGroupName, blueprintName);
-        Map<String, HostMetadata> hostsToRemove = selectHostsToRemove(decommissionCandidates, stack, adjustment);
-        List<String> hostList = new ArrayList<>(hostsToRemove.keySet());
-        PollingResult pollingResult = waitForAmbariOperations(stack, ambariClient, decommissionComponents(ambariClient, hostList, components));
+        PollingResult pollingResult = startServiceIfNeeded(stack, ambariClient, blueprintName);
         if (isSuccess(pollingResult)) {
-            pollingResult = waitForDataNodeDecommission(stack, ambariClient);
+            Set<String> components = getHadoopComponents(cluster, ambariClient, hostGroupName, blueprintName);
+            Map<String, HostMetadata> hostsToRemove = selectHostsToRemove(decommissionCandidates, stack, adjustment);
+            List<String> hostList = new ArrayList<>(hostsToRemove.keySet());
+            pollingResult = waitForAmbariOperations(stack, ambariClient, decommissionComponents(ambariClient, hostList, components));
             if (isSuccess(pollingResult)) {
-                pollingResult = waitForRegionServerDecommission(stack, ambariClient, hostList, components);
+                pollingResult = waitForDataNodeDecommission(stack, ambariClient);
                 if (isSuccess(pollingResult)) {
-                    pollingResult = stopHadoopComponents(stack, ambariClient, hostList);
+                    pollingResult = waitForRegionServerDecommission(stack, ambariClient, hostList, components);
                     if (isSuccess(pollingResult)) {
-                        ambariHostsRemover.deleteHosts(stack, hostList, new ArrayList<>(components));
-                        pollingResult = restartHadoopServices(stack, ambariClient, true);
+                        pollingResult = stopHadoopComponents(stack, ambariClient, hostList);
                         if (isSuccess(pollingResult)) {
-                            cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-                            HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupName);
-                            hostGroup.getHostMetadata().removeAll(hostsToRemove.values());
-                            hostGroupRepository.save(hostGroup);
-                            result.addAll(hostsToRemove.keySet());
+                            ambariHostsRemover.deleteHosts(stack, hostList, new ArrayList<>(components));
+                            pollingResult = restartHadoopServices(stack, ambariClient, true);
+                            if (isSuccess(pollingResult)) {
+                                cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
+                                HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupName);
+                                hostGroup.getHostMetadata().removeAll(hostsToRemove.values());
+                                hostGroupRepository.save(hostGroup);
+                                result.addAll(hostsToRemove.keySet());
+                            }
                         }
                     }
                 }
@@ -491,16 +494,63 @@ public class AmbariClusterConnector {
         Map<String, Integer> restartRequests = new HashMap<>();
         Map<String, Map<String, String>> serviceComponents = ambariClient.getServiceComponentsMap();
         if (decommissioned) {
-            int zookeeperRequestId = ambariClient.restartServiceComponents("ZOOKEEPER", Arrays.asList("ZOOKEEPER_SERVER"));
-            restartRequests.put("ZOOKEEPER", zookeeperRequestId);
+            restartRequests.put("ZOOKEEPER", restartComponentWithClient(ambariClient, "ZOOKEEPER", "ZOOKEEPER_SERVER"));
         }
         if (serviceComponents.containsKey("NAGIOS")) {
-            restartRequests.put("NAGIOS", ambariClient.restartServiceComponents("NAGIOS", Arrays.asList("NAGIOS_SERVER")));
+            restartRequests.put("NAGIOS", restartComponentWithClient(ambariClient, "NAGIOS", "NAGIOS_SERVER"));
         }
         if (serviceComponents.containsKey("GANGLIA")) {
-            restartRequests.put("GANGLIA", ambariClient.restartServiceComponents("GANGLIA", Arrays.asList("GANGLIA_SERVER")));
+            restartRequests.put("GANGLIA", restartComponentWithClient(ambariClient, "GANGLIA", "GANGLIA_SERVER"));
         }
         return waitForAmbariOperations(stack, ambariClient, restartRequests);
+    }
+
+    private int restartComponentWithClient(AmbariClient ambariClient, String service, String... compontents) {
+        return ambariClient.restartServiceComponents(service, Arrays.asList(compontents));
+    }
+
+    private PollingResult startServiceIfNeeded(Stack stack, AmbariClient ambariClient, String blueprint) throws CloudbreakException {
+        Map<String, Integer> stringIntegerMap = new HashMap<>();
+        Map<String, String> componentsCategory = ambariClient.getComponentsCategory(blueprint);
+        Map<String, Map<String, String>> hostComponentsStates = ambariClient.getHostComponentsStates();
+        for (Map.Entry<String, Map<String, String>> hostComponentsEntry : hostComponentsStates.entrySet()) {
+            Map<String, String> componentStateMap = hostComponentsEntry.getValue();
+            List<String> services = new ArrayList<>();
+            for (Map.Entry<String, String> componentStateEntry : componentStateMap.entrySet()) {
+                String category = componentsCategory.get(componentStateEntry.getKey());
+                if (!"CLIENT".equals(category)) {
+                    if ("INSTALLED".equals(componentStateEntry.getValue())) {
+                        if ("NODEMANAGER".equals(componentStateEntry.getKey())) {
+                            services.add("NODEMANAGER");
+                        } else if ("DATANODE".equals(componentStateEntry.getKey())) {
+                            services.add("DATANODE");
+                        } else if ("HBASE_REGIONSERVER".equals(componentStateEntry.getKey())) {
+                            services.add("HBASE_REGIONSERVER");
+                        } else {
+                            LOGGER.warn("No need to restart ambari service: {}", componentStateEntry.getKey());
+                        }
+                    } else {
+                        LOGGER.warn("Ambari service already running: {}", componentStateEntry.getKey());
+                    }
+                }
+            }
+            if (!services.isEmpty()) {
+                try {
+                    Map<String, Integer> tmpMap = ambariClient.startComponentsOnHost(hostComponentsEntry.getKey(), services);
+                    for (Entry<String, Integer> stringIntegerEntry : tmpMap.entrySet()) {
+                        stringIntegerMap.put(String.format("%s-%s", hostComponentsEntry.getKey(), stringIntegerEntry.getKey()), stringIntegerEntry.getValue());
+                    }
+
+                } catch (HttpResponseException e) {
+                    throw new CloudbreakException(e);
+                }
+            }
+        }
+        if (!stringIntegerMap.isEmpty()) {
+            return waitForAmbariOperations(stack, ambariClient, stringIntegerMap);
+        } else {
+            return SUCCESS;
+        }
     }
 
     private void waitForAmbariToStart(Stack stack) throws CloudbreakException {
