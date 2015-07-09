@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.domain.AwsInstanceType;
@@ -57,7 +58,7 @@ public class IntervalStackUsageGeneratorTest {
         underTest = new IntervalStackUsageGenerator();
         priceGenerators = new ArrayList<>();
         priceGenerators.add(new AwsPriceGenerator());
-        underTest.setPriceGenerators(priceGenerators);
+        ReflectionTestUtils.setField(underTest, "priceGenerators", priceGenerators);
         stack = TestUtil.stack();
         cloudbreakEvent = TestUtil.azureCloudbreakEvent(stack.getId());
         instanceHours = new HashMap<>();

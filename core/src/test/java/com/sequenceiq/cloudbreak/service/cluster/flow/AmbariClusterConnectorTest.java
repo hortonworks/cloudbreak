@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
@@ -84,6 +86,9 @@ public class AmbariClusterConnectorTest {
     @Mock
     private InstanceMetaDataRepository instanceMetadataRepository;
 
+    @Mock
+    private HostGroup hostGroup;
+
     @InjectMocks
     @Spy
     private AmbariClusterConnector underTest = new AmbariClusterConnector();
@@ -100,6 +105,7 @@ public class AmbariClusterConnectorTest {
         blueprint = TestUtil.blueprint();
         cluster = TestUtil.cluster(blueprint, stack, 1L);
         stack.setCluster(cluster);
+        cluster.setHostGroups(new HashSet<HostGroup>());
         when(tlsSecurityService.buildTLSClientConfig(anyLong(), anyString())).thenReturn(tlsClientConfig);
         when(ambariClient.extendBlueprintGlobalConfiguration(anyString(), anyMap())).thenReturn("");
         when(ambariClient.extendBlueprintHostGroupConfiguration(anyString(), anyMap())).thenReturn("");
