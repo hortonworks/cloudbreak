@@ -569,13 +569,13 @@ Once you have launched the cluster creation you can track the progress either on
 
 The provisioned cluster can be managed from the Details tab. There are a few lifecycle management options available.
 
-`Termimate:` - terminates the infrastrucre and removes all cloud resources, including data
+`Termimate:` terminates the infrastrucre and removes all cloud resources, including data
 
-`Stop:` - stops the infrastructure but keeps the data; a stopped cluster can be rebroight to the same state as previously been
+`Stop:` stops the infrastructure but keeps the data; a stopped cluster can be rebroight to the same state as previously been
 
-`Start:` - starts up the stopped cluster
+`Start:` starts up the stopped cluster
 
-`Synch:` - resync the cluster state and metadata
+`Synch:` resync the cluster state and metadata
 
 _Note: in a cloud based environment due to remote VM or Ambari service failures the `local` state of the cluster can be unsychronized from the remote cluster state - using the synch button the cluster is resynchronized and the right values are shown (e.g. number and types of instances, Ambari service health, etc)._
 
