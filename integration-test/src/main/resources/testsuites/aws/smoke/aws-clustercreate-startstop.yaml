@@ -26,9 +26,9 @@ tests:
     parameters: {
       awsTemplateName: it-aws-smoke-master-ss,
       awsInstanceType: C3Large,
-      awsVolumeType: Ephemeral,
+      awsVolumeType: Gp2,
       awsVolumeCount: 2,
-      awsVolumeSize: 16,
+      awsVolumeSize: 100,
       templateAdditions: "master,1"
     }
     classes:
