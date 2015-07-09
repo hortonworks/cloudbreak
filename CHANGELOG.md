@@ -4,6 +4,8 @@
 
 ### Added
 
+- Command `pull-parallel` added for quicker/simultaneous image pull
+
 ### Removed
 
 ### Changed
