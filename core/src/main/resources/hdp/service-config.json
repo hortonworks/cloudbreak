@@ -156,6 +156,11 @@
               "directory": ""
             },
             {
+              "name": "falcon.embeddedmq.data",
+              "prefix": "",
+              "directory": "embeddedmq/data"
+            },
+            {
               "name": "falcon_store_uri",
               "prefix": "file://",
               "directory": "store"
