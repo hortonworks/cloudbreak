@@ -39,7 +39,6 @@ public class IntervalStackUsageGenerator {
     @Inject
     private IntervalInstanceUsageGenerator instanceUsageGenerator;
 
-    @Inject
     private List<PriceGenerator> priceGenerators;
 
     public List<CloudbreakUsage> generateUsages(Date startTime, Date stopTime, CloudbreakEvent startEvent) throws ParseException {
@@ -64,6 +63,11 @@ public class IntervalStackUsageGenerator {
             }
         }
         return dailyUsagesByInstanceGroup;
+    }
+
+    @Inject
+    public void setPriceGenerators(List<PriceGenerator> priceGenerators) {
+        this.priceGenerators = priceGenerators;
     }
 
     private String getInstanceType(Template template) {
