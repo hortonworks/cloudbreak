@@ -315,9 +315,9 @@ public class AmbariClusterService implements ClusterService {
             TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, stack.getCluster().getAmbariIp());
             AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getCluster().getUserName(), stack.getCluster().getPassword());
             Set<HostMetadata> hosts = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
+            Map<String, String> hostStatuses = ambariClient.getHostStatuses();
             for (HostMetadata host : hosts) {
-                Map<String, String> hostNames = ambariClient.getHostNames();
-                updateHostMetadataByHostState(stack, ambariClient, host.getHostName(), hostNames);
+                updateHostMetadataByHostState(stack, host.getHostName(), hostStatuses);
             }
         } catch (CloudbreakSecuritySetupException e) {
             throw new CloudbreakServiceException(e);
@@ -568,9 +568,9 @@ public class AmbariClusterService implements ClusterService {
         return result;
     }
 
-    private void updateHostMetadataByHostState(Stack stack, AmbariClient ambariClient, String hostName, Map<String, String> hostNames) {
-        if (hostNames.containsValue(hostName)) {
-            String hostState = ambariClient.getHostState(hostName);
+    private void updateHostMetadataByHostState(Stack stack, String hostName, Map<String, String> hostStatuses) {
+        if (hostStatuses.containsKey(hostName)) {
+            String hostState = hostStatuses.get(hostName);
             HostMetadata hostMetadata = hostMetadataRepository.findHostsInClusterByName(stack.getCluster().getId(), hostName);
             HostMetadataState oldState = hostMetadata.getHostMetadataState();
             HostMetadataState newState = HostMetadataState.HEALTHY.name().equals(hostState) ? HostMetadataState.HEALTHY : HostMetadataState.UNHEALTHY;
