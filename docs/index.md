@@ -579,7 +579,7 @@ The provisioned cluster can be managed from the Details tab. There are a few lif
 
 _Note: in a cloud based environment due to remote VM or Ambari service failures the `local` state of the cluster can be unsychronized from the remote cluster state - using the synch button the cluster is resynchronized and the right values are shown (e.g. number and types of instances, Ambari service health, etc)._
 
-`Reinstall:` - due to wrong Blueprints sometimes the cluster can't be provisioned. With re-install the stack provisionig can be restarted using the already provisioned cloud infrastructure
+`Reinstall:` due to wrong Blueprints sometimes the cluster can't be provisioned. With re-install the stack provisionig can be restarted using the already provisioned cloud infrastructure
 
 _Note: Because Azure does not directly support third party public images we will have to copy the used image from VM Depot into your storage account. The steps below need to be finished once and only once before any stack is created for every affinity group:_
 
