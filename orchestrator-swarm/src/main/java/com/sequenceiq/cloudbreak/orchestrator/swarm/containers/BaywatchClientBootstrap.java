@@ -9,21 +9,17 @@ import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Bind;
-import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
-import com.github.dockerjava.api.model.PortBinding;
-import com.github.dockerjava.api.model.Ports;
-import com.github.dockerjava.api.model.RestartPolicy;
-import com.github.dockerjava.api.model.Volume;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.orchestrator.Node;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil;
+import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.BindsBuilder;
+import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.HostConfigBuilder;
 
 public class BaywatchClientBootstrap implements ContainerBootstrap {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaywatchClientBootstrap.class);
-    private static final int PORT = 49999;
     private static final String DOCKER_LOG_LOCATION = "/var/log/containers";
     private static final String SINCEDB_LOCATION = "/sincedb";
     private static final String LOCAL_SINCEDB_LOCATION = "/log-sincedb";
@@ -54,10 +50,12 @@ public class BaywatchClientBootstrap implements ContainerBootstrap {
     @Override
     public Boolean call() throws Exception {
         LOGGER.info("Creating Baywatch client container.");
-        HostConfig hostConfig = new HostConfig();
-        hostConfig.setPrivileged(true);
-        hostConfig.setNetworkMode("host");
-        hostConfig.setRestartPolicy(RestartPolicy.alwaysRestart());
+
+        Bind[] binds = new BindsBuilder()
+                .add(LOCAL_SINCEDB_LOCATION, SINCEDB_LOCATION)
+                .addLog("ambari-agent", "ambari-server", "consul-watch", "consul").build();
+
+        HostConfig hostConfig = new HostConfigBuilder().defaultConfig().binds(binds).build();
         try {
             String baywatchIp = Strings.isNullOrEmpty(externLocation) ? gatewayAddress : externLocation;
             String containerId = dockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
@@ -68,15 +66,8 @@ public class BaywatchClientBootstrap implements ContainerBootstrap {
                             String.format("BAYWATCH_CLIENT_HOSTNAME=%s", node.getHostname() + consulDomain),
                             String.format("BAYWATCH_CLIENT_PRIVATE_IP=%s", node.getPrivateIp()))
                     .withHostConfig(hostConfig));
-            dockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
-                    .withPortBindings(new PortBinding(new Ports.Binding("0.0.0.0", PORT), new ExposedPort(PORT)))
-                    .withBinds(
-                            new Bind("/hadoopfs/fs1/logs/ambari-agent", new Volume("/var/log/containers/ambari-agent")),
-                            new Bind("/hadoopfs/fs1/logs/ambari-server", new Volume("/var/log/containers/ambari-server")),
-                            new Bind("/hadoopfs/fs1/logs/consul-watch", new Volume("/var/log/containers/consul-watch")),
-                            new Bind(LOCAL_SINCEDB_LOCATION, new Volume(SINCEDB_LOCATION)))
-                    .withNetworkMode("host")
-                    .withRestartPolicy(RestartPolicy.alwaysRestart()));
+
+            dockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId));
             LOGGER.info("Baywatch client container started successfully");
             return true;
         } catch (Exception ex) {

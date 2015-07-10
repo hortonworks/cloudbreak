@@ -7,14 +7,11 @@ import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Bind;
-import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
-import com.github.dockerjava.api.model.PortBinding;
-import com.github.dockerjava.api.model.Ports;
-import com.github.dockerjava.api.model.RestartPolicy;
-import com.github.dockerjava.api.model.Volume;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil;
+import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.BindsBuilder;
+import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.HostConfigBuilder;
 
 
 public class BaywatchServerBootstrap implements ContainerBootstrap {
@@ -23,53 +20,39 @@ public class BaywatchServerBootstrap implements ContainerBootstrap {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaywatchServerBootstrap.class);
 
-    private static final int ES_PORT = 9300;
-    private static final int ES_TRANSPORT_PORT = 9200;
-    private static final int KIBANA_PORT = 3080;
     private static final String ES_WORK_PATH = "/es-work";
     private static final String ES_DATA_PATH = "/es-data";
 
     private final DockerClient docker;
     private final String imageName;
-    private final String node;
+    private final String nodeName;
     private final DockerClientUtil dockerClientUtil;
 
-    public BaywatchServerBootstrap(DockerClient docker, String imageName, String node, DockerClientUtil dockerClientUtil) {
+    public BaywatchServerBootstrap(DockerClient docker, String imageName, String nodeName, DockerClientUtil dockerClientUtil) {
         this.docker = docker;
         this.imageName = imageName;
-        this.node = node;
+        this.nodeName = nodeName;
         this.dockerClientUtil = dockerClientUtil;
     }
 
     @Override
     public Boolean call() throws Exception {
-        HostConfig hostConfig = new HostConfig();
-        hostConfig.setNetworkMode("host");
-        hostConfig.setPrivileged(true);
-        hostConfig.setRestartPolicy(RestartPolicy.alwaysRestart());
-        Ports ports = new Ports();
-        ports.add(new PortBinding(new Ports.Binding(ES_PORT), new ExposedPort(ES_PORT)));
-        ports.add(new PortBinding(new Ports.Binding(ES_TRANSPORT_PORT), new ExposedPort(ES_TRANSPORT_PORT)));
-        ports.add(new PortBinding(new Ports.Binding(KIBANA_PORT), new ExposedPort(KIBANA_PORT)));
-        hostConfig.setPortBindings(ports);
+
+        Bind[] binds = new BindsBuilder()
+                .add(ES_WORK_PATH)
+                .add(ES_DATA_PATH).build();
+
+        HostConfig hostConfig = new HostConfigBuilder().defaultConfig().binds(binds).build();
         try {
             String containerId = dockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)
-                    .withExposedPorts(new ExposedPort(ES_PORT), new ExposedPort(ES_TRANSPORT_PORT), new ExposedPort(KIBANA_PORT))
                     .withName(BAYWATCH_SERVER.getName())
-                    .withEnv(String.format("constraint:node==%s", node),
+                    .withEnv(String.format("constraint:node==%s", nodeName),
                             String.format("ES_CLUSTER_NAME=%s", CLUSTER_NAME),
                             String.format("ES_DATA_PATH=%s", ES_DATA_PATH),
                             String.format("ES_WORK_PATH=%s", ES_WORK_PATH))
                     .withHostConfig(hostConfig));
-            dockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId)
-                    .withPortBindings(
-                            new PortBinding(new Ports.Binding("0.0.0.0", ES_PORT), new ExposedPort(ES_PORT)),
-                            new PortBinding(new Ports.Binding("0.0.0.0", ES_TRANSPORT_PORT), new ExposedPort(ES_TRANSPORT_PORT)),
-                            new PortBinding(new Ports.Binding("0.0.0.0", KIBANA_PORT), new ExposedPort(KIBANA_PORT)))
-                    .withBinds(new Bind(ES_DATA_PATH, new Volume(ES_DATA_PATH)),
-                            new Bind(ES_WORK_PATH, new Volume(ES_WORK_PATH)))
-                    .withNetworkMode("host")
-                    .withRestartPolicy(RestartPolicy.alwaysRestart()));
+
+            dockerClientUtil.startContainer(docker, docker.startContainerCmd(containerId));
             LOGGER.info("Baywatch server container started successfully");
             return true;
         } catch (Exception ex) {

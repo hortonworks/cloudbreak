@@ -46,7 +46,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     private static final Logger LOGGER = LoggerFactory.getLogger(SwarmContainerOrchestrator.class);
     private static final int READ_TIMEOUT = 30000;
     private static final String MUNCHAUSEN_WAIT = "3600";
-    private static final String MUNCHAUSEN_DOCKER_IMAGE = "sequenceiq/munchausen:0.3";
+    private static final String MUNCHAUSEN_DOCKER_IMAGE = "sequenceiq/munchausen:0.5.3";
     private static final int MAX_IP_FOR_ONE_REQUEST = 600;
 
 
@@ -68,7 +68,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             Set<String> consulServers = selectConsulServers(privateGatewayIp, privateAddressesWithoutGateway, consulServerCount);
             Set<String> result = prepareDockerAddressInventory(privateAddresses);
 
-            String[] cmd = {"--debug", "bootstrap", "--wait", MUNCHAUSEN_WAIT, "--consulServers",
+            String[] cmd = {"--debug", "bootstrap", "--wait", MUNCHAUSEN_WAIT, "--consulLogLocation", "/hadoopfs/fs1/logs/consul", "--consulServers",
                     concatToString(consulServers), concatToString(result)};
             munchausenBootstrap(gatewayConfig, cmd).call();
         } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {
@@ -171,10 +171,13 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         }
         try {
             List<Future<Boolean>> futures = new ArrayList<>();
+            Iterator<Node> nodeIterator = cluster.getNodes().iterator();
             for (int i = 0; i < count; i++) {
+                Node node = nodeIterator.next();
                 String time = String.valueOf(new Date().getTime()) + i;
                 Callable<Boolean> runner = runner(
-                        consulWatchBootstrap(cluster.getGatewayConfig(), imageName, time), getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap());
+                        consulWatchBootstrap(cluster.getGatewayConfig(), imageName, node, time), getExitCriteria(),
+                        exitCriteriaModel, MDC.getCopyOfContextMap());
                 futures.add(getParallelContainerRunner().submit(runner));
             }
             for (Future<Boolean> future : futures) {
@@ -249,9 +252,11 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         }
         try {
             List<Future<Boolean>> futures = new ArrayList<>();
+            Iterator<Node> nodeIterator = cluster.getNodes().iterator();
             for (int i = 0; i < count; i++) {
+                Node node = nodeIterator.next();
                 String time = String.valueOf(new Date().getTime()) + i;
-                Callable<Boolean> runner = runner(logrotateBootsrap(cluster.getGatewayConfig(), imageName, time), getExitCriteria(), exitCriteriaModel,
+                Callable<Boolean> runner = runner(logrotateBootsrap(cluster.getGatewayConfig(), imageName, node, time), getExitCriteria(), exitCriteriaModel,
                         MDC.getCopyOfContextMap());
                 futures.add(getParallelContainerRunner().submit(runner));
             }
@@ -406,7 +411,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         return DockerClientConfig.createDefaultConfigBuilder()
                 .withReadTimeout(READ_TIMEOUT)
                 .withDockerCertPath(gatewayConfig.getCertificateDir())
-                .withVersion("1.19")
+                .withVersion("1.18")
                 .withUri("https://" + gatewayConfig.getAddress() + "/swarm")
                 .build();
     }
@@ -415,7 +420,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         return DockerClientConfig.createDefaultConfigBuilder()
                 .withReadTimeout(READ_TIMEOUT)
                 .withDockerCertPath(gatewayConfig.getCertificateDir())
-                .withVersion("1.19")
+                .withVersion("1.18")
                 .withUri("https://" + gatewayConfig.getAddress() + "/docker")
                 .build();
     }
@@ -451,9 +456,9 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @VisibleForTesting
-    ConsulWatchBootstrap consulWatchBootstrap(GatewayConfig gatewayConfig, String imageName, String time) {
+    ConsulWatchBootstrap consulWatchBootstrap(GatewayConfig gatewayConfig, String imageName, Node node, String time) {
         DockerClient dockerApiClient = swarmClient(gatewayConfig);
-        return new ConsulWatchBootstrap(dockerApiClient, imageName, time, new DockerClientUtil());
+        return new ConsulWatchBootstrap(dockerApiClient, imageName, node.getHostname(), time, new DockerClientUtil());
     }
 
     @VisibleForTesting
@@ -471,9 +476,9 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @VisibleForTesting
-    LogrotateBootsrap logrotateBootsrap(GatewayConfig gatewayConfig, String imageName, String time) {
+    LogrotateBootsrap logrotateBootsrap(GatewayConfig gatewayConfig, String imageName, Node node, String time) {
         DockerClient dockerApiClient = swarmClient(gatewayConfig);
-        return new LogrotateBootsrap(dockerApiClient, imageName, time, new DockerClientUtil());
+        return new LogrotateBootsrap(dockerApiClient, imageName, node.getHostname(), time, new DockerClientUtil());
     }
 
     @VisibleForTesting

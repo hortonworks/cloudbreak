@@ -6,6 +6,6 @@ public class LogrotateBootstrapTest extends AbstractContainerBootstrapTest {
 
     @Override
     public ContainerBootstrap getTestInstance() {
-        return new LogrotateBootsrap(getMockedDockerClient(), DUMMY_IMAGE, DUMMY_GENERATED_ID, getMockedDockerClientUtil());
+        return new LogrotateBootsrap(getMockedDockerClient(), DUMMY_IMAGE, DUMMY_GENERATED_ID, DUMMY_NODE, getMockedDockerClientUtil());
     }
 }
