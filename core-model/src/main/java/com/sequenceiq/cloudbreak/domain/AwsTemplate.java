@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import static com.sequenceiq.cloudbreak.domain.AwsVolumeType.Ephemeral;
+
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -66,5 +68,9 @@ public class AwsTemplate extends Template implements ProvisionEntity {
 
     public void setEncrypted(AwsEncryption encrypted) {
         this.encrypted = encrypted;
+    }
+
+    public boolean isEphemeral() {
+        return volumeType.equals(Ephemeral);
     }
 }

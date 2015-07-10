@@ -47,6 +47,8 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -129,6 +131,19 @@ public class AmbariClusterServiceTest {
         when(stackRepository.findOne(anyLong())).thenReturn(stack);
         when(clusterRepository.save(any(Cluster.class))).thenReturn(cluster);
         given(tlsSecurityService.buildTLSClientConfig(anyLong(), anyString())).willReturn(new TLSClientConfig("", "/tmp"));
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testStopWhenAwsHasEphemeralVolume() {
+        cluster = TestUtil.cluster(TestUtil.blueprint(), TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential()), 1L);
+        stack = TestUtil.setEphemeral(cluster.getStack());
+        cluster.setStatus(Status.AVAILABLE);
+        cluster.setStack(stack);
+        stack.setCluster(cluster);
+
+        when(stackRepository.findOne(anyLong())).thenReturn(stack);
+
+        underTest.updateStatus(1L, StatusRequest.STOPPED);
     }
 
     @Test(expected = BadRequestException.class)

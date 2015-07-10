@@ -14,6 +14,10 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.domain.AwsCredential;
+import com.sequenceiq.cloudbreak.domain.AwsInstanceType;
+import com.sequenceiq.cloudbreak.domain.AwsTemplate;
+import com.sequenceiq.cloudbreak.domain.AwsVolumeType;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureNetwork;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
@@ -21,15 +25,19 @@ import com.sequenceiq.cloudbreak.domain.AzureVmType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.GcpInstanceType;
+import com.sequenceiq.cloudbreak.domain.GcpTemplate;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -102,6 +110,24 @@ public class TestUtil {
         return azureCredential;
     }
 
+    public static Credential awsCredential() {
+        AwsCredential awsCredential = new AwsCredential();
+        awsCredential.setPublicKey(AZURE_PUB_KEY);
+        awsCredential.setPublicInAccount(false);
+        awsCredential.setArchived(false);
+        awsCredential.setRoleArn("rolearn");
+        return awsCredential;
+    }
+
+    public static Stack setEphemeral(Stack stack) {
+        if (stack.cloudPlatform().equals(CloudPlatform.AWS)) {
+            for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+                ((AwsTemplate) instanceGroup.getTemplate()).setVolumeType(AwsVolumeType.Ephemeral);
+            }
+        }
+        return stack;
+    }
+
     public static Stack stack(Status stackStatus, Credential credential) {
         Stack stack = new Stack();
         stack.setStatus(stackStatus);
@@ -109,8 +135,50 @@ public class TestUtil {
         stack.setName("simplestack");
         stack.setOwner("userid");
         stack.setId(1L);
-        stack.setInstanceGroups(generateAzureInstanceGroups(3));
+        switch (credential.cloudPlatform()) {
+            case AWS:
+                stack.setInstanceGroups(generateAwsInstanceGroups(3));
+                break;
+            case AZURE:
+                stack.setInstanceGroups(generateAzureInstanceGroups(3));
+                break;
+            case GCP:
+                stack.setInstanceGroups(generateAzureInstanceGroups(3));
+                break;
+            case OPENSTACK:
+                stack.setInstanceGroups(generateAzureInstanceGroups(3));
+                break;
+            default:
+                break;
+        }
         return stack;
+    }
+
+    public static Set<InstanceGroup> generateAwsInstanceGroups(int count) {
+        Set<InstanceGroup> instanceGroups = new HashSet<>();
+        instanceGroups.add(instanceGroup(1L, InstanceGroupType.GATEWAY, awsTemplate(1L)));
+        for (int i = 0; i < count - 1; i++) {
+            instanceGroups.add(instanceGroup(1L, InstanceGroupType.CORE, awsTemplate(1L)));
+        }
+        return instanceGroups;
+    }
+
+    public static Set<InstanceGroup> generateOpenStackInstanceGroups(int count) {
+        Set<InstanceGroup> instanceGroups = new HashSet<>();
+        instanceGroups.add(instanceGroup(1L, InstanceGroupType.GATEWAY, gcpTemplate(1L)));
+        for (int i = 0; i < count - 1; i++) {
+            instanceGroups.add(instanceGroup(1L, InstanceGroupType.CORE, gcpTemplate(1L)));
+        }
+        return instanceGroups;
+    }
+
+    public static Set<InstanceGroup> generateGcpInstanceGroups(int count) {
+        Set<InstanceGroup> instanceGroups = new HashSet<>();
+        instanceGroups.add(instanceGroup(1L, InstanceGroupType.GATEWAY, openstackTemplate(1L)));
+        for (int i = 0; i < count - 1; i++) {
+            instanceGroups.add(instanceGroup(1L, InstanceGroupType.CORE, openstackTemplate(1L)));
+        }
+        return instanceGroups;
     }
 
     public static Set<InstanceGroup> generateAzureInstanceGroups(int count) {
@@ -188,6 +256,34 @@ public class TestUtil {
         azureTemplate.setVolumeCount(1);
         azureTemplate.setVolumeSize(100);
         return azureTemplate;
+    }
+
+    public static Template awsTemplate(Long id) {
+        AwsTemplate awsTemplate = new AwsTemplate();
+        awsTemplate.setInstanceType(AwsInstanceType.C32xlarge);
+        awsTemplate.setId(id);
+        awsTemplate.setVolumeCount(1);
+        awsTemplate.setVolumeSize(100);
+        awsTemplate.setVolumeType(AwsVolumeType.Standard);
+        return awsTemplate;
+    }
+
+    public static Template openstackTemplate(Long id) {
+        OpenStackTemplate openStackTemplate = new OpenStackTemplate();
+        openStackTemplate.setInstanceType("Big");
+        openStackTemplate.setId(id);
+        openStackTemplate.setVolumeCount(1);
+        openStackTemplate.setVolumeSize(100);
+        return openStackTemplate;
+    }
+
+    public static Template gcpTemplate(Long id) {
+        GcpTemplate gcpTemplate = new GcpTemplate();
+        gcpTemplate.setGcpInstanceType(GcpInstanceType.N1_HIGHCPU_16);
+        gcpTemplate.setId(id);
+        gcpTemplate.setVolumeCount(1);
+        gcpTemplate.setVolumeSize(100);
+        return gcpTemplate;
     }
 
     public static Stack stack() {
