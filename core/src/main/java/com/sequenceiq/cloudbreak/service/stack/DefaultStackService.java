@@ -242,6 +242,9 @@ public class DefaultStackService implements StackService {
                 String statusDesc = "Stop request is ignored, because the cluster infrastructure is already stopped.";
                 LOGGER.info(statusDesc);
                 eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), statusDesc);
+            } else if (stack.infrastructureIsEphemeral()) {
+                throw new BadRequestException(
+                        String.format("Cannot stop a stack if the volumeType is Ephemeral.", stack.getId()));
             } else if (!stack.isAvailable() && !stack.isStopFailed()) {
                 throw new BadRequestException(
                         String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getId()));

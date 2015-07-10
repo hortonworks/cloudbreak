@@ -23,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.core.flow.FlowManager;
@@ -168,6 +169,15 @@ public class DefaultStackServiceTest {
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
         underTest.updateStatus(1L, StatusRequest.STARTED);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void updateStatusTestStopWhenClusterAndStackAvailableAndEphemeralThenBadRequestExceptionDropping() {
+        Stack stack = TestUtil.setEphemeral(TestUtil.stack(AVAILABLE, TestUtil.awsCredential()));
+        given(stackRepository.findOne(anyLong())).willReturn(stack);
+        given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
+        given(stackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
+        underTest.updateStatus(1L, StatusRequest.STOPPED);
     }
 
     private Stack stack(Status stackStatus, Status clusterStatus) {

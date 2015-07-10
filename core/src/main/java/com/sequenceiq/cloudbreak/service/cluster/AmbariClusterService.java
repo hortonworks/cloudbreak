@@ -267,6 +267,9 @@ public class AmbariClusterService implements ClusterService {
             String statusDesc = "Cluster stop request is ignored, because the cluster is already stopped.";
             LOGGER.info(statusDesc);
             eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), statusDesc);
+        } else if (stack.infrastructureIsEphemeral()) {
+            throw new BadRequestException(
+                    String.format("Cannot stop a cluster if the volumeType is Ephemeral.", cluster.getId()));
         } else if (!cluster.isClusterReadyForStop() && !cluster.isStopFailed()) {
             throw new BadRequestException(
                     String.format("Cannot update the status of cluster '%s' to STOPPED, because it isn't in AVAILABLE state.", cluster.getId()));

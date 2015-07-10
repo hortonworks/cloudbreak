@@ -555,4 +555,17 @@ public class Stack implements ProvisionEntity {
                 || START_IN_PROGRESS.equals(status)
                 || DELETE_IN_PROGRESS.equals(status);
     }
+
+    public boolean infrastructureIsEphemeral() {
+        boolean ephemeral = false;
+        if (CloudPlatform.AWS.equals(cloudPlatform())) {
+            for (InstanceGroup instanceGroup : instanceGroups) {
+                if (((AwsTemplate) instanceGroup.getTemplate()).isEphemeral()) {
+                    ephemeral = true;
+                    break;
+                }
+            }
+        }
+        return ephemeral;
+    }
 }
