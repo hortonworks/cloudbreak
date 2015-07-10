@@ -29,7 +29,7 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
     @Test
     @Parameters({ "clusterName", "ambariUser", "ambariPassword", "emailNeeded" })
     public void testClusterCreation(@Optional("it-cluster") String clusterName, @Optional("admin") String ambariUser,
-            @Optional("admin") String ambariPassword, @Optional("false") boolean emailNeeded) throws Exception {
+            @Optional("admin123!@#") String ambariPassword, @Optional("false") boolean emailNeeded) throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackIdStr = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);

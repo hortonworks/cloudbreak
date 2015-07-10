@@ -38,10 +38,8 @@ public class ClusterRequest {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.USERNAME, required = true)
     private String userName;
-    @Size(max = 15, min = 5, message = "The length of the password has to be in range of 5 to 15")
-    @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
-            message = "The password can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
+    @Size(max = 50, min = 5, message = "The length of the password has to be in range of 5 to 50")
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD, required = true)
     private String password;
     private String kerberosMasterKey;
