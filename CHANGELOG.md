@@ -1,4 +1,14 @@
-## Unreleased
+-e ## Unreleased
+
+### Fixed
+
+### Added
+
+### Removed
+
+### Changed
+
+## [v0.5.5] - 2015-07-10
 
 ### Fixed
 
