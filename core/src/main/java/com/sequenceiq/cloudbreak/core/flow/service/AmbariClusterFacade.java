@@ -416,7 +416,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         LOGGER.info("Changing ambari credentials for cluster: {}, ambari ip: {}", cluster.getName(), ambariIp);
         String userName = cluster.getUserName();
         String password = cluster.getPassword();
-        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), ambariIp);
         AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(clientConfig);
         if (ADMIN.equals(userName)) {
             if (!ADMIN.equals(password)) {
