@@ -8,6 +8,22 @@
 
 ### Changed
 
+## [v0.5.5] - 2015-07-10
+
+### Fixed
+
+### Added
+
+- Command `pull-parallel` added for quicker/simultaneous image pull
+- Release process includes upload to public-repo s3 bucket
+
+### Removed
+
+### Changed
+
+- License changed from MIT to Apache v2
+- release artifact includes additional files: license/readme/notes
+
 ## [v0.5.4] - 2015-07-03
 
 ### Fixed
