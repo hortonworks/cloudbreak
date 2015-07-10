@@ -238,6 +238,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 }
             );
         }
+
         $scope.$watch('pagination.currentPage + pagination.itemsPerPage', function(){
             if ($rootScope.activeCluster.metadata != null) {
                 paginateMetadata();
@@ -313,6 +314,21 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }, function(error) {
               $scope.showError(error, $rootScope.msg.cluster_stop_failed);
             });
+        }
+
+        $scope.isEphemeralCluster = function (activeCluster) {
+            var isEphemeral = false;
+            if (activeCluster.cloudPlatform === 'AWS') {
+                angular.forEach(activeCluster.instanceGroups, function(item) {
+                    var actualTemplate = $filter('filter')($rootScope.templates, { id: item.templateId});
+                    if (actualTemplate.length > 0) {
+                        if (actualTemplate[0].parameters.volumeType === $rootScope.config.AWS.volumeTypes[2].value.toString()) {
+                            isEphemeral = true;
+                        }
+                    }
+                });
+            }
+            return isEphemeral;
         }
 
         $scope.reinstallCluster = function (activeCluster) {

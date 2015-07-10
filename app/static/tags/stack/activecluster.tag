@@ -22,7 +22,7 @@
                             <a href="" class="btn btn-success" role="button" ng-show="activeCluster.status == 'STOPPED' || (activeCluster.cluster.status == 'START_REQUESTED' && activeCluster.status == 'AVAILABLE')" data-toggle="modal" data-target="#modal-start-cluster">
                                 <i class="fa fa-play fa-fw"></i><span> {{msg.active_cluster_command_start_label}}</span>
                             </a>
-                            <a href="" class="btn btn-warning" role="button" ng-show="(activeCluster.status == 'AVAILABLE' && activeCluster.cluster.status != 'START_REQUESTED') || ((activeCluster.status == 'STOP_REQUESTED' || activeCluster.status == 'STOP_FAILED') && activeCluster.cluster.status == 'STOPPED')" data-toggle="modal" data-target="#modal-stop-cluster">
+                            <a href="" class="btn btn-warning" role="button" ng-show="((activeCluster.status == 'AVAILABLE' && activeCluster.cluster.status != 'START_REQUESTED') || ((activeCluster.status == 'STOP_REQUESTED' || activeCluster.status == 'STOP_FAILED') && activeCluster.cluster.status == 'STOPPED')) && !isEphemeralCluster(activeCluster)"  data-toggle="modal" data-target="#modal-stop-cluster">
                                 <i class="fa fa-pause fa-fw"></i><span> {{msg.active_cluster_command_stop_label}}</span>
                             </a>
                             <a href="" id="terminate-btn" class="btn btn-danger" role="button" data-toggle="modal" data-target="#modal-terminate">
