@@ -54,7 +54,7 @@ release:
 
 	gh-release checksums sha256
 	gh-release create sequenceiq/$(NAME) $(VERSION) $(GIT_BRANCH) v$(VERSION)
-
+	# aws s3 cp --region us-east-1 release/cloudbreak-deployer_$(VERSION)_Linux_$(ARCH).tgz  s3://public-repo.sequenceiq.com
 
 release-next-ver: deps
 	./release-next-ver.sh 

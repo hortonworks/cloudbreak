@@ -5,6 +5,7 @@
 ### Added
 
 - Command `pull-parallel` added for quicker/simultaneous image pull
+- Release process includes upload to public-repo s3 bucket
 
 ### Removed
 
