@@ -348,7 +348,6 @@ public class TemplateParametersValidatorTest {
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(OpenStackTemplateParam.INSTANCE_TYPE.getName(), "small");
-        parameters.put(OpenStackTemplateParam.PUBLIC_NET_ID.getName(), "netid");
 
         templateJson.setVolumeCount(6);
         templateJson.setVolumeSize(30);
@@ -363,24 +362,8 @@ public class TemplateParametersValidatorTest {
         templateJson.setDescription("description");
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(OpenStackTemplateParam.PUBLIC_NET_ID.getName(), "netid");
 
         templateJson.setVolumeCount(10);
-        templateJson.setVolumeSize(30);
-        templateJson.setParameters(parameters);
-        assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
-    }
-
-    @Test
-    public void openStackTemplateJsonWithMissingPublicNetIdReturnTrue() {
-        TemplateRequest templateJson = new TemplateRequest();
-        templateJson.setCloudPlatform(CloudPlatform.OPENSTACK);
-        templateJson.setDescription("description");
-        templateJson.setName("name");
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put(OpenStackTemplateParam.INSTANCE_TYPE.getName(), "small");
-
-        templateJson.setVolumeCount(6);
         templateJson.setVolumeSize(30);
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);

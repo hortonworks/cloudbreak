@@ -4,7 +4,6 @@ import com.google.common.base.Optional;
 
 public enum OpenStackTemplateParam implements TemplateParam {
 
-    PUBLIC_NET_ID("publicNetId", true, String.class, Optional.<String>absent()),
     INSTANCE_TYPE("instanceType", true, String.class, Optional.<String>absent());
 
     private final String paramName;
