@@ -171,7 +171,11 @@
 
     "PublicRoute" : {
       "Type" : "AWS::EC2::Route",
+      <#if existingVPC>
+      "DependsOn" : "PublicRouteTable",
+      <#else>
       "DependsOn" : [ "PublicRouteTable", "AttachGateway" ],
+      </#if>
       "Properties" : {
         "RouteTableId" : { "Ref" : "PublicRouteTable" },
         "DestinationCidrBlock" : "0.0.0.0/0",
