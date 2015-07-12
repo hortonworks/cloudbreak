@@ -82,7 +82,7 @@
                             <div class="form-group" ng-if="activeCluster.cluster.statusReason != null && activeCluster.cluster.statusReason != ''">
                                 <label class="col-sm-3 control-label" for="sl_cloudStatus">{{msg.active_cluster_status_label}}</label>
                                 <div class="col-sm-9">
-                                    <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.cluster.statusReason}}2</p>
+                                    <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.cluster.statusReason}}</p>
                                 </div>
                             </div>
                         </form>
