@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class Node {
@@ -8,10 +9,13 @@ public class Node {
     private String hostname;
     private Set<String> dataVolumes;
 
+    public Node(Node node) {
+        this(node.getPrivateIp(), node.getPublicIp(), node.getHostname(), new HashSet<>(node.getDataVolumes()));
+    }
+
     public Node(String privateIp, String publicIp) {
         this.privateIp = privateIp;
         this.publicIp = publicIp;
-
     }
 
     public Node(String privateIp, String publicIp, String hostname, Set<String> dataVolumes) {
