@@ -4,7 +4,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.ec2.AmazonEC2Client;
@@ -12,8 +11,7 @@ import com.amazonaws.services.ec2.model.GetConsoleOutputRequest;
 import com.amazonaws.services.ec2.model.GetConsoleOutputResult;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
-@Component("awsStackConsoleOutputCheckerTask")
-@Qualifier("aws")
+@Component("awsConsoleOutputCheckerTask")
 public class ConsoleOutputCheckerTask extends StackBasedStatusCheckerTask<ConsoleOutputContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleOutputCheckerTask.class);
