@@ -37,13 +37,15 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         Integer blueprintId = Integer.valueOf(itContext.getContextParam(CloudbreakITContextConstants.BLUEPRINT_ID));
         List<HostGroup> hostgroups = itContext.getContextParam(CloudbreakITContextConstants.HOSTGROUP_ID, List.class);
         List<Map<String, Object>> map = convertHostGroups(hostgroups);
+        itContext.putContextParam(CloudbreakITContextConstants.AMBARI_USER_ID, ambariUser);
+        itContext.putContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID, ambariPassword);
         // WHEN
         // TODO email needed
         CloudbreakClient client = getClient();
         client.postCluster(clusterName, ambariUser, ambariPassword, blueprintId, "Cluster for integration test", Integer.valueOf(stackId), map);
         // THEN
         CloudbreakUtil.waitForStackStatus(itContext, stackIdStr, "AVAILABLE");
-        CloudbreakUtil.checkClusterAvailability(client, stackIdStr);
+        CloudbreakUtil.checkClusterAvailability(client, stackIdStr, ambariUser, ambariPassword);
     }
 
     private List<Map<String, Object>> convertHostGroups(List<HostGroup> hostGroups) {

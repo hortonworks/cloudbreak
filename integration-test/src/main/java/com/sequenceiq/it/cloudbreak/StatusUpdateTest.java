@@ -41,9 +41,11 @@ public class StatusUpdateTest extends AbstractCloudbreakIntegrationTest {
         }
         // THEN
         if (newStatus.equals(STARTED)) {
-            CloudbreakUtil.checkClusterAvailability(client, stackId);
+            CloudbreakUtil.checkClusterAvailability(client, stackId, itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID),
+                    itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID));
         } else if (newStatus.equals(STOPPED)) {
-            CloudbreakUtil.checkClusterStopped(client, stackId);
+            CloudbreakUtil.checkClusterStopped(client, stackId, itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID),
+                    itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID));
         }
     }
 }

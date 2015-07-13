@@ -40,6 +40,7 @@ public class ScalingTest extends AbstractCloudbreakIntegrationTest {
             CloudbreakUtil.waitForStackStatus(itContext, stackId, "AVAILABLE");
         }
         // THEN
-        CloudbreakUtil.checkClusterAvailability(client, stackId);
+        CloudbreakUtil.checkClusterAvailability(client, stackId, itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID),
+                itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID));
     }
 }
