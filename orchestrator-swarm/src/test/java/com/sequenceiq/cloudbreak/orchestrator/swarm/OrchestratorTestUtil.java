@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
 import com.sequenceiq.cloudbreak.orchestrator.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.orchestrator.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.Node;
 import com.sequenceiq.cloudbreak.orchestrator.ParallelContainerRunner;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
@@ -24,7 +25,7 @@ public class OrchestratorTestUtil {
     }
 
     public static GatewayConfig gatewayConfig() {
-        return new GatewayConfig("11.0.0.0", "/tmp/certs");
+        return new GatewayConfig("11.0.0.0", "11.0.0.0", "/tmp/certs");
     }
 
     public static ContainerOrchestratorCluster containerOrchestratorCluster(GatewayConfig gatewayConfig, Set<Node> nodes) {
@@ -44,6 +45,10 @@ public class OrchestratorTestUtil {
 
         }
         return new SimpleExitCriteriaModel();
+    }
+
+    public static LogVolumePath generateLogVolume() {
+        return new LogVolumePath("/hadoopfs/logs", "/var/log");
     }
 
     public static Callable<Boolean> createRunner(ContainerBootstrap containerBootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,

@@ -4,10 +4,12 @@ import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorCancelledExc
 import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
 import com.sequenceiq.cloudbreak.orchestrator.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.orchestrator.LogVolumePath;
 
 public class CancelledMockContainerOrchestrator extends MockContainerOrchestrator {
     @Override
-    public void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, int count, String platform, ExitCriteriaModel exitCriteriaModel)
+    public void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, int count, String platform,
+            LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         throw new CloudbreakOrchestratorCancelledException("cancelled");
     }

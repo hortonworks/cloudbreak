@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
 import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
+import com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -40,7 +41,6 @@ public class HeatTemplateBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(HeatTemplateBuilder.class);
 
     private static final int PRIVATE_ID_PART = 2;
-    private static final String MOUNT_PREFIX = "/hadoopfs/fs";
     private static final String DEVICE_PREFIX = "/dev/vd";
     private static final char[] DEVICE_CHAR = {'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'};
 
@@ -194,7 +194,7 @@ public class HeatTemplateBuilder {
     private List<OpenStackVolume> buildVolumes(int numDisk, int size) {
         List<OpenStackVolume> volumes = Lists.newArrayList();
         for (int i = 0; i < numDisk; i++) {
-            volumes.add(new OpenStackVolume(MOUNT_PREFIX + (i + 1), DEVICE_PREFIX + DEVICE_CHAR[i], size));
+            volumes.add(new OpenStackVolume(VolumeUtils.VOLUME_PREFIX + (i + 1), DEVICE_PREFIX + DEVICE_CHAR[i], size));
         }
         return volumes;
     }

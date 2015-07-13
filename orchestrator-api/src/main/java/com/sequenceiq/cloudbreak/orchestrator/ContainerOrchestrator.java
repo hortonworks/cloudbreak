@@ -9,30 +9,32 @@ public interface ContainerOrchestrator {
 
     void init(ParallelContainerRunner parallelContainerRunner, ExitCriteria exitCriteria);
 
-    void bootstrap(GatewayConfig gatewayConfig, Set<Node> nodes, int consulServerCount, ExitCriteriaModel exitCriteriaModel)
+    void bootstrap(GatewayConfig gatewayConfig, Set<Node> nodes, int consulServerCount, String consulLogLocation, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
-    void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel)
+    void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> nodes, String consulLogLocation, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
     void startRegistrator(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
     void startAmbariServer(ContainerOrchestratorCluster cluster, String dbImageName, String serverImageName, String platform,
-            ExitCriteriaModel exitCriteriaModel)
+            LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
-    void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, int count, String platform, ExitCriteriaModel exitCriteriaModel)
+    void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, int count, String platform,
+            LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
-    void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, int count, ExitCriteriaModel exitCriteriaModel)
+    void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, int count,
+            LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
     void startBaywatchServer(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
-    void startBaywatchClients(ContainerOrchestratorCluster cluster, String imageName, String gatewayAddress,
-            int count, String consulDomain, String externServerLocation, ExitCriteriaModel exitCriteriaModel)
+    void startBaywatchClients(ContainerOrchestratorCluster cluster, String imageName, int count,
+            String consulDomain, LogVolumePath logVolumePath, String externServerLocation, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
     void startLogrotate(ContainerOrchestratorCluster cluster, String imageName, int count, ExitCriteriaModel exitCriteriaModel)

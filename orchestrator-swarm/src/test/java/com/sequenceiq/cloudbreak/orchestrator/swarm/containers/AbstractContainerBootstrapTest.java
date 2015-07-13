@@ -25,6 +25,7 @@ import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.RestartPolicy;
+import com.sequenceiq.cloudbreak.orchestrator.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil;
 
@@ -38,7 +39,9 @@ public abstract class AbstractContainerBootstrapTest {
     protected static final String DUMMY_GETAWAY_ADDRESS = "25.26.27.1";
     protected static final Set<String> DUMMY_VOLUMES = Sets.newHashSet("/var/path1", "/var/path2");
     protected static final String[] CMD = new String[]{"cmd1", "cmd2"};
+    protected static final LogVolumePath DUMMY_LOG_VOLUME = new LogVolumePath("/var/path1", "/var/path2");
     private static final String DUMMY_CONTAINER_ID = "dummyContainerId";
+
 
     private ContainerBootstrap underTest;
 

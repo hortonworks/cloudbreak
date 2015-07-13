@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
 import static com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils.buildVolumePathString;
-import static com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils.getFirstVolume;
+import static com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils.getLogVolume;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -101,7 +101,7 @@ public class HadoopConfigurationService {
                 Map<String, String> properties = new HashMap<>();
                 for (ConfigProperty property : config.get(siteConfig)) {
                     String directory = serviceName.toLowerCase() + (property.getDirectory().isEmpty() ? "" : "/" + property.getDirectory());
-                    String value = global ? property.getPrefix() + getFirstVolume(directory) : buildVolumePathString(volumeCount, directory);
+                    String value = global ? property.getPrefix() + getLogVolume(directory) : buildVolumePathString(volumeCount, directory);
                     properties.put(property.getName(), value);
                 }
                 result.put(siteConfig, properties);

@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.Volume;
+import com.sequenceiq.cloudbreak.orchestrator.LogVolumePath;
 
 public class BindsBuilder {
 
@@ -23,13 +24,13 @@ public class BindsBuilder {
         return add("/var/run/docker.sock", containerPath);
     }
 
-    public BindsBuilder addLog() {
-        return add("/hadoopfs/fs1/logs", "/var/log");
+    public BindsBuilder addLog(LogVolumePath logVolumePath) {
+        return add(logVolumePath.getHostPath(), logVolumePath.getContainerPath());
     }
 
-    public BindsBuilder addLog(String... subdirs) {
+    public BindsBuilder addLog(LogVolumePath logVolumePath, String... subdirs) {
         for (String subdir : subdirs) {
-            add("/hadoopfs/fs1/logs/" + subdir, "/var/log/containers/" + subdir);
+            add(logVolumePath.getHostPath() + "/" + subdir, logVolumePath.getContainerPath() + "/" + subdir);
         }
         return this;
     }

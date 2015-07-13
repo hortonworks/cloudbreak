@@ -189,9 +189,9 @@ public class TlsSecurityService {
         return privateKeyPath;
     }
 
-    public GatewayConfig buildGatewayConfig(Long stackId, String publicIp) throws CloudbreakSecuritySetupException {
+    public GatewayConfig buildGatewayConfig(Long stackId, String publicIp, String privateIp) throws CloudbreakSecuritySetupException {
         prepareCertDir(stackId);
-        return new GatewayConfig(publicIp, prepareCertDir(stackId));
+        return new GatewayConfig(publicIp, privateIp, prepareCertDir(stackId));
     }
 
     public TLSClientConfig buildTLSClientConfig(Long stackId, String apiAddress) throws CloudbreakSecuritySetupException {
