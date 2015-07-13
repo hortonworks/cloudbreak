@@ -95,6 +95,12 @@ app.get('/reset/:resetToken', function(req, res) {
   res.render('reset')
 });
 
+getBasePath = function(req) {
+    if (req.url.indexOf('sultans') !== -1) {
+        return '/sultans/'
+    }
+    return '/'
+}
 
 app.post('/', function(req, res){
     var username = req.body.email
@@ -117,13 +123,13 @@ app.post('/', function(req, res){
             if (req.session.client_id == null) {
                 var sourceCookie = getCookie(req, 'source')
                 if (sourceCookie == null || sourceCookie == 'undefined'){
-                    res.redirect('dashboard')
+                    res.redirect(getBasePath(req) + 'dashboard')
                 } else {
                     var sourceUrl = new Buffer(sourceCookie, 'base64').toString('utf-8')
                     res.redirect(sourceUrl)
                 }
             } else {
-                res.redirect('confirm')
+                res.redirect(getBasePath(req) + 'confirm')
             }
         } else {
             res.render('login',{ errorMessage: "Incorrect email/password or account is disabled." });
@@ -142,9 +148,9 @@ app.get('/oauth/authorize', function(req, res){
         req.session.scope = req.param('scope')
         req.session.redirect_uri = req.param('redirect_uri')
         if (isUaaSession(req)) {
-            res.redirect('/confirm')
+            res.redirect(getBasePath(req) + 'confirm')
         } else {
-            res.redirect('/')
+            res.redirect(getBasePath(req))
         }
     } else {
         res.statusCode = 404
