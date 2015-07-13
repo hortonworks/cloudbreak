@@ -81,28 +81,11 @@ public class StackSyncService {
                 InstanceSyncState state = metadataSetup.getState(stack, instanceGroup, instance.getInstanceId());
                 ResourceType instanceResourceType = metadataSetup.getInstanceResourceType();
                 if (InstanceSyncState.DELETED.equals(state)) {
-                    instanceStateCounts.put(InstanceSyncState.DELETED, instanceStateCounts.get(InstanceSyncState.DELETED) + 1);
-
-                    deleteHostFromCluster(stack, instance);
-                    if (!instance.isTerminated()) {
-                        LOGGER.info("Instance '{}' is reported as deleted on the cloud provider, setting its state to TERMINATED.", instance.getInstanceId());
-                        deleteResourceIfNeeded(stackId, instance, instanceResourceType);
-                        updateMetaDataToTerminated(stackId, instance, instanceGroup);
-                    }
+                    syncDeletedInstance(stack, stackId, instanceStateCounts, instance, instanceGroup, instanceResourceType);
                 } else if (InstanceSyncState.RUNNING.equals(state)) {
-                    instanceStateCounts.put(InstanceSyncState.RUNNING, instanceStateCounts.get(InstanceSyncState.RUNNING) + 1);
-                    if (!instance.isRunning()) {
-                        LOGGER.info("Instance '{}' is reported as running on the cloud provider, updating metadata.", instance.getInstanceId());
-                        createResourceIfNeeded(stack, instance, instanceGroup);
-                        updateMetaDataToRunning(stackId, stack.getCluster(), instance, instanceGroup);
-                    }
+                    syncRunningInstance(stack, stackId, instanceStateCounts, instance, instanceGroup);
                 } else if (InstanceSyncState.STOPPED.equals(state)) {
-                    instanceStateCounts.put(InstanceSyncState.STOPPED, instanceStateCounts.get(InstanceSyncState.STOPPED) + 1);
-                    if (!instance.isTerminated() && !stack.isStopped()) {
-                        LOGGER.info("Instance '{}' is reported as stopped on the cloud provider, setting its state to STOPPED.", instance.getInstanceId());
-                        deleteResourceIfNeeded(stackId, instance, instanceResourceType);
-                        updateMetaDataToTerminated(stackId, instance, instanceGroup);
-                    }
+                    syncStoppedInstance(stack, stackId, instanceStateCounts, instance, instanceGroup, instanceResourceType);
                 } else {
                     instanceStateCounts.put(InstanceSyncState.IN_PROGRESS, instanceStateCounts.get(InstanceSyncState.IN_PROGRESS) + 1);
                 }
@@ -114,6 +97,37 @@ public class StackSyncService {
             }
         }
         handleSyncResult(stack, instanceStateCounts);
+    }
+
+    private void syncStoppedInstance(Stack stack, Long stackId, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance,
+            InstanceGroup instanceGroup, ResourceType instanceResourceType) {
+        instanceStateCounts.put(InstanceSyncState.STOPPED, instanceStateCounts.get(InstanceSyncState.STOPPED) + 1);
+        if (!instance.isTerminated() && !stack.isStopped()) {
+            LOGGER.info("Instance '{}' is reported as stopped on the cloud provider, setting its state to STOPPED.", instance.getInstanceId());
+            deleteResourceIfNeeded(stackId, instance, instanceResourceType);
+            updateMetaDataToTerminated(stackId, instance, instanceGroup);
+        }
+    }
+
+    private void syncRunningInstance(Stack stack, Long stackId, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance,
+            InstanceGroup instanceGroup) {
+        instanceStateCounts.put(InstanceSyncState.RUNNING, instanceStateCounts.get(InstanceSyncState.RUNNING) + 1);
+        if (!instance.isRunning() && !instance.isDecommissioned()) {
+            LOGGER.info("Instance '{}' is reported as running on the cloud provider, updating metadata.", instance.getInstanceId());
+            createResourceIfNeeded(stack, instance, instanceGroup);
+            updateMetaDataToRunning(stackId, stack.getCluster(), instance, instanceGroup);
+        }
+    }
+
+    private void syncDeletedInstance(Stack stack, Long stackId, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance,
+            InstanceGroup instanceGroup, ResourceType instanceResourceType) {
+        instanceStateCounts.put(InstanceSyncState.DELETED, instanceStateCounts.get(InstanceSyncState.DELETED) + 1);
+        deleteHostFromCluster(stack, instance);
+        if (!instance.isTerminated()) {
+            LOGGER.info("Instance '{}' is reported as deleted on the cloud provider, setting its state to TERMINATED.", instance.getInstanceId());
+            deleteResourceIfNeeded(stackId, instance, instanceResourceType);
+            updateMetaDataToTerminated(stackId, instance, instanceGroup);
+        }
     }
 
     private void createResourceIfNeeded(Stack stack, InstanceMetaData instance, InstanceGroup instanceGroup) {
