@@ -458,7 +458,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     @VisibleForTesting
     ConsulWatchBootstrap consulWatchBootstrap(GatewayConfig gatewayConfig, String imageName, Node node, String time) {
         DockerClient dockerApiClient = swarmClient(gatewayConfig);
-        return new ConsulWatchBootstrap(dockerApiClient, imageName, node.getHostname(), time, new DockerClientUtil());
+        return new ConsulWatchBootstrap(dockerApiClient, imageName, node, time, new DockerClientUtil());
     }
 
     @VisibleForTesting
