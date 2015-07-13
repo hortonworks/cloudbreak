@@ -158,7 +158,7 @@ app.get('/authorize', function(req, res, next){
     }
     console.log(data)
     req.session.token=data.access_token;
-    res.redirect('/');
+    res.redirect(hostAddress);
   });
 });
 
