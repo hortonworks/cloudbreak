@@ -18,6 +18,7 @@ public class CloudbreakUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakUtil.class);
     private static final int MAX_RETRY = 360;
     private static final int POLLING_INTERVAL = 10000;
+    private static final int DEFAULT_AMBARI_PORT = 8080;
 
     private CloudbreakUtil() {
     }
@@ -60,9 +61,9 @@ public class CloudbreakUtil {
                 }
             }
             retryCount++;
-        } while (!desiredStatus.equals(stackStatus) && !stackStatus.contains("FAILED") && retryCount < MAX_RETRY);
+        } while (!desiredStatus.equals(stackStatus) && !stackStatus.contains("FAILED") && !"DELETE_COMPLETED".equals(stackStatus) && retryCount < MAX_RETRY);
         LOGGER.info("Status {} for {} is in desired status {}", statusPath, stackId, stackStatus);
-        if (stackStatus.contains("FAILED")) {
+        if (stackStatus.contains("FAILED") || (!"DELETE_COMPLETED".equals(desiredStatus) && "DELETE_COMPLETED".equals(stackStatus))) {
             waitResult = WaitResult.FAILED;
         }
         if (retryCount == MAX_RETRY) {
@@ -71,7 +72,7 @@ public class CloudbreakUtil {
         return waitResult;
     }
 
-    public static void checkClusterAvailability(CloudbreakClient client, String stackId) throws Exception {
+    public static void checkClusterAvailability(CloudbreakClient client, String stackId, String ambariUser, String ambariPassowrd) throws Exception {
         Map<String, Object> stack = (Map<String, Object>) client.getStack(stackId);
 
         Assert.assertEquals(((Map<String, Object>) stack.get("cluster")).get("status"), "AVAILABLE", "The cluster hasn't been started!");
@@ -80,20 +81,20 @@ public class CloudbreakUtil {
         String ambariIp = (String) ((Map<String, Object>) stack.get("cluster")).get("ambariServerIp");
         Assert.assertNotNull(ambariIp, "The Ambari IP is not available!");
 
-        AmbariClient ambariClient = new AmbariClient(ambariIp);
+        AmbariClient ambariClient = new AmbariClient(ambariIp, DEFAULT_AMBARI_PORT, ambariUser, ambariPassowrd);
         Assert.assertEquals(ambariClient.healthCheck(), "RUNNING", "The Ambari server is not running!");
         Assert.assertEquals(ambariClient.getClusterHosts().size(), getNodeCount(stack) - 1,
                 "The number of cluster nodes in the stack differs from the number of nodes registered in ambari");
     }
 
-    public static void checkClusterStopped(CloudbreakClient client, String stackId) throws Exception {
+    public static void checkClusterStopped(CloudbreakClient client, String stackId, String ambariUser, String ambariPassowrd) throws Exception {
         Map<String, Object> stack = (Map<String, Object>) client.getStack(stackId);
 
         Assert.assertEquals(((Map<String, Object>) stack.get("cluster")).get("status"), "STOPPED", "The cluster is not stopped!");
         Assert.assertEquals(stack.get("status"), "STOPPED", "The stack is not stopped!");
 
         String ambariIp = (String) stack.get("ambariServerIp");
-        AmbariClient ambariClient = new AmbariClient(ambariIp);
+        AmbariClient ambariClient = new AmbariClient(ambariIp, DEFAULT_AMBARI_PORT, ambariUser, ambariPassowrd);
         Assert.assertFalse(isAmbariRunning(ambariClient), "The Ambari server is running in stopped state!");
     }
 
