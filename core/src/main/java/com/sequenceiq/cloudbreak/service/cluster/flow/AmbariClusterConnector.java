@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
+import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -124,6 +125,8 @@ public class AmbariClusterConnector {
     private AmbariHostsJoinStatusCheckerTask ambariHostsJoinStatusCheckerTask;
     @Inject
     private TlsSecurityService tlsSecurityService;
+    @Inject
+    private HostMetadataRepository hostMetadataRepository;
 
     public Cluster buildAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
@@ -135,7 +138,8 @@ public class AmbariClusterConnector {
             setBaseRepoURL(cluster, ambariClient);
             addBlueprint(stack, ambariClient, cluster.getBlueprint());
             int nodeCount = stack.getFullNodeCountWithoutDecommissionedNodes() - stack.getGateWayNodeCount();
-            PollingResult waitForHostsResult = waitForHosts(stack, ambariClient, nodeCount);
+            Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
+            PollingResult waitForHostsResult = waitForHosts(stack, ambariClient, nodeCount, hostsInCluster);
             checkPollingResult(waitForHostsResult, "Error while waiting for hosts to connect. Polling result: " + waitForHostsResult.name());
 
             Set<HostGroup> hostGroups = hostGroupRepository.findHostGroupsInCluster(cluster.getId());
@@ -183,7 +187,8 @@ public class AmbariClusterConnector {
         AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
         int nodeCount = stack.getFullNodeCountWithoutDecommissionedAndUnRegisteredNodes() - stack.getGateWayNodeCount()
                 + hostGroupAdjustment.getScalingAdjustment();
-        PollingResult pollingResult = waitForHosts(stack, ambariClient, nodeCount);
+        Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
+        PollingResult pollingResult = waitForHosts(stack, ambariClient, nodeCount, hostsInCluster);
         if (SUCCESS.equals(pollingResult)) {
             HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
             List<String> hosts = findFreeHosts(stack.getId(), hostGroup, hostGroupAdjustment.getScalingAdjustment());
@@ -598,7 +603,9 @@ public class AmbariClusterConnector {
     }
 
     private PollingResult waitForHostsToJoin(Stack stack) throws CloudbreakSecuritySetupException {
-        AmbariHostsCheckerContext ambariHostsCheckerContext = new AmbariHostsCheckerContext(stack, getAmbariClientByStack(stack), stack.getFullNodeCount());
+        Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
+        AmbariHostsCheckerContext ambariHostsCheckerContext =
+                new AmbariHostsCheckerContext(stack, getAmbariClientByStack(stack), hostsInCluster, stack.getFullNodeCount());
         return ambariHostJoin.pollWithTimeout(
                 ambariHostsJoinStatusCheckerTask,
                 ambariHostsCheckerContext,
@@ -696,10 +703,11 @@ public class AmbariClusterConnector {
         }
     }
 
-    private PollingResult waitForHosts(Stack stack, AmbariClient ambariClient, int nodeCount) {
+    private PollingResult waitForHosts(Stack stack, AmbariClient ambariClient, int nodeCount, Set<HostMetadata> hostsInCluster) {
         LOGGER.info("Waiting for hosts to connect.[Ambari server address: {}]", stack.getAmbariIp());
         return hostsPollingService.pollWithTimeout(
-                ambariHostsStatusCheckerTask, new AmbariHostsCheckerContext(stack, ambariClient, nodeCount), AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_HOSTS);
+                ambariHostsStatusCheckerTask, new AmbariHostsCheckerContext(stack, ambariClient, hostsInCluster, nodeCount),
+                AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_HOSTS);
     }
 
     private Map<String, List<String>> buildHostGroupAssociations(Set<HostGroup> hostGroups) throws InvalidHostGroupHostAssociation {
