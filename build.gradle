@@ -1,8 +1,97 @@
-def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
-apply from: "$rootDir/gradle/versioning.gradle"
-ext.config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL())
+import org.ajoberstar.gradle.git.release.opinion.Strategies
+import org.ajoberstar.gradle.git.release.opinion.Strategies.BuildMetadata
+import org.ajoberstar.gradle.git.release.opinion.Strategies.PreRelease
+import org.ajoberstar.gradle.git.release.semver.ChangeScope
+import org.ajoberstar.gradle.git.release.semver.PartialSemVerStrategy
+import org.ajoberstar.gradle.git.release.semver.SemVerStrategy
+import org.ajoberstar.grgit.Grgit
 
-ext.projVersion = version
+import static org.ajoberstar.gradle.git.release.semver.StrategyUtil.*
+
+final class VersionStrategies {
+
+    static final class Normal {
+        static final PartialSemVerStrategy INCREMENT_FROM_RC = closure { state ->
+            def nearestAny = state.nearestVersion.any
+            if ("dev".equals(state.stageFromProp) && ("".equals(nearestAny.preReleaseVersion) || nearestAny.preReleaseVersion.contains("rc"))) {
+                switch (state.scopeFromProp) {
+                    case ChangeScope.MAJOR:
+                        return state.copyWith(inferredNormal: nearestAny.incrementMajorVersion())
+                    case ChangeScope.MINOR:
+                        return state.copyWith(inferredNormal: nearestAny.incrementMinorVersion())
+                    case ChangeScope.PATCH:
+                        return state.copyWith(inferredNormal: nearestAny.incrementPatchVersion())
+                    default:
+                        return state
+                }
+            } else {
+                return state.copyWith(inferredNormal: nearestAny.normalVersion)
+            }
+        }
+    }
+
+    static final SemVerStrategy FEATURE_BRANCH = Strategies.DEFAULT.copyWith(
+            name: 'feature-branch',
+            stages: ['fb'] as SortedSet,
+            allowDirtyRepo: true,
+            preReleaseStrategy: all(PreRelease.STAGE_FLOAT, PreRelease.COUNT_COMMITS_SINCE_ANY, PreRelease.SHOW_UNCOMMITTED),
+            buildMetadataStrategy: BuildMetadata.COMMIT_ABBREVIATED_ID,
+            createTag: false
+    )
+
+    static final SemVerStrategy DEV = Strategies.DEFAULT.copyWith(
+            name: 'development',
+            stages: ['dev'] as SortedSet,
+            allowDirtyRepo: true,
+            normalStrategy: Normal.INCREMENT_FROM_RC,
+            preReleaseStrategy: all(PreRelease.STAGE_FIXED, PreRelease.COUNT_INCREMENTED)
+    )
+
+    static final SemVerStrategy RC = Strategies.DEFAULT.copyWith(
+            name: 'pre-release',
+            stages: ['rc'] as SortedSet,
+            allowDirtyRepo: true,
+            normalStrategy: Normal.INCREMENT_FROM_RC,
+            preReleaseStrategy: all(PreRelease.STAGE_FIXED, PreRelease.COUNT_INCREMENTED)
+    )
+
+    static final SemVerStrategy FINAL = Strategies.DEFAULT.copyWith(
+            name: 'release',
+            stages: ['final'] as SortedSet,
+            allowDirtyRepo: true
+    )
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath "org.ajoberstar:gradle-git:1.2.0"
+        classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
+    }
+}
+
+apply plugin: 'org.ajoberstar.release-opinion'
+
+release {
+    grgit = Grgit.open(project.file('.'))
+
+    versionStrategy VersionStrategies.FINAL
+    versionStrategy VersionStrategies.RC
+    versionStrategy VersionStrategies.FEATURE_BRANCH
+    versionStrategy VersionStrategies.DEV
+
+    defaultVersionStrategy = VersionStrategies.FEATURE_BRANCH
+
+    tagStrategy {
+        prefixNameWithV = false
+    }
+}
+
+def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
+ext.config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL())
 
 allprojects {
     apply plugin: 'idea'
@@ -17,8 +106,6 @@ subprojects {
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
-
-    version = projVersion
 
     configurations {
         deployerJars

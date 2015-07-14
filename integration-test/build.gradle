@@ -39,8 +39,7 @@ task buildInfo(type: BuildInfoTask) {
     destination = file("$buildDir")
     applicationPropertiesPath = "$buildDir"
     basename = jar.baseName
-    buildVersion =  projVersion
-
+    buildVersion = version
 }
 
 compileJava.dependsOn buildInfo
