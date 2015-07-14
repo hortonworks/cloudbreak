@@ -34,10 +34,10 @@ public class StackDeletionBasedExitCriteriaTest {
     public void exitNeededScenariosTest() {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
+        stack.setCluster(cluster);
         StackDeletionBasedExitCriteriaModel exitCriteriaModel = new StackDeletionBasedExitCriteriaModel(1L);
 
-        when(stackService.getById(anyLong())).thenReturn(stack);
-        when(clusterService.retrieveClusterByStackId(anyLong())).thenReturn(cluster);
+        when(stackService.findLazy(anyLong())).thenReturn(stack);
 
         assertFalse(underTest.isExitNeeded(exitCriteriaModel));
 
@@ -62,7 +62,7 @@ public class StackDeletionBasedExitCriteriaTest {
         cluster.setStatus(Status.UPDATE_IN_PROGRESS);
         assertFalse(underTest.isExitNeeded(exitCriteriaModel));
 
-        when(stackService.getById(anyLong())).thenThrow(new IllegalArgumentException("test"));
+        when(stackService.findLazy(anyLong())).thenThrow(new IllegalArgumentException("test"));
         assertTrue(underTest.isExitNeeded(exitCriteriaModel));
     }
 

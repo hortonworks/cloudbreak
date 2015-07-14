@@ -113,6 +113,15 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
+    public Stack findLazy(Long id) {
+        Stack stack = stackRepository.findByIdLazy(id);
+        if (stack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", id));
+        }
+        return stack;
+    }
+
+    @Override
     public byte[] getCertificate(Long id) {
         String cert = securityConfigRepository.getServerCertByStackId(id);
         if (cert == null) {

@@ -54,6 +54,10 @@ import javax.persistence.Version;
                         + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE c.id= :id"),
         @NamedQuery(
+                name = "Stack.findByIdLazy",
+                query = "SELECT c FROM Stack c "
+                        + "WHERE c.id= :id"),
+        @NamedQuery(
                 name = "Stack.findByIdWithSecurityConfig",
                 query = "SELECT s FROM Stack s "
                         + "LEFT JOIN FETCH s.securityConfig "
