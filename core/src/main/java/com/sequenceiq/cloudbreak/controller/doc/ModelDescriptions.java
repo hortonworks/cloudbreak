@@ -87,6 +87,7 @@ public class ModelDescriptions {
         public static final String INSTANCE_GROUP_TYPE = "type of the instance group";
         public static final String NODE_COUNT = "number of nodes";
         public static final String TEMPLATE_ID = "referenced template id";
+        public static final String STATUS = "status of the instance";
     }
 
     public static class InstanceGroupAdjustmentModelDescription {
