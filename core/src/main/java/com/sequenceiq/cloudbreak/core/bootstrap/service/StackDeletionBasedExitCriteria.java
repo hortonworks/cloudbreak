@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.ExitCriteriaModel;
@@ -28,10 +27,9 @@ public class StackDeletionBasedExitCriteria implements ExitCriteria {
     public boolean isExitNeeded(ExitCriteriaModel exitCriteriaModel) {
         StackDeletionBasedExitCriteriaModel model = (StackDeletionBasedExitCriteriaModel) exitCriteriaModel;
         try {
-            Stack stack = stackService.getById(model.getStackId());
-            Cluster cluster = clusterService.retrieveClusterByStackId(model.getStackId());
-            if (stack == null || cluster == null || stack.isDeleteInProgress() || stack.isDeleteCompleted()
-                || cluster.isDeleteInProgress() || cluster.isDeleteCompleted()) {
+            Stack stack = stackService.findLazy(model.getStackId());
+            if (stack == null || stack.getCluster() == null || stack.isDeleteInProgress() || stack.isDeleteCompleted()
+                || stack.getCluster().isDeleteInProgress() || stack.getCluster().isDeleteCompleted()) {
                 LOGGER.warn("Stack or cluster is in deletion phase no need for more polling");
                 return true;
             }

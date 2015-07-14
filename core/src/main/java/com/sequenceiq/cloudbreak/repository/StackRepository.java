@@ -16,6 +16,8 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
 
     Stack findById(@Param("id") Long id);
 
+    Stack findByIdLazy(@Param("id") Long id);
+
     Stack findByAmbari(@Param("ambariIp") String ambariIp);
 
     Set<Stack> findForUser(@Param("user") String user);

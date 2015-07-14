@@ -20,6 +20,8 @@ public interface StackService {
 
     Stack get(Long id);
 
+    Stack findLazy(Long id);
+
     byte[] getCertificate(Long id);
 
     Stack getById(Long id);
