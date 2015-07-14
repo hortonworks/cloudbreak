@@ -11,11 +11,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.Security;
 
 import javax.inject.Inject;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -194,6 +196,7 @@ public class TlsSecurityService {
     }
 
     public TLSClientConfig buildTLSClientConfig(Long stackId, String apiAddress) throws CloudbreakSecuritySetupException {
+        Security.addProvider(new BouncyCastleProvider());
         prepareCertDir(stackId);
         return new TLSClientConfig(apiAddress, prepareCertDir(stackId));
     }
