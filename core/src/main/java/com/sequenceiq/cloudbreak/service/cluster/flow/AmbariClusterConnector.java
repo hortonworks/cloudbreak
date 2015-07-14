@@ -106,6 +106,8 @@ public class AmbariClusterConnector {
     @Inject
     private AmbariHostsStatusCheckerTask ambariHostsStatusCheckerTask;
     @Inject
+    private AmbariHostsLeaveStatusCheckerTask hostsLeaveStatusCheckerTask;
+    @Inject
     private DNDecommissionStatusCheckerTask dnDecommissionStatusCheckerTask;
     @Inject
     private RSDecommissionStatusCheckerTask rsDecommissionStatusCheckerTask;
@@ -117,6 +119,8 @@ public class AmbariClusterConnector {
     private AmbariHostsRemover ambariHostsRemover;
     @Inject
     private PollingService<AmbariHostsCheckerContext> ambariHostJoin;
+    @Inject
+    private PollingService<AmbariHostsWithNames> ambariHostLeave;
     @Inject
     private PollingService<AmbariClientPollerObject> ambariHealthChecker;
     @Inject
@@ -225,7 +229,7 @@ public class AmbariClusterConnector {
         }
         HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
         List<String> hostList = new ArrayList<>(hostsToRemove.keySet());
-        ambariHostsRemover.deleteHosts(stack, hostList, new ArrayList<>(components));
+        deleteHosts(stack, hostList, components);
         PollingResult pollingResult = restartHadoopServices(stack, ambariClient, true);
         if (isSuccess(pollingResult)) {
             hostGroup.getHostMetadata().removeAll(hostsToRemove.values());
@@ -287,7 +291,7 @@ public class AmbariClusterConnector {
                     if (isSuccess(pollingResult)) {
                         pollingResult = stopHadoopComponents(stack, ambariClient, hostList);
                         if (isSuccess(pollingResult)) {
-                            ambariHostsRemover.deleteHosts(stack, hostList, new ArrayList<>(components));
+                            stopAndDeleteHosts(stack, ambariClient, hostList, components);
                             pollingResult = restartHadoopServices(stack, ambariClient, true);
                             if (isSuccess(pollingResult)) {
                                 cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
@@ -312,7 +316,7 @@ public class AmbariClusterConnector {
             if (!allServiceStopped(ambariClient.getHostComponentsStates())) {
                 stopAllServices(stack, ambariClient);
             }
-            stopAmbariAgents(stack);
+            stopAmbariAgents(stack, null);
         } catch (AmbariConnectionException ex) {
             LOGGER.debug("Ambari not running on the gateway machine, no need to stop it.");
         }
@@ -352,7 +356,7 @@ public class AmbariClusterConnector {
         if (ambariClient.getClusterHosts().contains(data.getHostName())) {
             String hostState = ambariClient.getHostState(data.getHostName());
             if ("UNKNOWN".equals(hostState)) {
-                ambariHostsRemover.deleteHosts(stack, Arrays.asList(data.getHostName()), new ArrayList<>(components));
+                deleteHosts(stack, Arrays.asList(data.getHostName()), components);
                 PollingResult result = restartHadoopServices(stack, ambariClient, true);
                 if (isTimeout(result)) {
                     throw new AmbariOperationFailedException("Timeout while restarting Hadoop services.");
@@ -366,6 +370,21 @@ public class AmbariClusterConnector {
             hostDeleted = true;
         }
         return hostDeleted;
+    }
+
+    private void stopAndDeleteHosts(Stack stack, AmbariClient ambariClient, List<String> hostList, Set<String> components) throws CloudbreakException {
+        stopAmbariAgents(stack, new HashSet<>(hostList));
+        PollingResult pollingResult = waitForHostsToLeave(stack, ambariClient, hostList);
+        if (isTimeout(pollingResult)) {
+            LOGGER.warn("Ambari agent stop timed out, delete the hosts anyway, hosts: {}", hostList);
+        }
+        if (!isExited(pollingResult)) {
+            deleteHosts(stack, hostList, components);
+        }
+    }
+
+    private void deleteHosts(Stack stack, List<String> hostList, Set<String> components) throws CloudbreakSecuritySetupException {
+        ambariHostsRemover.deleteHosts(stack, hostList, new ArrayList<>(components));
     }
 
     private void stopAllServices(Stack stack, AmbariClient ambariClient) throws CloudbreakException {
@@ -532,10 +551,10 @@ public class AmbariClusterConnector {
                         } else if ("HBASE_REGIONSERVER".equals(componentStateEntry.getKey())) {
                             services.add("HBASE_REGIONSERVER");
                         } else {
-                            LOGGER.warn("No need to restart ambari service: {}", componentStateEntry.getKey());
+                            LOGGER.info("No need to restart ambari service: {}", componentStateEntry.getKey());
                         }
                     } else {
-                        LOGGER.warn("Ambari service already running: {}", componentStateEntry.getKey());
+                        LOGGER.info("Ambari service already running: {}", componentStateEntry.getKey());
                     }
                 }
             }
@@ -575,9 +594,10 @@ public class AmbariClusterConnector {
         }
     }
 
-    private void stopAmbariAgents(Stack stack) throws CloudbreakException {
-        LOGGER.info("Stopping Ambari agents on the hosts.");
-        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.STOP_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
+    private void stopAmbariAgents(Stack stack, Set<String> hosts) throws CloudbreakException {
+        LOGGER.info("Stopping Ambari agents on hosts: {}", hosts == null || hosts.isEmpty() ? "all" : hosts);
+        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.STOP_AMBARI_EVENT,
+                DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT, Collections.<String>emptyList(), hosts);
     }
 
     private void startAmbariAgents(Stack stack) throws CloudbreakException {
@@ -763,13 +783,9 @@ public class AmbariClusterConnector {
         }
     }
 
-    private PollingResult startComponents(Stack stack, Cluster cluster, AmbariClient ambariClient, HostGroup hostGroup) {
-        try {
-            int id = ambariClient.startAllComponents(cluster.getBlueprint().getBlueprintName(), hostGroup.getName());
-            return waitForAmbariOperations(stack, ambariClient, singletonMap("START_SERVICES on new hosts", id));
-        } catch (HttpResponseException e) {
-            throw new BadRequestException("Failed to start the components on the new hosts", e);
-        }
+    private PollingResult waitForHostsToLeave(Stack stack, AmbariClient ambariClient, List<String> hostNames) throws CloudbreakSecuritySetupException {
+        return ambariHostLeave.pollWithTimeout(hostsLeaveStatusCheckerTask, new AmbariHostsWithNames(stack, ambariClient, hostNames),
+                AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_HOSTS, AmbariOperationService.MAX_FAILURE_COUNT);
     }
 
     private PollingResult waitForAmbariOperations(Stack stack, AmbariClient ambariClient, Map<String, Integer> operationRequests) {
