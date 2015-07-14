@@ -48,6 +48,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     private static final String MUNCHAUSEN_WAIT = "3600";
     private static final String MUNCHAUSEN_DOCKER_IMAGE = "sequenceiq/munchausen:0.5.3";
     private static final int MAX_IP_FOR_ONE_REQUEST = 600;
+    private static final String CONSUL_LOG_LOCATION = "/hadoopfs/fs1/logs/consul";
 
 
     /**
@@ -68,7 +69,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             Set<String> consulServers = selectConsulServers(privateGatewayIp, privateAddressesWithoutGateway, consulServerCount);
             Set<String> result = prepareDockerAddressInventory(privateAddresses);
 
-            String[] cmd = {"--debug", "bootstrap", "--wait", MUNCHAUSEN_WAIT, "--consulLogLocation", "/hadoopfs/fs1/logs/consul", "--consulServers",
+            String[] cmd = {"--debug", "bootstrap", "--wait", MUNCHAUSEN_WAIT, "--consulLogLocation", CONSUL_LOG_LOCATION, "--consulServers",
                     concatToString(consulServers), concatToString(result)};
             munchausenBootstrap(gatewayConfig, cmd).call();
         } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {
@@ -86,7 +87,8 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         try {
             Set<String> privateAddresses = getPrivateAddresses(nodes);
             Set<String> result = prepareDockerAddressInventory(privateAddresses);
-            String[] cmd = {"--debug", "add", "--wait", MUNCHAUSEN_WAIT, "--join", getConsulJoinIp(gatewayConfig.getAddress()), concatToString(result)};
+            String[] cmd = {"--debug", "add", "--wait", MUNCHAUSEN_WAIT, "--consulLogLocation", CONSUL_LOG_LOCATION,
+                    "--join", getConsulJoinIp(gatewayConfig.getAddress()), concatToString(result)};
             munchausenNewNodeBootstrap(gatewayConfig, cmd).call();
         } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {
             throw cloudbreakOrchestratorCancelledExceptionException;
