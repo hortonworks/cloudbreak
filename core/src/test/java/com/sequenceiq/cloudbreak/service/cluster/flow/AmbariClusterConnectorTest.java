@@ -31,9 +31,11 @@ import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
+import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
@@ -87,6 +89,9 @@ public class AmbariClusterConnectorTest {
     private InstanceMetaDataRepository instanceMetadataRepository;
 
     @Mock
+    private HostMetadataRepository hostMetadataRepository;
+
+    @Mock
     private HostGroup hostGroup;
 
     @InjectMocks
@@ -108,6 +113,7 @@ public class AmbariClusterConnectorTest {
         cluster.setHostGroups(new HashSet<HostGroup>());
         when(tlsSecurityService.buildTLSClientConfig(anyLong(), anyString())).thenReturn(tlsClientConfig);
         when(ambariClient.extendBlueprintGlobalConfiguration(anyString(), anyMap())).thenReturn("");
+        when(hostMetadataRepository.findHostsInCluster(anyLong())).thenReturn(new HashSet<HostMetadata>());
         when(ambariClient.extendBlueprintHostGroupConfiguration(anyString(), anyMap())).thenReturn("");
         when(ambariClient.addBlueprint(anyString())).thenReturn("");
         when(hadoopConfigurationService.getHostGroupConfiguration(any(Cluster.class))).thenReturn(new HashMap<String, Map<String, Map<String, String>>>());

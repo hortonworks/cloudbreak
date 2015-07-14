@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 @Component
@@ -18,10 +19,17 @@ public class AmbariHostsJoinStatusCheckerTask extends StackBasedStatusCheckerTas
     public boolean checkStatus(AmbariHostsCheckerContext hosts) {
         try {
             AmbariClient ambariClient = hosts.getAmbariClient();
-            List<String> hostNames = ambariClient.getClusterHosts();
-            for (String hostName : hostNames) {
-                if ("UNKNOWN".equals(ambariClient.getHostState(hostName))) {
-                    LOGGER.info("The state of the {} is UNKNOWN, waiting for join", hostName);
+            Map<String, String> hostNames = ambariClient.getHostStatuses();
+            for (HostMetadata hostMetadata : hosts.getHostsInCluster()) {
+                boolean contains = false;
+                for (Map.Entry<String, String> hostName : hostNames.entrySet()) {
+                    if (hostName.getKey().equals(hostMetadata.getHostName()) && !"UNKNOWN".equals(hostName.getValue())) {
+                        contains = true;
+                        break;
+                    }
+                }
+                if (!contains) {
+                    LOGGER.info("The host {} currently not part of the cluster, waiting for join", hostMetadata.getHostName());
                     return false;
                 }
             }

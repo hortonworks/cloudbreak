@@ -80,7 +80,7 @@ public class StackSyncService {
                 MetadataSetup metadataSetup = metadataSetups.get(stack.cloudPlatform());
                 InstanceSyncState state = metadataSetup.getState(stack, instanceGroup, instance.getInstanceId());
                 ResourceType instanceResourceType = metadataSetup.getInstanceResourceType();
-                if (InstanceSyncState.DELETED.equals(state)) {
+                if (InstanceSyncState.DELETED.equals(state) && !instance.isTerminated()) {
                     syncDeletedInstance(stack, stackId, instanceStateCounts, instance, instanceGroup, instanceResourceType);
                 } else if (InstanceSyncState.RUNNING.equals(state)) {
                     syncRunningInstance(stack, stackId, instanceStateCounts, instance, instanceGroup);

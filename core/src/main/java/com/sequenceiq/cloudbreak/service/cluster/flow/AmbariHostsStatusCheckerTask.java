@@ -19,8 +19,8 @@ public class AmbariHostsStatusCheckerTask extends StackBasedStatusCheckerTask<Am
         Map<String, String> healthyHostNames = t.getAmbariClient().getHostNamesByState("HEALTHY");
         Map<String, String> unHealthyHostNames = t.getAmbariClient().getHostNamesByState("UNHEALTHY");
         int totalNodes = healthyHostNames.size() + unHealthyHostNames.size();
-        LOGGER.info("Ambari client found {} hosts ({} needed). [Stack: '{}']", totalNodes, t.getHostCount(), t.getStack().getId());
-        if (totalNodes >= t.getHostCount()) {
+        LOGGER.info("Ambari client found {} hosts ({} needed). [Stack: '{}']", totalNodes, t.getHostsInCluster().size(), t.getStack().getId());
+        if (totalNodes >= t.getHostsInCluster().size()) {
             return true;
         }
         return false;
@@ -29,12 +29,12 @@ public class AmbariHostsStatusCheckerTask extends StackBasedStatusCheckerTask<Am
     @Override
     public void handleTimeout(AmbariHostsCheckerContext t) {
         throw new AmbariHostsUnavailableException(String.format("Operation timed out. Failed to find all '%s' Ambari hosts. Stack: '%s'",
-                t.getHostCount(), t.getStack().getId()));
+                t.getHostsInCluster().size(), t.getStack().getId()));
     }
 
     @Override
     public String successMessage(AmbariHostsCheckerContext t) {
-        return String.format("Ambari client found all %s hosts for stack '%s'", t.getHostCount(), t.getStack().getId());
+        return String.format("Ambari client found all %s hosts for stack '%s'", t.getHostsInCluster().size(), t.getStack().getId());
     }
 
 }
