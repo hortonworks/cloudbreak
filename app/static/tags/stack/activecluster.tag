@@ -183,14 +183,14 @@
                                                 <td class="col-md-2" data-title="'public IP'" class="col-md-3">{{instance.publicIp}}</td>
                                                 <td class="col-md-2" data-title="'private IP'" class="col-md-3">{{instance.privateIp}}</td>
                                                 <td class="col-md-2 text-center" data-title="'host group'" class="col-md-2"><span class="label label-default">{{instance.instanceGroup}}</span></td>
-                                                <td class="col-md-2 text-center" data-title="'state'" class="col-md-2" ng-switch on="instance.state">
-                                                    <div ng-switch-when="UNHEALTHY">
+                                                <td class="col-md-2 text-center" data-title="'state'" class="col-md-2">
+                                                    <div ng-if="instance.state === 'UNHEALTHY' || instance.instanceStatus === 'DECOMMISSIONED'">
                                                         <a ng-init="instance.unhealthyMessage=msg.active_cluster_stack_description_hostgroup_unhealthy_label" title="{{msg.active_cluster_stack_description_hostgroup_terminate_tooltip}}" href="" class="btn label label-block label-danger fa fa-trash-o fa-fw"
                                                         ng-mouseover="activeCluster.instanceId=instance.instanceId; instance.unhealthyMessage=msg.active_cluster_stack_description_hostgroup_terminate_label" ng-mouseleave="instance.unhealthyMessage=msg.active_cluster_stack_description_hostgroup_unhealthy_label"
                                                         role="button" style="font-size: 12px; width: 100px; display: inline-block; !important" data-toggle="modal" data-target="#modal-terminate-instance">
                                                         {{instance.unhealthyMessage}}</a>
                                                     </div>
-                                                    <span title="{{msg.active_cluster_stack_description_hostgroup_state_tooltip}}" class="label label-info" style="font-size: 12px;" ng-switch-default>{{msg.active_cluster_stack_description_hostgroup_healthy_label}}</span>
+                                                    <span ng-if="instance.state !== 'UNHEALTHY' && instance.instanceStatus !== 'DECOMMISSIONED'" title="{{msg.active_cluster_stack_description_hostgroup_state_tooltip}}" class="label label-info" style="font-size: 12px;">{{msg.active_cluster_stack_description_hostgroup_healthy_label}}</span>
                                                 </td>
                                             </tr>
                                             </tbody>
