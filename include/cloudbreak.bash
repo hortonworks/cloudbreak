@@ -119,7 +119,6 @@ cloudbreak-conf-uaa() {
 }
 
 cloudbreak-conf-defaults() {
-    env-import PRIVATE_IP
     env-import PUBLIC_IP
 
     env-import CB_HOST_ADDR $PUBLIC_IP
@@ -291,9 +290,9 @@ util-token() {
     local TOKEN=$(curl -siX POST \
         -H "accept: application/x-www-form-urlencoded" \
         -d credentials='{"username":"'${UAA_DEFAULT_USER_EMAIL}'","password":"'${UAA_DEFAULT_USER_PW}'"}' \
-        "$(boot2docker ip):8089/oauth/authorize?response_type=token&client_id=cloudbreak_shell&scope.0=openid&source=login&redirect_uri=http://cloudbreak.shell" \
+        "${PRIVATE_IP}:8089/oauth/authorize?response_type=token&client_id=cloudbreak_shell&scope.0=openid&source=login&redirect_uri=http://cloudbreak.shell" \
            | grep Location | cut -d'=' -f 2 | cut -d'&' -f 1)
-    debug TOKEN=$TOKEN
+    info TOKEN=$TOKEN
 }
 
 util-local-dev() {
