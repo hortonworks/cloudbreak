@@ -16,7 +16,6 @@ import com.google.api.services.compute.model.Address;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.CloudRegion;
-import com.sequenceiq.cloudbreak.domain.GcpCredential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -55,7 +54,7 @@ public class GcpReservedIpResourceBuilder extends GcpSimpleNetworkResourceBuilde
     @Override
     public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
         final GcpReservedIpCreateRequest reservedIpCreateRequest = (GcpReservedIpCreateRequest) createResourceRequest;
-        Stack stack = stackRepository.findById(reservedIpCreateRequest.getStackId());
+        Stack stack = stackRepository.findByIdLazy(reservedIpCreateRequest.getStackId());
         Compute.Addresses.Insert networkInsert = reservedIpCreateRequest
                 .getCompute()
                 .addresses()
@@ -63,7 +62,7 @@ public class GcpReservedIpResourceBuilder extends GcpSimpleNetworkResourceBuilde
         Operation execute = networkInsert.execute();
         if (execute.getHttpErrorStatusCode() == null) {
             Compute.RegionOperations.Get regionOperations = createRegionOperations(reservedIpCreateRequest.getCompute(),
-                    reservedIpCreateRequest.getGcpCredential(),
+                    reservedIpCreateRequest.getProjectId(),
                     execute,
                     reservedIpCreateRequest.getGcpZone());
             GcpResourceReadyPollerObject instReady =
@@ -82,23 +81,22 @@ public class GcpReservedIpResourceBuilder extends GcpSimpleNetworkResourceBuilde
 
     @Override
     public Boolean delete(Resource resource, GcpDeleteContextObject deleteContextObject, String region) throws Exception {
-        Stack stack = stackRepository.findById(deleteContextObject.getStackId());
+        Stack stack = stackRepository.findByIdLazy(deleteContextObject.getStackId());
         try {
-            GcpCredential gcpCredential = (GcpCredential) stack.getCredential();
             Operation operation = deleteContextObject
                     .getCompute()
                     .addresses()
-                    .delete(gcpCredential.getProjectId(), CloudRegion.valueOf(region).region(), resource.getResourceName())
+                    .delete(deleteContextObject.getProjectId(), CloudRegion.valueOf(region).region(), resource.getResourceName())
                     .execute();
             Compute.RegionOperations.Get regionOperations = createRegionOperations(
                     deleteContextObject.getCompute(),
-                    gcpCredential,
+                    deleteContextObject.getProjectId(),
                     operation,
                     CloudRegion.valueOf(region)
             );
             Compute.GlobalOperations.Get globalOperations = createGlobalOperations(
                     deleteContextObject.getCompute(),
-                    gcpCredential,
+                    deleteContextObject.getProjectId(),
                     operation
             );
             GcpRemoveReadyPollerObject gcpRemoveReady = new GcpRemoveReadyPollerObject(
@@ -111,7 +109,7 @@ public class GcpReservedIpResourceBuilder extends GcpSimpleNetworkResourceBuilde
             );
             gcpRemoveReadyPollerObjectPollingService.pollWithTimeout(gcpRemoveCheckerStatus, gcpRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         } catch (GoogleJsonResponseException ex) {
-            exceptionHandler(ex, resource.getResourceName(), stack);
+            exceptionHandler(ex, resource.getResourceName());
         } catch (IOException e) {
             throw new GcpResourceException(e);
         }
@@ -135,7 +133,7 @@ public class GcpReservedIpResourceBuilder extends GcpSimpleNetworkResourceBuilde
         address.setName(buildResources.get(0).getResourceName());
         return new GcpReservedIpCreateRequest(provisionContextObject.getStackId(), address,
                 provisionContextObject.getProjectId(), provisionContextObject.getCompute(),
-                CloudRegion.valueOf(stack.getRegion()), buildResources, (GcpCredential) stack.getCredential());
+                CloudRegion.valueOf(stack.getRegion()), buildResources);
     }
 
     @Override
@@ -149,17 +147,14 @@ public class GcpReservedIpResourceBuilder extends GcpSimpleNetworkResourceBuilde
         private String projectId;
         private Compute compute;
         private CloudRegion gcpZone;
-        private GcpCredential gcpCredential;
 
-        public GcpReservedIpCreateRequest(Long stackId, Address address, String projectId, Compute compute, CloudRegion gcpZone, List<Resource> buildNames,
-                GcpCredential gcpCredential) {
+        public GcpReservedIpCreateRequest(Long stackId, Address address, String projectId, Compute compute, CloudRegion gcpZone, List<Resource> buildNames) {
             super(buildNames);
             this.stackId = stackId;
             this.address = address;
             this.projectId = projectId;
             this.compute = compute;
             this.gcpZone = gcpZone;
-            this.gcpCredential = gcpCredential;
         }
 
         public Long getStackId() {
@@ -182,8 +177,6 @@ public class GcpReservedIpResourceBuilder extends GcpSimpleNetworkResourceBuilde
             return compute;
         }
 
-        public GcpCredential getGcpCredential() {
-            return gcpCredential;
-        }
+
     }
 }

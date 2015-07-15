@@ -49,7 +49,7 @@ public class AzureAffinityGroupResourceBuilder extends AzureSimpleNetworkResourc
     @Override
     public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
         AzureAffinityGroupCreateRequest aCSCR = (AzureAffinityGroupCreateRequest) createResourceRequest;
-        Stack stack = stackRepository.findById(aCSCR.stackId);
+        Stack stack = stackRepository.findByIdLazy(aCSCR.stackId);
         AzureClient azureClient = aCSCR.getAzureClient();
         Map<String, String> props = aCSCR.getProps();
         try {

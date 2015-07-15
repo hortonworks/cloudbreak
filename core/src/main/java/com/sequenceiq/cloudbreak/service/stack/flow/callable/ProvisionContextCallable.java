@@ -65,7 +65,7 @@ public class ProvisionContextCallable implements Callable<ResourceRequestResult>
                 CreateResourceRequest request = resourceBuilder
                         .buildCreateRequest(provisionContextObject, resources, buildResources, index, Optional.of(instanceGroup), userData);
                 stackUpdater.addStackResources(stack.getId(), request.getBuildableResources());
-                if (stackRepository.findById(stack.getId()).isStackInDeletionPhase()) {
+                if (stackRepository.findByIdLazy(stack.getId()).isStackInDeletionPhase()) {
                     break;
                 }
                 resourceBuilder.create(request, stack.getRegion());

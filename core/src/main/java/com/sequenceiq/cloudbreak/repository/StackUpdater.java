@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -45,19 +43,8 @@ public class StackUpdater {
         return stackRepository.save(stack);
     }
 
-    public Stack removeStackResources(Long stackId, List<Resource> resources) {
-        Stack stack = stackRepository.findOneWithLists(stackId);
-        Set<Resource> removableResources = new HashSet<>();
-        for (Resource resource : stack.getResources()) {
-            for (Resource searchTarget : resources) {
-                if (searchTarget.getResourceName().equals(resource.getResourceName()) && searchTarget.getResourceType().equals(resource.getResourceType())) {
-                    removableResources.add(resource);
-                    break;
-                }
-            }
-        }
-        resourceRepository.delete(removableResources);
-        return stack;
+    public void removeStackResources(List<Resource> resources) {
+        resourceRepository.delete(resources);
     }
 
     private Stack doUpdateStackStatus(Long stackId, Status status, String statusReason) {

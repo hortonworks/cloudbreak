@@ -12,11 +12,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Set;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -83,24 +81,6 @@ public class StackUpdaterTest {
         assertEquals(5, newStack.getResources().size());
         verify(resourceRepository, times(1)).save(anyList());
         verify(stackRepository, times(1)).save(any(Stack.class));
-    }
-
-    @Test
-    public void removeStackResourcesWithThreeNewResource() {
-        Stack stack = TestUtil.stack();
-        List<Resource> resources = TestUtil.generateAzureResources(5);
-        stack.getResources().addAll(resources);
-
-        ArgumentCaptor<Set> argument2 = ArgumentCaptor.forClass(Set.class);
-
-        when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(stackRepository.save(any(Stack.class))).then(returnsFirstArg());
-        doNothing().when(resourceRepository).delete(argument2.capture());
-
-        underTest.removeStackResources(1L, resources);
-        assertEquals(5, argument2.getValue().size());
-        verify(resourceRepository, times(1)).delete(anyList());
-        verify(stackRepository, times(0)).save(any(Stack.class));
     }
 
 }

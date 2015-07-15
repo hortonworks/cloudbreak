@@ -181,7 +181,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
 
     @Override
     public Boolean delete(Resource resource, AzureDeleteContextObject aDCO, String region) throws Exception {
-        Stack stack = stackRepository.findById(aDCO.getStackId());
+        Stack stack = stackRepository.findByIdLazy(aDCO.getStackId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
         try {
             Map<String, String> props = new HashMap<>();
@@ -194,7 +194,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             azureResourcePollerObjectPollingService.pollWithTimeout(azureDeleteResourceStatusCheckerTask, azureResourcePollerObject,
                     POLLING_INTERVAL, MAX_POLLING_ATTEMPTS, MAX_FAILURE_COUNT);
         } catch (HttpResponseException ex) {
-            httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner(), stack);
+            httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner());
         } catch (Exception ex) {
             throw new AzureResourceException(ex);
         }

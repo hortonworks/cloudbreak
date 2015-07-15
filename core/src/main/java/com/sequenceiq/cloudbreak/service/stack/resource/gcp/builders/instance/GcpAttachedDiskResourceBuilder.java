@@ -20,7 +20,6 @@ import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.CloudRegion;
-import com.sequenceiq.cloudbreak.domain.GcpCredential;
 import com.sequenceiq.cloudbreak.domain.GcpTemplate;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -74,7 +73,7 @@ public class GcpAttachedDiskResourceBuilder extends GcpSimpleInstanceResourceBui
                     Operation execute = insDisk.execute();
                     if (execute.getHttpErrorStatusCode() == null) {
                         Compute.ZoneOperations.Get zoneOperations =
-                                createZoneOperations(gADCR.getCompute(), gADCR.getGcpCredential(), execute, CloudRegion.valueOf(stack.getRegion()));
+                                createZoneOperations(gADCR.getCompute(), gADCR.getProjectId(), execute, CloudRegion.valueOf(stack.getRegion()));
                         GcpResourceReadyPollerObject gcpDiskReady =
                                 new GcpResourceReadyPollerObject(zoneOperations, stack, disk.getName(), execute.getName(), ResourceType.GCP_ATTACHED_DISK);
                         gcpDiskReadyPollerObjectPollingService.pollWithTimeout(gcpResourceCheckerStatus, gcpDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -113,9 +112,8 @@ public class GcpAttachedDiskResourceBuilder extends GcpSimpleInstanceResourceBui
     public CreateResourceRequest buildCreateRequest(GcpProvisionContextObject provisionContextObject, List<Resource> resources,
             List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup, Optional<String> userData) throws Exception {
         List<Disk> disks = new ArrayList<>();
-        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
+        Stack stack = stackRepository.findByIdLazy(provisionContextObject.getStackId());
         GcpTemplate gcpTemplate = (GcpTemplate) instanceGroup.orNull().getTemplate();
-        GcpCredential gcpCredential = (GcpCredential) stack.getCredential();
         for (Resource buildName : buildResources) {
             Disk disk = new Disk();
             disk.setSizeGb(instanceGroup.orNull().getTemplate().getVolumeSize().longValue());
@@ -124,7 +122,7 @@ public class GcpAttachedDiskResourceBuilder extends GcpSimpleInstanceResourceBui
             disks.add(disk);
         }
         return new GcpAttachedDiskCreateRequest(provisionContextObject.getStackId(), resources, disks, provisionContextObject.getProjectId(),
-                provisionContextObject.getCompute(), gcpTemplate, gcpCredential, buildResources);
+                provisionContextObject.getCompute(), gcpTemplate, buildResources);
     }
 
     @Override
@@ -140,10 +138,9 @@ public class GcpAttachedDiskResourceBuilder extends GcpSimpleInstanceResourceBui
         private String projectId;
         private Compute compute;
         private GcpTemplate gcpTemplate;
-        private GcpCredential gcpCredential;
 
         public GcpAttachedDiskCreateRequest(Long stackId, List<Resource> resources, List<Disk> disks,
-                String projectId, Compute compute, GcpTemplate gcpTemplate, GcpCredential gcpCredential, List<Resource> buildNames) {
+                String projectId, Compute compute, GcpTemplate gcpTemplate, List<Resource> buildNames) {
             super(buildNames);
             this.stackId = stackId;
             this.resources = resources;
@@ -151,7 +148,6 @@ public class GcpAttachedDiskResourceBuilder extends GcpSimpleInstanceResourceBui
             this.projectId = projectId;
             this.compute = compute;
             this.gcpTemplate = gcpTemplate;
-            this.gcpCredential = gcpCredential;
         }
 
         public Long getStackId() {
@@ -178,9 +174,6 @@ public class GcpAttachedDiskResourceBuilder extends GcpSimpleInstanceResourceBui
             return gcpTemplate;
         }
 
-        public GcpCredential getGcpCredential() {
-            return gcpCredential;
-        }
     }
 
 }

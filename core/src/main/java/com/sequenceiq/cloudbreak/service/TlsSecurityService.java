@@ -94,13 +94,14 @@ public class TlsSecurityService {
     }
 
     private void prepareFiles(Long stackId) throws CloudbreakSecuritySetupException {
-        Stack stack = stackRepository.findById(stackId);
+        Stack stack = stackRepository.findByIdLazy(stackId);
         if (stack != null) {
-            readServerCert(stack.getId());
-            readClientCert(stack.getId());
-            readClientKey(stack.getId());
-            readPrivateSshKey(stack.getId());
-            readPublicSshKey(stack.getId());
+            Long id = stack.getId();
+            readServerCert(id);
+            readClientCert(id);
+            readClientKey(id);
+            readPrivateSshKey(id);
+            readPublicSshKey(id);
         }
     }
 

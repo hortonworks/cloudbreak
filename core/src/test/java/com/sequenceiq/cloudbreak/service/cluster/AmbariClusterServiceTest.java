@@ -127,6 +127,7 @@ public class AmbariClusterServiceTest {
         clusterRequest = new ClusterRequest();
         clusterResponse = new ClusterResponse();
         when(stackRepository.findById(anyLong())).thenReturn(stack);
+        when(stackRepository.findByIdLazy(anyLong())).thenReturn(stack);
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(stackRepository.findOne(anyLong())).thenReturn(stack);
         when(clusterRepository.save(any(Cluster.class))).thenReturn(cluster);

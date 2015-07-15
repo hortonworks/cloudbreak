@@ -117,7 +117,7 @@ public class ParallelCloudResourceManager {
             }
             resourceRequestResults.addAll(provisionUtil.waitForRequestToFinish(stack.getId(), futures).get(FutureResult.FAILED));
             stackFailureHandlerService.handleFailure(stack, resourceRequestResults);
-            if (!stackRepository.findById(stack.getId()).isStackInDeletionPhase()) {
+            if (!stackRepository.findByIdLazy(stack.getId()).isStackInDeletionPhase()) {
                 return resourceSet;
             } else {
                 throw new CloudConnectorException("Failed to create stack resources; polling reached an invalid end state.");
@@ -166,7 +166,7 @@ public class ParallelCloudResourceManager {
             successResourceRequestResults.addAll(result.get(FutureResult.SUCCESS));
             failedResourceRequestResults.addAll(result.get(FutureResult.FAILED));
             upscaleFailureHandlerService.handleFailure(stack, failedResourceRequestResults);
-            if (stackRepository.findById(stack.getId()).isStackInDeletionPhase()) {
+            if (stackRepository.findByIdLazy(stack.getId()).isStackInDeletionPhase()) {
                 throw new ScalingFailedException("Upscaling of stack failed, because the stack is already in deletion phase.");
             }
             return collectResources(successResourceRequestResults);
@@ -207,8 +207,8 @@ public class ParallelCloudResourceManager {
                 failedResourceList.addAll(result.get(FutureResult.FAILED));
             }
             instanceIds = filterFailedResources(failedResourceList, instanceIds);
-            if (!stackRepository.findById(stack.getId()).isStackInDeletionPhase()) {
-                stackUpdater.removeStackResources(stack.getId(), deleteContextObject.getDecommissionResources());
+            if (!stackRepository.findByIdLazy(stack.getId()).isStackInDeletionPhase()) {
+                stackUpdater.removeStackResources(deleteContextObject.getDecommissionResources());
                 LOGGER.info("Terminated instances in stack: '{}'", instanceIds);
             } else {
                 throw new ScalingFailedException("Downscaling of stack failed, because the stack is already in deletion phase.");
@@ -236,7 +236,7 @@ public class ParallelCloudResourceManager {
                             try {
                                 MDC.setContextMap(mdcCtxMap);
                                 instanceResourceBuilders.get(cloudPlatform).get(index).delete(resource, dCO, stack.getRegion());
-                                stackUpdater.removeStackResources(stack.getId(), Arrays.asList(resource));
+                                stackUpdater.removeStackResources(Arrays.asList(resource));
                                 return ResourceRequestResult.ResourceRequestResultBuilder.builder()
                                         .withFutureResult(FutureResult.SUCCESS)
                                         .withInstanceGroup(stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup()))
@@ -263,7 +263,7 @@ public class ParallelCloudResourceManager {
             for (int i = networkResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
                 for (Resource resource : stack.getResourcesByType(networkResourceBuilders.get(cloudPlatform).get(i).resourceType())) {
                     networkResourceBuilders.get(cloudPlatform).get(i).delete(resource, dCO, stack.getRegion());
-                    stackUpdater.removeStackResources(stack.getId(), Arrays.asList(resource));
+                    stackUpdater.removeStackResources(Arrays.asList(resource));
                 }
             }
         } catch (Exception e) {
@@ -288,7 +288,7 @@ public class ParallelCloudResourceManager {
                         public Boolean call() throws Exception {
                             MDC.setContextMap(mdcCtxMap);
                             instanceResourceBuilders.get(cloudPlatform).get(index).rollback(resource, dCO, stack.getRegion());
-                            stackUpdater.removeStackResources(stack.getId(), Arrays.asList(resource));
+                            stackUpdater.removeStackResources(Arrays.asList(resource));
                             return true;
                         }
                     });

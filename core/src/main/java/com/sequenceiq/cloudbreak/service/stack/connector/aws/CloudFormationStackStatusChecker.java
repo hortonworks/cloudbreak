@@ -77,7 +77,7 @@ public class CloudFormationStackStatusChecker extends StackBasedStatusCheckerTas
             return false;
         }
         try {
-            Stack stack = stackRepository.findById(context.getStack().getId());
+            Stack stack = stackRepository.findByIdLazy(context.getStack().getId());
             return stack == null || stack.isDeleteInProgress() || stack.isDeleteCompleted();
         } catch (Exception e) {
             return true;
