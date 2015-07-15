@@ -49,7 +49,12 @@ format_disks() {
   cd /hadoopfs/fs1 && mkdir logs logs/ambari-server logs/ambari-agent logs/consul-watch
 }
 
+reload_sysconf() {
+  sysctl -p
+}
+
 main() {
+  reload_sysconf
   if [[ "$1" == "::" ]]; then
     shift
     eval "$@"

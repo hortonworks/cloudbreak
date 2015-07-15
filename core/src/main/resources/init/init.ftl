@@ -53,7 +53,13 @@ format_disks() {
 }
 </#noparse>
 
+<#-- Workaround to reload /etc/sysctl.conf parameters at first boot. Without this the parameters cannot be set properly. -->
+reload_sysconf() {
+  sysctl -p
+}
+
 main() {
+  reload_sysconf
   if [[ "$1" == "::" ]]; then
     shift
     eval "$@"
