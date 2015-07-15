@@ -20,7 +20,6 @@ import com.google.api.services.compute.model.Firewall;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.CloudRegion;
-import com.sequenceiq.cloudbreak.domain.GcpCredential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -67,9 +66,9 @@ public class GcpFireWallInResourceBuilder extends GcpSimpleNetworkResourceBuilde
         final GcpFireWallInCreateRequest gFWICR = (GcpFireWallInCreateRequest) createResourceRequest;
         Compute.Firewalls.Insert firewallInsert = gFWICR.getCompute().firewalls().insert(gFWICR.getProjectId(), gFWICR.getFirewall());
         Operation execute = firewallInsert.execute();
-        Stack stack = stackRepository.findById(gFWICR.getStackId());
+        Stack stack = stackRepository.findByIdLazy(gFWICR.getStackId());
         if (execute.getHttpErrorStatusCode() == null) {
-            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(gFWICR.getCompute(), (GcpCredential) stack.getCredential(), execute);
+            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(gFWICR.getCompute(), gFWICR.getProjectId(), execute);
             GcpResourceReadyPollerObject instReady =
                     new GcpResourceReadyPollerObject(globalOperations, stack, gFWICR.getFirewall().getName(), execute.getName(), GCP_FIREWALL_IN);
             gcpFirewallInternalReadyPollerObjectPollingService.pollWithTimeout(gcpResourceCheckerStatus, instReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -83,11 +82,11 @@ public class GcpFireWallInResourceBuilder extends GcpSimpleNetworkResourceBuilde
     public Boolean delete(Resource resource, GcpDeleteContextObject deleteContextObject, String region) throws Exception {
         Stack stack = stackRepository.findByIdLazy(deleteContextObject.getStackId());
         try {
-            GcpCredential gcpCredential = (GcpCredential) stack.getCredential();
-            Operation operation = deleteContextObject.getCompute().firewalls().delete(gcpCredential.getProjectId(), resource.getResourceName()).execute();
+            Operation operation = deleteContextObject.getCompute().firewalls().delete(deleteContextObject.getProjectId(), resource.getResourceName()).execute();
             Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(),
-                    gcpCredential, operation, CloudRegion.valueOf(region));
-            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(), gcpCredential, operation);
+                    deleteContextObject.getProjectId(), operation, CloudRegion.valueOf(region));
+            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(),
+                    deleteContextObject.getProjectId(), operation);
             GcpRemoveReadyPollerObject gcpRemoveReady =
                     new GcpRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName(), resourceType());
             gcpRemoveReadyPollerObjectPollingService.pollWithTimeout(gcpRemoveCheckerStatus, gcpRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);

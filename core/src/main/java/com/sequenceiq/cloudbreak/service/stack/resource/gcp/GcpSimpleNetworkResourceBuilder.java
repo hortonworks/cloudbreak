@@ -10,7 +10,6 @@ import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudRegion;
-import com.sequenceiq.cloudbreak.domain.GcpCredential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
@@ -32,19 +31,19 @@ public abstract class GcpSimpleNetworkResourceBuilder implements
         return CloudPlatform.GCP;
     }
 
-    protected Compute.ZoneOperations.Get createZoneOperations(Compute compute, GcpCredential gcpCredential, Operation operation, CloudRegion region)
+    protected Compute.ZoneOperations.Get createZoneOperations(Compute compute, String projectId, Operation operation, CloudRegion region)
             throws IOException {
-        return compute.zoneOperations().get(gcpCredential.getProjectId(), region.value(), operation.getName());
+        return compute.zoneOperations().get(projectId, region.value(), operation.getName());
     }
 
-    protected Compute.RegionOperations.Get createRegionOperations(Compute compute, GcpCredential gcpCredential, Operation operation, CloudRegion region)
+    protected Compute.RegionOperations.Get createRegionOperations(Compute compute, String projectId, Operation operation, CloudRegion region)
             throws IOException {
-        return compute.regionOperations().get(gcpCredential.getProjectId(), region.region(), operation.getName());
+        return compute.regionOperations().get(projectId, region.region(), operation.getName());
     }
 
-    protected Compute.GlobalOperations.Get createGlobalOperations(Compute compute, GcpCredential gcpCredential, Operation operation)
+    protected Compute.GlobalOperations.Get createGlobalOperations(Compute compute, String projectId, Operation operation)
             throws IOException {
-        return compute.globalOperations().get(gcpCredential.getProjectId(), operation.getName());
+        return compute.globalOperations().get(projectId, operation.getName());
     }
 
     protected void exceptionHandler(GoogleJsonResponseException ex, String name) {

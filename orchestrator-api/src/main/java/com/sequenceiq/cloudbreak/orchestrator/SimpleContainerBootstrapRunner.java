@@ -27,6 +27,11 @@ public class SimpleContainerBootstrapRunner implements Callable<Boolean> {
         this.exitCriteriaModel = exitCriteriaModel;
     }
 
+    public static Callable<Boolean> simpleContainerBootstrapRunner(ContainerBootstrap containerBootstrap, ExitCriteria exitCriteria,
+            ExitCriteriaModel exitCriteriaModel, Map<String, String> mdcMap) {
+        return new SimpleContainerBootstrapRunner(containerBootstrap, exitCriteria, exitCriteriaModel, mdcMap);
+    }
+
     @Override
     public Boolean call() throws Exception {
         MDC.setContextMap(mdcMap);
@@ -35,9 +40,11 @@ public class SimpleContainerBootstrapRunner implements Callable<Boolean> {
         Exception actualException = null;
         boolean exitNeeded = false;
         while (!success && MAX_RETRY_COUNT >= retryCount && !exitNeeded) {
+            LOGGER.debug("Preparing to start container: success: {}, retryCount: {}, exitNeeded: {}");
             exitNeeded = isExitNeeded();
             if (!exitNeeded) {
                 try {
+                    LOGGER.info("Calling container bootstrap: {}", containerBootstrap.getClass().getSimpleName());
                     containerBootstrap.call();
                     success = true;
                     LOGGER.info("Container started successfully.");
@@ -62,15 +69,12 @@ public class SimpleContainerBootstrapRunner implements Callable<Boolean> {
     }
 
     private boolean isExitNeeded() {
+        boolean exitNeeded = false;
         if (exitCriteriaModel != null && exitCriteria != null) {
-            return exitCriteria.isExitNeeded(exitCriteriaModel);
-        } else {
-            return false;
+            LOGGER.debug("exitCriteriaModel: {}, exitCriteria: {}", exitCriteriaModel, exitNeeded);
+            exitNeeded = exitCriteria.isExitNeeded(exitCriteriaModel);
         }
-    }
-
-    public static Callable<Boolean> simpleContainerBootstrapRunner(ContainerBootstrap containerBootstrap, ExitCriteria exitCriteria,
-            ExitCriteriaModel exitCriteriaModel, Map<String, String> mdcMap) {
-        return new SimpleContainerBootstrapRunner(containerBootstrap, exitCriteria, exitCriteriaModel, mdcMap);
+        LOGGER.debug("isExitNeeded: {}", exitNeeded);
+        return exitNeeded;
     }
 }

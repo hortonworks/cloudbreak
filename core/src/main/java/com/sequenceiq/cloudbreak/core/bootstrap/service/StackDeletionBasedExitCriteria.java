@@ -26,8 +26,10 @@ public class StackDeletionBasedExitCriteria implements ExitCriteria {
     @Override
     public boolean isExitNeeded(ExitCriteriaModel exitCriteriaModel) {
         StackDeletionBasedExitCriteriaModel model = (StackDeletionBasedExitCriteriaModel) exitCriteriaModel;
+        LOGGER.debug("Check isExitNeeded for model: {}", model);
         try {
             Stack stack = stackService.findLazy(model.getStackId());
+            LOGGER.debug("Stack fetched: {}, stack: {}", model.getStackId(), stack);
             if (stack == null || stack.getCluster() == null || stack.isDeleteInProgress() || stack.isDeleteCompleted()
                 || stack.getCluster().isDeleteInProgress() || stack.getCluster().isDeleteCompleted()) {
                 LOGGER.warn("Stack or cluster is in deletion phase no need for more polling");

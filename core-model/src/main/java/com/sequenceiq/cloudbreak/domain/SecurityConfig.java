@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -32,7 +33,8 @@ public class SecurityConfig implements ProvisionEntity {
     private String temporarySshPublicKey;
     @Column(columnDefinition = "TEXT")
     private String temporarySshPrivateKey;
-    @OneToOne
+
+    @OneToOne(fetch = FetchType.LAZY)
     private Stack stack;
 
     public SecurityConfig() {

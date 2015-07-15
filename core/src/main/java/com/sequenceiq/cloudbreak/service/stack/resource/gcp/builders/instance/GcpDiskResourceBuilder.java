@@ -15,7 +15,6 @@ import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.CloudRegion;
-import com.sequenceiq.cloudbreak.domain.GcpCredential;
 import com.sequenceiq.cloudbreak.domain.GcpTemplate;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -54,13 +53,13 @@ public class GcpDiskResourceBuilder extends GcpSimpleInstanceResourceBuilder {
     @Override
     public Boolean create(final CreateResourceRequest createResourceRequest, String region) throws Exception {
         final GcpDiskCreateRequest gDCR = (GcpDiskCreateRequest) createResourceRequest;
-        Stack stack = stackRepository.findById(gDCR.getStackId());
+        Stack stack = stackRepository.findByIdLazy(gDCR.getStackId());
         Compute.Disks.Insert insDisk = gDCR.getCompute().disks().insert(gDCR.getProjectId(), CloudRegion.valueOf(stack.getRegion()).value(), gDCR.getDisk());
         insDisk.setSourceImage(gcpStackUtil.getAmbariUbuntu(gDCR.getProjectId(), stack.getImage()));
         Operation execute = insDisk.execute();
         if (execute.getHttpErrorStatusCode() == null) {
             Compute.ZoneOperations.Get zoneOperations = createZoneOperations(gDCR.getCompute(),
-                    gDCR.getGcpCredential(), execute, CloudRegion.valueOf(stack.getRegion()));
+                    gDCR.getProjectId(), execute, CloudRegion.valueOf(stack.getRegion()));
             GcpResourceReadyPollerObject gcpDiskReady =
                     new GcpResourceReadyPollerObject(zoneOperations, stack, gDCR.getDisk().getName(), execute.getName(), ResourceType.GCP_DISK);
             gcpDiskReadyPollerObjectPollingService.pollWithTimeout(gcpResourceCheckerStatus, gcpDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -88,14 +87,13 @@ public class GcpDiskResourceBuilder extends GcpSimpleInstanceResourceBuilder {
     public CreateResourceRequest buildCreateRequest(GcpProvisionContextObject provisionContextObject, List<Resource> resources,
             List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup, Optional<String> userData) throws Exception {
         Stack stack = stackRepository.findByIdLazy(provisionContextObject.getStackId());
-        GcpCredential gcpCredential = (GcpCredential) stack.getCredential();
         GcpTemplate gcpTemplate = (GcpTemplate) instanceGroup.orNull().getTemplate();
         Disk disk = new Disk();
         disk.setSizeGb(SIZE);
         disk.setName(buildResources.get(0).getResourceName());
         disk.setKind(gcpTemplate.getGcpRawDiskType().getUrl(provisionContextObject.getProjectId(), CloudRegion.valueOf(stack.getRegion())));
         return new GcpDiskCreateRequest(provisionContextObject.getStackId(), resources, disk, provisionContextObject.getProjectId(),
-                provisionContextObject.getCompute(), gcpTemplate, gcpCredential, buildResources);
+                provisionContextObject.getCompute(), gcpTemplate, buildResources);
     }
 
     @Override
@@ -111,10 +109,9 @@ public class GcpDiskResourceBuilder extends GcpSimpleInstanceResourceBuilder {
         private String projectId;
         private Compute compute;
         private GcpTemplate gcpTemplate;
-        private GcpCredential gcpCredential;
 
         public GcpDiskCreateRequest(Long stackId, List<Resource> resources, Disk disk,
-                String projectId, Compute compute, GcpTemplate gcpTemplate, GcpCredential gcpCredential, List<Resource> buildNames) {
+                String projectId, Compute compute, GcpTemplate gcpTemplate, List<Resource> buildNames) {
             super(buildNames);
             this.stackId = stackId;
             this.resources = resources;
@@ -122,7 +119,6 @@ public class GcpDiskResourceBuilder extends GcpSimpleInstanceResourceBuilder {
             this.projectId = projectId;
             this.compute = compute;
             this.gcpTemplate = gcpTemplate;
-            this.gcpCredential = gcpCredential;
         }
 
         public Long getStackId() {
@@ -149,9 +145,7 @@ public class GcpDiskResourceBuilder extends GcpSimpleInstanceResourceBuilder {
             return gcpTemplate;
         }
 
-        public GcpCredential getGcpCredential() {
-            return gcpCredential;
-        }
+
     }
 
 }

@@ -82,13 +82,13 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
     @Override
     public Boolean create(final CreateResourceRequest createResourceRequest, String region) throws Exception {
         final GcpInstanceCreateRequest gICR = (GcpInstanceCreateRequest) createResourceRequest;
-        Stack stack = stackRepository.findById(gICR.getStackId());
+        Stack stack = stackRepository.findByIdLazy(gICR.getStackId());
         Compute.Instances.Insert ins =
                 gICR.getCompute().instances().insert(gICR.getProjectId(), CloudRegion.valueOf(stack.getRegion()).value(), gICR.getInstance());
         ins.setPrettyPrint(Boolean.TRUE);
         Operation execute = ins.execute();
         if (execute.getHttpErrorStatusCode() == null) {
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(gICR.getCompute(), gICR.getGcpCredential(), execute,
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(gICR.getCompute(), gICR.getProjectId(), execute,
                     CloudRegion.valueOf(stack.getRegion()));
             GcpResourceReadyPollerObject instReady =
                     new GcpResourceReadyPollerObject(zoneOperations, stack, gICR.getInstance().getName(), execute.getName(), ResourceType.GCP_INSTANCE);
@@ -139,8 +139,8 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
             Operation operation = deleteContextObject.getCompute().instances()
                     .delete(gcpCredential.getProjectId(), CloudRegion.valueOf(region).value(), resource.getResourceName()).execute();
             Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(),
-                    gcpCredential, operation, CloudRegion.valueOf(region));
-            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(), gcpCredential, operation);
+                    gcpCredential.getProjectId(), operation, CloudRegion.valueOf(region));
+            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(), gcpCredential.getProjectId(), operation);
             GcpRemoveReadyPollerObject gcpRemoveReady =
                     new GcpRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName(), resourceType());
             gcpRemoveReadyPollerObjectPollingService.pollWithTimeout(gcpRemoveCheckerStatus, gcpRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -273,7 +273,7 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
         if (operation.getHttpErrorStatusCode() == null) {
             Compute.ZoneOperations.Get zoneOperations = createZoneOperations(
                     startStopContextObject.getCompute(),
-                    credential,
+                    credential.getProjectId(),
                     operation,
                     CloudRegion.valueOf(startStopContextObject.getStack().getRegion()));
             GcpResourceReadyPollerObject instReady = new GcpResourceReadyPollerObject(zoneOperations, startStopContextObject.getStack(),

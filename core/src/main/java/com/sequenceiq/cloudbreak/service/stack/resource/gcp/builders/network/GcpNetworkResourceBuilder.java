@@ -18,7 +18,6 @@ import com.google.api.services.compute.model.Network;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.CloudRegion;
-import com.sequenceiq.cloudbreak.domain.GcpCredential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -63,7 +62,7 @@ public class GcpNetworkResourceBuilder extends GcpSimpleNetworkResourceBuilder {
         Compute.Networks.Insert networkInsert = gNCR.getCompute().networks().insert(gNCR.getProjectId(), gNCR.getNetwork());
         Operation execute = networkInsert.execute();
         if (execute.getHttpErrorStatusCode() == null) {
-            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(gNCR.getCompute(), (GcpCredential) stack.getCredential(), execute);
+            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(gNCR.getCompute(), gNCR.getProjectId(), execute);
             GcpResourceReadyPollerObject instReady =
                     new GcpResourceReadyPollerObject(globalOperations, stack, gNCR.getNetwork().getName(), execute.getName(), GCP_NETWORK);
             gcpNetworkReadyPollerObjectPollingService.pollWithTimeout(gcpResourceCheckerStatus, instReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -77,11 +76,11 @@ public class GcpNetworkResourceBuilder extends GcpSimpleNetworkResourceBuilder {
     public Boolean delete(Resource resource, GcpDeleteContextObject deleteContextObject, String region) throws Exception {
         Stack stack = stackRepository.findByIdLazy(deleteContextObject.getStackId());
         try {
-            GcpCredential gcpCredential = (GcpCredential) stack.getCredential();
-            Operation execute = deleteContextObject.getCompute().networks().delete(gcpCredential.getProjectId(), resource.getResourceName()).execute();
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(), gcpCredential, execute,
+            Operation execute = deleteContextObject.getCompute().networks().delete(deleteContextObject.getProjectId(), resource.getResourceName()).execute();
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(), deleteContextObject.getProjectId(), execute,
                     CloudRegion.valueOf(region));
-            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(), gcpCredential, execute);
+            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(),
+                    deleteContextObject.getProjectId(), execute);
             GcpRemoveReadyPollerObject gcpRemoveReady =
                     new GcpRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), execute.getName(), resourceType());
             gcpRemoveReadyPollerObjectPollingService.pollWithTimeout(gcpRemoveCheckerStatus, gcpRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
