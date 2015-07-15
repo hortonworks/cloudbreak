@@ -93,10 +93,18 @@ public class StackScalingService {
                 String.format("Start to terminate host '%s' from '%s'.", hostName, instanceGroupName), instanceGroupName);
         if (stack.getCluster() != null) {
             HostMetadata hostMetadata = hostMetadataRepository.findHostsInClusterByName(stack.getCluster().getId(), hostName);
-            if (HostMetadataState.HEALTHY.equals(hostMetadata.getHostMetadataState())) {
+            if (hostMetadata != null && HostMetadataState.HEALTHY.equals(hostMetadata.getHostMetadataState())) {
                 throw new ScalingFailedException(String.format("Host (%s) is in HEALTHY state. Cannot be removed.", hostName));
             }
             removeInstance(stack, instanceId, instanceGroupName);
+            removeHostmetadataIfExists(stack, instanceMetaData, hostMetadata);
+        } else {
+            removeInstance(stack, instanceId, instanceGroupName);
+        }
+    }
+
+    private void removeHostmetadataIfExists(Stack stack, InstanceMetaData instanceMetaData, HostMetadata hostMetadata) {
+        if (hostMetadata != null) {
             try {
                 ambariClusterConnector.deleteHostFromAmbari(stack, hostMetadata);
                 hostMetadataRepository.delete(hostMetadata);
@@ -108,7 +116,9 @@ public class StackScalingService {
                         String.format("Could not delete host '%s' from ambari.", instanceMetaData.getInstanceId()));
             }
         } else {
-            removeInstance(stack, instanceId, instanceGroupName);
+            LOGGER.info("Host cannot be deleted because it is not exist: ", instanceMetaData.getInstanceId());
+            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+                    String.format("Host '%s' is not found in ambari.", instanceMetaData.getInstanceId()));
         }
     }
 

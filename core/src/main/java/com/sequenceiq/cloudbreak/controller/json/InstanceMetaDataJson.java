@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.controller.json;
 
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.InstanceGroupModelDescription;
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.InstanceMetaDataModelDescription;
+import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
@@ -26,6 +27,8 @@ public class InstanceMetaDataJson implements JsonEntity {
     private Integer containerCount;
     @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_GROUP_NAME)
     private String instanceGroup;
+    @ApiModelProperty(InstanceGroupModelDescription.STATUS)
+    private InstanceStatus instanceStatus;
 
     public InstanceMetaDataJson() {
 
@@ -101,5 +104,13 @@ public class InstanceMetaDataJson implements JsonEntity {
 
     public void setContainerCount(Integer containerCount) {
         this.containerCount = containerCount;
+    }
+
+    public InstanceStatus getInstanceStatus() {
+        return instanceStatus;
+    }
+
+    public void setInstanceStatus(InstanceStatus instanceStatus) {
+        this.instanceStatus = instanceStatus;
     }
 }
