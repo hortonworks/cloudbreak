@@ -82,7 +82,7 @@ public class GcpReservedIpResourceBuilder extends GcpSimpleNetworkResourceBuilde
 
     @Override
     public Boolean delete(Resource resource, GcpDeleteContextObject deleteContextObject, String region) throws Exception {
-        Stack stack = stackRepository.findById(deleteContextObject.getStackId());
+        Stack stack = stackRepository.findByIdLazy(deleteContextObject.getStackId());
         try {
             GcpCredential gcpCredential = (GcpCredential) stack.getCredential();
             Operation operation = deleteContextObject
@@ -111,7 +111,7 @@ public class GcpReservedIpResourceBuilder extends GcpSimpleNetworkResourceBuilde
             );
             gcpRemoveReadyPollerObjectPollingService.pollWithTimeout(gcpRemoveCheckerStatus, gcpRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         } catch (GoogleJsonResponseException ex) {
-            exceptionHandler(ex, resource.getResourceName(), stack);
+            exceptionHandler(ex, resource.getResourceName());
         } catch (IOException e) {
             throw new GcpResourceException(e);
         }

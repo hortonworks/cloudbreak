@@ -75,7 +75,7 @@ public class GcpNetworkResourceBuilder extends GcpSimpleNetworkResourceBuilder {
 
     @Override
     public Boolean delete(Resource resource, GcpDeleteContextObject deleteContextObject, String region) throws Exception {
-        Stack stack = stackRepository.findById(deleteContextObject.getStackId());
+        Stack stack = stackRepository.findByIdLazy(deleteContextObject.getStackId());
         try {
             GcpCredential gcpCredential = (GcpCredential) stack.getCredential();
             Operation execute = deleteContextObject.getCompute().networks().delete(gcpCredential.getProjectId(), resource.getResourceName()).execute();
@@ -86,7 +86,7 @@ public class GcpNetworkResourceBuilder extends GcpSimpleNetworkResourceBuilder {
                     new GcpRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), execute.getName(), resourceType());
             gcpRemoveReadyPollerObjectPollingService.pollWithTimeout(gcpRemoveCheckerStatus, gcpRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         } catch (GoogleJsonResponseException ex) {
-            exceptionHandler(ex, resource.getResourceName(), stack);
+            exceptionHandler(ex, resource.getResourceName());
         } catch (IOException e) {
             throw new GcpResourceException("Error while deleting network resource", e);
         }

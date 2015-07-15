@@ -81,7 +81,7 @@ public class GcpFireWallInResourceBuilder extends GcpSimpleNetworkResourceBuilde
 
     @Override
     public Boolean delete(Resource resource, GcpDeleteContextObject deleteContextObject, String region) throws Exception {
-        Stack stack = stackRepository.findById(deleteContextObject.getStackId());
+        Stack stack = stackRepository.findByIdLazy(deleteContextObject.getStackId());
         try {
             GcpCredential gcpCredential = (GcpCredential) stack.getCredential();
             Operation operation = deleteContextObject.getCompute().firewalls().delete(gcpCredential.getProjectId(), resource.getResourceName()).execute();
@@ -92,7 +92,7 @@ public class GcpFireWallInResourceBuilder extends GcpSimpleNetworkResourceBuilde
                     new GcpRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName(), resourceType());
             gcpRemoveReadyPollerObjectPollingService.pollWithTimeout(gcpRemoveCheckerStatus, gcpRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         } catch (GoogleJsonResponseException ex) {
-            exceptionHandler(ex, resource.getResourceName(), stack);
+            exceptionHandler(ex, resource.getResourceName());
         } catch (IOException e) {
             throw new GcpResourceException("Error during deletion", e);
         }

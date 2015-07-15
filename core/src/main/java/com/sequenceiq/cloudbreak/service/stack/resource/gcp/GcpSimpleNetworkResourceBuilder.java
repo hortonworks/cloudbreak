@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.GcpCredential;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
@@ -48,7 +47,7 @@ public abstract class GcpSimpleNetworkResourceBuilder implements
         return compute.globalOperations().get(gcpCredential.getProjectId(), operation.getName());
     }
 
-    protected void exceptionHandler(GoogleJsonResponseException ex, String name, Stack stack) {
+    protected void exceptionHandler(GoogleJsonResponseException ex, String name) {
         if (ex.getDetails().get("code").equals(NOT_FOUND)) {
             LOGGER.info(String.format("Resource not found. Resource name: %s ", name));
         } else {

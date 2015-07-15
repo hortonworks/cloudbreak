@@ -133,7 +133,7 @@ public class GcpInstanceResourceBuilder extends GcpSimpleInstanceResourceBuilder
 
     @Override
     public Boolean delete(Resource resource, GcpDeleteContextObject deleteContextObject, String region) throws Exception {
-        Stack stack = stackRepository.findById(deleteContextObject.getStackId());
+        Stack stack = stackRepository.findByIdLazy(deleteContextObject.getStackId());
         try {
             GcpCredential gcpCredential = (GcpCredential) stack.getCredential();
             Operation operation = deleteContextObject.getCompute().instances()

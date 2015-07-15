@@ -15,7 +15,7 @@ public class AzureCreateResourceStatusCheckerTask extends AzureResourceStatusChe
 
     public boolean exitPolling(AzureResourcePollerObject t) {
         try {
-            Stack stack = stackRepository.findById(t.getStack().getId());
+            Stack stack = stackRepository.findByIdLazy(t.getStack().getId());
             if (stack == null || stack.isDeleteInProgress()) {
                 return true;
             }
