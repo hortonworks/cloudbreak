@@ -9,10 +9,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
+import com.amazonaws.services.autoscaling.model.Activity;
+import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 
@@ -22,6 +25,8 @@ public class ASGroupStatusCheckerTask extends StackBasedStatusCheckerTask<AutoSc
     private static final Logger LOGGER = LoggerFactory.getLogger(ASGroupStatusCheckerTask.class);
 
     private static final int INSTANCE_RUNNING = 16;
+    private static final int COMPLETED = 100;
+    private static final String CANCELLED = "Cancelled";
 
     @Inject
     private CloudFormationStackUtil cfStackUtil;
@@ -37,6 +42,14 @@ public class ASGroupStatusCheckerTask extends StackBasedStatusCheckerTask<AutoSc
         List<String> instanceIds = cfStackUtil.getInstanceIds(context.getAutoScalingGroupName(), amazonASClient);
         if (instanceIds.size() < context.getRequiredInstances()) {
             LOGGER.debug("Instances in AS group: {}, needed: {}", instanceIds.size(), context.getRequiredInstances());
+            DescribeScalingActivitiesRequest describeScalingActivitiesRequest =
+                    new DescribeScalingActivitiesRequest().withAutoScalingGroupName(context.getAutoScalingGroupName());
+            List<Activity> activities = amazonASClient.describeScalingActivities(describeScalingActivitiesRequest).getActivities();
+            for (Activity activity : activities) {
+                if (activity.getProgress().equals(COMPLETED) && CANCELLED.equals(activity.getStatusCode())) {
+                    throw new FlowCancelledException(activity.getStatusMessage());
+                }
+            }
             return false;
         }
         DescribeInstanceStatusResult describeResult = amazonEC2Client.describeInstanceStatus(new DescribeInstanceStatusRequest().withInstanceIds(instanceIds));

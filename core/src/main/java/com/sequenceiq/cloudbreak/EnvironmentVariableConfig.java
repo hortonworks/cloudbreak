@@ -24,6 +24,8 @@ public class EnvironmentVariableConfig {
     public static final String CB_DB_ENV_PASS = "";
     public static final String CB_DB_ENV_DB = "postgres";
 
+    public static final String CB_AWS_SPOTINSTANCE_ENABLED = "false";
+
     public static final String CB_PLUGINS_TRUSTED_SOURCES = "all-accounts";
 
     public static final String CB_AWS_EXTERNAL_ID = "provision-ambari";
