@@ -70,7 +70,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
         AzureNetworkCreateRequest request = (AzureNetworkCreateRequest) createResourceRequest;
         try {
-            Stack stack = stackRepository.findById(request.getStackId());
+            Stack stack = stackRepository.findByIdLazy(request.getStackId());
             AzureClient azureClient = request.getAzureClient();
             Map<String, String> props = request.getProps();
             if (!azureClient.getVirtualNetworks().toString().contains(request.getName())) {

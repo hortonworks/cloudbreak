@@ -135,7 +135,7 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public Cluster retrieveClusterByStackId(Long stackId) {
-        return stackRepository.findById(stackId).getCluster();
+        return stackRepository.findByIdLazy(stackId).getCluster();
     }
 
     @Override
@@ -287,7 +287,7 @@ public class AmbariClusterService implements ClusterService {
     @Override
     public Cluster updateClusterStatusByStackId(Long stackId, Status status, String statusReason) {
         LOGGER.debug("Updating cluster status. stackId: {}, status: {}, statusReason: {}", stackId, status, statusReason);
-        Cluster cluster = stackRepository.findById(stackId).getCluster();
+        Cluster cluster = stackRepository.findByIdLazy(stackId).getCluster();
         if (cluster != null) {
             cluster.setStatus(status);
             cluster.setStatusReason(statusReason);
@@ -310,7 +310,7 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public Cluster updateClusterMetadata(Long stackId) {
-        Stack stack = stackRepository.findById(stackId);
+        Stack stack = stackRepository.findByIdLazy(stackId);
         if (stack.getCluster() == null) {
             throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stackId));
         }

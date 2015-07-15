@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
-import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureResourceException;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
@@ -82,7 +81,7 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
         }
     }
 
-    protected void httpResponseExceptionHandler(HttpResponseException ex, String resourceName, String user, Stack stack) {
+    protected void httpResponseExceptionHandler(HttpResponseException ex, String resourceName, String user) {
         if (ex.getStatusCode() != NOT_FOUND) {
             throw new AzureResourceException(ex.getResponse().getData().toString());
         } else {

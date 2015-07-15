@@ -75,7 +75,7 @@ public class AzureReservedIpResourceBuilder extends AzureSimpleNetworkResourceBu
 
     @Override
     public Boolean delete(Resource resource, AzureDeleteContextObject azureDeleteContextObject, String region) throws Exception {
-        Stack stack = stackRepository.findById(azureDeleteContextObject.getStackId());
+        Stack stack = stackRepository.findByIdLazy(azureDeleteContextObject.getStackId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
         try {
             Map<String, String> props = new HashMap<>();
@@ -105,7 +105,7 @@ public class AzureReservedIpResourceBuilder extends AzureSimpleNetworkResourceBu
     @Override
     public AzureReservedIpCreateRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
             List<Resource> buildResources, int i, Optional<InstanceGroup> instanceGroup, Optional<String> userData) throws Exception {
-        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
+        Stack stack = stackRepository.findByIdLazy(provisionContextObject.getStackId());
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();
         props.put(NAME, buildResources.get(0).getResourceName());

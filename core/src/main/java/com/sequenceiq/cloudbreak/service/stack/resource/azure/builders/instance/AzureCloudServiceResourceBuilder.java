@@ -95,7 +95,7 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
     @Override
     public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
             List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup, Optional<String> userData) throws Exception {
-        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
+        Stack stack = stackRepository.findByIdLazy(provisionContextObject.getStackId());
         AzureTemplate azureTemplate = (AzureTemplate) instanceGroup.orNull().getTemplate();
         String vmName = buildResources.get(0).getResourceName();
         Map<String, String> props = new HashMap<>();

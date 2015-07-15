@@ -117,7 +117,7 @@ public class ParallelCloudResourceManager {
             }
             resourceRequestResults.addAll(provisionUtil.waitForRequestToFinish(stack.getId(), futures).get(FutureResult.FAILED));
             stackFailureHandlerService.handleFailure(stack, resourceRequestResults);
-            if (!stackRepository.findById(stack.getId()).isStackInDeletionPhase()) {
+            if (!stackRepository.findByIdLazy(stack.getId()).isStackInDeletionPhase()) {
                 return resourceSet;
             } else {
                 throw new CloudConnectorException("Failed to create stack resources; polling reached an invalid end state.");
@@ -166,7 +166,7 @@ public class ParallelCloudResourceManager {
             successResourceRequestResults.addAll(result.get(FutureResult.SUCCESS));
             failedResourceRequestResults.addAll(result.get(FutureResult.FAILED));
             upscaleFailureHandlerService.handleFailure(stack, failedResourceRequestResults);
-            if (stackRepository.findById(stack.getId()).isStackInDeletionPhase()) {
+            if (stackRepository.findByIdLazy(stack.getId()).isStackInDeletionPhase()) {
                 throw new ScalingFailedException("Upscaling of stack failed, because the stack is already in deletion phase.");
             }
             return collectResources(successResourceRequestResults);
@@ -207,7 +207,7 @@ public class ParallelCloudResourceManager {
                 failedResourceList.addAll(result.get(FutureResult.FAILED));
             }
             instanceIds = filterFailedResources(failedResourceList, instanceIds);
-            if (!stackRepository.findById(stack.getId()).isStackInDeletionPhase()) {
+            if (!stackRepository.findByIdLazy(stack.getId()).isStackInDeletionPhase()) {
                 stackUpdater.removeStackResources(deleteContextObject.getDecommissionResources());
                 LOGGER.info("Terminated instances in stack: '{}'", instanceIds);
             } else {

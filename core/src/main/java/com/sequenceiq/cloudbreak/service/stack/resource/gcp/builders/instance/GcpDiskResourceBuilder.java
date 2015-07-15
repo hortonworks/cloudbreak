@@ -87,7 +87,7 @@ public class GcpDiskResourceBuilder extends GcpSimpleInstanceResourceBuilder {
     @Override
     public CreateResourceRequest buildCreateRequest(GcpProvisionContextObject provisionContextObject, List<Resource> resources,
             List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup, Optional<String> userData) throws Exception {
-        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
+        Stack stack = stackRepository.findByIdLazy(provisionContextObject.getStackId());
         GcpCredential gcpCredential = (GcpCredential) stack.getCredential();
         GcpTemplate gcpTemplate = (GcpTemplate) instanceGroup.orNull().getTemplate();
         Disk disk = new Disk();

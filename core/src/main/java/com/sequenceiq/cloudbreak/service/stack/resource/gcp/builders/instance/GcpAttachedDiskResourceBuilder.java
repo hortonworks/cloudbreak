@@ -113,7 +113,7 @@ public class GcpAttachedDiskResourceBuilder extends GcpSimpleInstanceResourceBui
     public CreateResourceRequest buildCreateRequest(GcpProvisionContextObject provisionContextObject, List<Resource> resources,
             List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup, Optional<String> userData) throws Exception {
         List<Disk> disks = new ArrayList<>();
-        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
+        Stack stack = stackRepository.findByIdLazy(provisionContextObject.getStackId());
         GcpTemplate gcpTemplate = (GcpTemplate) instanceGroup.orNull().getTemplate();
         GcpCredential gcpCredential = (GcpCredential) stack.getCredential();
         for (Resource buildName : buildResources) {

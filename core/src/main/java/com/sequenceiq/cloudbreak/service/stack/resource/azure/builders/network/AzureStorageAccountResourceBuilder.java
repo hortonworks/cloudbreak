@@ -53,7 +53,7 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
     @Override
     public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
         AzureStorageAccountCreateRequest aCSCR = (AzureStorageAccountCreateRequest) createResourceRequest;
-        Stack stack = stackRepository.findById(aCSCR.stackId);
+        Stack stack = stackRepository.findByIdLazy(aCSCR.stackId);
         AzureClient azureClient = aCSCR.getAzureClient();
         for (Map<String, String> properties : aCSCR.getProps()) {
             String storageName = properties.get(NAME);
@@ -83,7 +83,7 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
 
     @Override
     public Boolean delete(Resource resource, AzureDeleteContextObject deleteContextObject, String region) throws Exception {
-        Stack stack = stackRepository.findById(deleteContextObject.getStackId());
+        Stack stack = stackRepository.findByIdLazy(deleteContextObject.getStackId());
         if (AzureStackUtil.GLOBAL_STORAGE != azureStackUtil.getNumOfStorageAccounts(stack)) {
             AzureClient azureClient = deleteContextObject.getAzureClient();
             String storageName = resource.getResourceName();
