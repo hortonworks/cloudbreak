@@ -96,7 +96,7 @@ app.get('/reset/:resetToken', function(req, res) {
 });
 
 getBasePath = function(req) {
-    if (req.url.indexOf('sultans') !== -1) {
+    if (req.headers['x-forwarded-for']  !== undefined) {
         return '/sultans/'
     }
     return '/'
