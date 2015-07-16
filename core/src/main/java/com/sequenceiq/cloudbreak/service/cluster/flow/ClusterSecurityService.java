@@ -22,15 +22,18 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.PollingResult;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
+import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
+
+import groovyx.net.http.HttpResponseException;
 
 @Service
 public class ClusterSecurityService {
@@ -81,8 +84,12 @@ public class ClusterSecurityService {
             }
         } catch (InterruptedException ie) {
             throw new CloudbreakException(ie);
+        } catch (HttpResponseException hre) {
+            String errorMessage = AmbariClientExceptionUtil.getErrorMessage(hre);
+            LOGGER.error("Ambari could not enable Kerberos service. " + errorMessage, hre);
         } catch (Exception e) {
             LOGGER.error("Error occurred during enabling the kerberos security", e);
+
         }
     }
 

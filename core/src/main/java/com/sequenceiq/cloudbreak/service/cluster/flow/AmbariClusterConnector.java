@@ -69,6 +69,7 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
+import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -170,6 +171,9 @@ public class AmbariClusterConnector {
             return cluster;
         } catch (FlowCancelledException flowCancelledException) {
             throw flowCancelledException;
+        } catch (HttpResponseException hre) {
+            String errorMessage = AmbariClientExceptionUtil.getErrorMessage(hre);
+            throw new AmbariOperationFailedException("Ambari could not create the cluster: " + errorMessage, hre);
         } catch (Exception e) {
             LOGGER.error("Error while building the Ambari cluster. Message {}, throwable: {}", e.getMessage(), e);
             throw new AmbariOperationFailedException(e.getMessage(), e);
@@ -512,7 +516,8 @@ public class AmbariClusterConnector {
             int requestId = ambariClient.stopAllComponentsOnHosts(hosts);
             return waitForAmbariOperations(stack, ambariClient, singletonMap("Stopping components on the decommissioned hosts", requestId));
         } catch (HttpResponseException e) {
-            throw new AmbariOperationFailedException("Ambari client could not stop components.", e);
+            String errorMessage = AmbariClientExceptionUtil.getErrorMessage(e);
+            throw new AmbariOperationFailedException("Ambari could not stop components. " + errorMessage, e);
         }
     }
 
@@ -566,9 +571,10 @@ public class AmbariClusterConnector {
                     for (Entry<String, Integer> stringIntegerEntry : tmpMap.entrySet()) {
                         stringIntegerMap.put(String.format("%s-%s", hostComponentsEntry.getKey(), stringIntegerEntry.getKey()), stringIntegerEntry.getValue());
                     }
-
                 } catch (HttpResponseException e) {
-                    throw new CloudbreakException(e);
+                    String exceptionErrorMsg = AmbariClientExceptionUtil.getErrorMessage(e);
+                    String errorMessage = String.format("Ambari could not start components on host %s. %s", hostComponentsEntry.getKey(), exceptionErrorMsg);
+                    throw new CloudbreakException(errorMessage, e);
                 }
             }
         }
@@ -692,7 +698,9 @@ public class AmbariClusterConnector {
                 addRepository(ambariClient, stack, version, os, ambStack.getStackRepoId(), ambStack.getStackBaseURL(), verify);
                 addRepository(ambariClient, stack, version, os, ambStack.getUtilsRepoId(), ambStack.getUtilsBaseURL(), verify);
             } catch (HttpResponseException e) {
-                throw new BadRequestException("Cannot use the specified Ambari stack: " + ambStack.toString(), e);
+                String exceptionErrorMsg = AmbariClientExceptionUtil.getErrorMessage(e);
+                String msg = String.format("Cannot use the specified Ambari stack: %s. Error: %s", ambStack.toString(), exceptionErrorMsg);
+                throw new BadRequestException(msg, e);
             }
         } else {
             LOGGER.info("Using latest HDP repository");
@@ -717,8 +725,9 @@ public class AmbariClusterConnector {
         } catch (IOException e) {
             if ("Conflict".equals(e.getMessage())) {
                 throw new BadRequestException("Ambari blueprint already exists.", e);
-            } else if ("Bad Request".equals(e.getMessage())) {
-                throw new BadRequestException("Failed to validate Ambari blueprint.", e);
+            } else if (e instanceof HttpResponseException) {
+                String errorMessage = AmbariClientExceptionUtil.getErrorMessage((HttpResponseException) e);
+                throw new CloudbreakServiceException("Ambari Blueprint could not be added: " + errorMessage, e);
             } else {
                 throw new CloudbreakServiceException(e);
             }
@@ -777,10 +786,9 @@ public class AmbariClusterConnector {
         } catch (HttpResponseException e) {
             if ("Conflict".equals(e.getMessage())) {
                 throw new BadRequestException("Host already exists.", e);
-            } else if ("Bad Request".equals(e.getMessage())) {
-                throw new BadRequestException("Failed to validate host.", e);
             } else {
-                throw new CloudbreakServiceException(e);
+                String errorMessage = AmbariClientExceptionUtil.getErrorMessage(e);
+                throw new CloudbreakServiceException("Ambari could not install services. " + errorMessage, e);
             }
         }
     }
