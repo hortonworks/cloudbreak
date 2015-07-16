@@ -193,13 +193,13 @@ public class AmbariClusterConnector {
         AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
         int nodeCount = stack.getFullNodeCountWithoutDecommissionedAndUnRegisteredNodes() - stack.getGateWayNodeCount()
                 + hostGroupAdjustment.getScalingAdjustment();
+        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
+        List<String> hosts = findFreeHosts(stack.getId(), hostGroup, hostGroupAdjustment.getScalingAdjustment());
+        Set<HostGroup> hostGroupAsSet = Sets.newHashSet(hostGroup);
+        Set<HostMetadata> hostMetadata = addHostMetadata(cluster, hosts, hostGroupAdjustment);
         Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
         PollingResult pollingResult = waitForHosts(stack, ambariClient, nodeCount, hostsInCluster);
         if (SUCCESS.equals(pollingResult)) {
-            HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
-            List<String> hosts = findFreeHosts(stack.getId(), hostGroup, hostGroupAdjustment.getScalingAdjustment());
-            Set<HostGroup> hostGroupAsSet = Sets.newHashSet(hostGroup);
-            Set<HostMetadata> hostMetadata = addHostMetadata(cluster, hosts, hostGroupAdjustment);
             if (recipesFound(hostGroupAsSet)) {
                 recipeEngine.setupRecipesOnHosts(stack, hostGroup.getRecipes(), new HashSet<>(hostMetadata));
             }
