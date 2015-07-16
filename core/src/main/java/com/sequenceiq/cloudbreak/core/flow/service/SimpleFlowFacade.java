@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
@@ -38,6 +39,24 @@ public class SimpleFlowFacade implements FlowFacade {
 
     @Inject
     private CloudbreakEventService cloudbreakEventService;
+
+    @Inject
+    private CloudbreakMessagesService cloudbreakMessagesService;
+
+    private enum Msg {
+
+        FLOW_STACK_PROVISIONED("flow.stack.provisioned");
+
+        private String code;
+
+        Msg(String msgCode) {
+            code = msgCode;
+        }
+
+        public String code() {
+            return code;
+        }
+    }
 
     @Override
     public FlowContext setup(FlowContext context) throws CloudbreakException {
@@ -82,7 +101,7 @@ public class SimpleFlowFacade implements FlowFacade {
             MDCBuilder.buildMdcContext(stack);
             metadataSetupService.setupMetadata(provisioningContext.getCloudPlatform(), stack);
             cloudbreakEventService.fireCloudbreakEvent(provisioningContext.getStackId(), BillingStatus.BILLING_STARTED.name(),
-                    "Provision of stack is successfully finished");
+                    cloudbreakMessagesService.getMessage(Msg.FLOW_STACK_PROVISIONED.code()));
             LOGGER.debug("Metadata setup DONE.");
             return new ProvisioningContext.Builder()
                     .setDefaultParams(provisioningContext.getStackId(), provisioningContext.getCloudPlatform())

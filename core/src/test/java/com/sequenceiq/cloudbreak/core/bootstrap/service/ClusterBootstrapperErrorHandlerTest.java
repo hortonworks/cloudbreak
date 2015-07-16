@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
@@ -83,6 +84,9 @@ public class ClusterBootstrapperErrorHandlerTest {
 
     @Mock
     private MetadataSetup metadataSetup;
+
+    @Mock
+    private CloudbreakMessagesService cloudbreakMessagesService;
 
     @InjectMocks
     private ClusterBootstrapperErrorHandler underTest;

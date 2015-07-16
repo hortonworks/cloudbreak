@@ -17,6 +17,7 @@ import static com.sequenceiq.cloudbreak.domain.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_IN_PROGRESS;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,7 +44,6 @@ import com.sequenceiq.cloudbreak.core.flow.context.StackInstanceUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
-import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -54,15 +54,15 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
@@ -125,6 +125,50 @@ public class SimpleStackFacade implements StackFacade {
     @Inject
     private SecurityGroupService securityGroupService;
 
+    @Inject
+    private CloudbreakMessagesService messagesService;
+
+    private enum Msg {
+        STACK_INFRASTRUCTURE_BOOTSTRAP("stack.infrastructure.bootstrap"),
+        STACK_INFRASTRUCTURE_METADATA_SETUP("stack.infrastructure.metadata.setup"),
+        STACK_INFRASTRUCTURE_STARTING("stack.infrastructure.starting"),
+        STACK_INFRASTRUCTURE_STARTED("stack.infrastructure.started"),
+        STACK_BILLING_STARTED("stack.billing.started"),
+        STACK_BILLING_STOPPED("stack.billing.stopped"),
+        STACK_INFRASTRUCTURE_STOPPING("stack.infrastructure.stopping"),
+        STACK_INFRASTRUCTURE_STOPPED("stack.infrastructure.stopped"),
+        STACK_NOTIFICATION_EMAIL("stack.notification.email"),
+        STACK_DELETE_IN_PROGRESS("stack.delete.in.progress"),
+        STACK_DELETE_COMPLETED("stack.delete.completed"),
+        STACK_ADDING_INSTANCES("stack.adding.instances"),
+        STACK_METADATA_EXTEND("stack.metadata.extend"),
+        STACK_BOOTSTRAP_NEW_NODES("stack.bootstrap.new.nodes"),
+        STACK_UPSCALE_FINISHED("stack.upscale.finished"),
+        STACK_DOWNSCALE_INSTANCES("stack.downscale.instances"),
+        STACK_DOWNSCALE_SUCCESS("stack.downscale.success"),
+        STACK_STOP_REQUESTED("stack.stop.requested"),
+        STACK_PROVISIONING("stack.provisioning"),
+        STACK_INFRASTRUCTURE_TIME("stack.infrastructure.time"),
+        STACK_INFRASTRUCTURE_SUBNETS_UPDATING("stack.infrastructure.subnets.updating"),
+        STACK_INFRASTRUCTURE_SUBNETS_UPDATED("stack.infrastructure.subnets.updated"),
+        STACK_INFRASTRUCTURE_UPDATE_FAILED("stack.infrastructure.update.failed"),
+        STACK_INFRASTRUCTURE_CREATE_FAILED("stack.infrastructure.create.failed"),
+        STACK_INFRASTRUCTURE_ROLLBACK_FAILED("stack.infrastructure.rollback.failed"),
+        STACK_INFRASTRUCTURE_DELETE_FAILED("stack.infrastructure.delete.failed"),
+        STACK_INFRASTRUCTURE_START_FAILED("stack.infrastructure.start.failed"),
+        STACK_INFRASTRUCTURE_STOP_FAILED("stack.infrastructure.stop.failed");
+
+        private String code;
+
+        Msg(String msgCode) {
+            code = msgCode;
+        }
+
+        public String code() {
+            return code;
+        }
+    }
+
     @Override
     public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
         ProvisioningContext actualContext = (ProvisioningContext) context;
@@ -132,7 +176,7 @@ public class SimpleStackFacade implements StackFacade {
             Stack stack = stackService.getById(actualContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
             stackUpdater.updateStackStatus(actualContext.getStackId(), UPDATE_IN_PROGRESS);
-            fireEventAndLog(actualContext.getStackId(), context, "Bootstrapping cluster on the infrastructure", UPDATE_IN_PROGRESS);
+            fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_INFRASTRUCTURE_BOOTSTRAP, UPDATE_IN_PROGRESS.name());
             clusterBootstrapper.bootstrapCluster(actualContext);
         } catch (Exception e) {
             LOGGER.error("Error occurred while bootstrapping container orchestrator: {}", e.getMessage());
@@ -148,7 +192,7 @@ public class SimpleStackFacade implements StackFacade {
             Stack stack = stackService.getById(actualContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
             stackUpdater.updateStackStatus(actualContext.getStackId(), UPDATE_IN_PROGRESS);
-            fireEventAndLog(actualContext.getStackId(), context, "Setting up metadata", UPDATE_IN_PROGRESS);
+            fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_INFRASTRUCTURE_METADATA_SETUP, UPDATE_IN_PROGRESS.name());
             consulMetadataSetup.setupConsulMetadata(stack.getId());
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
         } catch (Exception e) {
@@ -165,9 +209,11 @@ public class SimpleStackFacade implements StackFacade {
             Stack stack = stackService.getById(actualContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
             stackUpdater.updateStackStatus(actualContext.getStackId(), START_IN_PROGRESS, "Cluster infrastructure is now starting.");
+            fireEventAndLog(actualContext.getStackId(), actualContext, Msg.STACK_INFRASTRUCTURE_STARTING, START_IN_PROGRESS.name());
             context = stackStartService.start(actualContext);
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Cluster infrastructure started successfully.");
-            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), BILLING_STARTED.name(), "Cluster infrastructure started successfully.");
+            fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_STARTED, AVAILABLE.name());
+            fireEventAndLog(stack.getId(), context, Msg.STACK_BILLING_STARTED, BILLING_STARTED.name());
         } catch (Exception e) {
             LOGGER.error("Exception during the stack start process.", e.getMessage());
             throw new CloudbreakException(e);
@@ -183,12 +229,17 @@ public class SimpleStackFacade implements StackFacade {
                 Stack stack = stackService.getById(actualContext.getStackId());
                 MDCBuilder.buildMdcContext(stack);
                 stackUpdater.updateStackStatus(actualContext.getStackId(), STOP_IN_PROGRESS, "Cluster infrastructure is now stopping.");
+                fireEventAndLog(stack.getId(), actualContext, Msg.STACK_INFRASTRUCTURE_STOPPING, STOP_IN_PROGRESS.name());
                 context = stackStopService.stop(actualContext);
                 stackUpdater.updateStackStatus(stack.getId(), STOPPED, "Cluster infrastructure stopped successfully.");
-                cloudbreakEventService.fireCloudbreakEvent(stack.getId(), BILLING_STOPPED.name(), "Cluster infrastructure stopped successfully.");
+
+                fireEventAndLog(stack.getId(), actualContext, Msg.STACK_INFRASTRUCTURE_STOPPED, STOPPED.name());
+
+                fireEventAndLog(stack.getId(), actualContext, Msg.STACK_BILLING_STOPPED, BILLING_STOPPED.name());
+
                 if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
                     emailSenderService.sendStopSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
-                    fireEventAndLog(actualContext.getStackId(), context, "Notification email has been sent about state of the cluster.", STOPPED);
+                    fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_NOTIFICATION_EMAIL, STOPPED.name());
                 }
             }
         } catch (Exception e) {
@@ -205,18 +256,21 @@ public class SimpleStackFacade implements StackFacade {
             Stack stack = stackService.getById(actualContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
             stackUpdater.updateStackStatus(actualContext.getStackId(), DELETE_IN_PROGRESS, "Terminating the cluster and its infrastructure.");
+            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_DELETE_IN_PROGRESS, DELETE_IN_PROGRESS.name());
 
             if (stack != null && stack.getCredential() != null) {
                 terminationService.terminateStack(stack.getId(), actualContext.getCloudPlatform());
             }
 
-            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_STOPPED.name(),
-                    "Billing stopped, the cluster and its infrastructure have been terminated.");
-            stackUpdater.updateStackStatus(actualContext.getStackId(), DELETE_COMPLETED,
+            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_BILLING_STOPPED, BILLING_STOPPED.name());
+
+            stackUpdater.updateStackStatus(stack.getId(), DELETE_COMPLETED,
                     "The cluster and its infrastructure have successfully been terminated.");
+            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_DELETE_COMPLETED, DELETE_COMPLETED.name());
+
             if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
                 emailSenderService.sendTerminationSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
-                fireEventAndLog(actualContext.getStackId(), context, "Notification email has been sent about state of the cluster.", DELETE_COMPLETED);
+                fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_NOTIFICATION_EMAIL, DELETE_COMPLETED.name());
             }
             terminationService.finalizeTermination(stack.getId());
             clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
@@ -233,8 +287,10 @@ public class SimpleStackFacade implements StackFacade {
         try {
             Stack stack = stackService.getById(actualContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
-            String statusReason = String.format("Add %s new instance(s) to the infrastructure.", actualContext.getScalingAdjustment());
+            String statusReason = String.format("Adding %s new instance(s) to the infrastructure.", actualContext.getScalingAdjustment());
             stackUpdater.updateStackStatus(actualContext.getStackId(), UPDATE_IN_PROGRESS, statusReason);
+
+            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_ADDING_INSTANCES, UPDATE_IN_PROGRESS.name(), actualContext.getScalingAdjustment());
             Set<Resource> resources = stackScalingService.addInstances(stack.getId(), actualContext.getInstanceGroup(), actualContext.getScalingAdjustment());
             context = new StackScalingContext(stack.getId(), actualContext.getCloudPlatform(), actualContext.getScalingAdjustment(),
                     actualContext.getInstanceGroup(), resources, actualContext.getScalingType(), null);
@@ -267,7 +323,7 @@ public class SimpleStackFacade implements StackFacade {
         Stack stack = stackService.getById(actualCont.getStackId());
         Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
         MDCBuilder.buildMdcContext(stack);
-        fireEventAndLog(actualCont.getStackId(), context, "Extending metadata with new instances.", UPDATE_IN_PROGRESS);
+        fireEventAndLog(actualCont.getStackId(), context, Msg.STACK_METADATA_EXTEND, UPDATE_IN_PROGRESS.name());
         Set<String> upscaleCandidateAddresses = metadataSetupService.setupNewMetadata(stack.getId(), actualCont.getResources(), actualCont.getInstanceGroup());
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
         hostGroupAdjustmentJson.setWithStackUpdate(false);
@@ -286,7 +342,7 @@ public class SimpleStackFacade implements StackFacade {
         try {
             Stack stack = stackService.getById(actualContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
-            fireEventAndLog(actualContext.getStackId(), context, "Bootstrapping new node(s).", UPDATE_IN_PROGRESS);
+            fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_BOOTSTRAP_NEW_NODES, UPDATE_IN_PROGRESS.name());
             clusterBootstrapper.bootstrapNewNodes(actualContext);
         } catch (Exception e) {
             LOGGER.error("Exception during the handling of munchausen setup: {}", e.getMessage());
@@ -311,6 +367,7 @@ public class SimpleStackFacade implements StackFacade {
                 hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
             }
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Stack upscale has been finished successfully.");
+            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_UPSCALE_FINISHED, AVAILABLE.name());
             context = new ClusterScalingContext(stack.getId(), actualContext.getCloudPlatform(),
                     hostGroupAdjustmentJson, actualContext.getUpscaleCandidateAddresses(), new ArrayList<HostMetadata>(), actualContext.getScalingType());
         } catch (Exception e) {
@@ -326,15 +383,17 @@ public class SimpleStackFacade implements StackFacade {
         try {
             Stack stack = stackService.getById(actualContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
-            String statusMessage = "Removing '%s' instance(s) from the cluster infrastructure.";
             stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
-            cloudbreakEventService
-                    .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), String.format(statusMessage, actualContext.getScalingAdjustment()));
+            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_DOWNSCALE_INSTANCES, UPDATE_IN_PROGRESS.name(), actualContext.getScalingAdjustment());
+
             stackScalingService.downscaleStack(stack.getId(), actualContext.getInstanceGroup(), actualContext.getScalingAdjustment());
+
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Downscale of the cluster infrastructure finished successfully.");
+            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_DOWNSCALE_SUCCESS, AVAILABLE.name());
+
             if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
                 emailSenderService.sendDownScaleSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
-                fireEventAndLog(actualContext.getStackId(), context, "Notification email has been sent about state of the cluster.", AVAILABLE);
+                fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_NOTIFICATION_EMAIL, AVAILABLE.name());
             }
         } catch (Exception e) {
             LOGGER.error("Exception during the downscaling of stack: {}", e.getMessage());
@@ -350,6 +409,7 @@ public class SimpleStackFacade implements StackFacade {
             Stack stack = stackService.getById(actualContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
             stackUpdater.updateStackStatus(stack.getId(), STOP_REQUESTED, "Stopping of cluster infrastructure has been requested.");
+            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_STOP_REQUESTED, STOP_REQUESTED.name());
         } catch (Exception e) {
             LOGGER.error("Exception during the stack stop requested process: {}", e.getMessage());
             throw new CloudbreakException(e);
@@ -364,10 +424,13 @@ public class SimpleStackFacade implements StackFacade {
         Stack stack = stackService.getById(actualContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
         stackUpdater.updateStackStatus(stack.getId(), CREATE_IN_PROGRESS, "Creating infrastructure");
+        fireEventAndLog(stack.getId(), actualContext, Msg.STACK_PROVISIONING, CREATE_IN_PROGRESS.name());
+
         ProvisionComplete provisionResult = provisioningService.buildStack(actualContext.getCloudPlatform(), stack, actualContext.getSetupProperties());
         Date endDate = new Date();
         long seconds = (endDate.getTime() - startDate.getTime()) / DateUtils.MILLIS_PER_SECOND;
-        fireEventAndLog(stack.getId(), context, String.format("The creation of infrastructure took %s seconds.", seconds), AVAILABLE);
+
+        fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_TIME, AVAILABLE.name(), seconds);
         context = new ProvisioningContext.Builder()
                 .setDefaultParams(provisionResult.getStackId(), provisionResult.getCloudPlatform())
                 .setProvisionSetupProperties(actualContext.getSetupProperties())
@@ -408,6 +471,8 @@ public class SimpleStackFacade implements StackFacade {
             Stack stack = stackService.getById(actualContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
             stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Updating allowed subnets.");
+            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_INFRASTRUCTURE_SUBNETS_UPDATING, UPDATE_IN_PROGRESS.name());
+
             CloudPlatformConnector connector = cloudPlatformConnectors.get(stack.cloudPlatform());
             Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(stack.cloudPlatform(),
                     tlsSecurityService.readPublicSshKey(stack.getId()), connector.getSSHUser());
@@ -418,7 +483,9 @@ public class SimpleStackFacade implements StackFacade {
                     userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE));
             securityRuleRepository.delete(modifiedSubnets.get(REMOVED_SUBNETS));
             securityRuleRepository.save(newSecurityRules);
-            stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Updating of allowed subnets successfully finished.");
+
+            stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Allowed subnets successfully updated.");
+            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_INFRASTRUCTURE_SUBNETS_UPDATED, AVAILABLE.name());
         } catch (Exception e) {
             Stack stack = stackService.getById(actualContext.getStackId());
             SecurityGroup securityGroup = stack.getSecurityGroup();
@@ -440,6 +507,7 @@ public class SimpleStackFacade implements StackFacade {
             Stack stack = stackService.getById(actualContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, String.format("Stack update failed. %s", actualContext.getErrorReason()));
+            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_INFRASTRUCTURE_UPDATE_FAILED, AVAILABLE.name(), actualContext.getErrorReason());
         } catch (Exception e) {
             LOGGER.error("Exception during the handling of update allowed subnet failure: {}", e.getMessage());
             throw new CloudbreakException(e);
@@ -465,6 +533,7 @@ public class SimpleStackFacade implements StackFacade {
                 Stack stack = stackService.getById(id);
                 MDCBuilder.buildMdcContext(stack);
                 stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Stack update failed. " + errorReason);
+                fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_UPDATE_FAILED, AVAILABLE.name(), errorReason);
             }
         } catch (Exception e) {
             LOGGER.error("Exception during the handling of stack scaling failure: {}", e.getMessage());
@@ -479,7 +548,7 @@ public class SimpleStackFacade implements StackFacade {
         final Stack stack = stackService.getById(actualContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
         try {
-            fireEventAndLog(actualContext.getStackId(), context, "Creation of infrastructure failed.", UPDATE_IN_PROGRESS);
+            fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, UPDATE_IN_PROGRESS.name());
             if (!stack.isStackInDeletionPhase()) {
                 final CloudPlatform cloudPlatform = actualContext.getCloudPlatform();
                 if (!stack.getOnFailureActionAction().equals(OnFailureAction.ROLLBACK)) {
@@ -487,15 +556,17 @@ public class SimpleStackFacade implements StackFacade {
                 } else {
                     stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
                     cloudPlatformConnectors.get(cloudPlatform).rollback(stack, stack.getResources());
-                    cloudbreakEventService.fireCloudbreakEvent(stack.getId(), BILLING_STOPPED.name(), "Stack creation failed.");
+                    fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, BILLING_STOPPED.name());
                 }
                 stackUpdater.updateStackStatus(stack.getId(), CREATE_FAILED, actualContext.getErrorReason());
+                fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, CREATE_FAILED.name(), actualContext.getErrorReason());
             }
 
             context = new ProvisioningContext.Builder().setDefaultParams(stack.getId(), stack.cloudPlatform()).build();
         } catch (Exception ex) {
             LOGGER.error("Stack rollback failed on stack id : {}. Exception:", stack.getId(), ex);
             stackUpdater.updateStackStatus(stack.getId(), CREATE_FAILED, String.format("Rollback failed: %s", ex.getMessage()));
+            fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_ROLLBACK_FAILED, CREATE_FAILED.name(), ex.getMessage());
             throw new CloudbreakException(String.format("Stack rollback failed on {} stack: ", stack.getId(), ex));
         }
         return context;
@@ -507,9 +578,10 @@ public class SimpleStackFacade implements StackFacade {
         Stack stack = stackService.getById(actualContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
         stackUpdater.updateStackStatus(stack.getId(), DELETE_FAILED, "Termination failed: " + actualContext.getErrorReason());
+        fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_DELETE_FAILED, DELETE_FAILED.name(), actualContext.getErrorReason());
         if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
             emailSenderService.sendTerminationFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
-            fireEventAndLog(actualContext.getStackId(), context, "Notification email has been sent about state of the cluster.", DELETE_FAILED);
+            fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_NOTIFICATION_EMAIL, DELETE_FAILED.name());
         }
         return context;
     }
@@ -521,20 +593,22 @@ public class SimpleStackFacade implements StackFacade {
         MDCBuilder.buildMdcContext(stack);
         if (context.isStart()) {
             stackUpdater.updateStackStatus(context.getStackId(), START_FAILED, "Start failed: " + context.getErrorReason());
+            fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_START_FAILED, START_FAILED.name());
             if (stack.getCluster() != null) {
                 clusterService.updateClusterStatusByStackId(context.getStackId(), STOPPED);
                 if (stack.getCluster().getEmailNeeded()) {
                     emailSenderService.sendStartFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
-                    fireEventAndLog(context.getStackId(), context, "Notification email has been sent about state of the cluster.", START_FAILED);
+                    fireEventAndLog(context.getStackId(), context, Msg.STACK_NOTIFICATION_EMAIL, START_FAILED.name());
                 }
             }
         } else {
             stackUpdater.updateStackStatus(context.getStackId(), STOP_FAILED, "Stop failed: " + context.getErrorReason());
+            fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_STOP_FAILED, STOP_FAILED.name(), context.getErrorReason());
             if (stack.getCluster() != null) {
                 clusterService.updateClusterStatusByStackId(context.getStackId(), STOPPED);
                 if (stack.getCluster().getEmailNeeded()) {
                     emailSenderService.sendStopFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
-                    fireEventAndLog(context.getStackId(), context, "Notification email has been sent about state of the cluster.", STOP_FAILED);
+                    fireEventAndLog(context.getStackId(), context, Msg.STACK_NOTIFICATION_EMAIL, STOP_FAILED.name());
                 }
             }
         }
@@ -574,8 +648,9 @@ public class SimpleStackFacade implements StackFacade {
         }
     }
 
-    private void fireEventAndLog(Long stackId, FlowContext context, String eventMessage, Status eventType) {
-        LOGGER.debug("{} [STACK_FLOW_STEP]. Context: {}", eventMessage, context);
-        cloudbreakEventService.fireCloudbreakEvent(stackId, eventType.name(), eventMessage);
+    private void fireEventAndLog(Long stackId, FlowContext context, Msg msgCode, String eventType, Object... args) {
+        LOGGER.debug("{} [STACK_FLOW_STEP]. Context: {}", msgCode, context);
+        String message = messagesService.getMessage(msgCode.code(), Arrays.asList(args));
+        cloudbreakEventService.fireCloudbreakEvent(stackId, eventType, message);
     }
 }

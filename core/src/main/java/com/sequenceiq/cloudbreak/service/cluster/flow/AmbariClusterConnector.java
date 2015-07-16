@@ -68,6 +68,7 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 
@@ -132,6 +133,26 @@ public class AmbariClusterConnector {
     private TlsSecurityService tlsSecurityService;
     @Inject
     private HostMetadataRepository hostMetadataRepository;
+    @Inject
+    private CloudbreakMessagesService cloudbreakMessagesService;
+
+    private enum Msg {
+        AMBARI_CLUSTER_RESETTING_AMBARI_DATABASE("ambari.cluster.resetting.ambari.database"),
+        AMBARI_CLUSTER_AMBARI_DATABASE_RESET("ambari.cluster.ambari.database.reset"),
+        AMBARI_CLUSTER_RESTARTING_AMBARI_SERVER("ambari.cluster.restarting.ambari.server"),
+        AMBARI_CLUSTER_AMBARI_SERVER_RESTARTED("ambari.cluster.ambari.server.restarted");
+
+        private String code;
+
+        Msg(String msgCode) {
+            code = msgCode;
+        }
+
+        public String code() {
+            return code;
+        }
+    }
+
 
     public Cluster buildAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
@@ -241,14 +262,18 @@ public class AmbariClusterConnector {
         InstanceGroup instanceGroupByType = stack.getGatewayInstanceGroup();
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         List<String> hostNames = instanceMetadataRepository.findAliveInstancesHostNamesInInstanceGroup(instanceGroupByType.getId());
-        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), "Ambari database reset started.");
+        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
+                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_RESETTING_AMBARI_DATABASE.code()));
         pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.RESET_AMBARI_DB_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_DB,
                 Collections.<String>emptyList(), new HashSet<>(hostNames));
-        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), "Ambari database reset finished with success.");
-        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), "Ambari server restart started.");
+        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
+                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_AMBARI_DATABASE_RESET.code()));
+        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
+                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_RESTARTING_AMBARI_SERVER.code()));
         pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.RESET_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_SERVER,
                 Collections.<String>emptyList(), new HashSet<>(hostNames));
-        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), "Ambari server restart finished with success.");
+        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
+                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_AMBARI_SERVER_RESTARTED.code()));
         return cluster;
     }
 
