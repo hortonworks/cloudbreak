@@ -3,6 +3,10 @@ var $jq = jQuery.noConflict();
 
 var regApp = angular.module('regApp', ['ngRoute']);
 
+regApp.config(['$locationProvider', function($locationProvider){
+           $locationProvider.html5Mode(true);
+}]);
+
 var pathArray = window.location.pathname.split('/')
 
 var basePath = ''
@@ -32,14 +36,12 @@ regApp.controller("regController", ['$scope', '$http',
     }
 ]);
 
-regApp.controller("resetController", ['$scope', '$http',
+regApp.controller("resetController", ['$scope', '$http', '$location',
     function ($scope, $http, $location) {
         $scope.resetPassword = function() {
-                    var email = null;
-                    var url = window.location.href.split('?')
-                    if (url.length == 2 && url[1].split('=').length == 2 && url[1].split('=')[0] == 'email') {
-                        email = url[1].split('=')[1];
-                        var resetToken = pathArray[pathArray.length - 1]
+                    var resetToken = $location.search()['reset_token'];
+                    var email = $location.search()['email'];
+                    if (email != null && resetToken != null) {
                           $http({method: 'POST',dataType: 'json', url: basePath + "/reset/" + resetToken,
                              data: {password: resetPasswField.value, email: email}
                         }).success(function(responseData){
@@ -56,7 +58,7 @@ regApp.controller("resetController", ['$scope', '$http',
                            $jq("#msgDialog").modal('show');
                         });
                     } else {
-                        $scope.message = 'Email query parameter is missing (or there are more query parameters)'
+                        $scope.message = 'Email or reset_token query parameter is missing'
                         $jq("#errorDialog").modal('show');
                     }
         }

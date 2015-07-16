@@ -125,7 +125,7 @@ app.get('/register', function(req, res) {
 });
 
 // reset.html
-app.get('/reset/:resetToken', function(req, res) {
+app.get('/reset', function(req, res) {
   res.render('reset')
 });
 
@@ -463,7 +463,7 @@ app.post('/forget', function(req, res){
                var resetToken = md5(usrIdAndLastModified)
                var templateFile = path.join(__dirname,'templates','reset-password-email.jade')
                mailer.sendMail(req.body.email, 'Password reset' , templateFile, {user: userData.givenName,
-                  confirm: process.env.SL_ADDRESS + '/reset/' + resetToken + '?email=' + req.body.email})
+                  confirm: process.env.SL_ADDRESS + '/reset?reset_token=' + resetToken + '&email=' + req.body.email})
                res.json({message: 'SUCCESS'})
             });
         });
