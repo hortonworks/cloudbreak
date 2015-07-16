@@ -17,9 +17,9 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
                     $scope.accountUsers.push({active: false, username: $scope.invite.mail, idx:  $scope.invite.mail.toString().replace(/\./g, '').replace(/@/g, '')});
                 }
                 $scope.inviteForm.$setPristine();
+                $scope.showSuccess($filter("format")($rootScope.msg.user_form_invite_success, $scope.invite.mail))
                 initInvite();
                 collapseInviteUsersFormPanel();
-                $scope.showSuccess($filter("format")($rootScope.msg.user_form_invite_success, $scope.invite.mail))
                 $scope.getUsers();
             }, function (error) {
                 $scope.showError(error);
