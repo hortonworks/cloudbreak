@@ -25,6 +25,7 @@ app.set('view engine', 'html')
 app.use(express.static(path.join(__dirname, 'app/static')));
 app.use(cookieParser);
 app.use(session({
+  name: 'uluwatu.sid',
   genid: function(req) {
     return uid(30);
   },
@@ -267,7 +268,7 @@ app.delete('/users/:userId', function(req, res){
 function preventNoCachInResponse(res) {
   res.header("Cache-Control", "no-cache, no-store, must-revalidate");
   res.header("Pragma", "no-cache");
-  res.header("Expires",0); 
+  res.header("Expires",0);
 }
 
 // wildcards should be proxied =================================================
