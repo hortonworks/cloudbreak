@@ -2,12 +2,15 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -37,6 +40,7 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
@@ -63,6 +67,9 @@ public class AmbariClusterConnectorTest {
 
     @Mock
     private TLSClientConfig tlsClientConfig;
+
+    @Mock
+    private StackRepository stackRepository;
 
     @Mock
     private AmbariClientProvider ambariClientProvider;
@@ -118,6 +125,7 @@ public class AmbariClusterConnectorTest {
         when(ambariClient.addBlueprint(anyString())).thenReturn("");
         when(hadoopConfigurationService.getHostGroupConfiguration(any(Cluster.class))).thenReturn(new HashMap<String, Map<String, Map<String, String>>>());
         when(ambariClientProvider.getAmbariClient(any(TLSClientConfig.class), anyString(), anyString())).thenReturn(ambariClient);
+        when(ambariClientProvider.getDefaultAmbariClient(any(TLSClientConfig.class))).thenReturn(ambariClient);
         when(hostsPollingService.pollWithTimeout(any(AmbariHostsStatusCheckerTask.class), any(AmbariHostsCheckerContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(hostGroupRepository.findHostGroupsInCluster(anyLong())).thenReturn(cluster.getHostGroups());
@@ -127,7 +135,12 @@ public class AmbariClusterConnectorTest {
         when(clusterRepository.save(any(Cluster.class))).thenReturn(cluster);
         when(instanceMetadataRepository.save(anyCollection())).thenReturn(stack.getRunningInstanceMetaData());
         when(ambariClient.recommendAssignments(anyString())).thenReturn(createStringListMap());
-
+        when(ambariClient.deleteUser(anyString())).thenReturn("");
+        when(ambariClient.createUser(anyString(), anyString(), anyBoolean())).thenReturn("");
+        when(ambariClient.changePassword(anyString(), anyString(), anyString(), anyBoolean())).thenReturn("");
+        when(ambariClientProvider.getSecureAmbariClient(any(TLSClientConfig.class), any(Cluster.class))).thenReturn(ambariClient);
+        when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
+        when(clusterRepository.findOneWithLists(anyLong())).thenReturn(cluster);
     }
 
     @Test
@@ -146,6 +159,28 @@ public class AmbariClusterConnectorTest {
     public void testInstallAmbariWhenReachedMaxPollingEventsShouldInstallationFailed() throws Exception {
         when(ambariOperationService.waitForAmbariOperations(any(Stack.class), any(AmbariClient.class), anyMap())).thenReturn(PollingResult.TIMEOUT);
         underTest.buildAmbariCluster(stack);
+    }
+
+    @Test
+    public void testChangeAmbariCredentialsWhenUserIsTheSameThenModifyUser() throws Exception {
+        underTest.credentialChangeAmbariCluster(stack.getId(), "admin", "admin1");
+        verify(ambariClient, times(1)).changePassword(anyString(), anyString(), anyString(), anyBoolean());
+        verify(ambariClient, times(0)).deleteUser(anyString());
+        verify(ambariClient, times(0)).createUser(anyString(), anyString(), anyBoolean());
+    }
+
+    @Test
+    public void testChangeAmbariCredentialsWhenUserDifferentThanExistThenCreateNewUserDeleteOldOne() throws Exception {
+        underTest.credentialChangeAmbariCluster(stack.getId(), "admin123", "admin1");
+        verify(ambariClient, times(0)).changePassword(anyString(), anyString(), anyString(), anyBoolean());
+        verify(ambariClient, times(1)).deleteUser(anyString());
+        verify(ambariClient, times(1)).createUser(anyString(), anyString(), anyBoolean());
+    }
+
+    @Test(expected = CloudbreakSecuritySetupException.class)
+    public void testChangeAmbariCredentialsWhenCreateAmbariClientDropException() throws Exception {
+        when(tlsSecurityService.buildTLSClientConfig(anyLong(), anyString())).thenThrow(new CloudbreakSecuritySetupException("sdfsdfsd"));
+        underTest.credentialChangeAmbariCluster(stack.getId(), "admin123", "admin1");
     }
 
     private Map<String, List<String>> createStringListMap() {

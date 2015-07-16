@@ -44,4 +44,5 @@ public interface FlowManager {
 
     void triggerStackSync(Object object);
 
+    void triggerClusterUserNamePasswordUpdate(Object object);
 }

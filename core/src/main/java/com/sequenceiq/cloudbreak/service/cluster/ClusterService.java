@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.cluster;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.controller.json.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -37,5 +38,9 @@ public interface ClusterService {
 
     Cluster updateClusterMetadata(Long stackId);
 
+    Cluster updateClusterUsernameAndPassword(Cluster cluster, String userName, String password);
+
     Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, AmbariStackDetails ambariStackDetails);
+
+    Cluster updateUserNamePassword(Long stackId, UserNamePasswordJson userNamePasswordJson);
 }

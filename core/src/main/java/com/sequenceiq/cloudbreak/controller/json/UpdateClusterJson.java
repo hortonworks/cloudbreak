@@ -18,6 +18,8 @@ public class UpdateClusterJson implements JsonEntity {
     private HostGroupAdjustmentJson hostGroupAdjustment;
     @ApiModelProperty(required = true)
     private StatusRequest status;
+    @ApiModelProperty(required = true)
+    private UserNamePasswordJson userNamePasswordJson;
     @ApiModelProperty(StackModelDescription.BLUEPRINT_ID)
     private Long blueprintId;
     private Boolean validateBlueprint = true;
@@ -74,5 +76,13 @@ public class UpdateClusterJson implements JsonEntity {
 
     public void setAmbariStackDetails(AmbariStackDetailsJson ambariStackDetails) {
         this.ambariStackDetails = ambariStackDetails;
+    }
+
+    public UserNamePasswordJson getUserNamePasswordJson() {
+        return userNamePasswordJson;
+    }
+
+    public void setUserNamePasswordJson(UserNamePasswordJson userNamePasswordJson) {
+        this.userNamePasswordJson = userNamePasswordJson;
     }
 }

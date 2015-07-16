@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.AddInstancesHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.BootstrapClusterHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.BootstrapNewNodesHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterCredentialChangeHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterContainersHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterDownscaleHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterInstallHandler;
@@ -74,8 +75,9 @@ public class FlowInitializer implements InitializingBean {
         registerUpdateAllowedSubnetFlow();
         registerStopRequestedFlows();
         registerStartRequestedFlows();
-        registerSyncCluster();
-        registerSyncStack();
+        registerSyncClusterFlows();
+        registerSyncStackFlows();
+        registerAuthenticationClusterChangeFlows();
 
         reactor.on($(FlowPhases.PROVISIONING_SETUP.name()), getHandlerForClass(ProvisioningSetupHandler.class));
         reactor.on($(FlowPhases.PROVISIONING.name()), getHandlerForClass(ProvisioningHandler.class));
@@ -111,15 +113,20 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name()), getHandlerForClass(ClusterStatusUpdateFailureHandler.class));
         reactor.on($(FlowPhases.STACK_SYNC.name()), getHandlerForClass(StackSyncHandler.class));
         reactor.on($(FlowPhases.CLUSTER_SYNC.name()), getHandlerForClass(ClusterSyncHandler.class));
-
+        reactor.on($(FlowPhases.CLUSTER_USERNAME_PASSWORD_UPDATE.name()), getHandlerForClass(ClusterCredentialChangeHandler.class));
     }
 
-    private void registerSyncStack() {
+    private void registerAuthenticationClusterChangeFlows() {
+        transitionKeyService.registerTransition(ClusterCredentialChangeHandler.class, TransitionFactory
+                .createTransition(FlowPhases.CLUSTER_USERNAME_PASSWORD_UPDATE.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
+    }
+
+    private void registerSyncStackFlows() {
         transitionKeyService.registerTransition(StackSyncHandler.class, TransitionFactory
                 .createTransition(FlowPhases.STACK_SYNC.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
-    private void registerSyncCluster() {
+    private void registerSyncClusterFlows() {
         transitionKeyService.registerTransition(ClusterSyncHandler.class, TransitionFactory
                 .createTransition(FlowPhases.CLUSTER_SYNC.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }

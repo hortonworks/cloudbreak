@@ -29,6 +29,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.controller.json.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.flow.FlowManager;
@@ -55,6 +56,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
+import com.sequenceiq.cloudbreak.service.cluster.event.ClusterUserNamePasswordUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -232,6 +234,15 @@ public class AmbariClusterService implements ClusterService {
         return retVal;
     }
 
+    @Override
+    public Cluster updateUserNamePassword(Long stackId, UserNamePasswordJson userNamePasswordJson) {
+        Stack stack = stackRepository.findByIdLazy(stackId);
+        flowManager.triggerClusterUserNamePasswordUpdate(
+                new ClusterUserNamePasswordUpdateRequest(stack.getId(), userNamePasswordJson.getUserName(),
+                        userNamePasswordJson.getPassword(), stack.cloudPlatform()));
+        return stack.getCluster();
+    }
+
     private void sync(Stack stack, Cluster cluster, StatusRequest statusRequest) {
         flowManager.triggerClusterSync(new ClusterStatusUpdateRequest(stack.getId(), statusRequest, stack.cloudPlatform()));
     }
@@ -304,6 +315,15 @@ public class AmbariClusterService implements ClusterService {
     @Override
     public Cluster updateCluster(Cluster cluster) {
         LOGGER.debug("Updating cluster. clusterId: {}", cluster.getId());
+        cluster = clusterRepository.save(cluster);
+        return cluster;
+    }
+
+    @Override
+    public Cluster updateClusterUsernameAndPassword(Cluster cluster, String userName, String password) {
+        LOGGER.debug("Updating cluster. clusterId: {}", cluster.getId());
+        cluster.setUserName(userName);
+        cluster.setPassword(password);
         cluster = clusterRepository.save(cluster);
         return cluster;
     }

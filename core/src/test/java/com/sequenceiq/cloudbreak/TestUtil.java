@@ -439,8 +439,8 @@ public class TestUtil {
         cluster.setUpSince(new Date().getTime());
         cluster.setStatus(Status.AVAILABLE);
         cluster.setStatusReason("statusReason");
-        cluster.setUserName("userName");
-        cluster.setPassword("password");
+        cluster.setUserName("admin");
+        cluster.setPassword("admin");
         AmbariStackDetails ambariStackDetails = new AmbariStackDetails();
         cluster.setAmbariStackDetails(ambariStackDetails);
         cluster.setHostGroups(hostGroups(cluster));
