@@ -121,27 +121,27 @@ uluwatuServices.factory('UserOperation', ['$resource',
 
 uluwatuServices.factory('UserInvite', ['$resource',
     function ($resource) {
-        return $resource('sultans/invite');
+        return $resource('proxy/sultans/invite');
     }]);
 
 uluwatuServices.factory('AccountUsers', ['$resource',
     function ($resource) {
-        return $resource('sultans/users');
+        return $resource('proxy/sultans/users');
     }]);
 
 uluwatuServices.factory('AccountDetails', ['$resource',
     function ($resource) {
-        return $resource('sultans/account/details');
+        return $resource('proxy/sultans/account/details');
     }]);
 
 uluwatuServices.factory('ActivateAccountUsers', ['$resource',
     function ($resource) {
-        return $resource('sultans/activate');
+        return $resource('proxy/sultans/activate');
     }]);
 
 uluwatuServices.factory('UserPermission', ['$resource',
     function ($resource) {
-      return $resource('sultans/permission');
+      return $resource('proxy/sultans/permission');
     }]);
 
 uluwatuServices.factory('UserEvents', ['$resource',

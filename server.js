@@ -290,7 +290,7 @@ app.delete('*/periscope/*', function(req,res){
 
 
 
-app.get('*/sultans/*', function(req,res){
+app.get('*/proxy/sultans/*', function(req,res){
     preventNoCachInResponse(res);
     proxySultansRequest(req, res, proxyRestClient.get);
 });
@@ -300,7 +300,7 @@ app.get('*', function(req,res){
   proxyCloudbreakRequest(req, res, proxyRestClient.get);
 });
 
-app.post('*/sultans/*', function(req,res){
+app.post('*/proxy/sultans/*', function(req,res){
     proxySultansRequest(req, res, proxyRestClient.post);
 });
 
@@ -308,7 +308,7 @@ app.post('*', function(req,res){
   proxyCloudbreakRequest(req, res, proxyRestClient.post);
 });
 
-app.delete('*/sultans/*', function(req,res){
+app.delete('*/proxy/sultans/*', function(req,res){
     proxySultansRequest(req, res, proxyRestClient.delete);
 });
 
@@ -316,7 +316,7 @@ app.delete('*', function(req,res){
   proxyCloudbreakRequest(req, res, proxyRestClient.delete);
 });
 
-app.put('*/sultans/*', function(req,res){
+app.put('*/proxy/sultans/*', function(req,res){
     proxySultansRequest(req, res, proxyRestClient.put);
 });
 
@@ -343,7 +343,7 @@ function proxySultansRequest(req, res, method){
         cbRequestArgs.data = req.body;
     }
     cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
-    var req_url = req.url.replace("/sultans/", "");
+    var req_url = req.url.replace("/proxy/sultans/", "");
     console.log("Sultans request to: "+ sultansAddress + req_url);
     method(sultansAddress + req_url, cbRequestArgs, function(data, response){
         res.status(response.statusCode).send(data);
