@@ -30,6 +30,7 @@ app.set('view engine', 'html')
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(favicon(path.join(__dirname,'public','img','favicon.ico')));
 app.use(session({
+  name: 'sultans.sid',
   genid: function(req) {
     return uid(30);
   },
