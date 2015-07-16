@@ -9,7 +9,6 @@ var basePath = ''
 if (pathArray[1] === 'sultans') {
     basePath = '/sultans'
 }
-console.log("[HACK] basepath:" + basePath);
 
 regApp.controller("regController", ['$scope', '$http',
     function ($scope, $http) {
