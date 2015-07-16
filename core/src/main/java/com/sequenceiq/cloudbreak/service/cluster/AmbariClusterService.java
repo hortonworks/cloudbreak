@@ -60,6 +60,7 @@ import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
+import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -172,7 +173,8 @@ public class AmbariClusterService implements ClusterService {
             if ("Not Found".equals(e.getMessage())) {
                 throw new NotFoundException("Ambari blueprint not found.", e);
             } else {
-                throw new CloudbreakServiceException(e);
+                String errorMessage = AmbariClientExceptionUtil.getErrorMessage(e);
+                throw new CloudbreakServiceException("Could not get Cluster from Ambari as JSON: " + errorMessage, e);
             }
         } catch (CloudbreakSecuritySetupException e) {
             throw new CloudbreakServiceException(e);
