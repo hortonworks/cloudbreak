@@ -271,20 +271,20 @@ function preventNoCachInResponse(res) {
 }
 
 // wildcards should be proxied =================================================
-app.get('*/periscope/*', function(req,res){
+app.get('*/proxy/periscope/*', function(req,res){
   preventNoCachInResponse(res);
   proxyPeriscopeRequest(req, res, proxyRestClient.get);
 });
 
-app.post('*/periscope/*', function(req,res){
+app.post('*/proxy/periscope/*', function(req,res){
   proxyPeriscopeRequest(req, res, proxyRestClient.post);
 });
 
-app.put('*/periscope/*', function(req,res){
+app.put('*/proxy/periscope/*', function(req,res){
   proxyPeriscopeRequest(req, res, proxyRestClient.put);
 });
 
-app.delete('*/periscope/*', function(req,res){
+app.delete('*/proxy/periscope/*', function(req,res){
   proxyPeriscopeRequest(req, res, proxyRestClient.delete);
 });
 
@@ -357,7 +357,7 @@ function proxyPeriscopeRequest(req, res, method){
     cbRequestArgs.data = req.body;
   }
   cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
-  var req_url = req.url.replace("/periscope/", "");
+  var req_url = req.url.replace("/proxy/periscope/", "");
   console.log("Periscope request to: "+ periscopeAddress + req_url);
   method(periscopeAddress + req_url, cbRequestArgs, function(data, response){
     res.status(response.statusCode).send(data);
