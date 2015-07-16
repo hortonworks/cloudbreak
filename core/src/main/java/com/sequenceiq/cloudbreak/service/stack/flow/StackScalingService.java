@@ -4,12 +4,10 @@ import static com.sequenceiq.cloudbreak.domain.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.domain.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_IN_PROGRESS;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -132,7 +130,6 @@ public class StackScalingService {
         Stack stack = stackService.getById(stackId);
         Map<String, String> unregisteredHostNamesByInstanceId = getUnregisteredInstanceIds(instanceGroupName, scalingAdjustment, stack);
         Set<String> instanceIds = new HashSet<>(unregisteredHostNamesByInstanceId.keySet());
-        deleteHostsFromAmbari(stack, unregisteredHostNamesByInstanceId);
         instanceIds = cloudPlatformConnectors.get(stack.cloudPlatform()).removeInstances(stack, instanceIds, instanceGroupName);
         updateRemovedResourcesState(stack, instanceIds, stack.getInstanceGroupByInstanceGroupName(instanceGroupName));
     }
@@ -150,13 +147,6 @@ public class StackScalingService {
             }
         }
         return instanceIds;
-    }
-
-    private void deleteHostsFromAmbari(Stack stack, Map<String, String> unregisteredHostNamesByInstanceId) throws CloudbreakSecuritySetupException {
-        if (stack.getCluster() == null) {
-            List<String> hostList = new ArrayList<>(unregisteredHostNamesByInstanceId.values());
-            ambariHostsRemover.deleteHosts(stack, hostList, new ArrayList<String>());
-        }
     }
 
     private void updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) throws CloudbreakSecuritySetupException {
