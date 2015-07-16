@@ -51,6 +51,7 @@ app.get('/info', function(req, res) {
 // login.html
 app.get('/', function(req, res) {
     var logout = req.query.logout
+    var confirmToken = req.query.confirm_token
     if (logout != null && logout == 'true'){
         req.session.destroy(function() {
             res.clearCookie('connect.sid', { path: '/' });
@@ -59,6 +60,38 @@ app.get('/', function(req, res) {
             res.cookie('source', req.query.source);
             res.render('login',{ errorMessage: "" });
         })
+    } else if (confirmToken != null) {
+         getToken(req, res, function(token) {
+                getUserById(req, res, token, confirmToken, function(userData){
+                    if (confirmToken == userData.id) {
+                        var updateOptions = {
+                            headers: {
+                             'Accept' : 'application/json',
+                             'Authorization' : 'Bearer ' + token,
+                             'Content-Type' : 'application/json',
+                             'If-Match': userData.meta.version}
+                         }
+                        var updateData = {
+                             'userName' : userData.userName,
+                             'active' : true,
+                             'name' : {
+                                'familyName': userData.name.familyName,
+                                 'givenName' : userData.name.givenName
+                              },
+                             'emails':[
+                              {
+                               'value': userData.emails[0].value
+                              }]
+                        }
+                     updateUserData(req, res, token, userData.id, updateData, updateOptions, function(updateResp){
+                        res.render('login',{ errorMessage: "confirmation successful" });
+                     })
+                    } else {
+                       res.statusCode = 401
+                       res.render('login',{ errorMessage: 'Cannot retrieve user by confirm token.' })
+                    }
+                });
+         });
     } else {
         res.cookie('source', req.query.source);
         res.render('login',{ errorMessage: "" });
@@ -401,42 +434,6 @@ app.post('/register', function(req, res){
     }
 });
 
-// confirm registration
-app.get('/confirm/:confirm_token', function(req, res){
-   var confirmToken = req.param("confirm_token")
-   getToken(req, res, function(token) {
-        getUserById(req, res, token, confirmToken, function(userData){
-            if (confirmToken == userData.id) {
-                var updateOptions = {
-                     headers: {
-                       'Accept' : 'application/json',
-                       'Authorization' : 'Bearer ' + token,
-                       'Content-Type' : 'application/json',
-                       'If-Match': userData.meta.version}
-                    }
-                var updateData = {
-                       'userName' : userData.userName,
-                       'active' : true,
-                       'name' : {
-                         'familyName': userData.name.familyName,
-                         'givenName' : userData.name.givenName
-                        },
-                        'emails':[
-                        {
-                         'value': userData.emails[0].value
-                        }]
-                    }
-                updateUserData(req, res, token, userData.id, updateData, updateOptions, function(updateResp){
-                   res.render('login',{ errorMessage: "confirmation successful" });
-                })
-            } else {
-                res.statusCode = 401
-                res.json({message: 'Cannot retrieve user by confirm token.'})
-            }
-        });
-   });
-});
-
 app.post('/invite', function (req, res){
     var inviteEmail = req.body.invite_email
     if (validator.validateEmail(inviteEmail)){
@@ -535,7 +532,7 @@ app.post('/account/register', function(req, res){
                             updatePassword(req, res, token, userData.id, req.body.password, function(pwdResp){
                                 var templateFile = path.join(__dirname,'templates','confirmation-email.jade')
                                 mailer.sendMail(req.body.email, 'Registration' , templateFile, {user: req.body.firstName,
-                                  confirm: process.env.SL_ADDRESS + '/confirm/' + userData.id})
+                                  confirm: process.env.SL_ADDRESS + '/?confirm_token=' + userData.id})
                                 res.json({message: 'SUCCESS'});
                             });
                         });
@@ -917,7 +914,7 @@ registerUser = function(req, res, token) {
                      console.log('User created with ' + createResp.body.id + '(id) and name: ' + req.body.email)
                      var templateFile = path.join(__dirname,'templates','confirmation-email.jade')
                      mailer.sendMail(req.body.email, 'Registration' , templateFile, {user: req.body.firstName,
-                         confirm: process.env.SL_ADDRESS + '/confirm/' + createResp.body.id})
+                         confirm: process.env.SL_ADDRESS + '/?confirm_token=' + createResp.body.id})
                      updateAndPostSequenceIqGroups(token, createResp.body.id, req.body.company)
                      updateCloudbreakGroups(token, createResp.body.id)
                      res.json({status: 200, message: 'SUCCESS'})
@@ -948,7 +945,7 @@ registerUser = function(req, res, token) {
                                     console.log('Resending registration email for ' + userData.id + '(id) and name: ' + req.body.email)
                                     var templateFile = path.join(__dirname,'templates','confirmation-email.jade')
                                     mailer.sendMail(req.body.email, 'Registration' , templateFile, {user: req.body.firstName,
-                                     confirm: process.env.SL_ADDRESS + '/confirm/' + userData.id })
+                                     confirm: process.env.SL_ADDRESS + '/?confirm_token=' + userData.id })
                                     res.json({status: 200, message: 'SUCCESS'})
                                 });
                              });
