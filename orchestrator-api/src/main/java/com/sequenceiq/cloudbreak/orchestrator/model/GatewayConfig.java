@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.orchestrator;
+package com.sequenceiq.cloudbreak.orchestrator.model;
 
 public class GatewayConfig {
 

@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.orchestrator;
 
+import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
+
 public abstract class SimpleContainerOrchestrator implements ContainerOrchestrator {
 
     private ParallelContainerRunner parallelContainerRunner;

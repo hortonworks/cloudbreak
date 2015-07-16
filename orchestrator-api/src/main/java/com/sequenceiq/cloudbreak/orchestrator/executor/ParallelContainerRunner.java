@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.orchestrator;
+package com.sequenceiq.cloudbreak.orchestrator.executor;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;

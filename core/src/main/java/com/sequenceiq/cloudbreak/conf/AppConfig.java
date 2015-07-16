@@ -46,8 +46,8 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.StackDeletionBasedExitCr
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.ExitCriteria;
-import com.sequenceiq.cloudbreak.orchestrator.ParallelContainerRunner;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
+import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
 import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;

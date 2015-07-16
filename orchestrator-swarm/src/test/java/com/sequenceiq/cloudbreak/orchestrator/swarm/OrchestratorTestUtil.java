@@ -9,12 +9,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
-import com.sequenceiq.cloudbreak.orchestrator.ExitCriteria;
-import com.sequenceiq.cloudbreak.orchestrator.ExitCriteriaModel;
-import com.sequenceiq.cloudbreak.orchestrator.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.LogVolumePath;
-import com.sequenceiq.cloudbreak.orchestrator.Node;
-import com.sequenceiq.cloudbreak.orchestrator.ParallelContainerRunner;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 
 public class OrchestratorTestUtil {

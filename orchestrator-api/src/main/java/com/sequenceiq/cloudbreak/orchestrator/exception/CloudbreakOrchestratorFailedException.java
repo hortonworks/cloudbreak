@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.orchestrator;
+package com.sequenceiq.cloudbreak.orchestrator.exception;
 
 public class CloudbreakOrchestratorFailedException extends CloudbreakOrchestratorException {
 

@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.Volume;
-import com.sequenceiq.cloudbreak.orchestrator.LogVolumePath;
+import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 
 public class BindsBuilder {
 

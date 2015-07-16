@@ -5,8 +5,8 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.Node;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.service.StackContext;
 
 public class ContainerOrchestratorClusterContext extends StackContext {

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.orchestrator;
 
-import static com.sequenceiq.cloudbreak.orchestrator.SimpleContainerBootstrapRunner.simpleContainerBootstrapRunner;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Map;
@@ -10,13 +9,15 @@ import org.slf4j.MDC;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
 public class SimpleContainerBootstrapRunnerTest {
 
     @Test
     public void bootstrapSuccessWithoutException() throws Exception {
         MDC.put("test", "test");
-        Boolean call = simpleContainerBootstrapRunner(new MockBootstrapRunner(1, MDC.getCopyOfContextMap()),
+        Boolean call = new ContainerBootstrapRunner(new MockBootstrapRunner(1, MDC.getCopyOfContextMap()),
                 new MockExitCriteria(),
                 new MockExitCriteriaModel(),
                 MDC.getCopyOfContextMap()).call();

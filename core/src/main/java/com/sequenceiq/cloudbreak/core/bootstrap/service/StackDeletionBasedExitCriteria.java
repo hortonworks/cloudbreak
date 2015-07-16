@@ -7,8 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.orchestrator.ExitCriteria;
-import com.sequenceiq.cloudbreak.orchestrator.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 

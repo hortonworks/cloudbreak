@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorCancelledException;
-import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
-import com.sequenceiq.cloudbreak.orchestrator.ExitCriteria;
-import com.sequenceiq.cloudbreak.orchestrator.ExitCriteriaModel;
-import com.sequenceiq.cloudbreak.orchestrator.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.LogVolumePath;
-import com.sequenceiq.cloudbreak.orchestrator.Node;
-import com.sequenceiq.cloudbreak.orchestrator.ParallelContainerRunner;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
 
 public class MockContainerOrchestrator implements ContainerOrchestrator {
 

@@ -5,7 +5,7 @@ import java.util.concurrent.Future;
 
 import org.springframework.core.task.AsyncTaskExecutor;
 
-import com.sequenceiq.cloudbreak.orchestrator.ParallelContainerRunner;
+import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
 
 public class ExecutorBasedParallelContainerRunner implements ParallelContainerRunner {
 

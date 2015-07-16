@@ -3,6 +3,9 @@ package com.sequenceiq.cloudbreak.orchestrator;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+
 public class ContainerOrchestratorCluster {
     private GatewayConfig gatewayConfig;
     private Set<Node> nodes = new HashSet<>();

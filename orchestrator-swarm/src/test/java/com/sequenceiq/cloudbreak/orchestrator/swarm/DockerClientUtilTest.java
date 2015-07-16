@@ -1,13 +1,11 @@
 package com.sequenceiq.cloudbreak.orchestrator.swarm;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil.createContainer;
+import static com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil.forceRemove;
+import static com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil.startContainer;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,6 +24,7 @@ import com.github.dockerjava.api.command.InspectContainerCmd;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.command.RemoveContainerCmd;
 import com.github.dockerjava.api.command.StartContainerCmd;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DockerClientUtilTest {
@@ -54,7 +53,6 @@ public class DockerClientUtilTest {
     @Mock
     private InspectContainerResponse.ContainerState containerState;
 
-    private DockerClientUtil underTest = new DockerClientUtil();
 
     @Before
     public void before() {
@@ -73,7 +71,7 @@ public class DockerClientUtilTest {
         when(client.inspectContainerCmd(anyString())).thenReturn(inspectContainerCmd);
         when(inspectContainerCmd.exec()).thenReturn(null);
 
-        underTest.removeContainerIfExist(client, "ambari-server");
+        forceRemove(client, "ambari-server");
 
         verify(client, times(1)).inspectContainerCmd(anyString());
         verify(client, times(0)).removeContainerCmd(anyString());
@@ -83,7 +81,7 @@ public class DockerClientUtilTest {
     public void removeContainerIExistWhenInspectDropNotFoundException() throws Exception {
         when(client.inspectContainerCmd(anyString())).thenThrow(new NotFoundException("notfound"));
 
-        underTest.removeContainerIfExist(client, "ambari-server");
+        forceRemove(client, "ambari-server");
 
         verify(client, times(1)).inspectContainerCmd(anyString());
         verify(client, times(0)).removeContainerCmd(anyString());
@@ -93,10 +91,7 @@ public class DockerClientUtilTest {
     public void removeContainerIExistWhenInspectDropActualException() throws Exception {
         when(client.inspectContainerCmd(anyString())).thenThrow(new IllegalArgumentException("illegal argument"));
 
-        underTest.removeContainerIfExist(client, "ambari-server");
-
-        verify(client, times(1)).inspectContainerCmd(anyString());
-        verify(client, times(0)).removeContainerCmd(anyString());
+        forceRemove(client, "ambari-server");
     }
 
     @Test
@@ -108,68 +103,46 @@ public class DockerClientUtilTest {
         when(removeContainerCmd.withForce(anyBoolean())).thenReturn(removeContainerCmd);
         when(removeContainerCmd.exec()).thenReturn(null);
 
-        underTest.removeContainerIfExist(client, "ambari-server");
+        forceRemove(client, "ambari-server");
 
         verify(client, times(1)).inspectContainerCmd(anyString());
         verify(client, times(1)).removeContainerCmd(anyString());
     }
 
-    @Test
-    public void inspectContainerWhenEverythingWorksFine() throws Exception {
-        when(inspectContainerCmd.exec()).thenReturn(inspectContainerResponse);
-
-        assertEquals(inspectContainerResponse, underTest.inspectContainer(inspectContainerCmd));
-    }
-
-    @Test
-    public void inspectContainerWhenInspectNotWorksInTheFirstTimeThenRetryAgain() throws Exception {
-        when(inspectContainerCmd.exec()).thenReturn(null).thenReturn(inspectContainerResponse);
-
-        assertEquals(inspectContainerResponse, underTest.inspectContainer(inspectContainerCmd));
-
-        verify(inspectContainerCmd, times(2)).exec();
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void inspectContainerWhenInspectNotWorksAndExceptionComesAndDrops() throws Exception {
-        when(inspectContainerCmd.exec()).thenThrow(new IllegalArgumentException("illegalargumentexception"));
-
-        underTest.inspectContainer(inspectContainerCmd);
-    }
 
     @Test
     public void startContainerWhenEverythingWorksFine() throws Exception {
-        DockerClientUtil underTestSpy = spy(underTest);
-        doReturn(inspectContainerResponse).when(underTestSpy).inspectContainer(any(InspectContainerCmd.class));
         when(inspectContainerResponse.getState()).thenReturn(containerState);
         when(containerState.isRunning()).thenReturn(true);
-        when(startContainerCmd.exec()).thenReturn(null);
-
-        underTest.startContainer(client, startContainerCmd);
+        when(inspectContainerCmd.exec()).thenReturn(inspectContainerResponse);
+        when(client.inspectContainerCmd(anyString())).thenReturn(inspectContainerCmd);
+        when(client.startContainerCmd(anyString())).thenReturn(startContainerCmd);
+        startContainer(client, "OK");
 
         verify(startContainerCmd, times(1)).exec();
     }
 
-    @Test
-    public void waitForContainerWhenEverythingWorksFine() throws Exception {
-        DockerClientUtil underTestSpy = spy(underTest);
-        doReturn(inspectContainerResponse).when(underTestSpy).inspectContainer(any(InspectContainerCmd.class));
+    @Test(expected = CloudbreakOrchestratorFailedException.class)
+    public void startContainerButContainerNotStarted() throws Exception {
+        when(inspectContainerResponse.getState()).thenReturn(containerState);
+        when(containerState.isRunning()).thenReturn(false);
         when(inspectContainerCmd.exec()).thenReturn(inspectContainerResponse);
+        when(client.inspectContainerCmd(anyString())).thenReturn(inspectContainerCmd);
+        when(client.startContainerCmd(anyString())).thenReturn(startContainerCmd);
 
-        assertEquals(inspectContainerResponse, underTest.waitForContainer(inspectContainerCmd));
+        startContainer(client, "OK");
     }
 
     @Test
     public void createContainerWhenEverythingWorksFine() throws Exception {
-        DockerClientUtil underTestSpy = spy(underTest);
-        doReturn(inspectContainerResponse).when(underTestSpy).inspectContainer(any(InspectContainerCmd.class));
-        doNothing().when(underTestSpy).removeContainerIfExist(any(DockerClient.class), anyString());
         when(createContainerResponse.getId()).thenReturn("xxx666xxx");
         when(client.inspectContainerCmd(anyString())).thenReturn(inspectContainerCmd);
         when(inspectContainerCmd.exec()).thenReturn(inspectContainerResponse);
         when(createContainerCmd.exec()).thenReturn(createContainerResponse);
 
-        assertEquals("xxx666xxx", underTest.createContainer(client,  createContainerCmd));
+        createContainer(client, createContainerCmd);
+
+        //No exception
     }
 
 
