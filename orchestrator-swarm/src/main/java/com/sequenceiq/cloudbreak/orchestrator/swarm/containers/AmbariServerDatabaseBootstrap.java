@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
+import com.sequenceiq.cloudbreak.orchestrator.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.BindsBuilder;
@@ -23,13 +24,16 @@ public class AmbariServerDatabaseBootstrap implements ContainerBootstrap {
     private final String imageName;
     private final String nodeName;
     private final Set<String> dataVolumes;
+    private final LogVolumePath logVolumePath;
     private final DockerClientUtil dockerClientUtil;
 
-    public AmbariServerDatabaseBootstrap(DockerClient docker, String imageName, String nodeName, Set<String> dataVolumes, DockerClientUtil dockerClientUtil) {
+    public AmbariServerDatabaseBootstrap(DockerClient docker, String imageName, String nodeName, Set<String> dataVolumes,
+            LogVolumePath logVolumePath, DockerClientUtil dockerClientUtil) {
         this.docker = docker;
         this.imageName = imageName;
         this.nodeName = nodeName;
         this.dataVolumes = dataVolumes;
+        this.logVolumePath = logVolumePath;
         this.dockerClientUtil = dockerClientUtil;
     }
 
@@ -38,7 +42,8 @@ public class AmbariServerDatabaseBootstrap implements ContainerBootstrap {
 
         Bind[] binds = new BindsBuilder()
                 .add("/data/ambari-server/pgsql/data", "/var/lib/postgresql/data")
-                .add("/hadoopfs/fs1/logs/consul-watch", "/var/log/consul-watch").build();
+                .add(logVolumePath.getHostPath() + "/consul-watch",
+                        logVolumePath.getHostPath() + "/consul-watch").build();
 
         HostConfig hostConfig = new HostConfigBuilder().defaultConfig().binds(binds).build();
 

@@ -17,7 +17,7 @@ public class BaywatchClientBootstrapTest extends AbstractContainerBootstrapTest 
     public ContainerBootstrap getTestInstance() {
         return new BaywatchClientBootstrap(getMockedDockerClient(), DUMMY_GETAWAY_ADDRESS, DUMMY_IMAGE,
                 DUMMY_GENERATED_ID, new Node(DUMMY_PRIVATE_IP, DUMMY_PUBLIC_IP), DUMMY_VOLUMES, CONSUL_DOMAIN,
-                null, getMockedDockerClientUtil());
+                null, DUMMY_LOG_VOLUME, getMockedDockerClientUtil());
     }
 
     @Test
@@ -25,7 +25,7 @@ public class BaywatchClientBootstrapTest extends AbstractContainerBootstrapTest 
         // GIVEN
         BaywatchClientBootstrap underTest = new BaywatchClientBootstrap(getMockedDockerClient(), DUMMY_GETAWAY_ADDRESS, DUMMY_IMAGE,
                 DUMMY_GENERATED_ID, new Node(DUMMY_PRIVATE_IP, DUMMY_PUBLIC_IP), DUMMY_VOLUMES, CONSUL_DOMAIN,
-                "externLocation", getMockedDockerClientUtil());
+                "externLocation", DUMMY_LOG_VOLUME, getMockedDockerClientUtil());
         mockAll();
         // WHEN
         boolean result = underTest.call();

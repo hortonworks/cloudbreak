@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
 import com.sequenceiq.cloudbreak.orchestrator.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.orchestrator.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.Node;
 import com.sequenceiq.cloudbreak.orchestrator.ParallelContainerRunner;
 
@@ -27,13 +28,13 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
-    public void bootstrap(GatewayConfig gatewayConfig, Set<Node> nodes, int consulServerCount, ExitCriteriaModel exitCriteriaModel)
+    public void bootstrap(GatewayConfig gatewayConfig, Set<Node> nodes, int consulServerCount, String consulLogLocation, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         return;
     }
 
     @Override
-    public void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel)
+    public void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> nodes, String consulLogLocation, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         return;
     }
@@ -46,18 +47,21 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
 
     @Override
     public void startAmbariServer(ContainerOrchestratorCluster cluster, String dbImageName, String serverImageName, String platform,
-            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
-        return;
-    }
-
-    @Override
-    public void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, int count, String platform, ExitCriteriaModel exitCriteriaModel)
+            LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         return;
     }
 
     @Override
-    public void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, int count, ExitCriteriaModel exitCriteriaModel)
+    public void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, int count, String platform,
+            LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+        return;
+    }
+
+    @Override
+    public void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, int count,
+            LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         return;
     }
@@ -69,8 +73,8 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
-    public void startBaywatchClients(ContainerOrchestratorCluster cluster, String imageName, String gatewayAddress, int count,
-            String consulDomain, String externServerLocation, ExitCriteriaModel exitCriteriaModel)
+    public void startBaywatchClients(ContainerOrchestratorCluster cluster, String imageName, int count,
+            String consulDomain, LogVolumePath logVolumePath, String externServerLocation, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         return;
     }

@@ -11,6 +11,7 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.orchestrator.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.Node;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil;
@@ -32,10 +33,12 @@ public class BaywatchClientBootstrap implements ContainerBootstrap {
     private final Node node;
     private final String consulDomain;
     private final Set<String> dataVolumes;
+    private final LogVolumePath logVolumePath;
     private DockerClientUtil dockerClientUtil;
 
     public BaywatchClientBootstrap(DockerClient docker, String gatewayAddress, String imageName, String id,
-            Node node, Set<String> dataVolumes, String consulDomain, String externLocation, DockerClientUtil dockerClientUtil) {
+            Node node, Set<String> dataVolumes, String consulDomain, String externLocation,
+            LogVolumePath logVolumePath, DockerClientUtil dockerClientUtil) {
         this.docker = docker;
         this.gatewayAddress = gatewayAddress;
         this.imageName = imageName;
@@ -44,6 +47,7 @@ public class BaywatchClientBootstrap implements ContainerBootstrap {
         this.consulDomain = consulDomain;
         this.externLocation = externLocation;
         this.dataVolumes = dataVolumes;
+        this.logVolumePath = logVolumePath;
         this.dockerClientUtil = dockerClientUtil;
     }
 
@@ -53,7 +57,7 @@ public class BaywatchClientBootstrap implements ContainerBootstrap {
 
         Bind[] binds = new BindsBuilder()
                 .add(LOCAL_SINCEDB_LOCATION, SINCEDB_LOCATION)
-                .addLog("ambari-agent", "ambari-server", "consul-watch", "consul").build();
+                .addLog(logVolumePath, "ambari-agent", "ambari-server", "consul-watch", "consul").build();
 
         HostConfig hostConfig = new HostConfigBuilder().defaultConfig().binds(binds).build();
         try {

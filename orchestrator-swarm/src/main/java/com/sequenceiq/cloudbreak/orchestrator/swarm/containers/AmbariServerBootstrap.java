@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
+import com.sequenceiq.cloudbreak.orchestrator.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.BindsBuilder;
@@ -26,21 +27,23 @@ public class AmbariServerBootstrap implements ContainerBootstrap {
     private final String nodeName;
     private final Set<String> dataVolumes;
     private final DockerClientUtil dockerClientUtil;
+    private final LogVolumePath logVolumePath;
 
     public AmbariServerBootstrap(DockerClient docker, String imageName, String nodeName, Set<String> dataVolumes,
-            String cloudPlatform, DockerClientUtil dockerClientUtil) {
+            String cloudPlatform, LogVolumePath logVolumePath, DockerClientUtil dockerClientUtil) {
         this.docker = docker;
         this.imageName = imageName;
         this.cloudPlatform = cloudPlatform;
         this.nodeName = nodeName;
         this.dataVolumes = dataVolumes;
+        this.logVolumePath = logVolumePath;
         this.dockerClientUtil = dockerClientUtil;
     }
 
     @Override
     public Boolean call() throws Exception {
 
-        Bind[] binds = new BindsBuilder().addLog().build();
+        Bind[] binds = new BindsBuilder().addLog(logVolumePath).build();
         HostConfig hostConfig = new HostConfigBuilder().defaultConfig().expose(PORT).binds(binds).build();
 
         String containerId = dockerClientUtil.createContainer(docker, docker.createContainerCmd(imageName)

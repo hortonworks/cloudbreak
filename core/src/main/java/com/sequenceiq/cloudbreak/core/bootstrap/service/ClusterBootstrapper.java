@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils;
 
 @Component
 public class ClusterBootstrapper {
@@ -41,6 +42,8 @@ public class ClusterBootstrapper {
     private static final int POLLING_INTERVAL = 5000;
 
     private static final int MAX_POLLING_ATTEMPTS = 500;
+
+    private static final String CONSUL_LOG_LOCATION = VolumeUtils.getLogVolume("logs/consul");
 
     @Inject
     private StackRepository stackRepository;
@@ -76,7 +79,8 @@ public class ClusterBootstrapper {
             nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp()));
         }
         try {
-            GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIp());
+            GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
+                    gatewayInstance.getPublicIp(), gatewayInstance.getPrivateIp());
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
             bootstrapApiPollingService.pollWithTimeout(
                     bootstrapApiCheckerTask,
@@ -84,7 +88,7 @@ public class ClusterBootstrapper {
                     POLLING_INTERVAL,
                     MAX_POLLING_ATTEMPTS);
             List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIp());
-            containerOrchestrator.bootstrap(gatewayConfig, nodeMap.get(0), stack.getConsulServers(),
+            containerOrchestrator.bootstrap(gatewayConfig, nodeMap.get(0), stack.getConsulServers(), CONSUL_LOG_LOCATION,
                     stackDeletionBasedExitCriteriaModel(stack.getId()));
             if (nodeMap.size() > 1) {
                 clusterAvailabilityPollingService.pollWithTimeout(clusterAvailabilityCheckerTask,
@@ -92,7 +96,8 @@ public class ClusterBootstrapper {
                         POLLING_INTERVAL,
                         MAX_POLLING_ATTEMPTS);
                 for (int i = 1; i < nodeMap.size(); i++) {
-                    containerOrchestrator.bootstrapNewNodes(gatewayConfig, nodeMap.get(i), stackDeletionBasedExitCriteriaModel(stack.getId()));
+                    containerOrchestrator.bootstrapNewNodes(gatewayConfig, nodeMap.get(i), CONSUL_LOG_LOCATION,
+                            stackDeletionBasedExitCriteriaModel(stack.getId()));
                     clusterAvailabilityPollingService.pollWithTimeout(clusterAvailabilityCheckerTask,
                             new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodeMap.get(i)),
                             POLLING_INTERVAL,
@@ -126,11 +131,13 @@ public class ClusterBootstrapper {
             }
         }
         try {
-            GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIp());
+            GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
+                    gatewayInstance.getPublicIp(), gatewayInstance.getPrivateIp());
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
             List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIp());
             for (int i = 0; i < nodeMap.size(); i++) {
-                containerOrchestrator.bootstrapNewNodes(gatewayConfig, nodeMap.get(i), stackDeletionBasedExitCriteriaModel(stack.getId()));
+                containerOrchestrator.bootstrapNewNodes(gatewayConfig, nodeMap.get(i), CONSUL_LOG_LOCATION,
+                        stackDeletionBasedExitCriteriaModel(stack.getId()));
                 clusterAvailabilityPollingService.pollWithTimeout(clusterAvailabilityCheckerTask,
                         new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodeMap.get(i)),
                         POLLING_INTERVAL,

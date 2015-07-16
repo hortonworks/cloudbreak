@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorFailedExcept
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
 import com.sequenceiq.cloudbreak.orchestrator.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.orchestrator.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.LogVolumePath;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 
@@ -72,22 +73,23 @@ public class ClusterContainerRunnerTest {
 
         when(containerOrchestratorResolver.get()).thenReturn(mockContainerOrchestrator);
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString())).thenReturn(new GatewayConfig("10.0.0.1", "/cert/1"));
+        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
+                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
 
         underTest.runClusterContainers(provisioningContext);
 
         verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
-                anyString(), any(ExitCriteriaModel.class));
+                anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyString(), any(ExitCriteriaModel.class));
+                anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
                 any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyInt(), anyString(), anyString(), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(),
+                anyInt(), anyString(), any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
-                any(ExitCriteriaModel.class));
+                any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startRegistrator(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
     }
 
@@ -101,7 +103,8 @@ public class ClusterContainerRunnerTest {
 
         when(containerOrchestratorResolver.get()).thenReturn(new FailedMockContainerOrchestrator());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString())).thenReturn(new GatewayConfig("10.0.0.1", "/cert/1"));
+        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
+                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
 
         underTest.runClusterContainers(provisioningContext);
     }
@@ -116,7 +119,8 @@ public class ClusterContainerRunnerTest {
 
         when(containerOrchestratorResolver.get()).thenReturn(new CancelledMockContainerOrchestrator());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString())).thenReturn(new GatewayConfig("10.0.0.1", "/cert/1"));
+        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
+                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
 
         underTest.runClusterContainers(provisioningContext);
     }
@@ -132,20 +136,21 @@ public class ClusterContainerRunnerTest {
 
         when(containerOrchestratorResolver.get()).thenReturn(mockContainerOrchestrator);
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString())).thenReturn(new GatewayConfig("10.0.0.1", "/cert/1"));
+        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
+                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
 
         underTest.runClusterContainers(provisioningContext);
 
         verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
-                anyString(), any(ExitCriteriaModel.class));
+                anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyInt(), anyString(), anyString(), any(ExitCriteriaModel.class));
+                anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(),
+                anyInt(), anyString(), any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
-                any(ExitCriteriaModel.class));
+                any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startRegistrator(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
@@ -161,20 +166,21 @@ public class ClusterContainerRunnerTest {
 
         when(containerOrchestratorResolver.get()).thenReturn(mockContainerOrchestrator);
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString())).thenReturn(new GatewayConfig("10.0.0.1", "/cert/1"));
+        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
+                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
 
         underTest.runClusterContainers(provisioningContext);
 
         verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
-                anyString(), any(ExitCriteriaModel.class));
+                anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyInt(), anyString(), anyString(), any(ExitCriteriaModel.class));
+                anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(0)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(),
+                anyInt(), anyString(), any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
-                any(ExitCriteriaModel.class));
+                any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startRegistrator(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
@@ -191,20 +197,21 @@ public class ClusterContainerRunnerTest {
                 new ArrayList<HostMetadata>(), ScalingType.UPSCALE_ONLY_CLUSTER);
         when(containerOrchestratorResolver.get()).thenReturn(mockContainerOrchestrator);
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString())).thenReturn(new GatewayConfig("10.0.0.1", "/cert/1"));
+        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
+                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
 
         underTest.addClusterContainers(context);
 
         verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
-                anyString(), any(ExitCriteriaModel.class));
+                anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyInt(), anyString(), anyString(), any(ExitCriteriaModel.class));
+                anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(),
+                anyInt(), anyString(), any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
-                any(ExitCriteriaModel.class));
+                any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startRegistrator(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
@@ -221,7 +228,8 @@ public class ClusterContainerRunnerTest {
                 new ArrayList<HostMetadata>(), ScalingType.UPSCALE_ONLY_CLUSTER);
         when(containerOrchestratorResolver.get()).thenReturn(new FailedMockContainerOrchestrator());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString())).thenReturn(new GatewayConfig("10.0.0.1", "/cert/1"));
+        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
+                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
 
         underTest.addClusterContainers(context);
     }
@@ -237,7 +245,8 @@ public class ClusterContainerRunnerTest {
                 new ArrayList<HostMetadata>(), ScalingType.UPSCALE_ONLY_CLUSTER);
         when(containerOrchestratorResolver.get()).thenReturn(new CancelledMockContainerOrchestrator());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString())).thenReturn(new GatewayConfig("10.0.0.1", "/cert/1"));
+        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
+                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
 
         underTest.addClusterContainers(context);
     }
@@ -254,20 +263,21 @@ public class ClusterContainerRunnerTest {
                 new ArrayList<HostMetadata>(), ScalingType.UPSCALE_ONLY_CLUSTER);
         when(containerOrchestratorResolver.get()).thenReturn(mockContainerOrchestrator);
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString())).thenReturn(new GatewayConfig("10.0.0.1", "/cert/1"));
+        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
+                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
 
         underTest.addClusterContainers(context);
 
         verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
-                anyString(), any(ExitCriteriaModel.class));
+                anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyInt(), anyString(), anyString(), any(ExitCriteriaModel.class));
+                anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(),
+                anyInt(), anyString(), any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
-                any(ExitCriteriaModel.class));
+                any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startRegistrator(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
@@ -285,20 +295,21 @@ public class ClusterContainerRunnerTest {
 
         when(containerOrchestratorResolver.get()).thenReturn(mockContainerOrchestrator);
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString())).thenReturn(new GatewayConfig("10.0.0.1", "/cert/1"));
+        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
+                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
 
         underTest.addClusterContainers(context);
 
         verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
-                anyString(), any(ExitCriteriaModel.class));
+                anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyInt(), anyString(), anyString(), any(ExitCriteriaModel.class));
+                anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(0)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(),
+                anyInt(), anyString(), any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
-                any(ExitCriteriaModel.class));
+                any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startRegistrator(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));

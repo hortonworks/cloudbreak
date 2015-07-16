@@ -12,6 +12,7 @@ public class ConsulWatchBootstrapTest extends AbstractContainerBootstrapTest {
     public ContainerBootstrap getTestInstance() {
         Node node = mock(Node.class);
         when(node.getHostname()).thenReturn(DUMMY_GENERATED_ID);
-        return new ConsulWatchBootstrap(getMockedDockerClient(), DUMMY_IMAGE, node, DUMMY_NODE, getMockedDockerClientUtil());
+        return new ConsulWatchBootstrap(getMockedDockerClient(), DUMMY_IMAGE, node, DUMMY_NODE,
+                DUMMY_LOG_VOLUME, getMockedDockerClientUtil());
     }
 }

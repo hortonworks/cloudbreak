@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
+import com.sequenceiq.cloudbreak.orchestrator.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.Node;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil;
@@ -22,12 +23,15 @@ public class ConsulWatchBootstrap implements ContainerBootstrap {
     private final String id;
     private final String imageName;
     private final Node node;
+    private final LogVolumePath logVolumePath;
     private final DockerClientUtil dockerClientUtil;
 
-    public ConsulWatchBootstrap(DockerClient docker, String imageName, Node node, String id, DockerClientUtil dockerClientUtil) {
+    public ConsulWatchBootstrap(DockerClient docker, String imageName, Node node, String id,
+            LogVolumePath logVolumePath, DockerClientUtil dockerClientUtil) {
         this.docker = docker;
         this.id = id;
         this.imageName = imageName;
+        this.logVolumePath = logVolumePath;
         this.node = new Node(node);
         this.dockerClientUtil = dockerClientUtil;
     }
@@ -38,7 +42,8 @@ public class ConsulWatchBootstrap implements ContainerBootstrap {
 
         Bind[] binds = new BindsBuilder()
                 .addDockerSocket()
-                .add("/hadoopfs/fs1/logs/consul-watch", "/var/log/consul-watch").build();
+                .add(logVolumePath.getHostPath() + "/consul-watch",
+                        logVolumePath.getContainerPath() + "/consul-watch").build();
 
         HostConfig hostConfig = new HostConfigBuilder().alwaysRestart().privileged().binds(binds).build();
         String ip = node.getPrivateIp();
