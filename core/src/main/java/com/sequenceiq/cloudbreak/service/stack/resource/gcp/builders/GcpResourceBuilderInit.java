@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.gcp.builders;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -12,14 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.Compute;
-import com.google.api.services.dns.Dns;
-import com.google.api.services.dns.model.ManagedZone;
-import com.google.api.services.dns.model.ManagedZonesListResponse;
-import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GcpCredential;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -71,9 +65,12 @@ public class GcpResourceBuilderInit implements
         GcpCredential credential = (GcpCredential) stack.getCredential();
         Compute compute = gcpStackUtil.buildCompute(credential, stack);
         List<Resource> resourceList = new ArrayList<>();
-        List<InstanceGroup> instanceGroups = Lists.newArrayList(stack.getInstanceGroups());
+        List<Resource> instances = stack.getResourcesByType(ResourceType.GCP_INSTANCE);
         for (String res : decommissionSet) {
-            resourceList.add(new Resource(ResourceType.GCP_INSTANCE, res, stack, instanceGroups.get(0).getGroupName()));
+            Resource instanceResource = getResourceByName(res, instances);
+            if (instanceResource != null) {
+                resourceList.add(instanceResource);
+            }
         }
         GcpDeleteContextObject gcpDeleteContextObject = new GcpDeleteContextObject(stack.getId(), credential.getProjectId(),
                 compute, resourceList);
@@ -87,26 +84,6 @@ public class GcpResourceBuilderInit implements
         return new GcpStartStopContextObject(stack, compute);
     }
 
-    private ManagedZone buildManagedZone(Dns dns, Stack stack) throws IOException {
-        GcpCredential credential = (GcpCredential) stack.getCredential();
-        ManagedZonesListResponse execute1 = dns.managedZones().list(credential.getProjectId()).execute();
-        ManagedZone original = null;
-        for (ManagedZone managedZone : execute1.getManagedZones()) {
-            if (managedZone.getName().equals(credential.getProjectId())) {
-                original = managedZone;
-                break;
-            }
-        }
-        if (original == null) {
-            ManagedZone managedZone = new ManagedZone();
-            managedZone.setName(credential.getProjectId());
-            managedZone.setDnsName(String.format("%s.%s", credential.getProjectId(), "com"));
-            ManagedZone execute = dns.managedZones().create(credential.getProjectId(), managedZone).execute();
-            return execute;
-        }
-        return original;
-    }
-
     @Override
     public ResourceBuilderType resourceBuilderType() {
         return ResourceBuilderType.RESOURCE_BUILDER_INIT;
@@ -115,5 +92,16 @@ public class GcpResourceBuilderInit implements
     @Override
     public CloudPlatform cloudPlatform() {
         return CloudPlatform.GCP;
+    }
+
+    private Resource getResourceByName(String resourceName, List<Resource> resources) {
+        Resource result = null;
+        for (Resource resource : resources) {
+            if (resource.getResourceName().equals(resourceName)) {
+                result = resource;
+                break;
+            }
+        }
+        return result;
     }
 }
