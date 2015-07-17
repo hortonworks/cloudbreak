@@ -353,12 +353,13 @@ public class DefaultStackService implements StackService {
         }
     }
 
-    private void validateInstanceGroup(Stack stack, String instanceGroup) {
-        if (isGateway(stack.getInstanceGroupByInstanceGroupName(instanceGroup).getInstanceGroupType())) {
-            throw new BadRequestException("The Ambari server instancegroup modification is not enabled.");
-        }
-        if (stack.getInstanceGroupByInstanceGroupName(instanceGroup) == null) {
+    private void validateInstanceGroup(Stack stack, String instanceGroupName) {
+        InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
+        if (instanceGroup == null) {
             throw new BadRequestException(String.format("Stack '%s' does not have an instanceGroup named '%s'.", stack.getId(), instanceGroup));
+        }
+        if (isGateway(instanceGroup.getInstanceGroupType())) {
+            throw new BadRequestException("The Ambari server instancegroup modification is not enabled.");
         }
     }
 
