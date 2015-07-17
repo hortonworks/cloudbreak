@@ -18,7 +18,8 @@ public class AmbariHostsStatusCheckerTask extends StackBasedStatusCheckerTask<Am
     public boolean checkStatus(AmbariHostsCheckerContext t) {
         Map<String, String> healthyHostNames = t.getAmbariClient().getHostNamesByState("HEALTHY");
         Map<String, String> unHealthyHostNames = t.getAmbariClient().getHostNamesByState("UNHEALTHY");
-        int totalNodes = healthyHostNames.size() + unHealthyHostNames.size();
+        Map<String, String> alertHostNames = t.getAmbariClient().getHostNamesByState("ALERT");
+        int totalNodes = healthyHostNames.size() + unHealthyHostNames.size() + alertHostNames.size();
         LOGGER.info("Ambari client found {} hosts ({} needed). [Stack: '{}']", totalNodes, t.getHostsInCluster().size(), t.getStack().getId());
         if (totalNodes >= t.getHostsInCluster().size()) {
             return true;

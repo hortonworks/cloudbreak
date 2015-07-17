@@ -8,17 +8,14 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 @Service
 public class AmbariHostsRemover {
-
-    private static final int UNREGISTER_RETRY = 5;
 
     @Inject
     private AmbariClientProvider ambariClientProvider;
@@ -33,19 +30,7 @@ public class AmbariHostsRemover {
         for (String hostName : hosts) {
             ambariClient.deleteHostComponents(hostName, components);
             ambariClient.deleteHost(hostName);
-            unregisterHost(ambariClient, hostName, UNREGISTER_RETRY);
         }
     }
 
-    private void unregisterHost(AmbariClient ambariClient, String host, int retry) {
-        try {
-            ambariClient.unregisterHost(host);
-        } catch (Exception e) {
-            if (--retry > -1) {
-                unregisterHost(ambariClient, host, retry);
-            } else {
-                throw new AmbariOperationFailedException("Failed to unregister certain hosts from Ambari", e);
-            }
-        }
-    }
 }
