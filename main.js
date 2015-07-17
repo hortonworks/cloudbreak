@@ -129,11 +129,23 @@ app.get('/reset', function(req, res) {
   res.render('reset')
 });
 
+// in case request comes from a proxy, we might need to add a base url prefix, like /sultans/
 getBasePath = function(req) {
+
+    var basePath = '/'
     if (req.headers['x-forwarded-for']  !== undefined) {
-        return '/sultans/'
+            basePath = req.headers['x-proxy-prefix'] || '/'
     }
-    return '/'
+
+    if (process.env.DEBUG !== undefined) {
+        for(var key in req.headers) {
+            var value = req.headers[key];
+            console.log("[HACK]    HEADERS " + key + " : " + value);
+        }
+        console.log("[HACK] basePath: " + basePath);
+    }
+
+    return basePath
 }
 
 app.post('/', function(req, res){
@@ -142,6 +154,17 @@ app.post('/', function(req, res){
     var userCredentials = {username: username, password: password}
     needle.post(uaaAddress + '/login.do', userCredentials,
        function(err, tokenResp) {
+           console.log("[HACK] login.do");
+
+        console.log("---- ERR:" + err);
+        console.log("---- LOC:  " + tokenResp.location);
+        console.log("---- BODY: " + tokenResp.body);
+        for(var key in tokenResp.headers) {
+            var value = tokenResp.headers[key];
+            console.log("[HACK]    tokenResp-HEADERS " + key + " : " + value);
+        }
+
+
         if (err == null) {
         var splittedLocation = tokenResp.headers.location.split('?')
         if (splittedLocation.length == 1 || splittedLocation[1] != 'error=true'){
