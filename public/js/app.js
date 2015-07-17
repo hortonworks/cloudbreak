@@ -3,21 +3,10 @@ var $jq = jQuery.noConflict();
 
 var regApp = angular.module('regApp', ['ngRoute']);
 
-regApp.config(['$locationProvider', function($locationProvider){
-           $locationProvider.html5Mode(true);
-}]);
-
-var pathArray = window.location.pathname.split('/')
-
-var basePath = ''
-if (pathArray[1] === 'sultans') {
-    basePath = '/sultans'
-}
-
 regApp.controller("regController", ['$scope', '$http',
     function ($scope, $http) {
         $scope.signUp = function() {
-            $http({method: 'POST',dataType: 'json',url:  basePath + "/register",
+            $http({method: 'POST',dataType: 'json',url:  "/register",
                    data: {email: email.value, firstName: firstName.value, lastName: lastName.value, password: password.value,
                           company: company.value}
                   }).success(function(responseData){
@@ -36,13 +25,15 @@ regApp.controller("regController", ['$scope', '$http',
     }
 ]);
 
-regApp.controller("resetController", ['$scope', '$http', '$location',
+regApp.controller("resetController", ['$scope', '$http',
     function ($scope, $http, $location) {
         $scope.resetPassword = function() {
-                    var resetToken = $location.search()['reset_token'];
-                    var email = $location.search()['email'];
-                    if (email != null && resetToken != null) {
-                          $http({method: 'POST',dataType: 'json', url: basePath + "/reset/" + resetToken,
+                    var email = null;
+                    var url = window.location.href.split('?')
+                    if (url.length == 2 && url[1].split('=').length == 2 && url[1].split('=')[0] == 'email') {
+                        email = url[1].split('=')[1];
+                        var resetToken =  window.location.pathname.split('/')[2]
+                          $http({method: 'POST',dataType: 'json', url:  "/reset/" + resetToken,
                              data: {password: resetPasswField.value, email: email}
                         }).success(function(responseData){
                            if (responseData.message == 'SUCCESS'){
@@ -58,7 +49,7 @@ regApp.controller("resetController", ['$scope', '$http', '$location',
                            $jq("#msgDialog").modal('show');
                         });
                     } else {
-                        $scope.message = 'Email or reset_token query parameter is missing'
+                        $scope.message = 'Email query parameter is missing (or there are more query parameters)'
                         $jq("#errorDialog").modal('show');
                     }
         }
@@ -73,7 +64,7 @@ regApp.controller("loginController", ['$scope', '$http', '$rootScope',
           }
         });
         $scope.forgetPassword = function() {
-            $http({method: 'POST',dataType: 'json', url: basePath + "/forget",
+            $http({method: 'POST',dataType: 'json', url:  "/forget",
                  data: {email: email.value},
                  headers: {'Content-Type': 'application/json'}
             }).success(function(responseData){
@@ -102,7 +93,7 @@ regApp.controller("loginController", ['$scope', '$http', '$rootScope',
 regApp.controller("regForAccController", ['$scope', '$http',
     function ($scope, $http) {
             $scope.signUpByInvite = function() {
-                $http({method: 'POST',dataType: 'json',url: basePath + "/account/register",
+                $http({method: 'POST',dataType: 'json',url:  "/account/register",
                        data: {email: email.value, firstName: firstName.value, lastName: lastName.value, password: password.value,
                               company: company.value}
                       }).success(function(responseData){
