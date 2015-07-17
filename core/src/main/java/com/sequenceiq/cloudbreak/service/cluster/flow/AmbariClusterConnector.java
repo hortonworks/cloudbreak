@@ -225,28 +225,6 @@ public class AmbariClusterConnector {
         return result;
     }
 
-    private void rollbackUpscaledInstances(Stack stack, Cluster cluster, AmbariClient ambariClient, HostGroupAdjustmentJson hostGroupAdjustment,
-            Set<HostMetadata> hostMetadata) throws CloudbreakSecuritySetupException {
-        Set<String> components = getHadoopComponents(cluster, ambariClient, hostGroupAdjustment.getHostGroup(),
-                cluster.getBlueprint().getBlueprintName());
-        Map<String, HostMetadata> hostsToRemove = new HashMap<>();
-        for (HostMetadata data : hostMetadata) {
-            hostsToRemove.put(data.getHostName(), data);
-        }
-        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
-        List<String> hostList = new ArrayList<>(hostsToRemove.keySet());
-        deleteHosts(stack, hostList, components);
-        PollingResult pollingResult = restartHadoopServices(stack, ambariClient, true);
-        if (isSuccess(pollingResult)) {
-            hostGroup.getHostMetadata().removeAll(hostsToRemove.values());
-            hostGroupRepository.save(hostGroup);
-            for (HostMetadata metadata : hostsToRemove.values()) {
-                InstanceMetaData hostInStack = instanceMetadataRepository.findHostInStack(stack.getId(), metadata.getHostName());
-                instanceTerminationHandler.terminateInstance(stack, hostInStack);
-            }
-        }
-    }
-
     public AmbariClient getAmbariClientByStack(Stack stack) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
         TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
@@ -376,6 +354,41 @@ public class AmbariClusterConnector {
             hostDeleted = true;
         }
         return hostDeleted;
+    }
+
+    private void rollbackUpscaledInstances(Stack stack, Cluster cluster, AmbariClient ambariClient, HostGroupAdjustmentJson hostGroupAdjustment,
+            Set<HostMetadata> hostMetadata) throws CloudbreakSecuritySetupException {
+        Set<String> components = getHadoopComponents(cluster, ambariClient, hostGroupAdjustment.getHostGroup(),
+                cluster.getBlueprint().getBlueprintName());
+        Map<String, HostMetadata> hostsToRemove = new HashMap<>();
+        for (HostMetadata data : hostMetadata) {
+            hostsToRemove.put(data.getHostName(), data);
+        }
+        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
+        List<String> hostList = new ArrayList<>(hostsToRemove.keySet());
+        tryToDeleteHosts(stack, components, hostList);
+        PollingResult pollingResult = restartHadoopServices(stack, ambariClient, true);
+        if (isSuccess(pollingResult)) {
+            hostGroup.getHostMetadata().removeAll(hostsToRemove.values());
+            hostGroupRepository.save(hostGroup);
+            for (HostMetadata metadata : hostsToRemove.values()) {
+                InstanceMetaData hostInStack = instanceMetadataRepository.findHostInStack(stack.getId(), metadata.getHostName());
+                instanceTerminationHandler.terminateInstance(stack, hostInStack);
+            }
+        }
+    }
+
+    private void tryToDeleteHosts(Stack stack, Set<String> components, List<String> hostList) {
+        try {
+            deleteHosts(stack, hostList, components);
+        } catch (Exception e) {
+            String msg = "Could not delete host(s) from Ambari! ";
+            if (e instanceof HttpResponseException) {
+                String errorMessage = AmbariClientExceptionUtil.getErrorMessage((HttpResponseException) e);
+                msg += errorMessage;
+            }
+            LOGGER.warn(msg, e);
+        }
     }
 
     private void stopAndDeleteHosts(Stack stack, AmbariClient ambariClient, List<String> hostList, Set<String> components) throws CloudbreakException {
