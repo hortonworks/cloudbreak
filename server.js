@@ -25,7 +25,6 @@ app.set('view engine', 'html')
 app.use(express.static(path.join(__dirname, 'app/static')));
 app.use(cookieParser);
 app.use(session({
-  name: 'uluwatu.sid',
   genid: function(req) {
     return uid(30);
   },
@@ -268,30 +267,30 @@ app.delete('/users/:userId', function(req, res){
 function preventNoCachInResponse(res) {
   res.header("Cache-Control", "no-cache, no-store, must-revalidate");
   res.header("Pragma", "no-cache");
-  res.header("Expires",0);
+  res.header("Expires",0); 
 }
 
 // wildcards should be proxied =================================================
-app.get('*/proxy/periscope/*', function(req,res){
+app.get('*/periscope/*', function(req,res){
   preventNoCachInResponse(res);
   proxyPeriscopeRequest(req, res, proxyRestClient.get);
 });
 
-app.post('*/proxy/periscope/*', function(req,res){
+app.post('*/periscope/*', function(req,res){
   proxyPeriscopeRequest(req, res, proxyRestClient.post);
 });
 
-app.put('*/proxy/periscope/*', function(req,res){
+app.put('*/periscope/*', function(req,res){
   proxyPeriscopeRequest(req, res, proxyRestClient.put);
 });
 
-app.delete('*/proxy/periscope/*', function(req,res){
+app.delete('*/periscope/*', function(req,res){
   proxyPeriscopeRequest(req, res, proxyRestClient.delete);
 });
 
 
 
-app.get('*/proxy/sultans/*', function(req,res){
+app.get('*/sultans/*', function(req,res){
     preventNoCachInResponse(res);
     proxySultansRequest(req, res, proxyRestClient.get);
 });
@@ -301,7 +300,7 @@ app.get('*', function(req,res){
   proxyCloudbreakRequest(req, res, proxyRestClient.get);
 });
 
-app.post('*/proxy/sultans/*', function(req,res){
+app.post('*/sultans/*', function(req,res){
     proxySultansRequest(req, res, proxyRestClient.post);
 });
 
@@ -309,7 +308,7 @@ app.post('*', function(req,res){
   proxyCloudbreakRequest(req, res, proxyRestClient.post);
 });
 
-app.delete('*/proxy/sultans/*', function(req,res){
+app.delete('*/sultans/*', function(req,res){
     proxySultansRequest(req, res, proxyRestClient.delete);
 });
 
@@ -317,7 +316,7 @@ app.delete('*', function(req,res){
   proxyCloudbreakRequest(req, res, proxyRestClient.delete);
 });
 
-app.put('*/proxy/sultans/*', function(req,res){
+app.put('*/sultans/*', function(req,res){
     proxySultansRequest(req, res, proxyRestClient.put);
 });
 
@@ -344,7 +343,7 @@ function proxySultansRequest(req, res, method){
         cbRequestArgs.data = req.body;
     }
     cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
-    var req_url = req.url.replace("/proxy/sultans/", "");
+    var req_url = req.url.replace("/sultans/", "");
     console.log("Sultans request to: "+ sultansAddress + req_url);
     method(sultansAddress + req_url, cbRequestArgs, function(data, response){
         res.status(response.statusCode).send(data);
@@ -358,7 +357,7 @@ function proxyPeriscopeRequest(req, res, method){
     cbRequestArgs.data = req.body;
   }
   cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
-  var req_url = req.url.replace("/proxy/periscope/", "");
+  var req_url = req.url.replace("/periscope/", "");
   console.log("Periscope request to: "+ periscopeAddress + req_url);
   method(periscopeAddress + req_url, cbRequestArgs, function(data, response){
     res.status(response.statusCode).send(data);
