@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupJson;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.json.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.controller.json.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -124,6 +125,24 @@ public class ClusterController {
     public ResponseEntity<String> updateCluster(@PathVariable Long stackId, @RequestBody UpdateClusterJson updateJson) throws CloudbreakSecuritySetupException {
         Stack stack = stackService.get(stackId);
         MDCBuilder.buildMdcContext(stack);
+        UserNamePasswordJson userNamePasswordJson = updateJson.getUserNamePasswordJson();
+        if (userNamePasswordJson != null) {
+            if (!stack.isAvailable()) {
+                throw new BadRequestException(String.format(
+                        "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
+                        stack.getStatus()));
+            }
+            if (!userNamePasswordJson.getOldPassword().equals(stack.getCluster().getPassword())) {
+                throw new BadRequestException(String.format(
+                        "Cluster actual password does not match in the request, please pass the real password.", stackId,
+                        stack.getStatus()));
+            }
+            LOGGER.info("Cluster username password update request received. Stack id:  {}, username: {}, password: {}",
+                    stackId, userNamePasswordJson.getUserName(), userNamePasswordJson.getPassword());
+            clusterService.updateUserNamePassword(stackId, userNamePasswordJson);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
         if (updateJson.getStatus() != null) {
             LOGGER.info("Cluster status update request received. Stack id:  {}, status: {} ", stackId, updateJson.getStatus());
             clusterService.updateStatus(stackId, updateJson.getStatus());

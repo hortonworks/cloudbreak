@@ -248,6 +248,24 @@ public class AmbariClusterConnector {
         return cluster;
     }
 
+    public Cluster credentialChangeAmbariCluster(Long stackId, String newUserName, String newPassword) throws CloudbreakSecuritySetupException {
+        Stack stack = stackRepository.findOneWithLists(stackId);
+        Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
+        String oldUserName = cluster.getUserName();
+        String oldPassword = cluster.getPassword();
+        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
+        if (newUserName.equals(oldUserName)) {
+            if (!newPassword.equals(oldPassword)) {
+                ambariClient.changePassword(oldUserName, oldPassword, newPassword, true);
+            }
+        } else {
+            ambariClient.createUser(newUserName, newPassword, true);
+            ambariClient.deleteUser(oldUserName);
+        }
+        return cluster;
+    }
+
     public Set<String> decommissionAmbariNodes(Long stackId, HostGroupAdjustmentJson adjustmentRequest, List<HostMetadata> decommissionCandidates)
             throws CloudbreakException {
         Set<String> result = new HashSet<>();
@@ -832,4 +850,5 @@ public class AmbariClusterConnector {
                 AMBARI_POLLING_INTERVAL,
                 MAX_ATTEMPTS_FOR_REGION_DECOM);
     }
+
 }

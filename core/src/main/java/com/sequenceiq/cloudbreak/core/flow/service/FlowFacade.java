@@ -88,4 +88,5 @@ public interface FlowFacade {
 
     FlowContext handleStackSync(FlowContext context) throws CloudbreakException;
 
+    FlowContext credentialChange(FlowContext context) throws CloudbreakException;
 }

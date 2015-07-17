@@ -28,6 +28,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterContainerRunner;
+import com.sequenceiq.cloudbreak.core.flow.context.ClusterAuthenticationContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
@@ -332,6 +333,20 @@ public class AmbariClusterFacade implements ClusterFacade {
         MDCBuilder.buildMdcContext(stack);
         ambariClusterStatusUpdater.updateClusterStatus(stack, cluster);
         return context;
+    }
+
+    @Override
+    public FlowContext credentialChange(FlowContext context) throws CloudbreakException {
+        ClusterAuthenticationContext actualContext = (ClusterAuthenticationContext) context;
+        Stack stack = stackService.getById(actualContext.getStackId());
+        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
+        MDCBuilder.buildMdcContext(cluster);
+        fireEventAndLog(stack.getId(), context, "Changing Ambari cluster authentication in progress", UPDATE_IN_PROGRESS);
+        ambariClusterConnector.credentialChangeAmbariCluster(stack.getId(), actualContext.getUser(), actualContext.getPassword());
+        clusterService.updateClusterUsernameAndPassword(cluster, actualContext.getUser(), actualContext.getPassword());
+        clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
+        fireEventAndLog(stack.getId(), context, "Changing Ambari cluster authentication finished", UPDATE_IN_PROGRESS);
+        return actualContext;
     }
 
     @Override

@@ -585,4 +585,15 @@ public class SimpleFlowFacade implements FlowFacade {
         }
     }
 
+    @Override
+    public FlowContext credentialChange(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Authentication change for cluster requested. Context: {}", context);
+        try {
+            return clusterFacade.credentialChange(context);
+        } catch (Exception e) {
+            LOGGER.error("Exception during cluster authentication change!: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
 }

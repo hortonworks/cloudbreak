@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.ScalingType;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
+import com.sequenceiq.cloudbreak.service.cluster.event.ClusterUserNamePasswordUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.RemoveInstanceRequest;
@@ -91,6 +92,8 @@ public class ReactorFlowManagerTest {
         UpdateAmbariHostsRequest updateAmbariHostsRequest = new UpdateAmbariHostsRequest(1L, new HostGroupAdjustmentJson(), new HashSet<String>(),
                 new ArrayList<HostMetadata>(), true, CloudPlatform.AZURE, ScalingType.DOWNSCALE_ONLY_CLUSTER);
         UpdateAllowedSubnetsRequest updateAllowedSubnetsRequest = new UpdateAllowedSubnetsRequest(CloudPlatform.AZURE, 1L, new ArrayList<SecurityRule>());
+        ClusterUserNamePasswordUpdateRequest clusterUserNamePasswordUpdateRequest =
+                new ClusterUserNamePasswordUpdateRequest(1L, "admin", "admin1", CloudPlatform.AZURE);
 
         flowManager.triggerProvisioning(provisionRequest);
         flowManager.triggerClusterInstall(provisionRequest);
@@ -110,6 +113,7 @@ public class ReactorFlowManagerTest {
         flowManager.triggerUpdateAllowedSubnets(updateAllowedSubnetsRequest);
         flowManager.triggerClusterSync(clusterStatusUpdateRequest);
         flowManager.triggerStackSync(stackStatusUpdateRequest);
+        flowManager.triggerClusterUserNamePasswordUpdate(clusterUserNamePasswordUpdateRequest);
 
         int count = -1;
         for (Method method : flowManager.getClass().getDeclaredMethods()) {

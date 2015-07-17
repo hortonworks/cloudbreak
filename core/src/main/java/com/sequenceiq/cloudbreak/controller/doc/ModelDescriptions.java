@@ -100,6 +100,12 @@ public class ModelDescriptions {
         public static final String HOST_GROUP_NAME = "name of the host group";
     }
 
+    public static class UserNamePasswordModelDescription {
+        public static final String NEW_USER_NAME = "new user name in ambari";
+        public static final String OLD_PASSWORD = "old password in ambari";
+        public static final String NEW_PASSWORD = "new password in ambari";
+    }
+
     public static class HostMetadataModelDescription {
         public static final String STATE = "state of the host";
     }

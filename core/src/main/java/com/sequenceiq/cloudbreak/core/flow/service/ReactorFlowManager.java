@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.core.flow.ErrorHandlerAwareFlowEventFactory;
 import com.sequenceiq.cloudbreak.core.flow.FlowManager;
 import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
 import com.sequenceiq.cloudbreak.core.flow.TransitionKeyService;
+import com.sequenceiq.cloudbreak.core.flow.context.ClusterAuthenticationContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
+import com.sequenceiq.cloudbreak.service.cluster.event.ClusterUserNamePasswordUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.RemoveInstanceRequest;
@@ -187,6 +189,15 @@ public class ReactorFlowManager implements FlowManager {
         StackStatusUpdateRequest statusUpdateRequest = (StackStatusUpdateRequest) object;
         StackStatusUpdateContext context = new StackStatusUpdateContext(statusUpdateRequest.getStackId(), statusUpdateRequest.getCloudPlatform(), false);
         reactor.notify(FlowPhases.STACK_SYNC.name(), eventFactory.createEvent(context, FlowPhases.STACK_SYNC.name()));
+    }
+
+    @Override
+    public void triggerClusterUserNamePasswordUpdate(Object object) {
+        ClusterUserNamePasswordUpdateRequest request = (ClusterUserNamePasswordUpdateRequest) object;
+        ClusterAuthenticationContext context = new ClusterAuthenticationContext(request.getStackId(), request.getCloudPlatform(),
+                request.getNewUserName(), request.getNewPassword());
+        reactor.notify(FlowPhases.CLUSTER_USERNAME_PASSWORD_UPDATE.name(),
+                eventFactory.createEvent(context, FlowPhases.CLUSTER_USERNAME_PASSWORD_UPDATE.name()));
     }
 
 }
