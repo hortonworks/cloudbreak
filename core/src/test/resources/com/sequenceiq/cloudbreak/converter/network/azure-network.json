@@ -1,0 +1,10 @@
+{
+  "name" : "azure-network",
+  "cloudPlatform" : "AZURE",
+  "subnetCIDR" : "10.0.0.0/16",
+  "parameters" : {
+    "addressPrefixCIDR" : "addressPrefixCIDR"
+  },
+  "description" : "default description",
+  "publicInAccount" : true
+}

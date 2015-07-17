@@ -1,0 +1,13 @@
+{
+  "volumeCount":1,
+  "volumeSize":100,
+  "parameters":
+  {
+    "vmType":"STANDARD_D2",
+    "volumeSize":100
+  },
+  "name":"azure-resource",
+  "description":"azure template description",
+  "public":true,
+  "cloudPlatform":"AZURE"
+}

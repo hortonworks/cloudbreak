@@ -1,0 +1,9 @@
+{
+  "name" : "azure-network-invalid",
+  "cloudPlatform" : "AZURE",
+  "subnetCIDR" : "10.0.0.0/16",
+  "parameters" : {
+  },
+  "description" : "default description",
+  "publicInAccount" : true
+}

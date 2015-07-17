@@ -1,0 +1,16 @@
+{
+  "volumeCount":1,
+  "volumeSize":100,
+  "parameters":
+  {
+    "sshLocation":"0.0.0.0/0",
+    "instanceType":"M3Large",
+    "volumeType":"Standard",
+    "encrypted":true,
+    "spotPrice":0.1
+  },
+  "name":"aws-template",
+  "public":true,
+  "cloudPlatform":"AWS",
+  "description": "aws template description"
+}

@@ -1,0 +1,11 @@
+{
+  "name" : "aws-network",
+  "cloudPlatform" : "AWS",
+  "subnetCIDR" : "10.0.0.0/16",
+  "parameters" : {
+    "vpcId" : "vpcId",
+    "internetGatewayId": "internetGatewayId"
+  },
+  "description" : "default description",
+  "publicInAccount" : true
+}

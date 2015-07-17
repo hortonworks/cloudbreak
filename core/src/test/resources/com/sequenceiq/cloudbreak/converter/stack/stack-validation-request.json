@@ -1,0 +1,21 @@
+{
+  "networkId" : 1,
+  "blueprintId" : 2,
+  "hostGroups": [
+    {
+      "name" : "hostGroupName",
+      "recipeIds" : [
+        1, 2, 3, 4, 5
+      ],
+      "instanceGroupName": "is1"
+    }
+  ],
+  "instanceGroups" : [
+    {
+      "type" : "GATEWAY",
+      "group" : "is1",
+      "nodeCount" : 1,
+      "templateId" : 51
+    }
+  ]
+}
