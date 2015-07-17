@@ -9,12 +9,14 @@ import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_THREADPOOL_
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_THREADPOOL_CORE_SIZE;
 
 import java.io.IOException;
+import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -89,6 +91,11 @@ public class AppConfig {
 
     @Inject
     private List<CredentialHandler<? extends Credential>> credentialHandlers;
+
+    @PostConstruct
+    public void init() {
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+    }
 
     @Bean
     public ExitCriteria stackDeletionBasedExitCriteria() {
