@@ -17,7 +17,7 @@
 
                 <p class="btn-row-over-panel">
                     <a href="" id="panel-create-credentials-collapse-btn" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-credentials-collapse">
-                        <i class="fa fa-plus fa-fw"></i><span> {{msg.credential_manage_title}}</span>
+                        <i class="fa fa-plus fa-fw"></i><span> {{msg.credential_form_create}}</span>
                     </a>
                 </p>
 
