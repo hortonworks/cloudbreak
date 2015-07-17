@@ -4,7 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.orchestrator.Node;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 
 public class BaywatchClientBootstrapTest extends AbstractContainerBootstrapTest {
@@ -17,7 +17,7 @@ public class BaywatchClientBootstrapTest extends AbstractContainerBootstrapTest 
     public ContainerBootstrap getTestInstance() {
         return new BaywatchClientBootstrap(getMockedDockerClient(), DUMMY_GETAWAY_ADDRESS, DUMMY_IMAGE,
                 DUMMY_GENERATED_ID, new Node(DUMMY_PRIVATE_IP, DUMMY_PUBLIC_IP), DUMMY_VOLUMES, CONSUL_DOMAIN,
-                null, DUMMY_LOG_VOLUME, getMockedDockerClientUtil());
+                null, DUMMY_LOG_VOLUME);
     }
 
     @Test
@@ -25,8 +25,8 @@ public class BaywatchClientBootstrapTest extends AbstractContainerBootstrapTest 
         // GIVEN
         BaywatchClientBootstrap underTest = new BaywatchClientBootstrap(getMockedDockerClient(), DUMMY_GETAWAY_ADDRESS, DUMMY_IMAGE,
                 DUMMY_GENERATED_ID, new Node(DUMMY_PRIVATE_IP, DUMMY_PUBLIC_IP), DUMMY_VOLUMES, CONSUL_DOMAIN,
-                "externLocation", DUMMY_LOG_VOLUME, getMockedDockerClientUtil());
-        mockAll();
+                "externLocation", DUMMY_LOG_VOLUME);
+        mockDockerClient();
         // WHEN
         boolean result = underTest.call();
         // THEN

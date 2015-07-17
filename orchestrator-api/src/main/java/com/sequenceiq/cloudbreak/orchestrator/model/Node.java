@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.orchestrator;
+package com.sequenceiq.cloudbreak.orchestrator.model;
 
 import java.util.HashSet;
 import java.util.Set;

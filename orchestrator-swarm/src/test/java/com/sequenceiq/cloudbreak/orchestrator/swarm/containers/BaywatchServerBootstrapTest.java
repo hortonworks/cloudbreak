@@ -6,6 +6,6 @@ public class BaywatchServerBootstrapTest extends AbstractContainerBootstrapTest 
 
     @Override
     public ContainerBootstrap getTestInstance() {
-        return new BaywatchServerBootstrap(getMockedDockerClient(), DUMMY_IMAGE, DUMMY_NODE, getMockedDockerClientUtil());
+        return new BaywatchServerBootstrap(getMockedDockerClient(), DUMMY_IMAGE, DUMMY_NODE);
     }
 }

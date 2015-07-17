@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.orchestrator;
+package com.sequenceiq.cloudbreak.orchestrator.containers;
 
 public enum DockerContainer {
 

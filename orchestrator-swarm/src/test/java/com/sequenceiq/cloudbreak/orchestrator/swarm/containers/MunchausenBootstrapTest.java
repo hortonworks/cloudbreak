@@ -6,6 +6,6 @@ public class MunchausenBootstrapTest extends AbstractContainerBootstrapTest {
 
     @Override
     public ContainerBootstrap getTestInstance() {
-        return new MunchausenBootstrap(getMockedDockerClient(), DUMMY_IMAGE, CMD, getMockedDockerClientUtil());
+        return new MunchausenBootstrap(getMockedDockerClient(), DUMMY_IMAGE, CMD);
     }
 }

@@ -7,6 +7,6 @@ public class AmbariAgentBoostrapTest extends AbstractContainerBootstrapTest {
     @Override
     public ContainerBootstrap getTestInstance() {
         return new AmbariAgentBootstrap(getMockedDockerClient(), DUMMY_IMAGE, DUMMY_NODE, DUMMY_VOLUMES,
-                DUMMY_GENERATED_ID, DUMMY_CLOUD_PLATFORM, DUMMY_LOG_VOLUME, getMockedDockerClientUtil());
+                DUMMY_GENERATED_ID, DUMMY_CLOUD_PLATFORM, DUMMY_LOG_VOLUME);
     }
 }

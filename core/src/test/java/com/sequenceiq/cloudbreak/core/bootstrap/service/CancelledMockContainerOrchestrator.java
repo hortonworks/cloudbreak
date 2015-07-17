@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
-import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorCancelledException;
-import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
-import com.sequenceiq.cloudbreak.orchestrator.ExitCriteriaModel;
-import com.sequenceiq.cloudbreak.orchestrator.LogVolumePath;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 
 public class CancelledMockContainerOrchestrator extends MockContainerOrchestrator {
     @Override

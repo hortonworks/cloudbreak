@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.swarm;
 
 
-import static com.sequenceiq.cloudbreak.orchestrator.SimpleContainerBootstrapRunner.simpleContainerBootstrapRunner;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -23,16 +21,17 @@ import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.jaxrs.DockerCmdExecFactoryImpl;
 import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorCancelledException;
-import com.sequenceiq.cloudbreak.orchestrator.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
-import com.sequenceiq.cloudbreak.orchestrator.ExitCriteria;
-import com.sequenceiq.cloudbreak.orchestrator.ExitCriteriaModel;
-import com.sequenceiq.cloudbreak.orchestrator.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.LogVolumePath;
-import com.sequenceiq.cloudbreak.orchestrator.Node;
+import com.sequenceiq.cloudbreak.orchestrator.ContainerBootstrapRunner;
 import com.sequenceiq.cloudbreak.orchestrator.SimpleContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariAgentBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariServerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariServerDatabaseBootstrap;
@@ -71,13 +70,14 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
             String[] cmd = {"--debug", "bootstrap", "--wait", MUNCHAUSEN_WAIT, "--consulLogLocation", consulLogLocation, "--consulServers",
                     concatToString(consulServers), concatToString(result)};
-            munchausenBootstrap(gatewayConfig, cmd).call();
-        } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {
-                throw cloudbreakOrchestratorCancelledExceptionException;
-        } catch (CloudbreakOrchestratorFailedException cloudbreakOrchestratorFailedException) {
-                throw cloudbreakOrchestratorFailedException;
+
+            runner(munchausenBootstrap(gatewayConfig, cmd),
+                    getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
+
+        } catch (CloudbreakOrchestratorCancelledException | CloudbreakOrchestratorFailedException coe) {
+            throw coe;
         } catch (Exception ex) {
-                throw new CloudbreakOrchestratorFailedException(ex);
+            throw new CloudbreakOrchestratorFailedException(ex);
         }
     }
 
@@ -89,11 +89,12 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             Set<String> result = prepareDockerAddressInventory(privateAddresses);
             String[] cmd = {"--debug", "add", "--wait", MUNCHAUSEN_WAIT, "--consulLogLocation", consulLogLocation,
                     "--join", getConsulJoinIp(gatewayConfig.getPublicAddress()), concatToString(result)};
-            munchausenNewNodeBootstrap(gatewayConfig, cmd).call();
-        } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {
-            throw cloudbreakOrchestratorCancelledExceptionException;
-        } catch (CloudbreakOrchestratorFailedException cloudbreakOrchestratorFailedException) {
-            throw cloudbreakOrchestratorFailedException;
+
+            runner(munchausenNewNodeBootstrap(gatewayConfig, cmd),
+                    getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
+
+        } catch (CloudbreakOrchestratorCancelledException | CloudbreakOrchestratorFailedException coe) {
+            throw coe;
         } catch (Exception ex) {
             throw new CloudbreakOrchestratorFailedException(ex);
         }
@@ -106,10 +107,8 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             Node gateway = getGatewayNode(cluster.getGatewayConfig().getPublicAddress(), cluster.getNodes());
             runner(registratorBootstrap(cluster.getGatewayConfig(), imageName, gateway), getExitCriteria(), exitCriteriaModel,
                     MDC.getCopyOfContextMap()).call();
-        } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {
-            throw cloudbreakOrchestratorCancelledExceptionException;
-        } catch (CloudbreakOrchestratorFailedException cloudbreakOrchestratorFailedException) {
-            throw cloudbreakOrchestratorFailedException;
+        } catch (CloudbreakOrchestratorCancelledException | CloudbreakOrchestratorFailedException coe) {
+            throw coe;
         } catch (Exception ex) {
             throw new CloudbreakOrchestratorFailedException(ex);
         }
@@ -125,10 +124,8 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
             runner(ambariServerBootstrap(cluster.getGatewayConfig(), serverImageName, gateway, platform, logVolumePath),
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
-        } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {
-            throw cloudbreakOrchestratorCancelledExceptionException;
-        } catch (CloudbreakOrchestratorFailedException cloudbreakOrchestratorFailedException) {
-            throw cloudbreakOrchestratorFailedException;
+        } catch (CloudbreakOrchestratorCancelledException | CloudbreakOrchestratorFailedException coe) {
+            throw coe;
         } catch (Exception ex) {
             throw new CloudbreakOrchestratorFailedException(ex);
         }
@@ -156,14 +153,8 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             for (Future<Boolean> future : futures) {
                 future.get();
             }
-        } catch (Exception exception) {
-            if (exception instanceof CloudbreakOrchestratorCancelledException) {
-                throw (CloudbreakOrchestratorCancelledException) exception;
-            } else if (exception instanceof CloudbreakOrchestratorFailedException) {
-                throw (CloudbreakOrchestratorFailedException) exception;
-            } else {
-                throw new CloudbreakOrchestratorFailedException(exception);
-            }
+        } catch (Exception ex) {
+            throw new CloudbreakOrchestratorFailedException(ex);
         }
     }
 
@@ -188,14 +179,8 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             for (Future<Boolean> future : futures) {
                 future.get();
             }
-        } catch (Exception exception) {
-            if (exception instanceof CloudbreakOrchestratorCancelledException) {
-                throw (CloudbreakOrchestratorCancelledException) exception;
-            } else if (exception instanceof CloudbreakOrchestratorFailedException) {
-                throw (CloudbreakOrchestratorFailedException) exception;
-            } else {
-                throw new CloudbreakOrchestratorFailedException(exception);
-            }
+        } catch (Exception ex) {
+            throw new CloudbreakOrchestratorFailedException(ex);
         }
     }
 
@@ -238,14 +223,8 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             for (Future<Boolean> future : futures) {
                 future.get();
             }
-        } catch (Exception exception) {
-            if (exception instanceof CloudbreakOrchestratorCancelledException) {
-                throw (CloudbreakOrchestratorCancelledException) exception;
-            } else if (exception instanceof CloudbreakOrchestratorFailedException) {
-                throw (CloudbreakOrchestratorFailedException) exception;
-            } else {
-                throw new CloudbreakOrchestratorFailedException(exception);
-            }
+        } catch (Exception ex) {
+            throw new CloudbreakOrchestratorFailedException(ex);
         }
     }
 
@@ -268,14 +247,8 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             for (Future<Boolean> future : futures) {
                 future.get();
             }
-        } catch (Exception exception) {
-            if (exception instanceof CloudbreakOrchestratorCancelledException) {
-                throw (CloudbreakOrchestratorCancelledException) exception;
-            } else if (exception instanceof CloudbreakOrchestratorFailedException) {
-                throw (CloudbreakOrchestratorFailedException) exception;
-            } else {
-                throw new CloudbreakOrchestratorFailedException(exception);
-            }
+        } catch (Exception ex) {
+            throw new CloudbreakOrchestratorFailedException(ex);
         }
     }
 
@@ -287,9 +260,8 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             if (allAvailableNode.size() == getPrivateAddresses(nodes).size()) {
                 return true;
             }
-        } catch (Throwable t) {
+        } catch (Exception t) {
             LOGGER.info(String.format("Cannot connect to Swarm manager, maybe it hasn't started yet: %s", t.getMessage()));
-            return false;
         }
         return false;
     }
@@ -445,31 +417,31 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     @VisibleForTesting
     MunchausenBootstrap munchausenBootstrap(GatewayConfig gatewayConfig, String[] cmd) {
         DockerClient dockerApiClient = dockerClient(gatewayConfig);
-        return new MunchausenBootstrap(dockerApiClient, MUNCHAUSEN_DOCKER_IMAGE, cmd, new DockerClientUtil());
+        return new MunchausenBootstrap(dockerApiClient, MUNCHAUSEN_DOCKER_IMAGE, cmd);
     }
 
     @VisibleForTesting
     MunchausenBootstrap munchausenNewNodeBootstrap(GatewayConfig gatewayConfig, String[] cmd) {
         DockerClient dockerApiClient = swarmClient(gatewayConfig);
-        return new MunchausenBootstrap(dockerApiClient, MUNCHAUSEN_DOCKER_IMAGE, cmd, new DockerClientUtil());
+        return new MunchausenBootstrap(dockerApiClient, MUNCHAUSEN_DOCKER_IMAGE, cmd);
     }
 
     @VisibleForTesting
     RegistratorBootstrap registratorBootstrap(GatewayConfig gatewayConfig, String imageName, Node gateway) {
         DockerClient dockerApiClient = swarmClient(gatewayConfig);
-        return new RegistratorBootstrap(dockerApiClient, imageName, gateway.getHostname(), gateway.getPrivateIp(), new DockerClientUtil());
+        return new RegistratorBootstrap(dockerApiClient, imageName, gateway.getHostname(), gateway.getPrivateIp());
     }
 
     @VisibleForTesting
     ConsulWatchBootstrap consulWatchBootstrap(GatewayConfig gatewayConfig, String imageName, Node node, String time, LogVolumePath logVolumePath) {
         DockerClient dockerApiClient = swarmClient(gatewayConfig);
-        return new ConsulWatchBootstrap(dockerApiClient, imageName, node, time, logVolumePath, new DockerClientUtil());
+        return new ConsulWatchBootstrap(dockerApiClient, imageName, node, time, logVolumePath);
     }
 
     @VisibleForTesting
     BaywatchServerBootstrap baywatchServerBootstrap(GatewayConfig gatewayConfig, String imageName, Node gateway) {
         DockerClient dockerApiClient = swarmClient(gatewayConfig);
-        return new BaywatchServerBootstrap(dockerApiClient, imageName, gateway.getHostname(), new DockerClientUtil());
+        return new BaywatchServerBootstrap(dockerApiClient, imageName, gateway.getHostname());
     }
 
     @VisibleForTesting
@@ -477,13 +449,13 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             String consulDomain, LogVolumePath logVolumePath, String externServerLocation) {
         DockerClient dockerApiClient = swarmClient(gatewayConfig);
         return new BaywatchClientBootstrap(dockerApiClient, gatewayConfig.getPrivateAddress(), imageName, time, node, node.getDataVolumes(),
-                consulDomain, externServerLocation, logVolumePath, new DockerClientUtil());
+                consulDomain, externServerLocation, logVolumePath);
     }
 
     @VisibleForTesting
     LogrotateBootsrap logrotateBootsrap(GatewayConfig gatewayConfig, String imageName, Node node, String time) {
         DockerClient dockerApiClient = swarmClient(gatewayConfig);
-        return new LogrotateBootsrap(dockerApiClient, imageName, node.getHostname(), time, new DockerClientUtil());
+        return new LogrotateBootsrap(dockerApiClient, imageName, node.getHostname(), time);
     }
 
     @VisibleForTesting
@@ -491,27 +463,27 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             String time, String platform, LogVolumePath logVolumePath) {
         DockerClient dockerApiClient = swarmClient(gatewayConfig);
         return new AmbariAgentBootstrap(dockerApiClient, imageName, node.getHostname(), node.getDataVolumes(), time,
-                platform, logVolumePath, new DockerClientUtil());
+                platform, logVolumePath);
     }
 
     @VisibleForTesting
     AmbariServerDatabaseBootstrap ambariServerDatabaseBootstrap(GatewayConfig gatewayConfig, String dbImageName, Node gateway, LogVolumePath logVolumePath) {
         DockerClient dockerApiClient = swarmClient(gatewayConfig);
         return new AmbariServerDatabaseBootstrap(dockerApiClient, dbImageName, gateway.getHostname(), gateway.getDataVolumes(),
-                logVolumePath, new DockerClientUtil());
+                logVolumePath);
     }
 
     @VisibleForTesting
     AmbariServerBootstrap ambariServerBootstrap(GatewayConfig gatewayConfig, String serverImageName, Node node, String platform, LogVolumePath logVolumePath) {
         DockerClient dockerApiClient = swarmClient(gatewayConfig);
         return new AmbariServerBootstrap(dockerApiClient, serverImageName, node.getHostname(), node.getDataVolumes(), platform,
-                logVolumePath, new DockerClientUtil());
+                logVolumePath);
     }
 
     @VisibleForTesting
-    Callable<Boolean> runner(ContainerBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,
+    public Callable<Boolean> runner(ContainerBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,
             Map<String, String> mdcMap) {
-        return simpleContainerBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, mdcMap);
+        return new ContainerBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, mdcMap);
     }
 
     private String getConsulJoinIp(String publicIp) {

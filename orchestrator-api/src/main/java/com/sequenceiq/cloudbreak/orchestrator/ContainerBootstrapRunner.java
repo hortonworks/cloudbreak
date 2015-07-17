@@ -8,10 +8,14 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
-public class SimpleContainerBootstrapRunner implements Callable<Boolean> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleContainerBootstrapRunner.class);
-    private static final int MAX_RETRY_COUNT = 7;
+public class ContainerBootstrapRunner implements Callable<Boolean> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContainerBootstrapRunner.class);
+    private static final int MAX_RETRY_COUNT = 15;
     private static final int SLEEP_TIME = 10000;
 
     private final ContainerBootstrap containerBootstrap;
@@ -19,17 +23,12 @@ public class SimpleContainerBootstrapRunner implements Callable<Boolean> {
     private final ExitCriteria exitCriteria;
     private final ExitCriteriaModel exitCriteriaModel;
 
-    private SimpleContainerBootstrapRunner(ContainerBootstrap containerBootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,
+    public ContainerBootstrapRunner(ContainerBootstrap containerBootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,
             Map<String, String> mdcReplica) {
         this.containerBootstrap = containerBootstrap;
         this.mdcMap = mdcReplica;
         this.exitCriteria = exitCriteria;
         this.exitCriteriaModel = exitCriteriaModel;
-    }
-
-    public static Callable<Boolean> simpleContainerBootstrapRunner(ContainerBootstrap containerBootstrap, ExitCriteria exitCriteria,
-            ExitCriteriaModel exitCriteriaModel, Map<String, String> mdcMap) {
-        return new SimpleContainerBootstrapRunner(containerBootstrap, exitCriteria, exitCriteriaModel, mdcMap);
     }
 
     @Override
@@ -39,28 +38,27 @@ public class SimpleContainerBootstrapRunner implements Callable<Boolean> {
         int retryCount = 0;
         Exception actualException = null;
         boolean exitNeeded = false;
+        String type = containerBootstrap.getClass().getSimpleName().replace("Bootstrap", "");
         while (!success && MAX_RETRY_COUNT >= retryCount && !exitNeeded) {
-            LOGGER.debug("Preparing to start container: success: {}, retryCount: {}, exitNeeded: {}");
-            exitNeeded = isExitNeeded();
-            if (!exitNeeded) {
-                try {
-                    LOGGER.info("Calling container bootstrap: {}", containerBootstrap.getClass().getSimpleName());
-                    containerBootstrap.call();
-                    success = true;
-                    LOGGER.info("Container started successfully.");
-                } catch (Exception ex) {
-                    success = false;
-                    actualException = ex;
-                    retryCount++;
-                    LOGGER.error(String.format("Container failed to start, retrying [%s/%s]: %s", MAX_RETRY_COUNT, retryCount, ex.getMessage()));
-                    Thread.sleep(SLEEP_TIME);
-                }
+            if (isExitNeeded()) {
+                LOGGER.error(exitCriteria.exitMessage());
+                throw new CloudbreakOrchestratorCancelledException(exitCriteria.exitMessage());
+            }
+            try {
+                LOGGER.info("Calling container bootstrap: {}", containerBootstrap.getClass().getSimpleName());
+                containerBootstrap.call();
+                success = true;
+                LOGGER.info("Container {} successfully!", type);
+            } catch (Exception ex) {
+                // Swarm is not extremely stable so we retry aggressively in every case
+                actualException = ex;
+                retryCount++;
+                LOGGER.error("Container {} failed to start, retrying [{}/{}]: {}", type,
+                        MAX_RETRY_COUNT, retryCount, ex.getMessage());
+                Thread.sleep(SLEEP_TIME);
             }
         }
-        if (exitNeeded) {
-            LOGGER.error(exitCriteria.exitMessage());
-            throw new CloudbreakOrchestratorCancelledException(exitCriteria.exitMessage());
-        }
+
         if (!success) {
             LOGGER.error(String.format("Container failed to start in %s attempts: %s", MAX_RETRY_COUNT, actualException));
             throw actualException;

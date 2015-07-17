@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
-import com.sequenceiq.cloudbreak.orchestrator.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
 public class StackDeletionBasedExitCriteriaModel extends ExitCriteriaModel {
 
