@@ -50,6 +50,16 @@
                                 </div>
                             </div>
                             <div class="form-group">
+                                <label class="col-sm-3 control-label" for="sl_username"></i>{{msg.active_cluster_username_label}}</label>
+                                <div class="col-sm-9">
+                                    <p id="sl_username" class="form-control-static">{{activeCluster.cluster.userName}}
+                                        <a href="" class="btn-sm btn-info" role="button" data-toggle="modal" data-target="#modal-credential-cluster" style="text-decoration: none;">
+                                            <i class="fa fa-key fa-fw"></i><span> {{msg.active_cluster_command_credential_label}}</span>
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="form-group">
                                 <label class="col-sm-3 control-label" for="sl_nodeCount">{{msg.active_cluster_node_count_label}}</label>
                                 <div class="col-sm-9">
                                     <p id="sl_nodeCount" class="form-control-static">{{activeCluster.nodeCount}}</p>
@@ -391,6 +401,65 @@
             </div>
         </div>
     </div>
+
+     <div class="modal fade" id="modal-credential-cluster" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
+            <div class="modal-dialog modal-md">
+                <div class="modal-content">
+                    <!-- .modal-header -->
+                    <div class="modal-body">
+                        <p>{{msg.cluster_list_credential_dialog_prefix}} <strong>{{activeCluster.name}}</strong> {{msg.cluster_list_credential_dialog_suffix}}</p>
+                        <form class="form" name="changeCredential">
+                            <div class="row">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label" for="newUserName">{{msg.cluster_form_ambari_user_label}}</label>
+                                    <div class="col-sm-8">
+                                        <input type="text" name="newUserName" class="form-control" id="newUserName"  ng-model="newCredential.newUserName" placeholder="{{msg.cluster_form_ambari_user_placeholder}}" ng-pattern="/^[a-z][-a-z0-9]*[a-z0-9]$/" ng-minlength="5" ng-maxlength="15" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top: 8px">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label" for="newPassword">{{msg.cluster_form_ambari_old_password_label}}</label>
+                                    <div class="col-sm-8">
+                                        <input type="password" name="oldPassword" class="form-control" id="oldPassword" ng-model="newCredential.oldPassword" placeholder="{{msg.cluster_form_ambari_password_placeholder}}" ng-minlength="5" ng-maxlength="50" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top: 8px">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label" for="newPassword">{{msg.cluster_form_ambari_new_password_label}}</label>
+                                    <div class="col-sm-8">
+                                        <input type="password" name="newPassword" class="form-control" id="newPassword" ng-model="newCredential.newPassword" placeholder="{{msg.cluster_form_ambari_password_placeholder}}" ng-minlength="5" ng-maxlength="50" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top: 8px">
+                                <div class="form-group" ng-class="{ 'has-error': changeCredential.newPasswordforce.$dirty && changeCredential.newPasswordforce.$invalid }">
+                                    <label class="col-sm-4 control-label" for="newPasswordforce">{{msg.cluster_form_ambari_new_password_label}}</label>
+                                    <div class="col-sm-8">
+                                        <input type="password" name="newPasswordforce" match="newCredential.newPassword" class="form-control" id="newPasswordforce" ng-model="newCredential.newPasswordforce" placeholder="{{msg.cluster_form_ambari_password_placeholder}}" ng-minlength="5" ng-maxlength="50" required>
+                                         <div class="help-block" ng-show="changeCredential.newPasswordforce.$dirty && changeCredential.newPasswordforce.$invalid"><i class="fa fa-warning"></i>
+                                          {{msg.error_change_credentail_cluster}}
+                                         </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <button type="button" class="btn btn-block btn-default" data-dismiss="modal">{{msg.cluster_list_cancel_command_label}}</button>
+                            </div>
+                            <div class="col-xs-6">
+                                <button type="button" class="btn btn-block btn-success" data-dismiss="modal" id="stackStackBtn" ng-click="changeClusterCredential(activeCluster)"><i class="fa fa-key fa-fw"></i>{{msg.active_cluster_command_credential_short_label}}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     <div class="modal fade" id="modal-reset-cluster" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
         <div class="modal-dialog modal-md">
