@@ -203,8 +203,10 @@ public class AmbariClusterConnector {
         Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
         PollingResult pollingResult = waitForHosts(stack, ambariClient, nodeCount, hostsInCluster);
         if (SUCCESS.equals(pollingResult)) {
-            if (recipesFound(hostGroupAsSet)) {
-                recipeEngine.setupRecipesOnHosts(stack, hostGroup.getRecipes(), new HashSet<>(hostMetadata));
+            boolean recipesFound = recipesFound(hostGroupAsSet);
+            if (recipesFound) {
+                recipeEngine.setupRecipesOnHosts(stack, hostGroup.getRecipes(), hostMetadata);
+                recipeEngine.executePreInstall(stack, hostMetadata);
             }
             try {
                 pollingResult = waitForAmbariOperations(stack, ambariClient, installServices(hosts, stack, ambariClient, hostGroupAdjustment));
@@ -214,6 +216,9 @@ public class AmbariClusterConnector {
                         pollingResult = restartHadoopServices(stack, ambariClient, false);
                         if (isSuccess(pollingResult)) {
                             result.addAll(hosts);
+                            if (recipesFound) {
+                                recipeEngine.executePostInstall(stack, hostMetadata);
+                            }
                         }
                     }
                 }

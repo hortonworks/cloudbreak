@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_AGENT;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -57,8 +58,26 @@ public class RecipeEngine {
         pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.PRE_INSTALL, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
     }
 
+    public void executePreInstall(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakSecuritySetupException {
+        pluginManager.triggerAndWaitForPlugins(stack,
+                ConsulPluginEvent.PRE_INSTALL,
+                DEFAULT_RECIPE_TIMEOUT,
+                AMBARI_AGENT,
+                Collections.<String>emptyList(),
+                getHostnames(hostMetadata));
+    }
+
     public void executePostInstall(Stack stack) throws CloudbreakSecuritySetupException {
         pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.POST_INSTALL, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
+    }
+
+    public void executePostInstall(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakSecuritySetupException {
+        pluginManager.triggerAndWaitForPlugins(stack,
+                ConsulPluginEvent.POST_INSTALL,
+                DEFAULT_RECIPE_TIMEOUT,
+                AMBARI_AGENT,
+                Collections.<String>emptyList(),
+                getHostnames(hostMetadata));
     }
 
     private void setupProperties(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakSecuritySetupException {
