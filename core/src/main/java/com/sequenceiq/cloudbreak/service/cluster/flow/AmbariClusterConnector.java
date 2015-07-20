@@ -188,8 +188,7 @@ public class AmbariClusterConnector {
         }
     }
 
-    public Set<String> installAmbariNode(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment, List<HostMetadata> hostMetadataNotUsed)
-            throws CloudbreakSecuritySetupException {
+    public Set<String> installAmbariNode(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) throws CloudbreakSecuritySetupException {
         Set<String> result = new HashSet<>();
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
@@ -575,40 +574,34 @@ public class AmbariClusterConnector {
         Map<String, Integer> stringIntegerMap = new HashMap<>();
         Map<String, String> componentsCategory = ambariClient.getComponentsCategory(blueprint);
         Map<String, Map<String, String>> hostComponentsStates = ambariClient.getHostComponentsStates();
+        Set<String> services = new HashSet<>();
         for (Map.Entry<String, Map<String, String>> hostComponentsEntry : hostComponentsStates.entrySet()) {
             Map<String, String> componentStateMap = hostComponentsEntry.getValue();
-            List<String> services = new ArrayList<>();
             for (Map.Entry<String, String> componentStateEntry : componentStateMap.entrySet()) {
-                String category = componentsCategory.get(componentStateEntry.getKey());
+                String componentKey = componentStateEntry.getKey();
+                String category = componentsCategory.get(componentKey);
                 if (!"CLIENT".equals(category)) {
-                    if ("INSTALLED".equals(componentStateEntry.getValue())) {
-                        if ("NODEMANAGER".equals(componentStateEntry.getKey())) {
-                            services.add("NODEMANAGER");
-                        } else if ("DATANODE".equals(componentStateEntry.getKey())) {
-                            services.add("DATANODE");
-                        } else if ("HBASE_REGIONSERVER".equals(componentStateEntry.getKey())) {
-                            services.add("HBASE_REGIONSERVER");
+                    if (!"STARTED".equals(componentStateEntry.getValue())) {
+                        if ("NODEMANAGER".equals(componentKey) || "DATANODE".equals(componentKey)) {
+                            services.add("HDFS");
+                        } else if ("HBASE_REGIONSERVER".equals(componentKey)) {
+                            services.add("HBASE");
                         } else {
-                            LOGGER.info("No need to restart ambari service: {}", componentStateEntry.getKey());
+                            LOGGER.info("No need to restart ambari service: {}", componentKey);
                         }
                     } else {
-                        LOGGER.info("Ambari service already running: {}", componentStateEntry.getKey());
+                        LOGGER.info("Ambari service already running: {}", componentKey);
                     }
-                }
-            }
-            if (!services.isEmpty()) {
-                try {
-                    Map<String, Integer> tmpMap = ambariClient.startComponentsOnHost(hostComponentsEntry.getKey(), services);
-                    for (Entry<String, Integer> stringIntegerEntry : tmpMap.entrySet()) {
-                        stringIntegerMap.put(String.format("%s-%s", hostComponentsEntry.getKey(), stringIntegerEntry.getKey()), stringIntegerEntry.getValue());
-                    }
-                } catch (HttpResponseException e) {
-                    String exceptionErrorMsg = AmbariClientExceptionUtil.getErrorMessage(e);
-                    String errorMessage = String.format("Ambari could not start components on host %s. %s", hostComponentsEntry.getKey(), exceptionErrorMsg);
-                    throw new CloudbreakException(errorMessage, e);
                 }
             }
         }
+        if (!services.isEmpty()) {
+            for (String service: services) {
+                int requestId = ambariClient.startService(service);
+                stringIntegerMap.put(service + "_START", requestId);
+            }
+        }
+
         if (!stringIntegerMap.isEmpty()) {
             return waitForAmbariOperations(stack, ambariClient, stringIntegerMap);
         } else {

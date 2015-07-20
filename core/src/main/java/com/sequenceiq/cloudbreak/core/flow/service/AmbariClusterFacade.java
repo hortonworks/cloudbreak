@@ -223,7 +223,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         Cluster cluster = clusterService.retrieveClusterByStackId(actualContext.getStackId());
         MDCBuilder.buildMdcContext(cluster);
         stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Scaling up ambari cluster.");
-        Set<String> hostNames = ambariClusterConnector.installAmbariNode(stack.getId(), actualContext.getHostGroupAdjustment(), actualContext.getCandidates());
+        Set<String> hostNames = ambariClusterConnector.installAmbariNode(stack.getId(), actualContext.getHostGroupAdjustment());
         updateInstanceMetadataAfterScaling(false, hostNames, stack);
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Upscale of cluster finished successfully.");
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
