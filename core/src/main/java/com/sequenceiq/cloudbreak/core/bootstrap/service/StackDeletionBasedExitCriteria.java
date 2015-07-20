@@ -6,19 +6,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
 public class StackDeletionBasedExitCriteria implements ExitCriteria {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDeletionBasedExitCriteria.class);
-
-    @Inject
-    private ClusterService clusterService;
 
     @Inject
     private StackService stackService;
@@ -30,9 +27,13 @@ public class StackDeletionBasedExitCriteria implements ExitCriteria {
         try {
             Stack stack = stackService.findLazy(model.getStackId());
             LOGGER.debug("Stack fetched: {}, stack: {}", model.getStackId(), stack);
-            if (stack == null || stack.getCluster() == null || stack.isDeleteInProgress() || stack.isDeleteCompleted()
-                || stack.getCluster().isDeleteInProgress() || stack.getCluster().isDeleteCompleted()) {
-                LOGGER.warn("Stack or cluster is in deletion phase no need for more polling");
+            if (stack == null || stack.isDeleteInProgress() || stack.isDeleteCompleted()) {
+                LOGGER.warn("Stack is in deletion phase no need for more polling");
+                return true;
+            }
+            Cluster cluster = stack.getCluster();
+            if (cluster != null && (cluster.isDeleteInProgress() || cluster.isDeleteCompleted())) {
+                LOGGER.warn("Cluster is in deletion phase no need for more polling");
                 return true;
             }
         } catch (Exception ex) {

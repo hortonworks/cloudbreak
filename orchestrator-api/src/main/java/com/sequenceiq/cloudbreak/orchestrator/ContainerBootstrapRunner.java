@@ -37,9 +37,8 @@ public class ContainerBootstrapRunner implements Callable<Boolean> {
         boolean success = false;
         int retryCount = 0;
         Exception actualException = null;
-        boolean exitNeeded = false;
         String type = containerBootstrap.getClass().getSimpleName().replace("Bootstrap", "");
-        while (!success && MAX_RETRY_COUNT >= retryCount && !exitNeeded) {
+        while (!success && MAX_RETRY_COUNT >= retryCount) {
             if (isExitNeeded()) {
                 LOGGER.error(exitCriteria.exitMessage());
                 throw new CloudbreakOrchestratorCancelledException(exitCriteria.exitMessage());
