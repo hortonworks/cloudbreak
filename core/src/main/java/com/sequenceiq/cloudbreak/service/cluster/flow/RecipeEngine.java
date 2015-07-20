@@ -51,7 +51,7 @@ public class RecipeEngine {
 
     public void setupRecipesOnHosts(Stack stack, Set<Recipe> recipes, Set<HostMetadata> hostMetadata) throws CloudbreakSecuritySetupException {
         Set<InstanceMetaData> instances = instanceMetadataRepository.findNotTerminatedForStack(stack.getId());
-        installPluginsOnHosts(stack, recipes, hostMetadata, instances);
+        installPluginsOnHosts(stack, recipes, hostMetadata, instances, true);
     }
 
     public void executePreInstall(Stack stack) throws CloudbreakSecuritySetupException {
@@ -91,19 +91,18 @@ public class RecipeEngine {
     private void installPlugins(Stack stack, Set<HostGroup> hostGroups, Set<InstanceMetaData> instances) throws CloudbreakSecuritySetupException {
         for (HostGroup hostGroup : hostGroups) {
             LOGGER.info("Installing plugins for recipes on hostgroup {}.", hostGroup.getName());
-            installPluginsOnHosts(stack, hostGroup.getRecipes(), hostGroup.getHostMetadata(), instances);
+            installPluginsOnHosts(stack, hostGroup.getRecipes(), hostGroup.getHostMetadata(), instances, false);
         }
     }
 
-    private void installPluginsOnHosts(Stack stack, Set<Recipe> recipes, Set<HostMetadata> hostMetadata, Set<InstanceMetaData> instances)
-            throws CloudbreakSecuritySetupException {
+    private void installPluginsOnHosts(Stack stack, Set<Recipe> recipes, Set<HostMetadata> hostMetadata, Set<InstanceMetaData> instances,
+            boolean existingHostGroup) throws CloudbreakSecuritySetupException {
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
         TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
         for (Recipe recipe : recipes) {
             Map<String, PluginExecutionType> plugins = recipe.getPlugins();
-            Map<String, Set<String>> eventIdMap =
-                    pluginManager.installPlugins(clientConfig, plugins, getHostnames(hostMetadata));
+            Map<String, Set<String>> eventIdMap = pluginManager.installPlugins(clientConfig, plugins, getHostnames(hostMetadata), existingHostGroup);
             pluginManager.waitForEventFinish(stack, instances, eventIdMap, recipe.getTimeout());
         }
     }

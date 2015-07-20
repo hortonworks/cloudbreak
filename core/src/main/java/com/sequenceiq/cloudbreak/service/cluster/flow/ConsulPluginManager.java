@@ -68,17 +68,23 @@ public class ConsulPluginManager implements PluginManager {
     }
 
     @Override
-    public Map<String, Set<String>> installPlugins(TLSClientConfig clientConfig, Map<String, PluginExecutionType> plugins, Set<String> hosts) {
+    public Map<String, Set<String>> installPlugins(TLSClientConfig clientConfig, Map<String, PluginExecutionType> plugins, Set<String> hosts,
+            boolean existingHostGroup) {
         Map<String, Set<String>> eventIdMap = new HashMap<>();
         ConsulClient client = ConsulUtils.createClient(clientConfig);
         for (Map.Entry<String, PluginExecutionType> plugin : plugins.entrySet()) {
             Set<String> installedHosts = new HashSet<>();
             if (PluginExecutionType.ONE_NODE.equals(plugin.getValue())) {
-                String installedHost = FluentIterable.from(hosts).first().get();
-                installedHosts.add(installedHost);
+                if (!existingHostGroup) {
+                    String installedHost = FluentIterable.from(hosts).first().get();
+                    installedHosts.add(installedHost);
+                } else {
+                    continue;
+                }
             } else {
                 installedHosts.addAll(hosts);
             }
+
             for (Map.Entry<String, Set<String>> nodeFilter : getNodeFilters(installedHosts).entrySet()) {
                 EventParams eventParams = new EventParams();
                 eventParams.setNode(nodeFilter.getKey());
