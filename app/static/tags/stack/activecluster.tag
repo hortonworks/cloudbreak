@@ -53,7 +53,7 @@
                                 <label class="col-sm-3 control-label" for="sl_username"></i>{{msg.active_cluster_username_label}}</label>
                                 <div class="col-sm-9">
                                     <p id="sl_username" class="form-control-static">{{activeCluster.cluster.userName}}
-                                        <a href="" class="btn-sm btn-info" role="button" data-toggle="modal" data-target="#modal-credential-cluster" style="text-decoration: none;">
+                                        <a ng-if="activeCluster.cluster.ambariServerIp != null" class="btn-sm btn-info" role="button" data-toggle="modal" data-target="#modal-credential-cluster" style="text-decoration: none;">
                                             <i class="fa fa-key fa-fw"></i><span> {{msg.active_cluster_command_credential_label}}</span>
                                         </a>
                                     </p>
