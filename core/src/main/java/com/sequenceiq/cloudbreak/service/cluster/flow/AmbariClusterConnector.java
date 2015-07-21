@@ -601,9 +601,13 @@ public class AmbariClusterConnector {
             }
         }
         if (!services.isEmpty()) {
-            for (String service: services) {
-                int requestId = ambariClient.startService(service);
-                stringIntegerMap.put(service + "_START", requestId);
+            if (services.contains("HDFS")) {
+                int requestId = ambariClient.startService("HDFS");
+                stringIntegerMap.put("HDFS_START", requestId);
+            }
+            if (services.contains("HBASE")) {
+                int requestId = ambariClient.startService("HBASE");
+                stringIntegerMap.put("HBASE_START", requestId);
             }
         }
 
