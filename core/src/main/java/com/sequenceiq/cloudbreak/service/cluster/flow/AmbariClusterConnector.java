@@ -386,14 +386,13 @@ public class AmbariClusterConnector {
         for (HostMetadata data : hostMetadata) {
             hostsToRemove.put(data.getHostName(), data);
         }
-        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
         List<String> hostList = new ArrayList<>(hostsToRemove.keySet());
         tryToDeleteHosts(stack, components, hostList);
         PollingResult pollingResult = restartHadoopServices(stack, ambariClient, true);
         if (isSuccess(pollingResult)) {
-            hostGroup.getHostMetadata().removeAll(hostsToRemove.values());
-            hostGroupRepository.save(hostGroup);
             for (HostMetadata metadata : hostsToRemove.values()) {
+                HostMetadata findedHostMetaData = hostMetadataRepository.findHostsInClusterByName(cluster.getId(), metadata.getHostName());
+                hostMetadataRepository.delete(findedHostMetaData.getId());
                 InstanceMetaData hostInStack = instanceMetadataRepository.findHostInStack(stack.getId(), metadata.getHostName());
                 instanceTerminationHandler.terminateInstance(stack, hostInStack);
             }
