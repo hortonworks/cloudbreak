@@ -383,11 +383,9 @@ public class AwsConnector implements CloudPlatformConnector {
         String consoleOutput = amazonEC2Client.getConsoleOutput(new GetConsoleOutputRequest().withInstanceId(gatewayId)).getDecodedOutput();
 
         Set<String> result = FingerprintParserUtil.parseFingerprints(consoleOutput);
-
-        // disabled fingerprint validation, since RHEL 7 and CentOS 7 does not return fingerprints on AWS
-        // if (result.isEmpty()) {
-        //    throw new AwsResourceException("Couldn't parse SSH fingerprint from console output.");
-        //}
+        if (result.isEmpty()) {
+            throw new AwsResourceException("Couldn't parse SSH fingerprint from console output.");
+        }
         return result;
     }
 

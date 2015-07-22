@@ -444,7 +444,7 @@ public class SimpleStackFacade implements StackFacade {
         ProvisioningContext actualContext = (ProvisioningContext) context;
         Stack stack = stackService.getById(actualContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
-        tlsSetupService.setupTls(actualContext.getCloudPlatform(), stack, actualContext.getSetupProperties());
+        tlsSetupService.setupTls(actualContext.getCloudPlatform(), stack);
         return actualContext;
     }
 
