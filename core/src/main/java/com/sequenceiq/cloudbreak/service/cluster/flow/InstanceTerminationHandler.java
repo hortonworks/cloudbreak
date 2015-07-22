@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
@@ -51,33 +53,51 @@ public class InstanceTerminationHandler {
     private CloudbreakEventService eventService;
     @javax.annotation.Resource
     private Map<CloudPlatform, MetadataSetup> metadataSetups;
+    @Inject
+    private CloudbreakMessagesService cloudbreakMessagesService;
+
+    private enum Msg {
+        STACK_INSTANCE_TERMINATE("stack.instance.terminate"),
+        STACK_INSTANCE_DELETE("stack.instance.delete");
+
+        private String code;
+
+        Msg(String msgCode) {
+            code = msgCode;
+        }
+
+        public String code() {
+            return code;
+        }
+    }
 
     public void terminateInstance(Stack stack, InstanceMetaData instanceMetaData) {
-        String message = String.format("Terminate instance %s.", instanceMetaData.getInstanceId());
+        String message = cloudbreakMessagesService.getMessage(Msg.STACK_INSTANCE_TERMINATE.code(),
+                Arrays.asList(instanceMetaData.getInstanceId()));
         LOGGER.info(message);
         eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), message);
         InstanceGroup ig = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceMetaData.getInstanceGroup().getGroupName());
         ig.setNodeCount(ig.getNodeCount() - 1);
         instanceGroupRepository.save(ig);
-        message = String.format("Delete '%s' node. and Decrease the nodecount on %s instancegroup",
-                instanceMetaData.getInstanceId(), ig.getGroupName());
+        message = cloudbreakMessagesService.getMessage(Msg.STACK_INSTANCE_DELETE.code(),
+                Arrays.asList(instanceMetaData.getInstanceId(), ig.getGroupName()));
         LOGGER.info(message);
         eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), message);
         deleteResourceAndDependencies(stack, instanceMetaData);
         deleteInstanceResourceFromDatabase(stack, instanceMetaData);
         instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
         instanceMetaDataRepository.save(instanceMetaData);
-        LOGGER.info("The status of instanceMetadata with {} id and {} name setted to TERMINATED.",
-                instanceMetaData.getId(), instanceMetaData.getInstanceId());
+        LOGGER.info("InstanceMetadata [ id: {}, name: {} ] status set {}",
+                instanceMetaData.getId(), instanceMetaData.getInstanceId(), instanceMetaData.getInstanceStatus());
     }
 
     private void deleteResourceAndDependencies(Stack stack, InstanceMetaData instanceMetaData) {
-        LOGGER.info(String.format("Instance %s rollback started.", instanceMetaData.getInstanceId()));
+        LOGGER.info("Rolling back instance: {}", instanceMetaData.getInstanceId());
         CloudPlatformConnector cloudPlatformConnector = cloudPlatformConnectors.get(stack.cloudPlatform());
         Set<String> instanceIds = new HashSet<>();
         instanceIds.add(instanceMetaData.getInstanceId());
         cloudPlatformConnector.removeInstances(stack, instanceIds, instanceMetaData.getInstanceGroup().getGroupName());
-        LOGGER.info("Instance deleted with {} id and {} name.", instanceMetaData.getId(), instanceMetaData.getInstanceId());
+        LOGGER.info("Instance [ id: {}, name: {} ] deleted", instanceMetaData.getId(), instanceMetaData.getInstanceId());
     }
 
     private void deleteInstanceResourceFromDatabase(Stack stack, InstanceMetaData instanceMetaData) {

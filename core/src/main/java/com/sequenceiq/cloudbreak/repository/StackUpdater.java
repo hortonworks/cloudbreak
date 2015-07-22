@@ -57,10 +57,6 @@ public class StackUpdater {
                 stack.setStatusReason(statusReason);
             }
             stack = stackRepository.save(stack);
-            if (statusReason != null && !statusReason.isEmpty()) {
-                LOGGER.info("Updated stack: [status: '{}', statusReason: '{}'].", status.name(), statusReason);
-                cloudbreakEventService.fireCloudbreakEvent(stackId, status.name(), statusReason);
-            }
         }
         return stack;
     }

@@ -65,7 +65,6 @@ public class StackUpdaterTest {
         Stack newStack = underTest.updateStackStatus(1L, Status.DELETE_COMPLETED, "test");
         assertEquals(Status.DELETE_COMPLETED, newStack.getStatus());
         assertEquals("test", newStack.getStatusReason());
-        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
     }
 
     @Test

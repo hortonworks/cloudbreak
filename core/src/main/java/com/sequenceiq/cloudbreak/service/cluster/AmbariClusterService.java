@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.service.cluster.DataNodeUtils.sortByUsed
 import java.io.IOException;
 import java.net.ConnectException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -60,6 +61,7 @@ import com.sequenceiq.cloudbreak.service.cluster.event.ClusterUserNamePasswordUp
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
@@ -112,6 +114,26 @@ public class AmbariClusterService implements ClusterService {
 
     @Inject
     private CloudbreakEventService eventService;
+
+    @Inject
+    private CloudbreakMessagesService cloudbreakMessagesService;
+
+    private enum Msg {
+        AMBARI_CLUSTER_START_IGNORED("ambari.cluster.start.ignored"),
+        AMBARI_CLUSTER_STOP_IGNORED("ambari.cluster.stop.ignored"),
+        AMBARI_CLUSTER_HOST_STATUS_UPDATED("ambari.cluster.host.status.updated");
+
+        private String code;
+
+        Msg(String msgCode) {
+            code = msgCode;
+        }
+
+        public String code() {
+            return code;
+        }
+        }
+
 
     @Override
     public Cluster create(CbUser user, Long stackId, Cluster cluster) {
@@ -256,7 +278,7 @@ public class AmbariClusterService implements ClusterService {
             flowManager.triggerClusterStartRequested(retVal);
         } else {
             if (cluster.isAvailable()) {
-                String statusDesc = "Cluster start request is ignored, because the cluster is already available.";
+                String statusDesc = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_START_IGNORED.code());
                 LOGGER.info(statusDesc);
                 eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), statusDesc);
             } else if (!cluster.isClusterReadyForStart() && !cluster.isStartFailed()) {
@@ -277,7 +299,7 @@ public class AmbariClusterService implements ClusterService {
     private ClusterStatusUpdateRequest stop(Stack stack, Cluster cluster, StatusRequest statusRequest) {
         ClusterStatusUpdateRequest retVal = null;
         if (cluster.isStopped()) {
-            String statusDesc = "Cluster stop request is ignored, because the cluster is already stopped.";
+            String statusDesc = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_STOP_IGNORED.code());
             LOGGER.info(statusDesc);
             eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), statusDesc);
         } else if (stack.infrastructureIsEphemeral()) {
@@ -603,7 +625,7 @@ public class AmbariClusterService implements ClusterService {
                 hostMetadata.setHostMetadataState(newState);
                 hostMetadataRepository.save(hostMetadata);
                 eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                        String.format("Host (%s) state has been updated to: %s", hostName, newState.name()));
+                        cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_STATUS_UPDATED.code(), Arrays.asList(hostName, newState.name())));
             }
         }
     }

@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.notification;
 
 import java.util.Date;
 
-import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Status;
 
 public class Notification {
@@ -25,22 +24,6 @@ public class Notification {
     public Notification() {
     }
 
-    public Notification(CloudbreakEvent event) {
-        this.eventType = event.getEventType();
-        this.eventTimestamp = event.getEventTimestamp();
-        this.eventMessage = event.getEventMessage();
-        this.owner = event.getOwner();
-        this.account = event.getAccount();
-        this.cloud = event.getCloud();
-        this.region = event.getRegion();
-        this.blueprintName = event.getBlueprintName();
-        this.blueprintId = event.getBlueprintId();
-        this.stackId = event.getStackId();
-        this.stackName = event.getStackName();
-        this.stackStatus = event.getStackStatus();
-        this.nodeCount = event.getNodeCount();
-        this.instanceGroup = event.getInstanceGroup();
-    }
 
     public String getEventType() {
         return eventType;
