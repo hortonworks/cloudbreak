@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 
@@ -43,6 +44,24 @@ public class MetadataSetupService {
 
     @Inject
     private CloudbreakEventService eventService;
+
+    @Inject
+    private CloudbreakMessagesService cloudbreakMessagesService;
+
+    private enum Msg {
+        STACK_METADATA_SETUP_UPSCALING_BILLING_CHANGED("stack.metadata.setup.billing.changed");
+
+        private String code;
+
+        Msg(String msgCode) {
+            code = msgCode;
+        }
+
+        public String code() {
+            return code;
+        }
+    }
+
 
     public String setupMetadata(final CloudPlatform cloudPlatform, Stack stack) throws Exception {
         Set<CoreInstanceMetaData> coreInstanceMetaData = metadataSetups.get(cloudPlatform).collectMetadata(stack);
@@ -66,7 +85,8 @@ public class MetadataSetupService {
         int nodeCount = instanceGroup.getNodeCount() + coreInstanceMetaData.size();
         instanceGroup.setNodeCount(nodeCount);
         instanceGroupRepository.save(instanceGroup);
-        eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(), "Billing changed due to upscaling of cluster infrastructure.");
+        eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
+                cloudbreakMessagesService.getMessage(Msg.STACK_METADATA_SETUP_UPSCALING_BILLING_CHANGED.code));
         return upscaleCandidateAddresses;
     }
 

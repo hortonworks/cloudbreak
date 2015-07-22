@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.status;
 
+import java.util.Arrays;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -14,6 +16,7 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 @Component
@@ -35,13 +38,30 @@ public class AmbariClusterStatusUpdater {
     @Inject
     private TlsSecurityService tlsSecurityService;
 
+    @Inject
+    private CloudbreakMessagesService cloudbreakMessagesService;
+
+    private enum Msg {
+        AMBARI_CLUSTER_COULD_NOT_SYNC("ambari.cluster.could.not.sync"),
+        AMBARI_CLUSTER_SYNCHRONIZED("ambari.cluster.synchronized");
+
+        private String code;
+
+        Msg(String msgCode) {
+            code = msgCode;
+        }
+
+        public String code() {
+            return code;
+        }
+    }
+
+
     public void updateClusterStatus(Stack stack, Cluster cluster) throws CloudbreakSecuritySetupException {
         if (isStackOrClusterStatusInvalid(stack, cluster)) {
-            LOGGER.warn(String.format("Cluster could not be synchronized while stack is in %s state and cluster is in %s state!",
-                    stack.getStatus(), cluster.getStatus()));
-            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(),
-                    String.format("Cluster could not be synchronized while stack is in %s state and cluster is in %s state!",
-                    stack.getStatus().normalizedStatusName(), cluster.getStatus().normalizedStatusName()));
+            String msg = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_COULD_NOT_SYNC.code(), Arrays.asList(stack.getStatus(), cluster.getStatus()));
+            LOGGER.warn(msg);
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), msg);
         } else {
             Long stackId = stack.getId();
             String blueprintName = cluster != null ? cluster.getBlueprint().getBlueprintName() : null;
@@ -71,7 +91,8 @@ public class AmbariClusterStatusUpdater {
                 statusReason = "The cluster's state is up to date.";
             }
         }
-        cloudbreakEventService.fireCloudbreakEvent(stackId, statusInEvent.name(), "Synced cluster state with Ambari: " + statusReason);
+        cloudbreakEventService.fireCloudbreakEvent(stackId, statusInEvent.name(), cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_SYNCHRONIZED.code(),
+                Arrays.asList(statusReason)));
     }
 
     private boolean isUpdateEnabled(ClusterStatus clusterStatus) {
