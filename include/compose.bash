@@ -341,14 +341,6 @@ uluwatu:
         - 3000:3000
     image: sequenceiq/uluwatu-bin:$DOCKER_TAG_ULUWATU
 
-proxy:
-    ports:
-        - 80:80
-    environment:
-        - DEBUG=1
-    dns: $PRIVATE_IP
-    image: sequenceiq/cbdproxy:$DOCKER_TAG_PROXY
-
 pcdb:
     environment:
         - SERVICE_NAME=pcdb
