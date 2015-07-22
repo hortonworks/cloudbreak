@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.transport.verification.HostKeyVerifier;
-import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 
 @Component
 public class TlsSetupService {
@@ -65,29 +64,23 @@ public class TlsSetupService {
     @Value("#{'${cb.cert.dir:" + CB_CERT_DIR + "}' + '/' + '${cb.tls.cert.file:" + CB_TLS_CERT_FILE + "}'}")
     private String tlsCertificatePath;
 
-    public void setupTls(CloudPlatform cloudPlatform, Stack stack, Map<String, Object> setupProperties) throws CloudbreakException {
+    public void setupTls(CloudPlatform cloudPlatform, Stack stack) throws CloudbreakException {
 
         InstanceMetaData gateway = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
         CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
         LOGGER.info("SSH into gateway node to setup certificates on gateway.");
         Set<String> sshFingerprints = connector.getSSHFingerprints(stack, gateway.getInstanceId());
         LOGGER.info("Fingerprint has been determined: {}", sshFingerprints);
-        setupTls(cloudPlatform, stack, gateway.getPublicIp(), connector.getSSHUser(), stack.getCredential().getPublicKey(), sshFingerprints);
+        setupTls(stack, gateway.getPublicIp(), connector.getSSHUser(), sshFingerprints);
 
     }
 
-    private void setupTls(CloudPlatform cloudPlatform, Stack stack, String publicIp, String user, String publicKey, Set<String> sshFingerprints) throws
+    private void setupTls(Stack stack, String publicIp, String user, Set<String> sshFingerprints) throws
             CloudbreakException {
         LOGGER.info("SSHClient parameters: stackId: {}, publicIp: {},  user: {}", stack.getId(), publicIp, user);
         final SSHClient ssh = new SSHClient();
         try {
-            HostKeyVerifier hostKeyVerifier;
-            if (cloudPlatform == CloudPlatform.AWS) {
-                hostKeyVerifier = new PromiscuousVerifier();
-            } else {
-                hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints);
-            }
-
+            HostKeyVerifier hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints);
             sshCheckerTaskContextPollingService.pollWithTimeout(
                     sshCheckerTask,
                     new SshCheckerTaskContext(stack, hostKeyVerifier, publicIp, user, tlsSecurityService.getSshPrivateFileLocation(stack.getId())),
