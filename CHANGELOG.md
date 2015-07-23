@@ -2,6 +2,15 @@
 
 ### Fixed
 
+### Added
+
+### Removed
+
+### Changed
+## [v0.5.7] - 2015-07-23
+
+### Fixed
+
 - Fix make release dependency
 - Fix CHANGELOG generation at `make release-next-ver` avoid inserting extra -e
 
