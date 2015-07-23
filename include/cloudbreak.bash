@@ -26,8 +26,8 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_PERISCOPE 0.5.6
     env-import DOCKER_TAG_PCDB 0.5.6
     env-import DOCKER_TAG_UAA 1.8.1-v2
-    env-import DOCKER_TAG_ULUWATU 1.0.0
-    env-import DOCKER_TAG_SULTANS 1.0.0
+    env-import DOCKER_TAG_ULUWATU 1.0.1
+    env-import DOCKER_TAG_SULTANS 1.0.1
     env-import DOCKER_TAG_AMBASSADOR 0.5.0
     env-import DOCKER_TAG_CERT_TOOL 0.0.3
     env-import DOCKER_TAG_CLOUDBREAK_SHELL 0.5.1
