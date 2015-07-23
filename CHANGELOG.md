@@ -7,10 +7,10 @@
 ### Removed
 
 ### Changed
-## [v0.5.9] - 2015-07-23
+## [v1.0.0] - 2015-07-23
 
 ### Fixed
-
+- GA Release
 ### Added
 
 ### Removed
