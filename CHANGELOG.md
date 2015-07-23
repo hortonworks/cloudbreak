@@ -7,6 +7,15 @@
 ### Removed
 
 ### Changed
+## [v0.5.9] - 2015-07-23
+
+### Fixed
+
+### Added
+
+### Removed
+
+### Changed
 ## [v0.5.8] - 2015-07-23
 
 ### Fixed
