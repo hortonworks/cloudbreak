@@ -1,8 +1,10 @@
--e ## Unreleased
+## Unreleased
 
 ### Fixed
 
 ### Added
+
+- Release artifacts are published at public-repo-1.hortonworks.com/HDP/cloudbreak/
 
 ### Removed
 
