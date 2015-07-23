@@ -8,6 +8,18 @@
 
 ### Changed
 
+## [v0.5.6] - 2015-07-23
+
+### Fixed
+
+### Added
+
+- Release artifacts are published at public-repo-1.hortonworks.com/HDP/cloudbreak/
+
+### Removed
+
+### Changed
+
 ## [v0.5.5] - 2015-07-10
 
 ### Fixed

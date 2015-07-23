@@ -5,6 +5,8 @@ ARCH=$(shell uname -m)
 VERSION=$(shell cat VERSION)
 GIT_REV=$(shell git rev-parse --short HEAD)
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
+S3_TARGET?=s3://public-repo-1.hortonworks.com/HDP/cloudbreak/
+#S3_TARGET=s3://public-repo.sequenceiq.com
 
 ifeq ($(GIT_BRANCH), release)
 FLAGS="-X main.Version $(VERSION)"
@@ -44,17 +46,25 @@ install-test:
 	docker build -f Dockerfile.installtest -t cbd:delme . 
 	docker run --rm cbd:delme cbd --version
 
-release:
+prepare-release: build
 	rm -rf release && mkdir release
 
 	cp $(ARTIFACTS) build/Linux/
 	tar -zcf release/$(NAME)_$(VERSION)_Linux_$(ARCH).tgz -C build/Linux $(ARTIFACTS) $(BINARYNAME)
 	cp $(ARTIFACTS) build/Darwin/
 	tar -zcf release/$(NAME)_$(VERSION)_Darwin_$(ARCH).tgz -C build/Darwin $(ARTIFACTS) $(BINARYNAME)
+	
+release:
 
 	gh-release checksums sha256
 	gh-release create sequenceiq/$(NAME) $(VERSION) $(GIT_BRANCH) v$(VERSION)
-	# aws s3 cp --region us-east-1 release/cloudbreak-deployer_$(VERSION)_Linux_$(ARCH).tgz  s3://public-repo.sequenceiq.com
+	# upload to s3 bucket
+	docker run --rm \
+		-v $(PWD):/data \
+		-w /data \
+		-e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) \
+		-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) \
+		anigeo/awscli s3 cp release/$(NAME)_$(VERSION)_Linux_$(ARCH).tgz $(S3_TARGET)
 
 release-next-ver: deps
 	./release-next-ver.sh 

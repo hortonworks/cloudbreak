@@ -21,13 +21,13 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_CONSUL v0.5.0-v3
     env-import DOCKER_TAG_REGISTRATOR v5
     env-import DOCKER_TAG_POSTGRES 9.4.1
-    env-import DOCKER_TAG_CLOUDBREAK 0.5.177
-    env-import DOCKER_TAG_CBDB 0.5.177
+    env-import DOCKER_TAG_CLOUDBREAK 1.0.0-rc.2
+    env-import DOCKER_TAG_CBDB 1.0.0-rc.1
     env-import DOCKER_TAG_PERISCOPE 0.5.6
     env-import DOCKER_TAG_PCDB 0.5.6
     env-import DOCKER_TAG_UAA 1.8.1-v2
-    env-import DOCKER_TAG_ULUWATU 0.5.48
-    env-import DOCKER_TAG_SULTANS 0.5.6
+    env-import DOCKER_TAG_ULUWATU 1.0.0
+    env-import DOCKER_TAG_SULTANS 1.0.0
     env-import DOCKER_TAG_AMBASSADOR 0.5.0
     env-import DOCKER_TAG_CERT_TOOL 0.0.3
     env-import DOCKER_TAG_CLOUDBREAK_SHELL 0.5.1
@@ -119,7 +119,6 @@ cloudbreak-conf-uaa() {
 }
 
 cloudbreak-conf-defaults() {
-    env-import PRIVATE_IP
     env-import PUBLIC_IP
 
     env-import CB_HOST_ADDR $PUBLIC_IP
@@ -291,9 +290,9 @@ util-token() {
     local TOKEN=$(curl -siX POST \
         -H "accept: application/x-www-form-urlencoded" \
         -d credentials='{"username":"'${UAA_DEFAULT_USER_EMAIL}'","password":"'${UAA_DEFAULT_USER_PW}'"}' \
-        "$(boot2docker ip):8089/oauth/authorize?response_type=token&client_id=cloudbreak_shell&scope.0=openid&source=login&redirect_uri=http://cloudbreak.shell" \
+        "${PRIVATE_IP}:8089/oauth/authorize?response_type=token&client_id=cloudbreak_shell&scope.0=openid&source=login&redirect_uri=http://cloudbreak.shell" \
            | grep Location | cut -d'=' -f 2 | cut -d'&' -f 1)
-    debug TOKEN=$TOKEN
+    info TOKEN=$TOKEN
 }
 
 util-local-dev() {
