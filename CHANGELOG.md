@@ -7,6 +7,17 @@
 ### Removed
 
 ### Changed
+## [v0.5.8] - 2015-07-23
+
+### Fixed
+
+- Fix CircleCI release. CircleCI doesn’t allow --rm on docker run
+
+### Added
+
+### Removed
+
+### Changed
 ## [v0.5.7] - 2015-07-23
 
 ### Fixed
