@@ -59,7 +59,7 @@ release: prepare-release
 	gh-release checksums sha256
 	gh-release create sequenceiq/$(NAME) $(VERSION) $(GIT_BRANCH) v$(VERSION)
 	# upload to s3 bucket
-	docker run --rm \
+	docker run \
 		-v $(PWD):/data \
 		-w /data \
 		-e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) \
@@ -67,7 +67,7 @@ release: prepare-release
 		anigeo/awscli s3 cp release/$(NAME)_$(VERSION)_Linux_$(ARCH).tgz $(S3_TARGET)
 
 release-next-ver: deps
-	./release-next-ver.sh 
+	./release-next-ver.sh
 
 circleci:
 	rm ~/.gitconfig
