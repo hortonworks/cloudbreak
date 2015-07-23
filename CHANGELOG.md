@@ -1,6 +1,8 @@
--e ## Unreleased
+## Unreleased
 
 ### Fixed
+
+- Fixed make release dependency
 
 ### Added
 
