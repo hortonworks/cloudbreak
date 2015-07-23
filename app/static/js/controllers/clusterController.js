@@ -72,7 +72,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.selectBlueprintreinstallChange = function () {
-          var actualBp = $filter('filter')($rootScope.blueprints, { id: $rootScope.reinstallClusterObject.blueprintId});
+          var actualBp = $filter('filter')($rootScope.blueprints, { id: $rootScope.reinstallClusterObject.blueprintId}, true);
           var hostGroups = [];
           var index = 0;
           $rootScope.activeCluster.instanceGroups.forEach(function(value) {
@@ -93,7 +93,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
           if (tmpTemplate != null) {
             tmpTemplateId = tmpTemplate.id;
           }
-          var actualBp = $filter('filter')($rootScope.blueprints, { id: $scope.cluster.blueprintId});
+          var actualBp = $filter('filter')($rootScope.blueprints, { id: $scope.cluster.blueprintId}, true);
           var instanceGroups = [];
           var hostGroups = [];
           instanceGroups.push({templateId: tmpTemplateId, group: "cbgateway", nodeCount: 1, type: "GATEWAY"});
