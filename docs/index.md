@@ -183,25 +183,27 @@ At high level the supported list of components can be grouped into main categori
 | KAFKA	  | KAFKA_BROKER                                      |
 | KNOX	  | KNOX_GATEWAY                                      |
 | NAGIOS	  | NAGIOS_SERVER                                      |
+| ATLAS	  | ATLAS                                     |
+| CLOUDBREAK	  | CLOUDBREAK                                      |
 
 
 We provide a list of default Hadoop cluster Blueprints for your convenience, however you can always build and use your own Blueprint.
 
-* hdp-small-default - HDP 2.2 blueprint
+* hdp-small-default - HDP 2.3 blueprint
 
-This is a complex [Blueprint](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/core/src/main/resources/defaults/blueprints/hdp-small-default.bp) which allows you to launch a multi node, fully distributed HDP 2.2 Cluster in the cloud.
+This is a complex [Blueprint](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/core/src/main/resources/defaults/blueprints/hdp-small-default.bp) which allows you to launch a multi node, fully distributed HDP 2.3 Cluster in the cloud.
 
 It allows you to use the following services: HDFS, YARN, MAPREDUCE2, KNOX, HBASE, HIVE, HCATALOG, WEBHCAT, SLIDER, OOZIE, PIG, SQOOP, METRICS, TEZ, FALCON, ZOOKEEPER.
 
-* hdp-streaming-cluster - HDP 2.2 blueprint
+* hdp-streaming-cluster - HDP 2.3 blueprint
 
-This is a streaming [Blueprint](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/core/src/main/resources/defaults/blueprints/hdp-streaming-cluster.bp) which allows you to launch a multi node, fully distributed HDP 2.2 Cluster in the cloud, optimized for streaming jobs.
+This is a streaming [Blueprint](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/core/src/main/resources/defaults/blueprints/hdp-streaming-cluster.bp) which allows you to launch a multi node, fully distributed HDP 2.3 Cluster in the cloud, optimized for streaming jobs.
 
 It allows you to use the following services: HDFS, YARN, MAPREDUCE2, STORM, KNOX, HBASE, HIVE, HCATALOG, WEBHCAT, SLIDER, OOZIE, PIG, SQOOP, METRICS, TEZ, FALCON, ZOOKEEPER.
 
-* hdp-spark-cluster - HDP 2.2 blueprint
+* hdp-spark-cluster - HDP 2.3 blueprint
 
-This is an analytics [Blueprint](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/core/src/main/resources/defaults/blueprints/hdp-spark-cluster.bp) which allows you to launch a multi node, fully distributed HDP 2.2 Cluster in the cloud, optimized for analytic jobs.
+This is an analytics [Blueprint](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/core/src/main/resources/defaults/blueprints/hdp-spark-cluster.bp) which allows you to launch a multi node, fully distributed HDP 2.3 Cluster in the cloud, optimized for analytic jobs.
 
 It allows you to use the following services: HDFS, YARN, MAPREDUCE2, SPARK, ZEPPELIN, KNOX, HBASE, HIVE, HCATALOG, WEBHCAT, SLIDER, OOZIE, PIG, SQOOP, METRICS, TEZ, FALCON, ZOOKEEPER.
 
@@ -659,35 +661,55 @@ All the Hadoop ecosystem related code, configuration and services are inside Doc
 
 We needed to find a unified way to provision, manage and configure Hadoop clusters - welcome **Apache Ambari**.
 
-###Public Beta
-The first public beta version of Cloudbreak supports Hadoop on Amazon's EC2, Microsoft's Azure, Google Cloud Platform and OpenStack cloud providers. The supported Hadoop platform is the Hortonworks Data Platform - the 100% open source Hadoop distribution.
+###General availability
+The 1.0.0 version of Cloudbreak supports Hadoop on Amazon's EC2, Microsoft's Azure, Google Cloud Platform and OpenStack cloud providers. The supported Hadoop platform is the Hortonworks Data Platform (HDP - 2.3)- the 100% open source Hadoop distribution.
 
-Versions:
+**Versions:**
 
-CentOS - 6.5
-Hortonworks Data Platform - 2.2
-Apache Hadoop - 2.6.0
-Apache Tez - 0.6
-Apache Pig - 0.14
-Apache Hive & HCatalog - 0.14.0
-Apache HBase - 0.98.4
-Apache Phoenix - 4.2
-Apache Accumulo - 1.6.1
-Apache Storm - 0.9.3
-Apache Spark - 1.2.0
-Apache Slider - 0.5.1
-Apache Solr -  4.10.0
-Apache Kafka - 0.8.1
-Apache Falcon - 0.6.0
-Apache Sqoop - 1.4.5
-Apache Flume - 1.5.0
-Apache Ambari - 1.7.0
-Apache Oozie - 4.1.0
-Apache Zookeeper - 3.4.5
-Apache Knox - 0.5.0
-Docker - 1.6.2
-Swarm - 0.2
-Consul - 0.5
+*System*
+
+CentOS - 6.6
+Docker - 1.7.0
+Swarm - 0.3.0
+Consul - 0.5.0
+
+*Data management*
+
+Apache Hadoop - 2.7.1
+Apache YARN - 2.7.1
+
+*Data access*
+
+Apache Pig - 0.15.0
+Apache Hive & HCatalog - 1.2.1
+Apache Tez - 0.7.0
+Apache Solr -  5.2.1
+Apache Spark - 1.3.1
+Apache Slider - 0.80.0
+Apache HBase - 1.1.1
+Apache Phoenix - 4.4.0
+Apache Accumulo - 1.7.0
+Apache Storm - 0.10.0
+
+*Governance and Integration*
+
+Apache Falcon - 0.6.1
+Apache Atlas - 0.5.0
+Apache Sqoop - 1.4.6
+Apache Flume - 1.5.2
+Apache Kafka - 0.8.2
+
+*Operations*
+
+Apache Ambari - 2.1.0
+Apache Oozie - 4.2.0
+Apache Zookeeper - 3.4.6
+
+*Security*
+
+Apache Knox - 0.6.0
+Apache Ranger - 0.5.0
+
 
 ###Future releases
 
@@ -706,7 +728,7 @@ Supported cloud providers:
   * Google Cloud Platform
   * OpenStack
 
-While we have just released the first public beta version of Cloudbreak, we have already started working on other cloud providers - namely *Rackspace* and *HP Helion Public Cloud*.
+While we have just released the first public GA version of Cloudbreak, we have already started working on other cloud providers - namely *Rackspace* and *HP Helion Public Cloud*.
 We have received many requests from people to integrate Cloudbreak with 3d party hypervisors and cloud providers - as IBM's SoftLayer. In case you'd like to have your favorite cloud provider listed don't hesitate to contact us or use our SDK and process to add yours. You can fill the following [questionnaire](https://docs.google.com/forms/d/129RVh6VfjRsuuHOcS3VPbFYTdM2SEjANDsGCR5Pul0I/viewform) and request your favorite cloud provider. In case you'd like to integrate your favorite provider we are happy to support you and merge your contribution.
 
 Enjoy Cloudbreak - the Hadoop as a Service API which brings you a Hadoop ecosystem in minutes. You are literaly one click or REST call away from a fully functional, distributed Hadoop cluster.
