@@ -9,7 +9,7 @@ echo $VER > VERSION
 
 # edit CHANGELOG.md
 sed -i "s/## Unreleased/## $REL_DATE/" CHANGELOG.md
-echo -e '## Unreleased\n\n### Fixed\n\n### Added\n\n### Removed\n\n### Changed\n'| cat - CHANGELOG.md | tee CHANGELOG.md
+printf '## Unreleased\n\n### Fixed\n\n### Added\n\n### Removed\n\n### Changed\n'| cat - CHANGELOG.md | tee CHANGELOG.md
 
 git commit -m "prepare for release $VER" VERSION CHANGELOG.md
 git push origin master

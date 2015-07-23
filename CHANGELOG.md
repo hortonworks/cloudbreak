@@ -2,7 +2,8 @@
 
 ### Fixed
 
-- Fixed make release dependency
+- Fix make release dependency
+- Fix CHANGELOG generation at `make release-next-ver` avoid inserting extra -e
 
 ### Added
 
