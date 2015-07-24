@@ -1,9 +1,13 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> bfc26ff... CLOUD-932 proper versioning
 import org.ajoberstar.gradle.git.release.opinion.Strategies
 import org.ajoberstar.gradle.git.release.opinion.Strategies.BuildMetadata
 import org.ajoberstar.gradle.git.release.opinion.Strategies.PreRelease
 import org.ajoberstar.gradle.git.release.semver.ChangeScope
 import org.ajoberstar.gradle.git.release.semver.PartialSemVerStrategy
+<<<<<<< HEAD
 import org.ajoberstar.gradle.git.release.semver.SemVerStrategyState
 import org.ajoberstar.gradle.git.release.semver.SemVerStrategy
 import org.ajoberstar.gradle.git.release.semver.TagUtil
@@ -56,6 +60,17 @@ final class VersionStrategies {
         }
 
         final PartialSemVerStrategy INCREMENT_FROM_PRE_RELEASE = closure { state ->
+=======
+import org.ajoberstar.gradle.git.release.semver.SemVerStrategy
+import org.ajoberstar.grgit.Grgit
+
+import static org.ajoberstar.gradle.git.release.semver.StrategyUtil.*
+
+final class VersionStrategies {
+
+    static final class Normal {
+        static final PartialSemVerStrategy INCREMENT_FROM_RC = closure { state ->
+>>>>>>> bfc26ff... CLOUD-932 proper versioning
             def nearestAny = state.nearestVersion.any
             if ("dev".equals(state.stageFromProp) && ("".equals(nearestAny.preReleaseVersion) || nearestAny.preReleaseVersion.contains("rc"))) {
                 switch (state.scopeFromProp) {
@@ -68,6 +83,7 @@ final class VersionStrategies {
                     default:
                         return state
                 }
+<<<<<<< HEAD
             } else if ("rc".equals(state.stageFromProp)) {
                 if ("".equals(nearestAny.preReleaseVersion)) {
                     return state.copyWith(inferredNormal: nearestAny.incrementPatchVersion())
@@ -77,12 +93,15 @@ final class VersionStrategies {
                 } else {
                     return state.copyWith(inferredNormal: nearestAny.normalVersion)
                 }
+=======
+>>>>>>> bfc26ff... CLOUD-932 proper versioning
             } else {
                 return state.copyWith(inferredNormal: nearestAny.normalVersion)
             }
         }
     }
 
+<<<<<<< HEAD
     final class PreRelStrategies {
 
         private Grgit grgit
@@ -121,6 +140,9 @@ final class VersionStrategies {
     }
 
     final SemVerStrategy FEATURE_BRANCH = Strategies.DEFAULT.copyWith(
+=======
+    static final SemVerStrategy FEATURE_BRANCH = Strategies.DEFAULT.copyWith(
+>>>>>>> bfc26ff... CLOUD-932 proper versioning
             name: 'feature-branch',
             stages: ['fb'] as SortedSet,
             allowDirtyRepo: true,
@@ -129,6 +151,7 @@ final class VersionStrategies {
             createTag: false
     )
 
+<<<<<<< HEAD
     final SemVerStrategy DEV = Strategies.DEFAULT.copyWith(
             name: 'development',
             stages: ['dev'] as SortedSet,
@@ -147,6 +170,25 @@ final class VersionStrategies {
     )
 
     final SemVerStrategy FINAL = Strategies.DEFAULT.copyWith(
+=======
+    static final SemVerStrategy DEV = Strategies.DEFAULT.copyWith(
+            name: 'development',
+            stages: ['dev'] as SortedSet,
+            allowDirtyRepo: true,
+            normalStrategy: Normal.INCREMENT_FROM_RC,
+            preReleaseStrategy: all(PreRelease.STAGE_FIXED, PreRelease.COUNT_INCREMENTED)
+    )
+
+    static final SemVerStrategy RC = Strategies.DEFAULT.copyWith(
+            name: 'pre-release',
+            stages: ['rc'] as SortedSet,
+            allowDirtyRepo: true,
+            normalStrategy: Normal.INCREMENT_FROM_RC,
+            preReleaseStrategy: all(PreRelease.STAGE_FIXED, PreRelease.COUNT_INCREMENTED)
+    )
+
+    static final SemVerStrategy FINAL = Strategies.DEFAULT.copyWith(
+>>>>>>> bfc26ff... CLOUD-932 proper versioning
             name: 'release',
             stages: ['final'] as SortedSet,
             allowDirtyRepo: true,
@@ -154,6 +196,7 @@ final class VersionStrategies {
     )
 }
 
+<<<<<<< HEAD
 buildscript {
     repositories {
         mavenCentral()
@@ -250,14 +293,34 @@ subprojects {
         maven { url "http://maven.sequenceiq.com/releases" }
         mavenLocal()
 =======
+=======
+>>>>>>> bfc26ff... CLOUD-932 proper versioning
 buildscript {
     repositories {
         mavenCentral()
         jcenter()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.0.2.RELEASE")
+        classpath "org.ajoberstar:gradle-git:1.2.0"
         classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:1.0.2.RELEASE"
+    }
+}
+
+apply plugin: 'org.ajoberstar.release-opinion'
+
+release {
+    grgit = Grgit.open(project.file('.'))
+
+    versionStrategy VersionStrategies.FINAL
+    versionStrategy VersionStrategies.RC
+    versionStrategy VersionStrategies.FEATURE_BRANCH
+    versionStrategy VersionStrategies.DEV
+
+    defaultVersionStrategy = VersionStrategies.FEATURE_BRANCH
+
+    tagStrategy {
+        prefixNameWithV = false
     }
 }
 
@@ -277,7 +340,6 @@ sourceCompatibility = 1.7
 group = 'com.sequenceiq'
 
 allprojects {
-    apply from: "$rootDir/gradle/versioning.gradle"
     ext.config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL())
 }
 
