@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.domain.Cluster;
 
+@EntityType(entityClass = Cluster.class)
 public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     Cluster findById(@Param("id") Long id);

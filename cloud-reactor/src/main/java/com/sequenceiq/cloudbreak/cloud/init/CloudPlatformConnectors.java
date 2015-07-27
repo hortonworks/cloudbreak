@@ -16,13 +16,10 @@ public class CloudPlatformConnectors {
 
     @Inject
     private List<CloudConnector> connectors;
-
-    private Map<String, CloudConnector> map;
-
+    private Map<String, CloudConnector> map = new HashMap<>();
 
     @PostConstruct
     public void cloudPlatformConnectors() {
-        map = new HashMap<>();
         for (CloudConnector connector : connectors) {
             map.put(connector.platform(), connector);
         }

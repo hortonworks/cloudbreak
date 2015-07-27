@@ -42,8 +42,7 @@ public class HeatTemplateBuilder {
     private Configuration freemarkerConfiguration;
 
 
-    public String build(String stackName, List<Group> groups, Network network, Security
-            security, Image instanceUserData) {
+    public String build(String stackName, List<Group> groups, Security security, Image instanceUserData) {
         try {
             List<NovaInstanceView> novaInstances = new OpenStackGroupView(groups).getFlatNovaView();
             Map<String, Object> model = new HashMap<>();
@@ -51,8 +50,7 @@ public class HeatTemplateBuilder {
             model.put("agents", novaInstances);
             model.put("core_user_data", formatUserData(instanceUserData.getUserData(InstanceGroupType.CORE)));
             model.put("gateway_user_data", formatUserData(instanceUserData.getUserData(InstanceGroupType.GATEWAY)));
-            model.put("subnets", security.getAllowedSubnets());
-            model.put("ports", security.getPorts());
+            model.put("rules", security.getRules());
             String generatedTemplate = processTemplateIntoString(freemarkerConfiguration.getTemplate(openStackHeatTemplatePath, "UTF-8"), model);
             LOGGER.debug("Generated Heat template: {}", generatedTemplate);
             return generatedTemplate;

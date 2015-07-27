@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 
+@EntityType(entityClass = HostGroup.class)
 public interface HostGroupRepository extends CrudRepository<HostGroup, Long> {
 
     Set<HostGroup> findHostGroupsInCluster(@Param("clusterId") Long clusterId);

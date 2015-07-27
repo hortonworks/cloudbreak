@@ -16,6 +16,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.cloud.service.Persister;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.cloudbreak.repository.EntityType;
 
 public abstract class AbstractCloudPersisterService<T> implements Persister<T> {
 
@@ -24,23 +25,17 @@ public abstract class AbstractCloudPersisterService<T> implements Persister<T> {
     @Inject
     private List<CrudRepository> repositoryList;
 
-    private Map<Class, CrudRepository> repositoryMap = new HashMap<>();
-
     @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
+    private Map<Class, CrudRepository> repositoryMap = new HashMap<>();
 
     @Override
     public abstract T persist(T data);
 
-    protected ConversionService getConversionService() {
-        return conversionService;
-    }
-
     @Override
     public abstract T retrieve(T data);
-
 
     @PostConstruct
     public void checkRepoMap() {
@@ -51,49 +46,28 @@ public abstract class AbstractCloudPersisterService<T> implements Persister<T> {
         }
     }
 
+    protected ConversionService getConversionService() {
+        return conversionService;
+    }
+
     private void fillRepositoryMap() {
         for (CrudRepository repo : repositoryList) {
-            Class entityClass = getEntityClassForRepository(repo);
-            if (null != entityClass) {
-                repositoryMap.put(entityClass, repo);
-            }
+            repositoryMap.put(getEntityClassForRepository(repo), repo);
         }
     }
 
     private Class getEntityClassForRepository(CrudRepository repo) {
-        Class clazz = null;
-        try {
-            // force an exception that contains the domain object name
-            repo.delete(Long.MIN_VALUE);
-        } catch (Exception e) {
-            String clazzStr = getDomainClassNameFromException(e);
-            try {
-                clazz = Class.forName(clazzStr);
-            } catch (ClassNotFoundException ex) {
-                throw new IllegalStateException("Invalid domain class: " + clazzStr);
-            }
+        Class<?> originalInterface = repo.getClass().getInterfaces()[0];
+        EntityType annotation = originalInterface.getAnnotation(EntityType.class);
+        if (annotation == null) {
+            throw new IllegalStateException("Entity class is not specified for repository: " + originalInterface.getSimpleName());
         }
-        return clazz;
-    }
-
-    private String getDomainClassNameFromException(Exception e) {
-        LOGGER.debug("Exception message: {}", e.getMessage());
-        String classStr = null;
-
-        for (String word : e.getMessage().split(" ")) {
-            if (word.startsWith("com.sequenceiq")) {
-                classStr = word.endsWith(".") ? word.replaceAll(".$", "") : word;
-                break;
-            }
-        }
-        return classStr;
+        return annotation.entityClass();
     }
 
     protected CrudRepository getRepositoryForEntity(ProvisionEntity entity) {
-        CrudRepository repo = null;
-        if (repositoryMap.containsKey(entity.getClass())) {
-            repo = repositoryMap.get(entity.getClass());
-        } else {
+        CrudRepository repo = repositoryMap.get(entity.getClass());
+        if (repo == null) {
             throw new IllegalStateException("No repository found for the entityClass:" + entity.getClass());
         }
         return repo;

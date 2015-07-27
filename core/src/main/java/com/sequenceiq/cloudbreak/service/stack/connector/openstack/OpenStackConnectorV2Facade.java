@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.openstack;
 
-import java.util.ArrayList;
+import static com.sequenceiq.cloudbreak.service.stack.flow.ReflectionUtils.getDeclaredFields;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,22 +24,15 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.Instance;
-import com.sequenceiq.cloudbreak.cloud.model.Network;
-import com.sequenceiq.cloudbreak.cloud.model.Subnet;
-import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.converter.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
-import com.sequenceiq.cloudbreak.domain.OpenStackNetwork;
-import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 
 import reactor.bus.Event;
@@ -54,35 +48,27 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
     private EventBus eventBus;
 
     @Inject
+    private StackRepository stackRepository;
+
+    @Inject
+    private SecurityRuleRepository securityRuleRepository;
+
+    @Inject
     private PBEStringCleanablePasswordEncryptor pbeStringCleanablePasswordEncryptor;
 
+    @Inject
+    private StackToCloudStackConverter cloudStackConverter;
 
     @Override
     public Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties) {
         LOGGER.info("Assembling launch request for stack: {}", stack);
         LaunchStackResult res = null;
+
         StackContext stackContext = new StackContext(stack.getId(), stack.getName(), CloudPlatform.OPENSTACK.name());
         CloudCredential cloudCredential = buildCloudCredential(stack);
 
-        List<Group> groups = getGroups(stack);
+        CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
 
-        Image image = new Image(stack.getImage());
-        image.putUserData(InstanceGroupType.CORE, coreUserData);
-        image.putUserData(InstanceGroupType.GATEWAY, gateWayUserData);
-
-        OpenStackNetwork openStackNetwork = (OpenStackNetwork) stack.getNetwork();
-        Subnet subnet = new Subnet(openStackNetwork.getSubnetCIDR());
-        Network network = new Network(subnet);
-        network.putParameter("publicNetId", openStackNetwork.getPublicNetId());
-
-        //FIXME
-        //Security security = new Security();
-        //for (com.sequenceiq.cloudbreak.domain.Subnet cbSubNet : stack.getAllowedSubnets()) {
-        //    Subnet sn = new Subnet(cbSubNet.getCidr());
-        //    security.addAllowedSubnet(sn);
-        //}
-
-        CloudStack cloudStack = new CloudStack(groups, network, null, image);
         Promise<LaunchStackResult> promise = Promises.prepare();
         LaunchStackRequest launchStackRequest = new LaunchStackRequest(stackContext, cloudCredential, cloudStack, promise);
 
@@ -177,34 +163,8 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
         return null;
     }
 
-    public List<Group> getGroups(Stack stack) {
-        List<Group> groups = new ArrayList<>();
-        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-
-            Group group = new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType());
-
-            for (int nodeId = 0; nodeId < instanceGroup.getNodeCount(); nodeId++) {
-                OpenStackTemplate openStackTemplate = (OpenStackTemplate) instanceGroup.getTemplate();
-                Instance instance = new Instance(openStackTemplate.getInstanceType(), group.getName(), nodeId);
-
-                for (int i = 0; i < openStackTemplate.getVolumeCount(); i++) {
-                    Volume volume = new Volume("/hadoop/fs" + i, "HDD", openStackTemplate.getVolumeSize());
-                    instance.addVolume(volume);
-                }
-                group.addInstance(instance);
-            }
-            groups.add(group);
-        }
-        return groups;
-    }
-
     private CloudCredential buildCloudCredential(Stack stack) {
         OpenStackCredential openstackCredential = (OpenStackCredential) stack.getCredential();
-        CloudCredential cloudCredential = new CloudCredential(openstackCredential.getName());
-        cloudCredential.putParameter("userName", pbeStringCleanablePasswordEncryptor.decrypt(openstackCredential.getUserName()));
-        cloudCredential.putParameter("password", pbeStringCleanablePasswordEncryptor.decrypt(openstackCredential.getPassword()));
-        cloudCredential.putParameter("tenantName", openstackCredential.getTenantName());
-        cloudCredential.putParameter("endpoint", openstackCredential.getEndpoint());
-        return cloudCredential;
+        return new CloudCredential(openstackCredential.getName(), getDeclaredFields(openstackCredential));
     }
 }

@@ -42,6 +42,16 @@ public class AwsTemplate extends Template implements ProvisionEntity {
         return CloudPlatform.AWS;
     }
 
+    @Override
+    public String getInstanceTypeName() {
+        return getInstanceType().getValue();
+    }
+
+    @Override
+    public String getVolumeTypeName() {
+        return getVolumeType().getValue();
+    }
+
     public AwsVolumeType getVolumeType() {
         return volumeType;
     }

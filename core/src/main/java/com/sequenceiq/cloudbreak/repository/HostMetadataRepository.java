@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 
+@EntityType(entityClass = HostMetadata.class)
 public interface HostMetadataRepository extends CrudRepository<HostMetadata, Long> {
 
     Set<HostMetadata> findHostsInCluster(@Param("clusterId") Long clusterId);

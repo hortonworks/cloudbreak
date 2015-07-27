@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
+import com.sequenceiq.cloudbreak.cloud.ProvisionSetup;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.StackContext;
@@ -18,21 +19,21 @@ public class OpenStackConnector implements CloudConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackConnector.class);
 
-    private static final String OPENSTACK = "OPENSTACK";
-
     @Inject
     private OpenStackClient openStackClient;
 
     @Inject
-    private OpenStackResourceConnector rc;
+    private OpenStackResourceConnector resourceConnector;
 
     @Inject
-    private OpenStackInstanceConnector ic;
+    private OpenStackInstanceConnector instanceConnector;
 
+    @Inject
+    private OpenStackProvisionSetup provisionSetup;
 
     @Override
     public String platform() {
-        return OPENSTACK;
+        return OpenStackConstants.OPENSTACK;
     }
 
     @Override
@@ -43,11 +44,16 @@ public class OpenStackConnector implements CloudConnector {
 
     @Override
     public ResourceConnector resources() {
-        return rc;
+        return resourceConnector;
     }
 
     @Override
     public InstanceConnector instances() {
-        return ic;
+        return instanceConnector;
+    }
+
+    @Override
+    public ProvisionSetup provision() {
+        return provisionSetup;
     }
 }

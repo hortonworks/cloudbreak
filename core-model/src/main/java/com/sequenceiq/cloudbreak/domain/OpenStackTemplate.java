@@ -23,4 +23,14 @@ public class OpenStackTemplate extends Template implements ProvisionEntity {
         return CloudPlatform.OPENSTACK;
     }
 
+    @Override
+    public String getInstanceTypeName() {
+        return getInstanceType();
+    }
+
+    @Override
+    public String getVolumeTypeName() {
+        return "HDD";
+    }
+
 }

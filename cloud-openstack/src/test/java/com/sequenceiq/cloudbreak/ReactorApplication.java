@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Instance;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
+import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.notification.PollingNotifier;
@@ -132,15 +134,13 @@ public class ReactorApplication implements CommandLineRunner {
         Network network = new Network(subnet);
         network.putParameter("publicNetId", "028ffc0c-63c5-4ca0-802a-3ac753eaf76c");
 
-        Subnet all = new Subnet("0.0.0.0/0");
-        Security security = new Security();
-        security.addAllowedSubnet(subnet);
-        security.addAllowedSubnet(all);
+        List<SecurityRule> rules = Arrays.asList(new SecurityRule("0.0.0.0/0", new String[]{"22", "443"}, "tcp"));
+        Security security = new Security(rules);
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
         String ts = sdf.format(new Date());
 
-        StackContext stackContext = new StackContext(0, "stack-name_" + ts, "OPENSTACK");
+        StackContext stackContext = new StackContext(0L, "stack-name_" + ts, "OPENSTACK");
 
         CloudStack cs = new CloudStack(groups, network, security, image);
         LaunchStackRequest lr = new LaunchStackRequest(stackContext, c, cs, promise);

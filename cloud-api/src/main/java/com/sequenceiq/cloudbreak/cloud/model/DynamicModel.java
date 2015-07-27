@@ -26,4 +26,8 @@ public class DynamicModel {
     public void putParameter(Class clazz, Object value) {
         putParameter(clazz.getName(), value);
     }
+
+    public void putAll(Map<String, Object> params) {
+        parameters.putAll(params);
+    }
 }

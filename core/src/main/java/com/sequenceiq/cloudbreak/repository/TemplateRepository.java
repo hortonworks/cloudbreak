@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PostAuthorize;
 
 import com.sequenceiq.cloudbreak.domain.Template;
 
+@EntityType(entityClass = Template.class)
 public interface TemplateRepository extends CrudRepository<Template, Long> {
 
     @PostAuthorize("hasPermission(returnObject,'read')")

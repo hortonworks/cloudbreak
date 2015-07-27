@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PostAuthorize;
 
 import com.sequenceiq.cloudbreak.domain.Credential;
 
+@EntityType(entityClass = Credential.class)
 public interface CredentialRepository extends CrudRepository<Credential, Long> {
 
     @PostAuthorize("hasPermission(returnObject,'read')")

@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PostAuthorize;
 
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
+@EntityType(entityClass = Recipe.class)
 public interface RecipeRepository extends CrudRepository<Recipe, Long> {
 
     @PostAuthorize("hasPermission(returnObject,'read')")

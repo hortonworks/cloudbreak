@@ -2,19 +2,19 @@ package com.sequenceiq.cloudbreak.cloud.event.context;
 
 public class StackContext {
 
-    private long stackId;
+    private Long stackId;
 
     private String stackName;
 
     private String platform;
 
-    public StackContext(long stackId, String stackName, String platform) {
+    public StackContext(Long stackId, String stackName, String platform) {
         this.stackId = stackId;
         this.stackName = stackName;
         this.platform = platform;
     }
 
-    public long getStackId() {
+    public Long getStackId() {
         return stackId;
     }
 
