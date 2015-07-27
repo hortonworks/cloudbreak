@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PostAuthorize;
 
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 
+@EntityType(entityClass = SecurityGroup.class)
 public interface SecurityGroupRepository extends CrudRepository<SecurityGroup, Long> {
 
     SecurityGroup findById(@Param("id") Long id);

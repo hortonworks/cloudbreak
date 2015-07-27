@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PostAuthorize;
 
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
+@EntityType(entityClass = Blueprint.class)
 public interface BlueprintRepository extends CrudRepository<Blueprint, Long> {
 
     @PostAuthorize("hasPermission(returnObject,'read')")

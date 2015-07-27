@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PostAuthorize;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
 
+@EntityType(entityClass = Stack.class)
 public interface StackRepository extends CrudRepository<Stack, Long> {
 
     @PostAuthorize("hasPermission(returnObject,'read')")

@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 
+@EntityType(entityClass = InstanceMetaData.class)
 public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaData, Long> {
 
     Set<InstanceMetaData> findNotTerminatedForStack(@Param("stackId") Long stackId);
