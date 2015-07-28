@@ -140,7 +140,9 @@ public class AmbariClusterConnector {
         AMBARI_CLUSTER_RESETTING_AMBARI_DATABASE("ambari.cluster.resetting.ambari.database"),
         AMBARI_CLUSTER_AMBARI_DATABASE_RESET("ambari.cluster.ambari.database.reset"),
         AMBARI_CLUSTER_RESTARTING_AMBARI_SERVER("ambari.cluster.restarting.ambari.server"),
-        AMBARI_CLUSTER_AMBARI_SERVER_RESTARTED("ambari.cluster.ambari.server.restarted");
+        AMBARI_CLUSTER_AMBARI_SERVER_RESTARTED("ambari.cluster.ambari.server.restarted"),
+        AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP("ambari.cluster.removing.node.from.hostgroup"),
+        AMBARI_CLUSTER_ADDING_NODE_TO_HOSTGROUP("ambari.cluster.adding.node.to.hostgroup");
 
         private String code;
 
@@ -304,8 +306,11 @@ public class AmbariClusterConnector {
         int adjustment = Math.abs(adjustmentRequest.getScalingAdjustment());
         String hostGroupName = adjustmentRequest.getHostGroup();
         LOGGER.info("Decommissioning {} hosts from host group '{}'", adjustment, hostGroupName);
-        String eventMsg = String.format("Removing '%s' node(s) from the '%s' hostgroup.", adjustment, hostGroupName);
-        eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), eventMsg, hostGroupName);
+
+
+        eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
+                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP.code(),
+                        Arrays.asList(adjustment, hostGroupName)), hostGroupName);
         TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
         String blueprintName = stack.getCluster().getBlueprint().getBlueprintName();
@@ -818,8 +823,9 @@ public class AmbariClusterConnector {
     private List<String> findFreeHosts(Long stackId, HostGroup hostGroup, int scalingAdjustment) {
         Set<InstanceMetaData> unregisteredHosts = instanceMetadataRepository.findUnregisteredHostsInInstanceGroup(hostGroup.getInstanceGroup().getId());
         Set<InstanceMetaData> instances = FluentIterable.from(unregisteredHosts).limit(scalingAdjustment).toSet();
-        String statusReason = String.format("Adding '%s' new host(s) to the '%s' host group.", instances.size(), hostGroup.getName());
-        eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), statusReason, hostGroup.getName());
+        eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
+                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_ADDING_NODE_TO_HOSTGROUP.code(),
+                        Arrays.asList(instances.size(), hostGroup.getName())), hostGroup.getName());
         return getHostNames(instances);
     }
 

@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 public class AmbariClusterStatusUpdaterTest {
@@ -39,6 +40,8 @@ public class AmbariClusterStatusUpdaterTest {
     private TlsSecurityService tlsSecurityService;
     @Mock
     private AmbariClient ambariClient;
+    @Mock
+    private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Before
     public void setUp() {
@@ -57,8 +60,6 @@ public class AmbariClusterStatusUpdaterTest {
         underTest.updateClusterStatus(stack, stack.getCluster());
         // THEN
         BDDMockito.verify(clusterService, BDDMockito.times(1)).updateClusterStatusByStackId(stack.getId(), Status.STOPPED);
-        BDDMockito.verify(cloudbreakEventService, BDDMockito.times(1)).fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(),
-                "Synced cluster state with Ambari: " + ClusterStatus.INSTALLED.getStatusReason());
     }
 
     @Test
@@ -72,8 +73,6 @@ public class AmbariClusterStatusUpdaterTest {
         underTest.updateClusterStatus(stack, stack.getCluster());
         // THEN
         BDDMockito.verify(clusterService, BDDMockito.times(0)).updateClusterStatusByStackId(BDDMockito.any(Long.class), BDDMockito.any(Status.class));
-        BDDMockito.verify(cloudbreakEventService, BDDMockito.times(1)).fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(),
-                "Synced cluster state with Ambari: The cluster's state is up to date.");
     }
 
     private Stack createStack(Status stackStatus) {

@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.RemoveInstanceRequest;
@@ -88,6 +89,24 @@ public class DefaultStackService implements StackService {
     private SecurityRuleRepository securityRuleRepository;
     @Inject
     private CloudbreakEventService eventService;
+
+    @Inject
+    private CloudbreakMessagesService cloudbreakMessagesService;
+
+    private enum Msg {
+        STACK_STOP_IGNORED("stack.stop.ignored"),
+        STACK_START_IGNORED("stack.start.ignored");
+
+        private String code;
+
+        Msg(String msgCode) {
+            code = msgCode;
+        }
+
+        public String code() {
+            return code;
+        }
+    }
 
     @Override
     public Set<Stack> retrievePrivateStacks(CbUser user) {
@@ -248,7 +267,7 @@ public class DefaultStackService implements StackService {
             flowManager.triggerStackStopRequested(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), statusRequest));
         } else {
             if (stack.isStopped()) {
-                String statusDesc = "Stop request is ignored, because the cluster infrastructure is already stopped.";
+                String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_IGNORED.code());
                 LOGGER.info(statusDesc);
                 eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), statusDesc);
             } else if (stack.infrastructureIsEphemeral()) {
@@ -269,7 +288,7 @@ public class DefaultStackService implements StackService {
 
     private void start(Stack stack, Cluster cluster, StatusRequest statusRequest) {
         if (stack.isAvailable()) {
-            String statusDesc = "Start request is ignored, because the cluster infrastructure is already available.";
+            String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_START_IGNORED.code());
             LOGGER.info(statusDesc);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), statusDesc);
         } else if ((!stack.isStopped() || (cluster != null && !cluster.isStopped())) && !stack.isStartFailed()) {

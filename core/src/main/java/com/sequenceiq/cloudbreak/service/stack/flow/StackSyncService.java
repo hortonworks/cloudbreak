@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.domain.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.domain.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.domain.Status.STOPPED;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 
@@ -60,6 +62,33 @@ public class StackSyncService {
     private AmbariClusterConnector ambariClusterConnector;
     @javax.annotation.Resource
     private Map<CloudPlatform, MetadataSetup> metadataSetups;
+
+    @Inject
+    private CloudbreakMessagesService cloudbreakMessagesService;
+
+    private enum Msg {
+        STACK_SYNC_INSTANCE_STATUS_RETRIEVAL_FAILED("stack.sync.instance.status.retrieval.failed"),
+        STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE("stack.sync.instance.status.couldnt.determine"),
+        STACK_SYNC_INSTANCE_OPERATION_IN_PROGRESS("stack.sync.instance.operation.in.progress"),
+        STACK_SYNC_INSTANCE_STOPPED_ON_PROVIDER("stack.sync.instance.stopped.on.provider"),
+        STACK_SYNC_INSTANCE_STATE_SYNCED("stack.sync.instance.state.synced"),
+        STACK_SYNC_HOST_DELETED("stack.sync.host.deleted"),
+        STACK_SYNC_INSTANCE_REMOVAL_FAILED("stack.sync.instance.removal.failed"),
+        STACK_SYNC_HOST_UPDATED("stack.sync.host.updated"),
+        STACK_SYNC_INSTANCE_TERMINATED("stack.sync.instance.terminated"),
+        STACK_SYNC_INSTANCE_DELETED_CBMETADATA("stack.sync.instance.deleted.cbmetadata"),
+        STACK_SYNC_INSTANCE_RUNNING("stack.sync.instance.running");
+
+        private String code;
+
+        Msg(String msgCode) {
+            code = msgCode;
+        }
+
+        public String code() {
+            return code;
+        }
+    }
 
     public void sync(Long stackId) {
         Stack stack = stackService.getById(stackId);
@@ -92,7 +121,7 @@ public class StackSyncService {
             } catch (CloudConnectorException e) {
                 LOGGER.warn(e.getMessage(), e);
                 eventService.fireCloudbreakEvent(stackId, AVAILABLE.name(),
-                        String.format("Couldn't retrieve status of instance '%s' from cloud provider.", instance.getInstanceId()));
+                        cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATUS_RETRIEVAL_FAILED.code(), Arrays.asList(instance.getInstanceId())));
                 instanceStateCounts.put(InstanceSyncState.UNKNOWN, instanceStateCounts.get(InstanceSyncState.UNKNOWN) + 1);
             }
         }
@@ -147,18 +176,26 @@ public class StackSyncService {
 
     private void handleSyncResult(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts) {
         if (instanceStateCounts.get(InstanceSyncState.UNKNOWN) > 0) {
-            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), "The state of one or more instances couldn't be determined. Try syncing later.");
+            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE.code()));
         } else if (instanceStateCounts.get(InstanceSyncState.IN_PROGRESS) > 0) {
-            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), "An operation on one or more instances is in progress. Try syncing later.");
+            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_OPERATION_IN_PROGRESS.code()));
         } else if (instanceStateCounts.get(InstanceSyncState.RUNNING) > 0 && instanceStateCounts.get(InstanceSyncState.STOPPED) > 0) {
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                    "Some instances were stopped on the cloud provider. Restart or terminate them and try syncing later.");
+                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_HOST_DELETED.code()));
         } else if (instanceStateCounts.get(InstanceSyncState.RUNNING) > 0) {
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, SYNC_STATUS_REASON);
+            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATE_SYNCED.code()));
         } else if (instanceStateCounts.get(InstanceSyncState.STOPPED) > 0) {
             stackUpdater.updateStackStatus(stack.getId(), STOPPED, SYNC_STATUS_REASON);
+            eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(),
+                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATE_SYNCED.code()));
         } else {
             stackUpdater.updateStackStatus(stack.getId(), DELETE_FAILED, SYNC_STATUS_REASON);
+            eventService.fireCloudbreakEvent(stack.getId(), DELETE_FAILED.name(),
+                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATE_SYNCED.code()));
         }
     }
 
@@ -183,26 +220,24 @@ public class StackSyncService {
                     if (ambariClusterConnector.deleteHostFromAmbari(stack, hostMetadata)) {
                         hostMetadataRepository.delete(hostMetadata.getId());
                         eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                                String.format("Deleted host '%s' from Ambari because it is marked as terminated by the cloud provider.",
-                                        instanceMetaData.getDiscoveryFQDN()));
+                                cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_HOST_DELETED.code(), Arrays.asList(instanceMetaData.getDiscoveryFQDN())));
                     } else {
-                        eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), String.format(
-                                "Instance '%s' is terminated but couldn't remove host from Ambari because it still reports the host as healthy."
-                                        + " Try syncing later.",
-                                instanceMetaData.getDiscoveryFQDN()));
+                        eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+                                cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_REMOVAL_FAILED.code(),
+                                        Arrays.asList(instanceMetaData.getDiscoveryFQDN())));
                     }
                 } else {
                     hostMetadata.setHostMetadataState(HostMetadataState.UNHEALTHY);
                     hostMetadataRepository.save(hostMetadata);
                     eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                            String.format("Host (%s) state has been updated to: %s", instanceMetaData.getDiscoveryFQDN(), HostMetadataState.UNHEALTHY.name()));
+                            cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_HOST_UPDATED.code(),
+                                    Arrays.asList(instanceMetaData.getDiscoveryFQDN(), HostMetadataState.UNHEALTHY.name())));
                 }
             }
         } catch (Exception e) {
             LOGGER.error("Host cannot be deleted from cluster: ", e);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                    String.format("Instance '%s' is marked as terminated by the cloud provider, but couldn't delete the host from Ambari.",
-                            instanceMetaData.getDiscoveryFQDN()));
+                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_TERMINATED.code(), Arrays.asList(instanceMetaData.getDiscoveryFQDN())));
         }
     }
 
@@ -212,8 +247,7 @@ public class StackSyncService {
         instanceMetaDataRepository.save(instanceMetaData);
         instanceGroupRepository.save(instanceGroup);
         eventService.fireCloudbreakEvent(stackId, AVAILABLE.name(),
-                String.format("Deleted instance '%s' from Cloudbreak metadata because it couldn't be found on the cloud provider.",
-                        instanceMetaData.getDiscoveryFQDN()));
+                cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_DELETED_CBMETADATA.code(), Arrays.asList(instanceMetaData.getDiscoveryFQDN())));
     }
 
     private void updateMetaDataToRunning(Long stackId, Cluster cluster, InstanceMetaData instanceMetaData, InstanceGroup instanceGroup) {
@@ -229,8 +263,7 @@ public class StackSyncService {
         instanceMetaDataRepository.save(instanceMetaData);
         instanceGroupRepository.save(instanceGroup);
         eventService.fireCloudbreakEvent(stackId, AVAILABLE.name(),
-                String.format("Updated metadata of instance '%s' to running because the cloud provider reported it as running.",
-                        instanceMetaData.getInstanceId()));
+                cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_RUNNING.code(), Arrays.asList(instanceMetaData.getDiscoveryFQDN())));
     }
 
 

@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.domain.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.domain.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_IN_PROGRESS;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
@@ -73,6 +75,27 @@ public class StackScalingService {
     @javax.annotation.Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
+    @Inject
+    private CloudbreakMessagesService cloudbreakMessagesService;
+
+    private enum Msg {
+        STACK_SCALING_HOST_DELETED("stack.scaling.host.deleted"),
+        STACK_SCALING_HOST_DELETE_FAILED("stack.scaling.host.delete.failed"),
+        STACK_SCALING_HOST_NOT_FOUND("stack.scaling.host.not.found"),
+        STACK_SCALING_BILLING_CHANGED("stack.scaling.billing.changed"),
+        STACK_SCALING_TERMINATING_HOST_FROM_HOSTGROUP("stack.scaling.terminating.host.from.hostgroup");
+
+        private String code;
+
+        Msg(String msgCode) {
+            code = msgCode;
+        }
+
+        public String code() {
+            return code;
+        }
+    }
+
     public Set<Resource> addInstances(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
         Stack stack = stackService.getById(stackId);
         CloudPlatformConnector connector = cloudPlatformConnectors.get(stack.cloudPlatform());
@@ -88,7 +111,8 @@ public class StackScalingService {
         String instanceGroupName = instanceMetaData.getInstanceGroup().getGroupName();
         String hostName = instanceMetaData.getDiscoveryFQDN();
         eventService.fireCloudbreakInstanceGroupEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
-                String.format("Start to terminate host '%s' from '%s'.", hostName, instanceGroupName), instanceGroupName);
+                cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_TERMINATING_HOST_FROM_HOSTGROUP.code(), Arrays.asList(hostName, instanceGroupName)),
+                instanceGroupName);
         if (stack.getCluster() != null) {
             HostMetadata hostMetadata = hostMetadataRepository.findHostsInClusterByName(stack.getCluster().getId(), hostName);
             if (hostMetadata != null && HostMetadataState.HEALTHY.equals(hostMetadata.getHostMetadataState())) {
@@ -107,16 +131,21 @@ public class StackScalingService {
                 ambariClusterConnector.deleteHostFromAmbari(stack, hostMetadata);
                 hostMetadataRepository.delete(hostMetadata);
                 eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                        String.format("Host '%s' successfully deleted.", instanceMetaData.getInstanceId()));
+                        cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_DELETED.code(),
+                                Arrays.asList(instanceMetaData.getInstanceId())));
             } catch (Exception e) {
                 LOGGER.error("Host cannot be deleted from cluster: ", e);
                 eventService.fireCloudbreakEvent(stack.getId(), DELETE_FAILED.name(),
-                        String.format("Could not delete host '%s' from ambari.", instanceMetaData.getInstanceId()));
+                        cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_DELETE_FAILED.code(),
+                                Arrays.asList(instanceMetaData.getInstanceId())));
+
             }
         } else {
             LOGGER.info("Host cannot be deleted because it is not exist: ", instanceMetaData.getInstanceId());
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                    String.format("Host '%s' is not found in ambari.", instanceMetaData.getInstanceId()));
+                    cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_NOT_FOUND.code(),
+                            Arrays.asList(instanceMetaData.getInstanceId())));
+
         }
     }
 
@@ -170,7 +199,7 @@ public class StackScalingService {
         }
         LOGGER.info("Successfully terminated metadata of instances '{}' in stack.", instanceIds);
         eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
-                "Billing changed due to downscaling of cluster infrastructure.");
+                cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_BILLING_CHANGED.code()));
     }
 
     private void removeAgentFromConsul(Stack stack, ConsulClient client, InstanceMetaData metaData) {
