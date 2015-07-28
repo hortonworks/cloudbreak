@@ -58,7 +58,8 @@ final class VersionStrategies {
     static final SemVerStrategy FINAL = Strategies.DEFAULT.copyWith(
             name: 'release',
             stages: ['final'] as SortedSet,
-            allowDirtyRepo: true
+            allowDirtyRepo: true,
+            enforcePrecedence: false
     )
 }
 
