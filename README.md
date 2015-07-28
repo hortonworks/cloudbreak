@@ -4,7 +4,7 @@ For recent changes please check the [CHANGELOG.md](https://github.com/sequenceiq
 ## Requirements
 
 Currently only **Linux** and **OSX** 64 bit binaries are released for Cloudbreak Deployer. For anything else we will create a special Docker container.
-The deployment itself needs only **Docker 1.5.0** or later.
+The deployment itself needs only **Docker 1.7.0** or later.
 
 ## Installation
 
