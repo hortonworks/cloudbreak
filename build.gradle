@@ -338,6 +338,7 @@ apply plugin: 'license-report'
 
 sourceCompatibility = 1.7
 group = 'com.sequenceiq'
+mainClassName = 'com.sequenceiq.periscope.PeriscopeApplication'
 
 allprojects {
     ext.config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL())
