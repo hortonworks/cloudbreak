@@ -83,7 +83,7 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
 
     @Override
     public Boolean delete(Resource resource, AzureDeleteContextObject deleteContextObject, String region) throws Exception {
-        Stack stack = stackRepository.findByIdLazy(deleteContextObject.getStackId());
+        Stack stack = stackRepository.findById(deleteContextObject.getStackId());
         if (AzureStackUtil.GLOBAL_STORAGE != azureStackUtil.getNumOfStorageAccounts(stack)) {
             AzureClient azureClient = deleteContextObject.getAzureClient();
             String storageName = resource.getResourceName();
