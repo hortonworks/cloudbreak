@@ -529,7 +529,7 @@ Security groups allows confoguration of traffic/access to the cluster. Currently
 
 `only-ssh-and-ssl:` all ports are locked down (you can't access Hadoop servives outside of the VPN) but SSH (22) and HTTPS (443)
 
-`all-services-port:` all Hadoop services + SSH/HTTP are accessible by default
+`all-services-port:` all Hadoop services + SSH/HTTP are accessible by default: SSH (22) HTTPS (443) 8080 (Ambari) 8500 (Consul) 50070 (NN) 8088 (RM Web) 8030 (RM Scheduler) 8050 (RM IPC) 19888 (Job history server) 60010 (HBase master) 15000 (Falcon) 8744 (Storm) 11000 (Oozie) 18080 (Spark HS) 8042 (NM Web) 9996 (Zeppelin WebSocket) 9995 (Zeppelin UI) 3080 (Kibana) 9200 (Elasticsearch)
 
 ###Create cluster
 Using the create cluster functionality you will create a cloud Stack and a Hadoop Cluster. In order to create a cluster you will have to select a credential first.
