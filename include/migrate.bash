@@ -70,6 +70,7 @@ migrate-cmd() {
 
     cloudbreak-config
     migrate-config
+    compose-generate-yaml
     local params="$@"
     if [ -z "$params" ]
     then
