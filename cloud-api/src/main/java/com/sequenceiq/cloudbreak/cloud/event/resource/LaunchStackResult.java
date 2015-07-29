@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.event;
+package com.sequenceiq.cloudbreak.cloud.event.resource;
 
 import java.util.List;
 

@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.event.LaunchStackResult;
+import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -29,7 +29,7 @@ public class PollTaskConfig {
 
             @Override
             public PollTask<LaunchStackResult> newPollResourcesStateTask(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResource) {
-                CloudConnector connector = cloudPlatformConnectors.get(authenticatedContext.getStackContext().getPlatform());
+                CloudConnector connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatform());
                 return new PollResourcesStateTask(authenticatedContext, connector, cloudResource);
             }
         };

@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.ProvisionSetup;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.event.context.StackContext;
+import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 @Service("OpenStackConnectorV2")
@@ -37,9 +37,9 @@ public class OpenStackConnector implements CloudConnector {
     }
 
     @Override
-    public AuthenticatedContext authenticate(StackContext stackContext, CloudCredential cloudCredential) {
+    public AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential) {
         LOGGER.info("Authenticating to openstack ...");
-        return openStackClient.createAuthenticatedContext(stackContext, cloudCredential);
+        return openStackClient.createAuthenticatedContext(cloudContext, cloudCredential);
     }
 
     @Override

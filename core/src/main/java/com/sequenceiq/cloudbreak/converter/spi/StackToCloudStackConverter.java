@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter;
+package com.sequenceiq.cloudbreak.converter.spi;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,19 +1,20 @@
-package com.sequenceiq.cloudbreak.cloud.event;
+package com.sequenceiq.cloudbreak.cloud.event.instance;
 
-import com.sequenceiq.cloudbreak.cloud.event.context.StackContext;
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
+import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 import reactor.rx.Promise;
 
-public class BaseRequest<T> extends CloudPlatformRequest<T> {
+public class CollectMetadataRequest<T> extends CloudPlatformRequest<T> {
 
     private CloudCredential cloudCredential;
 
     private CloudStack cloudStack;
 
-    public BaseRequest(StackContext stackContext, CloudCredential cloudCredential, CloudStack cloudStack, Promise<T> result) {
-        super(stackContext, result);
+    public CollectMetadataRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack, Promise<T> result) {
+        super(cloudContext, result);
         this.cloudCredential = cloudCredential;
         this.cloudStack = cloudStack;
     }
@@ -29,10 +30,11 @@ public class BaseRequest<T> extends CloudPlatformRequest<T> {
     //BEGIN GENERATED CODE
     @Override
     public String toString() {
-        return "LaunchStackRequest{" +
+        return "CloudStackRequest{" +
                 "cloudCredential=" + cloudCredential +
                 ", cloudStack=" + cloudStack +
                 '}';
     }
     //END GENERATED CODE
+
 }

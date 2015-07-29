@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.event;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.cloud.event.context.StackContext;
+import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 
@@ -15,8 +15,8 @@ public class TerminateStackRequest<T> extends CloudPlatformRequest<T> {
 
     private List<CloudResource> cloudResources = new ArrayList<>();
 
-    public TerminateStackRequest(StackContext stackContext, CloudCredential cloudCredential, Promise<T> result) {
-        super(stackContext, result);
+    public TerminateStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, Promise<T> result) {
+        super(cloudContext, result);
         this.cloudCredential = cloudCredential;
     }
 

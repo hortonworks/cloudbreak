@@ -15,16 +15,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.event.LaunchStackRequest;
-import com.sequenceiq.cloudbreak.cloud.event.LaunchStackResult;
-import com.sequenceiq.cloudbreak.cloud.event.TerminateStackRequest;
-import com.sequenceiq.cloudbreak.cloud.event.TerminateStackResult;
-import com.sequenceiq.cloudbreak.cloud.event.context.StackContext;
+import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
+import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
+import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackRequest;
+import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
+import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.converter.StackToCloudStackConverter;
+import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
@@ -64,13 +64,13 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
         LOGGER.info("Assembling launch request for stack: {}", stack);
         LaunchStackResult res = null;
 
-        StackContext stackContext = new StackContext(stack.getId(), stack.getName(), CloudPlatform.OPENSTACK.name());
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), CloudPlatform.OPENSTACK.name());
         CloudCredential cloudCredential = buildCloudCredential(stack);
 
         CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
 
         Promise<LaunchStackResult> promise = Promises.prepare();
-        LaunchStackRequest launchStackRequest = new LaunchStackRequest(stackContext, cloudCredential, cloudStack, promise);
+        LaunchStackRequest launchStackRequest = new LaunchStackRequest(cloudContext, cloudCredential, cloudStack, promise);
 
         LOGGER.info("Triggering event: {}", launchStackRequest);
         eventBus.notify(launchStackRequest.selector(LaunchStackRequest.class), Event.wrap(launchStackRequest));
@@ -108,10 +108,10 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
     @Override
     public void deleteStack(Stack stack, Credential credential) {
         LOGGER.debug("Assembling terminate stack event for stack: {}", stack);
-        StackContext stackContext = new StackContext(stack.getId(), stack.getName(), CloudPlatform.OPENSTACK.name());
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), CloudPlatform.OPENSTACK.name());
         CloudCredential cloudCredential = buildCloudCredential(stack);
         Promise<TerminateStackResult> promise = Promises.prepare();
-        TerminateStackRequest terminateStackRequest = new TerminateStackRequest(stackContext, cloudCredential, promise);
+        TerminateStackRequest terminateStackRequest = new TerminateStackRequest(cloudContext, cloudCredential, promise);
         String reference = stack.getResourceByType(ResourceType.HEAT_STACK) != null
                 ? stack.getResourceByType(ResourceType.HEAT_STACK).getResourceName() : null;
 

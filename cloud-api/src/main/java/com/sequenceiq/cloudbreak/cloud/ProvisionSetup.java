@@ -7,7 +7,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 public interface ProvisionSetup {
 
+    // FIXME do not pass CloudStack just the objects what we need response is too generic
     Map<String, Object> setup(AuthenticatedContext authenticatedContext, CloudStack stack) throws Exception;
 
+    // FIXME do not pass CloudStack just the objects what we need response is too generic
     String preCheck(AuthenticatedContext authenticatedContext, CloudStack stack);
 }

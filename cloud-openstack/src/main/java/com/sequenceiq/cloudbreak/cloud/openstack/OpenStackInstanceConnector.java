@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.openstack;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -24,12 +25,17 @@ public class OpenStackInstanceConnector implements InstanceConnector {
     private OpenStackClient openStackClient;
 
     @Inject
-    private OpenStackHeatUtils utils;
+    private OpenStackMetadataCollector metadataCollector;
 
 
     @Override
-    public List<CloudVmInstanceStatus> metaData(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<Instance> vms) {
+    public Set<String> getSSHFingerprints(AuthenticatedContext authenticatedContext, Instance vm) {
         return null;
+    }
+
+    @Override
+    public List<CloudVmInstanceStatus> collectMetadata(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<Instance> vms) {
+        return metadataCollector.collectVmMetadata(authenticatedContext, resources, vms);
     }
 
     @Override

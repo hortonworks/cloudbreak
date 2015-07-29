@@ -6,7 +6,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.event.LaunchStackResult;
+import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -33,7 +33,7 @@ public class PollResourcesStateTask implements PollTask<LaunchStackResult> {
     public LaunchStackResult call() throws Exception {
         List<CloudResourceStatus> results = connector.resources().check(authenticatedContext, cloudResource);
         CloudResourceStatus status = ResourceStatusLists.aggregate(results);
-        return new LaunchStackResult(authenticatedContext.getStackContext(), status.getStatus(), status.getStatusReason(), results);
+        return new LaunchStackResult(authenticatedContext.getCloudContext(), status.getStatus(), status.getStatusReason(), results);
 
     }
 

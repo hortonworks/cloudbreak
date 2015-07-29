@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.event;
+package com.sequenceiq.cloudbreak.cloud.event.resource;
 
 public class TerminateStackResult {
     private String resultMsg;

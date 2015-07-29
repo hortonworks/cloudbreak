@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.connector.openstack;
+package com.sequenceiq.cloudbreak.service.stack.connector.openstack.adapter;
 
 import static com.sequenceiq.cloudbreak.service.stack.flow.ReflectionUtils.getDeclaredFields;
 
@@ -15,14 +15,15 @@ import com.sequenceiq.cloudbreak.cloud.event.PreProvisionCheckRequest;
 import com.sequenceiq.cloudbreak.cloud.event.PreProvisionCheckResult;
 import com.sequenceiq.cloudbreak.cloud.event.ProvisionSetupRequest;
 import com.sequenceiq.cloudbreak.cloud.event.ProvisionSetupResult;
-import com.sequenceiq.cloudbreak.cloud.event.context.StackContext;
+import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.converter.StackToCloudStackConverter;
+import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
+import com.sequenceiq.cloudbreak.service.stack.connector.openstack.OpenStackProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 
@@ -51,11 +52,11 @@ public class OpenStackProvisionSetupAdapter implements ProvisionSetup {
     @Override
     public String preProvisionCheck(Stack stack) {
         if (experimentalConnector) {
-            StackContext stackContext = new StackContext(stack.getId(), stack.getName(), CloudPlatform.OPENSTACK.name());
+            CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), CloudPlatform.OPENSTACK.name());
             CloudCredential cloudCredential = buildCloudCredential(stack);
             CloudStack cloudStack = cloudStackConverter.convert(stack);
             Promise<PreProvisionCheckResult> promise = Promises.prepare();
-            PreProvisionCheckRequest preProvisionCheckRequest = new PreProvisionCheckRequest(stackContext, cloudCredential, cloudStack, promise);
+            PreProvisionCheckRequest preProvisionCheckRequest = new PreProvisionCheckRequest(cloudContext, cloudCredential, cloudStack, promise);
             LOGGER.info("Triggering event: {}", preProvisionCheckRequest);
             eventBus.notify(preProvisionCheckRequest.selector(PreProvisionCheckRequest.class), Event.wrap(preProvisionCheckRequest));
             PreProvisionCheckResult res;
@@ -74,11 +75,11 @@ public class OpenStackProvisionSetupAdapter implements ProvisionSetup {
     @Override
     public ProvisionEvent setupProvisioning(Stack stack) throws Exception {
         if (experimentalConnector) {
-            StackContext stackContext = new StackContext(stack.getId(), stack.getName(), CloudPlatform.OPENSTACK.name());
+            CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), CloudPlatform.OPENSTACK.name());
             CloudCredential cloudCredential = buildCloudCredential(stack);
             CloudStack cloudStack = cloudStackConverter.convert(stack);
             Promise<ProvisionSetupResult> promise = Promises.prepare();
-            ProvisionSetupRequest provisionSetupRequest = new ProvisionSetupRequest(stackContext, cloudCredential, cloudStack, promise);
+            ProvisionSetupRequest provisionSetupRequest = new ProvisionSetupRequest(cloudContext, cloudCredential, cloudStack, promise);
             LOGGER.info("Triggering event: {}", provisionSetupRequest);
             eventBus.notify(provisionSetupRequest.selector(ProvisionSetupRequest.class), Event.wrap(provisionSetupRequest));
             ProvisionSetupResult res;

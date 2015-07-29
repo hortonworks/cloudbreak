@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.event.context.StackContext;
+import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceAllocationNotification;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceAllocationPersisted;
@@ -24,10 +24,10 @@ public class ResourceAllocationNotifier implements ResourcePersistenceNotifier<R
     private EventBus eventBus;
 
     @Override
-    public Promise<ResourceAllocationPersisted> notifyResourceAllocation(CloudResource cloudResource, StackContext stackContext) {
-        LOGGER.info("Assembling resource allocation notification. resource: {}, stack context: {}", cloudResource, stackContext);
+    public Promise<ResourceAllocationPersisted> notifyResourceAllocation(CloudResource cloudResource, CloudContext cloudContext) {
+        LOGGER.info("Assembling resource allocation notification. resource: {}, stack context: {}", cloudResource, cloudContext);
         Promise<ResourceAllocationPersisted> promise = Promises.prepare();
-        ResourceAllocationNotification notification = new ResourceAllocationNotification(cloudResource, stackContext.getStackId(), promise);
+        ResourceAllocationNotification notification = new ResourceAllocationNotification(cloudResource, cloudContext.getStackId(), promise);
         LOGGER.info("Firing notification: {}", notification);
         eventBus.notify("resource-allocation-persisted", Event.wrap(notification));
         return promise;

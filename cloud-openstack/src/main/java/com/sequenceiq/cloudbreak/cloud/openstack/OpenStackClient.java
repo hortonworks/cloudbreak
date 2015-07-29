@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.event.context.StackContext;
+import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 
@@ -24,8 +24,8 @@ public class OpenStackClient {
         OSFactory.enableHttpLoggingFilter(debug);
     }
 
-    public AuthenticatedContext createAuthenticatedContext(StackContext stackContext, CloudCredential cloudCredential) {
-        AuthenticatedContext authenticatedContext = new AuthenticatedContext(stackContext, cloudCredential);
+    public AuthenticatedContext createAuthenticatedContext(CloudContext cloudContext, CloudCredential cloudCredential) {
+        AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
         Access access = createAccess(cloudCredential);
         authenticatedContext.putParameter(Access.class, access);
         return authenticatedContext;

@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.event.LaunchStackRequest;
-import com.sequenceiq.cloudbreak.cloud.event.LaunchStackResult;
+import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
+import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -56,9 +56,9 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
         LOGGER.info("Received event: {}", launchStackRequestEvent);
         LaunchStackRequest launchStackRequest = launchStackRequestEvent.getData();
         try {
-            String platform = launchStackRequest.getStackContext().getPlatform();
+            String platform = launchStackRequest.getCloudContext().getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
-            AuthenticatedContext ac = connector.authenticate(launchStackRequest.getStackContext(), launchStackRequest.getCloudCredential());
+            AuthenticatedContext ac = connector.authenticate(launchStackRequest.getCloudContext(), launchStackRequest.getCloudCredential());
 
             List<CloudResourceStatus> resourceStatus = connector.resources().launch(ac, launchStackRequest.getCloudStack(),
                     resourcePersistenceNotifier);
@@ -66,7 +66,7 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
 
             PollTask<LaunchStackResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources);
-            LaunchStackResult launchStackResult = LaunchStackResults.build(launchStackRequest.getStackContext(), resourceStatus);
+            LaunchStackResult launchStackResult = LaunchStackResults.build(launchStackRequest.getCloudContext(), resourceStatus);
             if (!task.completed(launchStackResult)) {
                 launchStackResult = syncPollingScheduler.schedule(task, INTERVAL, MAX_ATTEMPT);
             }
@@ -75,7 +75,7 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
 
         } catch (Exception e) {
             LOGGER.error("Failed to handle LaunchStackRequest. Error: ", e);
-            launchStackRequest.getResult().onNext(new LaunchStackResult(launchStackRequest.getStackContext(), ResourceStatus.FAILED, e.getMessage(), null));
+            launchStackRequest.getResult().onNext(new LaunchStackResult(launchStackRequest.getCloudContext(), ResourceStatus.FAILED, e.getMessage(), null));
         }
         LOGGER.info("LaunchStackHandler finished");
     }

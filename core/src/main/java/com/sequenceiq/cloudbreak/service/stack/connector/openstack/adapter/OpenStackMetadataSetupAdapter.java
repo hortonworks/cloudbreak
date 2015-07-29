@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.connector.openstack;
+package com.sequenceiq.cloudbreak.service.stack.connector.openstack.adapter;
 
 import java.util.Set;
 
@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
+import com.sequenceiq.cloudbreak.service.stack.connector.openstack.OpenStackMetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 
@@ -25,6 +26,7 @@ public class OpenStackMetadataSetupAdapter implements MetadataSetup {
 
     @Value("${cb.openstack.experimental.connector:false}")
     private boolean experimentalConnector;
+
 
     @Inject
     private OpenStackMetadataSetup openStackMetadataSetup;

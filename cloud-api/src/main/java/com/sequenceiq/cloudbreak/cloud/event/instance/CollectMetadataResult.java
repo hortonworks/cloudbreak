@@ -1,14 +1,14 @@
-package com.sequenceiq.cloudbreak.cloud.event;
+package com.sequenceiq.cloudbreak.cloud.event.instance;
 
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.cloud.event.context.StackContext;
+import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 
-public class LaunchStackResult {
+public class CollectMetadataResult {
 
-    private StackContext stackContext;
+    private CloudContext cloudContext;
 
     private ResourceStatus status;
 
@@ -16,15 +16,15 @@ public class LaunchStackResult {
 
     private List<CloudResourceStatus> results;
 
-    public LaunchStackResult(StackContext stackContext, ResourceStatus status, String statusReason, List<CloudResourceStatus> results) {
-        this.stackContext = stackContext;
+    public CollectMetadataResult(CloudContext cloudContext, ResourceStatus status, String statusReason, List<CloudResourceStatus> results) {
+        this.cloudContext = cloudContext;
         this.status = status;
         this.statusReason = statusReason;
         this.results = results;
     }
 
-    public StackContext getStackContext() {
-        return stackContext;
+    public CloudContext getCloudContext() {
+        return cloudContext;
     }
 
     public ResourceStatus getStatus() {
@@ -44,7 +44,7 @@ public class LaunchStackResult {
     @Override
     public String toString() {
         return "LaunchStackResult{" +
-                "stackContext=" + stackContext +
+                "stackContext=" + cloudContext +
                 ", status=" + status +
                 ", statusReason='" + statusReason + '\'' +
                 ", results=" + results +

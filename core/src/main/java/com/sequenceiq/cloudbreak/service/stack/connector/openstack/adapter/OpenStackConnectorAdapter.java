@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.connector.openstack;
+package com.sequenceiq.cloudbreak.service.stack.connector.openstack.adapter;
 
 import java.util.Map;
 import java.util.Set;
@@ -15,6 +15,8 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.connector.openstack.OpenStackConnector;
+import com.sequenceiq.cloudbreak.service.stack.connector.openstack.OpenStackConnectorV2Facade;
 
 @Service
 public class OpenStackConnectorAdapter implements CloudPlatformConnector {

@@ -34,9 +34,9 @@ public class ProvisionSetupHandler implements CloudPlatformEventHandler<Provisio
         LOGGER.info("Received event: {}", event);
         ProvisionSetupRequest request = event.getData();
         try {
-            String platform = request.getStackContext().getPlatform();
+            String platform = request.getCloudContext().getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
-            AuthenticatedContext authenticatedContext = connector.authenticate(request.getStackContext(), request.getCloudCredential());
+            AuthenticatedContext authenticatedContext = connector.authenticate(request.getCloudContext(), request.getCloudCredential());
             Map<String, Object> provisionSetupResult = connector.provision().setup(authenticatedContext, request.getCloudStack());
             request.getResult().onNext(new ProvisionSetupResult(provisionSetupResult));
         } catch (Exception e) {

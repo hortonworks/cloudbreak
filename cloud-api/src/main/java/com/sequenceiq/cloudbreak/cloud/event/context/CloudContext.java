@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.event.context;
 
-public class StackContext {
+public class CloudContext {
 
     private Long stackId;
 
@@ -8,7 +8,7 @@ public class StackContext {
 
     private String platform;
 
-    public StackContext(Long stackId, String stackName, String platform) {
+    public CloudContext(Long stackId, String stackName, String platform) {
         this.stackId = stackId;
         this.stackName = stackName;
         this.platform = platform;

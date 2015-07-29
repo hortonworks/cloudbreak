@@ -19,9 +19,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
-import com.sequenceiq.cloudbreak.cloud.event.LaunchStackRequest;
-import com.sequenceiq.cloudbreak.cloud.event.LaunchStackResult;
-import com.sequenceiq.cloudbreak.cloud.event.context.StackContext;
+import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
+import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
+import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.handler.PollingHandlerFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -140,10 +140,10 @@ public class ReactorApplication implements CommandLineRunner {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
         String ts = sdf.format(new Date());
 
-        StackContext stackContext = new StackContext(0L, "stack-name_" + ts, "OPENSTACK");
+        CloudContext cloudContext = new CloudContext(0L, "stack-name_" + ts, "OPENSTACK");
 
         CloudStack cs = new CloudStack(groups, network, security, image);
-        LaunchStackRequest lr = new LaunchStackRequest(stackContext, c, cs, promise);
+        LaunchStackRequest lr = new LaunchStackRequest(cloudContext, c, cs, promise);
         LOGGER.debug("Launchrequest: {}", lr);
         return lr;
 
