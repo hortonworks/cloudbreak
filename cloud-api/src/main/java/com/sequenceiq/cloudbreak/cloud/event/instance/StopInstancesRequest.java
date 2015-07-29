@@ -1,43 +1,46 @@
-package com.sequenceiq.cloudbreak.cloud.event.resource;
+package com.sequenceiq.cloudbreak.cloud.event.instance;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 
 import reactor.rx.Promise;
 
-public class TerminateStackRequest<T> extends CloudPlatformRequest<T> {
+public class StopInstancesRequest<T> extends CloudPlatformRequest<T> {
 
     private CloudCredential cloudCredential;
 
-    private List<CloudResource> cloudResources;
+    private List<CloudInstance> cloudInstances;
 
-    public TerminateStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, List<CloudResource> resources, Promise<T> result) {
+    public StopInstancesRequest(CloudContext cloudContext, CloudCredential cloudCredential, List<CloudInstance> cloudInstances, Promise<T> result) {
         super(cloudContext, result);
         this.cloudCredential = cloudCredential;
-        this.cloudResources = new ArrayList<>(resources);
+        this.cloudInstances = cloudInstances;
     }
 
     public CloudCredential getCloudCredential() {
         return cloudCredential;
     }
 
-    public List<CloudResource> getCloudResources() {
-        return cloudResources;
+    public List<CloudInstance> getCloudInstances() {
+        return cloudInstances;
     }
 
     //BEGIN GENERATED CODE
+
     @Override
     public String toString() {
-        return "TerminateStackRequest{" +
+        return "StopStackRequest{" +
                 "cloudCredential=" + cloudCredential +
-                ", cloudResources=" + cloudResources +
+                ", cloudInstances=" + cloudInstances +
                 '}';
     }
+
+
     //END GENERATED CODE
+
 
 }

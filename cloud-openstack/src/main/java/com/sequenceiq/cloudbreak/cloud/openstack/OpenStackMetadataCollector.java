@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.openstack;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,12 +14,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.Instance;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 
 
 @Component
@@ -36,18 +38,24 @@ public class OpenStackMetadataCollector {
     private OpenStackHeatUtils utils;
 
 
-    public List<CloudVmInstanceStatus> collectVmMetadata(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<Instance> vms) {
+    public List<CloudVmInstanceStatus> collectVmMetadata(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<InstanceTemplate> vms) {
 
         CloudResource resource = utils.getHeatResource(resources);
 
         String stackName = resource.getName();
         String heatStackId = resource.getReference();
 
+        Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(vms, new Function<InstanceTemplate, String>() {
+            public String apply(InstanceTemplate from) {
+                return utils.getPrivateInstanceId(from.getGroupName(), Integer.toString(from.getPrivateId()));
+            }
+        });
+
         OSClient client = openStackClient.createOSClient(authenticatedContext);
 
         Stack heatStack = client.heat().stacks().getDetails(stackName, heatStackId);
 
-        Map<String, InstanceMetaData> metaDataMap = new HashMap<>();
+        List<CloudVmInstanceStatus> results = new ArrayList<>();
 
         List<Map<String, Object>> outputs = heatStack.getOutputs();
         for (Map<String, Object> map : outputs) {
@@ -55,24 +63,18 @@ public class OpenStackMetadataCollector {
             Server server = client.compute().servers().get(instanceUUID);
             Map<String, String> metadata = server.getMetadata();
             String privateInstanceId = utils.getPrivateInstanceId(metadata);
-            InstanceMetaData metaData = createInstanceMetaData(server, instanceUUID);
-            metaDataMap.put(privateInstanceId, metaData);
-        }
-
-        List<CloudVmInstanceStatus> results = new ArrayList<>();
-        for (Instance vm : vms) {
-            String privateInstanceId = utils.getPrivateInstanceId(vm.getGroupName(), Integer.toString(vm.getPrivateId()));
-            InstanceMetaData metaData = metaDataMap.get(privateInstanceId);
-            vm.addMetaData(metaData);
-            CloudVmInstanceStatus status = new CloudVmInstanceStatus(vm, InstanceStatus.CREATED);
-            results.add(status);
+            InstanceTemplate template = templateMap.get(privateInstanceId);
+            if (template != null) {
+                CloudInstance cloudInstance = createInstanceMetaData(server, instanceUUID, template);
+                results.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED));
+            }
         }
 
         return results;
     }
 
 
-    private InstanceMetaData createInstanceMetaData(Server server, String instanceId) {
+    private CloudInstance createInstanceMetaData(Server server, String instanceId, InstanceTemplate template) {
 
         String privateIp = null;
         String floatingIp = null;
@@ -99,11 +101,10 @@ public class OpenStackMetadataCollector {
             }
         }
 
-        InstanceMetaData md = new InstanceMetaData(
-                instanceId,
+        CloudInstanceMetaData md = new CloudInstanceMetaData(
                 privateIp,
                 floatingIp);
 
-        return md;
+        return new CloudInstance(instanceId, md, template);
     }
 }

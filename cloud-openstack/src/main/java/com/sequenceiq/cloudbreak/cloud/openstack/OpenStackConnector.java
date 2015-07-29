@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
-import com.sequenceiq.cloudbreak.cloud.ProvisionSetup;
+import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
@@ -29,7 +29,7 @@ public class OpenStackConnector implements CloudConnector {
     private OpenStackInstanceConnector instanceConnector;
 
     @Inject
-    private OpenStackProvisionSetup provisionSetup;
+    private OpenStackSetup openStackSetup;
 
     @Override
     public String platform() {
@@ -53,7 +53,7 @@ public class OpenStackConnector implements CloudConnector {
     }
 
     @Override
-    public ProvisionSetup provision() {
-        return provisionSetup;
+    public Setup setup() {
+        return openStackSetup;
     }
 }

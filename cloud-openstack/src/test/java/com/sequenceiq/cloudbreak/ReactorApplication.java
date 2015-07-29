@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.Instance;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
@@ -118,7 +118,7 @@ public class ReactorApplication implements CommandLineRunner {
         List<Group> groups = new ArrayList<>();
         Group g = new Group("master", InstanceGroupType.CORE);
         groups.add(g);
-        Instance instance = new Instance("m1.medium", g.getName(), 0);
+        InstanceTemplate instance = new InstanceTemplate("m1.medium", g.getName(), 0);
         Volume v = new Volume("/hadoop/fs1", "HDD", 1);
         instance.addVolume(v);
         v = new Volume("/hadoop/fs2", "HDD", 1);

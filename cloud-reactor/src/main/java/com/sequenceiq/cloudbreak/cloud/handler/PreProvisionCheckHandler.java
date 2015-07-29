@@ -35,7 +35,7 @@ public class PreProvisionCheckHandler implements CloudPlatformEventHandler<PrePr
             String platform = request.getCloudContext().getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
             AuthenticatedContext authenticatedContext = connector.authenticate(request.getCloudContext(), request.getCloudCredential());
-            String message = connector.provision().preCheck(authenticatedContext, request.getCloudStack());
+            String message = connector.setup().preCheck(authenticatedContext, request.getCloudStack());
             PreProvisionCheckResult result = new PreProvisionCheckResult(message);
             request.getResult().onNext(result);
         } catch (Exception e) {

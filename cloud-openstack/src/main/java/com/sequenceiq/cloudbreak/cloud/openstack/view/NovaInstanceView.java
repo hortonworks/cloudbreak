@@ -7,18 +7,18 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.cloud.model.Instance;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackHeatUtils;
 import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 
 public class NovaInstanceView {
 
-    private Instance instance;
+    private InstanceTemplate instance;
 
     private InstanceGroupType type;
 
-    public NovaInstanceView(Instance instance, InstanceGroupType type) {
+    public NovaInstanceView(InstanceTemplate instance, InstanceGroupType type) {
         this.instance = instance;
         this.type = type;
     }

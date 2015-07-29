@@ -95,10 +95,10 @@ public class MetadataSetupService {
         for (CoreInstanceMetaData coreInstanceMetadataEntry : coreInstanceMetaData) {
             long timeInMillis = Calendar.getInstance().getTimeInMillis();
             InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(
-                    stack.getId(), coreInstanceMetadataEntry.getInstanceGroup().getGroupName());
+                    stack.getId(), coreInstanceMetadataEntry.getInstanceGroupName());
             InstanceMetaData instanceMetaDataEntry = new InstanceMetaData();
             instanceMetaDataEntry.setPrivateIp(coreInstanceMetadataEntry.getPrivateIp());
-            instanceMetaDataEntry.setInstanceGroup(coreInstanceMetadataEntry.getInstanceGroup());
+            instanceMetaDataEntry.setInstanceGroup(instanceGroup);
             instanceMetaDataEntry.setPublicIp(coreInstanceMetadataEntry.getPublicIp());
             instanceMetaDataEntry.setInstanceId(coreInstanceMetadataEntry.getInstanceId());
             instanceMetaDataEntry.setVolumeCount(coreInstanceMetadataEntry.getVolumeCount());

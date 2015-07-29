@@ -106,7 +106,7 @@ public class AzureMetadataSetup implements MetadataSetup {
                         getPrivateIP((String) virtualMachine),
                         getVirtualIP((String) virtualMachine),
                         stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup()).getTemplate().getVolumeCount(),
-                        stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup())
+                        resource.getInstanceGroup()
                 );
                 return instanceMetaData;
             } catch (IOException e) {

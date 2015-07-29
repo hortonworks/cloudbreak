@@ -1,20 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-public class InstanceMetaData {
+public class CloudInstanceMetaData {
 
-    private String instanceId;
     private String privateIp;
     private String publicIp;
 
 
-    public InstanceMetaData(String instanceId, String privateIp, String publicIp) {
-        this.instanceId = instanceId;
+    public CloudInstanceMetaData(String privateIp, String publicIp) {
         this.privateIp = privateIp;
         this.publicIp = publicIp;
-    }
-
-    public String getInstanceId() {
-        return instanceId;
     }
 
     public String getPrivateIp() {
@@ -29,7 +23,6 @@ public class InstanceMetaData {
     @Override
     public String toString() {
         return "InstanceMetaData{" +
-                "instanceId='" + instanceId + '\'' +
                 ", privateIp='" + privateIp + '\'' +
                 ", publicIp='" + publicIp + '\'' +
                 '}';

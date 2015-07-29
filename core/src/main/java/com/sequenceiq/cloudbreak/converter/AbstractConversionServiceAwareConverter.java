@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -24,5 +28,15 @@ public abstract class AbstractConversionServiceAwareConverter<S, T> implements C
         } else {
             throw new IllegalStateException("Can't register Converter to ConverterRegistry");
         }
+    }
+
+    public List<T> convert(Collection<S> sources) {
+        List<T> targets = new ArrayList<>();
+        if (sources != null) {
+            for (S source : sources) {
+                targets.add(convert(source));
+            }
+        }
+        return targets;
     }
 }

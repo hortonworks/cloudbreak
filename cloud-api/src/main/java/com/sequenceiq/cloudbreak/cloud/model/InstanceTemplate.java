@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Instance {
+public class InstanceTemplate {
 
     private String flavor;
 
@@ -11,11 +11,9 @@ public class Instance {
 
     private int privateId;
 
-    private InstanceMetaData metaData;
-
     private List<Volume> volumes;
 
-    public Instance(String flavor, String groupName, int privateId) {
+    public InstanceTemplate(String flavor, String groupName, int privateId) {
         this.flavor = flavor;
         this.groupName = groupName;
         this.privateId = privateId;
@@ -24,10 +22,6 @@ public class Instance {
 
     public String getFlavor() {
         return flavor;
-    }
-
-    public InstanceMetaData getMetaData() {
-        return metaData;
     }
 
     public List<Volume> getVolumes() {
@@ -46,18 +40,18 @@ public class Instance {
         volumes.add(volume);
     }
 
-    public void addMetaData(InstanceMetaData metaData) {
-        this.metaData = metaData;
-    }
 
     //BEGIN GENERATED CODE
+
     @Override
     public String toString() {
-        return "Instance{" +
+        return "InstanceTemplate{" +
                 "flavor='" + flavor + '\'' +
-                ", metaData=" + metaData +
+                ", groupName='" + groupName + '\'' +
+                ", privateId=" + privateId +
                 ", volumes=" + volumes +
                 '}';
     }
+
     //END GENERATED CODE
 }

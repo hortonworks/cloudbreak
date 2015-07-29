@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.Instance;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 
 public class OpenStackGroupView {
 
@@ -18,7 +18,7 @@ public class OpenStackGroupView {
 
         List<NovaInstanceView> novaInstances = new ArrayList<>();
         for (Group group : groups) {
-            for (Instance instance : group.getInstances()) {
+            for (InstanceTemplate instance : group.getInstances()) {
                 NovaInstanceView novaInstance = new NovaInstanceView(instance, group.getType());
                 novaInstances.add(novaInstance);
             }

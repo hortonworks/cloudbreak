@@ -2,25 +2,25 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 public class CloudVmInstanceStatus {
 
-    private Instance instance;
+    private CloudInstance cloudInstance;
 
     private InstanceStatus status;
 
     private String statusReason;
 
-    public CloudVmInstanceStatus(Instance instance, InstanceStatus status, String statusReason) {
-        this.instance = instance;
+    public CloudVmInstanceStatus(CloudInstance cloudInstance, InstanceStatus status, String statusReason) {
+        this.cloudInstance = cloudInstance;
         this.status = status;
         this.statusReason = statusReason;
     }
 
-    public CloudVmInstanceStatus(Instance instance, InstanceStatus status) {
-        this.instance = instance;
+    public CloudVmInstanceStatus(CloudInstance cloudInstance, InstanceStatus status) {
+        this.cloudInstance = cloudInstance;
         this.status = status;
     }
 
-    public Instance getInstance() {
-        return instance;
+    public CloudInstance getCloudInstance() {
+        return cloudInstance;
     }
 
     public InstanceStatus getStatus() {
@@ -35,7 +35,7 @@ public class CloudVmInstanceStatus {
     @Override
     public String toString() {
         return "CloudVmInstanceStatus{" +
-                "instance=" + instance +
+                "instance=" + cloudInstance +
                 ", status=" + status +
                 ", statusReason='" + statusReason + '\'' +
                 '}';

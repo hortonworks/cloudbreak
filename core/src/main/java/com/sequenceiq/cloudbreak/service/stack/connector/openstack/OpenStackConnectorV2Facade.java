@@ -17,17 +17,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesRequest;
+import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesRequest;
+import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
-import com.sequenceiq.cloudbreak.cloud.event.resource.StartStackRequest;
-import com.sequenceiq.cloudbreak.cloud.event.resource.StopStackRequest;
-import com.sequenceiq.cloudbreak.cloud.event.resource.StopStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -62,6 +64,10 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
 
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
+
+    @Inject
+    private InstanceMetaDataToCloudInstanceConverter instanceConverter;
+
 
     @Override
     public Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties) {
@@ -147,13 +153,13 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
         LOGGER.info("Assembling start request for stack: {}", stack);
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), CloudPlatform.OPENSTACK.name());
         CloudCredential cloudCredential = buildCloudCredential(stack);
-        CloudStack cloudStack = cloudStackConverter.convert(stack);
-        Promise<StartStackRequest> promise = Promises.prepare();
-        StartStackRequest startStackRequest = new StartStackRequest(cloudContext, cloudCredential, cloudStack, promise);
+        List<CloudInstance> instances = instanceConverter.convert(stack.getInstanceMetaDataAsList());
+        Promise<StartInstancesRequest> promise = Promises.prepare();
+        StartInstancesRequest startStackRequest = new StartInstancesRequest(cloudContext, cloudCredential, instances, promise);
         LOGGER.info("Triggering event: {}", startStackRequest);
         eventBus.notify(startStackRequest.selector(), Event.wrap(startStackRequest));
         try {
-            StartStackRequest res = promise.await(1, TimeUnit.HOURS);
+            StartInstancesRequest res = promise.await(1, TimeUnit.HOURS);
             LOGGER.info("Result: {}", res);
         } catch (InterruptedException e) {
             LOGGER.error("Error while starting stack: ", e);
@@ -170,13 +176,13 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
         LOGGER.info("Assembling stop request for stack: {}", stack);
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), CloudPlatform.OPENSTACK.name());
         CloudCredential cloudCredential = buildCloudCredential(stack);
-        CloudStack cloudStack = cloudStackConverter.convert(stack);
-        Promise<StopStackResult> promise = Promises.prepare();
-        StopStackRequest stopStackRequest = new StopStackRequest(cloudContext, cloudCredential, cloudStack, promise);
+        List<CloudInstance> instances = instanceConverter.convert(stack.getInstanceMetaDataAsList());
+        Promise<StopInstancesResult> promise = Promises.prepare();
+        StopInstancesRequest stopStackRequest = new StopInstancesRequest(cloudContext, cloudCredential, instances, promise);
         LOGGER.info("Triggering event: {}", stopStackRequest);
         eventBus.notify(stopStackRequest.selector(), Event.wrap(stopStackRequest));
         try {
-            StopStackResult res = promise.await(1, TimeUnit.HOURS);
+            StopInstancesResult res = promise.await(1, TimeUnit.HOURS);
             LOGGER.info("Result: {}", res);
         } catch (InterruptedException e) {
             LOGGER.error("Error while stopping stack: ", e);

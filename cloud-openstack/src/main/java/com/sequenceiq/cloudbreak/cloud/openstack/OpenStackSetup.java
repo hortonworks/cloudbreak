@@ -16,21 +16,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.cloud.ProvisionSetup;
+import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 
 @Component("OpenStackProvisionSetupV2")
-public class OpenStackProvisionSetup implements ProvisionSetup {
+public class OpenStackSetup implements Setup {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackProvisionSetup.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackSetup.class);
 
     @Inject
     private OpenStackClient openStackClient;
 
     @Override
-    public Map<String, Object> setup(AuthenticatedContext authenticatedContext, CloudStack stack) throws Exception {
+    public Map<String, Object> execute(AuthenticatedContext authenticatedContext, CloudStack stack) throws Exception {
         return new HashMap<>();
     }
 

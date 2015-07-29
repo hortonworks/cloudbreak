@@ -2,16 +2,16 @@ package com.sequenceiq.cloudbreak.cloud.event;
 
 import java.util.Map;
 
-public class ProvisionSetupResult {
+public class SetupResult {
 
     private Map<String, Object> setupProperties;
     private Exception exception;
 
-    public ProvisionSetupResult(Map<String, Object> setupProperties) {
+    public SetupResult(Map<String, Object> setupProperties) {
         this.setupProperties = setupProperties;
     }
 
-    public ProvisionSetupResult(Exception exception) {
+    public SetupResult(Exception exception) {
         this.exception = exception;
     }
 

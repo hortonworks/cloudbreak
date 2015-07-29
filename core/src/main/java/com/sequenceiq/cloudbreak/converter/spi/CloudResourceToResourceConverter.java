@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.eventbus.converter;
+package com.sequenceiq.cloudbreak.converter.spi;
 
 import org.springframework.stereotype.Component;
 

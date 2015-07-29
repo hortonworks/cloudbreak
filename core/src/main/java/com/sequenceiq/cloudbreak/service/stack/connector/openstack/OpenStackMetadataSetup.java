@@ -123,7 +123,7 @@ public class OpenStackMetadataSetup {
                 privateIp,
                 floatingIp,
                 server.getOsExtendedVolumesAttached().size(),
-                stack.getInstanceGroupByInstanceGroupName(instanceGroupName)
+                instanceGroupName
         );
 
         return md;

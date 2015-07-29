@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -10,19 +7,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.event.ProvisionSetupResult;
+import com.sequenceiq.cloudbreak.cloud.event.SetupResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.event.resource.StartStackRequest;
-import com.sequenceiq.cloudbreak.cloud.event.resource.StartStackResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesRequest;
+import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.Instance;
 
 import reactor.bus.Event;
 
 @Component
-public class StartStackHandler implements CloudPlatformEventHandler<StartStackRequest> {
+public class StartStackHandler implements CloudPlatformEventHandler<StartInstancesRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StartStackHandler.class);
 
@@ -30,33 +24,27 @@ public class StartStackHandler implements CloudPlatformEventHandler<StartStackRe
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Override
-    public Class<StartStackRequest> type() {
-        return StartStackRequest.class;
+    public Class<StartInstancesRequest> type() {
+        return StartInstancesRequest.class;
     }
 
     @Override
-    public void accept(Event<StartStackRequest> event) {
+    public void accept(Event<StartInstancesRequest> event) {
         LOGGER.info("Received event: {}", event);
-        StartStackRequest request = event.getData();
+        StartInstancesRequest request = event.getData();
         try {
             String platform = request.getCloudContext().getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
             AuthenticatedContext authenticatedContext = connector.authenticate(request.getCloudContext(), request.getCloudCredential());
-            connector.instances().start(authenticatedContext, getInstances(request.getCloudStack()));
+            connector.instances().start(authenticatedContext, request.getCloudInstances());
             //TODO poll
-            request.getResult().onNext(new StartStackResult(request.getCloudContext(), "Stack successfully started"));
+            request.getResult().onNext(new StartInstancesResult(request.getCloudContext(), "Stack successfully started"));
         } catch (Exception e) {
             LOGGER.error("Failed to handle StopStackRequest.", e);
-            request.getResult().onNext(new ProvisionSetupResult(e));
+            request.getResult().onNext(new SetupResult(e));
         }
         LOGGER.info("StopStackHandler finished");
     }
 
-    private List<Instance> getInstances(CloudStack cloudStack) {
-        List<Instance> instances = new ArrayList<>();
-        for (Group group : cloudStack.getGroups()) {
-            instances.addAll(group.getInstances());
-        }
-        return instances;
-    }
+
 }

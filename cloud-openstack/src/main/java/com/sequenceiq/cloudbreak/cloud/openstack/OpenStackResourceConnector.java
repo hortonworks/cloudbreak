@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.Instance;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourcePersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceAllocationPersisted;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -126,7 +126,8 @@ public class OpenStackResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, List<Instance> vms) {
+    public List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack stack,
+            List<CloudResource> resources, List<InstanceTemplate> vms) {
         String stackName = authenticatedContext.getCloudContext().getStackName();
         String heatTemplate = heatTemplateBuilder.build(stackName, stack.getGroups(), stack.getSecurity(), stack.getImage());
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(authenticatedContext.getCloudCredential(), stack.getNetwork(), stack.getImage());

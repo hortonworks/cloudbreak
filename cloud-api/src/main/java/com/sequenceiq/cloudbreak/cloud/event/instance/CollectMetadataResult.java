@@ -3,23 +3,16 @@ package com.sequenceiq.cloudbreak.cloud.event.instance;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 
 public class CollectMetadataResult {
 
     private CloudContext cloudContext;
 
-    private ResourceStatus status;
+    private List<CloudVmInstanceStatus> results;
 
-    private String statusReason;
-
-    private List<CloudResourceStatus> results;
-
-    public CollectMetadataResult(CloudContext cloudContext, ResourceStatus status, String statusReason, List<CloudResourceStatus> results) {
+    public CollectMetadataResult(CloudContext cloudContext, List<CloudVmInstanceStatus> results) {
         this.cloudContext = cloudContext;
-        this.status = status;
-        this.statusReason = statusReason;
         this.results = results;
     }
 
@@ -27,28 +20,22 @@ public class CollectMetadataResult {
         return cloudContext;
     }
 
-    public ResourceStatus getStatus() {
-        return status;
-    }
-
-    public String getStatusReason() {
-        return statusReason;
-    }
-
-    public List<CloudResourceStatus> getResults() {
+    public List<CloudVmInstanceStatus> getResults() {
         return results;
     }
 
 
     //BEGIN GENERATED CODE
+
     @Override
     public String toString() {
-        return "LaunchStackResult{" +
-                "stackContext=" + cloudContext +
-                ", status=" + status +
-                ", statusReason='" + statusReason + '\'' +
+        return "CollectMetadataResult{" +
+                "cloudContext=" + cloudContext +
                 ", results=" + results +
                 '}';
     }
+
+
     //END GENERATED CODE
+
 }

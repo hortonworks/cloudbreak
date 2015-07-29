@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.Instance;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
@@ -71,9 +71,10 @@ public class StackToCloudStackConverter {
         List<Group> groups = new ArrayList<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             Group group = new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType());
+            // FIXME nodeId shall be an "internal id" from Cloudbreak and not a counter
             for (int nodeId = 0; nodeId < instanceGroup.getNodeCount(); nodeId++) {
                 Template template = instanceGroup.getTemplate();
-                Instance instance = new Instance(template.getInstanceTypeName(), group.getName(), nodeId);
+                InstanceTemplate instance = new InstanceTemplate(template.getInstanceTypeName(), group.getName(), nodeId);
                 for (int i = 0; i < template.getVolumeCount(); i++) {
                     Volume volume = new Volume(VolumeUtils.VOLUME_PREFIX + (i + 1), template.getVolumeTypeName(), template.getVolumeSize());
                     instance.addVolume(volume);
@@ -83,6 +84,16 @@ public class StackToCloudStackConverter {
             groups.add(group);
         }
         return groups;
+    }
+
+
+    public List<InstanceTemplate> buildInstanceTemplates(Stack stack) {
+        List<Group> groups = buildInstanceGroups(stack);
+        List<InstanceTemplate> instanceTemplates = new ArrayList<>();
+        for (Group group : groups) {
+            instanceTemplates.addAll(group.getInstances());
+        }
+        return instanceTemplates;
     }
 
 }

@@ -7,8 +7,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 import reactor.rx.Promise;
 
-public class ProvisionSetupRequest<T> extends CloudStackRequest<T> {
-    public ProvisionSetupRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack, Promise<T> result) {
+public class SetupRequest<T> extends CloudStackRequest<T> {
+    public SetupRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack, Promise<T> result) {
         super(cloudContext, cloudCredential, cloudStack, result);
     }
 }

@@ -1,11 +1,11 @@
-package com.sequenceiq.cloudbreak.cloud.event.resource;
+package com.sequenceiq.cloudbreak.cloud.event.instance;
 
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 
-public class StartStackResult {
+public class StopInstancesResult {
 
     private CloudContext cloudContext;
 
@@ -13,7 +13,7 @@ public class StartStackResult {
 
     private List<CloudResourceStatus> results;
 
-    public StartStackResult(CloudContext cloudContext, String statusReason) {
+    public StopInstancesResult(CloudContext cloudContext, String statusReason) {
         this.cloudContext = cloudContext;
         this.statusReason = statusReason;
     }
@@ -30,13 +30,17 @@ public class StartStackResult {
         return results;
     }
 
+    //BEGIN GENERATED CODE
+
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("StopStackResult{");
-        sb.append("cloudContext=").append(cloudContext);
-        sb.append(", statusReason='").append(statusReason).append('\'');
-        sb.append(", results=").append(results);
-        sb.append('}');
-        return sb.toString();
+        return "StopStackResult{" +
+                "cloudContext=" + cloudContext +
+                ", statusReason='" + statusReason + '\'' +
+                ", results=" + results +
+                '}';
     }
+
+
+    //END GENERATED CODE
 }

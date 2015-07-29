@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.eventbus.converter;
+package com.sequenceiq.cloudbreak.converter.spi;
 
 import org.springframework.stereotype.Component;
 
@@ -8,8 +8,11 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 
 @Component
 public class ResourceToCloudResourceConverter extends AbstractConversionServiceAwareConverter<Resource, CloudResource> {
+
     @Override
-    public CloudResource convert(Resource source) {
-        return new CloudResource(source.getResourceType(), source.getResourceName(), source.getResourceName());
+    public CloudResource convert(Resource resource) {
+        return new CloudResource(resource.getResourceType(), resource.getStack().getName(), resource.getResourceName());
     }
+
+
 }

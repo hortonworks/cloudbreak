@@ -11,7 +11,7 @@ public class Group {
 
     private InstanceGroupType type;
 
-    private List<Instance> instances;
+    private List<InstanceTemplate> instances;
 
     public Group(String name, InstanceGroupType type) {
         this.name = name;
@@ -27,11 +27,11 @@ public class Group {
         return type;
     }
 
-    public List<Instance> getInstances() {
+    public List<InstanceTemplate> getInstances() {
         return instances;
     }
 
-    public void addInstance(Instance instance) {
+    public void addInstance(InstanceTemplate instance) {
         instances.add(instance);
     }
 

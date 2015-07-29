@@ -12,6 +12,6 @@ public interface CloudConnector extends CloudPlatformAware {
 
     InstanceConnector instances();
 
-    ProvisionSetup provision();
+    Setup setup();
 
 }
