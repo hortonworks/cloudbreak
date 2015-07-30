@@ -1,0 +1,12 @@
+{
+  "volumeSize":100,
+  "parameters":
+  {
+    "gcpInstanceType":"N1_STANDARD_2",
+    "volumeType":"SSD"
+  },
+  "name":"gcp-template",
+  "description":"gcp description",
+  "public":true,
+  "cloudPlatform":"GCP"
+}

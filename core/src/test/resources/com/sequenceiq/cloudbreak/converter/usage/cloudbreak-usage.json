@@ -1,0 +1,11 @@
+{
+  "owner": "ownerId",
+  "account": "accountId",
+  "provider": "AWS",
+  "region": "us-east-1",
+  "instanceHours": 4,
+  "stackId": 50,
+  "stackName": "mystack",
+  "instanceType": "M3Large",
+  "instanceGroup": "slave_1"
+}

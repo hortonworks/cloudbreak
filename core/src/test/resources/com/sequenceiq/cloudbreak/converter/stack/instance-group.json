@@ -1,0 +1,6 @@
+{
+  "type" : "GATEWAY",
+  "group" : "groupName",
+  "nodeCount" : 1,
+  "templateId" : 51
+}

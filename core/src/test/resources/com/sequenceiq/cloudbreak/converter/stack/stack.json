@@ -1,0 +1,42 @@
+{
+  "cloudPlatform": "AWS",
+  "name": "mystack",
+  "region": "eu-west-1",
+  "credentialId": 51,
+  "image": "aws-image",
+  "onFailureAction": "ROLLBACK",
+  "failurePolicy": {
+    "id": 1,
+    "threshold": 10,
+    "adjustmentType": "EXACT"
+  },
+  "instanceGroups": [
+    {
+      "templateId": 1,
+      "nodeCount": 10,
+      "group": "gateway-group",
+      "type": "GATEWAY",
+      "id": 0,
+      "metadata": [
+        {
+          "privateIp": "10.0.0.1",
+          "publicIp": "52.53.54.55",
+          "instanceId": "instance",
+          "volumeCount": 1,
+          "ambariServer": false,
+          "dockerSubnet": "0.0.0.0/0",
+          "discoveryFQDN": "instance",
+          "containerCount": 5,
+          "instanceGroup": "gateway-group",
+          "instanceStatus": "REGISTERED"
+        }
+      ]
+    }
+  ],
+  "securityGroupId": 52,
+  "networkId": 53,
+  "parameters": {
+    "dedicatedInstances" : true
+  },
+  "consulServerCount": 1
+}

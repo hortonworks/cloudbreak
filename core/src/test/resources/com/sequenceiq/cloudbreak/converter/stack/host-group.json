@@ -1,0 +1,7 @@
+{
+  "name" : "hostgroup_name",
+  "recipeIds" : [
+    1, 2, 3, 4, 5
+  ],
+  "instanceGroupName": "instancegroup_name"
+}

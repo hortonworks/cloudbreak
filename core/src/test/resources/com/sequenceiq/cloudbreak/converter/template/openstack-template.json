@@ -1,0 +1,12 @@
+{
+  "volumeCount":1,
+  "volumeSize":100,
+  "parameters":
+  {
+    "instanceType":"Big"
+  },
+  "name":"openstack-template",
+  "description":"openstack description",
+  "public":true,
+  "cloudPlatform":"OPENSTACK"
+}
