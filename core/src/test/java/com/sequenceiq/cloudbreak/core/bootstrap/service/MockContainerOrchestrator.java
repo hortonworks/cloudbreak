@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCa
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
+import com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -47,7 +48,7 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
 
     @Override
     public void startAmbariServer(ContainerOrchestratorCluster cluster, String dbImageName, String serverImageName, String platform,
-            LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
+            LogVolumePath logVolumePath, Boolean localAgentRequired, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         return;
     }
@@ -62,6 +63,13 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
     @Override
     public void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, int count,
             LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+        return;
+    }
+
+    @Override
+    public void startKerberosServer(ContainerOrchestratorCluster cluster, String serverImageName, LogVolumePath logVolumePath,
+            KerberosConfiguration kerberosConfiguration, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         return;
     }

@@ -43,7 +43,7 @@ public class AmbariServerBootstrap implements ContainerBootstrap {
     public Boolean call() throws Exception {
         LOGGER.info("Creating Ambari server container on: {}", nodeName);
 
-        Bind[] binds = new BindsBuilder().addLog(logVolumePath).build();
+        Bind[] binds = new BindsBuilder().addLog(logVolumePath).add("/etc/krb5.conf").build();
         HostConfig hostConfig = new HostConfigBuilder().defaultConfig().expose(PORT).binds(binds).build();
 
         String name = AMBARI_SERVER.getName();
@@ -51,9 +51,9 @@ public class AmbariServerBootstrap implements ContainerBootstrap {
                 .withHostConfig(hostConfig)
                 .withName(name)
                 .withEnv(String.format("constraint:node==%s", nodeName),
-                        String.format("POSTGRES_DB=localhost"),
+                        "POSTGRES_DB=localhost",
                         String.format("CLOUD_PLATFORM=%s", cloudPlatform),
-                        String.format("SERVICE_NAME=%s", "ambari-8080"))
+                        "SERVICE_NAME=ambari-8080")
                 .withCmd("/start-server"));
 
         startContainer(docker, name);

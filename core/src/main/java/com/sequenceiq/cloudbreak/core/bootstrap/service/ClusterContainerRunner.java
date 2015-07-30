@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONT
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_BAYWATCH_CLIENT;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_BAYWATCH_SERVER;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_DOCKER_CONSUL_WATCH_PLUGN;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_KERBEROS;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_LOGROTATE;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_REGISTRATOR;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.StackDeletionBasedExitCriteriaModel.stackDeletionBasedExitCriteriaModel;
@@ -26,18 +27,21 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
 
@@ -63,6 +67,9 @@ public class ClusterContainerRunner {
     @Value("${cb.docker.container.ambari.db:" + CB_DOCKER_CONTAINER_AMBARI_DB + "}")
     private String postgresDockerImageName;
 
+    @Value("${cb.docker.container.kerberos:" + CB_DOCKER_CONTAINER_KERBEROS + "}")
+    private String kerberosDockerImageName;
+
     @Value("${cb.docker.container.baywatch.server:" + CB_DOCKER_CONTAINER_BAYWATCH_SERVER + "}")
     private String baywatchServerDockerImageName;
 
@@ -77,6 +84,9 @@ public class ClusterContainerRunner {
 
     @Value("${cb.baywatch.enabled:" + CB_BAYWATCH_ENABLED + "}")
     private Boolean baywatchEnabled;
+
+    @Inject
+    private ClusterService clusterService;
 
     @Inject
     private StackRepository stackRepository;
@@ -107,25 +117,33 @@ public class ClusterContainerRunner {
             nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp(), instanceMetaData.getDiscoveryName(), dataVolumes));
         }
         try {
+            Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
             LogVolumePath logVolumePath = new LogVolumePath(HOST_VOLUME_PATH, CONTAINER_VOLUME_PATH);
 
-            ContainerOrchestratorCluster cluster = new ContainerOrchestratorCluster(gatewayConfig, nodes);
-            containerOrchestrator.startRegistrator(cluster, registratorDockerImageName, stackDeletionBasedExitCriteriaModel(stack.getId()));
-            containerOrchestrator.startAmbariServer(cluster, postgresDockerImageName, getAmbariImageName(stack), cloudPlatform,
+            ContainerOrchestratorCluster orchestratorCluster = new ContainerOrchestratorCluster(gatewayConfig, nodes);
+            containerOrchestrator.startRegistrator(orchestratorCluster, registratorDockerImageName, stackDeletionBasedExitCriteriaModel(stack.getId()));
+            containerOrchestrator.startAmbariServer(orchestratorCluster, postgresDockerImageName, getAmbariImageName(stack), cloudPlatform,
+                    logVolumePath, cluster.isSecure(), stackDeletionBasedExitCriteriaModel(stack.getId()));
+            containerOrchestrator.startAmbariAgents(orchestratorCluster, getAmbariImageName(stack), orchestratorCluster.getNodes().size() - 1, cloudPlatform,
                     logVolumePath, stackDeletionBasedExitCriteriaModel(stack.getId()));
-            containerOrchestrator.startAmbariAgents(cluster, getAmbariImageName(stack), cluster.getNodes().size() - 1, cloudPlatform,
+            containerOrchestrator.startConsulWatches(orchestratorCluster, consulWatchPlugnDockerImageName, orchestratorCluster.getNodes().size(),
                     logVolumePath, stackDeletionBasedExitCriteriaModel(stack.getId()));
-            containerOrchestrator.startConsulWatches(cluster, consulWatchPlugnDockerImageName, cluster.getNodes().size(),
-                    logVolumePath, stackDeletionBasedExitCriteriaModel(stack.getId()));
-            containerOrchestrator.startLogrotate(cluster, logrotateDockerImageName, cluster.getNodes().size(),
+            containerOrchestrator.startLogrotate(orchestratorCluster, logrotateDockerImageName, orchestratorCluster.getNodes().size(),
                     stackDeletionBasedExitCriteriaModel(stack.getId()));
+            if (cluster.isSecure()) {
+                KerberosConfiguration kerberosConfiguration = new KerberosConfiguration(cluster.getKerberosMasterKey(), cluster.getKerberosAdmin(),
+                        cluster.getKerberosPassword());
+                containerOrchestrator.startKerberosServer(orchestratorCluster, kerberosDockerImageName, logVolumePath, kerberosConfiguration,
+                        stackDeletionBasedExitCriteriaModel(stack.getId()));
+            }
             if (baywatchEnabled) {
                 if (StringUtils.isEmpty(baywatchServerExternLocation)) {
-                    containerOrchestrator.startBaywatchServer(cluster, baywatchServerDockerImageName, stackDeletionBasedExitCriteriaModel(stack.getId()));
+                    containerOrchestrator.startBaywatchServer(orchestratorCluster, baywatchServerDockerImageName,
+                            stackDeletionBasedExitCriteriaModel(stack.getId()));
                 }
                 LogVolumePath baywatchLogVolumePath = new LogVolumePath(HOST_VOLUME_PATH, BAYWATCH_CONTAINER_VOLUME_PATH);
-                containerOrchestrator.startBaywatchClients(cluster, baywatchClientDockerImageName, cluster.getNodes().size(), ConsulUtils.CONSUL_DOMAIN,
-                        baywatchLogVolumePath, baywatchServerExternLocation, stackDeletionBasedExitCriteriaModel(stack.getId()));
+                containerOrchestrator.startBaywatchClients(orchestratorCluster, baywatchClientDockerImageName, orchestratorCluster.getNodes().size(),
+                        ConsulUtils.CONSUL_DOMAIN, baywatchLogVolumePath, baywatchServerExternLocation, stackDeletionBasedExitCriteriaModel(stack.getId()));
             }
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new FlowCancelledException(e.getMessage());

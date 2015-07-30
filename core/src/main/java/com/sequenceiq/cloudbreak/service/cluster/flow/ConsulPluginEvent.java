@@ -8,8 +8,7 @@ public enum ConsulPluginEvent {
     STOP_AMBARI_EVENT("ambari-stop"),
     RESTART_AMBARI_EVENT("ambari-restart"),
     RESET_AMBARI_DB_EVENT("ambari-db-reset"),
-    RESET_AMBARI_EVENT("ambari-reset"),
-    CREATE_KERBEROS_KDC("create-kdc");
+    RESET_AMBARI_EVENT("ambari-reset");
 
     private final String name;
 
