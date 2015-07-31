@@ -248,7 +248,7 @@ You can do this on the management console, or - if you have aws-cli configured -
   * Select Role for Cross-Account access
     *  Allows IAM users from a 3rd party AWS account to access this account.
 
-      **Account ID:** In case you are using our hosted solution you will need to pass SequenceIQ's account id: 755047402263
+      **Account ID:** In case you are using our hosted solution you will need to pass SequenceIQ's account id: 755047402263, otherwise use the account ID you have configured as the master account in your Cloudbreak Deployer Profile.
 
       **External ID:** provision-ambari (association link)
 
@@ -260,8 +260,9 @@ You can do this on the management console, or - if you have aws-cli configured -
 
 1. Download [this script](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/aws/create-iam-role.sh), e.g: `curl -O https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/aws/create-iam-role.sh`
 2. Make sure you have the [AWS CLI](http://aws.amazon.com/cli/) installed and on your path.
-3. Run `./create-iam-role`
-4. Copy the resulting role ARN
+3. In case you are using the hosted solution keep the account ID (755047402263), otherwise use the account ID you have configured as the master account in your Cloudbreak Deployer Profile.
+4. Run `./create-iam-role`
+5. Copy the resulting role ARN
 
 Once this is configured, Cloudbreak is ready to launch Hadoop clusters on your behalf. The only thing Cloudbreak requires is the `Role ARN` (Role for Cross-Account access).
 
