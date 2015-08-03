@@ -108,22 +108,29 @@ public class StackFailureHandlerService implements FailureHandlerService {
                     resourceList.add(newResource);
                 }
             }
+            for (Resource resource : exception.getBuiltResources()) {
+                Resource newResource = resourceRepository.findByStackIdAndNameAndType(stack.getId(), resource.getResourceName(), resource.getResourceType());
+                if (newResource != null) {
+                    LOGGER.info(String.format("Resource %s with id %s and type %s was not deleted so added to rollback list.",
+                            newResource.getResourceName(), newResource.getId(), newResource.getResourceType()));
+                    resourceList.add(newResource);
+                }
+            }
             if (!resourceList.isEmpty()) {
                 LOGGER.info("Resource list not empty so rollback will start.Resource list size is: " + resourceList.size());
-                doRollbackAndDecreaseNodeCount(exception, stack, resourceList, failedResourceRequestResult);
+                doRollbackAndDecreaseNodeCount(exception.getInstanceGroup(), stack, resourceList, failedResourceRequestResult);
             }
         }
     }
 
-    private void doRollbackAndDecreaseNodeCount(ResourceRequestResult exception, Stack stack, List<Resource> resourceList,
-            List<ResourceRequestResult> resourceRequestResults) {
-        InstanceGroup instanceGroup = instanceGroupRepository.findOne(exception.getInstanceGroup().getId());
+    private void doRollbackAndDecreaseNodeCount(InstanceGroup ig, Stack stack, List<Resource> resourcesForDeletion, List<ResourceRequestResult> requestResult) {
+        InstanceGroup instanceGroup = instanceGroupRepository.findOne(ig.getId());
         instanceGroup.setNodeCount(instanceGroup.getNodeCount() - 1);
         LOGGER.info(String.format("InstanceGroup %s node count decreased with one so the new node size is: %s",
                 instanceGroup.getGroupName(), instanceGroup.getNodeCount()));
         if (instanceGroup.getNodeCount() <= 0) {
             LOGGER.info("InstanceGroup node count lower than 1 which is incorrect so error will throw");
-            throwError(stack, resourceRequestResults);
+            throwError(stack, requestResult);
         } else {
             LOGGER.info("InstanceGroup saving with the new node count which is: " + instanceGroup.getNodeCount());
             instanceGroupRepository.save(instanceGroup);
@@ -133,7 +140,7 @@ public class StackFailureHandlerService implements FailureHandlerService {
                 final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
                 for (int i = instanceResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
                     ResourceType resourceType = instanceResourceBuilders.get(cloudPlatform).get(i).resourceType();
-                    for (Resource tmpResource : resourceList) {
+                    for (Resource tmpResource : resourcesForDeletion) {
                         if (resourceType.equals(tmpResource.getResourceType())) {
                             String message = String.format("Resource will be rolled back because provision failed on the resource: %s",
                                     tmpResource.getResourceName());
@@ -146,23 +153,23 @@ public class StackFailureHandlerService implements FailureHandlerService {
             } catch (Exception e) {
                 LOGGER.info("Resource can not be deleted. Reason: {} ", e.getMessage());
             }
-            for (Resource tmpResource : resourceList) {
+            for (Resource tmpResource : resourcesForDeletion) {
                 LOGGER.info("Deleting resource. id: {}, name: {}, type: {}", tmpResource.getId(), tmpResource.getResourceName(), tmpResource.getResourceType());
-                resourceRepository.delete(tmpResource);
+                resourceRepository.delete(tmpResource.getId());
             }
         }
     }
 
-    private void throwError(Stack stack, List<ResourceRequestResult> resourceRequestResults) {
+    private void throwError(Stack stack, List<ResourceRequestResult> requestResult) {
         eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
                 "All resource will be rolled back because too much resource creation failed during the provisioning.");
         Stack oneWithLists = stackRepository.findOneWithLists(stack.getId());
         StringBuilder sb = new StringBuilder();
-        for (ResourceRequestResult resourceRequestResult : resourceRequestResults) {
+        for (ResourceRequestResult resourceRequestResult : requestResult) {
             if (resourceRequestResult.getException().orNull() != null) {
                 sb.append(String.format("%s, ", resourceRequestResult.getException().orNull().getMessage()));
             }
         }
-        throw new BuildStackFailureException(sb.toString(), resourceRequestResults.get(0).getException().orNull(), oneWithLists.getResources());
+        throw new BuildStackFailureException(sb.toString(), requestResult.get(0).getException().orNull(), oneWithLists.getResources());
     }
 }

@@ -75,6 +75,7 @@ public class ProvisionContextCallable implements Callable<ResourceRequestResult>
         } catch (Exception ex) {
             return ResourceRequestResult.ResourceRequestResultBuilder.builder()
                     .withException(ex)
+                    .withBuildedResources(resources)
                     .withResources(buildResources)
                     .withFutureResult(FutureResult.FAILED)
                     .withInstanceGroup(instanceGroup)

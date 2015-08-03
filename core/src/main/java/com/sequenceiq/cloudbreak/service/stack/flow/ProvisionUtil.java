@@ -6,24 +6,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 
 @Component
 public class ProvisionUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisionUtil.class);
-
-    @Inject
-    private StackRepository stackRepository;
 
     @javax.annotation.Resource
     private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
@@ -38,7 +32,6 @@ public class ProvisionUtil {
 
     public Map<FutureResult, List<ResourceRequestResult>> waitForRequestToFinish(Long stackId, List<Future<ResourceRequestResult>> futures)
             throws Exception {
-        Stack stack = stackRepository.findOneWithLists(stackId);
         Map<FutureResult, List<ResourceRequestResult>> result = new HashMap<>();
         result.put(FutureResult.FAILED, new ArrayList<ResourceRequestResult>());
         result.put(FutureResult.SUCCESS, new ArrayList<ResourceRequestResult>());
