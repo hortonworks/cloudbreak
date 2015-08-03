@@ -52,19 +52,26 @@ public class ScalingFailureHandlerService implements FailureHandlerService {
         for (ResourceRequestResult exception : failedResourceRequestResult) {
             List<Resource> resourceList = new ArrayList<>();
             LOGGER.error("Error: {}", exception.getException().orNull().getMessage());
-            for (Resource resource : exception.getResources()) {
-                Resource newResource = resourceRepository.findByStackIdAndNameAndType(stack.getId(), resource.getResourceName(), resource.getResourceType());
-                if (newResource != null) {
-                    LOGGER.info("Resource will be rolled back. name: {}, id: {}, type: {}", newResource.getResourceName(), newResource.getId(),
-                            newResource.getResourceType());
-                    resourceList.add(newResource);
-                }
-            }
+            resourceList.addAll(collectFailedResources(stack.getId(), exception.getResources()));
+            resourceList.addAll(collectFailedResources(stack.getId(), exception.getBuiltResources()));
             if (!resourceList.isEmpty()) {
                 LOGGER.info("Rolling back resources for stackId: {}. Resources to be rolled back: {}", stack.getId(), resourceList.size());
                 doRollback(stack, resourceList);
             }
         }
+    }
+
+    private List<Resource> collectFailedResources(Long stackId, List<Resource> resources) {
+        List<Resource> resourceList = new ArrayList<>();
+        for (Resource resource : resources) {
+            Resource newResource = resourceRepository.findByStackIdAndNameAndType(stackId, resource.getResourceName(), resource.getResourceType());
+            if (newResource != null) {
+                LOGGER.info(String.format("Resource %s with id %s and type %s was not deleted so added to rollback list.",
+                        newResource.getResourceName(), newResource.getId(), newResource.getResourceType()));
+                resourceList.add(newResource);
+            }
+        }
+        return resourceList;
     }
 
     private void doRollback(Stack stack, List<Resource> resourceList) {
