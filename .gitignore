@@ -23,3 +23,4 @@ stacks_log/
 application.yml
 suites_log/
 test-output/
+gradle/wrapper/
