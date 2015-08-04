@@ -4,13 +4,11 @@ import java.util.Set;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.access.prepost.PostAuthorize;
 
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
 public interface RecipeRepository extends CrudRepository<Recipe, Long> {
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     Recipe findOne(@Param("id") Long id);
 
     Recipe findByNameInAccount(@Param("name") String name, @Param("account") String account);

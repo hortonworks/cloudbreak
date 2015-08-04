@@ -11,8 +11,6 @@ public interface SecurityGroupService {
 
     SecurityGroup get(Long id);
 
-    SecurityGroup getById(Long id);
-
     SecurityGroup getPrivateSecurityGroup(String name, CbUser user);
 
     SecurityGroup getPublicSecurityGroup(String name, CbUser user);

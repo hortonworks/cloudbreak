@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -38,6 +39,7 @@ public class SimpleRecipeService implements RecipeService {
     }
 
     @Override
+    @PostAuthorize("hasPermission(returnObject,'read')")
     public Recipe get(Long id) {
         Recipe recipe = recipeRepository.findOne(id);
         if (recipe == null) {
@@ -80,7 +82,7 @@ public class SimpleRecipeService implements RecipeService {
 
     @Override
     public void delete(Long id, CbUser user) {
-        Recipe recipe = recipeRepository.findOne(id);
+        Recipe recipe = get(id);
         if (recipe == null) {
             throw new NotFoundException(String.format("Recipe '%s' not found.", id));
         }

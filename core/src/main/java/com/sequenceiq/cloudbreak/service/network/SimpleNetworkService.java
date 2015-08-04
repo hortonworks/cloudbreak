@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -43,6 +44,7 @@ public class SimpleNetworkService implements NetworkService {
     }
 
     @Override
+    @PostAuthorize("hasPermission(returnObject,'read')")
     public Network get(Long id) {
         Network network = networkRepository.findOne(id);
         if (network == null) {
@@ -81,7 +83,7 @@ public class SimpleNetworkService implements NetworkService {
     @Override
     public void delete(Long id, CbUser user) {
         LOGGER.info("Deleting network with id: {}", id);
-        Network network = networkRepository.findOne(id);
+        Network network = get(id);
         if (network == null) {
             throw new NotFoundException(String.format("Network '%s' not found.", id));
         }

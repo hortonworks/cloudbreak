@@ -11,7 +11,7 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     Cluster findById(@Param("id") Long id);
 
-    Set<Cluster> findAllClustersByBlueprint(@Param("id") Long id);
+    Set<Cluster> findAllClustersByBlueprint(@Param("id") Long blueprintId);
 
     Cluster findOneWithLists(@Param("id") Long id);
 

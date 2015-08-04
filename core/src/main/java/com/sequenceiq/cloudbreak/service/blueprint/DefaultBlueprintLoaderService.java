@@ -35,6 +35,9 @@ public class DefaultBlueprintLoaderService {
     private ConversionService conversionService;
 
     @Inject
+    private BlueprintService blueprintService;
+
+    @Inject
     private BlueprintRepository blueprintRepository;
 
     @Inject
@@ -53,7 +56,7 @@ public class DefaultBlueprintLoaderService {
         for (String blueprintName : blueprintArray) {
             Blueprint oneByName = null;
             try {
-                oneByName = blueprintRepository.findOneByName(blueprintName, user.getAccount());
+                oneByName = blueprintService.getByName(blueprintName, user);
             } catch (Exception e) {
                 oneByName = null;
             }

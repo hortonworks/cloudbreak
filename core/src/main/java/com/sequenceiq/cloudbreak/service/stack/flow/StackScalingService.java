@@ -114,7 +114,7 @@ public class StackScalingService {
                 cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_TERMINATING_HOST_FROM_HOSTGROUP.code(), Arrays.asList(hostName, instanceGroupName)),
                 instanceGroupName);
         if (stack.getCluster() != null) {
-            HostMetadata hostMetadata = hostMetadataRepository.findHostsInClusterByName(stack.getCluster().getId(), hostName);
+            HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), hostName);
             if (hostMetadata != null && HostMetadataState.HEALTHY.equals(hostMetadata.getHostMetadataState())) {
                 throw new ScalingFailedException(String.format("Host (%s) is in HEALTHY state. Cannot be removed.", hostName));
             }

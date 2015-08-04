@@ -52,10 +52,10 @@ import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 import groovyx.net.http.HttpResponseException;
@@ -66,7 +66,7 @@ import reactor.bus.EventBus;
 public class AmbariClusterServiceTest {
 
     @Mock
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Mock
     private ClusterRepository clusterRepository;
@@ -126,10 +126,9 @@ public class AmbariClusterServiceTest {
         stack.setCluster(cluster);
         clusterRequest = new ClusterRequest();
         clusterResponse = new ClusterResponse();
-        when(stackRepository.findById(anyLong())).thenReturn(stack);
-        when(stackRepository.findByIdLazy(anyLong())).thenReturn(stack);
-        when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(stackRepository.findOne(anyLong())).thenReturn(stack);
+        when(stackService.get(anyLong())).thenReturn(stack);
+        when(stackService.getById(anyLong())).thenReturn(stack);
+        when(stackService.findLazy(anyLong())).thenReturn(stack);
         when(clusterRepository.save(any(Cluster.class))).thenReturn(cluster);
         given(tlsSecurityService.buildTLSClientConfig(anyLong(), anyString())).willReturn(new TLSClientConfig("", "/tmp"));
     }
@@ -142,7 +141,8 @@ public class AmbariClusterServiceTest {
         cluster.setStack(stack);
         stack.setCluster(cluster);
 
-        when(stackRepository.findOne(anyLong())).thenReturn(stack);
+        when(stackService.get(anyLong())).thenReturn(stack);
+        when(stackService.getById(anyLong())).thenReturn(stack);
 
         underTest.updateStatus(1L, StatusRequest.STOPPED);
     }

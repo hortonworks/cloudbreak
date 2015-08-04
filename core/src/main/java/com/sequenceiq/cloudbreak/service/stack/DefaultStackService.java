@@ -19,6 +19,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
@@ -89,7 +90,6 @@ public class DefaultStackService implements StackService {
     private SecurityRuleRepository securityRuleRepository;
     @Inject
     private CloudbreakEventService eventService;
-
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
@@ -123,6 +123,7 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
+    @PostAuthorize("hasPermission(returnObject,'read')")
     public Stack get(Long id) {
         Stack stack = stackRepository.findOne(id);
         if (stack == null) {
@@ -175,6 +176,7 @@ public class DefaultStackService implements StackService {
         return stack;
     }
 
+    @PostAuthorize("hasPermission(returnObject,'read')")
     public Stack getPublicStack(String name, CbUser cbUser) {
         Stack stack = stackRepository.findOneByName(name, cbUser.getAccount());
         if (stack == null) {
@@ -238,7 +240,7 @@ public class DefaultStackService implements StackService {
 
     @Override
     public void updateStatus(Long stackId, StatusRequest status) {
-        Stack stack = stackRepository.findOne(stackId);
+        Stack stack = get(stackId);
         Cluster cluster = null;
         if (stack.getCluster() != null) {
             cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
@@ -302,7 +304,7 @@ public class DefaultStackService implements StackService {
 
     @Override
     public void updateNodeCount(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustmentJson) {
-        Stack stack = stackRepository.findOne(stackId);
+        Stack stack = get(stackId);
         validateStackStatus(stack);
         validateInstanceGroup(stack, instanceGroupAdjustmentJson.getInstanceGroup());
         validateScalingAdjustment(instanceGroupAdjustmentJson, stack);
@@ -322,7 +324,7 @@ public class DefaultStackService implements StackService {
 
     @Override
     public void updateAllowedSubnets(Long stackId, List<SecurityRule> securityRuleList) {
-        Stack stack = stackRepository.findOne(stackId);
+        Stack stack = get(stackId);
         if (!stack.isAvailable()) {
             throw new BadRequestException(String.format("Stack is currently in '%s' state. Security constraints cannot be updated.", stack.getStatus()));
         }
@@ -343,6 +345,11 @@ public class DefaultStackService implements StackService {
     public void validateStack(StackValidation stackValidation) {
         networkConfigurationValidator.validateNetworkForStack(stackValidation.getNetwork(), stackValidation.getInstanceGroups());
         blueprintValidator.validateBlueprintForStack(stackValidation.getBlueprint(), stackValidation.getHostGroups(), stackValidation.getInstanceGroups());
+    }
+
+    @Override
+    public Stack save(Stack stack) {
+        return stackRepository.save(stack);
     }
 
     private void validateScalingAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack) {

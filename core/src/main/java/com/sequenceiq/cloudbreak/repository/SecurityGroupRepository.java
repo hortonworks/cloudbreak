@@ -4,7 +4,6 @@ import java.util.Set;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.access.prepost.PostAuthorize;
 
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 
@@ -12,11 +11,7 @@ public interface SecurityGroupRepository extends CrudRepository<SecurityGroup, L
 
     SecurityGroup findById(@Param("id") Long id);
 
-    @PostAuthorize("hasPermission(returnObject,'read')")
     SecurityGroup findOneById(@Param("id") Long id);
-
-    @PostAuthorize("hasPermission(returnObject,'read')")
-    SecurityGroup findOneByName(@Param("name") String name, @Param("account") String account);
 
     SecurityGroup findByNameForUser(@Param("name") String name, @Param("owner") String userId);
 

@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -54,6 +55,7 @@ public class SimpleCredentialService implements CredentialService {
     }
 
     @Override
+    @PostAuthorize("hasPermission(returnObject,'read')")
     public Credential get(Long id) {
         Credential credential = credentialRepository.findOne(id);
         if (credential == null) {
@@ -118,7 +120,7 @@ public class SimpleCredentialService implements CredentialService {
 
     @Override
     public Credential update(Long id) throws Exception {
-        Credential credential = credentialRepository.findOne(id);
+        Credential credential = get(id);
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", id));
         } else {
