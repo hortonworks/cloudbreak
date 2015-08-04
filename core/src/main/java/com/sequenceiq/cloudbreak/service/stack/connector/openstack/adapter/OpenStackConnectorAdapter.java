@@ -70,12 +70,20 @@ public class OpenStackConnectorAdapter implements CloudPlatformConnector {
 
     @Override
     public void startAll(Stack stack) {
-        openStackConnector.startAll(stack);
+        if (experimentalConnector) {
+            openStackConnectorV2Facade.startAll(stack);
+        } else {
+            openStackConnector.startAll(stack);
+        }
     }
 
     @Override
     public void stopAll(Stack stack) {
-        openStackConnector.stopAll(stack);
+        if (experimentalConnector) {
+            openStackConnectorV2Facade.stopAll(stack);
+        } else {
+            openStackConnector.stopAll(stack);
+        }
     }
 
     @Override

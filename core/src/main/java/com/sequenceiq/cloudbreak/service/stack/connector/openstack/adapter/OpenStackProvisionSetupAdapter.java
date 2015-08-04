@@ -58,7 +58,7 @@ public class OpenStackProvisionSetupAdapter implements ProvisionSetup {
             Promise<PreProvisionCheckResult> promise = Promises.prepare();
             PreProvisionCheckRequest preProvisionCheckRequest = new PreProvisionCheckRequest(cloudContext, cloudCredential, cloudStack, promise);
             LOGGER.info("Triggering event: {}", preProvisionCheckRequest);
-            eventBus.notify(preProvisionCheckRequest.selector(PreProvisionCheckRequest.class), Event.wrap(preProvisionCheckRequest));
+            eventBus.notify(preProvisionCheckRequest.selector(), Event.wrap(preProvisionCheckRequest));
             PreProvisionCheckResult res;
             try {
                 res = promise.await(1, TimeUnit.HOURS);
@@ -81,7 +81,7 @@ public class OpenStackProvisionSetupAdapter implements ProvisionSetup {
             Promise<ProvisionSetupResult> promise = Promises.prepare();
             ProvisionSetupRequest provisionSetupRequest = new ProvisionSetupRequest(cloudContext, cloudCredential, cloudStack, promise);
             LOGGER.info("Triggering event: {}", provisionSetupRequest);
-            eventBus.notify(provisionSetupRequest.selector(ProvisionSetupRequest.class), Event.wrap(provisionSetupRequest));
+            eventBus.notify(provisionSetupRequest.selector(), Event.wrap(provisionSetupRequest));
             ProvisionSetupResult res;
             try {
                 res = promise.await(1, TimeUnit.HOURS);

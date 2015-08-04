@@ -14,11 +14,12 @@ public class TerminateStackRequest<T> extends CloudPlatformRequest<T> {
 
     private CloudCredential cloudCredential;
 
-    private List<CloudResource> cloudResources = new ArrayList<>();
+    private List<CloudResource> cloudResources;
 
-    public TerminateStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, Promise<T> result) {
+    public TerminateStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, List<CloudResource> resources, Promise<T> result) {
         super(cloudContext, result);
         this.cloudCredential = cloudCredential;
+        this.cloudResources = new ArrayList<>(resources);
     }
 
     public CloudCredential getCloudCredential() {
@@ -29,8 +30,6 @@ public class TerminateStackRequest<T> extends CloudPlatformRequest<T> {
         return cloudResources;
     }
 
-    //BEGIN GENERATED CODE
-
     @Override
     public String toString() {
         return "TerminateStackRequest{" +
@@ -39,5 +38,4 @@ public class TerminateStackRequest<T> extends CloudPlatformRequest<T> {
                 '}';
     }
 
-    //END GENERATED CODE
 }

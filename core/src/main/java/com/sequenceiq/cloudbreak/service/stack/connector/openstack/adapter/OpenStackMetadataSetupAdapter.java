@@ -43,9 +43,9 @@ public class OpenStackMetadataSetupAdapter implements MetadataSetup {
     @Override
     public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, final String instanceGroupName) {
         if (experimentalConnector) {
-            return openStackMetadataSetup.collectNewMetadata(stack, resourceList, instanceGroupName);
+            return openStackMetadataSetup.collectNewMetadata(stack, instanceGroupName);
         } else {
-            return openStackMetadataSetup.collectNewMetadata(stack, resourceList, instanceGroupName);
+            return openStackMetadataSetup.collectNewMetadata(stack, instanceGroupName);
         }
     }
 

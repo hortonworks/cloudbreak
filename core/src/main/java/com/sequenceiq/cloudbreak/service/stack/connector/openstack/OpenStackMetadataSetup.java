@@ -56,7 +56,7 @@ public class OpenStackMetadataSetup {
         return instancesCoreMetadata;
     }
 
-    public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, final String instanceGroupName) {
+    public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, final String instanceGroupName) {
         OSClient osClient = openStackUtil.createOSClient(stack);
         Resource heatResource = stack.getResourceByType(ResourceType.HEAT_STACK);
         String heatStackId = heatResource.getResourceName();

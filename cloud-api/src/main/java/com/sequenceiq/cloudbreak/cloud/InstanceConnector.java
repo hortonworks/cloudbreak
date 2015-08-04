@@ -16,9 +16,9 @@ public interface InstanceConnector {
 
     List<CloudVmInstanceStatus> collectMetadata(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<Instance> vms);
 
-    List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudResource> resources, List<Instance> vms);
+    List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<Instance> vms);
 
-    List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<Instance> vms);
+    List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<Instance> vms);
 
     List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudResource> resources, List<Instance> vms);
 

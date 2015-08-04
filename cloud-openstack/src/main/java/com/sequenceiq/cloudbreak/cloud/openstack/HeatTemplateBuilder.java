@@ -41,7 +41,6 @@ public class HeatTemplateBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-
     public String build(String stackName, List<Group> groups, Security security, Image instanceUserData) {
         try {
             List<NovaInstanceView> novaInstances = new OpenStackGroupView(groups).getFlatNovaView();
@@ -59,7 +58,6 @@ public class HeatTemplateBuilder {
         }
     }
 
-
     public Map<String, String> buildParameters(CloudCredential credential, Network network, Image image) {
         KeystoneCredentialView osCredential = new KeystoneCredentialView(credential);
         NeutronNetworkView neutronView = new NeutronNetworkView(network);
@@ -70,7 +68,6 @@ public class HeatTemplateBuilder {
         parameters.put("app_net_cidr", neutronView.getSubnetCIDR());
         return parameters;
     }
-
 
     private String formatUserData(String userData) {
         String[] lines = userData.split("\n");

@@ -19,6 +19,10 @@ public class CloudPlatformRequest<T> {
         return clazz.getSimpleName().toUpperCase();
     }
 
+    public String selector() {
+        return selector(getClass());
+    }
+
     public CloudContext getCloudContext() {
         return cloudContext;
     }

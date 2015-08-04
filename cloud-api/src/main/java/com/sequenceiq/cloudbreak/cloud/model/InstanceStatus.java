@@ -5,6 +5,7 @@ public enum InstanceStatus {
     CREATED(StatusGroup.PERMANENT),
     STARTED(StatusGroup.PERMANENT),
     STOPPED(StatusGroup.PERMANENT),
+    FAILED(StatusGroup.PERMANENT),
     TERMINATED(StatusGroup.PERMANENT),
     IN_PROGRESS(StatusGroup.TRANSIENT);
 
