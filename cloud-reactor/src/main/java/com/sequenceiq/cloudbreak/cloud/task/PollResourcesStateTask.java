@@ -6,13 +6,12 @@ import java.util.List;
 import javax.inject.Inject;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceStatusLists;
 
-public class PollResourcesStateTask implements PollTask<LaunchStackResult> {
+public class PollResourcesStateTask implements PollTask<ResourcesStatePollerResult> {
 
     private CloudConnector connector;
 
@@ -30,15 +29,15 @@ public class PollResourcesStateTask implements PollTask<LaunchStackResult> {
     }
 
     @Override
-    public LaunchStackResult call() throws Exception {
+    public ResourcesStatePollerResult call() throws Exception {
         List<CloudResourceStatus> results = connector.resources().check(authenticatedContext, cloudResource);
         CloudResourceStatus status = ResourceStatusLists.aggregate(results);
-        return new LaunchStackResult(authenticatedContext.getCloudContext(), status.getStatus(), status.getStatusReason(), results);
+        return new ResourcesStatePollerResult(authenticatedContext.getCloudContext(), status.getStatus(), status.getStatusReason(), results);
 
     }
 
     @Override
-    public boolean completed(LaunchStackResult launchStackResult) {
-        return launchStackResult.getStatus().isPermanent();
+    public boolean completed(ResourcesStatePollerResult resourcesStatePollerResult) {
+        return resourcesStatePollerResult.getStatus().isPermanent();
     }
 }

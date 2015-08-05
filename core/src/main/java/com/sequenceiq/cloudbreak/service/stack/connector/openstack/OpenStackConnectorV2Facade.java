@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
+import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackRequest;
@@ -88,6 +89,11 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
         try {
             res = promise.await(1, TimeUnit.HOURS);
             LOGGER.info("Result: {}", res);
+            if (res == null) {
+                throw new OpenStackResourceException("Launch of stack failed: resource(s) could not be created in time.");
+            } else if (res.getStatus().equals(EventStatus.FAILED)) {
+                throw new OpenStackResourceException(res.getStatusReason());
+            }
         } catch (InterruptedException e) {
             LOGGER.error("Error while launching stack: ", e);
         }
@@ -132,8 +138,13 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
         LOGGER.info("Triggering terminate stack event: {}", terminateStackRequest);
         eventBus.notify(terminateStackRequest.selector(), Event.wrap(terminateStackRequest));
         try {
-            TerminateStackResult res = promise.await();
+            TerminateStackResult res = promise.await(1, TimeUnit.HOURS);
             LOGGER.info("Terminate stack result: {}", res);
+            if (res == null) {
+                throw new OpenStackResourceException("Stack termination failed: the termination of resource timed out.");
+            } else if (res.getStatus().equals(EventStatus.FAILED)) {
+                throw new OpenStackResourceException(res.getStatusReason(), res.getErrorDetails());
+            }
         } catch (InterruptedException e) {
             LOGGER.error("Error while terminating stack: ", e);
         }
