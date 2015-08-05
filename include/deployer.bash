@@ -165,6 +165,7 @@ doctor() {
     fi
 
     docker-check-version
+    deployer-generate
 }
 
 cbd-find-root() {
