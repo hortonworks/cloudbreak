@@ -1,16 +1,17 @@
 package com.sequenceiq.cloudbreak.cloud.event.instance;
 
-import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
+import java.util.List;
 
-public class StartInstancesResult {
+import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+
+public class InstancesStatusResult {
 
     private final CloudContext cloudContext;
-    private final String statusReason;
-    private final InstancesStatusResult results;
+    private final List<CloudVmInstanceStatus> results;
 
-    public StartInstancesResult(CloudContext cloudContext, String statusReason, InstancesStatusResult results) {
+    public InstancesStatusResult(CloudContext cloudContext, List<CloudVmInstanceStatus> results) {
         this.cloudContext = cloudContext;
-        this.statusReason = statusReason;
         this.results = results;
     }
 
@@ -18,19 +19,14 @@ public class StartInstancesResult {
         return cloudContext;
     }
 
-    public String getStatusReason() {
-        return statusReason;
-    }
-
-    public InstancesStatusResult getResults() {
+    public List<CloudVmInstanceStatus> getResults() {
         return results;
     }
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("StartInstancesResult{");
+        final StringBuilder sb = new StringBuilder("InstancesStatusResult{");
         sb.append("cloudContext=").append(cloudContext);
-        sb.append(", statusReason='").append(statusReason).append('\'');
         sb.append(", results=").append(results);
         sb.append('}');
         return sb.toString();

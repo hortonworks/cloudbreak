@@ -10,9 +10,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.event.instance.InstancesStatusResult;
+import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 
 @Configuration
@@ -23,14 +25,18 @@ public class PollTaskConfig {
 
     @Bean
     @Scope(value = "prototype")
-    public PollTaskFactory newFetchResourcesStateTask() {
-
+    public PollTaskFactory newFetchStateTask() {
         return new PollTaskFactory() {
-
             @Override
             public PollTask<LaunchStackResult> newPollResourcesStateTask(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResource) {
                 CloudConnector connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatform());
                 return new PollResourcesStateTask(authenticatedContext, connector, cloudResource);
+            }
+
+            @Override
+            public PollTask<InstancesStatusResult> newPollInstanceStateTask(AuthenticatedContext authenticatedContext, List<CloudInstance> instances) {
+                CloudConnector connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatform());
+                return new PollInstancesStateTask(authenticatedContext, connector, instances);
             }
         };
     }

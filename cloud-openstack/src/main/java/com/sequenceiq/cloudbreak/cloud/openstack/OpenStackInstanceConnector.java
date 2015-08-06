@@ -9,17 +9,19 @@ import javax.inject.Inject;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.model.compute.Action;
 import org.openstack4j.model.compute.ActionResponse;
+import org.openstack4j.model.compute.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.openstack.status.NovaInstanceStatus;
 
 @Service
 public class OpenStackInstanceConnector implements InstanceConnector {
@@ -53,15 +55,20 @@ public class OpenStackInstanceConnector implements InstanceConnector {
     }
 
     @Override
-    public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
-        return null;
+    public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
+        List<CloudVmInstanceStatus> statuses = new ArrayList<>();
+        OSClient osClient = openStackClient.createOSClient(ac);
+        for (CloudInstance vm : vms) {
+            Server server = osClient.compute().servers().get(vm.getInstanceId());
+            statuses.add(new CloudVmInstanceStatus(vm, NovaInstanceStatus.get(server)));
+        }
+        return statuses;
     }
 
     private List<CloudVmInstanceStatus> executeAction(AuthenticatedContext ac, List<CloudInstance> cloudInstances, Action action) {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
         OSClient osClient = openStackClient.createOSClient(ac);
         for (CloudInstance cloudInstance : cloudInstances) {
-            //TODO use real instance id
             ActionResponse actionResponse = osClient.compute().servers().action(cloudInstance.getInstanceId(), action);
             if (actionResponse.isSuccess()) {
                 statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS));
@@ -71,6 +78,5 @@ public class OpenStackInstanceConnector implements InstanceConnector {
         }
         return statuses;
     }
-
 
 }

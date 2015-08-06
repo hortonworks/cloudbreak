@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesRequest;
+import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
@@ -91,10 +92,10 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
             LOGGER.error("Error while launching stack: ", e);
         }
 
-        return tranformResults(res.getResults(), stack);
+        return transformResults(res.getResults(), stack);
     }
 
-    private Set<Resource> tranformResults(List<CloudResourceStatus> cloudResourceStatuses, Stack stack) {
+    private Set<Resource> transformResults(List<CloudResourceStatus> cloudResourceStatuses, Stack stack) {
         Set<Resource> retSet = new HashSet<>();
         for (CloudResourceStatus cloudResourceStatus : cloudResourceStatuses) {
             Resource resource = new Resource(cloudResourceStatus.getCloudResource().getType(), cloudResourceStatus.getCloudResource().getReference(), stack);
@@ -154,12 +155,14 @@ public class OpenStackConnectorV2Facade implements CloudPlatformConnector {
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), CloudPlatform.OPENSTACK.name());
         CloudCredential cloudCredential = buildCloudCredential(stack);
         List<CloudInstance> instances = instanceConverter.convert(stack.getInstanceMetaDataAsList());
-        Promise<StartInstancesRequest> promise = Promises.prepare();
+        Promise<StartInstancesResult> promise = Promises.prepare();
         StartInstancesRequest startStackRequest = new StartInstancesRequest(cloudContext, cloudCredential, instances, promise);
+        //TODO we should create the promise inside the request to avoid ClassCastExceptions
+        //TODO the request should know what type of result will come back
         LOGGER.info("Triggering event: {}", startStackRequest);
         eventBus.notify(startStackRequest.selector(), Event.wrap(startStackRequest));
         try {
-            StartInstancesRequest res = promise.await(1, TimeUnit.HOURS);
+            StartInstancesResult res = promise.await(1, TimeUnit.HOURS);
             LOGGER.info("Result: {}", res);
         } catch (InterruptedException e) {
             LOGGER.error("Error while starting stack: ", e);
