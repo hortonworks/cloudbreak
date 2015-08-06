@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.event.SetupResult;
+import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
@@ -41,7 +41,7 @@ public class StartStackHandler implements CloudPlatformEventHandler<StartInstanc
             request.getResult().onNext(new StartInstancesResult(request.getCloudContext(), "Stack successfully started"));
         } catch (Exception e) {
             LOGGER.error("Failed to handle StopStackRequest.", e);
-            request.getResult().onNext(new SetupResult(e));
+            request.getResult().onNext(new SetupResult(e, request));
         }
         LOGGER.info("StopStackHandler finished");
     }

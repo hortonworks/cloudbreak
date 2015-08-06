@@ -8,6 +8,8 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 
 public class LaunchStackResult {
 
+
+
     private CloudContext cloudContext;
 
     private ResourceStatus status;

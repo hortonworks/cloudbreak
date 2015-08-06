@@ -11,18 +11,11 @@ import reactor.rx.Promise;
 
 public class StartInstancesRequest<T> extends CloudPlatformRequest<T> {
 
-    private CloudCredential cloudCredential;
-
     private List<CloudInstance> cloudInstances;
 
     public StartInstancesRequest(CloudContext cloudContext, CloudCredential cloudCredential, List<CloudInstance> cloudInstances, Promise<T> result) {
-        super(cloudContext, result);
-        this.cloudCredential = cloudCredential;
+        super(cloudContext, cloudCredential, result);
         this.cloudInstances = cloudInstances;
-    }
-
-    public CloudCredential getCloudCredential() {
-        return cloudCredential;
     }
 
     public List<CloudInstance> getCloudInstances() {
@@ -34,11 +27,9 @@ public class StartInstancesRequest<T> extends CloudPlatformRequest<T> {
     @Override
     public String toString() {
         return "StartStackRequest{" +
-                "cloudCredential=" + cloudCredential +
                 ", cloudInstances=" + cloudInstances +
                 '}';
     }
-
 
     //END GENERATED CODE
 

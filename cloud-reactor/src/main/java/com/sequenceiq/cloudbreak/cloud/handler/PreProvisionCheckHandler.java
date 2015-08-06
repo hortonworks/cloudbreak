@@ -7,8 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.event.PreProvisionCheckRequest;
-import com.sequenceiq.cloudbreak.cloud.event.PreProvisionCheckResult;
+import com.sequenceiq.cloudbreak.cloud.event.setup.PreProvisionCheckRequest;
+import com.sequenceiq.cloudbreak.cloud.event.setup.PreProvisionCheckResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 
@@ -36,11 +36,11 @@ public class PreProvisionCheckHandler implements CloudPlatformEventHandler<PrePr
             CloudConnector connector = cloudPlatformConnectors.get(platform);
             AuthenticatedContext authenticatedContext = connector.authenticate(request.getCloudContext(), request.getCloudCredential());
             String message = connector.setup().preCheck(authenticatedContext, request.getCloudStack());
-            PreProvisionCheckResult result = new PreProvisionCheckResult(message);
+            PreProvisionCheckResult result = new PreProvisionCheckResult(request);
             request.getResult().onNext(result);
         } catch (Exception e) {
             LOGGER.error("Failed to handle PreProvisionCheckRequest.", e);
-            request.getResult().onNext(new PreProvisionCheckResult(e.getMessage()));
+            request.getResult().onNext(new PreProvisionCheckResult(e.getMessage(), e, request));
         }
         LOGGER.info("PreProvisionCheckHandler finished");
     }

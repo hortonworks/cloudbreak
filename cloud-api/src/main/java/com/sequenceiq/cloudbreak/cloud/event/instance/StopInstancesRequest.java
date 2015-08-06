@@ -11,18 +11,11 @@ import reactor.rx.Promise;
 
 public class StopInstancesRequest<T> extends CloudPlatformRequest<T> {
 
-    private CloudCredential cloudCredential;
-
     private List<CloudInstance> cloudInstances;
 
     public StopInstancesRequest(CloudContext cloudContext, CloudCredential cloudCredential, List<CloudInstance> cloudInstances, Promise<T> result) {
-        super(cloudContext, result);
-        this.cloudCredential = cloudCredential;
+        super(cloudContext, cloudCredential, result);
         this.cloudInstances = cloudInstances;
-    }
-
-    public CloudCredential getCloudCredential() {
-        return cloudCredential;
     }
 
     public List<CloudInstance> getCloudInstances() {
@@ -33,9 +26,8 @@ public class StopInstancesRequest<T> extends CloudPlatformRequest<T> {
 
     @Override
     public String toString() {
-        return "StopStackRequest{" +
-                "cloudCredential=" + cloudCredential +
-                ", cloudInstances=" + cloudInstances +
+        return "StopInstancesRequest{" +
+                "cloudInstances=" + cloudInstances +
                 '}';
     }
 

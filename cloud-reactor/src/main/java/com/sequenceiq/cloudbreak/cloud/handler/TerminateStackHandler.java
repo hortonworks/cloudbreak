@@ -47,10 +47,10 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
             List<CloudResourceStatus> resourceStatus = connector.resources().terminate(ac, terminateStackRequest.getCloudResources());
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
 
-            terminateStackRequest.getResult().onNext(new TerminateStackResult("Stack terminated"));
+            terminateStackRequest.getResult().onNext(new TerminateStackResult(terminateStackRequest));
         } catch (Exception e) {
             LOGGER.error("Failed to handle TerminateStackRequest: {}", e);
-            terminateStackRequest.getResult().onNext(new TerminateStackResult("Stack termination failed."));
+            terminateStackRequest.getResult().onNext(new TerminateStackResult("Stack termination failed.", e, terminateStackRequest));
         }
         LOGGER.info("TerminateStackHandler finished");
 

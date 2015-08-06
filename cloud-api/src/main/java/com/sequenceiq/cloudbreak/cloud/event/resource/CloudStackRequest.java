@@ -9,18 +9,11 @@ import reactor.rx.Promise;
 
 public class CloudStackRequest<T> extends CloudPlatformRequest<T> {
 
-    private CloudCredential cloudCredential;
-
     private CloudStack cloudStack;
 
     public CloudStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack, Promise<T> result) {
-        super(cloudContext, result);
-        this.cloudCredential = cloudCredential;
+        super(cloudContext, cloudCredential, result);
         this.cloudStack = cloudStack;
-    }
-
-    public CloudCredential getCloudCredential() {
-        return cloudCredential;
     }
 
     public CloudStack getCloudStack() {
@@ -31,7 +24,6 @@ public class CloudStackRequest<T> extends CloudPlatformRequest<T> {
     @Override
     public String toString() {
         return "CloudStackRequest{" +
-                "cloudCredential=" + cloudCredential +
                 ", cloudStack=" + cloudStack +
                 '}';
     }

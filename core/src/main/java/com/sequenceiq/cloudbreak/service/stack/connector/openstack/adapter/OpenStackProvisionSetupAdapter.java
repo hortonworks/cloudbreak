@@ -9,10 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.event.PreProvisionCheckRequest;
-import com.sequenceiq.cloudbreak.cloud.event.PreProvisionCheckResult;
-import com.sequenceiq.cloudbreak.cloud.event.SetupRequest;
-import com.sequenceiq.cloudbreak.cloud.event.SetupResult;
+import com.sequenceiq.cloudbreak.cloud.event.setup.PreProvisionCheckRequest;
+import com.sequenceiq.cloudbreak.cloud.event.setup.PreProvisionCheckResult;
+import com.sequenceiq.cloudbreak.cloud.event.setup.SetupRequest;
+import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -68,7 +68,7 @@ public class OpenStackProvisionSetupAdapter implements ProvisionSetup {
                 LOGGER.error("Error while executing pre-provision check", e);
                 return e.getMessage();
             }
-            return res.getMessage();
+            return res.getStatusReason();
         }
         return openStackProvisionSetup.preProvisionCheck(stack);
     }
@@ -87,9 +87,7 @@ public class OpenStackProvisionSetupAdapter implements ProvisionSetup {
             try {
                 res = promise.await(1, TimeUnit.HOURS);
                 LOGGER.info("Result: {}", res);
-                if (res.isFailed()) {
-                    throw res.getException();
-                }
+                res.check();
             } catch (InterruptedException e) {
                 LOGGER.error("Error while executing pre-provision check", e);
             }

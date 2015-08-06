@@ -12,18 +12,11 @@ import reactor.rx.Promise;
 
 public class TerminateStackRequest<T> extends CloudPlatformRequest<T> {
 
-    private CloudCredential cloudCredential;
-
     private List<CloudResource> cloudResources;
 
     public TerminateStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, List<CloudResource> resources, Promise<T> result) {
-        super(cloudContext, result);
-        this.cloudCredential = cloudCredential;
+        super(cloudContext, cloudCredential, result);
         this.cloudResources = new ArrayList<>(resources);
-    }
-
-    public CloudCredential getCloudCredential() {
-        return cloudCredential;
     }
 
     public List<CloudResource> getCloudResources() {
@@ -34,7 +27,6 @@ public class TerminateStackRequest<T> extends CloudPlatformRequest<T> {
     @Override
     public String toString() {
         return "TerminateStackRequest{" +
-                "cloudCredential=" + cloudCredential +
                 ", cloudResources=" + cloudResources +
                 '}';
     }

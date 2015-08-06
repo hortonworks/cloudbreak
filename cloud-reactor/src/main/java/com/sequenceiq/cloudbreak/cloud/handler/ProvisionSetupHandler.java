@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.event.SetupRequest;
-import com.sequenceiq.cloudbreak.cloud.event.SetupResult;
+import com.sequenceiq.cloudbreak.cloud.event.setup.SetupRequest;
+import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 
@@ -38,10 +38,10 @@ public class ProvisionSetupHandler implements CloudPlatformEventHandler<SetupReq
             CloudConnector connector = cloudPlatformConnectors.get(platform);
             AuthenticatedContext authenticatedContext = connector.authenticate(request.getCloudContext(), request.getCloudCredential());
             Map<String, Object> provisionSetupResult = connector.setup().execute(authenticatedContext, request.getCloudStack());
-            request.getResult().onNext(new SetupResult(provisionSetupResult));
+            request.getResult().onNext(new SetupResult(request, provisionSetupResult));
         } catch (Exception e) {
             LOGGER.error("Failed to handle ProvisionSetupRequest.", e);
-            request.getResult().onNext(new SetupResult(e));
+            request.getResult().onNext(new SetupResult(e, request));
         }
         LOGGER.info("ProvisionSetupHandler finished");
     }

@@ -1,13 +1,15 @@
 package com.sequenceiq.cloudbreak.cloud.event.resource;
 
-public class TerminateStackResult {
-    private String resultMsg;
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 
-    public TerminateStackResult(String resultMsg) {
-        this.resultMsg = resultMsg;
+public class TerminateStackResult extends CloudPlatformResult {
+
+    public TerminateStackResult(CloudPlatformRequest<?> request) {
+        super(request);
     }
 
-    public String getResultMsg() {
-        return resultMsg;
+    public TerminateStackResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request) {
+        super(statusReason, errorDetails, request);
     }
 }

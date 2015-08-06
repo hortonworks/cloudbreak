@@ -12,22 +12,15 @@ import reactor.rx.Promise;
 
 public class CollectMetadataRequest<T> extends CloudPlatformRequest<T> {
 
-    private CloudCredential cloudCredential;
-
     private List<CloudResource> cloudResource;
 
     private List<InstanceTemplate> vms;
 
     public CollectMetadataRequest(CloudContext cloudContext, CloudCredential cloudCredential, List<CloudResource> cloudResource, List<InstanceTemplate> vms,
             Promise<T> result) {
-        super(cloudContext, result);
-        this.cloudCredential = cloudCredential;
+        super(cloudContext, cloudCredential, result);
         this.cloudResource = cloudResource;
         this.vms = vms;
-    }
-
-    public CloudCredential getCloudCredential() {
-        return cloudCredential;
     }
 
     public List<CloudResource> getCloudResource() {
@@ -42,7 +35,6 @@ public class CollectMetadataRequest<T> extends CloudPlatformRequest<T> {
     @Override
     public String toString() {
         return "CollectMetadataRequest{" +
-                "cloudCredential=" + cloudCredential +
                 ", cloudResource=" + cloudResource +
                 ", vms=" + vms +
                 '}';
