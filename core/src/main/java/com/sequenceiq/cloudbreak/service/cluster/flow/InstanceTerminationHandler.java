@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
+import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
@@ -47,12 +48,10 @@ public class InstanceTerminationHandler {
     private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
     @javax.annotation.Resource
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
-    @javax.annotation.Resource
-    private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
     @Inject
     private CloudbreakEventService eventService;
-    @javax.annotation.Resource
-    private Map<CloudPlatform, MetadataSetup> metadataSetups;
+    @Inject
+    private CloudPlatformResolver platformResolver;
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
@@ -93,7 +92,7 @@ public class InstanceTerminationHandler {
 
     private void deleteResourceAndDependencies(Stack stack, InstanceMetaData instanceMetaData) {
         LOGGER.info("Rolling back instance: {}", instanceMetaData.getInstanceId());
-        CloudPlatformConnector cloudPlatformConnector = cloudPlatformConnectors.get(stack.cloudPlatform());
+        CloudPlatformConnector cloudPlatformConnector = platformResolver.connector(stack.cloudPlatform());
         Set<String> instanceIds = new HashSet<>();
         instanceIds.add(instanceMetaData.getInstanceId());
         cloudPlatformConnector.removeInstances(stack, instanceIds, instanceMetaData.getInstanceGroup().getGroupName());
@@ -101,7 +100,7 @@ public class InstanceTerminationHandler {
     }
 
     private void deleteInstanceResourceFromDatabase(Stack stack, InstanceMetaData instanceMetaData) {
-        MetadataSetup metadataSetup = metadataSetups.get(stack.cloudPlatform());
+        MetadataSetup metadataSetup = platformResolver.metadata(stack.cloudPlatform());
         String instanceId = instanceMetaData.getInstanceId();
         Resource resource = resourceRepository.findByStackIdAndNameAndType(stack.getId(), instanceId,
                 metadataSetup.getInstanceResourceType());

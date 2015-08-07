@@ -28,7 +28,7 @@ public interface CloudPlatformConnector {
 
     void updateAllowedSubnets(Stack stack, String gateWayUserData, String coreUserData);
 
-    String getSSHUser();
+    String getSSHUser(Map<String, String> context);
 
     Set<String> getSSHFingerprints(Stack stack, String gateway);
 

@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
-import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 public class OpenStackConnector implements CloudConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackConnector.class);
+    private static final String SSH_USER = "ec2-user";
 
     @Inject
     private OpenStackClient openStackClient;
@@ -34,6 +35,11 @@ public class OpenStackConnector implements CloudConnector {
     @Override
     public String platform() {
         return OpenStackConstants.OPENSTACK;
+    }
+
+    @Override
+    public String sshUser() {
+        return SSH_USER;
     }
 
     @Override

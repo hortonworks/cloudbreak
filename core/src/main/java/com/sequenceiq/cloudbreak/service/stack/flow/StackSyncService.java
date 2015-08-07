@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.HostMetadataState;
@@ -32,6 +31,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
@@ -60,9 +60,8 @@ public class StackSyncService {
     private ResourceRepository resourceRepository;
     @Inject
     private AmbariClusterConnector ambariClusterConnector;
-    @javax.annotation.Resource
-    private Map<CloudPlatform, MetadataSetup> metadataSetups;
-
+    @Inject
+    private CloudPlatformResolver platformResolver;
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
@@ -106,7 +105,7 @@ public class StackSyncService {
         for (InstanceMetaData instance : instances) {
             InstanceGroup instanceGroup = instance.getInstanceGroup();
             try {
-                MetadataSetup metadataSetup = metadataSetups.get(stack.cloudPlatform());
+                MetadataSetup metadataSetup = platformResolver.metadata(stack.cloudPlatform());
                 InstanceSyncState state = metadataSetup.getState(stack, instanceGroup, instance.getInstanceId());
                 ResourceType instanceResourceType = metadataSetup.getInstanceResourceType();
                 if (InstanceSyncState.DELETED.equals(state) && !instance.isTerminated()) {
@@ -160,7 +159,7 @@ public class StackSyncService {
     }
 
     private void createResourceIfNeeded(Stack stack, InstanceMetaData instance, InstanceGroup instanceGroup) {
-        ResourceType resourceType = metadataSetups.get(stack.cloudPlatform()).getInstanceResourceType();
+        ResourceType resourceType = platformResolver.metadata(stack.cloudPlatform()).getInstanceResourceType();
         if (resourceType != null) {
             Resource resource = new Resource(resourceType, instance.getInstanceId(), stack, instanceGroup.getGroupName());
             resourceRepository.save(resource);

@@ -128,7 +128,7 @@ public class AzureConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public String getSSHUser() {
+    public String getSSHUser(Map<String, String> context) {
         return EnvironmentVariableConfig.CB_GCP_AND_AZURE_USER_NAME;
     }
 

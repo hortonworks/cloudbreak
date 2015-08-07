@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -23,15 +22,15 @@ import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
-import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 
 @Service
 public class TerminationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TerminationService.class);
     private static final String DELIMITER = "_";
 
-    @javax.annotation.Resource
-    private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
+    @Inject
+    private CloudPlatformResolver platformResolver;
 
     @Inject
     private StackRepository stackRepository;
@@ -51,7 +50,7 @@ public class TerminationService {
     public void terminateStack(Long stackId, CloudPlatform cloudPlatform) {
         final Stack stack = stackRepository.findOneWithLists(stackId);
         try {
-            cloudPlatformConnectors.get(cloudPlatform).deleteStack(stack, stack.getCredential());
+            platformResolver.connector(cloudPlatform).deleteStack(stack, stack.getCredential());
         } catch (Exception ex) {
             LOGGER.error("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
             throw new TerminationFailedException(ex);

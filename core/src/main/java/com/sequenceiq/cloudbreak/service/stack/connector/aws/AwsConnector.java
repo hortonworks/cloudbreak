@@ -365,7 +365,7 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public String getSSHUser() {
+    public String getSSHUser(Map<String, String> context) {
         return DEFAULT_SSH_USER;
     }
 

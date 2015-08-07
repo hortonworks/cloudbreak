@@ -4,7 +4,8 @@ public enum CloudPlatform {
     AWS("ec2", true, 0, "xvd", 97),
     AZURE("azure", false, 6, "sd", 98),
     GCP("gcp", false, 30, "sd", 97),
-    OPENSTACK("openstack", true, 0, "vd", 97);
+    OPENSTACK("openstack", true, 0, "vd", 97),
+    ADAPTER("adapter", true, 0, "", 0);
 
     private final String initScriptPrefix;
     private final boolean withTemplate;

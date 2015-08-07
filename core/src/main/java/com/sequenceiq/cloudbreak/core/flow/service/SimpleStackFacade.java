@@ -15,6 +15,7 @@ import static com.sequenceiq.cloudbreak.domain.Status.STOP_FAILED;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_IN_PROGRESS;
+import static java.util.Collections.singletonMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,6 +58,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
@@ -84,8 +86,6 @@ public class SimpleStackFacade implements StackFacade {
 
     @Inject
     private StackService stackService;
-    @javax.annotation.Resource
-    private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
     @Inject
     private CloudbreakEventService cloudbreakEventService;
     @Inject
@@ -124,9 +124,10 @@ public class SimpleStackFacade implements StackFacade {
     private StackSyncService stackSyncService;
     @Inject
     private SecurityGroupService securityGroupService;
-
     @Inject
     private CloudbreakMessagesService messagesService;
+    @Inject
+    private CloudPlatformResolver platformResolver;
 
     private enum Msg {
         STACK_INFRASTRUCTURE_BOOTSTRAP("stack.infrastructure.bootstrap"),
@@ -473,13 +474,14 @@ public class SimpleStackFacade implements StackFacade {
             stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Updating allowed subnets.");
             fireEventAndLog(stack.getId(), actualContext, Msg.STACK_INFRASTRUCTURE_SUBNETS_UPDATING, UPDATE_IN_PROGRESS.name());
 
-            CloudPlatformConnector connector = cloudPlatformConnectors.get(stack.cloudPlatform());
-            Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(stack.cloudPlatform(),
-                    tlsSecurityService.readPublicSshKey(stack.getId()), connector.getSSHUser());
+            CloudPlatform cloudPlatform = stack.cloudPlatform();
+            CloudPlatformConnector connector = platformResolver.connector(cloudPlatform);
+            Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(cloudPlatform,
+                    tlsSecurityService.readPublicSshKey(stack.getId()), connector.getSSHUser(singletonMap(ProvisioningService.PLATFORM, cloudPlatform.name())));
             Map<String, Set<SecurityRule>> modifiedSubnets = getModifiedSubnetList(stack, actualContext.getAllowedSecurityRules());
             Set<SecurityRule> newSecurityRules = modifiedSubnets.get(UPDATED_SUBNETS);
             stack.getSecurityGroup().setSecurityRules(newSecurityRules);
-            cloudPlatformConnectors.get(stack.cloudPlatform()).updateAllowedSubnets(stack,
+            connector.updateAllowedSubnets(stack,
                     userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE));
             securityRuleRepository.delete(modifiedSubnets.get(REMOVED_SUBNETS));
             securityRuleRepository.save(newSecurityRules);
@@ -555,7 +557,7 @@ public class SimpleStackFacade implements StackFacade {
                     LOGGER.debug("Nothing to do. OnFailureAction {}", stack.getOnFailureActionAction());
                 } else {
                     stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
-                    cloudPlatformConnectors.get(cloudPlatform).rollback(stack, stack.getResources());
+                    platformResolver.connector(cloudPlatform).rollback(stack, stack.getResources());
                     fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, BILLING_STOPPED.name());
                 }
                 stackUpdater.updateStackStatus(stack.getId(), CREATE_FAILED, actualContext.getErrorReason());
