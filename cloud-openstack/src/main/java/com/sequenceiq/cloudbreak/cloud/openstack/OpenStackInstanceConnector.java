@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.openstack;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -27,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.status.NovaInstanceStatus;
 public class OpenStackInstanceConnector implements InstanceConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackInstanceConnector.class);
+    private static final int CONSOLE_OUTPUT_LINES = Integer.MAX_VALUE;
 
     @Inject
     private OpenStackClient openStackClient;
@@ -35,8 +35,9 @@ public class OpenStackInstanceConnector implements InstanceConnector {
     private OpenStackMetadataCollector metadataCollector;
 
     @Override
-    public Set<String> getSSHFingerprints(AuthenticatedContext authenticatedContext, CloudInstance vm) {
-        return null;
+    public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm) {
+        OSClient osClient = openStackClient.createOSClient(authenticatedContext);
+        return osClient.compute().servers().getConsoleOutput(vm.getInstanceId(), CONSOLE_OUTPUT_LINES);
     }
 
     @Override
@@ -78,5 +79,4 @@ public class OpenStackInstanceConnector implements InstanceConnector {
         }
         return statuses;
     }
-
 }

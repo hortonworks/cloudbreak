@@ -20,6 +20,8 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsRequest;
+import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesRequest;
@@ -49,13 +51,13 @@ import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.stack.connector.openstack.OpenStackConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.openstack.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
@@ -91,10 +93,6 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
     private CredentialToCloudCredentialConverter credentialConverter;
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
-
-    //TODO remove
-    @Inject
-    private OpenStackConnector openStackConnector;
 
     @Override
     public String preProvisionCheck(Stack stack) {
@@ -270,12 +268,6 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
     }
 
     @Override
-    public Set<String> getSSHFingerprints(Stack stack, String gateway) {
-        //TODO fix
-        return openStackConnector.getSSHFingerprints(stack, gateway);
-    }
-
-    @Override
     public Set<CoreInstanceMetaData> collectMetadata(Stack stack) {
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
@@ -318,6 +310,40 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
     @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.ADAPTER;
+    }
+
+
+    @Override
+    public Set<String> getSSHFingerprints(Stack stack, String gateway) {
+        Set<String> result = new HashSet<>();
+        Resource heatResource = stack.getResourceByType(ResourceType.HEAT_STACK);
+        if (heatResource == null) {
+            String errorMessage = String.format("No Heat resource is referenced with this stack: %s, unable to get ssh fingerprints", stack.getId());
+            LOGGER.info(errorMessage);
+            throw new OpenStackResourceException(errorMessage);
+        }
+        LOGGER.debug("Get SSH fingerprints of gateway instance for stack: {}", stack);
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), CloudPlatform.OPENSTACK.name());
+        CloudCredential cloudCredential = buildCloudCredential(stack);
+        Promise<GetSSHFingerprintsResult> promise = Promises.prepare();
+        InstanceMetaData gatewayMetaData = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
+        CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData);
+        GetSSHFingerprintsRequest getSSHFingerprintsRequest = new GetSSHFingerprintsRequest(cloudContext, cloudCredential, promise, gatewayInstance);
+        LOGGER.info("Triggering GetSSHFingerprintsRequest stack event: {}", getSSHFingerprintsRequest);
+        eventBus.notify(getSSHFingerprintsRequest.selector(), Event.wrap(getSSHFingerprintsRequest));
+        try {
+            GetSSHFingerprintsResult res = promise.await(1, TimeUnit.HOURS);
+            LOGGER.info("Get SSH fingerprints of gateway instance for stack result: {}", res);
+            if (res == null) {
+                throw new OpenStackResourceException("Failed to get SSH fingerprints of gateway instance: the termination of resource timed out.");
+            } else if (res.getStatus().equals(EventStatus.FAILED)) {
+                throw new OpenStackResourceException(res.getStatusReason(), res.getErrorDetails());
+            }
+            result.addAll(res.getSshFingerprints());
+        } catch (InterruptedException e) {
+            LOGGER.error("Failed to get SSH fingerprints of gateway instance: ", e);
+        }
+        return result;
     }
 
     private CloudCredential buildCloudCredential(Stack stack) {

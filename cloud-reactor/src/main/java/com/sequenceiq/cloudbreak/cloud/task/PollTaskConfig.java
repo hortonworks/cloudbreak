@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Scope;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.event.instance.InstanceConsoleOutputResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.InstancesStatusResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -36,6 +37,12 @@ public class PollTaskConfig {
             public PollTask<InstancesStatusResult> newPollInstanceStateTask(AuthenticatedContext authenticatedContext, List<CloudInstance> instances) {
                 CloudConnector connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatform());
                 return new PollInstancesStateTask(authenticatedContext, connector, instances);
+            }
+
+            @Override
+            public PollTask<InstanceConsoleOutputResult> newPollInstanceConsoleOutputTask(AuthenticatedContext authenticatedContext, CloudInstance instance) {
+                CloudConnector connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatform());
+                return new PollInstanceConsoleOutputTask(connector, authenticatedContext, instance);
             }
         };
     }

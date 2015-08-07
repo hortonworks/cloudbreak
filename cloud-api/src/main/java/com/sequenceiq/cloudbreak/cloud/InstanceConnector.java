@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud;
 
 import java.util.List;
-import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -13,7 +12,7 @@ public interface InstanceConnector {
 
     // VM
 
-    Set<String> getSSHFingerprints(AuthenticatedContext authenticatedContext, CloudInstance vm);
+    String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm);
 
     List<CloudVmInstanceStatus> collectMetadata(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<InstanceTemplate> vms);
 

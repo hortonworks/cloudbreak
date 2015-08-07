@@ -66,6 +66,7 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
             if (!statePollerResult.getStatus().equals(ResourceStatus.DELETED)) {
                 String statusReason = "Stack could not be terminated, Resource(s) could not be deleted on the provider side.";
                 terminateStackResult = new TerminateStackResult(statusReason, null, terminateStackRequest);
+                LOGGER.info(statusReason);
             } else {
                 terminateStackResult = new TerminateStackResult(terminateStackRequest);
             }
