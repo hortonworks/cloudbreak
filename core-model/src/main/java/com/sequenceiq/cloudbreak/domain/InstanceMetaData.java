@@ -58,6 +58,7 @@ public class InstanceMetaData implements ProvisionEntity {
     @Id
     @GeneratedValue
     private Long id;
+    private Long privateId;
     private String privateIp;
     private String publicIp;
     private Integer volumeCount;
@@ -116,6 +117,14 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getPrivateId() {
+        return privateId;
+    }
+
+    public void setPrivateId(Long privateId) {
+        this.privateId = privateId;
     }
 
     public String getInstanceId() {

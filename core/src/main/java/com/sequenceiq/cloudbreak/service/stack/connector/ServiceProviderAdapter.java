@@ -232,6 +232,7 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
             LOGGER.info("Terminate stack result: {}", res);
             if (res == null) {
                 throw new OpenStackResourceException("Stack termination failed: the termination of resource timed out.");
+                //TODO shouldn't we allow cluster delete then, what if someone deletes the stack by hand?
             } else if (res.getStatus().equals(EventStatus.FAILED)) {
                 throw new OpenStackResourceException(res.getStatusReason(), res.getErrorDetails());
             }

@@ -15,11 +15,9 @@ public class CloudVmInstanceStatusToCoreInstanceMetaDataConverter extends Abstra
     public CoreInstanceMetaData convert(CloudVmInstanceStatus cloudVmInstanceStatus) {
         CloudInstance cloudInstance = cloudVmInstanceStatus.getCloudInstance();
         InstanceTemplate template = cloudInstance.getTemplate();
-
-        return new CoreInstanceMetaData(cloudInstance.getInstanceId(),
+        return new CoreInstanceMetaData(cloudInstance.getInstanceId(), template.getPrivateId(),
                 cloudInstance.getMetaData().getPrivateIp(), cloudInstance.getMetaData().getPublicIp(),
                 template.getVolumes().size(), template.getGroupName());
-
     }
 
 }

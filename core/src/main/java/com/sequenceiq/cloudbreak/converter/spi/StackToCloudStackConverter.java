@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
@@ -35,11 +37,54 @@ public class StackToCloudStackConverter {
     }
 
     public CloudStack convert(Stack stack, String coreUserData, String gateWayUserData) {
-        List<Group> instanceGroups = buildInstanceGroups(stack);
+        List<Group> instanceGroups = buildInstanceGroups(stack.getInstanceGroupsAsList());
         Image image = buildImage(stack, coreUserData, gateWayUserData);
         Network network = buildNetwork(stack);
         Security security = buildSecurity(stack);
         return new CloudStack(instanceGroups, network, security, image);
+    }
+
+    public List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups) {
+        // sort by name to avoid shuffling the different instance groups
+        Collections.sort(instanceGroups);
+        List<Group> groups = new ArrayList<>();
+        long privateId = getFirstValidPrivateId(instanceGroups);
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            Group group = new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType());
+            Template template = instanceGroup.getTemplate();
+            int desiredNodeCount = instanceGroup.getNodeCount();
+            // existing instances
+            for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
+                group.addInstance(buildInstanceTemplate(template, instanceGroup.getGroupName(), instanceMetaData.getPrivateId()));
+            }
+            // new instances
+            int existingNodesSize = group.getInstances().size();
+            if (existingNodesSize < desiredNodeCount) {
+                for (long i = 0; i < desiredNodeCount - existingNodesSize; i++) {
+                    group.addInstance(buildInstanceTemplate(template, instanceGroup.getGroupName(), privateId++));
+                }
+            }
+            groups.add(group);
+        }
+        return groups;
+    }
+
+    public List<InstanceTemplate> buildInstanceTemplates(Stack stack) {
+        List<Group> groups = buildInstanceGroups(stack.getInstanceGroupsAsList());
+        List<InstanceTemplate> instanceTemplates = new ArrayList<>();
+        for (Group group : groups) {
+            instanceTemplates.addAll(group.getInstances());
+        }
+        return instanceTemplates;
+    }
+
+    public InstanceTemplate buildInstanceTemplate(Template template, String name, long privateId) {
+        InstanceTemplate instance = new InstanceTemplate(template.getInstanceTypeName(), name, privateId);
+        for (int i = 0; i < template.getVolumeCount(); i++) {
+            Volume volume = new Volume(VolumeUtils.VOLUME_PREFIX + (i + 1), template.getVolumeTypeName(), template.getVolumeSize());
+            instance.addVolume(volume);
+        }
+        return instance;
     }
 
     private Image buildImage(Stack stack, String coreUserData, String gateWayUserData) {
@@ -67,33 +112,20 @@ public class StackToCloudStackConverter {
         return new Security(rules);
     }
 
-    public List<Group> buildInstanceGroups(Stack stack) {
-        List<Group> groups = new ArrayList<>();
-        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            Group group = new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType());
-            // FIXME nodeId shall be an "internal id" from Cloudbreak and not a counter
-            for (int nodeId = 0; nodeId < instanceGroup.getNodeCount(); nodeId++) {
-                Template template = instanceGroup.getTemplate();
-                InstanceTemplate instance = new InstanceTemplate(template.getInstanceTypeName(), group.getName(), nodeId);
-                for (int i = 0; i < template.getVolumeCount(); i++) {
-                    Volume volume = new Volume(VolumeUtils.VOLUME_PREFIX + (i + 1), template.getVolumeTypeName(), template.getVolumeSize());
-                    instance.addVolume(volume);
+    private Long getFirstValidPrivateId(List<InstanceGroup> instanceGroups) {
+        long highest = 0;
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
+                Long privateId = metaData.getPrivateId();
+                if (privateId == null) {
+                    continue;
                 }
-                group.addInstance(instance);
+                if (privateId > highest) {
+                    highest = privateId;
+                }
             }
-            groups.add(group);
         }
-        return groups;
-    }
-
-
-    public List<InstanceTemplate> buildInstanceTemplates(Stack stack) {
-        List<Group> groups = buildInstanceGroups(stack);
-        List<InstanceTemplate> instanceTemplates = new ArrayList<>();
-        for (Group group : groups) {
-            instanceTemplates.addAll(group.getInstances());
-        }
-        return instanceTemplates;
+        return highest == 0 ? 0 : highest + 1;
     }
 
 }

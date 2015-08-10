@@ -99,6 +99,7 @@ public class MetadataSetupService {
             instanceMetaDataEntry.setInstanceGroup(instanceGroup);
             instanceMetaDataEntry.setPublicIp(coreInstanceMetadataEntry.getPublicIp());
             instanceMetaDataEntry.setInstanceId(coreInstanceMetadataEntry.getInstanceId());
+            instanceMetaDataEntry.setPrivateId(coreInstanceMetadataEntry.getPrivateId());
             instanceMetaDataEntry.setVolumeCount(coreInstanceMetadataEntry.getVolumeCount());
             instanceMetaDataEntry.setDockerSubnet(null);
             instanceMetaDataEntry.setContainerCount(coreInstanceMetadataEntry.getContainerCount());

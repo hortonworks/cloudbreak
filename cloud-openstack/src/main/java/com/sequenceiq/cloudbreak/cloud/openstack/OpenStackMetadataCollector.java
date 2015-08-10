@@ -47,7 +47,7 @@ public class OpenStackMetadataCollector {
 
         Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(vms, new Function<InstanceTemplate, String>() {
             public String apply(InstanceTemplate from) {
-                return utils.getPrivateInstanceId(from.getGroupName(), Integer.toString(from.getPrivateId()));
+                return utils.getPrivateInstanceId(from.getGroupName(), Long.toString(from.getPrivateId()));
             }
         });
 

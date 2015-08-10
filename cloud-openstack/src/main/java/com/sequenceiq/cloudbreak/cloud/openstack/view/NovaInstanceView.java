@@ -35,7 +35,7 @@ public class NovaInstanceView {
         return instance.getGroupName().replaceAll("_", "") + "_" + instance.getPrivateId();
     }
 
-    public int getPrivateId() {
+    public long getPrivateId() {
         return instance.getPrivateId();
     }
 
@@ -61,7 +61,7 @@ public class NovaInstanceView {
     private Map<String, String> generateMetadata() {
         Map<String, String> metadata = new HashMap<>();
         metadata.put(OpenStackHeatUtils.CB_INSTANCE_GROUP_NAME, instance.getGroupName());
-        metadata.put(OpenStackHeatUtils.CB_INSTANCE_PRIVATE_ID, Integer.toString(instance.getPrivateId()));
+        metadata.put(OpenStackHeatUtils.CB_INSTANCE_PRIVATE_ID, Long.toString(getPrivateId()));
         return metadata;
     }
 

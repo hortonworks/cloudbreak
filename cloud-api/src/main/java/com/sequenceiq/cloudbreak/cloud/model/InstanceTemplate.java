@@ -9,11 +9,11 @@ public class InstanceTemplate {
 
     private String groupName;
 
-    private int privateId;
+    private long privateId;
 
     private List<Volume> volumes;
 
-    public InstanceTemplate(String flavor, String groupName, int privateId) {
+    public InstanceTemplate(String flavor, String groupName, long privateId) {
         this.flavor = flavor;
         this.groupName = groupName;
         this.privateId = privateId;
@@ -32,7 +32,7 @@ public class InstanceTemplate {
         return groupName;
     }
 
-    public int getPrivateId() {
+    public long getPrivateId() {
         return privateId;
     }
 
@@ -40,9 +40,7 @@ public class InstanceTemplate {
         volumes.add(volume);
     }
 
-
     //BEGIN GENERATED CODE
-
     @Override
     public String toString() {
         return "InstanceTemplate{" +

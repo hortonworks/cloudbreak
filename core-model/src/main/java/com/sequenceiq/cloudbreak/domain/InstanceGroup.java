@@ -23,7 +23,7 @@ import javax.persistence.OneToOne;
                         + "WHERE i.stack.id = :stackId "
                         + "AND i.groupName = :groupName")
 })
-public class InstanceGroup implements ProvisionEntity {
+public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup> {
     @Id
     @GeneratedValue
     private Long id;
@@ -104,4 +104,8 @@ public class InstanceGroup implements ProvisionEntity {
         this.instanceGroupType = instanceGroupType;
     }
 
+    @Override
+    public int compareTo(InstanceGroup o) {
+        return this.groupName.compareTo(o.groupName);
+    }
 }
