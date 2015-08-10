@@ -19,10 +19,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
+import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
-import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.handler.PollingHandlerFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -33,15 +32,11 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.cloudbreak.cloud.notification.PollingNotifier;
-import com.sequenceiq.cloudbreak.cloud.polling.DummyPollingInfo;
-import com.sequenceiq.cloudbreak.cloud.polling.PollingInfo;
 import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 
 import reactor.Environment;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-import reactor.fn.Pausable;
 import reactor.fn.timer.Timer;
 import reactor.rx.Promise;
 import reactor.rx.Promises;
@@ -71,9 +66,6 @@ public class ReactorApplication implements CommandLineRunner {
     //@Value("${endpoint}")
     private String endpoint;
 
-    @Inject
-    private PollingNotifier pollingNotifier;
-
 
     @Inject
     private Timer timer;
@@ -88,7 +80,7 @@ public class ReactorApplication implements CommandLineRunner {
     public void run(String... args) throws Exception {
         //promiseTest();
 //        errorHandlerTest();
-        timerTest();
+
     }
 
     private void asyncNotify(Promise<LaunchStackResult> promise) {
@@ -153,12 +145,5 @@ public class ReactorApplication implements CommandLineRunner {
         eventBus.notify("selector-no-consumer", Event.wrap("no consumer for me"));
     }
 
-    private void timerTest() {
-        LOGGER.debug("submitted at: {}", System.nanoTime());
-        PollingInfo pollingInfo = new DummyPollingInfo();
-
-        Pausable pausable = timer.submit(PollingHandlerFactory.createStartPollingHandler(pollingInfo, pollingNotifier)
-                , DEFAULT_DELAY, TimeUnit.SECONDS);
-    }
 
 }
