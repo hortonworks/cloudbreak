@@ -56,7 +56,7 @@ public class GcpMetadataSetup implements MetadataSetup {
     }
 
     @Override
-    public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup) {
+    public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup, Integer scalingAdjustment) {
         List<Resource> resources = new ArrayList<>();
         for (Resource resource : resourceList) {
             if (ResourceType.GCP_INSTANCE.equals(resource.getResourceType())) {

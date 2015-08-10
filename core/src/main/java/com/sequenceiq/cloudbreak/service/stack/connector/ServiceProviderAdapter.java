@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.service.stack.flow.ReflectionUtils.getDe
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +32,8 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
+import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackRequest;
+import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PreProvisionCheckRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PreProvisionCheckResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupRequest;
@@ -201,9 +204,36 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
     }
 
     @Override
-    public Set<Resource> addInstances(Stack stack, String gateWayUserData, String coreUserData, Integer instanceCount, String instanceGroup) {
-        //TODO
-        return null;
+    public Set<Resource> addInstances(Stack stack, String gateWayUserData, String coreUserData, Integer adjustment, String instanceGroup) {
+        LOGGER.debug("Assembling upscale stack event for stack: {}", stack);
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
+        CloudCredential cloudCredential = buildCloudCredential(stack);
+        InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
+        group.setNodeCount(group.getNodeCount() + adjustment);
+        CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
+        Promise<UpscaleStackResult> promise = Promises.prepare();
+        //TODO which resources?
+        Set<Resource> jpaResult = stack.getResources();
+        List<CloudResource> resources = new ArrayList<>();
+        for (Resource resource : jpaResult) {
+            resources.add(new CloudResource(resource.getResourceType(), stack.getName(), resource.getResourceName()));
+        }
+        UpscaleStackRequest upscaleRequest = new UpscaleStackRequest(cloudContext, cloudCredential, cloudStack, resources, adjustment, promise);
+        LOGGER.info("Triggering upscale stack event: {}", upscaleRequest);
+        eventBus.notify(upscaleRequest.selector(), Event.wrap(upscaleRequest));
+        UpscaleStackResult res = null;
+        try {
+            res = promise.await(1, TimeUnit.HOURS);
+            LOGGER.info("Upscale stack result: {}", res);
+            if (res == null) {
+                throw new OpenStackResourceException("Upscale of stack failed: resource(s) could not be created in time.");
+            } else if (res.getStatus().equals(EventStatus.FAILED)) {
+                throw new OpenStackResourceException(res.getStatusReason());
+            }
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while terminating stack: ", e);
+        }
+        return transformResults(res.getResults(), stack);
     }
 
     @Override
@@ -284,16 +314,30 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
             LOGGER.info("Result: {}", res);
             return new HashSet<>(instanceConverter.convert(res.getResults()));
         } catch (InterruptedException e) {
-            LOGGER.error("Error while executing pre-provision check", e);
+            LOGGER.error("Error while executing collectMetadata", e);
             throw new RuntimeException("Failed to collect metadata");
-
         }
     }
 
     @Override
-    public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup) {
-        //TODO
-        return null;
+    public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroupName, Integer scalingAdjustment) {
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
+        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        List<InstanceTemplate> instanceTemplates = getNewInstanceTemplates(stack, instanceGroupName, scalingAdjustment);
+        List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
+        Promise<CollectMetadataResult> promise = Promises.prepare();
+        CollectMetadataRequest cmr = new CollectMetadataRequest(cloudContext, cloudCredential, cloudResources, instanceTemplates, promise);
+        LOGGER.info("Triggering event: {}", cmr);
+        eventBus.notify(cmr.selector(CollectMetadataRequest.class), Event.wrap(cmr));
+        CollectMetadataResult res;
+        try {
+            res = promise.await(1, TimeUnit.HOURS);
+            LOGGER.info("Result: {}", res);
+            return new HashSet<>(instanceConverter.convert(res.getResults()));
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while collectNewMetadata", e);
+            throw new RuntimeException("Failed to collect metadata");
+        }
     }
 
     @Override
@@ -360,4 +404,22 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
         }
         return retSet;
     }
+
+    private List<InstanceTemplate> getNewInstanceTemplates(Stack stack, String instanceGroupName, Integer scalingAdjustment) {
+        List<Long> existingIds = new ArrayList<>();
+        for (InstanceMetaData data : stack.getInstanceMetaDataAsList()) {
+            existingIds.add(data.getPrivateId());
+        }
+        InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
+        group.setNodeCount(group.getNodeCount() + scalingAdjustment);
+        List<InstanceTemplate> instanceTemplates = cloudStackConverter.buildInstanceTemplates(stack);
+        Iterator<InstanceTemplate> iterator = instanceTemplates.iterator();
+        while (iterator.hasNext()) {
+            if (existingIds.contains(iterator.next().getPrivateId())) {
+                iterator.remove();
+            }
+        }
+        return instanceTemplates;
+    }
+
 }

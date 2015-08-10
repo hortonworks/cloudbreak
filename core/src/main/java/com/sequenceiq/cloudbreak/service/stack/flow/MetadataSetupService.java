@@ -71,9 +71,9 @@ public class MetadataSetupService {
         return saveInstanceMetaData(stack, coreInstanceMetaData);
     }
 
-    public Set<String> setupNewMetadata(Long stackId, Set<Resource> resources, String instanceGroupName) {
+    public Set<String> setupNewMetadata(Long stackId, Set<Resource> resources, String instanceGroupName, Integer scalingAdjustment) {
         Stack stack = stackService.getById(stackId);
-        Set<CoreInstanceMetaData> coreInstanceMetaData = collectNewMetadata(stack, resources, instanceGroupName);
+        Set<CoreInstanceMetaData> coreInstanceMetaData = collectNewMetadata(stack, resources, instanceGroupName, scalingAdjustment);
         saveInstanceMetaData(stack, coreInstanceMetaData);
         Set<String> upscaleCandidateAddresses = new HashSet<>();
         for (CoreInstanceMetaData coreInstanceMetadataEntry : coreInstanceMetaData) {
@@ -123,9 +123,9 @@ public class MetadataSetupService {
         return ambariServerIP;
     }
 
-    private Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resources, String instanceGroup) {
+    private Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resources, String instanceGroup, Integer scalingAdjustment) {
         try {
-            return cloudPlatformResolver.metadata(stack.cloudPlatform()).collectNewMetadata(stack, resources, instanceGroup);
+            return cloudPlatformResolver.metadata(stack.cloudPlatform()).collectNewMetadata(stack, resources, instanceGroup, scalingAdjustment);
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occurred while updating stack metadata.", e);
             throw e;

@@ -122,7 +122,6 @@ public class OpenStackResourceConnector implements ResourceConnector {
         String heatTemplate = heatTemplateBuilder.build(stackName, stack.getGroups(), stack.getSecurity(), stack.getImage());
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(authenticatedContext.getCloudCredential(), stack.getNetwork(), stack.getImage());
         return updateHeatStack(authenticatedContext, resources, heatTemplate, parameters);
-
     }
 
     @Override

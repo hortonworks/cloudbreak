@@ -6,14 +6,14 @@ import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 
-public class LaunchStackResult {
+public class UpscaleStackResult {
 
     private CloudContext cloudContext;
     private ResourceStatus status;
     private String statusReason;
     private List<CloudResourceStatus> results;
 
-    public LaunchStackResult(CloudContext cloudContext, ResourceStatus status, String statusReason, List<CloudResourceStatus> results) {
+    public UpscaleStackResult(CloudContext cloudContext, ResourceStatus status, String statusReason, List<CloudResourceStatus> results) {
         this.cloudContext = cloudContext;
         this.status = status;
         this.statusReason = statusReason;

@@ -325,15 +325,17 @@ public class SimpleStackFacade implements StackFacade {
         Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
         MDCBuilder.buildMdcContext(stack);
         fireEventAndLog(actualCont.getStackId(), context, Msg.STACK_METADATA_EXTEND, UPDATE_IN_PROGRESS.name());
-        Set<String> upscaleCandidateAddresses = metadataSetupService.setupNewMetadata(stack.getId(), actualCont.getResources(), actualCont.getInstanceGroup());
+        Integer scalingAdjustment = actualCont.getScalingAdjustment();
+        Set<String> upscaleCandidateAddresses = metadataSetupService.setupNewMetadata(
+                stack.getId(), actualCont.getResources(), actualCont.getInstanceGroup(), scalingAdjustment);
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
         hostGroupAdjustmentJson.setWithStackUpdate(false);
-        hostGroupAdjustmentJson.setScalingAdjustment(actualCont.getScalingAdjustment());
+        hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
         if (stack.getCluster() != null) {
             HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(cluster.getId(), actualCont.getInstanceGroup());
             hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
         }
-        return new StackScalingContext(stack.getId(), actualCont.getCloudPlatform(), actualCont.getScalingAdjustment(), actualCont.getInstanceGroup(),
+        return new StackScalingContext(stack.getId(), actualCont.getCloudPlatform(), scalingAdjustment, actualCont.getInstanceGroup(),
                 actualCont.getResources(), actualCont.getScalingType(), upscaleCandidateAddresses);
     }
 

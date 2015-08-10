@@ -63,7 +63,7 @@ public class AzureMetadataSetup implements MetadataSetup {
     }
 
     @Override
-    public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup) {
+    public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup, Integer scalingAdjustment) {
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential);
         List<Resource> resources = new ArrayList<>();
