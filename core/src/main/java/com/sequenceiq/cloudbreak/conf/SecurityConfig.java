@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.conf;
 import java.io.IOException;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -72,7 +73,8 @@ public class SecurityConfig {
         @Value("${cb.client.secret}")
         private String clientSecret;
 
-        @Value("${cb.identity.server.url}")
+        @Inject
+        @Named("identityServerUrl")
         private String identityServerUrl;
 
         @Inject
