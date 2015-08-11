@@ -3,9 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.event.context;
 public class CloudContext {
 
     private Long stackId;
-
     private String stackName;
-
     private String platform;
 
     public CloudContext(Long stackId, String stackName, String platform) {
@@ -26,7 +24,6 @@ public class CloudContext {
         return platform;
     }
 
-    //BEGIN GENERATED CODE
     @Override
     public String toString() {
         return "StackContext{" +
@@ -35,5 +32,4 @@ public class CloudContext {
                 ", platform='" + platform + '\'' +
                 '}';
     }
-    //END GENERATED CODE
 }

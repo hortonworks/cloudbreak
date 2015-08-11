@@ -11,6 +11,7 @@ public class LaunchStackResult {
     private CloudContext cloudContext;
     private ResourceStatus status;
     private String statusReason;
+    private Exception exception;
     private List<CloudResourceStatus> results;
 
     public LaunchStackResult(CloudContext cloudContext, ResourceStatus status, String statusReason, List<CloudResourceStatus> results) {
@@ -18,6 +19,16 @@ public class LaunchStackResult {
         this.status = status;
         this.statusReason = statusReason;
         this.results = results;
+    }
+
+    public LaunchStackResult(CloudContext cloudContext, Exception exception) {
+        this.cloudContext = cloudContext;
+        this.exception = exception;
+        this.status = ResourceStatus.FAILED;
+    }
+
+    public Exception getException() {
+        return exception;
     }
 
     public CloudContext getCloudContext() {
@@ -28,6 +39,10 @@ public class LaunchStackResult {
         return status;
     }
 
+    public boolean isFailed() {
+        return status == ResourceStatus.FAILED;
+    }
+
     public String getStatusReason() {
         return statusReason;
     }
@@ -36,15 +51,15 @@ public class LaunchStackResult {
         return results;
     }
 
-    //BEGIN GENERATED CODE
     @Override
     public String toString() {
-        return "LaunchStackResult{" +
-                "stackContext=" + cloudContext +
-                ", status=" + status +
-                ", statusReason='" + statusReason + '\'' +
-                ", results=" + results +
-                '}';
+        final StringBuilder sb = new StringBuilder("LaunchStackResult{");
+        sb.append("cloudContext=").append(cloudContext);
+        sb.append(", status=").append(status);
+        sb.append(", statusReason='").append(statusReason).append('\'');
+        sb.append(", exception=").append(exception);
+        sb.append(", results=").append(results);
+        sb.append('}');
+        return sb.toString();
     }
-    //END GENERATED CODE
 }

@@ -1,22 +1,23 @@
 package com.sequenceiq.cloudbreak.cloud.event;
 
+import java.util.concurrent.TimeUnit;
+
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 import reactor.rx.Promise;
+import reactor.rx.Promises;
 
 public class CloudPlatformRequest<T> {
 
     private CloudContext cloudContext;
-
     private CloudCredential cloudCredential;
-
     private Promise<T> result;
 
-    public CloudPlatformRequest(CloudContext cloudContext, CloudCredential cloudCredential, Promise<T> result) {
+    public CloudPlatformRequest(CloudContext cloudContext, CloudCredential cloudCredential) {
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;
-        this.result = result;
+        this.result = Promises.prepare();
     }
 
     public static String selector(Class clazz) {
@@ -39,7 +40,18 @@ public class CloudPlatformRequest<T> {
         return result;
     }
 
-    //BEGIN GENERATED CODE
+    public T await() throws InterruptedException {
+        return await(1, TimeUnit.HOURS);
+    }
+
+    public T await(long timeout, TimeUnit unit) throws InterruptedException {
+        T result = this.result.await(timeout, unit);
+        if (result == null) {
+            throw new InterruptedException("Operation timed out, couldn't retrieve result");
+        }
+        return result;
+    }
+
     @Override
     public String toString() {
         return "CloudPlatformRequest{" +
@@ -47,5 +59,4 @@ public class CloudPlatformRequest<T> {
                 ", cloudCredential=" + cloudCredential +
                 '}';
     }
-    //END GENERATED CODE
 }

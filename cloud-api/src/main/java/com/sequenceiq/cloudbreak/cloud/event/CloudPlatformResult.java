@@ -5,11 +5,8 @@ import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 public class CloudPlatformResult {
 
     private EventStatus status;
-
     private String statusReason;
-
     private Exception errorDetails;
-
     private CloudPlatformRequest<?> request;
 
     public CloudPlatformResult(CloudPlatformRequest<?> request) {
@@ -40,13 +37,6 @@ public class CloudPlatformResult {
         return request;
     }
 
-    public void check() throws Exception {
-        if (errorDetails != null) {
-            throw errorDetails;
-        }
-    }
-
-    //BEGIN GENERATED CODE
     @Override
     public String toString() {
         return "CloudPlatformResult{" +
@@ -56,5 +46,4 @@ public class CloudPlatformResult {
                 ", request=" + request +
                 '}';
     }
-    //END GENERATED CODE
 }

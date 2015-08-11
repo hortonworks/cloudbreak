@@ -1,14 +1,15 @@
-package com.sequenceiq.cloudbreak.service.stack.connector;
+package com.sequenceiq.cloudbreak.service.stack.connector.adapter;
 
 import static com.sequenceiq.cloudbreak.service.stack.flow.ReflectionUtils.getDeclaredFields;
+import static java.lang.String.format;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -45,6 +46,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.converter.spi.CloudVmInstanceStatusToCoreInstanceMetaDataConverter;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
@@ -55,13 +58,14 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.stack.connector.openstack.OpenStackResourceException;
+import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
+import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
@@ -70,8 +74,6 @@ import com.sequenceiq.cloudbreak.service.stack.flow.ProvisioningService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-import reactor.rx.Promise;
-import reactor.rx.Promises;
 
 @Component
 public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, CloudPlatformConnector {
@@ -102,19 +104,20 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
-        Promise<PreProvisionCheckResult> promise = Promises.prepare();
-        PreProvisionCheckRequest preProvisionCheckRequest = new PreProvisionCheckRequest(cloudContext, cloudCredential, cloudStack, promise);
+        PreProvisionCheckRequest<PreProvisionCheckResult> preProvisionCheckRequest = new PreProvisionCheckRequest<>(cloudContext, cloudCredential, cloudStack);
         LOGGER.info("Triggering event: {}", preProvisionCheckRequest);
         eventBus.notify(preProvisionCheckRequest.selector(), Event.wrap(preProvisionCheckRequest));
-        PreProvisionCheckResult res;
         try {
-            res = promise.await(1, TimeUnit.HOURS);
+            PreProvisionCheckResult res = preProvisionCheckRequest.await();
             LOGGER.info("Result: {}", res);
+            if (res.getErrorDetails() != null) {
+                return res.getErrorDetails().getMessage();
+            }
+            return res.getStatusReason();
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing pre-provision check", e);
             return e.getMessage();
         }
-        return res.getStatusReason();
     }
 
     @Override
@@ -123,46 +126,46 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), cloudPlatform.name());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
-        Promise<SetupResult> promise = Promises.prepare();
-        SetupRequest setupRequest = new SetupRequest(cloudContext, cloudCredential, cloudStack, promise);
+        SetupRequest<SetupResult> setupRequest = new SetupRequest<>(cloudContext, cloudCredential, cloudStack);
         LOGGER.info("Triggering event: {}", setupRequest);
         eventBus.notify(setupRequest.selector(), Event.wrap(setupRequest));
-        SetupResult res;
         try {
-            res = promise.await(1, TimeUnit.HOURS);
+            SetupResult res = setupRequest.await();
             LOGGER.info("Result: {}", res);
-            res.check();
+            if (res.getErrorDetails() != null) {
+                throw new OperationException("Failed to setup provisioning", cloudContext, res.getErrorDetails());
+            }
+            return new ProvisionSetupComplete(cloudPlatform, stack.getId()).withSetupProperties(res.getSetupProperties());
         } catch (InterruptedException e) {
-            LOGGER.error("Error while executing pre-provision check", e);
+            LOGGER.error("Error while executing provisioning setup", e);
+            throw new OperationException("Unexpected exception occurred during provisioning setup", cloudContext, e);
         }
-        return new ProvisionSetupComplete(cloudPlatform, stack.getId());
     }
 
     @Override
     public Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties) {
         LOGGER.info("Assembling launch request for stack: {}", stack);
-        LaunchStackResult res = null;
-
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
         CloudCredential cloudCredential = buildCloudCredential(stack);
         CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
 
-        Promise<LaunchStackResult> promise = Promises.prepare();
-        LaunchStackRequest launchStackRequest = new LaunchStackRequest(cloudContext, cloudCredential, cloudStack, promise);
-        LOGGER.info("Triggering event: {}", launchStackRequest);
-        eventBus.notify(launchStackRequest.selector(), Event.wrap(launchStackRequest));
+        LaunchStackRequest<LaunchStackResult> launchRequest = new LaunchStackRequest<>(cloudContext, cloudCredential, cloudStack);
+        LOGGER.info("Triggering event: {}", launchRequest);
+        eventBus.notify(launchRequest.selector(), Event.wrap(launchRequest));
         try {
-            res = promise.await(1, TimeUnit.HOURS);
+            LaunchStackResult res = launchRequest.await();
             LOGGER.info("Result: {}", res);
-            if (res == null) {
-                throw new OpenStackResourceException("Launch of stack failed: resource(s) could not be created in time.");
-            } else if (res.getStatus().equals(EventStatus.FAILED)) {
-                throw new OpenStackResourceException(res.getStatusReason());
+            if (res.isFailed()) {
+                if (res.getException() != null) {
+                    throw new OperationException("Failed to build the stack", cloudContext, res.getException());
+                }
+                throw new OperationException(format("Failed to build the stack for %s due to: %s", cloudContext, res.getStatusReason()));
             }
+            return transformResults(res.getResults(), stack);
         } catch (InterruptedException e) {
-            LOGGER.error("Error while launching stack: ", e);
+            LOGGER.error("Error while launching stack", e);
+            throw new OperationException("Unexpected exception occurred during build stack", cloudContext, e);
         }
-        return transformResults(res.getResults(), stack);
     }
 
     @Override
@@ -171,17 +174,26 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
         CloudCredential cloudCredential = buildCloudCredential(stack);
         List<CloudInstance> instances = metadataConverter.convert(stack.getInstanceMetaDataAsList());
-        Promise<StartInstancesResult> promise = Promises.prepare();
-        StartInstancesRequest startStackRequest = new StartInstancesRequest(cloudContext, cloudCredential, instances, promise);
-        //TODO we should create the promise inside the request to avoid ClassCastExceptions
-        //TODO the request should know what type of result will come back
-        LOGGER.info("Triggering event: {}", startStackRequest);
-        eventBus.notify(startStackRequest.selector(), Event.wrap(startStackRequest));
+        StartInstancesRequest<StartInstancesResult> startRequest = new StartInstancesRequest<>(cloudContext, cloudCredential, instances);
+        LOGGER.info("Triggering event: {}", startRequest);
+        eventBus.notify(startRequest.selector(), Event.wrap(startRequest));
         try {
-            StartInstancesResult res = promise.await(1, TimeUnit.HOURS);
+            StartInstancesResult res = startRequest.await();
             LOGGER.info("Result: {}", res);
+            if (res.isFailed()) {
+                Exception exception = res.getException();
+                LOGGER.error(format("Failed to start the stack: %s", cloudContext), exception);
+                throw new OperationException("Unexpected exception occurred during stack start", cloudContext, exception);
+            } else {
+                for (CloudVmInstanceStatus instanceStatus : res.getResults().getResults()) {
+                    if (instanceStatus.getStatus().equals(InstanceStatus.FAILED)) {
+                        throw new OperationException("Failed to start the following instance: " + instanceStatus.getCloudInstance());
+                    }
+                }
+            }
         } catch (InterruptedException e) {
-            LOGGER.error("Error while starting stack: ", e);
+            LOGGER.error("Error while starting the stack", e);
+            throw new OperationException("Unexpected exception occurred during stack start", cloudContext, e);
         }
     }
 
@@ -191,15 +203,26 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
         CloudCredential cloudCredential = buildCloudCredential(stack);
         List<CloudInstance> instances = metadataConverter.convert(stack.getInstanceMetaDataAsList());
-        Promise<StopInstancesResult> promise = Promises.prepare();
-        StopInstancesRequest stopStackRequest = new StopInstancesRequest(cloudContext, cloudCredential, instances, promise);
-        LOGGER.info("Triggering event: {}", stopStackRequest);
-        eventBus.notify(stopStackRequest.selector(), Event.wrap(stopStackRequest));
+        StopInstancesRequest<StopInstancesResult> stopRequest = new StopInstancesRequest<>(cloudContext, cloudCredential, instances);
+        LOGGER.info("Triggering event: {}", stopRequest);
+        eventBus.notify(stopRequest.selector(), Event.wrap(stopRequest));
         try {
-            StopInstancesResult res = promise.await(1, TimeUnit.HOURS);
+            StopInstancesResult res = stopRequest.await();
             LOGGER.info("Result: {}", res);
+            if (res.isFailed()) {
+                Exception exception = res.getException();
+                LOGGER.error("Failed to stop the stack", exception);
+                throw new OperationException("Unexpected exception occurred during stack stop", cloudContext, exception);
+            } else {
+                for (CloudVmInstanceStatus instanceStatus : res.getResults().getResults()) {
+                    if (instanceStatus.getStatus().equals(InstanceStatus.FAILED)) {
+                        throw new OperationException("Failed to stop the following instance: " + instanceStatus.getCloudInstance());
+                    }
+                }
+            }
         } catch (InterruptedException e) {
-            LOGGER.error("Error while stopping stack: ", e);
+            LOGGER.error("Error while stopping the stack", e);
+            throw new OperationException("Unexpected exception occurred during stack stop", cloudContext, e);
         }
     }
 
@@ -211,29 +234,29 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
         InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         group.setNodeCount(group.getNodeCount() + adjustment);
         CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
-        Promise<UpscaleStackResult> promise = Promises.prepare();
         //TODO which resources?
         Set<Resource> jpaResult = stack.getResources();
         List<CloudResource> resources = new ArrayList<>();
         for (Resource resource : jpaResult) {
             resources.add(new CloudResource(resource.getResourceType(), stack.getName(), resource.getResourceName()));
         }
-        UpscaleStackRequest upscaleRequest = new UpscaleStackRequest(cloudContext, cloudCredential, cloudStack, resources, adjustment, promise);
+        UpscaleStackRequest<UpscaleStackResult> upscaleRequest = new UpscaleStackRequest<>(cloudContext, cloudCredential, cloudStack, resources, adjustment);
         LOGGER.info("Triggering upscale stack event: {}", upscaleRequest);
         eventBus.notify(upscaleRequest.selector(), Event.wrap(upscaleRequest));
-        UpscaleStackResult res = null;
         try {
-            res = promise.await(1, TimeUnit.HOURS);
+            UpscaleStackResult res = upscaleRequest.await();
             LOGGER.info("Upscale stack result: {}", res);
-            if (res == null) {
-                throw new OpenStackResourceException("Upscale of stack failed: resource(s) could not be created in time.");
-            } else if (res.getStatus().equals(EventStatus.FAILED)) {
-                throw new OpenStackResourceException(res.getStatusReason());
+            if (res.isFailed()) {
+                if (res.getException() != null) {
+                    throw new OperationException("Failed to upscale the stack", cloudContext, res.getException());
+                }
+                throw new OperationException(format("Failed to upscale the stack: %s due to: %s", cloudContext, res.getStatusReason()));
             }
+            return transformResults(res.getResults(), stack);
         } catch (InterruptedException e) {
-            LOGGER.error("Error while terminating stack: ", e);
+            LOGGER.error("Error while upscaling the stack", e);
+            throw new OperationException("Unexpected exception occurred during add new instances", cloudContext, e);
         }
-        return transformResults(res.getResults(), stack);
     }
 
     @Override
@@ -247,27 +270,28 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
         LOGGER.debug("Assembling terminate stack event for stack: {}", stack);
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
         CloudCredential cloudCredential = buildCloudCredential(stack);
-        Promise<TerminateStackResult> promise = Promises.prepare();
         //TODO which resources?
         Set<Resource> jpaResult = stack.getResources();
         List<CloudResource> resources = new ArrayList<>();
         for (Resource resource : jpaResult) {
             resources.add(new CloudResource(resource.getResourceType(), stack.getName(), resource.getResourceName()));
         }
-        TerminateStackRequest terminateStackRequest = new TerminateStackRequest(cloudContext, cloudCredential, resources, promise);
-        LOGGER.info("Triggering terminate stack event: {}", terminateStackRequest);
-        eventBus.notify(terminateStackRequest.selector(), Event.wrap(terminateStackRequest));
+        TerminateStackRequest<TerminateStackResult> terminateRequest = new TerminateStackRequest<>(cloudContext, cloudCredential, resources);
+        LOGGER.info("Triggering terminate stack event: {}", terminateRequest);
+        eventBus.notify(terminateRequest.selector(), Event.wrap(terminateRequest));
         try {
-            TerminateStackResult res = promise.await(1, TimeUnit.HOURS);
+            TerminateStackResult res = terminateRequest.await();
             LOGGER.info("Terminate stack result: {}", res);
-            if (res == null) {
-                throw new OpenStackResourceException("Stack termination failed: the termination of resource timed out.");
-                //TODO shouldn't we allow cluster delete then, what if someone deletes the stack by hand?
-            } else if (res.getStatus().equals(EventStatus.FAILED)) {
-                throw new OpenStackResourceException(res.getStatusReason(), res.getErrorDetails());
+            //TODO shouldn't we allow cluster delete then, what if someone deletes the stack by hand?
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                if (res.getErrorDetails() != null) {
+                    throw new OperationException("Failed to terminate the stack", cloudContext, res.getErrorDetails());
+                }
+                throw new OperationException(format("Failed to terminate the stack: %s due to %s", cloudContext, res.getStatusReason()));
             }
         } catch (InterruptedException e) {
-            LOGGER.error("Error while terminating stack: ", e);
+            LOGGER.error("Error while terminating the stack", e);
+            throw new OperationException("Unexpected exception occurred during stack termination", cloudContext, e);
         }
     }
 
@@ -284,18 +308,17 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
     @Override
     public String getSSHUser(Map<String, String> context) {
         CloudContext cloudContext = new CloudContext(null, null, context.get(ProvisioningService.PLATFORM));
-        Promise<SshUserResponse> promise = Promises.prepare();
-        SshUserRequest<SshUserResponse> sshUserRequest = new SshUserRequest<>(cloudContext, promise);
+        SshUserRequest<SshUserResponse> sshUserRequest = new SshUserRequest<>(cloudContext);
         LOGGER.info("Triggering event: {}", sshUserRequest);
         eventBus.notify(CloudPlatformRequest.selector(SshUserRequest.class), Event.wrap(sshUserRequest));
-        SshUserResponse response = null;
         try {
-            response = promise.await(1, TimeUnit.HOURS);
+            SshUserResponse response = sshUserRequest.await();
             LOGGER.info("Result: {}", response);
+            return response.getUser();
         } catch (InterruptedException e) {
-            LOGGER.error("Error while retrieving ssh user", e);
+            LOGGER.error(format("Error while retrieving ssh user for stack: %s", cloudContext), e);
+            throw new OperationException("Unexpected exception occurred during retrieving the SSH user", cloudContext, e);
         }
-        return response.getUser();
     }
 
     @Override
@@ -304,18 +327,20 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<InstanceTemplate> instanceTemplates = cloudStackConverter.buildInstanceTemplates(stack);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
-        Promise<CollectMetadataResult> promise = Promises.prepare();
-        CollectMetadataRequest cmr = new CollectMetadataRequest(cloudContext, cloudCredential, cloudResources, instanceTemplates, promise);
+        CollectMetadataRequest<CollectMetadataResult> cmr = new CollectMetadataRequest<>(cloudContext, cloudCredential, cloudResources, instanceTemplates);
         LOGGER.info("Triggering event: {}", cmr);
         eventBus.notify(cmr.selector(CollectMetadataRequest.class), Event.wrap(cmr));
-        CollectMetadataResult res;
         try {
-            res = promise.await(1, TimeUnit.HOURS);
+            CollectMetadataResult res = cmr.await();
             LOGGER.info("Result: {}", res);
+            if (res.getException() != null) {
+                LOGGER.error("Failed to collect metadata", res.getException());
+                return Collections.emptySet();
+            }
             return new HashSet<>(instanceConverter.convert(res.getResults()));
         } catch (InterruptedException e) {
-            LOGGER.error("Error while executing collectMetadata", e);
-            throw new RuntimeException("Failed to collect metadata");
+            LOGGER.error(format("Error while executing collectMetadata, stack: %s", cloudContext), e);
+            throw new OperationException("Unexpected exception occurred during collecting the metadata", cloudContext, e);
         }
     }
 
@@ -325,18 +350,20 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<InstanceTemplate> instanceTemplates = getNewInstanceTemplates(stack, instanceGroupName, scalingAdjustment);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
-        Promise<CollectMetadataResult> promise = Promises.prepare();
-        CollectMetadataRequest cmr = new CollectMetadataRequest(cloudContext, cloudCredential, cloudResources, instanceTemplates, promise);
+        CollectMetadataRequest<CollectMetadataResult> cmr = new CollectMetadataRequest<>(cloudContext, cloudCredential, cloudResources, instanceTemplates);
         LOGGER.info("Triggering event: {}", cmr);
         eventBus.notify(cmr.selector(CollectMetadataRequest.class), Event.wrap(cmr));
-        CollectMetadataResult res;
         try {
-            res = promise.await(1, TimeUnit.HOURS);
+            CollectMetadataResult res = cmr.await();
             LOGGER.info("Result: {}", res);
+            if (res.getException() != null) {
+                LOGGER.error(format("Failed to collect metadata, stack: %s", cloudContext), res.getException());
+                return Collections.emptySet();
+            }
             return new HashSet<>(instanceConverter.convert(res.getResults()));
         } catch (InterruptedException e) {
-            LOGGER.error("Error while collectNewMetadata", e);
-            throw new RuntimeException("Failed to collect metadata");
+            LOGGER.error(format("Error while collecting new metadata for stack: %s", cloudContext), e);
+            throw new OperationException("Unexpected exception occurred during collecting the metadata", cloudContext, e);
         }
     }
 
@@ -361,39 +388,31 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
     @Override
     public Set<String> getSSHFingerprints(Stack stack, String gateway) {
         Set<String> result = new HashSet<>();
-        Resource heatResource = stack.getResourceByType(ResourceType.HEAT_STACK);
-        if (heatResource == null) {
-            String errorMessage = String.format("No Heat resource is referenced with this stack: %s, unable to get ssh fingerprints", stack.getId());
-            LOGGER.info(errorMessage);
-            throw new OpenStackResourceException(errorMessage);
-        }
         LOGGER.debug("Get SSH fingerprints of gateway instance for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), CloudPlatform.OPENSTACK.name());
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
         CloudCredential cloudCredential = buildCloudCredential(stack);
-        Promise<GetSSHFingerprintsResult> promise = Promises.prepare();
         InstanceMetaData gatewayMetaData = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
         CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData);
-        GetSSHFingerprintsRequest getSSHFingerprintsRequest = new GetSSHFingerprintsRequest(cloudContext, cloudCredential, promise, gatewayInstance);
-        LOGGER.info("Triggering GetSSHFingerprintsRequest stack event: {}", getSSHFingerprintsRequest);
-        eventBus.notify(getSSHFingerprintsRequest.selector(), Event.wrap(getSSHFingerprintsRequest));
+        GetSSHFingerprintsRequest<GetSSHFingerprintsResult> SSHFingerprintReq = new GetSSHFingerprintsRequest<>(cloudContext, cloudCredential, gatewayInstance);
+        LOGGER.info("Triggering GetSSHFingerprintsRequest stack event: {}", SSHFingerprintReq);
+        eventBus.notify(SSHFingerprintReq.selector(), Event.wrap(SSHFingerprintReq));
         try {
-            GetSSHFingerprintsResult res = promise.await(1, TimeUnit.HOURS);
+            GetSSHFingerprintsResult res = SSHFingerprintReq.await();
             LOGGER.info("Get SSH fingerprints of gateway instance for stack result: {}", res);
-            if (res == null) {
-                throw new OpenStackResourceException("Failed to get SSH fingerprints of gateway instance: the termination of resource timed out.");
-            } else if (res.getStatus().equals(EventStatus.FAILED)) {
-                throw new OpenStackResourceException(res.getStatusReason(), res.getErrorDetails());
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                throw new OperationException(res.getStatusReason(), cloudContext, res.getErrorDetails());
             }
             result.addAll(res.getSshFingerprints());
         } catch (InterruptedException e) {
-            LOGGER.error("Failed to get SSH fingerprints of gateway instance: ", e);
+            LOGGER.error(format("Failed to get SSH fingerprints of gateway instance stack: %s", cloudContext), e);
+            throw new OperationException("Unexpected exception occurred during retrieving SSH fingerprints", cloudContext, e);
         }
         return result;
     }
 
     private CloudCredential buildCloudCredential(Stack stack) {
-        OpenStackCredential openstackCredential = (OpenStackCredential) stack.getCredential();
-        return new CloudCredential(openstackCredential.getName(), getDeclaredFields(openstackCredential));
+        Credential credential = stack.getCredential();
+        return new CloudCredential(credential.getName(), getDeclaredFields(credential));
     }
 
     private Set<Resource> transformResults(List<CloudResourceStatus> cloudResourceStatuses, Stack stack) {

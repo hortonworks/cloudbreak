@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.InstancesStatusResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
-import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
@@ -49,8 +48,8 @@ public class StopStackHandler implements CloudPlatformEventHandler<StopInstances
     public void accept(Event<StopInstancesRequest> event) {
         LOGGER.info("Received event: {}", event);
         StopInstancesRequest request = event.getData();
+        CloudContext cloudContext = request.getCloudContext();
         try {
-            CloudContext cloudContext = request.getCloudContext();
             String platform = cloudContext.getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
             List<CloudInstance> instances = request.getCloudInstances();
@@ -62,14 +61,10 @@ public class StopStackHandler implements CloudPlatformEventHandler<StopInstances
             if (!task.completed(statusResult)) {
                 statusResult = syncPollingScheduler.schedule(task, INTERVAL, MAX_ATTEMPT);
             }
-
-            //TODO check if state is FAILED
-            request.getResult().onNext(new StopInstancesResult(cloudContext, "Stack successfully stopped", statusResult));
+            request.getResult().onNext(new StopInstancesResult(cloudContext, statusResult));
         } catch (Exception e) {
-            LOGGER.error("Failed to handle StopStackRequest.", e);
-            request.getResult().onNext(new SetupResult(e.getMessage(), e, request));
+            request.getResult().onNext(new StopInstancesResult(cloudContext, e));
         }
-        LOGGER.info("StopStackHandler finished");
     }
 
 

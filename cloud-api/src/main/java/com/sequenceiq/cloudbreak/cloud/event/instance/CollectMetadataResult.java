@@ -8,12 +8,17 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 public class CollectMetadataResult {
 
     private CloudContext cloudContext;
-
     private List<CloudVmInstanceStatus> results;
+    private Exception exception;
 
     public CollectMetadataResult(CloudContext cloudContext, List<CloudVmInstanceStatus> results) {
         this.cloudContext = cloudContext;
         this.results = results;
+    }
+
+    public CollectMetadataResult(CloudContext cloudContext, Exception exception) {
+        this.cloudContext = cloudContext;
+        this.exception = exception;
     }
 
     public CloudContext getCloudContext() {
@@ -24,18 +29,17 @@ public class CollectMetadataResult {
         return results;
     }
 
-
-    //BEGIN GENERATED CODE
+    public Exception getException() {
+        return exception;
+    }
 
     @Override
     public String toString() {
-        return "CollectMetadataResult{" +
-                "cloudContext=" + cloudContext +
-                ", results=" + results +
-                '}';
+        final StringBuilder sb = new StringBuilder("CollectMetadataResult{");
+        sb.append("cloudContext=").append(cloudContext);
+        sb.append(", results=").append(results);
+        sb.append(", exception=").append(exception);
+        sb.append('}');
+        return sb.toString();
     }
-
-
-    //END GENERATED CODE
-
 }

@@ -11,6 +11,7 @@ public class UpscaleStackResult {
     private CloudContext cloudContext;
     private ResourceStatus status;
     private String statusReason;
+    private Exception exception;
     private List<CloudResourceStatus> results;
 
     public UpscaleStackResult(CloudContext cloudContext, ResourceStatus status, String statusReason, List<CloudResourceStatus> results) {
@@ -18,6 +19,16 @@ public class UpscaleStackResult {
         this.status = status;
         this.statusReason = statusReason;
         this.results = results;
+    }
+
+    public UpscaleStackResult(CloudContext cloudContext, Exception exception) {
+        this.cloudContext = cloudContext;
+        this.exception = exception;
+        this.status = ResourceStatus.FAILED;
+    }
+
+    public Exception getException() {
+        return exception;
     }
 
     public CloudContext getCloudContext() {
@@ -36,7 +47,10 @@ public class UpscaleStackResult {
         return results;
     }
 
-    //BEGIN GENERATED CODE
+    public boolean isFailed() {
+        return status == ResourceStatus.FAILED;
+    }
+
     @Override
     public String toString() {
         return "LaunchStackResult{" +
@@ -46,5 +60,4 @@ public class UpscaleStackResult {
                 ", results=" + results +
                 '}';
     }
-    //END GENERATED CODE
 }

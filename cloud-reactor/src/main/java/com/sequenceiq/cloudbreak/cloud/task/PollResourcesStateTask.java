@@ -14,11 +14,8 @@ import com.sequenceiq.cloudbreak.cloud.transform.ResourceStatusLists;
 public class PollResourcesStateTask implements PollTask<ResourcesStatePollerResult> {
 
     private CloudConnector connector;
-
     private AuthenticatedContext authenticatedContext;
-
     private List<CloudResource> cloudResource;
-
 
     @Inject
     public PollResourcesStateTask(AuthenticatedContext authenticatedContext, CloudConnector connector,
@@ -33,7 +30,6 @@ public class PollResourcesStateTask implements PollTask<ResourcesStatePollerResu
         List<CloudResourceStatus> results = connector.resources().check(authenticatedContext, cloudResource);
         CloudResourceStatus status = ResourceStatusLists.aggregate(results);
         return new ResourcesStatePollerResult(authenticatedContext.getCloudContext(), status.getStatus(), status.getStatusReason(), results);
-
     }
 
     @Override

@@ -3,9 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 public class CloudVmInstanceStatus {
 
     private CloudInstance cloudInstance;
-
     private InstanceStatus status;
-
     private String statusReason;
 
     public CloudVmInstanceStatus(CloudInstance cloudInstance, InstanceStatus status, String statusReason) {
@@ -31,7 +29,6 @@ public class CloudVmInstanceStatus {
         return statusReason;
     }
 
-    //BEGIN GENERATED CODE
     @Override
     public String toString() {
         return "CloudVmInstanceStatus{" +
@@ -40,5 +37,4 @@ public class CloudVmInstanceStatus {
                 ", statusReason='" + statusReason + '\'' +
                 '}';
     }
-    //BEGIN GENERATED CODE
 }

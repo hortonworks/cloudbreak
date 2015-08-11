@@ -11,12 +11,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourcePersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
@@ -56,29 +56,24 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
     public void accept(Event<LaunchStackRequest> launchStackRequestEvent) {
         LOGGER.info("Received event: {}", launchStackRequestEvent);
         LaunchStackRequest launchStackRequest = launchStackRequestEvent.getData();
+        CloudContext cloudContext = launchStackRequest.getCloudContext();
         try {
-            String platform = launchStackRequest.getCloudContext().getPlatform();
+            String platform = cloudContext.getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
-            AuthenticatedContext ac = connector.authenticate(launchStackRequest.getCloudContext(), launchStackRequest.getCloudCredential());
-
+            AuthenticatedContext ac = connector.authenticate(cloudContext, launchStackRequest.getCloudCredential());
             List<CloudResourceStatus> resourceStatus = connector.resources().launch(ac, launchStackRequest.getCloudStack(),
                     resourcePersistenceNotifier);
-
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
-
             PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources);
-            ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(launchStackRequest.getCloudContext(), resourceStatus);
+            ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatus);
             if (!task.completed(statePollerResult)) {
                 statePollerResult = syncPollingScheduler.schedule(task, INTERVAL, MAX_ATTEMPT);
             }
-
             launchStackRequest.getResult().onNext(ResourcesStatePollerResults.transformToLaunchStackResult(statePollerResult));
-
+            LOGGER.info("Launching the stack successfully finished for {}", cloudContext);
         } catch (Exception e) {
-            LOGGER.error("Failed to handle LaunchStackRequest. Error: ", e);
-            launchStackRequest.getResult().onNext(new LaunchStackResult(launchStackRequest.getCloudContext(), ResourceStatus.FAILED, e.getMessage(), null));
+            launchStackRequest.getResult().onNext(new LaunchStackResult(cloudContext, e));
         }
-        LOGGER.info("LaunchStackHandler finished");
     }
 
 

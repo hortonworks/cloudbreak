@@ -26,9 +26,6 @@ public class CollectMetadataHandler implements CloudPlatformEventHandler<Collect
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CollectMetadataHandler.class);
 
-    private static final int INTERVAL = 5;
-    private static final int MAX_ATTEMPT = 100;
-
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
@@ -46,7 +43,7 @@ public class CollectMetadataHandler implements CloudPlatformEventHandler<Collect
     @Override
     public void accept(Event<CollectMetadataRequest> launchStackRequestEvent) {
         LOGGER.info("Received event: {}", launchStackRequestEvent);
-        CollectMetadataRequest collectMetadataRequest = launchStackRequestEvent.getData();
+        CollectMetadataRequest<CollectMetadataResult> collectMetadataRequest = launchStackRequestEvent.getData();
         try {
             String platform = collectMetadataRequest.getCloudContext().getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
@@ -55,19 +52,12 @@ public class CollectMetadataHandler implements CloudPlatformEventHandler<Collect
             List<CloudVmInstanceStatus> instanceStatuses = connector.instances().collectMetadata(ac, collectMetadataRequest.getCloudResource(),
                     collectMetadataRequest.getVms());
 
-
             CollectMetadataResult collectMetadataResult = new CollectMetadataResult(collectMetadataRequest.getCloudContext(), instanceStatuses);
-
-
             collectMetadataRequest.getResult().onNext(collectMetadataResult);
-
+            LOGGER.info("Metadata collection successfully finished");
         } catch (Exception e) {
-            LOGGER.error("Failed to handle LaunchStackRequest. Error: ", e);
-            // TODO send error reason
-            collectMetadataRequest.getResult().onNext(new CollectMetadataResult(collectMetadataRequest.getCloudContext(), null));
+            collectMetadataRequest.getResult().onNext(new CollectMetadataResult(collectMetadataRequest.getCloudContext(), e));
         }
-        LOGGER.info("LaunchStackHandler finished");
     }
-
 
 }

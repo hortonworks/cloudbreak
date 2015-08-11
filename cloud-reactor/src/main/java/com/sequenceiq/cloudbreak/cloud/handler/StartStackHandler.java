@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.InstancesStatusResult;
@@ -49,8 +48,8 @@ public class StartStackHandler implements CloudPlatformEventHandler<StartInstanc
     public void accept(Event<StartInstancesRequest> event) {
         LOGGER.info("Received event: {}", event);
         StartInstancesRequest request = event.getData();
+        CloudContext cloudContext = request.getCloudContext();
         try {
-            CloudContext cloudContext = request.getCloudContext();
             String platform = cloudContext.getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
             AuthenticatedContext authenticatedContext = connector.authenticate(cloudContext, request.getCloudCredential());
@@ -62,13 +61,10 @@ public class StartStackHandler implements CloudPlatformEventHandler<StartInstanc
             if (!task.completed(statusResult)) {
                 statusResult = syncPollingScheduler.schedule(task, INTERVAL, MAX_ATTEMPT);
             }
-            //TODO check if state is FAILED
-            request.getResult().onNext(new StartInstancesResult(cloudContext, "Stack successfully started", statusResult));
+            request.getResult().onNext(new StartInstancesResult(cloudContext, statusResult));
         } catch (Exception e) {
-            LOGGER.error("Failed to handle StopStackRequest.", e);
-            request.getResult().onNext(new SetupResult(e, request));
+            request.getResult().onNext(new StartInstancesResult(cloudContext, e));
         }
-        LOGGER.info("StopStackHandler finished");
     }
 
 

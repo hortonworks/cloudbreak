@@ -8,14 +8,12 @@ import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 
-import reactor.rx.Promise;
-
 public class TerminateStackRequest<T> extends CloudPlatformRequest<T> {
 
     private List<CloudResource> cloudResources;
 
-    public TerminateStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, List<CloudResource> resources, Promise<T> result) {
-        super(cloudContext, cloudCredential, result);
+    public TerminateStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, List<CloudResource> resources) {
+        super(cloudContext, cloudCredential);
         this.cloudResources = new ArrayList<>(resources);
     }
 

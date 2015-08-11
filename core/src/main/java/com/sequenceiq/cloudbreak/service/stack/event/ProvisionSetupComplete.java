@@ -17,10 +17,6 @@ public class ProvisionSetupComplete extends ProvisionEvent {
         return setupProperties;
     }
 
-    public void setSetupProperties(Map<String, Object> setupProperties) {
-        this.setupProperties = setupProperties;
-    }
-
     public ProvisionSetupComplete withSetupProperty(String key, Object value) {
         this.setupProperties.put(key, value);
         return this;

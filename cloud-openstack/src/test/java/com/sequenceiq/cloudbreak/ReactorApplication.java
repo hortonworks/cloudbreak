@@ -84,12 +84,11 @@ public class ReactorApplication implements CommandLineRunner {
     }
 
     private void asyncNotify(Promise<LaunchStackResult> promise) {
-        LaunchStackRequest sr = request(promise);
+        LaunchStackRequest sr = request();
         eventBus.notify(CloudPlatformRequest.selector(LaunchStackRequest.class), Event.wrap(sr));
     }
 
     private void promiseTest() {
-
         try {
             Promise<LaunchStackResult> promise = Promises.prepare();
             asyncNotify(promise);
@@ -100,7 +99,7 @@ public class ReactorApplication implements CommandLineRunner {
         }
     }
 
-    private LaunchStackRequest request(Promise<LaunchStackResult> promise) {
+    private LaunchStackRequest request() {
         CloudCredential c = new CloudCredential("opencred");
         c.putParameter("userName", userName);
         c.putParameter("password", password);
@@ -135,7 +134,7 @@ public class ReactorApplication implements CommandLineRunner {
         CloudContext cloudContext = new CloudContext(0L, "stack-name_" + ts, "OPENSTACK");
 
         CloudStack cs = new CloudStack(groups, network, security, image);
-        LaunchStackRequest lr = new LaunchStackRequest(cloudContext, c, cs, promise);
+        LaunchStackRequest<LaunchStackResult> lr = new LaunchStackRequest<>(cloudContext, c, cs);
         LOGGER.debug("Launchrequest: {}", lr);
         return lr;
 

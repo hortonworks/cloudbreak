@@ -11,12 +11,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
+import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackRequest;
+import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourcePersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
@@ -56,10 +56,11 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
     public void accept(Event<UpscaleStackRequest> upscaleStackRequestEvent) {
         LOGGER.info("Received event: {}", upscaleStackRequestEvent);
         UpscaleStackRequest request = upscaleStackRequestEvent.getData();
+        CloudContext cloudContext = request.getCloudContext();
         try {
-            String platform = request.getCloudContext().getPlatform();
+            String platform = cloudContext.getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
-            AuthenticatedContext ac = connector.authenticate(request.getCloudContext(), request.getCloudCredential());
+            AuthenticatedContext ac = connector.authenticate(cloudContext, request.getCloudCredential());
 
             List<CloudResourceStatus> resourceStatus = connector.resources()
                     .upscale(ac, request.getCloudStack(), request.getResourceList(), request.getAdjustment());
@@ -67,18 +68,15 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
 
             PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources);
-            ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(request.getCloudContext(), resourceStatus);
+            ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatus);
             if (!task.completed(statePollerResult)) {
                 statePollerResult = syncPollingScheduler.schedule(task, INTERVAL, MAX_ATTEMPT);
             }
-
             request.getResult().onNext(ResourcesStatePollerResults.transformToUpscaleStackResult(statePollerResult));
-
+            LOGGER.info("Upscale successfully finished for {}", cloudContext);
         } catch (Exception e) {
-            LOGGER.error("Failed to handle UpscaleStackRequest.", e);
-            request.getResult().onNext(new LaunchStackResult(request.getCloudContext(), ResourceStatus.FAILED, e.getMessage(), null));
+            request.getResult().onNext(new UpscaleStackResult(cloudContext, e));
         }
-        LOGGER.info("UpscaleStackHandler finished");
     }
 
 

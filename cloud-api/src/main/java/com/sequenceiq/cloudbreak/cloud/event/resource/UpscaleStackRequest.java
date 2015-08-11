@@ -7,16 +7,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
-import reactor.rx.Promise;
-
 public class UpscaleStackRequest<T> extends CloudStackRequest<T> {
 
     private List<CloudResource> resourceList;
     private int adjustment;
 
     public UpscaleStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack, List<CloudResource> resourceList,
-            int adjustment, Promise<T> result) {
-        super(cloudContext, cloudCredential, cloudStack, result);
+            int adjustment) {
+        super(cloudContext, cloudCredential, cloudStack);
         this.resourceList = resourceList;
         this.adjustment = adjustment;
     }
