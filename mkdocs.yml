@@ -1,0 +1,11 @@
+site_name: Cloudbreak Deployer
+theme: mkdocs
+theme_dir: mkdocs_theme
+pages:
+    - 'Home': index.md
+    - 'Docs':
+        - Architecture : architecture.md
+        - Configuration : configuration.md
+        - Database : database.md
+        - Development : development.md
+        - Changelog : changelog.md
