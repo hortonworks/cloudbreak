@@ -20,8 +20,8 @@ public class CloudStackRequest<T> extends CloudPlatformRequest<T> {
 
     @Override
     public String toString() {
-        return "CloudStackRequest{" +
-                ", cloudStack=" + cloudStack +
-                '}';
+        return "CloudStackRequest{"
+                + ", cloudStack=" + cloudStack
+                + '}';
     }
 }

@@ -39,11 +39,11 @@ public class CloudPlatformResult {
 
     @Override
     public String toString() {
-        return "CloudPlatformResult{" +
-                "status=" + status +
-                ", statusReason='" + statusReason + '\'' +
-                ", errorDetails=" + errorDetails +
-                ", request=" + request +
-                '}';
+        return "CloudPlatformResult{"
+                + "status=" + status
+                + ", statusReason='" + statusReason + '\''
+                + ", errorDetails=" + errorDetails
+                + ", request=" + request
+                + '}';
     }
 }

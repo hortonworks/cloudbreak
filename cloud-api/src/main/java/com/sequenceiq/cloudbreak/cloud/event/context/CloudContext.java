@@ -26,10 +26,10 @@ public class CloudContext {
 
     @Override
     public String toString() {
-        return "StackContext{" +
-                "stackId=" + stackId +
-                ", stackName='" + stackName + '\'' +
-                ", platform='" + platform + '\'' +
-                '}';
+        return "StackContext{"
+                + "stackId=" + stackId
+                + ", stackName='" + stackName + '\''
+                + ", platform='" + platform + '\''
+                + '}';
     }
 }

@@ -53,11 +53,11 @@ public class UpscaleStackResult {
 
     @Override
     public String toString() {
-        return "LaunchStackResult{" +
-                "stackContext=" + cloudContext +
-                ", status=" + status +
-                ", statusReason='" + statusReason + '\'' +
-                ", results=" + results +
-                '}';
+        return "LaunchStackResult{"
+                + "stackContext=" + cloudContext
+                + ", status=" + status
+                + ", statusReason='" + statusReason + '\''
+                + ", results=" + results
+                + '}';
     }
 }

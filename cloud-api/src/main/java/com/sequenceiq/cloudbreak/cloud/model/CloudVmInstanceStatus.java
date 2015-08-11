@@ -31,10 +31,10 @@ public class CloudVmInstanceStatus {
 
     @Override
     public String toString() {
-        return "CloudVmInstanceStatus{" +
-                "instance=" + cloudInstance +
-                ", status=" + status +
-                ", statusReason='" + statusReason + '\'' +
-                '}';
+        return "CloudVmInstanceStatus{"
+                + "instance=" + cloudInstance
+                + ", status=" + status
+                + ", statusReason='" + statusReason + '\''
+                + '}';
     }
 }

@@ -29,6 +29,8 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
+import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackRequest;
+import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackRequest;
@@ -235,11 +237,7 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
         group.setNodeCount(group.getNodeCount() + adjustment);
         CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
         //TODO which resources?
-        Set<Resource> jpaResult = stack.getResources();
-        List<CloudResource> resources = new ArrayList<>();
-        for (Resource resource : jpaResult) {
-            resources.add(new CloudResource(resource.getResourceType(), stack.getName(), resource.getResourceName()));
-        }
+        List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         UpscaleStackRequest<UpscaleStackResult> upscaleRequest = new UpscaleStackRequest<>(cloudContext, cloudCredential, cloudStack, resources, adjustment);
         LOGGER.info("Triggering upscale stack event: {}", upscaleRequest);
         eventBus.notify(upscaleRequest.selector(), Event.wrap(upscaleRequest));
@@ -261,8 +259,34 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
 
     @Override
     public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
-        //TODO
-        return null;
+        LOGGER.debug("Assembling downscale stack event for stack: {}", stack);
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
+        CloudCredential cloudCredential = buildCloudCredential(stack);
+        CloudStack cloudStack = cloudStackConverter.convert(stack);
+        List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
+        List<InstanceTemplate> instanceTemplates = new ArrayList<>();
+        InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
+        for (InstanceMetaData metaData : group.getInstanceMetaData()) {
+            if (instanceIds.contains(metaData.getInstanceId())) {
+                CloudInstance cloudInstance = metadataConverter.convert(metaData);
+                instanceTemplates.add(cloudInstance.getTemplate());
+            }
+        }
+        DownscaleStackRequest<DownscaleStackResult> downscaleRequest = new DownscaleStackRequest<>(cloudContext,
+                cloudCredential, cloudStack, resources, instanceTemplates);
+        LOGGER.info("Triggering downscale stack event: {}", downscaleRequest);
+        eventBus.notify(downscaleRequest.selector(), Event.wrap(downscaleRequest));
+        try {
+            DownscaleStackResult res = downscaleRequest.await();
+            LOGGER.info("Downscale stack result: {}", res);
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                throw new OperationException(res.getStatusReason());
+            }
+            return instanceIds;
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while downscaling the stack", e);
+            throw new OperationException("Unexpected exception occurred during remove instances", cloudContext, e);
+        }
     }
 
     @Override
@@ -393,11 +417,11 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
         CloudCredential cloudCredential = buildCloudCredential(stack);
         InstanceMetaData gatewayMetaData = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
         CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData);
-        GetSSHFingerprintsRequest<GetSSHFingerprintsResult> SSHFingerprintReq = new GetSSHFingerprintsRequest<>(cloudContext, cloudCredential, gatewayInstance);
-        LOGGER.info("Triggering GetSSHFingerprintsRequest stack event: {}", SSHFingerprintReq);
-        eventBus.notify(SSHFingerprintReq.selector(), Event.wrap(SSHFingerprintReq));
+        GetSSHFingerprintsRequest<GetSSHFingerprintsResult> sSHFingerprintReq = new GetSSHFingerprintsRequest<>(cloudContext, cloudCredential, gatewayInstance);
+        LOGGER.info("Triggering GetSSHFingerprintsRequest stack event: {}", sSHFingerprintReq);
+        eventBus.notify(sSHFingerprintReq.selector(), Event.wrap(sSHFingerprintReq));
         try {
-            GetSSHFingerprintsResult res = SSHFingerprintReq.await();
+            GetSSHFingerprintsResult res = sSHFingerprintReq.await();
             LOGGER.info("Get SSH fingerprints of gateway instance for stack result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 throw new OperationException(res.getStatusReason(), cloudContext, res.getErrorDetails());

@@ -54,9 +54,9 @@ public class CloudPlatformRequest<T> {
 
     @Override
     public String toString() {
-        return "CloudPlatformRequest{" +
-                "cloudContext=" + cloudContext +
-                ", cloudCredential=" + cloudCredential +
-                '}';
+        return "CloudPlatformRequest{"
+                + "cloudContext=" + cloudContext
+                + ", cloudCredential=" + cloudCredential
+                + '}';
     }
 }
