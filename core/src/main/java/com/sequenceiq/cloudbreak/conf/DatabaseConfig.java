@@ -6,6 +6,8 @@ import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DB_ENV_USER
 
 import java.util.Properties;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
@@ -36,23 +38,21 @@ public class DatabaseConfig {
     @Value("${cb.db.env.db:" + CB_DB_ENV_DB + "}")
     private String dbName;
 
-    @Value("${cb.db.port.5432.tcp.addr}")
-    private String dbHost;
-
-    @Value("${cb.db.port.5432.tcp.port}")
-    private String dbPort;
-
     @Value("${cb.hbm2ddl.strategy:validate}")
     private String hbm2ddlStrategy;
 
     @Value("${cb.hibernate.debug:false}")
     private boolean debug;
 
+    @Inject
+    @Named("databaseAddress")
+    private String databaseAddress;
+
     @Bean
     public DataSource dataSource() {
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
         dataSource.setDriverClass(Driver.class);
-        dataSource.setUrl(String.format("jdbc:postgresql://%s:%s/%s", dbHost, dbPort, dbName));
+        dataSource.setUrl(String.format("jdbc:postgresql://%s/%s", databaseAddress, dbName));
         dataSource.setUsername(dbUser);
         dataSource.setPassword(dbPassword);
         return dataSource;
@@ -101,5 +101,4 @@ public class DatabaseConfig {
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
         return properties;
     }
-
 }
