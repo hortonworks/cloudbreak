@@ -101,8 +101,7 @@ public class StackScalingService {
         Stack stack = stackService.getById(stackId);
         CloudPlatform cloudPlatform = stack.cloudPlatform();
         CloudPlatformConnector connector = platformResolver.connector(cloudPlatform);
-        Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(cloudPlatform,
-                tlsSecurityService.readPublicSshKey(stack.getId()), connector.getSSHUser(singletonMap(ProvisioningService.PLATFORM, cloudPlatform.name())));
+        Map<InstanceGroupType, String> userdata = buildUserData(stack, cloudPlatform, connector);
         return connector.addInstances(stack, userdata.get(InstanceGroupType.GATEWAY),
                 userdata.get(InstanceGroupType.CORE), scalingAdjustment, instanceGroupName);
     }
@@ -153,15 +152,23 @@ public class StackScalingService {
 
     private void removeInstance(Stack stack, String instanceId, String instanceGroupName) throws CloudbreakSecuritySetupException {
         Set<String> instanceIds = Sets.newHashSet(instanceId);
-        instanceIds = platformResolver.connector(stack.cloudPlatform()).removeInstances(stack, instanceIds, instanceGroupName);
+        CloudPlatform platform = stack.cloudPlatform();
+        CloudPlatformConnector connector = platformResolver.connector(platform);
+        Map<InstanceGroupType, String> userdata = buildUserData(stack, platform, connector);
+        instanceIds = connector.removeInstances(stack, userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE),
+                instanceIds, instanceGroupName);
         updateRemovedResourcesState(stack, instanceIds, stack.getInstanceGroupByInstanceGroupName(instanceGroupName));
     }
 
     public void downscaleStack(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
         Stack stack = stackService.getById(stackId);
+        CloudPlatform platform = stack.cloudPlatform();
+        CloudPlatformConnector connector = platformResolver.connector(platform);
         Map<String, String> unregisteredHostNamesByInstanceId = getUnregisteredInstanceIds(instanceGroupName, scalingAdjustment, stack);
         Set<String> instanceIds = new HashSet<>(unregisteredHostNamesByInstanceId.keySet());
-        instanceIds = platformResolver.connector(stack.cloudPlatform()).removeInstances(stack, instanceIds, instanceGroupName);
+        Map<InstanceGroupType, String> userdata = buildUserData(stack, platform, connector);
+        instanceIds = connector.removeInstances(stack, userdata.get(InstanceGroupType.GATEWAY),
+                userdata.get(InstanceGroupType.CORE), instanceIds, instanceGroupName);
         updateRemovedResourcesState(stack, instanceIds, stack.getInstanceGroupByInstanceGroupName(instanceGroupName));
     }
 
@@ -178,6 +185,12 @@ public class StackScalingService {
             }
         }
         return instanceIds;
+    }
+
+    private Map<InstanceGroupType, String> buildUserData(Stack stack, CloudPlatform platform, CloudPlatformConnector connector)
+            throws CloudbreakSecuritySetupException {
+        return userDataBuilder.buildUserData(platform,
+                    tlsSecurityService.readPublicSshKey(stack.getId()), connector.getSSHUser(singletonMap(ProvisioningService.PLATFORM, platform.name())));
     }
 
     private void updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) throws CloudbreakSecuritySetupException {

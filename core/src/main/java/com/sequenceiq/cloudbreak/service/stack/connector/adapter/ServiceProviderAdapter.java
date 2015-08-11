@@ -263,19 +263,30 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
     }
 
     @Override
-    public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
+    public Set<String> removeInstances(Stack stack, String gateWayUserData, String coreUserData, Set<String> instanceIds, String instanceGroup) {
         LOGGER.debug("Assembling downscale stack event for stack: {}", stack);
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
         CloudCredential cloudCredential = buildCloudCredential(stack);
-        CloudStack cloudStack = cloudStackConverter.convert(stack);
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         List<InstanceTemplate> instanceTemplates = new ArrayList<>();
         InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
-        for (InstanceMetaData metaData : group.getInstanceMetaData()) {
+        List<InstanceMetaData> temporarilyRemovedInstances = new ArrayList<>();
+        for (InstanceMetaData metaData : group.getAllInstanceMetaData()) {
             if (instanceIds.contains(metaData.getInstanceId())) {
                 CloudInstance cloudInstance = metadataConverter.convert(metaData);
                 instanceTemplates.add(cloudInstance.getTemplate());
+                metaData.setInstanceStatus(com.sequenceiq.cloudbreak.domain.InstanceStatus.TERMINATED);
+                temporarilyRemovedInstances.add(metaData);
             }
+        }
+        Integer originalGroupNodeCount = group.getNodeCount();
+        //hacking node count for the appropriate CloudStack conversion
+        group.setNodeCount(originalGroupNodeCount - instanceIds.size());
+        CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
+        //set back original node count
+        group.setNodeCount(originalGroupNodeCount);
+        for (InstanceMetaData metaData : temporarilyRemovedInstances) {
+            metaData.setInstanceStatus(com.sequenceiq.cloudbreak.domain.InstanceStatus.UNREGISTERED);
         }
         DownscaleStackRequest<DownscaleStackResult> downscaleRequest = new DownscaleStackRequest<>(cloudContext,
                 cloudCredential, cloudStack, resources, instanceTemplates);
@@ -285,7 +296,7 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
             DownscaleStackResult res = downscaleRequest.await();
             LOGGER.info("Downscale stack result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                throw new OperationException(res.getStatusReason());
+                throw new OperationException(res.getStatusReason(), cloudContext, res.getErrorDetails());
             }
             return instanceIds;
         } catch (InterruptedException e) {

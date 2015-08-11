@@ -14,7 +14,7 @@ public interface CloudPlatformConnector {
 
     Set<Resource> addInstances(Stack stack, String gateWayUserData, String coreUserData, Integer instanceCount, String instanceGroup);
 
-    Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup);
+    Set<String> removeInstances(Stack stack, String gateWayUserData, String coreUserData, Set<String> instanceIds, String instanceGroup);
 
     void deleteStack(Stack stack, Credential credential);
 

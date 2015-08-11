@@ -12,11 +12,10 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackRequest;
-import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
+import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
@@ -64,10 +63,14 @@ public class DownscaleStackHandler implements CloudPlatformEventHandler<Downscal
             if (!task.completed(statePollerResult)) {
                 statePollerResult = syncPollingScheduler.schedule(task);
             }
-            request.getResult().onNext(ResourcesStatePollerResults.transformToUpscaleStackResult(statePollerResult));
+
+            request.getResult().onNext(new DownscaleStackResult(request, ResourceLists.transform(statePollerResult.getResults())));
             LOGGER.info("Downscale successfully finished for {}", cloudContext);
+
         } catch (Exception e) {
-            request.getResult().onNext(new LaunchStackResult(cloudContext, ResourceStatus.FAILED, e.getMessage(), null));
+            LOGGER.error("Failed to handle DownscaleStackRequest.", e);
+            request.getResult().onNext(new DownscaleStackResult(e.getMessage(), e, request));
         }
+        LOGGER.info("DownscaleStackRequest finished");
     }
 }

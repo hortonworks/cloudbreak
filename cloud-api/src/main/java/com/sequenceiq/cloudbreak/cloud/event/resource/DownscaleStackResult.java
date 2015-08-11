@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.event.resource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
@@ -15,9 +16,9 @@ public class DownscaleStackResult extends CloudPlatformResult {
         this.downscaledResources = downscaledResources;
     }
 
-    public DownscaleStackResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request, List<CloudResource> downscaledResources) {
+    public DownscaleStackResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request) {
         super(statusReason, errorDetails, request);
-        this.downscaledResources = downscaledResources;
+        this.downscaledResources = new ArrayList<>();
     }
 
     public List<CloudResource> getDownscaledResources() {

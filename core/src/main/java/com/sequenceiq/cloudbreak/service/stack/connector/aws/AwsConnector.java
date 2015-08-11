@@ -326,7 +326,7 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
+    public Set<String> removeInstances(Stack stack, String gateWayUserData, String coreUserData, Set<String> instanceIds, String instanceGroup) {
         Regions region = Regions.valueOf(stack.getRegion());
         AwsCredential credential = (AwsCredential) stack.getCredential();
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(region, credential);
