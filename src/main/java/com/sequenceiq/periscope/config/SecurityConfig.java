@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -66,7 +67,8 @@ public class SecurityConfig {
         @Value("${periscope.client.secret}")
         private String clientSecret;
 
-        @Value("${periscope.identity.server.url}")
+        @Autowired
+        @Qualifier("identityServerUrl")
         private String identityServerUrl;
 
         @Autowired

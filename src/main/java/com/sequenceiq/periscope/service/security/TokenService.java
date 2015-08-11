@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
@@ -23,10 +24,13 @@ public class TokenService {
     @Autowired
     private RestOperations restTemplate;
 
-    @Value("${periscope.identity.server.url}")
+    @Autowired
+    @Qualifier("identityServerUrl")
     private String identityServerUrl;
+
     @Value("${periscope.client.id}")
     private String id;
+
     @Value("${periscope.client.secret}")
     private String secret;
 

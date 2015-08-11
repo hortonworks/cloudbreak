@@ -8,6 +8,7 @@ import java.util.Map;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
@@ -27,14 +28,15 @@ public class RemoteUserDetailsService implements UserDetailsService {
     @Autowired
     private RestOperations restTemplate;
 
+    @Autowired
+    @Qualifier("identityServerUrl")
+    private String identityServerUrl;
+
     @Value("${periscope.client.id}")
     private String clientId;
 
     @Value("${periscope.client.secret}")
     private String clientSecret;
-
-    @Value("${periscope.identity.server.url}")
-    private String identityServerUrl;
 
     @Override
     @Cacheable("userCache")

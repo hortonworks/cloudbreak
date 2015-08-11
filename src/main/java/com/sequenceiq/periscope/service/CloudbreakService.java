@@ -1,7 +1,7 @@
 package com.sequenceiq.periscope.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
@@ -13,7 +13,8 @@ public class CloudbreakService {
     @Autowired
     private TokenService tokenService;
 
-    @Value("${periscope.cloudbreak.url}")
+    @Autowired
+    @Qualifier("cloudbreakUrl")
     private String cloudbreakUrl;
 
     public CloudbreakClient getClient() {

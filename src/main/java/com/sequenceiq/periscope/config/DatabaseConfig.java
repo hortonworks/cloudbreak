@@ -7,6 +7,8 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.postgresql.Driver;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,20 +34,18 @@ public class DatabaseConfig {
     @Value("${periscope.db.name:postgres}")
     private String dbName;
 
-    @Value("${periscope.db.tcp.addr}")
-    private String dbHost;
-
-    @Value("${periscope.db.tcp.port}")
-    private String dbPort;
-
     @Value("${periscope.db.hbm2ddl.strategy:validate}")
     private String hbm2ddlStrategy;
+
+    @Autowired
+    @Qualifier("databaseAddress")
+    private String databaseAddress;
 
     @Bean
     public DataSource dataSource() {
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
         dataSource.setDriverClass(Driver.class);
-        dataSource.setUrl(String.format("jdbc:postgresql://%s:%s/%s", dbHost, dbPort, dbName));
+        dataSource.setUrl(String.format("jdbc:postgresql://%s/%s", databaseAddress, dbName));
         dataSource.setUsername(dbUser);
         dataSource.setPassword(dbPassword);
         return dataSource;
