@@ -17,6 +17,11 @@ test:
     - make tests
 
 deployment:
+  master:
+    branch: master
+    commands:
+      - eval $(docker run gliderlabs/pagebuilder circleci-cmd)
+
   release:
     branch: release
     commands:
