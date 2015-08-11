@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.notification.ResourcePersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
@@ -41,7 +41,7 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
     private PollTaskFactory statusCheckFactory;
 
     @Inject
-    private ResourcePersistenceNotifier resourcePersistenceNotifier;
+    private PersistenceNotifier persistenceNotifier;
 
     @Override
     public Class<LaunchStackRequest> type() {
@@ -58,7 +58,7 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
             CloudConnector connector = cloudPlatformConnectors.get(platform);
             AuthenticatedContext ac = connector.authenticate(cloudContext, launchStackRequest.getCloudCredential());
             List<CloudResourceStatus> resourceStatus = connector.resources().launch(ac, launchStackRequest.getCloudStack(),
-                    resourcePersistenceNotifier);
+                    persistenceNotifier);
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
             PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources);
             ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatus);

@@ -15,12 +15,12 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 public class CloudPlatformConnectors {
 
     @Inject
-    private List<CloudConnector> connectors;
+    private List<CloudConnector> cloudConnectors;
     private Map<String, CloudConnector> map = new HashMap<>();
 
     @PostConstruct
     public void cloudPlatformConnectors() {
-        for (CloudConnector connector : connectors) {
+        for (CloudConnector connector : cloudConnectors) {
             map.put(connector.platform(), connector);
         }
     }

@@ -6,7 +6,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 
 import reactor.rx.Promise;
 
-public interface ResourcePersistenceNotifier<T> {
+public interface PersistenceNotifier<T> {
 
     Promise<T> notifyResourceAllocation(CloudResource cloudResource, CloudContext cloudContext);
 
