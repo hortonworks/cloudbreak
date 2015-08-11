@@ -1,12 +1,19 @@
 #!/bin/bash
+
 [[ "TRACE" ]] && set -x
-if [ -z "$ULU_CLOUDBREAK_ADDRESS" ]; then
-  echo ULU_CLOUDBREAK_ADDRESS must be set;
+
+if [ -z "$ULU_CLOUDBREAK_ADDRESS" ] && [ -z "$ULU_CLOUDBREAK_SERVICEID" ]; then
+  echo ULU_CLOUDBREAK_ADDRESS or ULU_CLOUDBREAK_SERVICEID must be set;
   MISSING_ENV_VARS=true;
 fi
 
-if [ -z "$ULU_IDENTITY_ADDRESS" ]; then
-  echo ULU_IDENTITY_ADDRESS must be set;
+if [ -z "$ULU_IDENTITY_ADDRESS" ] && [ -z "$ULU_IDENTITY_SERVICEID" ]; then
+  echo ULU_IDENTITY_ADDRESS or ULU_IDENTITY_SERVICEID must be set;
+  MISSING_ENV_VARS=true;
+fi
+
+if [ -z "$ULU_SULTANS_ADDRESS" ] && [ -z "$ULU_SULTANS_SERVICEID" ]; then
+  echo ULU_SULTANS_ADDRESS or ULU_SULTANS_SERVICEID must be set;
   MISSING_ENV_VARS=true;
 fi
 
@@ -25,11 +32,6 @@ if [ -z "$ULU_HOST_ADDRESS" ]; then
   MISSING_ENV_VARS=true;
 fi
 
-if [ -z "$ULU_SULTANS_ADDRESS" ]; then
-  echo ULU_SULTANS_ADDRESS must be set;
-  MISSING_ENV_VARS=true;
-fi
-
 if [ -z "$ULU_PRODUCTION" ]; then
   export ULU_PRODUCTION=false;
 fi
@@ -37,7 +39,6 @@ fi
 if [ $MISSING_ENV_VARS ]; then
   exit 1;
 fi
-
 
 cd /uluwatu
 if [ "$ULU_PRODUCTION" = true ]; then
