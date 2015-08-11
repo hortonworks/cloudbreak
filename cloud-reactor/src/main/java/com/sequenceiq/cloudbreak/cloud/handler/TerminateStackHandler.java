@@ -28,8 +28,6 @@ import reactor.bus.Event;
 @Component
 public class TerminateStackHandler implements CloudPlatformEventHandler<TerminateStackRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(TerminateStackHandler.class);
-    private static final int INTERVAL = 5;
-    private static final int MAX_ATTEMPT = 100;
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -59,7 +57,7 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
             PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources);
             ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(terminateStackRequest.getCloudContext(), resourceStatus);
             if (!task.completed(statePollerResult)) {
-                statePollerResult = syncPollingScheduler.schedule(task, INTERVAL, MAX_ATTEMPT);
+                statePollerResult = syncPollingScheduler.schedule(task);
             }
 
             TerminateStackResult terminateStackResult;

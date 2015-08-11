@@ -12,7 +12,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 @Configuration
 public class CloudReactorConfiguration {
 
-    @Value("${cb.cloud.api.executorservice.pool.size:10}")
+    @Value("${cb.cloud.api.executorservice.pool.size:40}")
     private int executorServicePoolSize;
 
     @Bean

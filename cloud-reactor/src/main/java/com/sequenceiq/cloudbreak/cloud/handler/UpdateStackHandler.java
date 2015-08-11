@@ -11,12 +11,12 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackRequest;
-import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
+import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateStackRequest;
+import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateStackResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.notification.ResourcePersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
@@ -27,8 +27,12 @@ import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
 import reactor.bus.Event;
 
 @Component
-public class DownscaleStackHandler implements CloudPlatformEventHandler<DownscaleStackRequest> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DownscaleStackHandler.class);
+public class UpdateStackHandler implements CloudPlatformEventHandler<UpdateStackRequest> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpdateStackHandler.class);
+
+    @Inject
+    private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Inject
     private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
@@ -37,25 +41,22 @@ public class DownscaleStackHandler implements CloudPlatformEventHandler<Downscal
     private PollTaskFactory statusCheckFactory;
 
     @Inject
-    private CloudPlatformConnectors cloudPlatformConnectors;
+    private ResourcePersistenceNotifier resourcePersistenceNotifier;
 
     @Override
-    public Class<DownscaleStackRequest> type() {
-        return DownscaleStackRequest.class;
+    public Class<UpdateStackRequest> type() {
+        return UpdateStackRequest.class;
     }
 
     @Override
-    public void accept(Event<DownscaleStackRequest> downscaleStackRequestEvent) {
-        LOGGER.info("Received event: {}", downscaleStackRequestEvent);
-        DownscaleStackRequest request = downscaleStackRequestEvent.getData();
+    public void accept(Event<UpdateStackRequest> updateRequestEvent) {
+        LOGGER.info("Received event: {}", updateRequestEvent);
+        UpdateStackRequest request = updateRequestEvent.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
-            String platform = cloudContext.getPlatform();
-            CloudConnector connector = cloudPlatformConnectors.get(platform);
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatform());
             AuthenticatedContext ac = connector.authenticate(cloudContext, request.getCloudCredential());
-
-            List<CloudResourceStatus> resourceStatus = connector.resources()
-                    .downscale(ac, request.getCloudStack(), request.getCloudResources(), request.getInstanceTemplates());
+            List<CloudResourceStatus> resourceStatus = connector.resources().update(ac, request.getCloudStack(), request.getResourceList());
 
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
 
@@ -64,10 +65,11 @@ public class DownscaleStackHandler implements CloudPlatformEventHandler<Downscal
             if (!task.completed(statePollerResult)) {
                 statePollerResult = syncPollingScheduler.schedule(task);
             }
-            request.getResult().onNext(ResourcesStatePollerResults.transformToUpscaleStackResult(statePollerResult));
-            LOGGER.info("Downscale successfully finished for {}", cloudContext);
+            request.getResult().onNext(ResourcesStatePollerResults.transformToUpdateStackResult(statePollerResult));
+            LOGGER.info("Update successfully finished for {}", cloudContext);
         } catch (Exception e) {
-            request.getResult().onNext(new LaunchStackResult(cloudContext, ResourceStatus.FAILED, e.getMessage(), null));
+            request.getResult().onNext(new UpdateStackResult(cloudContext, e));
         }
     }
+
 }

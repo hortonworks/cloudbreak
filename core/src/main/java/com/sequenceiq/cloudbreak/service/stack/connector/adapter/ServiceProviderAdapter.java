@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack.connector.adapter;
 
 import static com.sequenceiq.cloudbreak.service.stack.flow.ReflectionUtils.getDeclaredFields;
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,10 +32,14 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackResult;
+import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateRequest;
+import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
+import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateStackRequest;
+import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PreProvisionCheckRequest;
@@ -295,11 +300,7 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
         CloudCredential cloudCredential = buildCloudCredential(stack);
         //TODO which resources?
-        Set<Resource> jpaResult = stack.getResources();
-        List<CloudResource> resources = new ArrayList<>();
-        for (Resource resource : jpaResult) {
-            resources.add(new CloudResource(resource.getResourceType(), stack.getName(), resource.getResourceName()));
-        }
+        List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         TerminateStackRequest<TerminateStackResult> terminateRequest = new TerminateStackRequest<>(cloudContext, cloudCredential, resources);
         LOGGER.info("Triggering terminate stack event: {}", terminateRequest);
         eventBus.notify(terminateRequest.selector(), Event.wrap(terminateRequest));
@@ -326,7 +327,27 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
 
     @Override
     public void updateAllowedSubnets(Stack stack, String gateWayUserData, String coreUserData) {
-        //TODO
+        LOGGER.debug("Assembling update subnet event for: {}", stack);
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
+        CloudCredential cloudCredential = buildCloudCredential(stack);
+        CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
+        //TODO which resources?
+        List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
+        UpdateStackRequest<UpdateStackResult> updateRequest = new UpdateStackRequest<>(cloudContext, cloudCredential, cloudStack, resources);
+        eventBus.notify(updateRequest.selector(), Event.wrap(updateRequest));
+        try {
+            UpdateStackResult res = updateRequest.await();
+            LOGGER.info("Update stack result: {}", res);
+            if (res.isFailed()) {
+                if (res.getException() != null) {
+                    throw new OperationException("Failed to update the stack", cloudContext, res.getException());
+                }
+                throw new OperationException(format("Failed to update the stack: %s due to: %s", cloudContext, res.getStatusReason()));
+            }
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while updating the stack: " + cloudContext, e);
+            throw new OperationException("Unexpected exception occurred during the stack updates", cloudContext, e);
+        }
     }
 
     @Override
@@ -393,13 +414,35 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
 
     @Override
     public InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId) {
-        //TODO
-        return null;
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
+        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        InstanceGroup ig = stack.getInstanceGroupByInstanceGroupName(instanceGroup.getGroupName());
+        CloudInstance instance = null;
+        for (InstanceMetaData metaData : ig.getInstanceMetaData()) {
+            if (instanceId.equalsIgnoreCase(metaData.getInstanceId())) {
+                instance = metadataConverter.convert(metaData);
+                break;
+            }
+        }
+        GetInstancesStateRequest<GetInstancesStateResult> stateRequest =
+                new GetInstancesStateRequest<>(cloudContext, cloudCredential, asList(instance));
+        LOGGER.info("Triggering event: {}", stateRequest);
+        eventBus.notify(stateRequest.selector(), Event.wrap(stateRequest));
+        try {
+            GetInstancesStateResult res = stateRequest.await();
+            LOGGER.info("Result: {}", res);
+            if (res.isFailed()) {
+                throw new OperationException("Failed to retrieve instance state", cloudContext, res.getException());
+            }
+            return transform(res.getStatuses().get(0).getStatus());
+        } catch (InterruptedException e) {
+            LOGGER.error(format("Error while retrieving instance state of: %s", cloudContext), e);
+            throw new OperationException("Unexpected exception occurred during instance state retrieval", cloudContext, e);
+        }
     }
 
     @Override
     public ResourceType getInstanceResourceType() {
-        //TODO
         return null;
     }
 
@@ -407,7 +450,6 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.ADAPTER;
     }
-
 
     @Override
     public Set<String> getSSHFingerprints(Stack stack, String gateway) {
@@ -463,6 +505,25 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
             }
         }
         return instanceTemplates;
+    }
+
+    private InstanceSyncState transform(InstanceStatus instanceStatus) {
+        switch (instanceStatus) {
+            case IN_PROGRESS:
+                return InstanceSyncState.IN_PROGRESS;
+            case STARTED:
+                return InstanceSyncState.RUNNING;
+            case STOPPED:
+                return InstanceSyncState.STOPPED;
+            case CREATED:
+                return InstanceSyncState.RUNNING;
+            case FAILED:
+                return InstanceSyncState.DELETED;
+            case TERMINATED:
+                return InstanceSyncState.DELETED;
+            default:
+                return InstanceSyncState.UNKNOWN;
+        }
     }
 
 }

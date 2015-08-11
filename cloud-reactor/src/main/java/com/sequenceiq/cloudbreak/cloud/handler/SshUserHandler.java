@@ -36,6 +36,5 @@ public class SshUserHandler implements CloudPlatformEventHandler<SshUserRequest>
         CloudConnector connector = cloudPlatformConnectors.get(platform);
         SshUserResponse result = new SshUserResponse(cloudContext, connector.sshUser());
         request.getResult().onNext(result);
-        LOGGER.info("PreProvisionCheckHandler finished");
     }
 }

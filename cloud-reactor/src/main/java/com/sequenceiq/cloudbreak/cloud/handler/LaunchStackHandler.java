@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
-
 import java.util.List;
 
 import javax.inject.Inject;
@@ -31,9 +30,6 @@ import reactor.bus.Event;
 public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStackRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LaunchStackHandler.class);
-
-    private static final int INTERVAL = 5;
-    private static final int MAX_ATTEMPT = 100;
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -67,7 +63,7 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
             PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources);
             ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatus);
             if (!task.completed(statePollerResult)) {
-                statePollerResult = syncPollingScheduler.schedule(task, INTERVAL, MAX_ATTEMPT);
+                statePollerResult = syncPollingScheduler.schedule(task);
             }
             launchStackRequest.getResult().onNext(ResourcesStatePollerResults.transformToLaunchStackResult(statePollerResult));
             LOGGER.info("Launching the stack successfully finished for {}", cloudContext);
@@ -75,6 +71,5 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
             launchStackRequest.getResult().onNext(new LaunchStackResult(cloudContext, e));
         }
     }
-
 
 }

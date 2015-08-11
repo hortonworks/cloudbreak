@@ -6,11 +6,8 @@ import java.util.List;
 public class InstanceTemplate {
 
     private String flavor;
-
     private String groupName;
-
     private long privateId;
-
     private List<Volume> volumes;
 
     public InstanceTemplate(String flavor, String groupName, long privateId) {
@@ -40,16 +37,14 @@ public class InstanceTemplate {
         volumes.add(volume);
     }
 
-    //BEGIN GENERATED CODE
     @Override
     public String toString() {
-        return "InstanceTemplate{" +
-                "flavor='" + flavor + '\'' +
-                ", groupName='" + groupName + '\'' +
-                ", privateId=" + privateId +
-                ", volumes=" + volumes +
-                '}';
+        final StringBuilder sb = new StringBuilder("InstanceTemplate{");
+        sb.append("flavor='").append(flavor).append('\'');
+        sb.append(", groupName='").append(groupName).append('\'');
+        sb.append(", privateId=").append(privateId);
+        sb.append(", volumes=").append(volumes);
+        sb.append('}');
+        return sb.toString();
     }
-
-    //END GENERATED CODE
 }

@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 @Component
 public class OpenStackClient {
 
-    @Value("${cb.openstack.api.debug:true}")
+    @Value("${cb.openstack.api.debug:false}")
     private boolean debug;
 
     @PostConstruct

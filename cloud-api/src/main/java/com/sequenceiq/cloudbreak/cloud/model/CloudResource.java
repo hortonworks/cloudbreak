@@ -5,11 +5,8 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 public class CloudResource {
 
     private ResourceType type;
-
     private String name;
-
     private String reference;
-
 
     public CloudResource(ResourceType type, String name, String reference) {
         this.type = type;
@@ -29,14 +26,13 @@ public class CloudResource {
         return reference;
     }
 
-    //BEGIN GENERATED CODE
     @Override
     public String toString() {
-        return "CloudResource{" +
-                "type=" + type +
-                ", name='" + name + '\'' +
-                ", reference='" + reference + '\'' +
-                '}';
+        final StringBuilder sb = new StringBuilder("CloudResource{");
+        sb.append("type=").append(type);
+        sb.append(", name='").append(name).append('\'');
+        sb.append(", reference='").append(reference).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
-    //END GENERATED CODE
 }

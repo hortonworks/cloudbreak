@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
-
 import java.util.List;
 
 import javax.inject.Inject;
@@ -13,11 +12,8 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
-import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
-import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 
 import reactor.bus.Event;
 
@@ -28,12 +24,6 @@ public class CollectMetadataHandler implements CloudPlatformEventHandler<Collect
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
-
-    @Inject
-    private SyncPollingScheduler<LaunchStackResult> syncPollingScheduler;
-
-    @Inject
-    private PollTaskFactory statusCheckFactory;
 
     @Override
     public Class<CollectMetadataRequest> type() {

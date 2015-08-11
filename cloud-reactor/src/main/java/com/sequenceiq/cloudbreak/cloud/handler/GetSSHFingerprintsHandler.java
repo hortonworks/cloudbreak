@@ -28,8 +28,6 @@ import reactor.bus.Event;
 @Component
 public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetSSHFingerprintsRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GetSSHFingerprintsHandler.class);
-    private static final int INTERVAL = 5;
-    private static final int MAX_ATTEMPT = 100;
 
     @Inject
     private PollTaskFactory statusCheckFactory;
@@ -59,7 +57,7 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
             InstanceConsoleOutputResult consoleOutputResult = new InstanceConsoleOutputResult(cloudContext, cloudInstance, initialConsoleOutput);
             PollTask<InstanceConsoleOutputResult> outputPollerTask = statusCheckFactory.newPollInstanceConsoleOutputTask(ac, cloudInstance);
             if (!outputPollerTask.completed(consoleOutputResult)) {
-                consoleOutputResult = syncPollingScheduler.schedule(outputPollerTask, INTERVAL, MAX_ATTEMPT);
+                consoleOutputResult = syncPollingScheduler.schedule(outputPollerTask);
             }
             Set<String> sshFingerprints = FingerprintParserUtil.parseFingerprints(consoleOutputResult.getConsoleOutput());
             GetSSHFingerprintsResult fingerprintsResult;
@@ -69,11 +67,10 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
                 fingerprintsResult = new GetSSHFingerprintsResult(fingerprintsRequest, sshFingerprints);
             }
             fingerprintsRequest.getResult().onNext(fingerprintsResult);
+            LOGGER.info("GetSSHFingerprintsHandler finished");
         } catch (Exception e) {
-            LOGGER.error("Failed to handle GetSSHFingerprintsRequest: {}", e);
             fingerprintsRequest.getResult().onNext(new GetSSHFingerprintsResult("Failed to get ssh fingerprints!", e, fingerprintsRequest));
         }
-        LOGGER.info("GetSSHFingerprintsHandler finished");
     }
 
     private static class FingerprintParserUtil {

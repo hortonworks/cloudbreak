@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
-
 import java.util.List;
 
 import javax.inject.Inject;
@@ -31,9 +30,6 @@ import reactor.bus.Event;
 public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleStackRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpscaleStackHandler.class);
-
-    private static final int INTERVAL = 5;
-    private static final int MAX_ATTEMPT = 100;
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -70,7 +66,7 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
             PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources);
             ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatus);
             if (!task.completed(statePollerResult)) {
-                statePollerResult = syncPollingScheduler.schedule(task, INTERVAL, MAX_ATTEMPT);
+                statePollerResult = syncPollingScheduler.schedule(task);
             }
             request.getResult().onNext(ResourcesStatePollerResults.transformToUpscaleStackResult(statePollerResult));
             LOGGER.info("Upscale successfully finished for {}", cloudContext);
@@ -78,6 +74,5 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
             request.getResult().onNext(new UpscaleStackResult(cloudContext, e));
         }
     }
-
 
 }

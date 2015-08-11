@@ -6,8 +6,6 @@ import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.util.concurrent.ListenableScheduledFuture;
@@ -18,11 +16,15 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 @Component
 public class SyncPollingScheduler<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SyncPollingScheduler.class);
+    private static final int POLLING_INTERVAL = 5;
+    private static final int MAX_POLLING_ATTEMPT = 600;
 
     @Inject
     private ListeningScheduledExecutorService scheduler;
 
+    public T schedule(PollTask<T> task) throws ExecutionException, InterruptedException, TimeoutException {
+        return schedule(task, POLLING_INTERVAL, MAX_POLLING_ATTEMPT);
+    }
 
     public T schedule(PollTask<T> task, int interval, int maxAttempt) throws ExecutionException, InterruptedException, TimeoutException {
         T result;

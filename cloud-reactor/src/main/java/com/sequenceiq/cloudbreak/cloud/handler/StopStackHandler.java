@@ -27,8 +27,6 @@ import reactor.bus.Event;
 public class StopStackHandler implements CloudPlatformEventHandler<StopInstancesRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StopStackHandler.class);
-    private static final int INTERVAL = 5;
-    private static final int MAX_ATTEMPT = 100;
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -59,13 +57,12 @@ public class StopStackHandler implements CloudPlatformEventHandler<StopInstances
             PollTask<InstancesStatusResult> task = statusCheckFactory.newPollInstanceStateTask(authenticatedContext, instances);
             InstancesStatusResult statusResult = new InstancesStatusResult(cloudContext, cloudVmInstanceStatuses);
             if (!task.completed(statusResult)) {
-                statusResult = syncPollingScheduler.schedule(task, INTERVAL, MAX_ATTEMPT);
+                statusResult = syncPollingScheduler.schedule(task);
             }
             request.getResult().onNext(new StopInstancesResult(cloudContext, statusResult));
         } catch (Exception e) {
             request.getResult().onNext(new StopInstancesResult(cloudContext, e));
         }
     }
-
 
 }

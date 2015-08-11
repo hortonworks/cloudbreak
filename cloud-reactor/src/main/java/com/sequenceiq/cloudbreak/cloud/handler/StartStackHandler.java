@@ -27,8 +27,6 @@ import reactor.bus.Event;
 public class StartStackHandler implements CloudPlatformEventHandler<StartInstancesRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StartStackHandler.class);
-    private static final int INTERVAL = 5;
-    private static final int MAX_ATTEMPT = 100;
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -59,13 +57,12 @@ public class StartStackHandler implements CloudPlatformEventHandler<StartInstanc
             PollTask<InstancesStatusResult> task = statusCheckFactory.newPollInstanceStateTask(authenticatedContext, instances);
             InstancesStatusResult statusResult = new InstancesStatusResult(cloudContext, instanceStatuses);
             if (!task.completed(statusResult)) {
-                statusResult = syncPollingScheduler.schedule(task, INTERVAL, MAX_ATTEMPT);
+                statusResult = syncPollingScheduler.schedule(task);
             }
             request.getResult().onNext(new StartInstancesResult(cloudContext, statusResult));
         } catch (Exception e) {
             request.getResult().onNext(new StartInstancesResult(cloudContext, e));
         }
     }
-
 
 }
