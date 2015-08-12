@@ -51,4 +51,12 @@ public class RegistratorBootstrap implements ContainerBootstrap {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "RegistratorBootstrap{"
+                + "imageName='" + imageName + '\''
+                + ", nodeName='" + nodeName + '\''
+                + '}';
+    }
+
 }

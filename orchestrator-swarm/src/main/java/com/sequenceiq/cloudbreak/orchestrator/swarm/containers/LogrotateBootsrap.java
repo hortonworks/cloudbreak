@@ -49,4 +49,12 @@ public class LogrotateBootsrap implements ContainerBootstrap {
 
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "LogrotateBootsrap{"
+                + "imageName='" + imageName + '\''
+                + ", nodeName='" + nodeName + '\''
+                + '}';
+    }
 }
