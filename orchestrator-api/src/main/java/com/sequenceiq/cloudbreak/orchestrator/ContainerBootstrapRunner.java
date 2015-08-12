@@ -15,8 +15,8 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 public class ContainerBootstrapRunner implements Callable<Boolean> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ContainerBootstrapRunner.class);
-    private static final int MAX_RETRY_COUNT = 15;
-    private static final int SLEEP_TIME = 10000;
+    private static final int MAX_RETRY_COUNT = 30;
+    private static final int SLEEP_TIME = 5000;
 
     private final ContainerBootstrap containerBootstrap;
     private final Map<String, String> mdcMap;
@@ -43,17 +43,20 @@ public class ContainerBootstrapRunner implements Callable<Boolean> {
                 LOGGER.error(exitCriteria.exitMessage());
                 throw new CloudbreakOrchestratorCancelledException(exitCriteria.exitMessage());
             }
+            long startTime = System.currentTimeMillis();
             try {
-                LOGGER.info("Calling container bootstrap: {}", containerBootstrap.getClass().getSimpleName());
+                LOGGER.info("Calling container bootstrap: {}, additional info: {}", type, containerBootstrap);
                 containerBootstrap.call();
+                long elapsedTime = System.currentTimeMillis() - startTime;
                 success = true;
-                LOGGER.info("Container {} successfully!", type);
+                LOGGER.info("Container {} successfully! Elapsed time: {} ms, additional info: {}", type, elapsedTime, containerBootstrap);
             } catch (Exception ex) {
+                long elapsedTime = System.currentTimeMillis() - startTime;
                 // Swarm is not extremely stable so we retry aggressively in every case
                 actualException = ex;
                 retryCount++;
-                LOGGER.error("Container {} failed to start, retrying [{}/{}]: {}", type,
-                        MAX_RETRY_COUNT, retryCount, ex.getMessage());
+                LOGGER.error("Container {} failed to start, retrying [{}/{}] Elapsed time: {} ms; Reason: {}, additional info: {}", type,
+                        MAX_RETRY_COUNT, retryCount, elapsedTime, ex.getMessage(), containerBootstrap);
                 Thread.sleep(SLEEP_TIME);
             }
         }

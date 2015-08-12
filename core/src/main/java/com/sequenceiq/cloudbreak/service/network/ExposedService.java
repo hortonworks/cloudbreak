@@ -19,7 +19,8 @@ public enum ExposedService {
     ZEPPELIN_WEB_SOCKET("Zeppelin web socket"),
     ZEPPELIN_UI("Zeppelin ui", "ZEPPELIN_MASTER"),
     KIBANA("Kibana", "KIBANA"),
-    ELASTIC_SEARCH("Elastic Search", "ELASTIC_SEARCH");
+    ELASTIC_SEARCH("Elastic Search", "ELASTIC_SEARCH"),
+    SWARM("Swarm", "SWARM");
 
     private String serviceName;
     private String portName;

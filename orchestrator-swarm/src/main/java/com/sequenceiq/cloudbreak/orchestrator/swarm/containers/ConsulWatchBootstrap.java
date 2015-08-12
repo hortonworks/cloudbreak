@@ -57,4 +57,13 @@ public class ConsulWatchBootstrap implements ContainerBootstrap {
 
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "ConsulWatchBootstrap{"
+                + "imageName='" + imageName + '\''
+                + ", nodeName='" + node.getHostname() + '\''
+                + '}';
+    }
+
 }

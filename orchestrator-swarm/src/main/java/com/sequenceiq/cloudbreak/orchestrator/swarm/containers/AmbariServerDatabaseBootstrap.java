@@ -60,4 +60,12 @@ public class AmbariServerDatabaseBootstrap implements ContainerBootstrap {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "AmbariServerDatabaseBootstrap{"
+                + "imageName='" + imageName + '\''
+                + ", nodeName='" + nodeName + '\''
+                + '}';
+    }
+
 }

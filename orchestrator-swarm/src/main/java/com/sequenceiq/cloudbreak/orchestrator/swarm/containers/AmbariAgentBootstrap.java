@@ -66,4 +66,12 @@ public class AmbariAgentBootstrap implements ContainerBootstrap {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "AmbariAgentBootstrap{"
+                + "imageName='" + imageName + '\''
+                + ", nodeName='" + nodeName + '\''
+                + '}';
+    }
+
 }
