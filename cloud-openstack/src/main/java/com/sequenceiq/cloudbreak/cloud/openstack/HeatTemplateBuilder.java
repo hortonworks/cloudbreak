@@ -28,12 +28,12 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 
-@Service("HeatTemplateBuilderV2")
+@Service
 public class HeatTemplateBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HeatTemplateBuilder.class);
 
-    @Value("${cb.openstack.heat.template.path:templates/openstack-heat-v2.ftl}")
+    @Value("${cb.openstack.heat.template.path:templates/openstack-heat.ftl}")
     private String openStackHeatTemplatePath;
 
     @Inject

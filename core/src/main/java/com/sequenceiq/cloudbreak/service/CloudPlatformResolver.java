@@ -7,6 +7,8 @@ import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
@@ -14,14 +16,17 @@ import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 @Service
 public class CloudPlatformResolver {
 
-    @javax.annotation.Resource
+    @Resource
     private Map<CloudPlatform, MetadataSetup> metadataSetups;
 
     @Resource
     private Map<CloudPlatform, ProvisionSetup> provisionSetups;
 
-    @javax.annotation.Resource
-    private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
+    @Resource
+    private Map<CloudPlatform, CloudPlatformConnector> platformConnectors;
+
+    @Resource
+    private Map<CloudPlatform, CredentialHandler<Credential>> credentialHandlers;
 
     public MetadataSetup metadata(CloudPlatform platform) {
         MetadataSetup metadataSetup = metadataSetups.get(platform);
@@ -29,12 +34,17 @@ public class CloudPlatformResolver {
     }
 
     public CloudPlatformConnector connector(CloudPlatform platform) {
-        CloudPlatformConnector platformConnector = cloudPlatformConnectors.get(platform);
-        return platformConnector == null ? cloudPlatformConnectors.get(CloudPlatform.ADAPTER) : platformConnector;
+        CloudPlatformConnector platformConnector = platformConnectors.get(platform);
+        return platformConnector == null ? platformConnectors.get(CloudPlatform.ADAPTER) : platformConnector;
     }
 
-    public ProvisionSetup provisioning(CloudPlatform cloudPlatform) {
-        ProvisionSetup provisionSetup = provisionSetups.get(cloudPlatform);
+    public ProvisionSetup provisioning(CloudPlatform platform) {
+        ProvisionSetup provisionSetup = provisionSetups.get(platform);
         return provisionSetup == null ? provisionSetups.get(CloudPlatform.ADAPTER) : provisionSetup;
+    }
+
+    public CredentialHandler<Credential> credential(CloudPlatform platform) {
+        CredentialHandler<Credential> handler = credentialHandlers.get(platform);
+        return handler == null ? credentialHandlers.get(CloudPlatform.ADAPTER) : handler;
     }
 }

@@ -133,7 +133,7 @@ ${core_user_data}
         protocol: udp,
         port_range_min: 1,
         port_range_max: 65535},
-        {remote_ip_prefix: { get_param: app_net_cidr },
+        {remote_ip_prefix: 0.0.0.0/0,
         protocol: icmp}]
 
         

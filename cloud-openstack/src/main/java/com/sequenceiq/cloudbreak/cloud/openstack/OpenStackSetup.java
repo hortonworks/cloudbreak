@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 
-@Component("OpenStackProvisionSetupV2")
+@Component
 public class OpenStackSetup implements Setup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackSetup.class);

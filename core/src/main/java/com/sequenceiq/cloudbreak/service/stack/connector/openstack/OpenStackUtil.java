@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.service.stack.connector.openstack;
 
 import static org.apache.commons.lang3.StringUtils.deleteWhitespace;
 
-import java.util.Map;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -16,7 +14,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
-import com.sequenceiq.cloudbreak.domain.Stack;
 
 @Component
 @Lazy
@@ -35,10 +32,6 @@ public class OpenStackUtil {
         System.getProperties().setProperty(HttpLoggingFilter.class.getName(), Boolean.toString(debug));
     }
 
-    public OSClient createOSClient(Stack stack) {
-        return createOSClient((OpenStackCredential) stack.getCredential());
-    }
-
     public OSClient createOSClient(OpenStackCredential credential) {
         return OSFactory.builder().endpoint(credential.getEndpoint())
                 .credentials(encryptor.decrypt(credential.getUserName()), encryptor.decrypt(credential.getPassword()))
@@ -48,15 +41,6 @@ public class OpenStackUtil {
 
     public String getKeyPairName(OpenStackCredential credential) {
         return CB_KEYPAIR_NAME + deleteWhitespace(credential.getName().toLowerCase());
-    }
-
-    public String getInstanceId(String uuid, Map<String, String> metadata) {
-        return uuid + "_" + getNormalizedGroupName(metadata.get(HeatTemplateBuilder.CB_INSTANCE_GROUP_NAME)) + "_"
-                + metadata.get(HeatTemplateBuilder.CB_INSTANCE_PRIVATE_ID);
-    }
-
-    public String getNormalizedGroupName(String groupName) {
-        return groupName.replaceAll("_", "");
     }
 
 }

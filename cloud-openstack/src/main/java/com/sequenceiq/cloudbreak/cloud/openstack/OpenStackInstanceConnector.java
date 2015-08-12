@@ -61,7 +61,11 @@ public class OpenStackInstanceConnector implements InstanceConnector {
         OSClient osClient = openStackClient.createOSClient(ac);
         for (CloudInstance vm : vms) {
             Server server = osClient.compute().servers().get(vm.getInstanceId());
-            statuses.add(new CloudVmInstanceStatus(vm, NovaInstanceStatus.get(server)));
+            if (server == null) {
+                statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.TERMINATED));
+            } else {
+                statuses.add(new CloudVmInstanceStatus(vm, NovaInstanceStatus.get(server)));
+            }
         }
         return statuses;
     }

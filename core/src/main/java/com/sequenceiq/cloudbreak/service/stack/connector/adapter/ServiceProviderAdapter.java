@@ -333,7 +333,8 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
 
     @Override
     public void rollback(Stack stack, Set<Resource> resourceSet) {
-        //TODO
+        LOGGER.info("Rollback the whole stack for {}", stack.getId());
+        deleteStack(stack, stack.getCredential());
     }
 
     @Override

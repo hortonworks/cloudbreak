@@ -137,7 +137,7 @@ public class AppConfig {
     }
 
     @Bean
-    public Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors() {
+    public Map<CloudPlatform, CloudPlatformConnector> platformConnectors() {
         Map<CloudPlatform, CloudPlatformConnector> map = new HashMap<>();
         for (CloudPlatformConnector provisionService : cloudPlatformConnectorList) {
             map.put(provisionService.getCloudPlatform(), provisionService);

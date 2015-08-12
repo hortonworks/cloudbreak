@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 
-@Component("CloudPlatformConnectorsV2")
+@Component
 public class CloudPlatformConnectors {
 
     @Inject
