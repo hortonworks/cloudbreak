@@ -17,6 +17,7 @@ import static com.sequenceiq.cloudbreak.service.network.ExposedService.RESOURCEM
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.SPARK_HISTORY_SERVER;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.SSH;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.STORM;
+import static com.sequenceiq.cloudbreak.service.network.ExposedService.SWARM;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.ZEPPELIN_UI;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.ZEPPELIN_WEB_SOCKET;
 
@@ -52,6 +53,7 @@ public final class NetworkUtils {
         ports.add(new Port(ZEPPELIN_UI, "9995", "tcp"));
         ports.add(new Port(KIBANA, "3080", "tcp"));
         ports.add(new Port(ELASTIC_SEARCH, "9200", "tcp"));
+        ports.add(new Port(SWARM, "3376", "tcp"));
     }
 
     private NetworkUtils() {

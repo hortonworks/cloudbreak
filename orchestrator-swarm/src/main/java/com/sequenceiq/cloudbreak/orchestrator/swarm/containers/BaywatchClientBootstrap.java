@@ -75,4 +75,12 @@ public class BaywatchClientBootstrap implements ContainerBootstrap {
         return true;
 
     }
+
+    @Override
+    public String toString() {
+        return "BaywatchClientBootstrap{"
+                + "imageName='" + imageName + '\''
+                + ", nodeName='" + node.getHostname() + '\''
+                + '}';
+    }
 }
