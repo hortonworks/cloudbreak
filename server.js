@@ -428,7 +428,9 @@ function retryingResolve(protocol, serviceIdKey, serverUrlKey, configKey, resolv
   if (typeof(attemptNum)==='undefined') attemptNum = 0;
   resolve(protocol, serviceIdKey, serverUrlKey, configKey, resolveFn, function(err) {
     if (attemptNum < maxRetry) {
-      setTimeout(retryingResolve(protocol, serviceIdKey, serverUrlKey, configKey, resolveFn, errFn, attemptNum+1), 2000);
+      setTimeout(function() {
+        retryingResolve(protocol, serviceIdKey, serverUrlKey, configKey, resolveFn, errFn, attemptNum+1)
+      }, 2000);
     } else {
       errFn(err);
     }
