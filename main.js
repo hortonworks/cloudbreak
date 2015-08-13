@@ -20,8 +20,13 @@ var validator = require('./validator');
 var config = {
   environmentSet: true,
   clientId: process.env.SL_CLIENT_ID,
-  clientSecret: process.env.SL_CLIENT_SECRET,  
+  clientSecret: process.env.SL_CLIENT_SECRET,
+  addressResolvingRetryCount: process.env.SL_ADDRESS_RESOLVING_TIMEOUT ? process.env.SL_ADDRESS_RESOLVING_TIMEOUT / 2000 : 30,
   uaaAddress: null
+}
+
+if (config.addressResolvingRetryCount <= 0) {
+  config.addressResolvingRetryCount = 1;
 }
 
 function setResolvedAddress(configKey, resolvedAddress) {
@@ -1141,7 +1146,7 @@ function continueInit() {
 // resolve
 
 function retryingResolve(protocol, serviceIdKey, serverUrlKey, configKey, resolveFn, errFn, attemptNum) {
-  var maxRetry = 10;
+  var maxRetry = config.addressResolvingRetryCount;
   if (typeof(attemptNum)==='undefined') attemptNum = 0;
   resolve(protocol, serviceIdKey, serverUrlKey, configKey, resolveFn, function(err) {
     if (attemptNum < maxRetry) {
