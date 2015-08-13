@@ -269,18 +269,14 @@ cloudbreak:
         - ENDPOINTS_MAPPINGS_ENABLED=false
         - ENDPOINTS_BEANS_ENABLED=false
         - ENDPOINTS_ENV_ENABLED=false
-        - CB_IDENTITY_SERVER_URL=http://backend:8089
-        - CB_DB_PORT_5432_TCP_ADDR=backend
-        - CB_DB_PORT_5432_TCP_PORT=5432
-        - BACKEND_5432=cbdb.service.consul
-        - BACKEND_8089=identity.service.consul
+        - CB_IDENTITY_SERVICEID=identity.service.consul
+        - CB_DB_SERVICEID=cbdb.service.consul
         - SECURE_RANDOM=$SECURE_RANDOM
-    links:
-        - ambassador:backend
     ports:
         - 8080:8080
     volumes:
         - "$CBD_CERT_ROOT_PATH:/certs"
+    dns: $PRIVATE_IP
     image: sequenceiq/cloudbreak:$DOCKER_TAG_CLOUDBREAK
     command: bash
 
@@ -298,12 +294,10 @@ sultans:
         - SL_SMTP_SENDER_FROM=$CLOUDBREAK_SMTP_SENDER_FROM
         - SL_CB_ADDRESS=$ULU_HOST_ADDRESS
         - SL_ADDRESS=$ULU_SULTANS_ADDRESS
-        - SL_UAA_ADDRESS=http://backend:8089
-        - BACKEND_8089=identity.service.consul
-    links:
-        - ambassador:backend
+        - SL_UAA_SERVICEID=identity.service.consul
     ports:
         - 3001:3000
+    dns: $PRIVATE_IP
     image: sequenceiq/sultans-bin:$DOCKER_TAG_SULTANS
 
 uluwatu:
@@ -317,16 +311,12 @@ uluwatu:
         - ULU_HOST_ADDRESS=$ULU_HOST_ADDRESS
         - NODE_TLS_REJECT_UNAUTHORIZED=0
 
-        - ULU_IDENTITY_ADDRESS=http://backend:8089/
-        - ULU_CLOUDBREAK_ADDRESS=http://backend:8080
-        - ULU_PERISCOPE_ADDRESS=http://backend:8085/
-        - BACKEND_8089=identity.service.consul
-        - BACKEND_8080=cloudbreak.service.consul
-        - BACKEND_8085=periscope.service.consul
-    links:
-        - ambassador:backend
+        - ULU_IDENTITY_SERVICEID=identity.service.consul
+        - ULU_CLOUDBREAK_SERVICEID=cloudbreak.service.consul
+        - ULU_PERISCOPE_SERVICEID=periscope.service.consul
     ports:
         - 3000:3000
+    dns: $PRIVATE_IP
     image: sequenceiq/uluwatu-bin:$DOCKER_TAG_ULUWATU
 
 pcdb:
@@ -360,18 +350,13 @@ periscope:
         - ENDPOINTS_MAPPINGS_ENABLED=false
         - ENDPOINTS_BEANS_ENABLED=false
         - ENDPOINTS_ENV_ENABLED=false
-        - PERISCOPE_DB_TCP_ADDR=backend
-        - PERISCOPE_DB_TCP_PORT=5433
-        - PERISCOPE_CLOUDBREAK_URL=http://backend:8080
-        - PERISCOPE_IDENTITY_SERVER_URL=http://backend:8089/
-        - BACKEND_8080=cloudbreak.service.consul
-        - BACKEND_5433=pcdb.service.consul
-        - BACKEND_8089=identity.service.consul
+        - PERISCOPE_DB_SERVICEID=pcdb.service.consul
+        - PERISCOPE_CLOUDBREAK_SERVICEID=cloudbreak.service.consul
+        - PERISCOPE_IDENTITY_SERVICEID=identity.service.consul
         - SECURE_RANDOM=$SECURE_RANDOM
-    links:
-        - ambassador:backend
     ports:
         - 8085:8080
+    dns: $PRIVATE_IP
     volumes:
         - "$CBD_CERT_ROOT_PATH:/certs"
     image: sequenceiq/periscope:$DOCKER_TAG_PERISCOPE
