@@ -430,26 +430,30 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         InstanceGroup ig = stack.getInstanceGroupByInstanceGroupName(instanceGroup.getGroupName());
         CloudInstance instance = null;
-        for (InstanceMetaData metaData : ig.getInstanceMetaData()) {
+        for (InstanceMetaData metaData : ig.getAllInstanceMetaData()) {
             if (instanceId.equalsIgnoreCase(metaData.getInstanceId())) {
                 instance = metadataConverter.convert(metaData);
                 break;
             }
         }
-        GetInstancesStateRequest<GetInstancesStateResult> stateRequest =
-                new GetInstancesStateRequest<>(cloudContext, cloudCredential, asList(instance));
-        LOGGER.info("Triggering event: {}", stateRequest);
-        eventBus.notify(stateRequest.selector(), Event.wrap(stateRequest));
-        try {
-            GetInstancesStateResult res = stateRequest.await();
-            LOGGER.info("Result: {}", res);
-            if (res.isFailed()) {
-                throw new OperationException("Failed to retrieve instance state", cloudContext, res.getException());
+        if (instance != null) {
+            GetInstancesStateRequest<GetInstancesStateResult> stateRequest =
+                    new GetInstancesStateRequest<>(cloudContext, cloudCredential, asList(instance));
+            LOGGER.info("Triggering event: {}", stateRequest);
+            eventBus.notify(stateRequest.selector(), Event.wrap(stateRequest));
+            try {
+                GetInstancesStateResult res = stateRequest.await();
+                LOGGER.info("Result: {}", res);
+                if (res.isFailed()) {
+                    throw new OperationException("Failed to retrieve instance state", cloudContext, res.getException());
+                }
+                return transform(res.getStatuses().get(0).getStatus());
+            } catch (InterruptedException e) {
+                LOGGER.error(format("Error while retrieving instance state of: %s", cloudContext), e);
+                throw new OperationException("Unexpected exception occurred during instance state retrieval", cloudContext, e);
             }
-            return transform(res.getStatuses().get(0).getStatus());
-        } catch (InterruptedException e) {
-            LOGGER.error(format("Error while retrieving instance state of: %s", cloudContext), e);
-            throw new OperationException("Unexpected exception occurred during instance state retrieval", cloudContext, e);
+        } else {
+            return InstanceSyncState.DELETED;
         }
     }
 
