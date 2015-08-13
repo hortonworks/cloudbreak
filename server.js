@@ -55,11 +55,16 @@ var config = {
     '+periscope.cluster' +
     '+cloudbreak.events+cloudbreak.usages.account+cloudbreak.usages.user',
   hostAddress: process.env.ULU_HOST_ADDRESS,
+  addressResolvingRetryCount: process.env.ULU_ADDRESS_RESOLVING_TIMEOUT ? process.env.ULU_ADDRESS_RESOLVING_TIMEOUT / 2000 : 30,
   subscriptionAddress: null,
   identityServerAddress: null,
   sultansAddress: null,
   cloudbreakAddress: null,
   periscopeAddress: null,
+}
+
+if (config.addressResolvingRetryCount <= 0) {
+  config.addressResolvingRetryCount = 1;
 }
 
 function setResolvedAddress(configKey, resolvedAddress) {
@@ -424,7 +429,7 @@ function continueInit() {
 }
 
 function retryingResolve(protocol, serviceIdKey, serverUrlKey, configKey, resolveFn, errFn, attemptNum) {
-  var maxRetry = 10;
+  var maxRetry = config.addressResolvingRetryCount;
   if (typeof(attemptNum)==='undefined') attemptNum = 0;
   resolve(protocol, serviceIdKey, serverUrlKey, configKey, resolveFn, function(err) {
     if (attemptNum < maxRetry) {
