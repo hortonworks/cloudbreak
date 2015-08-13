@@ -26,8 +26,8 @@ import javax.persistence.UniqueConstraint;
         @NamedQuery(
                 name = "Blueprint.findPublicInAccountForUser",
                 query = "SELECT b FROM Blueprint b "
-                        + "WHERE (b.account= :account AND b.publicInAccount= true) "
-                        + "OR b.owner= :user "
+                        + "WHERE ((b.account= :account AND b.publicInAccount= true) "
+                        + "OR b.owner= :user) "
                         + "AND b.status <> 'DEFAULT_DELETED' "),
         @NamedQuery(
                 name = "Blueprint.findAllInAccount",
