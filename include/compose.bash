@@ -161,7 +161,7 @@ consul:
         - "8500:8500"
     hostname: node1
     image: sequenceiq/consul:$DOCKER_TAG_CONSUL
-    command: --server --bootstrap --advertise $PRIVATE_IP
+    command: --server --bootstrap --advertise $PRIVATE_IP $DOCKER_CONSUL_OPTIONS
 
 registrator:
     privileged: true

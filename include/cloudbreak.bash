@@ -12,6 +12,7 @@ cloudbreak-config() {
   cloudbreak-conf-ui
   cloudbreak-conf-java
   cloudbreak-conf-baywatch
+  cloudbreak-conf-consul
 }
 
 cloudbreak-conf-tags() {
@@ -34,6 +35,24 @@ cloudbreak-conf-tags() {
 
     env-import CB_DOCKER_CONTAINER_AMBARI ""
     env-import CB_DOCKER_CONTAINER_AMBARI_WARM ""
+}
+
+cloudbreak-conf-consul() {
+    env-import DOCKER_CONSUL_OPTIONS ""
+    if ! [[ "$DOCKER_CONSUL_OPTIONS" ]]; then
+        local nameserver=$(docker run -it --rm \
+            --net=host \
+            alpine \
+            sed -n "/nameserver/ {s/^.*nameserver[^0-9]*//;p;q}"  /etc/resolv.conf
+        )
+        if [[ "$nameserver" ]]; then
+            debug "host nameserver: $nameserver"
+            DOCKER_CONSUL_OPTIONS="-recursor $nameserver"
+        else
+            debug "no nameserver found in /etc/resolv.conf, 8.8.8.8 will be used for recursor"
+        fi
+        
+    fi
 }
 
 cloudbreak-conf-images() {

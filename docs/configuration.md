@@ -51,6 +51,18 @@ export CLOUDBREAK_SMTP_SENDER_PORT=
 export CLOUDBREAK_SMTP_SENDER_FROM=
 ```
 
+## Consul
+
+[Consul](http://consul.io) is used for dns resolution. All cloudbreak related services are registered as
+**someservice.service.consul**. Consul’s built in dns server is able to “fall-back” on an other dns server.
+This option is called `-recursor`. Clodbreak Deployer first tries to discover the dns settings of the host,
+by looking for **nameserver** entry in `/etc/resolv.conf`. If it finds one consul will use it as a recursor,
+otherwise **8.8.8.8** will be used.
+
+For a full list of available consul config options, see the [docs](https://consul.io/docs/agent/options.html)
+
+You can pass any additional consul configuration by defining a `DOCKER_CONSUL_OPTIONS` in `Profile`.
+
 ### List of configurations
 
 - **CB_AWS_AMI_MAP** : tbd
