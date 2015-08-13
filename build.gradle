@@ -3,15 +3,58 @@ import org.ajoberstar.gradle.git.release.opinion.Strategies.BuildMetadata
 import org.ajoberstar.gradle.git.release.opinion.Strategies.PreRelease
 import org.ajoberstar.gradle.git.release.semver.ChangeScope
 import org.ajoberstar.gradle.git.release.semver.PartialSemVerStrategy
+import org.ajoberstar.gradle.git.release.semver.SemVerStrategyState
 import org.ajoberstar.gradle.git.release.semver.SemVerStrategy
+import org.ajoberstar.gradle.git.release.semver.TagUtil
 import org.ajoberstar.grgit.Grgit
+import com.github.zafarkhaja.semver.Version
+
 
 import static org.ajoberstar.gradle.git.release.semver.StrategyUtil.*
 
+final class VersionUtils {
+    final static Version getNearestRcVersion(Grgit grgit, SemVerStrategyState state) {
+        List versionTags = grgit.tag.list().inject([]) { list, tag ->
+            Version version = TagUtil.parseAsVersion(tag)
+            if (version) {
+                if (grgit.isAncestorOf(tag, state.currentHead)) {
+                    def reachableCommitLog = grgit.log {
+                        range tag.commit.id, state.currentHead.id
+                    }
+                    def distance = reachableCommitLog.size()
+                    def data = [version: version, distance: distance]
+                    list << data
+                }
+            }
+            list
+        }
+
+        Map rc = versionTags.findAll { versionTag ->
+            versionTag.version.preReleaseVersion.contains("rc")
+        }.min { a, b ->
+            a.distance <=> b.distance ?: (a.version <=> b.version) * -1
+        }
+        return rc.version
+    }
+}
+
 final class VersionStrategies {
 
-    static final class Normal {
-        static final PartialSemVerStrategy INCREMENT_FROM_RC = closure { state ->
+    private Grgit grgit
+
+    public VersionStrategies(Grgit grgit) {
+        this.grgit = grgit
+    }
+
+    final class Normal {
+
+        private Grgit grgit
+
+        public Normal(Grgit grgit) {
+            this.grgit = grgit
+        }
+
+        final PartialSemVerStrategy INCREMENT_FROM_PRE_RELEASE = closure { state ->
             def nearestAny = state.nearestVersion.any
             if ("dev".equals(state.stageFromProp) && ("".equals(nearestAny.preReleaseVersion) || nearestAny.preReleaseVersion.contains("rc"))) {
                 switch (state.scopeFromProp) {
@@ -24,13 +67,49 @@ final class VersionStrategies {
                     default:
                         return state
                 }
+            } else if ("rc".equals(state.stageFromProp)) {
+                def rcVersion = VersionUtils.getNearestRcVersion(grgit, state)
+                if (rcVersion.normalVersion == state.nearestVersion.normal.normalVersion) {
+                    return state.copyWith(inferredNormal: rcVersion.incrementPatchVersion())
+                } else {
+                    return state.copyWith(inferredNormal: rcVersion.normalVersion)
+                }
             } else {
                 return state.copyWith(inferredNormal: nearestAny.normalVersion)
             }
         }
     }
 
-    static final SemVerStrategy FEATURE_BRANCH = Strategies.DEFAULT.copyWith(
+    final class RcStrategies {
+
+        private Grgit grgit
+
+        public RcStrategies(Grgit grgit) {
+            this.grgit = grgit
+        }
+
+        final PartialSemVerStrategy COUNT_INCREMENTED = closure { state ->
+            def nearest = state.nearestVersion
+            def nearestRc = VersionUtils.getNearestRcVersion(grgit, state)
+            def currentPreIdents = state.inferredPreRelease ? state.inferredPreRelease.split('\\.') as List : []
+            if (nearestRc == nearest.normal || nearestRc.normalVersion != state.inferredNormal) {
+                currentPreIdents << '1'
+            } else {
+                def nearestPreIdents = nearestRc.preReleaseVersion.split('\\.')
+                if (nearestPreIdents.size() <= currentPreIdents.size()) {
+                    currentPreIdents << '1'
+                } else if (currentPreIdents == nearestPreIdents[0..(currentPreIdents.size() - 1)]) {
+                    def count = parseIntOrZero(nearestPreIdents[currentPreIdents.size()])
+                    currentPreIdents << Integer.toString(count + 1)
+                } else {
+                    currentPreIdents << '1'
+                }
+            }
+            return state.copyWith(inferredPreRelease: currentPreIdents.join('.'))
+        }
+    }
+
+    final SemVerStrategy FEATURE_BRANCH = Strategies.DEFAULT.copyWith(
             name: 'feature-branch',
             stages: ['fb'] as SortedSet,
             allowDirtyRepo: true,
@@ -39,23 +118,24 @@ final class VersionStrategies {
             createTag: false
     )
 
-    static final SemVerStrategy DEV = Strategies.DEFAULT.copyWith(
+    final SemVerStrategy DEV = Strategies.DEFAULT.copyWith(
             name: 'development',
             stages: ['dev'] as SortedSet,
             allowDirtyRepo: true,
-            normalStrategy: Normal.INCREMENT_FROM_RC,
+            normalStrategy: new Normal(grgit).INCREMENT_FROM_PRE_RELEASE,
             preReleaseStrategy: all(PreRelease.STAGE_FIXED, PreRelease.COUNT_INCREMENTED)
     )
 
-    static final SemVerStrategy RC = Strategies.DEFAULT.copyWith(
+    final SemVerStrategy RC = Strategies.DEFAULT.copyWith(
             name: 'pre-release',
             stages: ['rc'] as SortedSet,
             allowDirtyRepo: true,
-            normalStrategy: Normal.INCREMENT_FROM_RC,
-            preReleaseStrategy: all(PreRelease.STAGE_FIXED, PreRelease.COUNT_INCREMENTED)
+            normalStrategy: new Normal(grgit).INCREMENT_FROM_PRE_RELEASE,
+            preReleaseStrategy: all(PreRelease.STAGE_FIXED, new RcStrategies(grgit).COUNT_INCREMENTED),
+            enforcePrecedence: false
     )
 
-    static final SemVerStrategy FINAL = Strategies.DEFAULT.copyWith(
+    final SemVerStrategy FINAL = Strategies.DEFAULT.copyWith(
             name: 'release',
             stages: ['final'] as SortedSet,
             allowDirtyRepo: true
@@ -78,12 +158,14 @@ apply plugin: 'org.ajoberstar.release-opinion'
 release {
     grgit = Grgit.open(project.file('.'))
 
-    versionStrategy VersionStrategies.FINAL
-    versionStrategy VersionStrategies.RC
-    versionStrategy VersionStrategies.FEATURE_BRANCH
-    versionStrategy VersionStrategies.DEV
+    VersionStrategies versionStrategies = new VersionStrategies(grgit)
 
-    defaultVersionStrategy = VersionStrategies.FEATURE_BRANCH
+    versionStrategy versionStrategies.FINAL
+    versionStrategy versionStrategies.RC
+    versionStrategy versionStrategies.FEATURE_BRANCH
+    versionStrategy versionStrategies.DEV
+
+    defaultVersionStrategy = versionStrategies.FEATURE_BRANCH
 
     tagStrategy {
         prefixNameWithV = false
