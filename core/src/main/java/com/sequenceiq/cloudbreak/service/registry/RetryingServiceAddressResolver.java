@@ -5,20 +5,24 @@ import org.slf4j.LoggerFactory;
 
 public class RetryingServiceAddressResolver implements ServiceAddressResolver {
     private static final Logger LOGGER = LoggerFactory.getLogger(RetryingServiceAddressResolver.class);
-    private static final int MAX_ATTEMPT_COUNT = 10;
     private static final int SLEEPTIME = 2000;
 
     private ServiceAddressResolver serviceAddressResolver;
+    private int maxRetryCount;
 
-    public RetryingServiceAddressResolver(ServiceAddressResolver serviceAddressResolver) {
+    public RetryingServiceAddressResolver(ServiceAddressResolver serviceAddressResolver, int timeoutInMillis) {
         this.serviceAddressResolver = serviceAddressResolver;
+        maxRetryCount = timeoutInMillis / SLEEPTIME;
+        if (maxRetryCount <= 0) {
+            maxRetryCount = 1;
+        }
     }
 
     @Override
     public String resolveUrl(String serverUrl, String protocol, String serviceId) throws ServiceAddressResolvingException {
         int attemptCount = 0;
         String resolvedAddress = null;
-        while (resolvedAddress == null && attemptCount < MAX_ATTEMPT_COUNT) {
+        while (resolvedAddress == null && attemptCount < maxRetryCount) {
             try {
                 resolvedAddress = serviceAddressResolver.resolveUrl(serverUrl, protocol, serviceId);
             } catch (ServiceAddressResolvingException e) {
@@ -33,7 +37,7 @@ public class RetryingServiceAddressResolver implements ServiceAddressResolver {
     public String resolveHostPort(String host, String port, String serviceId) throws ServiceAddressResolvingException {
         int attemptCount = 0;
         String resolvedAddress = null;
-        while (resolvedAddress == null && attemptCount < MAX_ATTEMPT_COUNT) {
+        while (resolvedAddress == null && attemptCount < maxRetryCount) {
             try {
                 resolvedAddress = serviceAddressResolver.resolveHostPort(host, port, serviceId);
             } catch (ServiceAddressResolvingException e) {
@@ -45,7 +49,7 @@ public class RetryingServiceAddressResolver implements ServiceAddressResolver {
     }
 
     private void handleException(ServiceAddressResolvingException e, int attemptCount) throws ServiceAddressResolvingException {
-        if (attemptCount == MAX_ATTEMPT_COUNT - 1) {
+        if (attemptCount == maxRetryCount - 1) {
             throw e;
         } else {
             try {

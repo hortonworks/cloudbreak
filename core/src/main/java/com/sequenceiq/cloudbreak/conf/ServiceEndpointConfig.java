@@ -11,6 +11,9 @@ import com.sequenceiq.cloudbreak.service.registry.ServiceAddressResolvingExcepti
 
 @Configuration
 public class ServiceEndpointConfig {
+    @Value("${cb.address.resolving.timeout:60000}")
+    private int resolvingTimeout;
+
     @Value("${cb.db.port.5432.tcp.addr:}")
     private String dbHost;
 
@@ -28,7 +31,7 @@ public class ServiceEndpointConfig {
 
     @Bean
     public ServiceAddressResolver serviceAddressResolver() {
-        return new RetryingServiceAddressResolver(new DNSServiceAddressResolver());
+        return new RetryingServiceAddressResolver(new DNSServiceAddressResolver(), resolvingTimeout);
     }
 
     @Bean
