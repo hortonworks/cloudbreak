@@ -11,6 +11,9 @@ import com.sequenceiq.periscope.service.registry.ServiceAddressResolvingExceptio
 
 @Configuration
 public class ServiceEndpointConfig {
+    @Value("${periscope.address.resolving.timeout:60000}")
+    private int resolvingTimeout;
+
     @Value("${periscope.db.tcp.addr:}")
     private String dbHost;
 
@@ -34,7 +37,7 @@ public class ServiceEndpointConfig {
 
     @Bean
     public ServiceAddressResolver serviceAddressResolver() {
-        return new RetryingServiceAddressResolver(new DNSServiceAddressResolver());
+        return new RetryingServiceAddressResolver(new DNSServiceAddressResolver(), resolvingTimeout);
     }
 
     @Bean
