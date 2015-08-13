@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -18,6 +20,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
@@ -41,6 +44,9 @@ public class TerminationService {
 
     @Inject
     private HostGroupRepository hostGroupRepository;
+
+    @Inject
+    private InstanceMetaDataRepository instanceMetaDataRepository;
 
     public void terminateStack(Long stackId, CloudPlatform cloudPlatform) {
         final Stack stack = stackRepository.findOneWithLists(stackId);
@@ -71,7 +77,7 @@ public class TerminationService {
             stack.setNetwork(null);
             stack.setSecurityGroup(null);
             stack.setName(terminatedName);
-            terminateMetaDataInstances(stack);
+            instanceMetaDataRepository.save(terminateMetaDataInstances(stack));
             stackRepository.save(stack);
         } catch (Exception ex) {
             LOGGER.error("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
@@ -79,11 +85,14 @@ public class TerminationService {
         }
     }
 
-    private void terminateMetaDataInstances(Stack stack) {
+    private List<InstanceMetaData> terminateMetaDataInstances(Stack stack) {
+        List<InstanceMetaData> instanceMetaDatas = new ArrayList<>();
         for (InstanceMetaData metaData : stack.getRunningInstanceMetaData()) {
             long timeInMillis = Calendar.getInstance().getTimeInMillis();
             metaData.setTerminationDate(timeInMillis);
             metaData.setInstanceStatus(InstanceStatus.TERMINATED);
+            instanceMetaDatas.add(metaData);
         }
+        return instanceMetaDatas;
     }
 }
