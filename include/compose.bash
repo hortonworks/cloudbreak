@@ -269,6 +269,7 @@ cloudbreak:
         - ENDPOINTS_MAPPINGS_ENABLED=false
         - ENDPOINTS_BEANS_ENABLED=false
         - ENDPOINTS_ENV_ENABLED=false
+        - CB_ADDRESS_RESOLVING_TIMEOUT=$ADDRESS_RESOLVING_TIMEOUT
         - CB_IDENTITY_SERVICEID=identity.service.consul
         - CB_DB_SERVICEID=cbdb.service.consul
         - SECURE_RANDOM=$SECURE_RANDOM
@@ -294,6 +295,7 @@ sultans:
         - SL_SMTP_SENDER_FROM=$CLOUDBREAK_SMTP_SENDER_FROM
         - SL_CB_ADDRESS=$ULU_HOST_ADDRESS
         - SL_ADDRESS=$ULU_SULTANS_ADDRESS
+        - SL_ADDRESS_RESOLVING_TIMEOUT=$ADDRESS_RESOLVING_TIMEOUT
         - SL_UAA_SERVICEID=identity.service.consul
     ports:
         - 3001:3000
@@ -311,6 +313,7 @@ uluwatu:
         - ULU_HOST_ADDRESS=$ULU_HOST_ADDRESS
         - NODE_TLS_REJECT_UNAUTHORIZED=0
 
+        - ULU_ADDRESS_RESOLVING_TIMEOUT=$ADDRESS_RESOLVING_TIMEOUT
         - ULU_IDENTITY_SERVICEID=identity.service.consul
         - ULU_CLOUDBREAK_SERVICEID=cloudbreak.service.consul
         - ULU_PERISCOPE_SERVICEID=periscope.service.consul
@@ -350,6 +353,7 @@ periscope:
         - ENDPOINTS_MAPPINGS_ENABLED=false
         - ENDPOINTS_BEANS_ENABLED=false
         - ENDPOINTS_ENV_ENABLED=false
+        - PERISCOPE_ADDRESS_RESOLVING_TIMEOUT=$ADDRESS_RESOLVING_TIMEOUT
         - PERISCOPE_DB_SERVICEID=pcdb.service.consul
         - PERISCOPE_CLOUDBREAK_SERVICEID=cloudbreak.service.consul
         - PERISCOPE_IDENTITY_SERVICEID=identity.service.consul
