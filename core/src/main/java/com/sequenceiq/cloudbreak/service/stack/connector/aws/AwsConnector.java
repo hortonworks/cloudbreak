@@ -73,6 +73,7 @@ import com.amazonaws.services.ec2.model.DisassociateAddressRequest;
 import com.amazonaws.services.ec2.model.DomainType;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.GetConsoleOutputRequest;
+import com.amazonaws.services.ec2.model.GetConsoleOutputResult;
 import com.amazonaws.services.ec2.model.Image;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.ReleaseAddressRequest;
@@ -380,7 +381,9 @@ public class AwsConnector implements CloudPlatformConnector {
             throw new AwsResourceException("Operation timed out: Couldn't get console output of gateway instance.");
         }
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(consoleOutputContext.getStack());
-        String consoleOutput = amazonEC2Client.getConsoleOutput(new GetConsoleOutputRequest().withInstanceId(gatewayId)).getDecodedOutput();
+        GetConsoleOutputRequest getConsoleOutputRequest = new GetConsoleOutputRequest().withInstanceId(gatewayId);
+        GetConsoleOutputResult getConsoleOutputResult = amazonEC2Client.getConsoleOutput(getConsoleOutputRequest);
+        String consoleOutput = getConsoleOutputResult.getDecodedOutput();
 
         Set<String> result = FingerprintParserUtil.parseFingerprints(consoleOutput);
         if (result.isEmpty()) {
