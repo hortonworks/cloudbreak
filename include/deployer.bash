@@ -139,7 +139,6 @@ load-profile() {
         module-load "$CBD_PROFILE"
         PROFILE_LOADED=true
     else
-        debug "diollar1=$1"
         if [[ "$1" != "init" ]];then
             echo "!! No Profile found. Please initalize your 'Profile' with the init command." | red
             echo "cbd init" | blue
