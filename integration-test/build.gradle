@@ -29,8 +29,11 @@ dependencies {
     compile "org.springframework:spring-context-support:4.1.4.RELEASE"
     compile "org.apache.httpcomponents:httpclient:4.3.5"
     compile 'javax:javaee-api:7.0'
+    compile "org.apache.velocity:velocity:1.7"
     compile "org.testng:testng:6.8.21"
-    compile "org.uncommons:reportng:1.1.4"
+    compile ("org.uncommons:reportng:1.1.4") {
+        exclude group: "velocity"
+    }
     runtime "com.google.inject:guice:3.0"
     runtime "org.hibernate:hibernate-validator:5.1.1.Final"
 }

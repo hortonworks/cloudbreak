@@ -206,6 +206,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             }
             deleteCredential(client, itContext.getCleanUpParameter(CloudbreakITContextConstants.CREDENTIAL_ID));
             deleteBlueprint(client, itContext.getCleanUpParameter(CloudbreakITContextConstants.BLUEPRINT_ID));
+            deleteNetwork(client, itContext.getCleanUpParameter(CloudbreakITContextConstants.NETWORK_ID));
         }
     }
 
@@ -222,6 +223,15 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         boolean result = false;
         if (templateId != null) {
             client.deleteTemplate(templateId);
+            result = true;
+        }
+        return result;
+    }
+
+    private boolean deleteNetwork(CloudbreakClient client, String networkId) throws Exception {
+        boolean result = false;
+        if (networkId != null) {
+            client.deleteNetwork(networkId);
             result = true;
         }
         return result;

@@ -27,6 +27,15 @@ integrationtest:
        roleArn:
        publicKeyFile:
 
+    # openstack credential details
+    openstackcredential:
+       name:
+       tenantName:
+       userName:
+       password:
+       endpoint:
+       publicKeyFile:
+
     cleanup:
         retryCount: 3
 
@@ -40,6 +49,7 @@ integrationtest:
         GCP: it-gcp-credential
         AWS: it-aws-credential
         AZURE: itazurecredential
+        OPENSTACK: it-openstack-credential
     defaultNetworks:
        GCP: default-gcp-network
        AWS: default-aws-network
