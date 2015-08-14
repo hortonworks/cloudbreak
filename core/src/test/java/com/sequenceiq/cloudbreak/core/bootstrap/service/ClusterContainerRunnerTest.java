@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,18 +28,21 @@ import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.ScalingType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
-import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
+import com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterContainerRunnerTest {
@@ -52,6 +57,9 @@ public class ClusterContainerRunnerTest {
     private TlsSecurityService tlsSecurityService;
 
     @Mock
+    private ClusterService clusterService;
+
+    @Mock
     private MockContainerOrchestrator mockContainerOrchestrator;
 
     @Mock
@@ -62,6 +70,30 @@ public class ClusterContainerRunnerTest {
 
     @InjectMocks
     private ClusterContainerRunner underTest;
+
+    @Test
+    public void runClusterContainersWhenSecurityEnabled() throws CloudbreakException, CloudbreakOrchestratorFailedException,
+            CloudbreakOrchestratorCancelledException {
+        ReflectionTestUtils.setField(underTest, "baywatchEnabled", false);
+        Stack stack = TestUtil.stack();
+        stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
+        Cluster cluster = new Cluster();
+        cluster.setSecure(true);
+        ProvisioningContext provisioningContext = new ProvisioningContext.Builder().setDefaultParams(1L, CloudPlatform.AZURE).build();
+
+        when(containerOrchestratorResolver.get()).thenReturn(mockContainerOrchestrator);
+        when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
+        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
+                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
+        when(clusterService.retrieveClusterByStackId(anyLong())).thenReturn(cluster);
+
+        underTest.runClusterContainers(provisioningContext);
+
+        verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
+                anyString(), any(LogVolumePath.class), eq(true), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startKerberosServer(any(ContainerOrchestratorCluster.class), anyString(), any(LogVolumePath.class),
+                any(KerberosConfiguration.class), any(ExitCriteriaModel.class));
+    }
 
     @Test
     public void runClusterContainersWhenBaywatchEnabled() throws CloudbreakException, CloudbreakOrchestratorFailedException,
@@ -75,13 +107,14 @@ public class ClusterContainerRunnerTest {
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
+        when(clusterService.retrieveClusterByStackId(anyLong())).thenReturn(new Cluster());
 
         underTest.runClusterContainers(provisioningContext);
 
         verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
                 anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
+                anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(),
@@ -99,12 +132,16 @@ public class ClusterContainerRunnerTest {
         ReflectionTestUtils.setField(underTest, "baywatchEnabled", true);
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
+        Cluster cluster = new Cluster();
+        cluster.setSecure(false);
+
         ProvisioningContext provisioningContext = new ProvisioningContext.Builder().setDefaultParams(1L, CloudPlatform.AZURE).build();
 
         when(containerOrchestratorResolver.get()).thenReturn(new FailedMockContainerOrchestrator());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
+        when(clusterService.retrieveClusterByStackId(1L)).thenReturn(cluster);
 
         underTest.runClusterContainers(provisioningContext);
     }
@@ -116,11 +153,14 @@ public class ClusterContainerRunnerTest {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
         ProvisioningContext provisioningContext = new ProvisioningContext.Builder().setDefaultParams(1L, CloudPlatform.AZURE).build();
+        Cluster cluster = new Cluster();
+        cluster.setSecure(false);
 
         when(containerOrchestratorResolver.get()).thenReturn(new CancelledMockContainerOrchestrator());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
+        when(clusterService.retrieveClusterByStackId(1L)).thenReturn(cluster);
 
         underTest.runClusterContainers(provisioningContext);
     }
@@ -138,13 +178,14 @@ public class ClusterContainerRunnerTest {
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
+        when(clusterService.retrieveClusterByStackId(anyLong())).thenReturn(new Cluster());
 
         underTest.runClusterContainers(provisioningContext);
 
         verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
                 anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
+                anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(),
                 anyInt(), anyString(), any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),
@@ -168,13 +209,14 @@ public class ClusterContainerRunnerTest {
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
+        when(clusterService.retrieveClusterByStackId(anyLong())).thenReturn(new Cluster());
 
         underTest.runClusterContainers(provisioningContext);
 
         verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
                 anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
+                anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(),
                 anyInt(), anyString(), any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),
@@ -205,7 +247,7 @@ public class ClusterContainerRunnerTest {
         verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
                 anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
+                anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(),
                 anyInt(), anyString(), any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),
@@ -271,7 +313,7 @@ public class ClusterContainerRunnerTest {
         verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
                 anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
+                anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(),
                 anyInt(), anyString(), any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),
@@ -303,7 +345,7 @@ public class ClusterContainerRunnerTest {
         verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), anyString(), anyInt(),
                 anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
+                anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(),
                 anyInt(), anyString(), any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),

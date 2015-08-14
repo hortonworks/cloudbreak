@@ -21,8 +21,8 @@ import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.jaxrs.DockerCmdExecFactoryImpl;
 import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerBootstrapRunner;
+import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
 import com.sequenceiq.cloudbreak.orchestrator.SimpleContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariAgentBootstrap;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariServerDatab
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.BaywatchClientBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.BaywatchServerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.ConsulWatchBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.KerberosServerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.LogrotateBootsrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.MunchausenBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.RegistratorBootstrap;
@@ -116,7 +118,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Override
     public void startAmbariServer(ContainerOrchestratorCluster cluster, String dbImageName, String serverImageName, String platform,
-            LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
+            LogVolumePath logVolumePath, Boolean localAgentRequired, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         try {
             Node gateway = getGatewayNode(cluster.getGatewayConfig().getPublicAddress(), cluster.getNodes());
@@ -124,6 +126,10 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
             runner(ambariServerBootstrap(cluster.getGatewayConfig(), serverImageName, gateway, platform, logVolumePath),
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
+            if (localAgentRequired) {
+                runner(ambariAgentBootstrap(cluster.getGatewayConfig(), serverImageName, gateway, String.valueOf(new Date().getTime()), platform, logVolumePath),
+                        getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
+            }
         } catch (CloudbreakOrchestratorCancelledException | CloudbreakOrchestratorFailedException coe) {
             throw coe;
         } catch (Exception ex) {
@@ -179,6 +185,21 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             for (Future<Boolean> future : futures) {
                 future.get();
             }
+        } catch (Exception ex) {
+            throw new CloudbreakOrchestratorFailedException(ex);
+        }
+    }
+
+    @Override
+    public void startKerberosServer(ContainerOrchestratorCluster cluster, String serverImageName, LogVolumePath logVolumePath,
+            KerberosConfiguration kerberosConfiguration, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+        try {
+            Node gateway = getGatewayNode(cluster.getGatewayConfig().getPublicAddress(), cluster.getNodes());
+            runner(kerberosServerBootstrap(kerberosConfiguration, cluster.getGatewayConfig(), serverImageName, gateway, logVolumePath),
+                    getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
+        } catch (CloudbreakOrchestratorCancelledException | CloudbreakOrchestratorFailedException coe) {
+            throw coe;
         } catch (Exception ex) {
             throw new CloudbreakOrchestratorFailedException(ex);
         }
@@ -478,6 +499,13 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         DockerClient dockerApiClient = swarmClient(gatewayConfig);
         return new AmbariServerBootstrap(dockerApiClient, serverImageName, node.getHostname(), node.getDataVolumes(), platform,
                 logVolumePath);
+    }
+
+    @VisibleForTesting
+    KerberosServerBootstrap kerberosServerBootstrap(KerberosConfiguration kerberosConfig, GatewayConfig gatewayConfig, String serverImageName, Node node,
+            LogVolumePath logVolumePath) {
+        DockerClient dockerApiClient = swarmClient(gatewayConfig);
+        return new KerberosServerBootstrap(dockerApiClient, serverImageName, node.getHostname(), logVolumePath, kerberosConfig);
     }
 
     @VisibleForTesting

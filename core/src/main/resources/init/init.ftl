@@ -49,7 +49,7 @@ format_disks() {
       mount /hadoopfs/fs${i}
     fi
   done
-  cd /hadoopfs/fs1 && mkdir logs logs/ambari-server logs/ambari-agent logs/consul-watch
+  cd /hadoopfs/fs1 && mkdir logs logs/ambari-server logs/ambari-agent logs/consul-watch logs/kerberos
 }
 </#noparse>
 

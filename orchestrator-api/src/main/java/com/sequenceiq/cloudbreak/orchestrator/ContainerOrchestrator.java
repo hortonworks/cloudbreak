@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
@@ -28,7 +29,7 @@ public interface ContainerOrchestrator {
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
     void startAmbariServer(ContainerOrchestratorCluster cluster, String dbImageName, String serverImageName, String platform,
-            LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
+            LogVolumePath logVolumePath, Boolean localAgentRequired, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
     void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, int count, String platform,
@@ -37,6 +38,10 @@ public interface ContainerOrchestrator {
 
     void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, int count,
             LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
+
+    void startKerberosServer(ContainerOrchestratorCluster cluster, String serverImageName, LogVolumePath logVolumePath,
+            KerberosConfiguration kerberosConfiguration, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
     void startBaywatchServer(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
