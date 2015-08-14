@@ -123,6 +123,7 @@ compose-logs() {
 
     dockerCompose logs "$@"
 }
+
 compose-generate-yaml() {
     declare desc="Generating docker-compose.yml based on Profile settings"
 

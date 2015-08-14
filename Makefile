@@ -58,13 +58,13 @@ release: prepare-release
 
 	gh-release checksums sha256
 	gh-release create sequenceiq/$(NAME) $(VERSION) $(GIT_BRANCH) v$(VERSION)
-	# upload to s3 bucket
-	docker run \
+	@echo upload artifacts to $(S3_TARGET) ...
+	@docker run \
 		-v $(PWD):/data \
 		-w /data \
 		-e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) \
 		-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) \
-		anigeo/awscli s3 cp release/$(NAME)_$(VERSION)_Linux_$(ARCH).tgz $(S3_TARGET)
+		anigeo/awscli s3 cp release/ $(S3_TARGET) --recursive --include "$(NAME)_$(VERSION)_*.tgz"
 
 release-next-ver: deps
 	./release-next-ver.sh

@@ -21,7 +21,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_CONSUL v0.5.0-v3
     env-import DOCKER_TAG_REGISTRATOR v5
     env-import DOCKER_TAG_POSTGRES 9.4.1
-    env-import DOCKER_TAG_CLOUDBREAK 1.0.0
+    env-import DOCKER_TAG_CLOUDBREAK 1.0.1
     env-import DOCKER_TAG_CBDB 1.0.0
     env-import DOCKER_TAG_PERISCOPE 0.5.6
     env-import DOCKER_TAG_PCDB 0.5.6
@@ -193,6 +193,8 @@ cloudbreak-generate-cert() {
     else
       info "Generating Cloudbreak client certificate and private key in ${CBD_CERT_ROOT_PATH}."
       docker run --rm -v ${CBD_CERT_ROOT_PATH}:/certs ehazlett/cert-tool:${DOCKER_TAG_CERT_TOOL} -d /certs -o=local &> /dev/null
+      owner=$(ls -od ${CBD_CERT_ROOT_PATH} | tr -s ' ' | cut -d ' ' -f 3)
+      [[ "$owner" != "$(whoami)" ]] && sudo chown -R $(whoami):$(id -gn) ${CBD_CERT_ROOT_PATH}
       cat "${CBD_CERT_ROOT_PATH}/ca.pem" >> "${CBD_CERT_ROOT_PATH}/client.pem"
       mv "${CBD_CERT_ROOT_PATH}/ca.pem" "${CBD_CERT_ROOT_PATH}/client-ca.pem"
       mv "${CBD_CERT_ROOT_PATH}/ca-key.pem" "${CBD_CERT_ROOT_PATH}/client-ca-key.pem"
