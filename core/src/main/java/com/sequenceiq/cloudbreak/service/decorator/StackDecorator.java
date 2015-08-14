@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.CredentialRepository;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
@@ -36,7 +36,7 @@ public class StackDecorator implements Decorator<Stack> {
     private static final double ONE_HUNDRED = 100.0;
 
     @Inject
-    private CredentialRepository credentialRepository;
+    private CredentialService credentialService;
 
     @Inject
     private NetworkService networkService;
@@ -65,8 +65,8 @@ public class StackDecorator implements Decorator<Stack> {
 
     @Override
     public Stack decorate(Stack subject, Object... data) {
-        subject.setSecurityGroup(securityGroupService.getById((Long) data[DecorationData.SECURITY_GROUP_ID.ordinal()]));
-        subject.setCredential(credentialRepository.findOne((Long) data[DecorationData.CREDENTIAL_ID.ordinal()]));
+        subject.setSecurityGroup(securityGroupService.get((Long) data[DecorationData.SECURITY_GROUP_ID.ordinal()]));
+        subject.setCredential(credentialService.get((Long) data[DecorationData.CREDENTIAL_ID.ordinal()]));
         int consulServers = getConsulServerCount((Integer) data[DecorationData.USR_CONSUL_SERVER_COUNT.ordinal()], subject.getFullNodeCount());
         subject.setConsulServers(consulServers);
         Network network = networkService.getById((Long) data[DecorationData.NETWORK_ID.ordinal()]);

@@ -21,16 +21,16 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
-import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
-import com.sequenceiq.cloudbreak.repository.NetworkRepository;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.network.NetworkService;
 
 @Component
 public class JsonToStackValidationConverter extends AbstractConversionServiceAwareConverter<StackValidationRequest, StackValidation> {
 
     @Inject
-    private BlueprintRepository blueprintRepository;
+    private BlueprintService blueprintService;
     @Inject
-    private NetworkRepository networkRepository;
+    private NetworkService networkService;
 
     @Override
     public StackValidation convert(StackValidationRequest stackValidationRequest) {
@@ -39,14 +39,14 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
         stackValidation.setInstanceGroups(instanceGroups);
         stackValidation.setHostGroups(convertHostGroupsFromJson(instanceGroups, stackValidationRequest.getHostGroups()));
         try {
-            Blueprint blueprint = blueprintRepository.findOne(stackValidationRequest.getBlueprintId());
+            Blueprint blueprint = blueprintService.get(stackValidationRequest.getBlueprintId());
             stackValidation.setBlueprint(blueprint);
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(
                     String.format("Access to blueprint '%s' is denied or blueprint doesn't exist.", stackValidationRequest.getBlueprintId()), e);
         }
         try {
-            Network network = networkRepository.findOne(stackValidationRequest.getNetworkId());
+            Network network = networkService.get(stackValidationRequest.getNetworkId());
             stackValidation.setNetwork(network);
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(

@@ -421,7 +421,7 @@ public class AmbariClusterConnector {
         PollingResult pollingResult = restartHadoopServices(stack, ambariClient, true);
         if (isSuccess(pollingResult)) {
             for (HostMetadata metadata : hostsToRemove.values()) {
-                HostMetadata findedHostMetaData = hostMetadataRepository.findHostsInClusterByName(cluster.getId(), metadata.getHostName());
+                HostMetadata findedHostMetaData = hostMetadataRepository.findHostInClusterByName(cluster.getId(), metadata.getHostName());
                 hostMetadataRepository.delete(findedHostMetaData.getId());
                 InstanceMetaData hostInStack = instanceMetadataRepository.findHostInStack(stack.getId(), metadata.getHostName());
                 instanceTerminationHandler.terminateInstance(stack, hostInStack);

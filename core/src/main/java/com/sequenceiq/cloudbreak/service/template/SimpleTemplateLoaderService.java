@@ -45,6 +45,9 @@ public class SimpleTemplateLoaderService {
     private TemplateRepository templateRepository;
 
     @Inject
+    private TemplateService templateService;
+
+    @Inject
     private JsonHelper jsonHelper;
 
     public Set<Template> loadTemplates(CbUser user) {
@@ -60,7 +63,7 @@ public class SimpleTemplateLoaderService {
         for (String templateName : templateArray) {
             Template oneByName = null;
             try {
-                oneByName = templateRepository.findOneByName(templateName, user.getAccount());
+                oneByName = templateService.getPublicTemplate(templateName, user);
             } catch (Exception e) {
                 oneByName = null;
             }

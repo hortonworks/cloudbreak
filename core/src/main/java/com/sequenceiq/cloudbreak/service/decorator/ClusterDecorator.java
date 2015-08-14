@@ -13,8 +13,8 @@ import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValida
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 public class ClusterDecorator implements Decorator<Cluster> {
@@ -27,13 +27,13 @@ public class ClusterDecorator implements Decorator<Cluster> {
     }
 
     @Inject
-    private BlueprintRepository blueprintRepository;
+    private BlueprintService blueprintService;
 
     @Inject
     private BlueprintValidator blueprintValidator;
 
     @Inject
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Inject
     private ConversionService conversionService;
@@ -49,12 +49,12 @@ public class ClusterDecorator implements Decorator<Cluster> {
         Long stackId = (Long) data[DecorationData.STACK_ID.ordinal()];
         Long blueprintId = (Long) data[DecorationData.BLUEPRINT_ID.ordinal()];
         Set<HostGroupJson> hostGroupsJsons = (Set<HostGroupJson>) data[DecorationData.HOSTGROUP_JSONS.ordinal()];
-        subject.setBlueprint(blueprintRepository.findOne(blueprintId));
+        subject.setBlueprint(blueprintService.get(blueprintId));
         subject.setHostGroups(convertHostGroupsFromJson(stackId, subject, hostGroupsJsons));
         boolean validate = (boolean) data[DecorationData.VALIDATE_BLUEPRINT.ordinal()];
         if (validate) {
-            Blueprint blueprint = blueprintRepository.findOne(blueprintId);
-            blueprintValidator.validateBlueprintForStack(blueprint, subject.getHostGroups(), stackRepository.findOne(stackId).getInstanceGroups());
+            Blueprint blueprint = blueprintService.get(blueprintId);
+            blueprintValidator.validateBlueprintForStack(blueprint, subject.getHostGroups(), stackService.get(stackId).getInstanceGroups());
         }
         return subject;
     }

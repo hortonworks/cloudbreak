@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -51,6 +52,7 @@ public class SimpleTemplateService implements TemplateService {
     }
 
     @Override
+    @PostAuthorize("hasPermission(returnObject,'read')")
     public Template get(Long id) {
         Template template = templateRepository.findOne(id);
         if (template == null) {
@@ -92,6 +94,7 @@ public class SimpleTemplateService implements TemplateService {
         }
     }
 
+    @PostAuthorize("hasPermission(returnObject,'read')")
     public Template getPublicTemplate(String name, CbUser user) {
         Template template = templateRepository.findOneByName(name, user.getAccount());
         if (template == null) {

@@ -13,6 +13,8 @@ public interface BlueprintService {
 
     Blueprint get(Long id);
 
+    Blueprint getByName(String name, CbUser user);
+
     Blueprint create(CbUser user, Blueprint blueprintRequest);
 
     void delete(Long id, CbUser user);

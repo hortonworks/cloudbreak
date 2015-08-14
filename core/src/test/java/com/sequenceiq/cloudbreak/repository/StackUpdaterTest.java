@@ -72,6 +72,7 @@ public class StackUpdaterTest {
         Stack stack = TestUtil.stack();
         List<Resource> resources = TestUtil.generateAzureResources(5);
 
+        when(stackRepository.findById(anyLong())).thenReturn(stack);
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(stackRepository.save(any(Stack.class))).then(returnsFirstArg());
         when(resourceRepository.save(anyList())).then(returnsFirstArg());

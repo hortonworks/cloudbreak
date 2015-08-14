@@ -15,7 +15,7 @@ import org.springframework.security.access.AccessDeniedException;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.controller.json.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.repository.TemplateRepository;
+import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 public class JsonToInstanceGroupConverterTest extends AbstractJsonConverterTest<InstanceGroupJson> {
 
@@ -23,7 +23,7 @@ public class JsonToInstanceGroupConverterTest extends AbstractJsonConverterTest<
     private JsonToInstanceGroupConverter underTest;
 
     @Mock
-    private TemplateRepository templateRepository;
+    private TemplateService templateService;
 
     @Before
     public void setUp() {
@@ -34,7 +34,7 @@ public class JsonToInstanceGroupConverterTest extends AbstractJsonConverterTest<
     @Test
     public void testConvert() {
         // GIVEN
-        given(templateRepository.findOne(anyLong())).willReturn(TestUtil.gcpTemplate(51L));
+        given(templateService.get(anyLong())).willReturn(TestUtil.gcpTemplate(51L));
         // WHEN
         InstanceGroup instanceGroup = underTest.convert(getRequest("stack/instance-group.json"));
         // THEN
@@ -44,7 +44,7 @@ public class JsonToInstanceGroupConverterTest extends AbstractJsonConverterTest<
     @Test(expected = AccessDeniedException.class)
     public void testConvertWhenAccessDenied() {
         // GIVEN
-        given(templateRepository.findOne(anyLong())).willThrow(new AccessDeniedException("exception"));
+        given(templateService.get(anyLong())).willThrow(new AccessDeniedException("exception"));
         // WHEN
         underTest.convert(getRequest("stack/instance-group.json"));
     }

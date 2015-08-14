@@ -47,21 +47,21 @@ import com.sequenceiq.cloudbreak.domain.ScalingType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
-import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterUserNamePasswordUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
@@ -77,10 +77,10 @@ public class AmbariClusterService implements ClusterService {
     private static final double SAFETY_PERCENTAGE = 1.2;
 
     @Inject
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Inject
-    private BlueprintRepository blueprintRepository;
+    private BlueprintService blueprintService;
 
     @Inject
     private ClusterRepository clusterRepository;
@@ -137,7 +137,7 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public Cluster create(CbUser user, Long stackId, Cluster cluster) {
-        Stack stack = stackRepository.findOne(stackId);
+        Stack stack = stackService.get(stackId);
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         if (stack.getCluster() != null) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster()
@@ -160,12 +160,12 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public Cluster retrieveClusterByStackId(Long stackId) {
-        return stackRepository.findByIdLazy(stackId).getCluster();
+        return stackService.findLazy(stackId).getCluster();
     }
 
     @Override
     public Cluster retrieveClusterForCurrentUser(Long stackId) {
-        Stack stack = stackRepository.findOne(stackId);
+        Stack stack = stackService.get(stackId);
         return stack.getCluster();
     }
 
@@ -180,7 +180,7 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public String getClusterJson(String ambariIp, Long stackId) {
-        Stack stack = stackRepository.findOne(stackId);
+        Stack stack = stackService.get(stackId);
         if (stack.getAmbariIp() == null) {
             throw new NotFoundException(String.format("Ambari server could not be available for the stack.[id: %s]", stackId));
         }
@@ -207,7 +207,7 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public UpdateAmbariHostsRequest updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) throws CloudbreakSecuritySetupException {
-        Stack stack = stackRepository.findOneWithLists(stackId);
+        Stack stack = stackService.get(stackId);
         Cluster cluster = stack.getCluster();
         if (cluster == null) {
             throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stackId));
@@ -235,13 +235,11 @@ public class AmbariClusterService implements ClusterService {
     public ClusterStatusUpdateRequest updateStatus(Long stackId, StatusRequest statusRequest) {
         ClusterStatusUpdateRequest retVal = null;
 
-        Stack stack = stackRepository.findOne(stackId);
+        Stack stack = stackService.get(stackId);
         Cluster cluster = stack.getCluster();
         if (cluster == null) {
             throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stackId));
         }
-        long clusterId = cluster.getId();
-
         switch (statusRequest) {
             case SYNC:
                 sync(stack, cluster, statusRequest);
@@ -260,7 +258,7 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public Cluster updateUserNamePassword(Long stackId, UserNamePasswordJson userNamePasswordJson) {
-        Stack stack = stackRepository.findByIdLazy(stackId);
+        Stack stack = stackService.get(stackId);
         flowManager.triggerClusterUserNamePasswordUpdate(
                 new ClusterUserNamePasswordUpdateRequest(stack.getId(), userNamePasswordJson.getUserName(),
                         userNamePasswordJson.getPassword(), stack.cloudPlatform()));
@@ -322,7 +320,7 @@ public class AmbariClusterService implements ClusterService {
     @Override
     public Cluster updateClusterStatusByStackId(Long stackId, Status status, String statusReason) {
         LOGGER.debug("Updating cluster status. stackId: {}, status: {}, statusReason: {}", stackId, status, statusReason);
-        Cluster cluster = stackRepository.findByIdLazy(stackId).getCluster();
+        Cluster cluster = stackService.findLazy(stackId).getCluster();
         if (cluster != null) {
             cluster.setStatus(status);
             cluster.setStatusReason(statusReason);
@@ -354,7 +352,7 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public Cluster updateClusterMetadata(Long stackId) {
-        Stack stack = stackRepository.findByIdLazy(stackId);
+        Stack stack = stackService.findLazy(stackId);
         if (stack.getCluster() == null) {
             throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stackId));
         }
@@ -377,14 +375,14 @@ public class AmbariClusterService implements ClusterService {
         if (blueprintId == null || hostGroups == null) {
             throw new BadRequestException("Blueprint id and hostGroup assignments can not be null.");
         }
-        Stack stack = stackRepository.findOne(stackId);
-        Blueprint blueprint = blueprintRepository.findOne(blueprintId);
+        Stack stack = stackService.get(stackId);
+        Blueprint blueprint = blueprintService.get(blueprintId);
         if (blueprint == null) {
             throw new BadRequestException(String.format("Blueprint not exist with '%s' id.", blueprintId));
         }
         Cluster cluster = stack.getCluster();
         if (validateBlueprint) {
-            blueprintValidator.validateBlueprintForStack(blueprint, hostGroups, stackRepository.findOne(stackId).getInstanceGroups());
+            blueprintValidator.validateBlueprintForStack(blueprint, hostGroups, stackService.get(stackId).getInstanceGroups());
         }
         cluster.setBlueprint(blueprint);
         cluster.getHostGroups().removeAll(cluster.getHostGroups());
@@ -618,7 +616,7 @@ public class AmbariClusterService implements ClusterService {
     private void updateHostMetadataByHostState(Stack stack, String hostName, Map<String, String> hostStatuses) {
         if (hostStatuses.containsKey(hostName)) {
             String hostState = hostStatuses.get(hostName);
-            HostMetadata hostMetadata = hostMetadataRepository.findHostsInClusterByName(stack.getCluster().getId(), hostName);
+            HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), hostName);
             HostMetadataState oldState = hostMetadata.getHostMetadataState();
             HostMetadataState newState = HostMetadataState.HEALTHY.name().equals(hostState) ? HostMetadataState.HEALTHY : HostMetadataState.UNHEALTHY;
             if (!oldState.equals(newState)) {

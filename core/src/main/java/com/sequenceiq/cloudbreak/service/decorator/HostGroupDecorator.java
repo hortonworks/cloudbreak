@@ -15,10 +15,10 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
-import com.sequenceiq.cloudbreak.repository.RecipeRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 public class HostGroupDecorator implements Decorator<HostGroup> {
@@ -35,13 +35,13 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
     private InstanceGroupRepository instanceGroupRepository;
 
     @Inject
-    private HostGroupRepository hostGroupRepository;
+    private HostGroupService hostGroupService;
 
     @Inject
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Inject
-    private RecipeRepository recipeRepository;
+    private RecipeService recipeService;
 
     @Override
     public HostGroup decorate(HostGroup subject, Object... data) {
@@ -67,7 +67,7 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
             subject.setInstanceGroup(instanceGroup);
             if (receipeIds != null) {
                 for (Long recipeId : receipeIds) {
-                    Recipe recipe = recipeRepository.findOne(recipeId);
+                    Recipe recipe = recipeService.get(recipeId);
                     subject.getRecipes().add(recipe);
                 }
             }
@@ -78,8 +78,8 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
     }
 
     private HostGroup reloadHostGroup(Long stackId, String instanceGroupName, String hostGroupName) {
-        Stack stack = stackRepository.findById(stackId);
-        HostGroup hostGroupsByInstanceGroupName = hostGroupRepository.findHostGroupsByInstanceGroupName(stack.getCluster().getId(), instanceGroupName);
+        Stack stack = stackService.get(stackId);
+        HostGroup hostGroupsByInstanceGroupName = hostGroupService.getByClusterIdAndInstanceGroupName(stack.getCluster().getId(), instanceGroupName);
         hostGroupsByInstanceGroupName.setName(hostGroupName);
         return hostGroupsByInstanceGroupName;
     }

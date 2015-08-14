@@ -34,7 +34,7 @@ public class StackUpdater {
     }
 
     public Stack addStackResources(Long stackId, List<Resource> resources) {
-        Stack stack = stackRepository.findOneWithLists(stackId);
+        Stack stack = stackRepository.findById(stackId);
         for (Resource resource : resources) {
             resource.setStack(stack);
         }

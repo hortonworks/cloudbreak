@@ -34,12 +34,6 @@ import javax.persistence.UniqueConstraint;
                         + "LEFT JOIN FETCH r.securityRules "
                         + "WHERE r.id= :id"),
         @NamedQuery(
-                name = "SecurityGroup.findOneByName",
-                query = "SELECT r FROM SecurityGroup r "
-                        + "LEFT JOIN FETCH r.securityRules "
-                        + "WHERE r.name= :name "
-                        + "AND r.status <> 'DEFAULT_DELETED' "),
-        @NamedQuery(
                 name = "SecurityGroup.findByNameForUser",
                 query = "SELECT r FROM SecurityGroup r "
                         + "LEFT JOIN FETCH r.securityRules "

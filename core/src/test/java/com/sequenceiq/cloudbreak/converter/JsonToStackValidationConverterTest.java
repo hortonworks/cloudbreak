@@ -22,8 +22,8 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
-import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
-import com.sequenceiq.cloudbreak.repository.NetworkRepository;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.network.NetworkService;
 
 public class JsonToStackValidationConverterTest extends AbstractJsonConverterTest<StackValidationRequest> {
 
@@ -31,9 +31,9 @@ public class JsonToStackValidationConverterTest extends AbstractJsonConverterTes
     private JsonToStackValidationConverter underTest;
 
     @Mock
-    private BlueprintRepository blueprintRepository;
+    private BlueprintService blueprintService;
     @Mock
-    private NetworkRepository networkRepository;
+    private NetworkService networkService;
     @Mock
     private ConversionService conversionService;
 
@@ -52,8 +52,8 @@ public class JsonToStackValidationConverterTest extends AbstractJsonConverterTes
         hostGroups.add(TestUtil.hostGroup());
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(instanceGroups);
-        given(networkRepository.findOne(1L)).willReturn(new AwsNetwork());
-        given(blueprintRepository.findOne(2L)).willReturn(new Blueprint());
+        given(networkService.get(1L)).willReturn(new AwsNetwork());
+        given(blueprintService.get(2L)).willReturn(new Blueprint());
         // WHEN
         StackValidation result = underTest.convert(getRequest("stack/stack-validation-request.json"));
         // THEN

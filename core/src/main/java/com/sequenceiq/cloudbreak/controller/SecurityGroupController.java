@@ -80,7 +80,7 @@ public class SecurityGroupController {
     @RequestMapping(value = "securitygroups/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<SecurityGroupJson> getSecurityGroup(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
-        SecurityGroup securityGroup = securityGroupService.getById(id);
+        SecurityGroup securityGroup = securityGroupService.get(id);
         return new ResponseEntity<>(convert(securityGroup), HttpStatus.OK);
     }
 

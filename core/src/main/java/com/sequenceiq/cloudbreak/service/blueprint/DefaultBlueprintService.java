@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -46,10 +47,21 @@ public class DefaultBlueprintService implements BlueprintService {
     }
 
     @Override
+    @PostAuthorize("hasPermission(returnObject,'read')")
     public Blueprint get(Long id) {
         Blueprint blueprint = blueprintRepository.findOne(id);
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", id));
+        }
+        return blueprint;
+    }
+
+    @Override
+    @PostAuthorize("hasPermission(returnObject,'read')")
+    public Blueprint getByName(String name, CbUser user) {
+        Blueprint blueprint = blueprintRepository.findByNameInAccount(name, user.getAccount(), user.getUsername());
+        if (blueprint == null) {
+            throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
         }
         return blueprint;
     }

@@ -212,7 +212,7 @@ public class StackSyncService {
     private void deleteHostFromCluster(Stack stack, InstanceMetaData instanceMetaData) {
         try {
             if (stack.getCluster() != null) {
-                HostMetadata hostMetadata = hostMetadataRepository.findHostsInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN());
+                HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN());
                 if (hostMetadata == null) {
                     throw new NotFoundException(String.format("Host not found with id '%s'", instanceMetaData.getDiscoveryFQDN()));
                 }
@@ -252,7 +252,7 @@ public class StackSyncService {
 
     private void updateMetaDataToRunning(Long stackId, Cluster cluster, InstanceMetaData instanceMetaData, InstanceGroup instanceGroup) {
         instanceGroup.setNodeCount(instanceGroup.getNodeCount() + 1);
-        HostMetadata hostMetadata = hostMetadataRepository.findHostsInClusterByName(cluster.getId(), instanceMetaData.getDiscoveryFQDN());
+        HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(cluster.getId(), instanceMetaData.getDiscoveryFQDN());
         if (hostMetadata != null) {
             LOGGER.info("Instance '{}' was found in the cluster metadata, setting it's state to REGISTERED.", instanceMetaData.getInstanceId());
             instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);

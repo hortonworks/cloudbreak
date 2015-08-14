@@ -49,4 +49,6 @@ public interface StackService {
     void updateAllowedSubnets(Long stackId, List<SecurityRule> securityRuleList);
 
     void validateStack(StackValidation stackValidation);
+
+    Stack save(Stack stack);
 }

@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -43,17 +44,9 @@ public class SimpleSecurityGroupService implements SecurityGroupService {
     }
 
     @Override
+    @PostAuthorize("hasPermission(returnObject,'read')")
     public SecurityGroup get(Long id) {
         SecurityGroup securityGroup = repository.findById(id);
-        if (securityGroup == null) {
-            throw new NotFoundException(String.format("SecurityGroup '%s' not found", id));
-        }
-        return securityGroup;
-    }
-
-    @Override
-    public SecurityGroup getById(Long id) {
-        SecurityGroup securityGroup = repository.findOneById(id);
         if (securityGroup == null) {
             throw new NotFoundException(String.format("SecurityGroup '%s' not found", id));
         }
@@ -81,7 +74,7 @@ public class SimpleSecurityGroupService implements SecurityGroupService {
     @Override
     public void delete(Long id, CbUser user) {
         LOGGER.info("Deleting SecurityGroup with id: {}", id);
-        SecurityGroup securityGroup = repository.findOne(id);
+        SecurityGroup securityGroup = get(id);
         if (securityGroup == null) {
             throw new NotFoundException(String.format("SecurityGroup '%s' not found.", id));
         }
