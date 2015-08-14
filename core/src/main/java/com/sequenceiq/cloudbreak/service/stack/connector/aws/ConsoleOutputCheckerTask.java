@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 public class ConsoleOutputCheckerTask extends StackBasedStatusCheckerTask<ConsoleOutputContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleOutputCheckerTask.class);
+    private static final String CB_FINGERPRINT_END = "-----END SSH HOST KEY FINGERPRINTS-----";
 
     @Inject
     private AwsStackUtil awsStackUtil;
@@ -23,7 +24,7 @@ public class ConsoleOutputCheckerTask extends StackBasedStatusCheckerTask<Consol
     public boolean checkStatus(ConsoleOutputContext consoleOutputContext) {
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(consoleOutputContext.getStack());
         GetConsoleOutputResult result = amazonEC2Client.getConsoleOutput(new GetConsoleOutputRequest().withInstanceId(consoleOutputContext.getInstanceId()));
-        if (result != null && result.getOutput() != null) {
+        if (result != null && result.getOutput() != null && result.getDecodedOutput().contains(CB_FINGERPRINT_END)) {
             return true;
         }
         LOGGER.warn("Console output is not yet available.");
