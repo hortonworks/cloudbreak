@@ -12,11 +12,21 @@ public class CloudStack {
 
     private Image image;
 
+    private String region;
+
     public CloudStack(List<Group> groups, Network network, Security security, Image image) {
         this.groups = groups;
         this.network = network;
         this.security = security;
         this.image = image;
+    }
+
+    public CloudStack(List<Group> groups, Network network, Security security, Image image, String region) {
+        this.groups = groups;
+        this.network = network;
+        this.security = security;
+        this.image = image;
+        this.region = region;
     }
 
     public List<Group> getGroups() {
@@ -33,6 +43,10 @@ public class CloudStack {
 
     public Image getImage() {
         return image;
+    }
+
+    public String getRegion() {
+        return region;
     }
 
     //BEGIN GENERATED CODE

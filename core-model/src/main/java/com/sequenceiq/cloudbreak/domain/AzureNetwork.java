@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.persistence.Entity;
 
 @Entity
@@ -16,7 +19,7 @@ public class AzureNetwork extends Network {
     }
 
     @Override
-    public CloudPlatform cloudPlatform() {
-        return CloudPlatform.AZURE;
+    public List<CloudPlatform> cloudPlatform() {
+        return Arrays.asList(CloudPlatform.AZURE, CloudPlatform.AZURE_RM);
     }
 }

@@ -19,6 +19,12 @@ public class Group {
         instances = new ArrayList<>();
     }
 
+    public Group(String name, InstanceGroupType type, List<InstanceTemplate> instances) {
+        this.name = name;
+        this.type = type;
+        this.instances = instances;
+    }
+
     public String getName() {
         return name;
     }

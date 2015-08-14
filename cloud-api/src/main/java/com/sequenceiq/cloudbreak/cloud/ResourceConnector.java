@@ -17,12 +17,12 @@ public interface ResourceConnector {
 
     List<CloudResourceStatus> check(AuthenticatedContext authenticatedContext, List<CloudResource> resources);
 
-    List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources);
+    List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> cloudResources);
 
     //e.g. security rules
     List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources);
 
-    List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, int adjustment);
+    List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources);
 
     List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, List<InstanceTemplate> vms);
 

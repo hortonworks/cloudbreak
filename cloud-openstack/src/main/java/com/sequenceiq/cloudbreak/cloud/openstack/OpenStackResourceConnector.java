@@ -65,7 +65,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
             promise.await();
         } catch (Exception e) {
             //Rollback
-            terminate(authenticatedContext, Arrays.asList(cloudResource));
+            terminate(authenticatedContext, stack, Arrays.asList(cloudResource));
         }
 
         List<CloudResourceStatus> resources = check(authenticatedContext, Arrays.asList(cloudResource));
@@ -97,7 +97,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
+    public List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, CloudStack cloudStack, List<CloudResource> resources) {
 
         for (CloudResource resource : resources) {
             switch (resource.getType()) {
@@ -117,7 +117,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, int adjustment) {
+    public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         String stackName = authenticatedContext.getCloudContext().getStackName();
         String heatTemplate = heatTemplateBuilder.build(stackName, stack.getGroups(), stack.getSecurity(), stack.getImage());
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(authenticatedContext.getCloudCredential(), stack.getNetwork(), stack.getImage());

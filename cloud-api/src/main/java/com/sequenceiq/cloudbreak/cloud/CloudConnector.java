@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
-public interface CloudConnector extends CloudPlatformAware {
+public interface CloudConnector {
 
     AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential);
 
@@ -13,5 +13,9 @@ public interface CloudConnector extends CloudPlatformAware {
     InstanceConnector instances();
 
     Setup setup();
+
+    String platform();
+
+    String sshUser();
 
 }

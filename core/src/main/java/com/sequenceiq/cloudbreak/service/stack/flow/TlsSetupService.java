@@ -83,7 +83,7 @@ public class TlsSetupService {
         LOGGER.info("SSHClient parameters: stackId: {}, publicIp: {},  user: {}", stack.getId(), publicIp, user);
         SSHClient ssh = new SSHClient();
         String privateKeyLocation = tlsSecurityService.getSshPrivateFileLocation(stack.getId());
-        HostKeyVerifier hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints);
+        HostKeyVerifier hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints, stack.cloudPlatform());
         try {
             waitForSsh(stack, publicIp, hostKeyVerifier, user, privateKeyLocation);
             setupTemporarySsh(ssh, publicIp, hostKeyVerifier, user, privateKeyLocation);

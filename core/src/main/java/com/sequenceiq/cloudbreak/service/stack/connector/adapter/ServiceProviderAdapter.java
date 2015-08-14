@@ -310,7 +310,8 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
         CloudCredential cloudCredential = buildCloudCredential(stack);
         //TODO which resources?
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
-        TerminateStackRequest<TerminateStackResult> terminateRequest = new TerminateStackRequest<>(cloudContext, cloudCredential, resources);
+        CloudStack cloudStack = cloudStackConverter.convert(stack, "", "");
+        TerminateStackRequest<TerminateStackResult> terminateRequest = new TerminateStackRequest<>(cloudContext, cloudStack, cloudCredential, resources);
         LOGGER.info("Triggering terminate stack event: {}", terminateRequest);
         eventBus.notify(terminateRequest.selector(), Event.wrap(terminateRequest));
         try {
