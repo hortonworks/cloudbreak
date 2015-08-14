@@ -39,20 +39,19 @@ cloudbreak-conf-tags() {
 
 cloudbreak-conf-consul() {
     env-import DOCKER_CONSUL_OPTIONS ""
-    if ! [[ "$DOCKER_CONSUL_OPTIONS" ]]; then
-        local nameserver=$(docker run -it --rm \
+    if ! [[ $DOCKER_CONSUL_OPTIONS =~ .*recursor.* ]]; then
+        local consulRecursors=$(docker run -it --rm \
             --net=host \
             alpine \
-            sed -n "/nameserver/ {s/^.*nameserver[^0-9]*//;p;q}"  /etc/resolv.conf
+            sed -n "/nameserver/ {s/^.*nameserver[^0-9]*/-recursor /;H}; $ {x;s/\n/ /gp}" /etc/resolv.conf \
+             | sed "s/\r//g"
         )
-        if [[ "$nameserver" ]]; then
-            debug "host nameserver: $nameserver"
-            DOCKER_CONSUL_OPTIONS="-recursor $nameserver"
-        else
-            debug "no nameserver found in /etc/resolv.conf, 8.8.8.8 will be used for recursor"
+        if [[ "$consulRecursors" ]]; then
+            debug "Consul recursors found on host: $consulRecursors"
+            DOCKER_CONSUL_OPTIONS="$DOCKER_CONSUL_OPTIONS $consulRecursors"
         fi
-        
     fi
+    debug "DOCKER_CONSUL_OPTIONS=$DOCKER_CONSUL_OPTIONS"
 }
 
 cloudbreak-conf-images() {
