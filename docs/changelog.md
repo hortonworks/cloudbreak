@@ -7,6 +7,15 @@
 ### Removed
 
 ### Changed
+## Unreleased
+
+### Fixed
+
+### Added
+
+### Removed
+
+### Changed
 
 - sequenceiq/cloudbreak image updated to 1.0.1
 
