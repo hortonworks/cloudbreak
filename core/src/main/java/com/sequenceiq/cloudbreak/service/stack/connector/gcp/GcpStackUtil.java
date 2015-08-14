@@ -90,7 +90,7 @@ public class GcpStackUtil {
                     executeInstance.getNetworkInterfaces().get(0).getNetworkIP(),
                     executeInstance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP(),
                     stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup()).getTemplate().getVolumeCount(),
-                    stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup())
+                    resource.getInstanceGroup()
             );
             return coreInstanceMetaData;
         } else {

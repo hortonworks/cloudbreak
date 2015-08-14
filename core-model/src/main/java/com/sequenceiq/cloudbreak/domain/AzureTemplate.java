@@ -26,4 +26,14 @@ public class AzureTemplate extends Template implements ProvisionEntity {
         return CloudPlatform.AZURE;
     }
 
+    @Override
+    public String getInstanceTypeName() {
+        return getVmType().vmType();
+    }
+
+    @Override
+    public String getVolumeTypeName() {
+        return "HDD";
+    }
+
 }

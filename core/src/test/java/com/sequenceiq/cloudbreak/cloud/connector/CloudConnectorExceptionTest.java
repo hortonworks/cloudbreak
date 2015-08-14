@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.connector;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+
 public class CloudConnectorExceptionTest {
 
     public static final String CAUSE_MESSAGE = "This is the cause message";

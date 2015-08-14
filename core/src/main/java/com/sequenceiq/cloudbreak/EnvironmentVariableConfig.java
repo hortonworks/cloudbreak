@@ -9,8 +9,6 @@ public class EnvironmentVariableConfig {
     public static final String CB_CONTAINER_THREADPOOL_CORE_SIZE = "40";
     public static final String CB_CONTAINER_THREADPOOL_CAPACITY_SIZE = "4000";
 
-    public static final String CB_EVENTBUS_THREADPOOL_CORE_SIZE = "100";
-
     public static final String CB_CERT_DIR = "/certs/";
     public static final String CB_TLS_PRIVATE_KEY_FILE = "client-key.pem";
     public static final String CB_TLS_CERT_FILE = "client.pem";
@@ -31,8 +29,6 @@ public class EnvironmentVariableConfig {
     public static final String CB_AWS_EXTERNAL_ID = "provision-ambari";
 
     public static final String CB_AWS_CF_TEMPLATE_PATH = "templates/aws-cf-stack.ftl";
-
-    public static final String CB_OPENSTACK_HEAT_TEMPLATE_PATH = "templates/openstack-heat.ftl";
 
     public static final String CB_BLUEPRINT_DEFAULTS = "hdp-small-default,hdp-spark-cluster,hdp-streaming-cluster";
     public static final String CB_TEMPLATE_DEFAULTS = "minviable-gcp,minviable-azure,minviable-aws";

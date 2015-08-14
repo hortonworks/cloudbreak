@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.domain.Template;
 
+@EntityType(entityClass = Template.class)
 public interface TemplateRepository extends CrudRepository<Template, Long> {
 
     Template findOne(@Param("id") Long id);

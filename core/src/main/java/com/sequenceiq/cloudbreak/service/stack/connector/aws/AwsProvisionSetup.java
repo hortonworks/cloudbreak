@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AWS_SPOTINSTANCE_ENABLED;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -74,10 +73,6 @@ public class AwsProvisionSetup implements ProvisionSetup {
             }
         }
         return result;
-    }
-
-    public Map<String, Object> getSetupProperties(Stack stack) {
-        return new HashMap<>();
     }
 
     @Override

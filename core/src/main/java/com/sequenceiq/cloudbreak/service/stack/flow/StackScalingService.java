@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import static com.sequenceiq.cloudbreak.domain.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.domain.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_IN_PROGRESS;
+import static java.util.Collections.singletonMap;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
@@ -72,9 +74,8 @@ public class StackScalingService {
     private TlsSecurityService tlsSecurityService;
     @Inject
     private AmbariClusterConnector ambariClusterConnector;
-    @javax.annotation.Resource
-    private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
-
+    @Inject
+    private CloudPlatformResolver platformResolver;
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
@@ -98,9 +99,9 @@ public class StackScalingService {
 
     public Set<Resource> addInstances(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
         Stack stack = stackService.getById(stackId);
-        CloudPlatformConnector connector = cloudPlatformConnectors.get(stack.cloudPlatform());
-        Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(stack.cloudPlatform(),
-                tlsSecurityService.readPublicSshKey(stack.getId()), connector.getSSHUser());
+        CloudPlatform cloudPlatform = stack.cloudPlatform();
+        CloudPlatformConnector connector = platformResolver.connector(cloudPlatform);
+        Map<InstanceGroupType, String> userdata = buildUserData(stack, cloudPlatform, connector);
         return connector.addInstances(stack, userdata.get(InstanceGroupType.GATEWAY),
                 userdata.get(InstanceGroupType.CORE), scalingAdjustment, instanceGroupName);
     }
@@ -151,15 +152,23 @@ public class StackScalingService {
 
     private void removeInstance(Stack stack, String instanceId, String instanceGroupName) throws CloudbreakSecuritySetupException {
         Set<String> instanceIds = Sets.newHashSet(instanceId);
-        instanceIds = cloudPlatformConnectors.get(stack.cloudPlatform()).removeInstances(stack, instanceIds, instanceGroupName);
+        CloudPlatform platform = stack.cloudPlatform();
+        CloudPlatformConnector connector = platformResolver.connector(platform);
+        Map<InstanceGroupType, String> userdata = buildUserData(stack, platform, connector);
+        instanceIds = connector.removeInstances(stack, userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE),
+                instanceIds, instanceGroupName);
         updateRemovedResourcesState(stack, instanceIds, stack.getInstanceGroupByInstanceGroupName(instanceGroupName));
     }
 
     public void downscaleStack(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
         Stack stack = stackService.getById(stackId);
+        CloudPlatform platform = stack.cloudPlatform();
+        CloudPlatformConnector connector = platformResolver.connector(platform);
         Map<String, String> unregisteredHostNamesByInstanceId = getUnregisteredInstanceIds(instanceGroupName, scalingAdjustment, stack);
         Set<String> instanceIds = new HashSet<>(unregisteredHostNamesByInstanceId.keySet());
-        instanceIds = cloudPlatformConnectors.get(stack.cloudPlatform()).removeInstances(stack, instanceIds, instanceGroupName);
+        Map<InstanceGroupType, String> userdata = buildUserData(stack, platform, connector);
+        instanceIds = connector.removeInstances(stack, userdata.get(InstanceGroupType.GATEWAY),
+                userdata.get(InstanceGroupType.CORE), instanceIds, instanceGroupName);
         updateRemovedResourcesState(stack, instanceIds, stack.getInstanceGroupByInstanceGroupName(instanceGroupName));
     }
 
@@ -176,6 +185,12 @@ public class StackScalingService {
             }
         }
         return instanceIds;
+    }
+
+    private Map<InstanceGroupType, String> buildUserData(Stack stack, CloudPlatform platform, CloudPlatformConnector connector)
+            throws CloudbreakSecuritySetupException {
+        return userDataBuilder.buildUserData(platform,
+                    tlsSecurityService.readPublicSshKey(stack.getId()), connector.getSSHUser(singletonMap(ProvisioningService.PLATFORM, platform.name())));
     }
 
     private void updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) throws CloudbreakSecuritySetupException {

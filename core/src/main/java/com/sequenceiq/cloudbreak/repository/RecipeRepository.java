@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
+@EntityType(entityClass = Recipe.class)
 public interface RecipeRepository extends CrudRepository<Recipe, Long> {
 
     Recipe findOne(@Param("id") Long id);

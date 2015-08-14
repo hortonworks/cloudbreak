@@ -3,6 +3,9 @@ include 'core'
 include 'integration-test'
 include 'orchestrator-swarm'
 include 'orchestrator-api'
+include 'cloud-api'
+include 'cloud-reactor'
+include 'cloud-openstack'
 
 rootProject.name = 'cloudbreak'
 

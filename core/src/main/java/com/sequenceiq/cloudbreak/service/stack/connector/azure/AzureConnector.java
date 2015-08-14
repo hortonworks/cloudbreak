@@ -89,7 +89,7 @@ public class AzureConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public Set<String> removeInstances(Stack stack, Set<String> origInstanceIds, String instanceGroup) {
+    public Set<String> removeInstances(Stack stack, String gateWayUserData, String coreUserData, Set<String> origInstanceIds, String instanceGroup) {
         RemoveInstancesOperation removeInstancesOperation = buildAzureOperation(new RemoveInstancesOperation.Builder(), stack)
                 .withOrigInstanceIds(origInstanceIds).build();
         return removeInstancesOperation.execute();
@@ -128,7 +128,7 @@ public class AzureConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public String getSSHUser() {
+    public String getSSHUser(Map<String, String> context) {
         return EnvironmentVariableConfig.CB_GCP_AND_AZURE_USER_NAME;
     }
 

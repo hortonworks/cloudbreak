@@ -14,7 +14,7 @@ public interface MetadataSetup {
 
     Set<CoreInstanceMetaData> collectMetadata(Stack stack);
 
-    Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup);
+    Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup, Integer scalingAdjustment);
 
     InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId);
 

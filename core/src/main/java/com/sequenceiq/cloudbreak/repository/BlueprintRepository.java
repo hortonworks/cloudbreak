@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
+@EntityType(entityClass = Blueprint.class)
 public interface BlueprintRepository extends CrudRepository<Blueprint, Long> {
 
     Blueprint findOne(@Param("id") Long id);

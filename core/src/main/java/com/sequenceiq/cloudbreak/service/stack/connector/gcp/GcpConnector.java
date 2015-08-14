@@ -63,7 +63,7 @@ public class GcpConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public Set<String> removeInstances(Stack stack, Set<String> origInstanceIds, String instanceGroup) {
+    public Set<String> removeInstances(Stack stack, String gateWayUserData, String coreUserData, Set<String> origInstanceIds, String instanceGroup) {
         return cloudResourceManager.removeExistingResources(stack, origInstanceIds, gcpResourceBuilderInit);
     }
 
@@ -98,7 +98,7 @@ public class GcpConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public String getSSHUser() {
+    public String getSSHUser(Map<String, String> context) {
         return EnvironmentVariableConfig.CB_GCP_AND_AZURE_USER_NAME;
     }
 

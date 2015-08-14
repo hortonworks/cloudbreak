@@ -92,6 +92,10 @@ public abstract class Template {
 
     public abstract CloudPlatform cloudPlatform();
 
+    public abstract String getInstanceTypeName();
+
+    public abstract String getVolumeTypeName();
+
     public Long getId() {
         return id;
     }

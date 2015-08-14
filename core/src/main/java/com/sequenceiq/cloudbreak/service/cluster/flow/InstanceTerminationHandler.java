@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import static java.util.Collections.singletonMap;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -12,8 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -23,10 +27,15 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
+import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
+import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
+import com.sequenceiq.cloudbreak.service.stack.flow.ProvisioningService;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 
@@ -47,14 +56,16 @@ public class InstanceTerminationHandler {
     private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
     @javax.annotation.Resource
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
-    @javax.annotation.Resource
-    private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
     @Inject
     private CloudbreakEventService eventService;
-    @javax.annotation.Resource
-    private Map<CloudPlatform, MetadataSetup> metadataSetups;
+    @Inject
+    private CloudPlatformResolver platformResolver;
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
+    @Inject
+    private UserDataBuilder userDataBuilder;
+    @Inject
+    private TlsSecurityService tlsSecurityService;
 
     private enum Msg {
         STACK_INSTANCE_TERMINATE("stack.instance.terminate"),
@@ -93,15 +104,26 @@ public class InstanceTerminationHandler {
 
     private void deleteResourceAndDependencies(Stack stack, InstanceMetaData instanceMetaData) {
         LOGGER.info("Rolling back instance: {}", instanceMetaData.getInstanceId());
-        CloudPlatformConnector cloudPlatformConnector = cloudPlatformConnectors.get(stack.cloudPlatform());
+        CloudPlatformConnector cloudPlatformConnector = platformResolver.connector(stack.cloudPlatform());
         Set<String> instanceIds = new HashSet<>();
         instanceIds.add(instanceMetaData.getInstanceId());
-        cloudPlatformConnector.removeInstances(stack, instanceIds, instanceMetaData.getInstanceGroup().getGroupName());
+        Map<InstanceGroupType, String> userdata = buildUserData(stack, stack.cloudPlatform(), cloudPlatformConnector);
+        cloudPlatformConnector.removeInstances(stack, userdata.get(InstanceGroupType.GATEWAY),
+                userdata.get(InstanceGroupType.CORE), instanceIds, instanceMetaData.getInstanceGroup().getGroupName());
         LOGGER.info("Instance [ id: {}, name: {} ] deleted", instanceMetaData.getId(), instanceMetaData.getInstanceId());
     }
 
+    private Map<InstanceGroupType, String> buildUserData(Stack stack, CloudPlatform platform, CloudPlatformConnector connector) {
+        try {
+            return userDataBuilder.buildUserData(platform,
+                    tlsSecurityService.readPublicSshKey(stack.getId()), connector.getSSHUser(singletonMap(ProvisioningService.PLATFORM, platform.name())));
+        } catch (CloudbreakSecuritySetupException e) {
+            throw new CloudbreakServiceException(e.getMessage(), e);
+        }
+    }
+
     private void deleteInstanceResourceFromDatabase(Stack stack, InstanceMetaData instanceMetaData) {
-        MetadataSetup metadataSetup = metadataSetups.get(stack.cloudPlatform());
+        MetadataSetup metadataSetup = platformResolver.metadata(stack.cloudPlatform());
         String instanceId = instanceMetaData.getInstanceId();
         Resource resource = resourceRepository.findByStackIdAndNameAndType(stack.getId(), instanceId,
                 metadataSetup.getInstanceResourceType());

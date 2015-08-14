@@ -1,5 +1,5 @@
 package com.sequenceiq.cloudbreak.domain;
 
 public enum InstanceStatus {
-    DECOMMISSIONED, REGISTERED, UNREGISTERED, TERMINATED
+    REQUESTED, DECOMMISSIONED, REGISTERED, UNREGISTERED, TERMINATED
 }

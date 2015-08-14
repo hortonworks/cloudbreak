@@ -63,7 +63,7 @@ public class AzureMetadataSetup implements MetadataSetup {
     }
 
     @Override
-    public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup) {
+    public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup, Integer scalingAdjustment) {
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential);
         List<Resource> resources = new ArrayList<>();
@@ -106,7 +106,7 @@ public class AzureMetadataSetup implements MetadataSetup {
                         getPrivateIP((String) virtualMachine),
                         getVirtualIP((String) virtualMachine),
                         stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup()).getTemplate().getVolumeCount(),
-                        stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup())
+                        resource.getInstanceGroup()
                 );
                 return instanceMetaData;
             } catch (IOException e) {

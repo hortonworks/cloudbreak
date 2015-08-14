@@ -8,10 +8,8 @@ import static com.sequenceiq.cloudbreak.domain.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_REQUESTED;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.binary.Base64;
@@ -32,7 +30,6 @@ import com.sequenceiq.cloudbreak.core.flow.FlowManager;
 import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -50,10 +47,10 @@ import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.RemoveInstanceRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
@@ -80,8 +77,6 @@ public class DefaultStackService implements StackService {
     private SecurityConfigRepository securityConfigRepository;
     @Inject
     private FlowManager flowManager;
-    @Resource
-    private Map<CloudPlatform, ProvisionSetup> provisionSetups;
     @Inject
     private BlueprintValidator blueprintValidator;
     @Inject
@@ -92,6 +87,8 @@ public class DefaultStackService implements StackService {
     private CloudbreakEventService eventService;
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
+    @Inject
+    private CloudPlatformResolver platformResolver;
 
     private enum Msg {
         STACK_STOP_IGNORED("stack.stop.ignored"),
@@ -200,7 +197,7 @@ public class DefaultStackService implements StackService {
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
         MDCBuilder.buildMdcContext(stack);
-        String result = provisionSetups.get(stack.cloudPlatform()).preProvisionCheck(stack);
+        String result = platformResolver.provisioning(stack.cloudPlatform()).preProvisionCheck(stack);
         if (null != result) {
             throw new BadRequestException(result);
         } else {

@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PostAuthorize;
 
 import com.sequenceiq.cloudbreak.domain.Network;
 
+@EntityType(entityClass = Network.class)
 public interface NetworkRepository extends CrudRepository<Network, Long> {
 
     @PostAuthorize("hasPermission(returnObject,'read')")

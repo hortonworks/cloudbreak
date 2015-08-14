@@ -5,8 +5,6 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.conf.EventBusConfig;
-
 import reactor.bus.EventBus;
 import reactor.bus.selector.Selectors;
 
@@ -21,7 +19,7 @@ public class CloudbreakEventReactorInitializer implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        reactor.on(Selectors.$(EventBusConfig.CLOUDBREAK_EVENT), cloudbreakEventHandler);
+        reactor.on(Selectors.$(CloudbreakEventService.CLOUDBREAK_EVENT), cloudbreakEventHandler);
     }
 
 }

@@ -455,6 +455,10 @@ public class Stack implements ProvisionEntity {
         return instanceMetadata;
     }
 
+    public List<InstanceMetaData> getInstanceMetaDataAsList() {
+        return new ArrayList<>(getRunningInstanceMetaData());
+    }
+
     public List<InstanceGroup> getInstanceGroupsAsList() {
         return new ArrayList<>(instanceGroups);
     }

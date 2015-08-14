@@ -37,4 +37,14 @@ public class GcpTemplate extends Template implements ProvisionEntity {
         return CloudPlatform.GCP;
     }
 
+    @Override
+    public String getInstanceTypeName() {
+        return getGcpInstanceType().getValue();
+    }
+
+    @Override
+    public String getVolumeTypeName() {
+        return getGcpRawDiskType().name();
+    }
+
 }

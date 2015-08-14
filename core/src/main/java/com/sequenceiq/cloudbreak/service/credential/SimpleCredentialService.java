@@ -1,11 +1,9 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -19,11 +17,11 @@ import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
 @Service
@@ -37,8 +35,8 @@ public class SimpleCredentialService implements CredentialService {
     @Inject
     private StackRepository stackRepository;
 
-    @Resource
-    private Map<CloudPlatform, CredentialHandler<Credential>> credentialHandlers;
+    @Inject
+    private CloudPlatformResolver platformResolver;
 
     @Override
     public Set<Credential> retrievePrivateCredentials(CbUser user) {
@@ -70,7 +68,7 @@ public class SimpleCredentialService implements CredentialService {
         LOGGER.debug("Creating credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         credential.setOwner(user.getUserId());
         credential.setAccount(user.getAccount());
-        credentialHandlers.get(credential.cloudPlatform()).init(credential);
+        platformResolver.credential(credential.cloudPlatform()).init(credential);
         Credential savedCredential;
         try {
             savedCredential = credentialRepository.save(credential);
@@ -124,7 +122,7 @@ public class SimpleCredentialService implements CredentialService {
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", id));
         } else {
-            return credentialHandlers.get(credential.cloudPlatform()).update(credential);
+            return platformResolver.credential(credential.cloudPlatform()).update(credential);
         }
     }
 
@@ -134,7 +132,7 @@ public class SimpleCredentialService implements CredentialService {
         }
         List<Stack> stacks = stackRepository.findByCredential(credential.getId());
         if (stacks.isEmpty()) {
-            credentialHandlers.get(credential.cloudPlatform()).delete(credential);
+            platformResolver.credential(credential.cloudPlatform()).delete(credential);
             archiveCredential(credential);
         } else {
             throw new BadRequestException(String.format("Credential '%d' is in use, cannot be deleted.", credential.getId()));

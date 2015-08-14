@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
 
+@EntityType(entityClass = Stack.class)
 public interface StackRepository extends CrudRepository<Stack, Long> {
 
     Stack findOne(@Param("id") Long id);

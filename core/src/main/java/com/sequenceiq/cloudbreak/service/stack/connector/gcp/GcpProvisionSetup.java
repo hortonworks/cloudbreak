@@ -5,8 +5,6 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -95,6 +93,7 @@ public class GcpProvisionSetup implements ProvisionSetup {
         }
 
         if (isSuccess(pollingResult)) {
+            //TODO do we need credential as setup property here?
             ret = new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
                     .withSetupProperty(CREDENTIAL, stack.getCredential());
         }
@@ -122,12 +121,6 @@ public class GcpProvisionSetup implements ProvisionSetup {
     @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.GCP;
-    }
-
-    private Map<String, Object> getSetupProperties(Stack stack) {
-        Map<String, Object> properties = new HashMap<>();
-        properties.put(CREDENTIAL, stack.getCredential());
-        return properties;
     }
 
 }

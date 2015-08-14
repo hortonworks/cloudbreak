@@ -2,16 +2,15 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_CERT_DIR;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_TLS_CERT_FILE;
+import static java.util.Collections.singletonMap;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -28,6 +27,7 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
@@ -48,8 +48,8 @@ public class TlsSetupService {
     private static final int SSH_POLLING_INTERVAL = 5000;
     private static final int SSH_MAX_ATTEMPTS_FOR_HOSTS = 100;
 
-    @Resource
-    private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
+    @Inject
+    private CloudPlatformResolver platformResolver;
 
     @Inject
     private SecurityConfigRepository securityConfigRepository;
@@ -71,11 +71,11 @@ public class TlsSetupService {
 
     public void setupTls(CloudPlatform cloudPlatform, Stack stack) throws CloudbreakException {
         InstanceMetaData gateway = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
-        CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
+        CloudPlatformConnector connector = platformResolver.connector(cloudPlatform);
         LOGGER.info("SSH into gateway node to setup certificates on gateway.");
         Set<String> sshFingerprints = connector.getSSHFingerprints(stack, gateway.getInstanceId());
         LOGGER.info("Fingerprint has been determined: {}", sshFingerprints);
-        setupTls(stack, gateway.getPublicIp(), connector.getSSHUser(), sshFingerprints);
+        setupTls(stack, gateway.getPublicIp(), connector.getSSHUser(singletonMap(ProvisioningService.PLATFORM, cloudPlatform.name())), sshFingerprints);
     }
 
     private void setupTls(Stack stack, String publicIp, String user, Set<String> sshFingerprints) throws

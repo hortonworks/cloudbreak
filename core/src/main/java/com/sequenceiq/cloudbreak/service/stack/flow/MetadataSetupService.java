@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.util.Calendar;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -21,17 +20,17 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 
 @Service
 public class MetadataSetupService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MetadataSetupService.class);
 
-    @javax.annotation.Resource
-    private Map<CloudPlatform, MetadataSetup> metadataSetups;
+    @Inject
+    private CloudPlatformResolver cloudPlatformResolver;
 
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
@@ -62,9 +61,8 @@ public class MetadataSetupService {
         }
     }
 
-
     public String setupMetadata(final CloudPlatform cloudPlatform, Stack stack) throws Exception {
-        Set<CoreInstanceMetaData> coreInstanceMetaData = metadataSetups.get(cloudPlatform).collectMetadata(stack);
+        Set<CoreInstanceMetaData> coreInstanceMetaData = cloudPlatformResolver.metadata(cloudPlatform).collectMetadata(stack);
         if (coreInstanceMetaData.size() != stack.getFullNodeCount()) {
             throw new WrongMetadataException(String.format(
                     "Size of the collected metadata set does not equal the node count of the stack. [metadata size=%s] [nodecount=%s]",
@@ -73,9 +71,9 @@ public class MetadataSetupService {
         return saveInstanceMetaData(stack, coreInstanceMetaData);
     }
 
-    public Set<String> setupNewMetadata(Long stackId, Set<Resource> resources, String instanceGroupName) {
+    public Set<String> setupNewMetadata(Long stackId, Set<Resource> resources, String instanceGroupName, Integer scalingAdjustment) {
         Stack stack = stackService.getById(stackId);
-        Set<CoreInstanceMetaData> coreInstanceMetaData = collectNewMetadata(stack, resources, instanceGroupName);
+        Set<CoreInstanceMetaData> coreInstanceMetaData = collectNewMetadata(stack, resources, instanceGroupName, scalingAdjustment);
         saveInstanceMetaData(stack, coreInstanceMetaData);
         Set<String> upscaleCandidateAddresses = new HashSet<>();
         for (CoreInstanceMetaData coreInstanceMetadataEntry : coreInstanceMetaData) {
@@ -95,12 +93,13 @@ public class MetadataSetupService {
         for (CoreInstanceMetaData coreInstanceMetadataEntry : coreInstanceMetaData) {
             long timeInMillis = Calendar.getInstance().getTimeInMillis();
             InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(
-                    stack.getId(), coreInstanceMetadataEntry.getInstanceGroup().getGroupName());
+                    stack.getId(), coreInstanceMetadataEntry.getInstanceGroupName());
             InstanceMetaData instanceMetaDataEntry = new InstanceMetaData();
             instanceMetaDataEntry.setPrivateIp(coreInstanceMetadataEntry.getPrivateIp());
-            instanceMetaDataEntry.setInstanceGroup(coreInstanceMetadataEntry.getInstanceGroup());
+            instanceMetaDataEntry.setInstanceGroup(instanceGroup);
             instanceMetaDataEntry.setPublicIp(coreInstanceMetadataEntry.getPublicIp());
             instanceMetaDataEntry.setInstanceId(coreInstanceMetadataEntry.getInstanceId());
+            instanceMetaDataEntry.setPrivateId(coreInstanceMetadataEntry.getPrivateId());
             instanceMetaDataEntry.setVolumeCount(coreInstanceMetadataEntry.getVolumeCount());
             instanceMetaDataEntry.setDockerSubnet(null);
             instanceMetaDataEntry.setContainerCount(coreInstanceMetadataEntry.getContainerCount());
@@ -124,9 +123,9 @@ public class MetadataSetupService {
         return ambariServerIP;
     }
 
-    private Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resources, String instanceGroup) {
+    private Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resources, String instanceGroup, Integer scalingAdjustment) {
         try {
-            return metadataSetups.get(stack.cloudPlatform()).collectNewMetadata(stack, resources, instanceGroup);
+            return cloudPlatformResolver.metadata(stack.cloudPlatform()).collectNewMetadata(stack, resources, instanceGroup, scalingAdjustment);
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occurred while updating stack metadata.", e);
             throw e;

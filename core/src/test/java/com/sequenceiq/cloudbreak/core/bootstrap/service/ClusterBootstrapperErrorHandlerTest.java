@@ -31,18 +31,21 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
+import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
+import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 
@@ -68,7 +71,7 @@ public class ClusterBootstrapperErrorHandlerTest {
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
 
     @Mock
-    private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
+    private CloudPlatformResolver platformResolver;
 
     @Mock
     private CloudbreakEventService eventService;
@@ -87,6 +90,12 @@ public class ClusterBootstrapperErrorHandlerTest {
 
     @Mock
     private CloudbreakMessagesService cloudbreakMessagesService;
+
+    @Mock
+    private UserDataBuilder userDataBuilder;
+
+    @Mock
+    private TlsSecurityService tlsSecurityService;
 
     @InjectMocks
     private ClusterBootstrapperErrorHandler underTest;
@@ -138,12 +147,12 @@ public class ClusterBootstrapperErrorHandlerTest {
         when(orchestrator.getAvailableNodes(any(GatewayConfig.class), anySet())).thenReturn(new ArrayList<String>());
         when(instanceGroupRepository.save(any(InstanceGroup.class))).then(returnsFirstArg());
         when(instanceMetaDataRepository.save(any(InstanceMetaData.class))).then(returnsFirstArg());
-        when(cloudPlatformConnectors.get(any(CloudPlatform.class))).thenReturn(cloudPlatformConnector);
-        when(metadataSetups.get(any(CloudPlatform.class))).thenReturn(metadataSetup);
+        when(platformResolver.connector(any(CloudPlatform.class))).thenReturn(cloudPlatformConnector);
+        when(platformResolver.metadata(any(CloudPlatform.class))).thenReturn(metadataSetup);
         when(metadataSetup.getInstanceResourceType()).thenReturn(ResourceType.AZURE_VIRTUAL_MACHINE);
         doNothing().when(resourceRepository).delete(anyLong());
         when(resourceRepository.findByStackIdAndNameAndType(anyLong(), anyString(), any(ResourceType.class))).thenReturn(new Resource());
-        when(cloudPlatformConnector.removeInstances(any(Stack.class), anySet(), anyString())).thenReturn(new HashSet<String>());
+        when(cloudPlatformConnector.removeInstances(any(Stack.class), anyString(), anyString(), anySet(), anyString())).thenReturn(new HashSet<String>());
         when(instanceMetaDataRepository.findNotTerminatedByPrivateAddress(anyLong(), anyString())).thenAnswer(new Answer<InstanceMetaData>() {
             @Override
             public InstanceMetaData answer(InvocationOnMock invocation) {
@@ -177,11 +186,11 @@ public class ClusterBootstrapperErrorHandlerTest {
         verify(eventService, times(4)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
         verify(instanceGroupRepository, times(3)).save(any(InstanceGroup.class));
         verify(instanceMetaDataRepository, times(3)).save(any(InstanceMetaData.class));
-        verify(cloudPlatformConnectors, times(3)).get(any(CloudPlatform.class));
-        verify(cloudPlatformConnector, times(3)).removeInstances(any(Stack.class), anySet(), anyString());
+        verify(platformResolver, times(3)).connector(any(CloudPlatform.class));
+        verify(cloudPlatformConnector, times(3)).removeInstances(any(Stack.class), anyString(), anyString(), anySet(), anyString());
         verify(metadataSetup, times(3)).getInstanceResourceType();
         verify(resourceRepository, times(3)).findByStackIdAndNameAndType(anyLong(), anyString(), any(ResourceType.class));
-        verify(metadataSetups, times(3)).get(any(CloudPlatform.class));
+        verify(platformResolver, times(3)).metadata(any(CloudPlatform.class));
         verify(resourceRepository, times(3)).delete(anyLong());
         verify(instanceGroupRepository, times(3)).findOneByGroupNameInStack(anyLong(), anyString());
 

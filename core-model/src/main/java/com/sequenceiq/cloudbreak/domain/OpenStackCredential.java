@@ -5,7 +5,9 @@ import javax.persistence.Entity;
 @Entity
 public class OpenStackCredential extends Credential implements ProvisionEntity {
 
+    @Encrypted
     private String userName;
+    @Encrypted
     private String password;
     private String tenantName;
     private String endpoint;
