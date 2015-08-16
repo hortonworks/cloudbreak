@@ -236,7 +236,7 @@ identity:
     links:
         - ambassador:mydb
     volumes:
-      - uaa.yml:/uaa/uaa.yml
+      - ./uaa.yml:/uaa/uaa.yml
     image: sequenceiq/uaa:$DOCKER_TAG_UAA
 
 cbdb:
