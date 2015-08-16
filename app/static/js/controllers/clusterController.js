@@ -88,7 +88,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         $scope.selectedBlueprintChange = function () {
           var tmpCloudPlatform = $rootScope.activeCredential.cloudPlatform;
-          var tmpTemplate = $filter('filter')($rootScope.templates, {cloudPlatform: tmpCloudPlatform}, true)[0];
+          var tmpTemplate = $filter('filter')($rootScope.templates, {cloudPlatform: tmpCloudPlatform.split("_")[0]}, true)[0];
           var tmpTemplateId = null;
           if (tmpTemplate != null) {
             tmpTemplateId = tmpTemplate.id;

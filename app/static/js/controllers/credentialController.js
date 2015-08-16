@@ -8,26 +8,38 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
         $scope.credentialInCreation = false;
         $scope.credentialAws = {};
         $scope.credentialAzure = {};
+        $scope.credentialAzureRm = {};
         $scope.credentialGcp = {};
         $scope.credentialOpenstack = {};
         $scope.azureCredential = false;
+        $scope.azureRmCredential = false;
         $scope.awsCredential = true;
         $scope.gcpCredential = false;
-        $scope.oepnstackCredential = false;
+        $scope.openstackCredential = false;
         $scope.awsCredentialForm = {};
         $scope.gcpCredentialForm = {};
         $scope.azureCredentialForm = {};
+        $scope.azureRmCredentialForm = {};
         $scope.openstackCredentialForm = {};
         $scope.gcp = {};
         $scope.gcp.p12 = "";
         $scope.showAlert = false;
         $scope.alertMessage = "";
 
+        $scope.createAzureRmCredentialRequest = function() {
+            $scope.azureCredential = false;
+            $scope.awsCredential = false;
+            $scope.gcpCredential = false;
+            $scope.openstackCredential = false;
+            $scope.azureRmCredential = true;
+        }
+
         $scope.createAwsCredentialRequest = function() {
             $scope.azureCredential = false;
             $scope.awsCredential = true;
             $scope.gcpCredential = false;
             $scope.openstackCredential = false;
+            $scope.azureRmCredential = false;
         }
 
         $scope.createAzureCredentialRequest = function() {
@@ -35,6 +47,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             $scope.awsCredential = false;
             $scope.gcpCredential = false;
             $scope.openstackCredential = false;
+            $scope.azureRmCredential = false;
         }
 
         $scope.createGcpCredentialRequest = function() {
@@ -42,6 +55,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             $scope.awsCredential = false;
             $scope.gcpCredential = true;
             $scope.openstackCredential = false;
+            $scope.azureRmCredential = false;
         }
 
         $scope.createOpenstackCredentialRequest = function() {
@@ -49,6 +63,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
           $scope.awsCredential = false;
           $scope.gcpCredential = false;
           $scope.openstackCredential = true;
+          $scope.azureRmCredential = false;
         }
 
         $scope.refreshCertificateFile = function(credentialId) {
@@ -161,6 +176,41 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             }
 
         }
+
+         $scope.createAzureRmCredential = function() {
+            $scope.credentialAzureRm.cloudPlatform = "AZURE_RM";
+            $scope.credentialAzureRm.publicKey = $base64.encode($scope.credentialAzureRm.publicKey)
+
+            if ($scope.credentialAzureRm.public){
+                AccountCredential.save($scope.credentialAzureRm, function(result){
+                    handleAzureRmCredentialSuccess(result)
+                }, function (error) {
+                    $scope.showError(error, $rootScope.msg.azure_rm_credential_failed);
+                    $scope.credentialInCreation = false;
+                    $scope.credentialAzureRm.publicKey = $base64.decode($scope.credentialAzureRm.publicKey);
+                    $scope.showErrorMessageAlert();
+                });
+            } else {
+                UserCredential.save($scope.credentialAzureRm, function(result){
+                    handleAzureRmCredentialSuccess(result)
+                }, function (error) {
+                    $scope.showError(error, $rootScope.msg.azure_rm_credential_failed);
+                    $scope.credentialInCreation = false;
+                    $scope.credentialAzureRm.publicKey = $base64.decode($scope.credentialAzureRm.publicKey);
+                    $scope.showErrorMessageAlert();
+                });
+            }
+
+             function handleAzureRmCredentialSuccess(result) {
+                $scope.credentialAzureRm.id = result.id;
+                $rootScope.credentials.push($scope.credentialAzureRm);
+                $scope.credentialAzureRm = {};
+                $scope.showSuccess($filter("format")($rootScope.msg.azure_credential_success, result.id));
+                $scope.azureRmCredentialForm.$setPristine();
+                collapseCreateCredentialFormPanel();
+                $scope.unShowErrorMessageAlert();
+             }
+         }
 
         $scope.createGcpCredential = function() {
             $scope.credentialGcp.cloudPlatform = "GCP";
