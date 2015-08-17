@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.sequenceiq.cloudbreak.cloud.handler.ConsumerNotFoundHandler;
 
 import reactor.Environment;
@@ -23,7 +24,8 @@ public class EventBusConfig {
 
     @Bean
     public ListeningScheduledExecutorService listeningScheduledExecutorService() {
-        return MoreExecutors.listeningDecorator(new ScheduledThreadPoolExecutor(eventBusThreadPoolSize));
+        return MoreExecutors.listeningDecorator(new ScheduledThreadPoolExecutor(eventBusThreadPoolSize,
+                new ThreadFactoryBuilder().setNameFormat("openstackEventBus-%d").build()));
     }
 
     @Bean

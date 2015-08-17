@@ -39,6 +39,6 @@ public class EventBusConfig {
     }
 
     private ThreadPoolExecutorDispatcher getEventBusDispatcher() {
-        return new ThreadPoolExecutorDispatcher(eventBusThreadPoolSize, eventBusThreadPoolSize);
+        return new ThreadPoolExecutorDispatcher(eventBusThreadPoolSize, eventBusThreadPoolSize, "reactorDispatcher");
     }
 }
