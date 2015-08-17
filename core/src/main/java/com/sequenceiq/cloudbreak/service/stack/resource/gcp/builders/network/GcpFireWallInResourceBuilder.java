@@ -12,13 +12,13 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Firewall;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.base.Optional;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceNameService;
 import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -34,13 +34,12 @@ import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceCheckerS
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpResourceReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
-import com.sequenceiq.cloudbreak.service.stack.resource.ResourceNameService;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.GcpSimpleNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpUpdateContextObject;
 
-@Component
+//@Component
 @Order(3)
 public class GcpFireWallInResourceBuilder extends GcpSimpleNetworkResourceBuilder {
 

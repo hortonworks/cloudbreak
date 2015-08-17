@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.task;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
@@ -12,6 +13,11 @@ public class ResourcesStatePollerResult {
     private ResourceStatus status;
     private String statusReason;
     private List<CloudResourceStatus> results;
+
+    public ResourcesStatePollerResult(CloudContext cloudContext) {
+        this.cloudContext = cloudContext;
+        this.results = new ArrayList<>();
+    }
 
     public ResourcesStatePollerResult(CloudContext cloudContext, ResourceStatus status, String statusReason, List<CloudResourceStatus> results) {
         this.cloudContext = cloudContext;
@@ -34,6 +40,22 @@ public class ResourcesStatePollerResult {
 
     public List<CloudResourceStatus> getResults() {
         return results;
+    }
+
+    public void setCloudContext(CloudContext cloudContext) {
+        this.cloudContext = cloudContext;
+    }
+
+    public void setStatus(ResourceStatus status) {
+        this.status = status;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
+    }
+
+    public void addResults(List<CloudResourceStatus> results) {
+        this.results.addAll(results);
     }
 
     @Override

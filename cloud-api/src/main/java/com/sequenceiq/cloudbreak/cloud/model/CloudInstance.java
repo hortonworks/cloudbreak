@@ -1,17 +1,24 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-public class CloudInstance {
+import java.util.Map;
+
+public class CloudInstance extends DynamicModel {
 
     private String instanceId;
-
     private CloudInstanceMetaData metaData;
-
     private InstanceTemplate template;
 
     public CloudInstance(String instanceId, CloudInstanceMetaData metaData, InstanceTemplate template) {
         this.instanceId = instanceId;
         this.metaData = metaData;
         this.template = template;
+    }
+
+    public CloudInstance(String instanceId, CloudInstanceMetaData metaData, InstanceTemplate template, Map<String, Object> params) {
+        this.instanceId = instanceId;
+        this.metaData = metaData;
+        this.template = template;
+        putAll(params);
     }
 
     public String getInstanceId() {
@@ -26,15 +33,13 @@ public class CloudInstance {
         return template;
     }
 
-    //BEGIN GENERATED CODE
     @Override
     public String toString() {
-        return "CloudInstance{" +
-                "instanceId='" + instanceId + '\'' +
-                ", metaData=" + metaData +
-                ", template=" + template +
-                '}';
+        final StringBuilder sb = new StringBuilder("CloudInstance{");
+        sb.append("instanceId='").append(instanceId).append('\'');
+        sb.append(", metaData=").append(metaData);
+        sb.append(", template=").append(template);
+        sb.append('}');
+        return sb.toString();
     }
-
-    //END GENERATED CODE
 }

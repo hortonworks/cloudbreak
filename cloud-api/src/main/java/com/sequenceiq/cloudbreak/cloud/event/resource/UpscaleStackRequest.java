@@ -10,28 +10,20 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 public class UpscaleStackRequest<T> extends CloudStackRequest<T> {
 
     private List<CloudResource> resourceList;
-    private int adjustment;
 
-    public UpscaleStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack, List<CloudResource> resourceList,
-            int adjustment) {
-        super(cloudContext, cloudCredential, cloudStack);
+    public UpscaleStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack stack, List<CloudResource> resourceList) {
+        super(cloudContext, cloudCredential, stack);
         this.resourceList = resourceList;
-        this.adjustment = adjustment;
     }
 
     public List<CloudResource> getResourceList() {
         return resourceList;
     }
 
-    public int getAdjustment() {
-        return adjustment;
-    }
-
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("UpscaleStackRequest{");
         sb.append("resourceList=").append(resourceList);
-        sb.append(", adjustment=").append(adjustment);
         sb.append('}');
         return sb.toString();
     }

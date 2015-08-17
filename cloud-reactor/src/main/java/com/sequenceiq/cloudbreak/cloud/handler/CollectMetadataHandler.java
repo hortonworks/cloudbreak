@@ -33,20 +33,17 @@ public class CollectMetadataHandler implements CloudPlatformEventHandler<Collect
     @Override
     public void accept(Event<CollectMetadataRequest> launchStackRequestEvent) {
         LOGGER.info("Received event: {}", launchStackRequestEvent);
-        CollectMetadataRequest<CollectMetadataResult> collectMetadataRequest = launchStackRequestEvent.getData();
+        CollectMetadataRequest<CollectMetadataResult> request = launchStackRequestEvent.getData();
         try {
-            String platform = collectMetadataRequest.getCloudContext().getPlatform();
+            String platform = request.getCloudContext().getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
-            AuthenticatedContext ac = connector.authenticate(collectMetadataRequest.getCloudContext(), collectMetadataRequest.getCloudCredential());
-
-            List<CloudVmInstanceStatus> instanceStatuses = connector.instances().collectMetadata(ac, collectMetadataRequest.getCloudResource(),
-                    collectMetadataRequest.getVms());
-
-            CollectMetadataResult collectMetadataResult = new CollectMetadataResult(collectMetadataRequest.getCloudContext(), instanceStatuses);
-            collectMetadataRequest.getResult().onNext(collectMetadataResult);
+            AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
+            List<CloudVmInstanceStatus> instanceStatuses = connector.instances().metadata().collect(ac, request.getCloudResource(), request.getVms());
+            CollectMetadataResult collectMetadataResult = new CollectMetadataResult(request.getCloudContext(), instanceStatuses);
+            request.getResult().onNext(collectMetadataResult);
             LOGGER.info("Metadata collection successfully finished");
         } catch (Exception e) {
-            collectMetadataRequest.getResult().onNext(new CollectMetadataResult(collectMetadataRequest.getCloudContext(), e));
+            request.getResult().onNext(new CollectMetadataResult(request.getCloudContext(), e));
         }
     }
 

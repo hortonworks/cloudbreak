@@ -44,7 +44,7 @@ public class ArmTemplateUtils {
 
     public CloudResourceStatus templateStatus(CloudResource resource, Map<String, Object> templateDeployment) {
         String status = ((Map) templateDeployment.get("properties")).get("provisioningState").toString();
-        LOGGER.info("Arm stack status of: {}  is: {}", resource.getReference(), status);
+        LOGGER.info("Arm stack status of: {}  is: {}", resource.getName(), status);
         CloudResourceStatus armResourceStatus = new CloudResourceStatus(resource, ArmStackStatus.mapResourceStatus(status));
         LOGGER.debug("Cloudresource status: {}", armResourceStatus);
         return armResourceStatus;

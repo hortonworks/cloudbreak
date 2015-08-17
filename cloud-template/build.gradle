@@ -1,0 +1,25 @@
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+version = '1.0'
+
+repositories {
+    maven { url 'http://repo.spring.io/libs-release' }
+    mavenCentral()
+}
+
+jar {
+    baseName = 'cloud-template'
+}
+
+dependencies {
+
+    compile project(':cloud-api')
+    compile project(':cloud-common')
+    compile project(':cloud-reactor')
+
+    compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
+    compile group: 'org.springframework',           name: 'spring-context-support',         version: '4.0.3.RELEASE'
+    compile group: 'javax',                         name: 'javaee-api',                     version: '7.0'
+
+}

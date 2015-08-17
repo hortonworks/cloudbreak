@@ -30,10 +30,8 @@ public class StartStackHandler implements CloudPlatformEventHandler<StartInstanc
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
-
     @Inject
     private PollTaskFactory statusCheckFactory;
-
     @Inject
     private SyncPollingScheduler<InstancesStatusResult> syncPollingScheduler;
 
@@ -50,10 +48,9 @@ public class StartStackHandler implements CloudPlatformEventHandler<StartInstanc
         try {
             String platform = cloudContext.getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
-            AuthenticatedContext authenticatedContext = connector.authenticate(cloudContext, request.getCloudCredential());
+            AuthenticatedContext authenticatedContext = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudInstance> instances = request.getCloudInstances();
-            List<CloudVmInstanceStatus> instanceStatuses = connector.instances().start(authenticatedContext, instances);
-
+            List<CloudVmInstanceStatus> instanceStatuses = connector.instances().start(authenticatedContext, request.getResources(), instances);
             PollTask<InstancesStatusResult> task = statusCheckFactory.newPollInstanceStateTask(authenticatedContext, instances);
             InstancesStatusResult statusResult = new InstancesStatusResult(cloudContext, instanceStatuses);
             if (!task.completed(statusResult)) {

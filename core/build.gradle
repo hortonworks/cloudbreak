@@ -70,16 +70,15 @@ dependencies {
     compile group: 'dnsjava',                       name: 'dnsjava',                        version: '2.1.7'
 
     compile project(':core-model')
+    compile project(':orchestrator-api')
+    compile project(':cloud-api')
+    compile project(':cloud-common')
 
     runtime project(':orchestrator-swarm')
-    compile project(':orchestrator-api')
-
-    compile project(':cloud-api')
     runtime project(':cloud-reactor')
     runtime project(':cloud-openstack')
     runtime project(':cloud-arm')
-
-    compile project(':cloud-common')
+    runtime project(':cloud-gcp')
 
     runtime     group: 'activation',                name: 'activation',                     version: '1.0.2'
 

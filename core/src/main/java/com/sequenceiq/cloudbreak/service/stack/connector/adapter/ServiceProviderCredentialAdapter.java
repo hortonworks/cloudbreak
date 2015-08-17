@@ -13,6 +13,8 @@ import com.sequenceiq.cloudbreak.cloud.event.credential.DeleteCredentialRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.DeleteCredentialResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -57,6 +59,10 @@ public class ServiceProviderCredentialAdapter implements CredentialHandler<Crede
             LOGGER.info("Result: {}", res);
             if (res.getStatus() != EventStatus.OK) {
                 throw new OperationException("Failed to setup provisioning", cloudContext, res.getErrorDetails());
+            }
+            if (CredentialStatus.FAILED.equals(res.getCloudCredentialStatus().getStatus())) {
+                throw new BadRequestException("Failed to setup provisioning: " + res.getCloudCredentialStatus().getStatusReason(),
+                        res.getCloudCredentialStatus().getException());
             }
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing provisioning setup", e);

@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil.createContainer;
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil.startContainer;
 
+import java.util.Arrays;
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -48,4 +49,13 @@ public class MunchausenBootstrap implements ContainerBootstrap {
         return true;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("MunchausenBootstrap{");
+        sb.append("docker=").append(docker);
+        sb.append(", cmd=").append(Arrays.toString(cmd));
+        sb.append(", containerName='").append(containerName).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

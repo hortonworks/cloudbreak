@@ -4,7 +4,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -14,7 +13,6 @@ import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcp.GcpStackUtil;
 
-@Component
 public class GcpCredentialHandler implements CredentialHandler<GcpCredential> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpCredentialHandler.class);

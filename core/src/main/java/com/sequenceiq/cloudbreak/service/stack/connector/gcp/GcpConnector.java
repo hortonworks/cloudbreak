@@ -9,7 +9,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.EnvironmentVariableConfig;
@@ -28,7 +27,8 @@ import com.sequenceiq.cloudbreak.service.stack.connector.ParallelCloudResourceMa
 import com.sequenceiq.cloudbreak.service.stack.flow.FingerprintParserUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.builders.GcpResourceBuilderInit;
 
-@Service
+//TODO
+//@Service
 public class GcpConnector implements CloudPlatformConnector {
     protected static final int POLLING_INTERVAL = 5000;
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpConnector.class);

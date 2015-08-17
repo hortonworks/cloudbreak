@@ -31,10 +31,8 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
-
     @Inject
     private PollTaskFactory statusCheckFactory;
-
     @Inject
     private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
 
@@ -46,37 +44,36 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
     @Override
     public void accept(Event<TerminateStackRequest> terminateStackRequestEvent) {
         LOGGER.info("Received event: {}", terminateStackRequestEvent);
-        TerminateStackRequest terminateStackRequest = terminateStackRequestEvent.getData();
-        TerminateStackResult terminateStackResult;
+        TerminateStackRequest request = terminateStackRequestEvent.getData();
         try {
-            String platform = terminateStackRequest.getCloudContext().getPlatform();
+            String platform = request.getCloudContext().getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
-            AuthenticatedContext ac = connector.authenticate(terminateStackRequest.getCloudContext(), terminateStackRequest.getCloudCredential());
-            List<CloudResourceStatus> resourceStatus = connector.resources().terminate(ac, terminateStackRequest.getCloudStack(),
-                    terminateStackRequest.getCloudResources());
+            AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
+            List<CloudResourceStatus> resourceStatus = connector.resources().terminate(ac, request.getCloudStack(), request.getCloudResources());
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
+            TerminateStackResult result;
             if (!resources.isEmpty()) {
                 PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourceTerminationTask(ac, resources);
-                ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(terminateStackRequest.getCloudContext(), resourceStatus);
+                ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(request.getCloudContext(), resourceStatus);
                 if (!task.completed(statePollerResult)) {
                     statePollerResult = syncPollingScheduler.schedule(task);
                 }
-
                 if (!statePollerResult.getStatus().equals(ResourceStatus.DELETED)) {
                     String statusReason = "Stack could not be terminated, Resource(s) could not be deleted on the provider side.";
-                    terminateStackResult = new TerminateStackResult(statusReason, null, terminateStackRequest);
+                    result = new TerminateStackResult(statusReason, null, request);
                     LOGGER.info(statusReason);
                 } else {
-                    terminateStackResult = new TerminateStackResult(terminateStackRequest);
+                    result = new TerminateStackResult(request);
                 }
             } else {
-                terminateStackResult = new TerminateStackResult(terminateStackRequest);
+                result = new TerminateStackResult(request);
             }
-            terminateStackRequest.getResult().onNext(terminateStackResult);
+            request.getResult().onNext(result);
             LOGGER.info("TerminateStackHandler finished");
         } catch (Exception e) {
             LOGGER.error("Failed to handle TerminateStackRequest: {}", e);
-            terminateStackRequest.getResult().onNext(new TerminateStackResult("Stack termination failed.", e, terminateStackRequest));
+            request.getResult().onNext(new TerminateStackResult("Stack termination failed.", e, request));
         }
     }
+
 }

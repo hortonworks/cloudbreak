@@ -28,21 +28,20 @@ public class CreateCredentialHandler implements CloudPlatformEventHandler<Create
         return CreateCredentialRequest.class;
     }
 
-
     @Override
     public void accept(Event<CreateCredentialRequest> createCredentialRequestEvent) {
         LOGGER.info("Received event: {}", createCredentialRequestEvent);
-        CreateCredentialRequest createCredentialRequest = createCredentialRequestEvent.getData();
+        CreateCredentialRequest request = createCredentialRequestEvent.getData();
         try {
-            String platform = createCredentialRequest.getCloudContext().getPlatform();
+            String platform = request.getCloudContext().getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
-            AuthenticatedContext ac = connector.authenticate(createCredentialRequest.getCloudContext(), createCredentialRequest.getCloudCredential());
+            AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
             CloudCredentialStatus cloudCredentialStatus = connector.credentials().create(ac);
-            CreateCredentialResult createCredentialResult = new CreateCredentialResult(createCredentialRequest, cloudCredentialStatus);
-            createCredentialRequest.getResult().onNext(createCredentialResult);
+            CreateCredentialResult createCredentialResult = new CreateCredentialResult(request, cloudCredentialStatus);
+            request.getResult().onNext(createCredentialResult);
             LOGGER.info("Create credential successfully finished");
         } catch (Exception e) {
-            createCredentialRequest.getResult().onNext(new CreateCredentialResult(e.getMessage(), e, createCredentialRequest));
+            request.getResult().onNext(new CreateCredentialResult(e.getMessage(), e, request));
         }
     }
 

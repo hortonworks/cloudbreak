@@ -8,7 +8,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
@@ -25,7 +24,7 @@ import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpProvisionCo
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpStartStopContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcp.model.GcpUpdateContextObject;
 
-@Component
+//@Component
 public class GcpResourceBuilderInit implements
         ResourceBuilderInit<GcpProvisionContextObject, GcpDeleteContextObject, GcpStartStopContextObject, GcpUpdateContextObject> {
 

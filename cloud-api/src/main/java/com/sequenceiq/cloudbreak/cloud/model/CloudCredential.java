@@ -5,9 +5,7 @@ import java.util.Map;
 public class CloudCredential extends DynamicModel {
 
     private String name;
-
     private String publicKey;
-
 
     public CloudCredential(String name, String publicKey) {
         this.name = name;
@@ -26,4 +24,9 @@ public class CloudCredential extends DynamicModel {
     public String getPublicKey() {
         return publicKey;
     }
+
+    public Long getId() {
+        return getParameter("id", Long.class);
+    }
+
 }

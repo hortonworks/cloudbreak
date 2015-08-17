@@ -28,21 +28,20 @@ public class DeleteCredentialHandler implements CloudPlatformEventHandler<Delete
         return DeleteCredentialRequest.class;
     }
 
-
     @Override
     public void accept(Event<DeleteCredentialRequest> deleteCredentialRequestEvent) {
         LOGGER.info("Received event: {}", deleteCredentialRequestEvent);
-        DeleteCredentialRequest deleteCredentialRequest = deleteCredentialRequestEvent.getData();
+        DeleteCredentialRequest request = deleteCredentialRequestEvent.getData();
         try {
-            String platform = deleteCredentialRequest.getCloudContext().getPlatform();
+            String platform = request.getCloudContext().getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
-            AuthenticatedContext ac = connector.authenticate(deleteCredentialRequest.getCloudContext(), deleteCredentialRequest.getCloudCredential());
+            AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
             CloudCredentialStatus cloudCredentialStatus = connector.credentials().delete(ac);
-            DeleteCredentialResult deleteCredentialResult = new DeleteCredentialResult(deleteCredentialRequest, cloudCredentialStatus);
-            deleteCredentialRequest.getResult().onNext(deleteCredentialResult);
+            DeleteCredentialResult deleteCredentialResult = new DeleteCredentialResult(request, cloudCredentialStatus);
+            request.getResult().onNext(deleteCredentialResult);
             LOGGER.info("Delete credential finished");
         } catch (Exception e) {
-            deleteCredentialRequest.getResult().onNext(new DeleteCredentialResult(e.getMessage(), e, deleteCredentialRequest));
+            request.getResult().onNext(new DeleteCredentialResult(e.getMessage(), e, request));
         }
     }
 

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter.spi;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
@@ -37,14 +39,18 @@ public class StackToCloudStackConverter {
     }
 
     public CloudStack convert(Stack stack, String coreUserData, String gateWayUserData) {
-        List<Group> instanceGroups = buildInstanceGroups(stack.getInstanceGroupsAsList());
+        return convert(stack, coreUserData, gateWayUserData, Collections.<String>emptySet());
+    }
+
+    public CloudStack convert(Stack stack, String coreUserData, String gateWayUserData, Set<String> deleteRequestedInstances) {
+        List<Group> instanceGroups = buildInstanceGroups(stack.getInstanceGroupsAsList(), deleteRequestedInstances);
         Image image = buildImage(stack, coreUserData, gateWayUserData);
         Network network = buildNetwork(stack);
         Security security = buildSecurity(stack);
         return new CloudStack(instanceGroups, network, security, image, stack.getRegion());
     }
 
-    public List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups) {
+    public List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, Set<String> deleteRequestedInstances) {
         // sort by name to avoid shuffling the different instance groups
         Collections.sort(instanceGroups);
         List<Group> groups = new ArrayList<>();
@@ -55,13 +61,15 @@ public class StackToCloudStackConverter {
             int desiredNodeCount = instanceGroup.getNodeCount();
             // existing instances
             for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
-                group.addInstance(buildInstanceTemplate(template, instanceGroup.getGroupName(), instanceMetaData.getPrivateId()));
+                InstanceStatus status = deleteRequestedInstances.contains(
+                        instanceMetaData.getInstanceId()) ? InstanceStatus.DELETE_REQUESTED : InstanceStatus.CREATED;
+                group.addInstance(buildInstanceTemplate(template, instanceGroup.getGroupName(), instanceMetaData.getPrivateId(), status));
             }
             // new instances
             int existingNodesSize = group.getInstances().size();
             if (existingNodesSize < desiredNodeCount) {
                 for (long i = 0; i < desiredNodeCount - existingNodesSize; i++) {
-                    group.addInstance(buildInstanceTemplate(template, instanceGroup.getGroupName(), privateId++));
+                    group.addInstance(buildInstanceTemplate(template, instanceGroup.getGroupName(), privateId++, InstanceStatus.CREATE_REQUESTED));
                 }
             }
             groups.add(group);
@@ -70,7 +78,7 @@ public class StackToCloudStackConverter {
     }
 
     public List<InstanceTemplate> buildInstanceTemplates(Stack stack) {
-        List<Group> groups = buildInstanceGroups(stack.getInstanceGroupsAsList());
+        List<Group> groups = buildInstanceGroups(stack.getInstanceGroupsAsList(), Collections.<String>emptySet());
         List<InstanceTemplate> instanceTemplates = new ArrayList<>();
         for (Group group : groups) {
             instanceTemplates.addAll(group.getInstances());
@@ -78,8 +86,8 @@ public class StackToCloudStackConverter {
         return instanceTemplates;
     }
 
-    public InstanceTemplate buildInstanceTemplate(Template template, String name, long privateId) {
-        InstanceTemplate instance = new InstanceTemplate(template.getInstanceTypeName(), name, privateId);
+    public InstanceTemplate buildInstanceTemplate(Template template, String name, long privateId, InstanceStatus status) {
+        InstanceTemplate instance = new InstanceTemplate(template.getInstanceTypeName(), name, privateId, status);
         for (int i = 0; i < template.getVolumeCount(); i++) {
             Volume volume = new Volume(VolumeUtils.VOLUME_PREFIX + (i + 1), template.getVolumeTypeName(), template.getVolumeSize());
             instance.addVolume(volume);

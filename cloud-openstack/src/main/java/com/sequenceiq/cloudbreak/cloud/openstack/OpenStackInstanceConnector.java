@@ -14,12 +14,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
+import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.openstack.status.NovaInstanceStatus;
 
 @Service
@@ -30,7 +30,6 @@ public class OpenStackInstanceConnector implements InstanceConnector {
 
     @Inject
     private OpenStackClient openStackClient;
-
     @Inject
     private OpenStackMetadataCollector metadataCollector;
 
@@ -41,17 +40,17 @@ public class OpenStackInstanceConnector implements InstanceConnector {
     }
 
     @Override
-    public List<CloudVmInstanceStatus> collectMetadata(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<InstanceTemplate> vms) {
-        return metadataCollector.collectVmMetadata(authenticatedContext, resources, vms);
+    public MetadataCollector metadata() {
+        return metadataCollector;
     }
 
     @Override
-    public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudInstance> vms) {
+    public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         return executeAction(ac, vms, Action.START);
     }
 
     @Override
-    public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudInstance> vms) {
+    public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         return executeAction(ac, vms, Action.STOP);
     }
 

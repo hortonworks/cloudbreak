@@ -25,4 +25,14 @@ public class Volume {
     public int getSize() {
         return size;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Volume{");
+        sb.append("mount='").append(mount).append('\'');
+        sb.append(", type='").append(type).append('\'');
+        sb.append(", size=").append(size);
+        sb.append('}');
+        return sb.toString();
+    }
 }

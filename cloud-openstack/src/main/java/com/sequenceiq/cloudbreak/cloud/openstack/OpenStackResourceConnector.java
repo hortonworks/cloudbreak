@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.openstack;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -18,12 +19,15 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceAllocationPersisted;
+import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 
 import reactor.rx.Promise;
@@ -60,7 +64,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
 
 
         CloudResource cloudResource = new CloudResource(ResourceType.HEAT_STACK, heatStack.getId());
-        Promise<ResourceAllocationPersisted> promise = notifier.notifyResourceAllocation(cloudResource, authenticatedContext.getCloudContext());
+        Promise<ResourcePersisted> promise = notifier.notifyAllocation(cloudResource, authenticatedContext.getCloudContext());
         try {
             promise.await();
         } catch (Exception e) {
@@ -81,7 +85,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
         for (CloudResource resource : resources) {
             switch (resource.getType()) {
                 case HEAT_STACK:
-                    String heatStackId = resource.getReference();
+                    String heatStackId = resource.getName();
                     String stackName = authenticatedContext.getCloudContext().getStackName();
                     LOGGER.info("Checking OpenStack Heat stack status of: {}", stackName);
                     Stack heatStack = client.heat().stacks().getDetails(stackName, heatStackId);
@@ -102,7 +106,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
         for (CloudResource resource : resources) {
             switch (resource.getType()) {
                 case HEAT_STACK:
-                    String heatStackId = resource.getReference();
+                    String heatStackId = resource.getName();
                     String stackName = authenticatedContext.getCloudContext().getStackName();
                     LOGGER.info("Terminate stack: {}", stackName);
                     OSClient client = openStackClient.createOSClient(authenticatedContext);
@@ -125,12 +129,12 @@ public class OpenStackResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack stack,
-            List<CloudResource> resources, List<InstanceTemplate> vms) {
-        String stackName = authenticatedContext.getCloudContext().getStackName();
+    public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack cloudStack, List<CloudResource> resources, List<CloudInstance> vms) {
+        CloudStack stack = removeDeleteRequestedInstances(cloudStack);
+        String stackName = auth.getCloudContext().getStackName();
         String heatTemplate = heatTemplateBuilder.build(stackName, stack.getGroups(), stack.getSecurity(), stack.getImage());
-        Map<String, String> parameters = heatTemplateBuilder.buildParameters(authenticatedContext.getCloudCredential(), stack.getNetwork(), stack.getImage());
-        return updateHeatStack(authenticatedContext, resources, heatTemplate, parameters);
+        Map<String, String> parameters = heatTemplateBuilder.buildParameters(auth.getCloudCredential(), stack.getNetwork(), stack.getImage());
+        return updateHeatStack(auth, resources, heatTemplate, parameters);
     }
 
     @Override
@@ -145,7 +149,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
             String> parameters) {
         CloudResource resource = utils.getHeatResource(resources);
         String stackName = authenticatedContext.getCloudContext().getStackName();
-        String heatStackId = resource.getReference();
+        String heatStackId = resource.getName();
 
         OSClient client = openStackClient.createOSClient(authenticatedContext);
         StackUpdate updateRequest = Builders.stackUpdate().template(heatTemplate)
@@ -153,6 +157,18 @@ public class OpenStackResourceConnector implements ResourceConnector {
         client.heat().stacks().update(stackName, heatStackId, updateRequest);
         LOGGER.info("Heat stack update request sent with stack name: '{}' for Heat stack: '{}'", stackName, heatStackId);
         return check(authenticatedContext, resources);
+    }
+
+    private CloudStack removeDeleteRequestedInstances(CloudStack stack) {
+        for (Group group : stack.getGroups()) {
+            Iterator<InstanceTemplate> iterator = group.getInstances().iterator();
+            while (iterator.hasNext()) {
+                if (InstanceStatus.DELETE_REQUESTED == iterator.next().getStatus()) {
+                    iterator.remove();
+                }
+            }
+        }
+        return stack;
     }
 
 }

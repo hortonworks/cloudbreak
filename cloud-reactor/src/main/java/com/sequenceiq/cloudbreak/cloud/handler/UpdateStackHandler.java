@@ -55,7 +55,7 @@ public class UpdateStackHandler implements CloudPlatformEventHandler<UpdateStack
         CloudContext cloudContext = request.getCloudContext();
         try {
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatform());
-            AuthenticatedContext ac = connector.authenticate(cloudContext, request.getCloudCredential());
+            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudResourceStatus> resourceStatus = connector.resources().update(ac, request.getCloudStack(), request.getResourceList());
 
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);

@@ -26,13 +26,13 @@ import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.BooleanResult;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceAllocationPersisted;
+import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
@@ -75,7 +75,7 @@ public class ArmResourceConnector implements ResourceConnector {
 
         CloudResource cloudResource = new CloudResource(ResourceType.ARM_TEMPLATE, stackName);
 
-        Promise<ResourceAllocationPersisted> promise = notifier.notifyResourceAllocation(cloudResource, authenticatedContext.getCloudContext());
+        Promise<ResourcePersisted> promise = notifier.notifyAllocation(cloudResource, authenticatedContext.getCloudContext());
         try {
             promise.await();
         } catch (Exception e) {
@@ -129,7 +129,7 @@ public class ArmResourceConnector implements ResourceConnector {
             List<String> storageProfileDiskNames = new ArrayList<>();
 
             try {
-                Map<String, Object> virtualMachines = azureRMClient.getVirtualMachines(resource.getReference());
+                Map<String, Object> virtualMachines = azureRMClient.getVirtualMachines(resource.getName());
                 List<Map> values = (List<Map>) virtualMachines.get("value");
                 for (Map value : values) {
                     Map properties = (Map) value.get("properties");
@@ -145,10 +145,10 @@ public class ArmResourceConnector implements ResourceConnector {
                     Map vhds = (Map) osDisk.get("vhd");
                     storageProfileDiskNames.add(getNameFromConnectionString(vhds.get("uri").toString()));
                 }
-                azureRMClient.deleteResourceGroup(resource.getReference());
+                azureRMClient.deleteResourceGroup(resource.getName());
                 PollTask<BooleanResult> task = statusCheckFactory.newPollBooleanTerminationTask(authenticatedContext,
                         new ArmResourceGroupDeleteStatusCheckerTask(armClient, new ResourceGroupCheckerContext(
-                                new ArmCredentialView(authenticatedContext.getCloudCredential()), resource.getReference())));
+                                new ArmCredentialView(authenticatedContext.getCloudCredential()), resource.getName())));
                 BooleanResult statePollerResult = task.call();
                 if (!task.completed(statePollerResult)) {
                     syncPollingScheduler.schedule(task);
@@ -158,7 +158,7 @@ public class ArmResourceConnector implements ResourceConnector {
                     throw new CloudConnectorException(e.getResponse().getData().toString(), e);
                 }
             } catch (Exception e) {
-                throw new CloudConnectorException(String.format("Could not delete resource group: %s", resource.getReference()), e);
+                throw new CloudConnectorException(String.format("Could not delete resource group: %s", resource.getName()), e);
             }
             deleteDisk(storageProfileDiskNames, azureRMClient, osStorageName, storageGroup);
         }
@@ -205,20 +205,19 @@ public class ArmResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
-            List<InstanceTemplate> vms) {
-        AzureRMClient client = armClient.createAccess(authenticatedContext.getCloudCredential());
-        String stackName = armTemplateUtils.getStackName(authenticatedContext.getCloudContext());
-        String osStorageName = armClient.getStorageName(authenticatedContext.getCloudCredential(), stack.getRegion());
-        String storageGroup = armClient.getStorageGroup(authenticatedContext.getCloudCredential(), stack.getRegion());
+    public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms) {
+        AzureRMClient client = armClient.createAccess(auth.getCloudCredential());
+        String stackName = armTemplateUtils.getStackName(auth.getCloudContext());
+        String osStorageName = armClient.getStorageName(auth.getCloudCredential(), stack.getRegion());
+        String storageGroup = armClient.getStorageGroup(auth.getCloudCredential(), stack.getRegion());
 
-        for (InstanceTemplate vm : vms) {
+        for (CloudInstance instance : vms) {
             List<String> networkInterfacesNames = new ArrayList<>();
             List<String> storageProfileDiskNames = new ArrayList<>();
-            String privateInstanceId = armTemplateUtils.getPrivateInstanceId(stackName, vm.getGroupName(), String.valueOf(vm.getPrivateId()));
+            String instanceId = instance.getInstanceId();
 
             try {
-                Map<String, Object> virtualMachine = client.getVirtualMachine(resources.get(0).getReference(), privateInstanceId);
+                Map<String, Object> virtualMachine = client.getVirtualMachine(stackName, instanceId);
 
                 Map properties = (Map) virtualMachine.get("properties");
 
@@ -248,20 +247,20 @@ public class ArmResourceConnector implements ResourceConnector {
                 throw new CloudConnectorException(String.format("Could not downscale: %s", stackName), e);
             }
             try {
-                deallocateVirtualMachine(authenticatedContext, client, stackName, privateInstanceId);
-                deleteVirtualMachine(authenticatedContext, client, stackName, privateInstanceId);
-                deleteNetworkInterfaces(authenticatedContext, client, stackName, networkInterfacesNames);
+                deallocateVirtualMachine(auth, client, stackName, instanceId);
+                deleteVirtualMachine(auth, client, stackName, instanceId);
+                deleteNetworkInterfaces(auth, client, stackName, networkInterfacesNames);
                 deleteDisk(storageProfileDiskNames, client, osStorageName, storageGroup);
             } catch (CloudConnectorException e) {
                 throw e;
             }
 
         }
-        return check(authenticatedContext, resources);
+        return check(auth, resources);
     }
 
     private void deleteNetworkInterfaces(AuthenticatedContext authenticatedContext, AzureRMClient client, String stackName, List<String> networkInterfacesNames)
-        throws CloudConnectorException {
+            throws CloudConnectorException {
         for (String networkInterfacesName : networkInterfacesNames) {
             try {
                 client.deleteNetworkInterface(stackName, networkInterfacesName);
@@ -269,7 +268,7 @@ public class ArmResourceConnector implements ResourceConnector {
                 PollTask<BooleanResult> task = statusCheckFactory.newPollBooleanStateTask(authenticatedContext,
                         new ArmNetworkInterfaceDeleteStatusCheckerTask(armClient,
                                 new NetworkInterfaceCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()),
-                                stackName, networkInterfacesName)));
+                                        stackName, networkInterfacesName)));
                 if (!task.completed(statePollerResult)) {
                     syncPollingScheduler.schedule(task);
                 }

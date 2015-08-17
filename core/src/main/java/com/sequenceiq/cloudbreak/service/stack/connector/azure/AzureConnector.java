@@ -15,8 +15,6 @@ import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -40,7 +38,6 @@ import com.sequenceiq.cloudbreak.service.stack.resource.azure.builders.AzureReso
 @Service
 public class AzureConnector implements CloudPlatformConnector {
     protected static final int POLLING_INTERVAL = 8000;
-    private static final Logger LOGGER = LoggerFactory.getLogger(AzureConnector.class);
     private static final int AZURE_THUMBPRINT_POLLING_ATTEMPTS = 120;
     private static final ObjectMapper MAPPER = new ObjectMapper();
 

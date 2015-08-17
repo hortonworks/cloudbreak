@@ -15,7 +15,6 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.cloud.service.Persister;
-import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.repository.EntityType;
 
 public abstract class AbstractCloudPersisterService<T> implements Persister<T> {
@@ -65,10 +64,10 @@ public abstract class AbstractCloudPersisterService<T> implements Persister<T> {
         return annotation.entityClass();
     }
 
-    protected CrudRepository getRepositoryForEntity(ProvisionEntity entity) {
-        CrudRepository repo = repositoryMap.get(entity.getClass());
+    protected <T> T getRepositoryForEntity(Class clazz) {
+        T repo = (T) repositoryMap.get(clazz);
         if (repo == null) {
-            throw new IllegalStateException("No repository found for the entityClass:" + entity.getClass());
+            throw new IllegalStateException("No repository found for the entityClass:" + clazz);
         }
         return repo;
     }

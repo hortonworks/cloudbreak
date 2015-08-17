@@ -30,10 +30,8 @@ public class StopStackHandler implements CloudPlatformEventHandler<StopInstances
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
-
     @Inject
     private PollTaskFactory statusCheckFactory;
-
     @Inject
     private SyncPollingScheduler<InstancesStatusResult> syncPollingScheduler;
 
@@ -51,9 +49,8 @@ public class StopStackHandler implements CloudPlatformEventHandler<StopInstances
             String platform = cloudContext.getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
             List<CloudInstance> instances = request.getCloudInstances();
-            AuthenticatedContext authenticatedContext = connector.authenticate(cloudContext, request.getCloudCredential());
-            List<CloudVmInstanceStatus> cloudVmInstanceStatuses = connector.instances().stop(authenticatedContext, instances);
-
+            AuthenticatedContext authenticatedContext = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
+            List<CloudVmInstanceStatus> cloudVmInstanceStatuses = connector.instances().stop(authenticatedContext, request.getResources(), instances);
             PollTask<InstancesStatusResult> task = statusCheckFactory.newPollInstanceStateTask(authenticatedContext, instances);
             InstancesStatusResult statusResult = new InstancesStatusResult(cloudContext, cloudVmInstanceStatuses);
             if (!task.completed(statusResult)) {
@@ -64,5 +61,6 @@ public class StopStackHandler implements CloudPlatformEventHandler<StopInstances
             request.getResult().onNext(new StopInstancesResult(cloudContext, e));
         }
     }
+
 
 }
