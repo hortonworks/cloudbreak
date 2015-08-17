@@ -41,7 +41,7 @@ public class CloudPlatformInitializer {
     }
 
     private void validateSelectors() {
-        LOGGER.debug("There are #{} handlers suitable for registering");
+        LOGGER.debug("There are {} handlers suitable for registering", handlers.size());
         Map<Class, CloudPlatformEventHandler> handlerMap = new HashMap<>();
         for (CloudPlatformEventHandler handler : handlers) {
             CloudPlatformEventHandler entry = handlerMap.put(handler.type(), handler);
