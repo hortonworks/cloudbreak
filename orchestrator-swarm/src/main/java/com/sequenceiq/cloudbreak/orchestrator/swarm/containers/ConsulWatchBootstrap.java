@@ -44,16 +44,27 @@ public class ConsulWatchBootstrap implements ContainerBootstrap {
                 .add(logVolumePath.getHostPath() + "/consul-watch",
                         logVolumePath.getContainerPath() + "/consul-watch").build();
 
-        HostConfig hostConfig = new HostConfigBuilder().alwaysRestart().privileged().binds(binds).build();
+        HostConfig hostConfig = new HostConfigBuilder().defaultConfig().binds(binds).build();
         String name = format("%s-%s", CONSUL_WATCH.getName(), id);
         String ip = node.getPrivateIp();
+
+        long createStartTime = System.currentTimeMillis();
 
         createContainer(docker, docker.createContainerCmd(imageName)
                 .withHostConfig(hostConfig)
                 .withName(name)
                 .withEnv(format("constraint:node==%s", node.getHostname()), format("CONSUL_HOST=%s", ip))
                 .withCmd(format("consul://%s:8500", ip)));
+
+        long elapsedTime = System.currentTimeMillis() - createStartTime;
+
+        LOGGER.info("Consul watch container created on: {}, within {} ms", node.getHostname(), elapsedTime);
+
+        long startTime = System.currentTimeMillis();
         startContainer(docker, name);
+        elapsedTime = System.currentTimeMillis() - startTime;
+
+        LOGGER.info("Consul watch container started on: {}  within {} ms", node.getHostname(), elapsedTime);
 
         return true;
     }
