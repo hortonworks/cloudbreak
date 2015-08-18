@@ -652,6 +652,31 @@ Cloudbreak comes with default base images - based on CentOS/RHEL 7. Should you w
 
 <!--releases.md-->
 
+##Kerberos security
+
+Ambari supports Kerberos security for internal communication. To activate Kerberos with Cloudbreak you have enable security option and fill kerberos master key, kerberos admin and kerberos password too.
+To run a job on the cluster, please follow the steps below.
+
+  * Log in via SSH to the Cloudbreak gateway node (IP address is the same as the Ambari UI)
+
+```
+sudo docker exec -i kerberos bash
+kadmin -p [admin_user]/[admin_user]@NODE.DC1.CONSUL (type admin password)
+addprinc ambari-qa (type user password twice)
+```
+
+  * Log in via SSH to any other node
+  
+```
+sudo docker exec -i $(docker ps | grep ambari-warmup | cut -d" " -f 1) bash
+su ambari-qa
+kinit -p ambari-qa
+hdfs dfs -mkdir input
+hdfs dfs -put /tmp/wait-for-host-number.sh input
+yarn jar $(find /usr/hdp -name hadoop-mapreduce-examples.jar) wordcount input output
+hdfs dfs -cat output/*
+```
+
 ##Releases, future plans
 
 When we have started to work on Cloudbreak the idea was to `democratise` the usage of Hadoop in the cloud and VMs. For us this was a necessity as we often had to deal with different Hadoop versions, distributions and cloud providers.
