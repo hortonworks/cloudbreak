@@ -8,6 +8,8 @@
 
 ### Changed
 
+- Fixed docker version checker to be 1.8.1 compatible. (docker added --format option)
+
 ## [v1.0.0] - 2015-08-15
 
 ### Fixed

@@ -73,8 +73,7 @@ docker-getversion() {
     echo $numver
 }
 
-docker-check-version() {
-    declare desc="Checks if docker is at least 1.5.0"
+docker-check-client-version() {
 
     docker --version &> /dev/null || local missing=1
     if [[ "$missing" ]]; then
@@ -95,7 +94,9 @@ docker-check-version() {
         exit 1
     fi
     info "docker client version: OK"
+}
 
+docker-check-server-version() {
     docker version &> /tmp/cbd.log || noserver=1
     if [[ "$noserver" ]]; then
         echo "[ERROR] docker version returned an error" | red
@@ -103,8 +104,19 @@ docker-check-version() {
         exit 127
     fi
 
-    local serverVer=$(docker version 2> /dev/null | grep "Server version")
-    local numserver=$(docker-getversion $serverVer)
+    local numserver
+    # since docker 1.8.1 docker version supports --format
+    if docker version --help | grep -q -- '--format'; then
+        local serverVer=$(docker version -f "{{.Server.Version}}")
+        debug "serverVer=$serverVer"
+        numserver=$(sed "s/\.//g" <<< "${serverVer}")
+
+    else
+        local serverVer=$(docker version 2> /dev/null | grep "Server version")
+        debug "serverVer=$serverVer"
+        numserver=$(docker-getversion $serverVer)
+    fi
+
 
     if [ $numserver -lt 150 ]; then
         echo "[ERROR] Please upgrade your docker version to 1.5.0 or latest" | red
@@ -112,4 +124,11 @@ docker-check-version() {
         exit 1
     fi
     info "docker server version: OK"
+}
+
+docker-check-version() {
+    declare desc="Checks if docker is at least 1.5.0"
+
+    docker-check-client-version
+    docker-check-server-version
 }
