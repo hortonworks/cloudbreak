@@ -1,15 +1,15 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
-import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.ClusterModelDescription;
-import com.wordnik.swagger.annotations.ApiModelProperty;
-
 import java.util.Set;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+
+import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.ClusterModelDescription;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 public class ClusterRequest {
 
@@ -42,6 +42,7 @@ public class ClusterRequest {
     @Size(max = 50, min = 5, message = "The length of the password has to be in range of 5 to 50")
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD, required = true)
     private String password;
+    @Size(max = 50, min = 3, message = "The length of the Kerberos password has to be in range of 3 to 50")
     private String kerberosMasterKey;
     @Size(max = 15, min = 5, message = "The length of the Kerberos admin has to be in range of 5 to 15")
     private String kerberosAdmin;

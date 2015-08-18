@@ -76,6 +76,11 @@ public class ClusterController {
     @RequestMapping(value = "/stacks/{stackId}/cluster", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<String> create(@ModelAttribute("user") CbUser user, @PathVariable Long stackId, @RequestBody @Valid ClusterRequest request) {
+        if (request.getEnableSecurity()
+                && (request.getKerberosMasterKey() == null || request.getKerberosAdmin() == null || request.getKerberosPassword() == null)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         MDCBuilder.buildUserMdcContext(user);
         Cluster cluster = conversionService.convert(request, Cluster.class);
         cluster = clusterDecorator.decorate(cluster, stackId, request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint());
