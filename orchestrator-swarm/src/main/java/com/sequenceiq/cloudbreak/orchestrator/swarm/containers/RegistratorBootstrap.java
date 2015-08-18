@@ -37,7 +37,7 @@ public class RegistratorBootstrap implements ContainerBootstrap {
         Bind[] binds = new BindsBuilder()
                 .addDockerSocket("/tmp/docker.sock").build();
 
-        HostConfig hostConfig = new HostConfigBuilder().privileged().alwaysRestart().expose(PORT).binds(binds).build();
+        HostConfig hostConfig = new HostConfigBuilder().defaultConfig().binds(binds).build();
 
         String name = REGISTRATOR.getName();
         createContainer(docker, docker.createContainerCmd(imageName)
