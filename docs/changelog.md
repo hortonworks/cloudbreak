@@ -7,7 +7,8 @@
 ### Removed
 
 ### Changed
-## Unreleased
+
+## [v1.0.0] - 2015-08-15
 
 ### Fixed
 
