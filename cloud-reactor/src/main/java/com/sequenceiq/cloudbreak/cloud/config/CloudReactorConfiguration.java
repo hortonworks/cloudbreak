@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 @Configuration
 public class CloudReactorConfiguration {
@@ -17,6 +18,8 @@ public class CloudReactorConfiguration {
 
     @Bean
     ListeningScheduledExecutorService listeningScheduledExecutorService() {
-        return MoreExecutors.listeningDecorator(new ScheduledThreadPoolExecutor(executorServicePoolSize));
+        return MoreExecutors
+                .listeningDecorator(new ScheduledThreadPoolExecutor(executorServicePoolSize,
+                        new ThreadFactoryBuilder().setNameFormat("reactorExecutor-%d").build()));
     }
 }
