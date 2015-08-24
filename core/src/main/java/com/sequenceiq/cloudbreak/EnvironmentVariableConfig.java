@@ -46,16 +46,16 @@ public class EnvironmentVariableConfig {
     public static final String CB_DOCKER_CONTAINER_AMBARI_DB = "postgres:9.4.1";
     public static final String CB_DOCKER_CONTAINER_KERBEROS = "sequenceiq/kerberos:2.1.0-consul";
     public static final String CB_DOCKER_CONTAINER_BAYWATCH_SERVER = "sequenceiq/baywatch:v0.5.3";
-    public static final String CB_DOCKER_CONTAINER_BAYWATCH_CLIENT = "sequenceiq/baywatch-client:v0.5.3";
+    public static final String CB_DOCKER_CONTAINER_BAYWATCH_CLIENT = "sequenceiq/baywatch-client:v1.0.0";
     public static final String CB_DOCKER_CONTAINER_LOGROTATE = "sequenceiq/logrotate:v0.5.1";
 
     public static final String CB_BAYWATCH_ENABLED = "true";
     public static final String CB_BAYWATCH_EXTERN_LOCATION = "";
 
-    public static final String CB_AZURE_IMAGE_URI = "https://102589fae040d8westeurope.blob.core.windows.net/images/cb-centos71-amb210-2015-08-14-centos7_2015-August-14_11-45-os-2015-08-14.vhd";
-    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-c47bc1c4,ap-southeast-1:ami-901816c2,ap-southeast-2:ami-43edae79,eu-west-1:ami-feedb089,sa-east-1:ami-a9860eb4,us-east-1:ami-f5b80d9e,us-west-1:ami-290cf26d,us-west-2:ami-b36c7983";
+    public static final String CB_AZURE_IMAGE_URI = "https://102589fae040d8westeurope.blob.core.windows.net/images/cb-centos71-amb210-2015-08-18-centos7_2015-August-18_13-51-os-2015-08-18.vhd";
+    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-6472f664,ap-southeast-1:ami-42b8b610,ap-southeast-2:ami-a572309f,eu-west-1:ami-d0a5faa7,sa-east-1:ami-9975fd84,us-east-1:ami-8564d5ee,us-west-1:ami-e7f40da3,us-west-2:ami-7fd7c34f";
     public static final String CB_OPENSTACK_IMAGE = "cb-centos71-amb210-2015-08-14";
-    public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos71-amb210-2015-08-14-centos71.tar.gz";
+    public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos71-amb210-2015-08-18-centos71.tar.gz";
 
     public static final String CB_GCP_AND_AZURE_USER_NAME = "cloudbreak";
 
