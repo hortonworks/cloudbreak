@@ -13,19 +13,21 @@ import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONT
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_REGISTRATOR;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.StackDeletionBasedExitCriteriaModel.stackDeletionBasedExitCriteriaModel;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
+import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -97,54 +99,9 @@ public class ClusterContainerRunner {
     @Inject
     private TlsSecurityService tlsSecurityService;
 
-    public void runClusterContainers(ProvisioningContext provisioningContext) throws CloudbreakException {
-        ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
-        String cloudPlatform = provisioningContext.getCloudPlatform().name();
-
-        Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
-        InstanceGroup gateway = stack.getGatewayInstanceGroup();
-        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
-                gatewayInstance.getPublicIp(), gatewayInstance.getPrivateIp());
-
-        Set<Node> nodes = new HashSet<>();
-        for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
-            int volumeCount = instanceMetaData.getInstanceGroup().getTemplate().getVolumeCount();
-            Set<String> dataVolumes = new HashSet<>();
-            for (int i = 1; i <= volumeCount; i++) {
-                dataVolumes.add(VolumeUtils.VOLUME_PREFIX + i);
-            }
-            nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp(), instanceMetaData.getDiscoveryName(), dataVolumes));
-        }
+    public void runClusterContainers(ProvisioningContext context) throws CloudbreakException {
         try {
-            Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
-            LogVolumePath logVolumePath = new LogVolumePath(HOST_VOLUME_PATH, CONTAINER_VOLUME_PATH);
-
-            ContainerOrchestratorCluster orchestratorCluster = new ContainerOrchestratorCluster(gatewayConfig, nodes);
-            containerOrchestrator.startRegistrator(orchestratorCluster, registratorDockerImageName, stackDeletionBasedExitCriteriaModel(stack.getId()));
-            containerOrchestrator.startAmbariServer(orchestratorCluster, postgresDockerImageName, getAmbariImageName(stack), cloudPlatform,
-                    logVolumePath, cluster.isSecure(), stackDeletionBasedExitCriteriaModel(stack.getId()));
-            containerOrchestrator.startAmbariAgents(orchestratorCluster, getAmbariImageName(stack), orchestratorCluster.getNodes().size() - 1, cloudPlatform,
-                    logVolumePath, stackDeletionBasedExitCriteriaModel(stack.getId()));
-            containerOrchestrator.startConsulWatches(orchestratorCluster, consulWatchPlugnDockerImageName, orchestratorCluster.getNodes().size(),
-                    logVolumePath, stackDeletionBasedExitCriteriaModel(stack.getId()));
-            containerOrchestrator.startLogrotate(orchestratorCluster, logrotateDockerImageName, orchestratorCluster.getNodes().size(),
-                    stackDeletionBasedExitCriteriaModel(stack.getId()));
-            if (cluster.isSecure()) {
-                KerberosConfiguration kerberosConfiguration = new KerberosConfiguration(cluster.getKerberosMasterKey(), cluster.getKerberosAdmin(),
-                        cluster.getKerberosPassword());
-                containerOrchestrator.startKerberosServer(orchestratorCluster, kerberosDockerImageName, logVolumePath, kerberosConfiguration,
-                        stackDeletionBasedExitCriteriaModel(stack.getId()));
-            }
-            if (baywatchEnabled) {
-                if (StringUtils.isEmpty(baywatchServerExternLocation)) {
-                    containerOrchestrator.startBaywatchServer(orchestratorCluster, baywatchServerDockerImageName,
-                            stackDeletionBasedExitCriteriaModel(stack.getId()));
-                }
-                LogVolumePath baywatchLogVolumePath = new LogVolumePath(HOST_VOLUME_PATH, BAYWATCH_CONTAINER_VOLUME_PATH);
-                containerOrchestrator.startBaywatchClients(orchestratorCluster, baywatchClientDockerImageName, orchestratorCluster.getNodes().size(),
-                        ConsulUtils.CONSUL_DOMAIN, baywatchLogVolumePath, baywatchServerExternLocation, stackDeletionBasedExitCriteriaModel(stack.getId()));
-            }
+            initializeClusterContainers(context, false, Collections.<String>emptySet());
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new FlowCancelledException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {
@@ -153,6 +110,17 @@ public class ClusterContainerRunner {
     }
 
     public void addClusterContainers(ClusterScalingContext context) throws CloudbreakException {
+        try {
+            initializeClusterContainers(context, true, context.getUpscaleCandidateAddresses());
+        } catch (CloudbreakOrchestratorCancelledException e) {
+            throw new FlowCancelledException(e.getMessage());
+        } catch (CloudbreakOrchestratorException e) {
+            throw new CloudbreakException(e);
+        }
+    }
+
+    private void initializeClusterContainers(DefaultFlowContext context, Boolean add, Set<String> candidateAddresses) throws CloudbreakException,
+            CloudbreakOrchestratorException {
         ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
         String cloudPlatform = context.getCloudPlatform().name();
 
@@ -162,9 +130,42 @@ public class ClusterContainerRunner {
         GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
                 gatewayInstance.getPublicIp(), gatewayInstance.getPrivateIp());
 
+        Set<Node> nodes = getNodes(add, stack, candidateAddresses);
+
+        LogVolumePath logVolumePath = new LogVolumePath(HOST_VOLUME_PATH, CONTAINER_VOLUME_PATH);
+        ContainerOrchestratorCluster orchestratorCluster = new ContainerOrchestratorCluster(gatewayConfig, nodes);
+        if (!add) {
+            Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
+            containerOrchestrator.startRegistrator(orchestratorCluster, registratorDockerImageName, stackDeletionBasedExitCriteriaModel(stack.getId()));
+            containerOrchestrator.startAmbariServer(orchestratorCluster, postgresDockerImageName, getAmbariImageName(stack), cloudPlatform, logVolumePath,
+                    cluster.isSecure(), stackDeletionBasedExitCriteriaModel(stack.getId()));
+            if (cluster.isSecure()) {
+                KerberosConfiguration kerberosConfiguration = new KerberosConfiguration(cluster.getKerberosMasterKey(), cluster.getKerberosAdmin(),
+                        cluster.getKerberosPassword());
+                containerOrchestrator.startKerberosServer(orchestratorCluster, kerberosDockerImageName, logVolumePath, kerberosConfiguration,
+                        stackDeletionBasedExitCriteriaModel(stack.getId()));
+            }
+        }
+        containerOrchestrator.startAmbariAgents(orchestratorCluster, getAmbariImageName(stack), cloudPlatform, logVolumePath,
+                stackDeletionBasedExitCriteriaModel(stack.getId()));
+        containerOrchestrator.startConsulWatches(orchestratorCluster, consulWatchPlugnDockerImageName, logVolumePath,
+                stackDeletionBasedExitCriteriaModel(stack.getId()));
+        containerOrchestrator.startLogrotate(orchestratorCluster, logrotateDockerImageName, stackDeletionBasedExitCriteriaModel(stack.getId()));
+        if (baywatchEnabled) {
+            if (!add && StringUtils.isEmpty(baywatchServerExternLocation)) {
+                containerOrchestrator.startBaywatchServer(orchestratorCluster, baywatchServerDockerImageName,
+                        stackDeletionBasedExitCriteriaModel(stack.getId()));
+            }
+            LogVolumePath baywatchLogVolumePath = new LogVolumePath(HOST_VOLUME_PATH, BAYWATCH_CONTAINER_VOLUME_PATH);
+            containerOrchestrator.startBaywatchClients(orchestratorCluster, baywatchClientDockerImageName, ConsulUtils.CONSUL_DOMAIN, baywatchLogVolumePath,
+                    baywatchServerExternLocation, stackDeletionBasedExitCriteriaModel(stack.getId()));
+        }
+    }
+
+    private Set<Node> getNodes(Boolean add, Stack stack, Set<String> candidateAddresses) {
         Set<Node> nodes = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
-            if (context.getUpscaleCandidateAddresses().contains(instanceMetaData.getPrivateIp())) {
+            if (!add || candidateAddresses.contains(instanceMetaData.getPrivateIp())) {
                 int volumeCount = instanceMetaData.getInstanceGroup().getTemplate().getVolumeCount();
                 Set<String> dataVolumes = new HashSet<>();
                 for (int i = 1; i <= volumeCount; i++) {
@@ -173,26 +174,8 @@ public class ClusterContainerRunner {
                 nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp(), instanceMetaData.getDiscoveryName(), dataVolumes));
             }
         }
-        try {
-            LogVolumePath logVolumePath = new LogVolumePath(HOST_VOLUME_PATH, CONTAINER_VOLUME_PATH);
 
-            ContainerOrchestratorCluster cluster = new ContainerOrchestratorCluster(gatewayConfig, nodes);
-            containerOrchestrator.startAmbariAgents(cluster, getAmbariImageName(stack), cluster.getNodes().size(), cloudPlatform,
-                    logVolumePath, stackDeletionBasedExitCriteriaModel(stack.getId()));
-            containerOrchestrator.startConsulWatches(cluster, consulWatchPlugnDockerImageName, cluster.getNodes().size(),
-                    logVolumePath, stackDeletionBasedExitCriteriaModel(stack.getId()));
-            containerOrchestrator.startLogrotate(cluster, logrotateDockerImageName, cluster.getNodes().size(),
-                    stackDeletionBasedExitCriteriaModel(stack.getId()));
-            if (baywatchEnabled) {
-                LogVolumePath baywatchLogVolumePath = new LogVolumePath(HOST_VOLUME_PATH, BAYWATCH_CONTAINER_VOLUME_PATH);
-                containerOrchestrator.startBaywatchClients(cluster, baywatchClientDockerImageName, cluster.getNodes().size(),
-                        ConsulUtils.CONSUL_DOMAIN, baywatchLogVolumePath, baywatchServerExternLocation, stackDeletionBasedExitCriteriaModel(stack.getId()));
-            }
-        } catch (CloudbreakOrchestratorCancelledException e) {
-            throw new FlowCancelledException(e.getMessage());
-        } catch (CloudbreakOrchestratorException e) {
-            throw new CloudbreakException(e);
-        }
+        return nodes;
     }
 
     private String getAmbariImageName(Stack stack) {

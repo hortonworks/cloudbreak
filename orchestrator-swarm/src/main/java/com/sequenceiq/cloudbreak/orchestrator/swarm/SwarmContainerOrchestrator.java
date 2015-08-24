@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -138,19 +137,15 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, int count, String platform,
-            LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
+    public void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, String platform, LogVolumePath logVolumePath,
+            ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
-        if (count > cluster.getNodes().size()) {
-            throw new CloudbreakOrchestratorFailedException("Cannot orchestrate more Ambari agent containers than the available nodes.");
-        }
         try {
             List<Future<Boolean>> futures = new ArrayList<>();
             Set<Node> nodes = getNodesWithoutGateway(cluster.getGatewayConfig().getPublicAddress(), cluster.getNodes());
-            Iterator<Node> nodeIterator = nodes.iterator();
-            for (int i = 0; i < count; i++) {
-                Node node = nodeIterator.next();
-                String time = String.valueOf(new Date().getTime()) + i;
+            int i = 0;
+            for (Node node : nodes) {
+                String time = String.valueOf(new Date().getTime()) + i++;
                 AmbariAgentBootstrap ambariAgentBootstrap =
                         ambariAgentBootstrap(cluster.getGatewayConfig(), imageName, node, time, platform, logVolumePath);
                 futures.add(getParallelContainerRunner()
@@ -165,18 +160,13 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, int count,
-            LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
+    public void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
-        if (count > cluster.getNodes().size()) {
-            throw new CloudbreakOrchestratorFailedException("Cannot orchestrate more Consul watch containers than the available nodes.");
-        }
         try {
             List<Future<Boolean>> futures = new ArrayList<>();
-            Iterator<Node> nodeIterator = cluster.getNodes().iterator();
-            for (int i = 0; i < count; i++) {
-                Node node = nodeIterator.next();
-                String time = String.valueOf(new Date().getTime()) + i;
+            int i = 0;
+            for (Node node : cluster.getNodes()) {
+                String time = String.valueOf(new Date().getTime()) + i++;
                 Callable<Boolean> runner = runner(
                         consulWatchBootstrap(cluster.getGatewayConfig(), imageName, node, time, logVolumePath), getExitCriteria(),
                         exitCriteriaModel, MDC.getCopyOfContextMap());
@@ -222,19 +212,14 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void startBaywatchClients(ContainerOrchestratorCluster cluster, String imageName, int count, String consulDomain, LogVolumePath logVolumePath,
+    public void startBaywatchClients(ContainerOrchestratorCluster cluster, String imageName, String consulDomain, LogVolumePath logVolumePath,
             String externServerLocation, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
-        if (count > cluster.getNodes().size()) {
-            throw new CloudbreakOrchestratorFailedException("Cannot orchestrate more Baywatch client containers than the available nodes.");
-        }
         try {
             List<Future<Boolean>> futures = new ArrayList<>();
-            Set<Node> nodes = cluster.getNodes();
-            Iterator<Node> nodeIterator = nodes.iterator();
-            for (int i = 0; i < count; i++) {
-                Node node = nodeIterator.next();
-                String time = String.valueOf(new Date().getTime()) + i;
+            int i = 0;
+            for (Node node : cluster.getNodes()) {
+                String time = String.valueOf(new Date().getTime()) + i++;
                 BaywatchClientBootstrap baywatchClientBootstrap =
                         baywatchClientBootstrap(cluster.getGatewayConfig(), imageName, time, node,
                                 consulDomain, logVolumePath, externServerLocation);
@@ -250,16 +235,12 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void startLogrotate(ContainerOrchestratorCluster cluster, String imageName, int count, ExitCriteriaModel exitCriteriaModel)
+    public void startLogrotate(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
-        if (count > cluster.getNodes().size()) {
-            throw new CloudbreakOrchestratorFailedException("Cannot orchestrate more Logrotate containers than the available nodes.");
-        }
         try {
             List<Future<Boolean>> futures = new ArrayList<>();
-            Iterator<Node> nodeIterator = cluster.getNodes().iterator();
-            for (int i = 0; i < count; i++) {
-                Node node = nodeIterator.next();
+            int i = 0;
+            for (Node node : cluster.getNodes()) {
                 String time = String.valueOf(new Date().getTime()) + i;
                 Callable<Boolean> runner = runner(logrotateBootsrap(cluster.getGatewayConfig(), imageName, node, time), getExitCriteria(), exitCriteriaModel,
                         MDC.getCopyOfContextMap());
