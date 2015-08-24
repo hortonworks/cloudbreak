@@ -12,13 +12,14 @@ cloudbreak-config() {
   cloudbreak-conf-ui
   cloudbreak-conf-java
   cloudbreak-conf-baywatch
+  cloudbreak-conf-consul
 }
 
 cloudbreak-conf-tags() {
     declare desc="Defines docker image tags"
 
     env-import DOCKER_TAG_ALPINE 3.1
-    env-import DOCKER_TAG_CONSUL v0.5.0-v3
+    env-import DOCKER_TAG_CONSUL 0.5
     env-import DOCKER_TAG_REGISTRATOR v5
     env-import DOCKER_TAG_POSTGRES 9.4.1
     env-import DOCKER_TAG_CLOUDBREAK 1.0.1
@@ -34,6 +35,23 @@ cloudbreak-conf-tags() {
 
     env-import CB_DOCKER_CONTAINER_AMBARI ""
     env-import CB_DOCKER_CONTAINER_AMBARI_WARM ""
+}
+
+cloudbreak-conf-consul() {
+    env-import DOCKER_CONSUL_OPTIONS ""
+    if ! [[ $DOCKER_CONSUL_OPTIONS =~ .*recursor.* ]]; then
+        local consulRecursors=$(docker run -it --rm \
+            --net=host \
+            alpine \
+            sed -n "/nameserver/ {s/^.*nameserver[^0-9]*/-recursor /;H}; $ {x;s/\n/ /gp}" /etc/resolv.conf \
+             | sed "s/\r//g"
+        )
+        if [[ "$consulRecursors" ]]; then
+            debug "Consul recursors found on host: $consulRecursors"
+            DOCKER_CONSUL_OPTIONS="$DOCKER_CONSUL_OPTIONS $consulRecursors"
+        fi
+    fi
+    debug "DOCKER_CONSUL_OPTIONS=$DOCKER_CONSUL_OPTIONS"
 }
 
 cloudbreak-conf-images() {
