@@ -55,10 +55,10 @@ public class EnvironmentVariableConfig {
     public static final String CB_BAYWATCH_ENABLED = "true";
     public static final String CB_BAYWATCH_EXTERN_LOCATION = "";
 
-    public static final String CB_AZURE_IMAGE_URI = "https://102589fae040d8westeurope.blob.core.windows.net/images/cb-centos71-amb210-2015-08-12-b1470_2015-August-12_14-41-os-2015-08-12.vhd";
-    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-78942f78,ap-southeast-1:ami-2c48467e,ap-southeast-2:ami-efa8ebd5,eu-west-1:ami-9eeab8e9,sa-east-1:ami-01dd551c,us-east-1:ami-87a803ec,us-west-1:ami-69de202d,us-west-2:ami-55c1cb65";
+    public static final String CB_AZURE_IMAGE_URI = "https://102589fae040d8westeurope.blob.core.windows.net/images/cb-centos71-amb210-2015-08-24-d18-ofs_2015-August-24_13-35-os-2015-08-24.vhd";
+    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-88f17188,ap-southeast-1:ami-c8a2ab9a,ap-southeast-2:ami-0b397431,eu-west-1:ami-e08cd497,sa-east-1:ami-bdac27a0,us-east-1:ami-af40ffc4,us-west-1:ami-f1976fb5,us-west-2:ami-073e2837";
     public static final String CB_OPENSTACK_IMAGE = "cb-centos71-amb210-2015-08-12";
-    public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos71-amb210-2015-08-12-b1470.tar.gz";
+    public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos71-amb210-2015-08-24-docker18.tar.gz";
 
     public static final String CB_GCP_AND_AZURE_USER_NAME = "cloudbreak";
 
