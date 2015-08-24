@@ -22,8 +22,6 @@ public class KerberosServerBootstrap implements ContainerBootstrap {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosServerBootstrap.class);
 
-    private static final Integer[] PORTS = new Integer[] { 88, 749 };
-
     private final DockerClient docker;
     private final String imageName;
     private final String nodeName;
@@ -43,7 +41,7 @@ public class KerberosServerBootstrap implements ContainerBootstrap {
         LOGGER.info("Creating Kerberos server container on: {}", nodeName);
 
         Bind[] binds = new BindsBuilder().addLog(logVolumePath).add("/etc/krb5.conf").build();
-        HostConfig hostConfig = new HostConfigBuilder().defaultConfig().expose(PORTS[0]).expose(PORTS[0]).binds(binds).build();
+        HostConfig hostConfig = new HostConfigBuilder().defaultConfig().binds(binds).build();
 
         String name = KERBEROS.getName();
         createContainer(docker, docker.createContainerCmd(imageName)
