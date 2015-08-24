@@ -234,6 +234,10 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         hostGroups: cluster.hostGroups,
                         password: cluster.password,
                         userName: cluster.userName,
+                        enableSecurity: cluster.enableSecurity || false,
+                        kerberosMasterKey: cluster.kerberosMasterKey || null,
+                        kerberosAdmin: cluster.kerberosAdmin || null,
+                        kerberosPassword: cluster.kerberosPassword || null,
                         validateBlueprint: cluster.validateBlueprint,
                         ambariStackDetails: cluster.ambariStackDetails === 'undefined' ? null : cluster.ambariStackDetails
                     }
