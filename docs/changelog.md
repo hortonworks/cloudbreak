@@ -13,6 +13,8 @@
 ### Changed
 - sequenceiq/cloudbreak image updated to 1.0.3
 
+- debug() function made multiline capable. Use \n in messages
+
 ## [v1.0.2] - 2015-08-25
 
 ### Fixed
