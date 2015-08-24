@@ -94,3 +94,7 @@ integrationtest:
         AZURE_UPDOWN_SMOKE_TEST:
         - classpath:/testsuites/azure/smoke/azure-clustercreate-updown.yaml
 
+        # Kerberos test with cluster creation and upscale-downscale
+        GCP_UPDOWN_KERBEROS_TEST:
+        - classpath:/testsuites/gcp/kerberos/gcp-clustercreate-startstop-updown.yaml
+
