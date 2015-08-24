@@ -1,6 +1,6 @@
 debug() {
   if [[ "$DEBUG" ]]; then
-      echo "[DEBUG] $*" | gray 1>&2
+      echo -e "[DEBUG] $*" | gray 1>&2
   fi
 }
 
