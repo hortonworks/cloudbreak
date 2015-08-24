@@ -6,6 +6,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 
 import java.util.Arrays;
+import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -86,6 +87,6 @@ public class CloudbreakUsageToJsonConverterTest extends AbstractEntityConverterT
 
     private CbUser createCbUser() {
         return new CbUser("dummyUserId", "john.smith@example.com", "dummyAccount",
-                Arrays.asList(CbUserRole.ADMIN, CbUserRole.USER), "John", "Smith");
+                Arrays.asList(CbUserRole.ADMIN, CbUserRole.USER), "John", "Smith", new Date());
     }
 }

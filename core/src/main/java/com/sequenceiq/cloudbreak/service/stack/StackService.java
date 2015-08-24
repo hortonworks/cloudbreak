@@ -18,6 +18,10 @@ public interface StackService {
 
     Set<Stack> retrieveAccountStacks(CbUser user);
 
+    Set<Stack> retrieveAccountStacks(String account);
+
+    Set<Stack> retrieveOwnerStacks(String owner);
+
     Stack get(Long id);
 
     Stack findLazy(Long id);

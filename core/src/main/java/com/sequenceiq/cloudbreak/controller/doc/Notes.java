@@ -37,6 +37,8 @@ public class Notes {
     public static final String NETWORK_NOTES = "Provider specific network settings could be configured by using Network resources.";
     public static final String SECURITY_GROUP_NOTES = "Different inbound security rules(group) could be configured by using SecurityGroup resources "
             + "and a group could be assigned to any Stack(cluster).";
+    public static final String ACCOUNT_PREFERENCES_NOTES = "Account related preferences that could be managed by the account admins and different "
+            + "restrictions could be added to Cloudbreak resources.";
 
     public static final String USER_NOTES = "Users can be invited under an account by the administrator, and all resources "
             + "(e.g. resources, networks, blueprints, credentials, clusters) can be shared across account users";

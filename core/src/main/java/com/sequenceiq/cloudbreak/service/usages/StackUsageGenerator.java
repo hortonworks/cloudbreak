@@ -82,7 +82,7 @@ public class StackUsageGenerator {
             Calendar start = Calendar.getInstance();
             start.setTime(startEvent.getEventTimestamp());
             cal.set(MINUTE, start.get(MINUTE));
-            //save billing start event for daily usage generation
+            //saveOne billing start event for daily usage generation
             CloudbreakEvent newBillingStart = createBillingStarterCloudbreakEvent(startEvent, cal);
             eventRepository.save(newBillingStart);
             LOGGER.debug("BILLING_STARTED is created with date:{} for running stack {}.", cal.getTime(), newBillingStart.getStackId());

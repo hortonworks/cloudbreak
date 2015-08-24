@@ -125,4 +125,9 @@ public class OperationDescriptions {
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private security group by name";
         public static final String DELETE_BY_ID = "delete security group by id";
     }
+
+    public static class AccountPreferencesDescription {
+        public static final String GET_PRIVATE = "retrieve account preferences for admin user";
+        public static final String PUT_PRIVATE = "update account preferences of admin user";
+    }
 }

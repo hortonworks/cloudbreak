@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.conf;
 
-import java.io.IOException;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.FilterChain;
@@ -9,6 +7,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
+
+import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.slf4j.Logger;
@@ -30,10 +33,6 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
 @Configuration
 public class SecurityConfig {
@@ -135,7 +134,8 @@ public class SecurityConfig {
                     .antMatchers("/recipes").access("#oauth2.hasScope('cloudbreak.recipes')")
                     .antMatchers("/user/networks").access("#oauth2.hasScope('cloudbreak.templates')")
                     .antMatchers("/account/networks").access("#oauth2.hasScope('cloudbreak.templates')")
-                    .antMatchers("/networks/**").access("#oauth2.hasScope('cloudbreak.templates')");
+                    .antMatchers("/networks/**").access("#oauth2.hasScope('cloudbreak.templates')")
+                    .antMatchers("/accountpreferences").access("#oauth2.hasScope('cloudbreak.templates')");
         }
     }
 

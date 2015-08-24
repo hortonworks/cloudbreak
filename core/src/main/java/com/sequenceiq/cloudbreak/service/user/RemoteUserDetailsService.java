@@ -1,16 +1,32 @@
 package com.sequenceiq.cloudbreak.service.user;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.CbUserRole;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
+import com.sequenceiq.cloudbreak.repository.CredentialRepository;
+import com.sequenceiq.cloudbreak.repository.NetworkRepository;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -26,27 +42,13 @@ import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestOperations;
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.domain.CbUserRole;
-import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
-import com.sequenceiq.cloudbreak.repository.CredentialRepository;
-import com.sequenceiq.cloudbreak.repository.NetworkRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.repository.TemplateRepository;
-
 @Service
 public class RemoteUserDetailsService implements UserDetailsService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RemoteUserDetailsService.class);
-
     private static final int ACCOUNT_PART = 2;
     private static final int ROLE_PART = 2;
+    private static final String UAA_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
     @Value("${cb.client.id}")
     private String clientId;
@@ -141,7 +143,9 @@ public class RemoteUserDetailsService implements UserDetailsService {
             String email = userNode.get("userName").asText();
             String givenName = userNode.get("name").get("givenName").asText();
             String familyName = userNode.get("name").get("familyName").asText();
-            return new CbUser(userId, email, account, roles, givenName, familyName);
+            String dateOfCreation = userNode.get("meta").get("created").asText();
+            Date created = parseUserCreated(dateOfCreation);
+            return new CbUser(userId, email, account, roles, givenName, familyName, created);
         } catch (IOException e) {
             throw new UserDetailsUnavailableException("User details cannot be retrieved from identity server.", e);
         }
@@ -183,6 +187,15 @@ public class RemoteUserDetailsService implements UserDetailsService {
             return "Basic " + new String(Base64.encode(creds.getBytes("UTF-8")));
         } catch (UnsupportedEncodingException e) {
             throw new IllegalStateException("Could not convert String");
+        }
+    }
+
+    private Date parseUserCreated(String dateOfCreation) {
+        try {
+            SimpleDateFormat uaaDateFormat = new SimpleDateFormat(UAA_DATE_PATTERN);
+            return uaaDateFormat.parse(dateOfCreation);
+        } catch (ParseException e) {
+            throw new UserDetailsUnavailableException("User details cannot be retrieved, becuase creation date of user cannot be parsed.", e);
         }
     }
 }
