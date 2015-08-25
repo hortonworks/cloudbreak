@@ -69,8 +69,8 @@ public class BootstrapManTest {
 
         for (int i = 0; i < LOOP_SIZE; i++) {
             LOGGER.info("Iteration: {}", i);
-            o.startConsulWatches(cluster, "sequenceiq/docker-consul-watch-plugn:2.0.0-consul", cluster.getNodes().size(),
-                    new LogVolumePath("/hadoopfs/fs1", "/hadoopfs/fs1"), new NoExitModel());
+            o.startConsulWatches(cluster, "sequenceiq/docker-consul-watch-plugn:2.0.0-consul", new LogVolumePath("/hadoopfs/fs1", "/hadoopfs/fs1"),
+                    new NoExitModel());
         }
 
         LOGGER.info("FINISHED");

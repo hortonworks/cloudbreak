@@ -32,12 +32,11 @@ public interface ContainerOrchestrator {
             LogVolumePath logVolumePath, Boolean localAgentRequired, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
-    void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, int count, String platform,
-            LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
+    void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, String platform, LogVolumePath logVolumePath,
+            ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
-    void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, int count,
-            LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
+    void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
     void startKerberosServer(ContainerOrchestratorCluster cluster, String serverImageName, LogVolumePath logVolumePath,
@@ -47,11 +46,11 @@ public interface ContainerOrchestrator {
     void startBaywatchServer(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
-    void startBaywatchClients(ContainerOrchestratorCluster cluster, String imageName, int count,
-            String consulDomain, LogVolumePath logVolumePath, String externServerLocation, ExitCriteriaModel exitCriteriaModel)
+    void startBaywatchClients(ContainerOrchestratorCluster cluster, String imageName, String consulDomain, LogVolumePath logVolumePath,
+            String externServerLocation, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
-    void startLogrotate(ContainerOrchestratorCluster cluster, String imageName, int count, ExitCriteriaModel exitCriteriaModel)
+    void startLogrotate(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException;
 
     boolean areAllNodesAvailable(GatewayConfig gatewayConfig, Set<Node> nodes);

@@ -54,15 +54,14 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
-    public void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, int count, String platform,
-            LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
+    public void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, String platform, LogVolumePath logVolumePath,
+            ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         return;
     }
 
     @Override
-    public void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, int count,
-            LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
+    public void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         return;
     }
@@ -81,14 +80,14 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
-    public void startBaywatchClients(ContainerOrchestratorCluster cluster, String imageName, int count,
-            String consulDomain, LogVolumePath logVolumePath, String externServerLocation, ExitCriteriaModel exitCriteriaModel)
+    public void startBaywatchClients(ContainerOrchestratorCluster cluster, String imageName, String consulDomain, LogVolumePath logVolumePath,
+            String externServerLocation, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         return;
     }
 
     @Override
-    public void startLogrotate(ContainerOrchestratorCluster cluster, String imageName, int count, ExitCriteriaModel exitCriteriaModel)
+    public void startLogrotate(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         return;
     }

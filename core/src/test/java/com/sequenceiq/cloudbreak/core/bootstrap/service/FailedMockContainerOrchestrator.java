@@ -8,8 +8,8 @@ import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 
 public class FailedMockContainerOrchestrator extends MockContainerOrchestrator {
     @Override
-    public void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, int count, String platform,
-            LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
+    public void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, String platform, LogVolumePath logVolumePath,
+            ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         throw new CloudbreakOrchestratorFailedException("failed");
     }
