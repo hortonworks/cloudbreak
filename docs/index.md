@@ -7,6 +7,7 @@ Full documentation is generated [here](http://sequenceiq.com/cloudbreak-deployer
 
 Currently only **Linux** and **OSX** 64 bit binaries are released for Cloudbreak Deployer. For anything else we will create a special Docker container.
 The deployment itself needs only **Docker 1.7.0** or later.
+Your firewall must be configured to let docker containers talk to each other, this is especially important on CentOS 7 where firewalld blocks some connections by default.
 
 ## Installation
 
