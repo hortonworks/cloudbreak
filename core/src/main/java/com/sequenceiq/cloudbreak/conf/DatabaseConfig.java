@@ -4,13 +4,13 @@ import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DB_ENV_DB;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DB_ENV_PASS;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DB_ENV_USER;
 
-import java.util.Properties;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+
+import java.util.Properties;
 
 import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,7 +61,7 @@ public class DatabaseConfig {
     @Bean
     public PlatformTransactionManager transactionManager() throws Exception {
         JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
-        jpaTransactionManager.setEntityManagerFactory(entityManagerFactory());
+        jpaTransactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
         jpaTransactionManager.afterPropertiesSet();
         return jpaTransactionManager;
     }
@@ -72,7 +72,7 @@ public class DatabaseConfig {
     }
 
     @Bean
-    public EntityManagerFactory entityManagerFactory() {
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
 
         entityManagerFactory.setPackagesToScan("com.sequenceiq.cloudbreak.domain");
@@ -81,7 +81,7 @@ public class DatabaseConfig {
         entityManagerFactory.setJpaVendorAdapter(jpaVendorAdapter());
         entityManagerFactory.setJpaProperties(jpaProperties());
         entityManagerFactory.afterPropertiesSet();
-        return entityManagerFactory.getObject();
+        return entityManagerFactory;
     }
 
     @Bean

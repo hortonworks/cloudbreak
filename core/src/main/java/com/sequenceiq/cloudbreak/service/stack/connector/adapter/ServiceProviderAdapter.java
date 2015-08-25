@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.service.stack.flow.ReflectionUtils.getDe
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
+import javax.inject.Inject;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -11,13 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
@@ -78,7 +73,10 @@ import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisioningService;
-
+import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
@@ -108,7 +106,7 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
 
     @Override
     public String preProvisionCheck(Stack stack) {
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         PreProvisionCheckRequest<PreProvisionCheckResult> preProvisionCheckRequest = new PreProvisionCheckRequest<>(cloudContext, cloudCredential, cloudStack);
@@ -130,7 +128,7 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
     @Override
     public ProvisionEvent setupProvisioning(Stack stack) throws Exception {
         CloudPlatform cloudPlatform = stack.cloudPlatform();
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), cloudPlatform.name());
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), cloudPlatform.name(), stack.getOwner());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         SetupRequest<SetupResult> setupRequest = new SetupRequest<>(cloudContext, cloudCredential, cloudStack);
@@ -152,7 +150,7 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
     @Override
     public Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties) {
         LOGGER.info("Assembling launch request for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
         CloudCredential cloudCredential = buildCloudCredential(stack);
         CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
 
@@ -178,7 +176,7 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
     @Override
     public void startAll(Stack stack) {
         LOGGER.info("Assembling start request for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
         CloudCredential cloudCredential = buildCloudCredential(stack);
         List<CloudInstance> instances = metadataConverter.convert(stack.getInstanceMetaDataAsList());
         StartInstancesRequest<StartInstancesResult> startRequest = new StartInstancesRequest<>(cloudContext, cloudCredential, instances);
@@ -207,7 +205,7 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
     @Override
     public void stopAll(Stack stack) {
         LOGGER.info("Assembling stop request for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
         CloudCredential cloudCredential = buildCloudCredential(stack);
         List<CloudInstance> instances = metadataConverter.convert(stack.getInstanceMetaDataAsList());
         StopInstancesRequest<StopInstancesResult> stopRequest = new StopInstancesRequest<>(cloudContext, cloudCredential, instances);
@@ -236,7 +234,7 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
     @Override
     public Set<Resource> addInstances(Stack stack, String gateWayUserData, String coreUserData, Integer adjustment, String instanceGroup) {
         LOGGER.debug("Assembling upscale stack event for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
         CloudCredential cloudCredential = buildCloudCredential(stack);
         InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         group.setNodeCount(group.getNodeCount() + adjustment);
@@ -265,7 +263,7 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
     @Override
     public Set<String> removeInstances(Stack stack, String gateWayUserData, String coreUserData, Set<String> instanceIds, String instanceGroup) {
         LOGGER.debug("Assembling downscale stack event for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
         CloudCredential cloudCredential = buildCloudCredential(stack);
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         List<InstanceTemplate> instanceTemplates = new ArrayList<>();
@@ -308,7 +306,7 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
     @Override
     public void deleteStack(Stack stack, Credential credential) {
         LOGGER.debug("Assembling terminate stack event for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
         CloudCredential cloudCredential = buildCloudCredential(stack);
         //TODO which resources?
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
@@ -340,7 +338,7 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
     @Override
     public void updateAllowedSubnets(Stack stack, String gateWayUserData, String coreUserData) {
         LOGGER.debug("Assembling update subnet event for: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
         CloudCredential cloudCredential = buildCloudCredential(stack);
         CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
         //TODO which resources?
@@ -364,7 +362,7 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
 
     @Override
     public String getSSHUser(Map<String, String> context) {
-        CloudContext cloudContext = new CloudContext(null, null, context.get(ProvisioningService.PLATFORM));
+        CloudContext cloudContext = new CloudContext(null, null, context.get(ProvisioningService.PLATFORM), null);
         SshUserRequest<SshUserResponse> sshUserRequest = new SshUserRequest<>(cloudContext);
         LOGGER.info("Triggering event: {}", sshUserRequest);
         eventBus.notify(CloudPlatformRequest.selector(SshUserRequest.class), Event.wrap(sshUserRequest));
@@ -380,7 +378,7 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
 
     @Override
     public Set<CoreInstanceMetaData> collectMetadata(Stack stack) {
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<InstanceTemplate> instanceTemplates = cloudStackConverter.buildInstanceTemplates(stack);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
@@ -403,7 +401,7 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
 
     @Override
     public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroupName, Integer scalingAdjustment) {
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<InstanceTemplate> instanceTemplates = getNewInstanceTemplates(stack, instanceGroupName, scalingAdjustment);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
@@ -426,7 +424,7 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
 
     @Override
     public InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId) {
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         InstanceGroup ig = stack.getInstanceGroupByInstanceGroupName(instanceGroup.getGroupName());
         CloudInstance instance = null;
@@ -471,7 +469,7 @@ public class ServiceProviderAdapter implements ProvisionSetup, MetadataSetup, Cl
     public Set<String> getSSHFingerprints(Stack stack, String gateway) {
         Set<String> result = new HashSet<>();
         LOGGER.debug("Get SSH fingerprints of gateway instance for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name());
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
         CloudCredential cloudCredential = buildCloudCredential(stack);
         InstanceMetaData gatewayMetaData = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
         CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData);

@@ -31,6 +31,7 @@ dependencies {
     compile "org.springframework.boot:spring-boot-starter-actuator:${springBootVersion}"
     compile "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
     compile "org.springframework.boot:spring-boot-starter-websocket:${springBootVersion}"
+    compile "org.springframework.boot:spring-boot-starter-aop:${springBootVersion}"
     compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',     version: '2.0.3.RELEASE'
     compile group: 'org.springframework.security',  name: 'spring-security-config',         version: '3.2.3.RELEASE'
     compile group: 'org.springframework.security',  name: 'spring-security-web',            version: '3.2.3.RELEASE'
@@ -79,8 +80,8 @@ dependencies {
 
     runtime     group: 'activation',                name: 'activation',                     version: '1.0.2'
 
-    testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: '1.1.8.RELEASE'
-    testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-freemarker', version: '1.1.8.RELEASE'
+    testCompile "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+    testCompile "org.springframework.boot:spring-boot-starter-freemarker:${springBootVersion}"
     testCompile group: 'com.jayway.restassured',    name: 'rest-assured',                   version: '2.3.4'
     testCompile group: 'com.jayway.restassured',    name: 'json-path',                      version: '2.3.4'
 }

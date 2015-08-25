@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.task;
 
-import java.util.List;
-
 import javax.inject.Inject;
+
+import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
@@ -10,23 +10,20 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.InstancesStatusResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 
-public class PollInstancesStateTask implements PollTask<InstancesStatusResult> {
+public class PollInstancesStateTask extends PollTask<InstancesStatusResult> {
 
-    private CloudConnector connector;
-    private AuthenticatedContext authenticatedContext;
     private List<CloudInstance> instances;
 
     @Inject
     public PollInstancesStateTask(AuthenticatedContext authenticatedContext, CloudConnector connector, List<CloudInstance> instances) {
-        this.authenticatedContext = authenticatedContext;
-        this.connector = connector;
+        super(connector, authenticatedContext);
         this.instances = instances;
     }
 
     @Override
     public InstancesStatusResult call() throws Exception {
-        List<CloudVmInstanceStatus> instanceStatuses = connector.instances().check(authenticatedContext, instances);
-        return new InstancesStatusResult(authenticatedContext.getCloudContext(), instanceStatuses);
+        List<CloudVmInstanceStatus> instanceStatuses = getConnector().instances().check(getAuthenticatedContext(), instances);
+        return new InstancesStatusResult(getAuthenticatedContext().getCloudContext(), instanceStatuses);
     }
 
     @Override
