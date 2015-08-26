@@ -15,7 +15,7 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
+import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 
@@ -47,7 +47,7 @@ public class ASGroupStatusCheckerTask extends StackBasedStatusCheckerTask<AutoSc
             List<Activity> activities = amazonASClient.describeScalingActivities(describeScalingActivitiesRequest).getActivities();
             for (Activity activity : activities) {
                 if (activity.getProgress().equals(COMPLETED) && CANCELLED.equals(activity.getStatusCode())) {
-                    throw new FlowCancelledException(activity.getStatusMessage());
+                    throw new CancellationException(activity.getStatusMessage());
                 }
             }
             return false;

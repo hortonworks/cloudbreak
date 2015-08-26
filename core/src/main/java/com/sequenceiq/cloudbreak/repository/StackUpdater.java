@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -56,7 +57,12 @@ public class StackUpdater {
             if (statusReason != null) {
                 stack.setStatusReason(statusReason);
             }
-            stack = stackRepository.save(stack);
+            InMemoryStateStore.put(stackId, status);
+            if (Status.DELETE_COMPLETED.equals(status)) {
+                InMemoryStateStore.delete(stackId);
+            } else {
+                stack = stackRepository.save(stack);
+            }
         }
         return stack;
     }

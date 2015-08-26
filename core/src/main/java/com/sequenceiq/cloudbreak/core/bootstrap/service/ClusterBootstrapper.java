@@ -14,8 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
 import com.sequenceiq.cloudbreak.core.flow.context.BootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ContainerOrchestratorClusterContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
@@ -113,7 +113,7 @@ public class ClusterBootstrapper {
                 clusterBootstrapperErrorHandler.terminateFailedNodes(containerOrchestrator, stack, gatewayConfig, nodes);
             }
         } catch (CloudbreakOrchestratorCancelledException e) {
-            throw new FlowCancelledException(e.getMessage());
+            throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {
             throw new CloudbreakException(e);
         }
@@ -152,7 +152,7 @@ public class ClusterBootstrapper {
                 clusterBootstrapperErrorHandler.terminateFailedNodes(containerOrchestrator, stack, gatewayConfig, nodes);
             }
         } catch (CloudbreakOrchestratorCancelledException e) {
-            throw new FlowCancelledException(e.getMessage());
+            throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {
             throw new CloudbreakException(e);
         }

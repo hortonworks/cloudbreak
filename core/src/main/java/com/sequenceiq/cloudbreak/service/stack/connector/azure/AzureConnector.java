@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.EnvironmentVariableConfig;
-import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
+import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -147,9 +147,9 @@ public class AzureConnector implements CloudPlatformConnector {
             PollingResult pollingResult = azureThumbprintCheckerContextPollingService
                     .pollWithTimeout(azureThumbprintChecker, azureThumbprintCheckerContext, POLLING_INTERVAL, AZURE_THUMBPRINT_POLLING_ATTEMPTS);
             if (PollingResult.isExited(pollingResult)) {
-                throw new FlowCancelledException("Operation cancelled.");
+                throw new CancellationException("Operation cancelled.");
             } else if (PollingResult.isTimeout(pollingResult)) {
-                throw new AzureResourceException("Operation timed out: Couldn't get thumbrpint from azure on gateway instance.");
+                throw new AzureResourceException("Operation timed out: Couldn't get thumbprint from azure on gateway instance.");
             }
 
             Object virtualMachine = azureClient.getVirtualMachine(props);

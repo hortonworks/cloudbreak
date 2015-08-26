@@ -2,9 +2,11 @@ package com.sequenceiq.cloudbreak.core.flow;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow.service.FlowFacade;
@@ -48,7 +50,7 @@ public abstract class AbstractFlowHandler<T extends DefaultFlowContext> implemen
             result = execute(event);
             success = true;
         } catch (Exception t) {
-            if (t instanceof FlowCancelledException || t.getCause() instanceof FlowCancelledException) {
+            if (t instanceof CancellationException || ExceptionUtils.getRootCause(t) instanceof CancellationException) {
                 LOGGER.warn("The flow has been cancelled: {}", t.getMessage());
                 return;
             }

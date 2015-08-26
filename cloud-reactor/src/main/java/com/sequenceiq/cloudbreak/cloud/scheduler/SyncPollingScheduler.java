@@ -29,6 +29,9 @@ public class SyncPollingScheduler<T> {
     public T schedule(PollTask<T> task, int interval, int maxAttempt) throws ExecutionException, InterruptedException, TimeoutException {
         T result;
         for (int i = 0; i < maxAttempt; i++) {
+            if (task.cancelled()) {
+                throw new CancellationException("Task was cancelled.");
+            }
             ListenableScheduledFuture<T> ft = schedule(task, interval);
             result = ft.get();
             if (task.completed(result)) {

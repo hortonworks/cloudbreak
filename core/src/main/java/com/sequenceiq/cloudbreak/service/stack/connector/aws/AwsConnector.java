@@ -85,7 +85,7 @@ import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
+import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsNetwork;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
@@ -196,7 +196,7 @@ public class AwsConnector implements CloudPlatformConnector {
         PollingResult pollingResult = cloudFormationPollingService
                 .pollWithTimeout(cloudFormationStackStatusChecker, cfStackContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
         if (isExited(pollingResult)) {
-            throw new FlowCancelledException("Stack creation cancelled.");
+            throw new CancellationException("Stack creation cancelled.");
         } else if (isTimeout(pollingResult)) {
             throw new AwsResourceException(String.format("Failed to create CloudFormation stack: %s, polling result '%s'",
                     stackId, pollingResult));
@@ -376,7 +376,7 @@ public class AwsConnector implements CloudPlatformConnector {
         PollingResult pollingResult = consoleOutputPollingService
                 .pollWithTimeout(consoleOutputCheckerTask, consoleOutputContext, POLLING_INTERVAL, CONSOLE_OUTPUT_POLLING_ATTEMPTS);
         if (PollingResult.isExited(pollingResult)) {
-            throw new FlowCancelledException("Operation cancelled.");
+            throw new CancellationException("Operation cancelled.");
         } else if (PollingResult.isTimeout(pollingResult)) {
             throw new AwsResourceException("Operation timed out: Couldn't get console output of gateway instance.");
         }

@@ -4,4 +4,6 @@ public interface CheckResult<T> {
 
     boolean completed(T t);
 
+    boolean cancelled();
+
 }

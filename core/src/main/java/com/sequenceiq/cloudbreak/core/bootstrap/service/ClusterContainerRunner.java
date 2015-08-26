@@ -24,8 +24,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
@@ -103,7 +103,7 @@ public class ClusterContainerRunner {
         try {
             initializeClusterContainers(context, false, Collections.<String>emptySet());
         } catch (CloudbreakOrchestratorCancelledException e) {
-            throw new FlowCancelledException(e.getMessage());
+            throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {
             throw new CloudbreakException(e);
         }
@@ -113,7 +113,7 @@ public class ClusterContainerRunner {
         try {
             initializeClusterContainers(context, true, context.getUpscaleCandidateAddresses());
         } catch (CloudbreakOrchestratorCancelledException e) {
-            throw new FlowCancelledException(e.getMessage());
+            throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {
             throw new CloudbreakException(e);
         }

@@ -30,9 +30,17 @@ public class PollTaskConfig {
     public PollTaskFactory newFetchStateTask() {
         return new PollTaskFactory() {
             @Override
-            public PollTask<ResourcesStatePollerResult> newPollResourcesStateTask(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResource) {
+            public PollTask<ResourcesStatePollerResult> newPollResourcesStateTask(AuthenticatedContext authenticatedContext,
+                    List<CloudResource> cloudResource) {
                 CloudConnector connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatform());
                 return new PollResourcesStateTask(authenticatedContext, connector.resources(), cloudResource);
+            }
+
+            @Override
+            public PollTask<ResourcesStatePollerResult> newPollResourceTerminationTask(AuthenticatedContext authenticatedContext,
+                    List<CloudResource> cloudResource) {
+                CloudConnector connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatform());
+                return new PollResourceTerminationTask(authenticatedContext, connector.resources(), cloudResource);
             }
 
             @Override
