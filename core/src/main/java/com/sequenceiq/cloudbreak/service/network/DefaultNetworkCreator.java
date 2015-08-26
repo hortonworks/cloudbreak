@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.model.NetworkConfig;
 import com.sequenceiq.cloudbreak.domain.AwsNetwork;
 import com.sequenceiq.cloudbreak.domain.AzureNetwork;
 import com.sequenceiq.cloudbreak.domain.CbUser;

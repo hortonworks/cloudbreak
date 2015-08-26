@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.service.network;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sequenceiq.cloudbreak.cloud.model.EndpointRule;
+
 public class Port {
 
     private final String name;

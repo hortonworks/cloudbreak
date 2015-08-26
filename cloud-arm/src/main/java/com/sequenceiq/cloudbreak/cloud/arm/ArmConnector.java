@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
@@ -28,6 +29,9 @@ public class ArmConnector implements CloudConnector {
 
     @Inject
     private ArmInstanceConnector armInstanceConnector;
+
+    @Inject
+    private ArmCredentialConnector armCredentialConnector;
 
     @Inject
     private ArmSetup armSetup;
@@ -61,6 +65,11 @@ public class ArmConnector implements CloudConnector {
     @Override
     public Setup setup() {
         return armSetup;
+    }
+
+    @Override
+    public CredentialConnector credentials() {
+        return armCredentialConnector;
     }
 
 }

@@ -6,12 +6,16 @@ public class CloudCredential extends DynamicModel {
 
     private String name;
 
-    public CloudCredential(String name) {
+    private String publicKey;
+
+
+    public CloudCredential(String name, String publicKey) {
         this.name = name;
+        this.publicKey = publicKey;
     }
 
-    public CloudCredential(String name, Map<String, Object> parameters) {
-        this.name = name;
+    public CloudCredential(String name, String publicKey, Map<String, Object> parameters) {
+        this(name, publicKey);
         super.putAll(parameters);
     }
 
@@ -19,4 +23,7 @@ public class CloudCredential extends DynamicModel {
         return name;
     }
 
+    public String getPublicKey() {
+        return publicKey;
+    }
 }

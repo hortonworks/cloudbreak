@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.reactor.config;
+package com.sequenceiq.cloudbreak.cloud.reactor.config;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;

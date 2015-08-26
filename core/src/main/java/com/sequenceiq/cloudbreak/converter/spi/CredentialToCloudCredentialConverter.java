@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 public class CredentialToCloudCredentialConverter {
 
     public CloudCredential convert(Credential credential) {
-        return new CloudCredential(credential.getName(), getDeclaredFields(credential));
+        return new CloudCredential(credential.getName(), credential.getPublicKey(), getDeclaredFields(credential));
     }
 
 

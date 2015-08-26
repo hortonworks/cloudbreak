@@ -1,13 +1,22 @@
 package com.sequenceiq.cloudbreak;
 
-import javax.inject.Inject;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
@@ -24,14 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.ComponentScan;
+
 import reactor.Environment;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -98,7 +100,7 @@ public class ReactorApplication implements CommandLineRunner {
     }
 
     private LaunchStackRequest request() {
-        CloudCredential c = new CloudCredential("opencred");
+        CloudCredential c = new CloudCredential("opencred", "somekey");
         c.putParameter("userName", userName);
         c.putParameter("password", password);
         c.putParameter("tenantName", tenantName);
@@ -132,7 +134,7 @@ public class ReactorApplication implements CommandLineRunner {
         CloudContext cloudContext = new CloudContext(0L, "stack-name_" + ts, "OPENSTACK", "TEST_USER");
 
         CloudStack cs = new CloudStack(groups, network, security, image);
-        LaunchStackRequest<LaunchStackResult> lr = new LaunchStackRequest<>(cloudContext, c, cs);
+        LaunchStackRequest lr = new LaunchStackRequest(cloudContext, c, cs);
         LOGGER.debug("Launchrequest: {}", lr);
         return lr;
 

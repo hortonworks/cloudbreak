@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.reactor.config;
+package com.sequenceiq.cloudbreak.cloud.reactor.config;
 
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_EVENTBUS_THREADPOOL_CORE_SIZE;
 

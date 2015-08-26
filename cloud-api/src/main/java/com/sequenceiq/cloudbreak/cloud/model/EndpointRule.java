@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.network;
+package com.sequenceiq.cloudbreak.cloud.model;
 
 public class EndpointRule {
 

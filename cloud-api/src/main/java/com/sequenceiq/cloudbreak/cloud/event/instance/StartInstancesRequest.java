@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 
-public class StartInstancesRequest<T> extends CloudPlatformRequest<T> {
+public class StartInstancesRequest extends CloudPlatformRequest<StartInstancesResult> {
 
     private List<CloudInstance> cloudInstances;
 
