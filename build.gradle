@@ -217,12 +217,14 @@ subprojects {
 
     checkstyleMain {
         ignoreFailures = false
-        configProperties = ['config_loc': "$projectDir/config/checkstyle"]
+        configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+        configProperties = ['config_loc': "$rootDir/config/checkstyle"]
     }
 
     checkstyleTest {
         ignoreFailures = false
-        configProperties = ['config_loc': "$projectDir/config/checkstyle"]
+        configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+        configProperties = ['config_loc': "$rootDir/config/checkstyle"]
     }
 
     dependencies {
