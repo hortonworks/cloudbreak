@@ -27,4 +27,7 @@ public enum ResourceType {
     GCP_FIREWALL_INTERNAL,
     GCP_ROUTE,
     GCP_INSTANCE,
+
+    // ARM
+    ARM_TEMPLATE
 }

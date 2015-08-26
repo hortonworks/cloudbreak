@@ -58,8 +58,7 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
             CloudConnector connector = cloudPlatformConnectors.get(platform);
             AuthenticatedContext ac = connector.authenticate(cloudContext, request.getCloudCredential());
 
-            List<CloudResourceStatus> resourceStatus = connector.resources()
-                    .upscale(ac, request.getCloudStack(), request.getResourceList(), request.getAdjustment());
+            List<CloudResourceStatus> resourceStatus = connector.resources().upscale(ac, request.getCloudStack(), request.getResourceList());
 
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
 

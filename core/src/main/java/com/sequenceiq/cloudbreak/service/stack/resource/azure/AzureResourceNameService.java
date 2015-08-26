@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.azure;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_MAX_AZURE_RESOURCE_NAME_LENGTH;
+
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -17,7 +19,7 @@ public class AzureResourceNameService extends CloudbreakResourceNameService {
     private static final int CLOUDSERVICE_PART_COUNT = 3;
     private static final String RESERVED_IP_PREFIX = "reserved-ip";
 
-    @Value("${cb.max.azure.resource.name.length:50}")
+    @Value("${cb.max.azure.resource.name.length:" + CB_MAX_AZURE_RESOURCE_NAME_LENGTH + "}")
     private int maxResourceNameLength;
 
     @Override

@@ -20,6 +20,22 @@ public class ReflectionUtils {
 
     public static Map<String, Object> getDeclaredFields(Object object) {
         Map<String, Object> dynamicFields = new HashMap<>();
+        try {
+            Field[] superFields = object.getClass().getSuperclass().getDeclaredFields();
+            for (Field field : superFields) {
+                if (!field.isAccessible()) {
+                    field.setAccessible(true);
+                }
+                String name = field.getName();
+                try {
+                    dynamicFields.put(name, getValue(field, object));
+                } catch (IllegalAccessException e) {
+                    LOGGER.error("Cannot retrieve field {} from class {}", name, object.getClass().getName());
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("Cannot retrieve fields from superclass");
+        }
         Field[] fields = object.getClass().getDeclaredFields();
         for (Field field : fields) {
             if (!field.isAccessible()) {
@@ -32,6 +48,7 @@ public class ReflectionUtils {
                 LOGGER.error("Cannot retrieve field {} from class {}", name, object.getClass().getName());
             }
         }
+
         return dynamicFields;
     }
 

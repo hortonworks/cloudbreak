@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.openstack;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_OPENSTACK_HEAT_TEMPLATE_PATH;
 import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processTemplateIntoString;
 
 import java.io.IOException;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -33,7 +35,7 @@ public class HeatTemplateBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HeatTemplateBuilder.class);
 
-    @Value("${cb.openstack.heat.template.path:templates/openstack-heat.ftl}")
+    @Value("${cb.openstack.heat.template.path:" + CB_OPENSTACK_HEAT_TEMPLATE_PATH + "}")
     private String openStackHeatTemplatePath;
 
     @Inject
@@ -54,7 +56,7 @@ public class HeatTemplateBuilder {
             LOGGER.debug("Generated Heat template: {}", generatedTemplate);
             return generatedTemplate;
         } catch (IOException | TemplateException e) {
-            throw new RuntimeException("Failed to process the OpenStack HeatTemplateBuilder", e);
+            throw new CloudConnectorException("Failed to process the OpenStack HeatTemplateBuilder", e);
         }
     }
 

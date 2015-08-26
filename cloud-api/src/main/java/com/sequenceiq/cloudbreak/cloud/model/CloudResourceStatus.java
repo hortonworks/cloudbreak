@@ -30,6 +30,10 @@ public class CloudResourceStatus {
         return statusReason;
     }
 
+    public void setStatus(ResourceStatus status) {
+        this.status = status;
+    }
+
     //BEGIN GENERATED CODE
     @Override
     public String toString() {

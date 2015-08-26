@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak;
 
+import java.util.Arrays;
+import java.util.List;
+
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+
 public class EnvironmentVariableConfig {
 
     public static final String CB_THREADPOOL_CORE_SIZE = "40";
@@ -56,8 +61,25 @@ public class EnvironmentVariableConfig {
     public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-ea0686ea,ap-southeast-1:ami-de5c548c,ap-southeast-2:ami-c75914fd,eu-west-1:ami-38154e4f,sa-east-1:ami-5149c24c,us-east-1:ami-33318f58,us-west-1:ami-59ef171d,us-west-2:ami-a9958399";
     public static final String CB_OPENSTACK_IMAGE = "cb-centos71-amb210-2015-08-25";
     public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos71-amb210-2015-08-25-centos71.tar.gz";
+    public static final String CB_AZURE_RM_IMAGE = "https://sequenceiqimages.blob.core.windows.net/images/cb-centos71-amb210-2015-08-25-centos7_2015-August-25_12-0-os-2015-08-25.vhd";
 
     public static final String CB_GCP_AND_AZURE_USER_NAME = "cloudbreak";
+
+    public static final String CB_ARM_TEMPLATE_PATH = "templates/arm-v2.ftl";
+    public static final String CB_ARM_PARAMETER_PATH = "templates/parameters.ftl";
+
+    public static final String CB_OPENSTACK_HEAT_TEMPLATE_PATH = "templates/openstack-heat.ftl";
+    public static final String CB_OPENSTACK_API_DEBUG = "false";
+
+    public static final String CB_EVENTBUS_THREADPOOL_CORE_SIZE = "100";
+    public static final String CB_CLOUD_API_EXECUTORSERVICE_POOL_SIZE = "40";
+
+    public static final String CB_MAX_AZURE_RESOURCE_NAME_LENGTH = "50";
+    public static final String CB_MAX_GCP_RESOURCE_NAME_LENGTH = "50";
+
+    public static final String CB_ADDRESS_RESOLVING_TIMEOUT = "60000";
+
+    public static final List<String> VERBOSEDCLOUDPLATFORMS = Arrays.asList(CloudPlatform.AZURE_RM.name());
 
     private EnvironmentVariableConfig() {
 

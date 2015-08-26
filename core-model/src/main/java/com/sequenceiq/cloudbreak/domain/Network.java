@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -152,5 +154,5 @@ public abstract class Network {
         this.status = status;
     }
 
-    public abstract CloudPlatform cloudPlatform();
+    public abstract List<CloudPlatform> cloudPlatform();
 }

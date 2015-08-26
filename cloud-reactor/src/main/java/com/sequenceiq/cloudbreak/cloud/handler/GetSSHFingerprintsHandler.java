@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.VERBOSEDCLOUDPLATFORMS;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -59,12 +61,17 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
             if (!outputPollerTask.completed(consoleOutputResult)) {
                 consoleOutputResult = syncPollingScheduler.schedule(outputPollerTask);
             }
-            Set<String> sshFingerprints = FingerprintParserUtil.parseFingerprints(consoleOutputResult.getConsoleOutput());
             GetSSHFingerprintsResult fingerprintsResult;
-            if (sshFingerprints.isEmpty()) {
-                fingerprintsResult = new GetSSHFingerprintsResult("Failed to get SSH fingerprints from the specified VM instance.", null, fingerprintsRequest);
+            if (!VERBOSEDCLOUDPLATFORMS.contains(platform)) {
+                Set<String> sshFingerprints = FingerprintParserUtil.parseFingerprints(consoleOutputResult.getConsoleOutput());
+                if (sshFingerprints.isEmpty()) {
+                    fingerprintsResult = new GetSSHFingerprintsResult("Failed to get SSH fingerprints from the specified VM instance.", null,
+                            fingerprintsRequest);
+                } else {
+                    fingerprintsResult = new GetSSHFingerprintsResult(fingerprintsRequest, sshFingerprints);
+                }
             } else {
-                fingerprintsResult = new GetSSHFingerprintsResult(fingerprintsRequest, sshFingerprints);
+                fingerprintsResult = new GetSSHFingerprintsResult(fingerprintsRequest, new HashSet<String>());
             }
             fingerprintsRequest.getResult().onNext(fingerprintsResult);
             LOGGER.info("GetSSHFingerprintsHandler finished");

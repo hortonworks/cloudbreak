@@ -47,24 +47,28 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
     public void accept(Event<TerminateStackRequest> terminateStackRequestEvent) {
         LOGGER.info("Received event: {}", terminateStackRequestEvent);
         TerminateStackRequest terminateStackRequest = terminateStackRequestEvent.getData();
+        TerminateStackResult terminateStackResult;
         try {
             String platform = terminateStackRequest.getCloudContext().getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
             AuthenticatedContext ac = connector.authenticate(terminateStackRequest.getCloudContext(), terminateStackRequest.getCloudCredential());
-            List<CloudResourceStatus> resourceStatus = connector.resources().terminate(ac, terminateStackRequest.getCloudResources());
+            List<CloudResourceStatus> resourceStatus = connector.resources().terminate(ac, terminateStackRequest.getCloudStack(),
+                    terminateStackRequest.getCloudResources());
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
+            if (!resources.isEmpty()) {
+                PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources);
+                ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(terminateStackRequest.getCloudContext(), resourceStatus);
+                if (!task.completed(statePollerResult)) {
+                    statePollerResult = syncPollingScheduler.schedule(task);
+                }
 
-            PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources);
-            ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(terminateStackRequest.getCloudContext(), resourceStatus);
-            if (!task.completed(statePollerResult)) {
-                statePollerResult = syncPollingScheduler.schedule(task);
-            }
-
-            TerminateStackResult terminateStackResult;
-            if (!statePollerResult.getStatus().equals(ResourceStatus.DELETED)) {
-                String statusReason = "Stack could not be terminated, Resource(s) could not be deleted on the provider side.";
-                terminateStackResult = new TerminateStackResult(statusReason, null, terminateStackRequest);
-                LOGGER.info(statusReason);
+                if (!statePollerResult.getStatus().equals(ResourceStatus.DELETED)) {
+                    String statusReason = "Stack could not be terminated, Resource(s) could not be deleted on the provider side.";
+                    terminateStackResult = new TerminateStackResult(statusReason, null, terminateStackRequest);
+                    LOGGER.info(statusReason);
+                } else {
+                    terminateStackResult = new TerminateStackResult(terminateStackRequest);
+                }
             } else {
                 terminateStackResult = new TerminateStackResult(terminateStackRequest);
             }

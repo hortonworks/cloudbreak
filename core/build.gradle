@@ -77,6 +77,9 @@ dependencies {
     compile project(':cloud-api')
     runtime project(':cloud-reactor')
     runtime project(':cloud-openstack')
+    runtime project(':cloud-arm')
+
+    compile project(':cloud-common')
 
     runtime     group: 'activation',                name: 'activation',                     version: '1.0.2'
 

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.decorator;
 
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AWS_AMI_MAP;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AZURE_IMAGE_URI;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AZURE_RM_IMAGE;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_GCP_SOURCE_IMAGE_PATH;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_OPENSTACK_IMAGE;
 
@@ -47,6 +48,9 @@ public class StackDecorator implements Decorator<Stack> {
     @Value("${cb.azure.image.uri:}")
     private String azureImage;
 
+    @Value("${cb.azure.rm.image.uri:}")
+    private String azureRmImage;
+
     @Value("${cb.aws.ami.map:}")
     private String awsImage;
 
@@ -70,7 +74,7 @@ public class StackDecorator implements Decorator<Stack> {
         int consulServers = getConsulServerCount((Integer) data[DecorationData.USR_CONSUL_SERVER_COUNT.ordinal()], subject.getFullNodeCount());
         subject.setConsulServers(consulServers);
         Network network = networkService.getById((Long) data[DecorationData.NETWORK_ID.ordinal()]);
-        if (!subject.cloudPlatform().equals(network.cloudPlatform())) {
+        if (!network.cloudPlatform().contains(subject.cloudPlatform())) {
             throw new BadRequestException("The selected credential and network must relate to the same cloud platform!");
         }
         subject.setNetwork(network);
@@ -101,6 +105,9 @@ public class StackDecorator implements Decorator<Stack> {
                 break;
             case OPENSTACK:
                 selectedImage = determineImageName(openStackImage, CB_OPENSTACK_IMAGE);
+                break;
+            case AZURE_RM:
+                selectedImage = determineImageName(azureRmImage, CB_AZURE_RM_IMAGE);
                 break;
             default:
                 throw new BadRequestException(String.format("Not supported cloud platform: %s", stack.cloudPlatform()));

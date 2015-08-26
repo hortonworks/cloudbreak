@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.controller.json.CredentialResponse;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.AzureRmCredential;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.GcpCredential;
@@ -208,6 +209,9 @@ public class CredentialController {
         case OPENSTACK:
             converted = conversionService.convert(json, OpenStackCredential.class);
             break;
+        case AZURE_RM:
+            converted = conversionService.convert(json, AzureRmCredential.class);
+            break;
         default:
             throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", json.getCloudPlatform()));
         }
@@ -226,6 +230,8 @@ public class CredentialController {
             return conversionService.convert((GcpCredential) credential, CredentialResponse.class);
         case OPENSTACK:
             return conversionService.convert((OpenStackCredential) credential, CredentialResponse.class);
+            case AZURE_RM:
+            return conversionService.convert((AzureRmCredential) credential, CredentialResponse.class);
         default:
             throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credential.cloudPlatform()));
         }

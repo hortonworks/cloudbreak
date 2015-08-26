@@ -17,6 +17,13 @@ public class InstanceTemplate {
         volumes = new ArrayList<>();
     }
 
+    public InstanceTemplate(String flavor, String groupName, int privateId, List<Volume> volumes) {
+        this.flavor = flavor;
+        this.groupName = groupName;
+        this.privateId = privateId;
+        this.volumes = volumes;
+    }
+
     public String getFlavor() {
         return flavor;
     }

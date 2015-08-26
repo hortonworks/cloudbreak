@@ -6,6 +6,7 @@ include 'orchestrator-api'
 include 'cloud-api'
 include 'cloud-reactor'
 include 'cloud-openstack'
+include 'cloud-arm'
+include 'cloud-common'
 
 rootProject.name = 'cloudbreak'
-

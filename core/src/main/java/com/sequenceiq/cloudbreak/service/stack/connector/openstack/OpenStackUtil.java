@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.EnvironmentVariableConfig;
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
 
 @Component
@@ -24,7 +25,7 @@ public class OpenStackUtil {
     @Inject
     private PBEStringCleanablePasswordEncryptor encryptor;
 
-    @Value("${cb.openstack.api.debug:false}")
+    @Value("${cb.openstack.api.debug:" + EnvironmentVariableConfig.CB_OPENSTACK_API_DEBUG + "}")
     private boolean debug;
 
     @PostConstruct

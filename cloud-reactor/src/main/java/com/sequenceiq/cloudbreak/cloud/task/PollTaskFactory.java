@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.cloud.task;
 
 import java.util.List;
 
+import com.sequenceiq.cloudbreak.cloud.BooleanStateConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.event.instance.BooleanResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.InstanceConsoleOutputResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.InstancesStatusResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -17,4 +19,5 @@ public interface PollTaskFactory {
 
     PollTask<InstanceConsoleOutputResult> newPollInstanceConsoleOutputTask(AuthenticatedContext authenticatedContext, CloudInstance instance);
 
+    PollTask<BooleanResult> newPollBooleanStateTask(AuthenticatedContext authenticatedContext, BooleanStateConnector connector);
 }

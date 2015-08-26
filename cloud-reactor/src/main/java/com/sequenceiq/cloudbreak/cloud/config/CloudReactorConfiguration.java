@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.config;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_CLOUD_API_EXECUTORSERVICE_POOL_SIZE;
+
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +15,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 @Configuration
 public class CloudReactorConfiguration {
 
-    @Value("${cb.cloud.api.executorservice.pool.size:40}")
+    @Value("${cb.cloud.api.executorservice.pool.size:" + CB_CLOUD_API_EXECUTORSERVICE_POOL_SIZE + "}")
     private int executorServicePoolSize;
 
     @Bean

@@ -24,7 +24,7 @@ public class AmbariHostsLeaveStatusCheckerTask extends StackBasedStatusCheckerTa
             Map<String, String> hostStatuses = ambariClient.getHostStatuses();
             for (String hostName : hostNames) {
                 String status = hostStatuses.get(hostName);
-                if (!LEFT_STATE.equals(status)) {
+                if (!LEFT_STATE.equals(status) || status == null) {
                     LOGGER.info("{} didn't leave the cluster yet", hostName);
                     return false;
                 }

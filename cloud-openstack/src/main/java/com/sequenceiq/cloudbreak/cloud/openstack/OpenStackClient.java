@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.openstack;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_OPENSTACK_API_DEBUG;
+
 import javax.annotation.PostConstruct;
 
 import org.openstack4j.api.OSClient;
@@ -16,7 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 @Component
 public class OpenStackClient {
 
-    @Value("${cb.openstack.api.debug:false}")
+    @Value("${cb.openstack.api.debug:" + CB_OPENSTACK_API_DEBUG + "}")
     private boolean debug;
 
     @PostConstruct

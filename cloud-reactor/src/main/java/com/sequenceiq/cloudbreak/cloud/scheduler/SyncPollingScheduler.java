@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 public class SyncPollingScheduler<T> {
 
     private static final int POLLING_INTERVAL = 5;
-    private static final int MAX_POLLING_ATTEMPT = 600;
+    private static final int MAX_POLLING_ATTEMPT = 1000;
 
     @Inject
     private ListeningScheduledExecutorService scheduler;
