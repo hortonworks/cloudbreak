@@ -178,7 +178,7 @@ deployer-delete() {
 }
 
 deployer-delete-yamls() {
-    rm uaa.yml docker-compose.yml
+    rm -f uaa.yml docker-compose.yml
 }
 
 deployer-generate() {

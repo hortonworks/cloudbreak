@@ -7,7 +7,26 @@
 ### Removed
 
 ### Changed
-## Unreleased
+
+## [v1.0.2] - 2015-08-25
+
+### Fixed
+
+### Added
+
+- `DOCKER_CONSUL_OPTIONS` config option to provide arbitrary consul option
+
+### Removed
+
+### Changed
+
+- Fixed docker version checker to be 1.8.1 compatible. (docker added --format option)
+- sequenceiq/cloudbreak image updated to 1.0.2
+- consul image changed from sequenceiq/consul to gliderlabs/consul
+- consul image updated to 0.5.2 (from 0.5.0)
+- consul discovers host dns settings, and uses the configured nameserver as recursor
+
+## [v1.0.0] - 2015-08-15
 
 ### Fixed
 
@@ -16,8 +35,6 @@
 ### Removed
 
 ### Changed
-
-- sequenceiq/cloudbreak image updated to 1.0.1
 
 ## [v1.0.0] - 2015-07-23
 

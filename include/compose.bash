@@ -156,12 +156,12 @@ consul:
     volumes:
         - "/var/run/docker.sock:/var/run/docker.sock"
     ports:
-        - "$PRIVATE_IP:53:53/udp"
+        - "$PRIVATE_IP:53:8600/udp"
         - "8400:8400"
         - "8500:8500"
     hostname: node1
-    image: sequenceiq/consul:$DOCKER_TAG_CONSUL
-    command: --server --bootstrap --advertise $PRIVATE_IP
+    image: gliderlabs/consul-server:$DOCKER_TAG_CONSUL
+    command: --bootstrap --advertise $PRIVATE_IP $DOCKER_CONSUL_OPTIONS
 
 registrator:
     privileged: true
@@ -236,7 +236,7 @@ identity:
     links:
         - ambassador:mydb
     volumes:
-      - uaa.yml:/uaa/uaa.yml
+      - ./uaa.yml:/uaa/uaa.yml
     image: sequenceiq/uaa:$DOCKER_TAG_UAA
 
 cbdb:
