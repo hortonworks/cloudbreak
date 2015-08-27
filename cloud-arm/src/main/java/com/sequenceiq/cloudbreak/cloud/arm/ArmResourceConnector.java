@@ -145,7 +145,7 @@ public class ArmResourceConnector implements ResourceConnector {
                 }
 
                 azureRMClient.deleteResourceGroup(resource.getName());
-                PollTask<BooleanResult> task = statusCheckFactory.newPollBooleanStateTask(authenticatedContext,
+                PollTask<BooleanResult> task = statusCheckFactory.newPollBooleanTerminationTask(authenticatedContext,
                         new ArmResourceGroupDeleteStatusCheckerTask(armClient, new ResourceGroupCheckerContext(
                                 new ArmCredentialView(authenticatedContext.getCloudCredential()), resource.getName())));
                 BooleanResult statePollerResult = task.call();
@@ -157,7 +157,7 @@ public class ArmResourceConnector implements ResourceConnector {
                     throw new CloudConnectorException(e.getResponse().getData().toString());
                 }
             } catch (Exception e) {
-                throw new CloudConnectorException(String.format("Could not delete resource group: %s", resource.getName()));
+                throw new CloudConnectorException(String.format("Could not delete resource group: %s", resource.getName()), e);
             }
             deleteDisk(storageProfileDiskNames, azureRMClient, osStorageName, storageGroup);
         }

@@ -59,6 +59,11 @@ public class PollTaskConfig {
             public PollTask<BooleanResult> newPollBooleanStateTask(AuthenticatedContext authenticatedContext, BooleanStateConnector connector) {
                 return new PollBooleanStateTask(authenticatedContext, connector);
             }
+
+            @Override
+            public PollTask<BooleanResult> newPollBooleanTerminationTask(AuthenticatedContext authenticatedContext, BooleanStateConnector connector) {
+                return new PollBooleanTerminationTask(authenticatedContext, connector);
+            }
         };
     }
 
