@@ -21,6 +21,11 @@ public class KeystoneCredentialView {
         return cloudCredential.getName();
     }
 
+
+    public String getPublicKey() {
+        return cloudCredential.getPublicKey();
+    }
+
     public String getUserName() {
         return cloudCredential.getParameter("userName", String.class);
     }
@@ -36,4 +41,6 @@ public class KeystoneCredentialView {
     public String getEndpoint() {
         return cloudCredential.getParameter("endpoint", String.class);
     }
+
+
 }

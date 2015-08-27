@@ -46,9 +46,6 @@ import reactor.rx.Promise;
 @Service
 public class ArmResourceConnector implements ResourceConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(ArmResourceConnector.class);
-    private static final int ARM_POLLING_INTERVAL = 5000;
-    private static final int MAX_ATTEMPTS_FOR_HOSTS = 240;
-    private static final int MAX_FAILURE_COUNT = 5;
 
     @Inject
     private ArmClient armClient;

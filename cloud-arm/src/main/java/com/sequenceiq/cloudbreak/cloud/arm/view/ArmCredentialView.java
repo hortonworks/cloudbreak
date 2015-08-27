@@ -10,6 +10,10 @@ public class ArmCredentialView {
         this.cloudCredential = cloudCredential;
     }
 
+    public String getPublicKey() {
+        return cloudCredential.getPublicKey();
+    }
+
     public String getName() {
         return cloudCredential.getName();
     }
@@ -30,8 +34,6 @@ public class ArmCredentialView {
         return cloudCredential.getParameter("tenantId", String.class);
     }
 
-    public String getPublicKey() {
-        return cloudCredential.getParameter("publicKey", String.class);
-    }
+
 
 }

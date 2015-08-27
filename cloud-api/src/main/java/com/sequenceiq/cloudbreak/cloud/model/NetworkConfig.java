@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.network;
+package com.sequenceiq.cloudbreak.cloud.model;
 
 public final class NetworkConfig {
     public static final String OPEN_NETWORK = "0.0.0.0/0";

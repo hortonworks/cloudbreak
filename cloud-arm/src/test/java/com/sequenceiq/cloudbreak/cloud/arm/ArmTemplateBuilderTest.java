@@ -5,9 +5,7 @@ import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.GATEWAY;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -50,9 +48,7 @@ public class ArmTemplateBuilderTest {
     }
 
     private CloudCredential createCloudCredential() {
-        Map<String, Object> credentialMap = new HashMap<>();
-        credentialMap.put("sshKey", "sshkey....");
-        return new CloudCredential("testcredential", credentialMap);
+        return new CloudCredential("testcredential", "sshkey....");
     }
 
     private CloudStack createCloudStack() {

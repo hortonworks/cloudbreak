@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.google.common.base.Optional;
+import com.sequenceiq.cloudbreak.cloud.model.EndpointRule;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.Stack;
 

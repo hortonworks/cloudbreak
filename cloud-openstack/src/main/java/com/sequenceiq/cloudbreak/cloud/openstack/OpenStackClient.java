@@ -38,8 +38,12 @@ public class OpenStackClient {
         return createOSClient(access);
     }
 
+    public KeystoneCredentialView createKeystoneCredential(CloudCredential credential) {
+        return new KeystoneCredentialView(credential);
+    }
+
     public Access createAccess(CloudCredential credential) {
-        KeystoneCredentialView osCredential = new KeystoneCredentialView(credential);
+        KeystoneCredentialView osCredential = createKeystoneCredential(credential);
         return OSFactory.builder().endpoint(osCredential.getEndpoint())
                 .credentials(osCredential.getUserName(), osCredential.getPassword())
                 .tenantName(osCredential.getTenantName())

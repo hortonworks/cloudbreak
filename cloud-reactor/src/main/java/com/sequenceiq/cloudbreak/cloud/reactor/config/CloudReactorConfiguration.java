@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.config;
+package com.sequenceiq.cloudbreak.cloud.reactor.config;
 
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_CLOUD_API_EXECUTORSERVICE_POOL_SIZE;
 
@@ -22,6 +22,6 @@ public class CloudReactorConfiguration {
     ListeningScheduledExecutorService listeningScheduledExecutorService() {
         return MoreExecutors
                 .listeningDecorator(new ScheduledThreadPoolExecutor(executorServicePoolSize,
-                        new ThreadFactoryBuilder().setNameFormat("reactorExecutor-%d").build()));
+                        new ThreadFactoryBuilder().setNameFormat("cloud-reactor-%d").build()));
     }
 }

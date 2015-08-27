@@ -8,11 +8,14 @@ public interface CloudConnector {
 
     AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential);
 
+    Setup setup();
+
+    CredentialConnector credentials();
+
     ResourceConnector resources();
 
     InstanceConnector instances();
 
-    Setup setup();
 
     String platform();
 

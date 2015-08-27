@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.connector.adapter;
+package com.sequenceiq.cloudbreak.service.stack.connector;
 
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 

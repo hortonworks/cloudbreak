@@ -32,7 +32,8 @@ dependencies {
     compile "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
     compile "org.springframework.boot:spring-boot-starter-websocket:${springBootVersion}"
     compile "org.springframework.boot:spring-boot-starter-aop:${springBootVersion}"
-    compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',     version: '2.0.3.RELEASE'
+    compile group: 'javax',                         name: 'javaee-api',                     version: '7.0'
+    compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',    version: '2.0.3.RELEASE'
     compile group: 'org.springframework.security',  name: 'spring-security-config',         version: '3.2.3.RELEASE'
     compile group: 'org.springframework.security',  name: 'spring-security-web',            version: '3.2.3.RELEASE'
     compile group: 'org.springframework',           name: 'spring-messaging',               version: '4.0.3.RELEASE'
@@ -54,7 +55,6 @@ dependencies {
     compile group: 'com.google.apis',               name: 'google-api-services-compute',    version: 'v1-rev46-1.19.1'
     compile group: 'com.google.apis',               name: 'google-api-services-storage',    version: 'v1-rev6-1.19.0'
     compile group: 'com.google.apis',               name: 'google-api-services-dns',        version: 'v1beta1-rev9-1.19.0'
-    compile group: 'org.pacesys',                   name: 'openstack4j',                    version: '2.0.0'
     compile group: 'org.bouncycastle',              name: 'bcprov-jdk15on',                 version: '1.47'
     compile group: 'org.bouncycastle',              name: 'bcpkix-jdk15on',                 version: '1.47'
     compile group: 'org.jasypt',                    name: 'jasypt',                         version: '1.9.2'
