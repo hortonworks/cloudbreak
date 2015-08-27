@@ -21,9 +21,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -144,7 +144,7 @@ public class ClusterContainerRunnerTest {
         underTest.runClusterContainers(provisioningContext);
     }
 
-    @Test(expected = FlowCancelledException.class)
+    @Test(expected = CancellationException.class)
     public void runClusterContainersWhenContainerRunnerCancelled()
             throws CloudbreakException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
         ReflectionTestUtils.setField(underTest, "baywatchEnabled", true);
@@ -271,7 +271,7 @@ public class ClusterContainerRunnerTest {
         underTest.addClusterContainers(context);
     }
 
-    @Test(expected = FlowCancelledException.class)
+    @Test(expected = CancellationException.class)
     public void runNewNodesClusterContainersWhenContainerRunnerCancelled()
             throws CloudbreakException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
         ReflectionTestUtils.setField(underTest, "baywatchEnabled", true);

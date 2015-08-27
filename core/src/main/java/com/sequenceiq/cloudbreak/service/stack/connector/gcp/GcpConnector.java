@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.EnvironmentVariableConfig;
-import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
+import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -115,7 +115,7 @@ public class GcpConnector implements CloudPlatformConnector {
             PollingResult pollingResult = consoleOutputPollingService
                     .pollWithTimeout(consoleOutputCheckerTask, gcpConsoleOutputContext, POLLING_INTERVAL, CONSOLE_OUTPUT_POLLING_ATTEMPTS);
             if (PollingResult.isExited(pollingResult)) {
-                throw new FlowCancelledException("Operation cancelled.");
+                throw new CancellationException("Operation cancelled.");
             } else if (PollingResult.isTimeout(pollingResult)) {
                 throw new GcpResourceException("Operation timed out: Couldn't get console output of gateway instance.");
             }

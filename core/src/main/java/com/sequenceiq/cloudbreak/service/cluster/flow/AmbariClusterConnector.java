@@ -38,12 +38,12 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
 import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
+import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.ClusterException;
-import com.sequenceiq.cloudbreak.core.flow.FlowCancelledException;
 import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -192,8 +192,8 @@ public class AmbariClusterConnector {
                 recipeEngine.executePostInstall(stack);
             }
             return cluster;
-        } catch (FlowCancelledException flowCancelledException) {
-            throw flowCancelledException;
+        } catch (CancellationException cancellationException) {
+            throw cancellationException;
         } catch (HttpResponseException hre) {
             String errorMessage = AmbariClientExceptionUtil.getErrorMessage(hre);
             throw new AmbariOperationFailedException("Ambari could not create the cluster: " + errorMessage, hre);
@@ -205,7 +205,7 @@ public class AmbariClusterConnector {
 
     private void checkPollingResult(PollingResult waitForHostsResult, String message) throws ClusterException {
         if (isExited(waitForHostsResult)) {
-            throw new FlowCancelledException("Stack or cluster in delete in progress phase.");
+            throw new CancellationException("Stack or cluster in delete in progress phase.");
         } else if (!isSuccess(waitForHostsResult)) {
             throw new ClusterException(message);
         }
@@ -397,7 +397,7 @@ public class AmbariClusterConnector {
                 if (isTimeout(result)) {
                     throw new AmbariOperationFailedException("Timeout while restarting Hadoop services.");
                 } else if (isExited(result)) {
-                    throw new FlowCancelledException("Cluster was terminated while restarting Hadoop services.");
+                    throw new CancellationException("Cluster was terminated while restarting Hadoop services.");
                 }
                 hostDeleted = true;
             }
@@ -463,7 +463,7 @@ public class AmbariClusterConnector {
             LOGGER.info("Waiting for Hadoop services to stop on stack");
             PollingResult servicesStopResult = ambariOperationService.waitForAmbariOperations(stack, ambariClient, singletonMap("stop services", requestId));
             if (isExited(servicesStopResult)) {
-                throw new FlowCancelledException("Cluster was terminated while waiting for Hadoop services to start");
+                throw new CancellationException("Cluster was terminated while waiting for Hadoop services to start");
             } else if (isTimeout(servicesStopResult)) {
                 throw new CloudbreakException("Timeout while stopping Ambari services.");
             }
@@ -478,7 +478,7 @@ public class AmbariClusterConnector {
             LOGGER.info("Waiting for Hadoop services to start on stack");
             PollingResult servicesStartResult = ambariOperationService.waitForAmbariOperations(stack, ambariClient, singletonMap("start services", requestId));
             if (isExited(servicesStartResult)) {
-                throw new FlowCancelledException("Cluster was terminated while waiting for Hadoop services to start");
+                throw new CancellationException("Cluster was terminated while waiting for Hadoop services to start");
             } else if (isTimeout(servicesStartResult)) {
                 throw new CloudbreakException("Timeout while starting Ambari services.");
             }
@@ -658,7 +658,7 @@ public class AmbariClusterConnector {
                 MAX_ATTEMPTS_FOR_HOSTS,
                 AmbariOperationService.MAX_FAILURE_COUNT);
         if (isExited(ambariHealthCheckResult)) {
-            throw new FlowCancelledException("Cluster was terminated while waiting for Ambari to start.");
+            throw new CancellationException("Cluster was terminated while waiting for Ambari to start.");
         } else if (isTimeout(ambariHealthCheckResult)) {
             throw new CloudbreakException("Ambari server was not restarted properly.");
         }
@@ -675,7 +675,7 @@ public class AmbariClusterConnector {
         pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.START_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
         PollingResult hostsJoinedResult = waitForHostsToJoin(stack);
         if (PollingResult.EXIT.equals(hostsJoinedResult)) {
-            throw new FlowCancelledException("Cluster was terminated while starting Ambari agents.");
+            throw new CancellationException("Cluster was terminated while starting Ambari agents.");
         } else if (PollingResult.TIMEOUT.equals(hostsJoinedResult)) {
             LOGGER.info("Ambari agents couldn't join. Restarting ambari agents...");
             restartAmbariAgents(stack);
@@ -686,7 +686,7 @@ public class AmbariClusterConnector {
         pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.RESTART_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
         PollingResult hostsJoinedResult = waitForHostsToJoin(stack);
         if (isExited(hostsJoinedResult)) {
-            throw new FlowCancelledException("Cluster was terminated while restarting Ambari agents.");
+            throw new CancellationException("Cluster was terminated while restarting Ambari agents.");
         } else if (isTimeout(hostsJoinedResult)) {
             throw new CloudbreakException("Services could not start because host(s) could not join.");
         }

@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.arm.status.ArmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -29,8 +30,7 @@ public class ArmInstanceConnector implements InstanceConnector {
 
     @Override
     public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm) {
-        // Currently Azure rm not supporting the get fingerprint method
-        return "-----END SSH HOST KEY FINGERPRINTS-----";
+        throw new CloudOperationNotSupportedException("Azure ARM doesn't provide access to the VM console output yet.");
     }
 
     @Override

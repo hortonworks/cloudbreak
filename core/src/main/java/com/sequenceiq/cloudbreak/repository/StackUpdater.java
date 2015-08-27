@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -24,6 +26,8 @@ public class StackUpdater {
     private CloudbreakEventService cloudbreakEventService;
     @Inject
     private ResourceRepository resourceRepository;
+    @Inject
+    private StatusToPollGroupConverter statusToPollGroupConverter;
 
     public Stack updateStackStatus(Long stackId, Status status) {
         return doUpdateStackStatus(stackId, status, "");
@@ -56,7 +60,12 @@ public class StackUpdater {
             if (statusReason != null) {
                 stack.setStatusReason(statusReason);
             }
-            stack = stackRepository.save(stack);
+            InMemoryStateStore.put(stackId, statusToPollGroupConverter.convert(status));
+            if (Status.DELETE_COMPLETED.equals(status)) {
+                InMemoryStateStore.delete(stackId);
+            } else {
+                stack = stackRepository.save(stack);
+            }
         }
         return stack;
     }

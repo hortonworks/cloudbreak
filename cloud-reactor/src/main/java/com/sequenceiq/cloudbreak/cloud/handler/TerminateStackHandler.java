@@ -56,7 +56,7 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
                     terminateStackRequest.getCloudResources());
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
             if (!resources.isEmpty()) {
-                PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources);
+                PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourceTerminationTask(ac, resources);
                 ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(terminateStackRequest.getCloudContext(), resourceStatus);
                 if (!task.completed(statePollerResult)) {
                     statePollerResult = syncPollingScheduler.schedule(task);

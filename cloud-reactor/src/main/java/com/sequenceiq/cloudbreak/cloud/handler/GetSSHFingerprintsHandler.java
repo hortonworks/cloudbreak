@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.VERBOSEDCLOUDPLATFORMS;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -21,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.InstanceConsoleOutputResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
@@ -58,11 +57,11 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
             String initialConsoleOutput = connector.instances().getConsoleOutput(ac, cloudInstance);
             InstanceConsoleOutputResult consoleOutputResult = new InstanceConsoleOutputResult(cloudContext, cloudInstance, initialConsoleOutput);
             PollTask<InstanceConsoleOutputResult> outputPollerTask = statusCheckFactory.newPollInstanceConsoleOutputTask(ac, cloudInstance);
-            if (!outputPollerTask.completed(consoleOutputResult)) {
-                consoleOutputResult = syncPollingScheduler.schedule(outputPollerTask);
-            }
             GetSSHFingerprintsResult fingerprintsResult;
-            if (!VERBOSEDCLOUDPLATFORMS.contains(platform)) {
+            try {
+                if (!outputPollerTask.completed(consoleOutputResult)) {
+                    consoleOutputResult = syncPollingScheduler.schedule(outputPollerTask);
+                }
                 Set<String> sshFingerprints = FingerprintParserUtil.parseFingerprints(consoleOutputResult.getConsoleOutput());
                 if (sshFingerprints.isEmpty()) {
                     fingerprintsResult = new GetSSHFingerprintsResult("Failed to get SSH fingerprints from the specified VM instance.", null,
@@ -70,7 +69,7 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
                 } else {
                     fingerprintsResult = new GetSSHFingerprintsResult(fingerprintsRequest, sshFingerprints);
                 }
-            } else {
+            } catch (CloudOperationNotSupportedException e) {
                 fingerprintsResult = new GetSSHFingerprintsResult(fingerprintsRequest, new HashSet<String>());
             }
             fingerprintsRequest.getResult().onNext(fingerprintsResult);

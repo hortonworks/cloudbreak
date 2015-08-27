@@ -20,6 +20,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -37,6 +39,9 @@ public class StackUpdaterTest {
     @Mock
     private ResourceRepository resourceRepository;
 
+    @Mock
+    private StatusToPollGroupConverter statusToPollGroupConverter;
+
     @InjectMocks
     private StackUpdater underTest;
 
@@ -47,6 +52,7 @@ public class StackUpdaterTest {
         when(stackRepository.findById(anyLong())).thenReturn(stack);
         when(stackRepository.save(any(Stack.class))).thenReturn(stack);
         doNothing().when(cloudbreakEventService).fireCloudbreakEvent(anyLong(), anyString(), anyString());
+        when(statusToPollGroupConverter.convert(Status.DELETE_COMPLETED)).thenReturn(PollGroup.POLLABLE);
 
         Stack newStack = underTest.updateStackStatus(1L, Status.DELETE_COMPLETED);
         assertEquals(Status.DELETE_COMPLETED, newStack.getStatus());
@@ -61,6 +67,7 @@ public class StackUpdaterTest {
         when(stackRepository.findById(anyLong())).thenReturn(stack);
         when(stackRepository.save(any(Stack.class))).thenReturn(stack);
         doNothing().when(cloudbreakEventService).fireCloudbreakEvent(anyLong(), anyString(), anyString());
+        when(statusToPollGroupConverter.convert(Status.DELETE_COMPLETED)).thenReturn(PollGroup.POLLABLE);
 
         Stack newStack = underTest.updateStackStatus(1L, Status.DELETE_COMPLETED, "test");
         assertEquals(Status.DELETE_COMPLETED, newStack.getStatus());

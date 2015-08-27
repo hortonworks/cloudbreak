@@ -1,10 +1,5 @@
 package com.sequenceiq.cloudbreak;
 
-import java.util.Arrays;
-import java.util.List;
-
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-
 public class EnvironmentVariableConfig {
 
     public static final String CB_THREADPOOL_CORE_SIZE = "40";
@@ -78,8 +73,6 @@ public class EnvironmentVariableConfig {
     public static final String CB_MAX_GCP_RESOURCE_NAME_LENGTH = "50";
 
     public static final String CB_ADDRESS_RESOLVING_TIMEOUT = "60000";
-
-    public static final List<String> VERBOSEDCLOUDPLATFORMS = Arrays.asList(CloudPlatform.AZURE_RM.name());
 
     private EnvironmentVariableConfig() {
 
