@@ -71,6 +71,12 @@ ${core_user_data}
       metadata: ${agent.metadata}
       networks:
         - port: { get_resource: ambari_app_port_${agent.instanceId} }
+      block_device_mapping:
+      <#list agent.volumes as volume>
+      - device_name: ${volume.device}
+        volume_id: { get_resource: ambari_volume_${agent.instanceId}_${volume_index} }
+      </#list>
+
       user_data_format: SOFTWARE_CONFIG
       <#if agent.type == "GATEWAY">
       user_data:  { get_resource: gw_user_data_config }
@@ -95,13 +101,7 @@ ${core_user_data}
       name: hdfs-volume
       size: ${volume.size}
 
-  ambari_volume_attach_${agent.instanceId}_${volume_index}:
-    type: OS::Cinder::VolumeAttachment
-    properties:
-      instance_uuid: { get_resource: ambari_${agent.instanceId} }
-      mountpoint: ${volume.device}
-      volume_id: { get_resource: ambari_volume_${agent.instanceId}_${volume_index} }
-  </#list>
+</#list>
 
   ambari_server_floatingip_${agent.instanceId}:
     type: OS::Neutron::FloatingIP
