@@ -69,3 +69,11 @@ tests:
     classes:
       - com.sequenceiq.it.cloudbreak.AwsCredentialCreationTest
       - com.sequenceiq.it.cloudbreak.CredentialDeleteByNameTest
+
+   # integratontest.azurermcredential params must be set in application.yml
+  - name: azure_rm_credential_test
+    parameters:
+      credentialName: itazurermcredentialrestest
+    classes:
+      - com.sequenceiq.it.cloudbreak.AzureRmCredentialCreationTest
+      - com.sequenceiq.it.cloudbreak.CredentialDeleteByNameTest

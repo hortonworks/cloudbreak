@@ -36,6 +36,15 @@ integrationtest:
        endpoint:
        publicKeyFile:
 
+    # azure rm credential details
+    azurermcredential:
+        name:
+        secretKey:
+        accesKey:
+        subscriptionId:
+        tenantId:
+        publicKeyFile:
+
     cleanup:
         retryCount: 3
 
@@ -49,11 +58,13 @@ integrationtest:
         GCP: it-gcp-credential
         AWS: it-aws-credential
         AZURE: itazurecredential
+        AZURE_RM: itazurermcredential
         OPENSTACK: it-openstack-credential
     defaultNetworks:
        GCP: default-gcp-network
        AWS: default-aws-network
        AZURE: default-azure-network
+       AZURE_RM: default-azure-network
     defaultSecurityGroup: all-services-port
     testSuites:
         # Full smoke tests with cluster creation, stop-start, upscale-downscale
@@ -61,48 +72,60 @@ integrationtest:
         - classpath:/testsuites/gcp/smoke/gcp-clustercreate-startstop-updown.yaml
         - classpath:/testsuites/aws/smoke/aws-clustercreate-startstop-updown.yaml
         - classpath:/testsuites/azure/smoke/azure-clustercreate-startstop-updown.yaml
+        - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-startstop-updown.yaml
         GCP_FULL_SMOKE_TEST:
         - classpath:/testsuites/gcp/smoke/gcp-clustercreate-startstop-updown.yaml
         AWS_FULL_SMOKE_TEST:
         - classpath:/testsuites/aws/smoke/aws-clustercreate-startstop-updown.yaml
         AZURE_FULL_SMOKE_TEST:
         - classpath:/testsuites/azure/smoke/azure-clustercreate-startstop-updown.yaml
+        AZURE_RM_FULL_SMOKE_TEST:
+        - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-startstop-updown.yaml
 
         # Simple smoke tests with cluster creation
         SIMPLE_SMOKE_TEST:
         - classpath:/testsuites/gcp/smoke/gcp-clustercreate.yaml
         - classpath:/testsuites/aws/smoke/aws-clustercreate.yaml
         - classpath:/testsuites/azure/smoke/azure-clustercreate.yaml
+        - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate.yaml
         GCP_SIMPLE_SMOKE_TEST:
         - classpath:/testsuites/gcp/smoke/gcp-clustercreate.yaml
         AWS_SIMPLE_SMOKE_TEST:
         - classpath:/testsuites/aws/smoke/aws-clustercreate.yaml
         AZURE_SIMPLE_SMOKE_TEST:
         - classpath:/testsuites/azure/smoke/azure-clustercreate.yaml
+        AZURE_RM_SIMPLE_SMOKE_TEST:
+        - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate.yaml
 
         # Smoke tests with cluster creation and stop-start
         STARTSTOP_SMOKE_TEST:
         - classpath:/testsuites/gcp/smoke/gcp-clustercreate-startstop.yaml
         - classpath:/testsuites/aws/smoke/aws-clustercreate-startstop.yaml
         - classpath:/testsuites/azure/smoke/azure-clustercreate-startstop.yaml
+        - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-startstop.yaml
         GCP_STARTSTOP_SMOKE_TEST:
         - classpath:/testsuites/gcp/smoke/gcp-clustercreate-startstop.yaml
         AWS_STARTSTOP_SMOKE_TEST:
         - classpath:/testsuites/aws/smoke/aws-clustercreate-startstop.yaml
         AZURE_STARTSTOP_SMOKE_TEST:
         - classpath:/testsuites/azure/smoke/azure-clustercreate-startstop.yaml
+        AZURE_RM_STARTSTOP_SMOKE_TEST:
+        - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-startstop.yaml
 
         # Smoke tests with cluster creation and upscale-downscale
         UPDOWN_SMOKE_TEST:
         - classpath:/testsuites/gcp/smoke/gcp-clustercreate-updown.yaml
         - classpath:/testsuites/aws/smoke/aws-clustercreate-updown.yaml
         - classpath:/testsuites/azure/smoke/azure-clustercreate-updown.yaml
+        - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-updown.yaml
         GCP_UPDOWN_SMOKE_TEST:
         - classpath:/testsuites/gcp/smoke/gcp-clustercreate-updown.yaml
         AWS_UPDOWN_SMOKE_TEST:
         - classpath:/testsuites/aws/smoke/aws-clustercreate-updown.yaml
         AZURE_UPDOWN_SMOKE_TEST:
         - classpath:/testsuites/azure/smoke/azure-clustercreate-updown.yaml
+        AZURE_UPDOWN_SMOKE_TEST:
+        - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-updown.yaml
 
         # Kerberos test with cluster creation and upscale-downscale
         GCP_UPDOWN_KERBEROS_TEST:
