@@ -59,7 +59,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
                         .parameters(parameters).timeoutMins(OPERATION_TIMEOUT).build());
 
 
-        CloudResource cloudResource = new CloudResource(ResourceType.HEAT_STACK, stackName, heatStack.getId());
+        CloudResource cloudResource = new CloudResource(ResourceType.HEAT_STACK, heatStack.getId());
         Promise<ResourceAllocationPersisted> promise = notifier.notifyResourceAllocation(cloudResource, authenticatedContext.getCloudContext());
         try {
             promise.await();
@@ -144,7 +144,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
     private List<CloudResourceStatus> updateHeatStack(AuthenticatedContext authenticatedContext, List<CloudResource> resources, String heatTemplate, Map<String,
             String> parameters) {
         CloudResource resource = utils.getHeatResource(resources);
-        String stackName = resource.getName();
+        String stackName = authenticatedContext.getCloudContext().getStackName();
         String heatStackId = resource.getReference();
 
         OSClient client = openStackClient.createOSClient(authenticatedContext);

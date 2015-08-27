@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.arm.status.ArmStackStatus;
+import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -33,13 +34,17 @@ public class ArmTemplateUtils {
         return String.format("%s%s%s", stackName, groupName.replaceAll("_", ""), privateId);
     }
 
+    public String getStackName(CloudContext cloudContext) {
+        return String.format("%s%s", cloudContext.getStackName(), cloudContext.getStackId());
+    }
+
     public String getLoadBalancerId(String stackName) {
         return String.format("%s%s", stackName, "lb");
     }
 
     public CloudResourceStatus templateStatus(CloudResource resource, Map<String, Object> templateDeployment) {
         String status = ((Map) templateDeployment.get("properties")).get("provisioningState").toString();
-        LOGGER.info("Arm stack status of: {}  is: {}", resource.getName(), status);
+        LOGGER.info("Arm stack status of: {}  is: {}", resource.getReference(), status);
         CloudResourceStatus armResourceStatus = new CloudResourceStatus(resource, ArmStackStatus.mapResourceStatus(status));
         LOGGER.debug("Cloudresource status: {}", armResourceStatus);
         return armResourceStatus;

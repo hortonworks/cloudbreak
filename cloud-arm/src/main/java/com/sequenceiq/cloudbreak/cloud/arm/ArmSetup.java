@@ -28,6 +28,8 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
 import com.sequenceiq.cloudbreak.domain.CloudRegion;
 
+import groovyx.net.http.HttpResponseException;
+
 @Component
 public class ArmSetup implements Setup {
 
@@ -62,7 +64,7 @@ public class ArmSetup implements Setup {
                         new ArmStorageStatusCheckerTask(armClient,
                                 new StorageCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()), storageGroup, osStorageName)));
                 if (!task.completed(statePollerResult)) {
-                    statePollerResult = syncPollingScheduler.schedule(task);
+                    syncPollingScheduler.schedule(task);
                 }
             }
             client.createContainerInStorage(storageGroup, osStorageName, IMAGES);
@@ -74,9 +76,11 @@ public class ArmSetup implements Setup {
                                 new ImageCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()), storageGroup, osStorageName,
                                         IMAGES, stack.getImage().getImageName())));
                 if (!task.completed(statePollerResult)) {
-                    statePollerResult = syncPollingScheduler.schedule(task);
+                    syncPollingScheduler.schedule(task);
                 }
             }
+        } catch (HttpResponseException ex) {
+            throw new CloudConnectorException(ex.getResponse().getData().toString(), ex);
         } catch (Exception ex) {
             throw new CloudConnectorException(ex);
         }
@@ -85,6 +89,14 @@ public class ArmSetup implements Setup {
 
     @Override
     public String preCheck(AuthenticatedContext authenticatedContext, CloudStack stack) {
+        AzureRMClient client = armClient.createAccess(authenticatedContext.getCloudCredential());
+        try {
+            client.getResourceGroups();
+        } catch (HttpResponseException ex) {
+            throw new CloudConnectorException(ex.getResponse().getData().toString(), ex);
+        } catch (Exception e) {
+            throw new CloudConnectorException("Could not authenticate to azure", e);
+        }
         return null;
     }
 

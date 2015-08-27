@@ -18,7 +18,7 @@
         <appender-ref ref="stdout"/>
     </root>
     <logger name="com.microsoft.aad">
-        <level value="INFO"/>
+        <level value="ERROR"/>
     </logger>
 
 

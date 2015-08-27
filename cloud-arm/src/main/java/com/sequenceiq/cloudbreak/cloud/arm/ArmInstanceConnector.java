@@ -19,6 +19,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 
+import groovyx.net.http.HttpResponseException;
+
 @Service
 public class ArmInstanceConnector implements InstanceConnector {
 
@@ -27,6 +29,9 @@ public class ArmInstanceConnector implements InstanceConnector {
 
     @Inject
     private ArmMetadataCollector armMetadataCollector;
+
+    @Inject
+    private ArmTemplateUtils armTemplateUtils;
 
     @Override
     public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm) {
@@ -41,14 +46,17 @@ public class ArmInstanceConnector implements InstanceConnector {
     @Override
     public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudInstance> vms) {
         AzureRMClient azureRMClient = armClient.createAccess(ac.getCloudCredential());
+        String stackName = armTemplateUtils.getStackName(ac.getCloudContext());
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
 
         for (CloudInstance vm : vms) {
             try {
-                azureRMClient.startVirtualMachine(ac.getCloudContext().getStackName(), vm.getInstanceId());
+                azureRMClient.startVirtualMachine(stackName, vm.getInstanceId());
                 statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.IN_PROGRESS));
+            } catch (HttpResponseException e) {
+                statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, e.getResponse().getData().toString()));
             } catch (Exception e) {
-                statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED));
+                statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, e.getMessage()));
             }
         }
         return statuses;
@@ -57,14 +65,17 @@ public class ArmInstanceConnector implements InstanceConnector {
     @Override
     public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudInstance> vms) {
         AzureRMClient azureRMClient = armClient.createAccess(ac.getCloudCredential());
+        String stackName = armTemplateUtils.getStackName(ac.getCloudContext());
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
 
         for (CloudInstance vm : vms) {
             try {
-                azureRMClient.stopVirtualMachine(ac.getCloudContext().getStackName(), vm.getInstanceId());
+                azureRMClient.stopVirtualMachine(stackName, vm.getInstanceId());
                 statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.IN_PROGRESS));
+            } catch (HttpResponseException e) {
+                statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, e.getResponse().getData().toString()));
             } catch (Exception e) {
-                statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED));
+                statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, e.getMessage()));
             }
         }
         return statuses;
@@ -74,10 +85,11 @@ public class ArmInstanceConnector implements InstanceConnector {
     public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
         AzureRMClient azureRMClient = armClient.createAccess(ac.getCloudCredential());
+        String stackName = armTemplateUtils.getStackName(ac.getCloudContext());
 
         for (CloudInstance vm : vms) {
             try {
-                Map<String, Object> virtualMachine = azureRMClient.getVirtualMachineInstanceView(ac.getCloudContext().getStackName(), vm.getInstanceId());
+                Map<String, Object> virtualMachine = azureRMClient.getVirtualMachineInstanceView(stackName, vm.getInstanceId());
                 List<Map<String, Object>> vmStatuses = (List) virtualMachine.get("statuses");
                 for (Map<String, Object> vmStatuse : vmStatuses) {
                     String statusCode = vmStatuse.get("code").toString();

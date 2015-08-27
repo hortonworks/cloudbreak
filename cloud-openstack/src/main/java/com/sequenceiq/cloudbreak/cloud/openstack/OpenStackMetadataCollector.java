@@ -42,7 +42,7 @@ public class OpenStackMetadataCollector {
 
         CloudResource resource = utils.getHeatResource(resources);
 
-        String stackName = resource.getName();
+        String stackName = authenticatedContext.getCloudContext().getStackName();
         String heatStackId = resource.getReference();
 
         Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(vms, new Function<InstanceTemplate, String>() {

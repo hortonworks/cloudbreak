@@ -11,7 +11,7 @@ public class ResourceToCloudResourceConverter extends AbstractConversionServiceA
 
     @Override
     public CloudResource convert(Resource resource) {
-        return new CloudResource(resource.getResourceType(), resource.getStack().getName(), resource.getResourceName());
+        return new CloudResource(resource.getResourceType(), resource.getResourceName());
     }
 
 
