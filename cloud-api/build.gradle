@@ -14,6 +14,7 @@ jar {
 
 dependencies {
 
+    compile project(':core-model')
     compile project(':cloud-common')
 
     compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion

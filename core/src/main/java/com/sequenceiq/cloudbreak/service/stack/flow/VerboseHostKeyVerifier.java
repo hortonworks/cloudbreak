@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.VERBOSEDCLOUDPLATFORMS;
-
 import java.security.PublicKey;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -17,6 +17,7 @@ public class VerboseHostKeyVerifier implements HostKeyVerifier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VerboseHostKeyVerifier.class);
 
+    private static final List<String> UNVERIFIED_CLOUD_PLATFORMS = Arrays.asList(CloudPlatform.AZURE_RM.name());
 
     private Set<String> expectedFingerprints;
     private CloudPlatform cloudPlatform;
@@ -28,26 +29,25 @@ public class VerboseHostKeyVerifier implements HostKeyVerifier {
 
     @Override
     public boolean verify(String hostname, int port, PublicKey key) {
-        if (!VERBOSEDCLOUDPLATFORMS.contains(cloudPlatform.name())) {
-            String receivedFingerprint = SecurityUtils.getFingerprint(key);
-            boolean matches = false;
-            for (String expectedFingerprint : expectedFingerprints) {
-                matches = receivedFingerprint.equals(expectedFingerprint);
-                if (matches) {
-                    break;
-                }
-            }
-
-            if (matches) {
-                LOGGER.info("HostKey has been successfully  verified. hostname: {}, port: {}, fingerprint: {}", hostname, port, receivedFingerprint);
-            } else {
-                LOGGER.error("HostKey verification failed. hostname: {}, port: {}, expectedFingerprint: {}, receivedFingerprint: {}", hostname, port,
-                        expectedFingerprints, receivedFingerprint);
-            }
-            return matches;
-        } else {
+        if (UNVERIFIED_CLOUD_PLATFORMS.contains(cloudPlatform.name())) {
             return true;
         }
+        String receivedFingerprint = SecurityUtils.getFingerprint(key);
+        boolean matches = false;
+        for (String expectedFingerprint : expectedFingerprints) {
+            matches = receivedFingerprint.equals(expectedFingerprint);
+            if (matches) {
+                break;
+            }
+        }
+
+        if (matches) {
+            LOGGER.info("HostKey has been successfully  verified. hostname: {}, port: {}, fingerprint: {}", hostname, port, receivedFingerprint);
+        } else {
+            LOGGER.error("HostKey verification failed. hostname: {}, port: {}, expectedFingerprint: {}, receivedFingerprint: {}", hostname, port,
+                    expectedFingerprints, receivedFingerprint);
+        }
+        return matches;
     }
 }
 
