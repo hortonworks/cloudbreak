@@ -92,6 +92,44 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                     {key: 'STANDARD_D14', value: 'D14', cloud: 'AZURE'}
                 ]
             },
+            'AZURE_RM': {
+                azureRegions: [
+                    {key: 'BRAZIL_SOUTH', value: 'Brazil South', cloud: 'AZURE'},
+                    {key: 'EAST_ASIA', value: 'East Asia', cloud: 'AZURE'},
+                    {key: 'EAST_US', value: 'East US', cloud: 'AZURE'},
+                    {key: 'CENTRAL_US', value: 'Central US', cloud: 'AZURE'},
+                    {key: 'NORTH_EUROPE', value: 'North Europe', cloud: 'AZURE'},
+                    {key: 'SOUTH_CENTRAL_US', value: 'South Central US'},
+                    {key: 'NORTH_CENTRAL_US', value: 'North Central US', cloud: 'AZURE'},
+                    {key: 'EAST_US_2', value: 'East US 2', cloud: 'AZURE'},
+                    {key: 'JAPAN_EAST', value: 'Japan East', cloud: 'AZURE'},
+                    {key: 'JAPAN_WEST', value: 'Japan West', cloud: 'AZURE'},
+                    {key: 'SOUTHEAST_ASIA', value: 'Southeast Asia', cloud: 'AZURE'},
+                    {key: 'BRAZIL_SOUTH', value: 'Brazil South', cloud: 'AZURE'},
+                    {key: 'WEST_US', value: 'West US', cloud: 'AZURE'},
+                    {key: 'WEST_EUROPE', value: 'West EU', cloud: 'AZURE'}
+                ],
+                azureVmTypes: [
+                    {key: 'A5', value: 'A5', cloud: 'AZURE'},
+                    {key: 'A6', value: 'A6', cloud: 'AZURE'},
+                    {key: 'A7', value: 'A7', cloud: 'AZURE'},
+                    {key: 'A8', value: 'A8', cloud: 'AZURE'},
+                    {key: 'A9', value: 'A9', cloud: 'AZURE'},
+                    {key: 'STANDARD_D1', value: 'D1', cloud: 'AZURE'},
+                    {key: 'STANDARD_D2', value: 'D2', cloud: 'AZURE'},
+                    {key: 'STANDARD_D3', value: 'D3', cloud: 'AZURE'},
+                    {key: 'STANDARD_D4', value: 'D4', cloud: 'AZURE'},
+                    {key: 'STANDARD_G1', value: 'G1', cloud: 'AZURE'},
+                    {key: 'STANDARD_G2', value: 'G2', cloud: 'AZURE'},
+                    {key: 'STANDARD_G3', value: 'G3', cloud: 'AZURE'},
+                    {key: 'STANDARD_G4', value: 'G4', cloud: 'AZURE'},
+                    {key: 'STANDARD_G5', value: 'G5', cloud: 'AZURE'},
+                    {key: 'STANDARD_D11', value: 'D11', cloud: 'AZURE'},
+                    {key: 'STANDARD_D12', value: 'D12', cloud: 'AZURE'},
+                    {key: 'STANDARD_D13', value: 'D13', cloud: 'AZURE'},
+                    {key: 'STANDARD_D14', value: 'D14', cloud: 'AZURE'}
+                ]
+            },
             'AWS': {
                 volumeTypes: [
                     {key: 'Gp2', value: 'SSD', encryptable: true},

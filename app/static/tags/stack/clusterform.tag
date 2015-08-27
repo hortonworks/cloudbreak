@@ -55,13 +55,16 @@
                             <select class="form-control" id="selectRegion" ng-model="cluster.region" ng-show="activeCredential.cloudPlatform == 'OPENSTACK'">
                               <option ng-repeat="region in $root.config.OPENSTACK.regions" value="{{region.key}}">{{region.value}}</option>
                             </select>
+                            <select class="form-control" id="selectRegion" ng-model="cluster.region" ng-show="activeCredential.cloudPlatform == 'AZURE_RM'">
+                                <option ng-repeat="region in $root.config.AZURE_RM.azureRegions" value="{{region.key}}">{{region.value}}</option>
+                            </select>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for="selectClusterNetwork">{{msg.cluster_form_network_label}}</label>
                         <div class="col-sm-9">
                             <select class="form-control" id="selectClusterNetwork" ng-model="cluster.networkId" required>
-                                <option ng-repeat="network in $root.networks | filter:{cloudPlatform: activeCredential.cloudPlatform} | orderBy:'name'" value="{{network.id}}">{{network.name}}</option>
+                                <option ng-repeat="network in $root.networks | filter:{cloudPlatform: activeCredential.cloudPlatform.split('_')[0]} | orderBy:'name'" value="{{network.id}}">{{network.name}}</option>
                             </select>
                         </div>
                     </div>
@@ -152,7 +155,7 @@
                                       <label class="col-sm-3 control-label" for="templateName{{$index}}">{{msg.cluster_form_hostgroup_template_label}}</label>
                                       <div class="col-sm-9">
                                         <select class="form-control" id="template-name-{{$index}}" name="template-name-{{$index}}" ng-model="instanceGroup.templateId"
-                                          ng-options="template.id as template.name for template in $root.templates | filter: {'cloudPlatform': activeCredential.cloudPlatform} | orderBy:'name'" required>
+                                          ng-options="template.id as template.name for template in $root.templates | filter: {'cloudPlatform': activeCredential.cloudPlatform.split('_')[0]} | orderBy:'name'" required>
                                         </select>
                                       </div>
                                     </div>

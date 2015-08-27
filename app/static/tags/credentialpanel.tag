@@ -30,7 +30,7 @@
                                 <div class="btn-segmented-control" id="providerSelector1">
                                     <div class="btn-group btn-group-justified">
                                         <a id="awsChange" type="button" class="btn btn-info" ng-click="createAwsCredentialRequest()">{{msg.aws_label}}</a>
-                                        <a id="azureChange" type="button" class="btn btn-default" ng-click="createAzureCredentialRequest()">{{msg.azure_label}}</a>
+                                         <a id="azureRmChange" type="button" class="btn btn-default" ng-click="createAzureRmCredentialRequest()">{{msg.azure_rm_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified">
                                       <a id="gcpChange" type="button" class="btn btn-default" ng-click="createGcpCredentialRequest()">{{msg.gcp_label}}</a>
@@ -47,6 +47,9 @@
 
                             <form class="form-horizontal" role="form" name="azureCredentialForm"  ng-show="azureCredential && !credentialInCreation">
                                 <div ng-include src="'tags/credential/azureform.tag'"></div>
+                            </form>
+                            <form class="form-horizontal" role="form" name="azureRmCredentialForm"  ng-show="azureRmCredential && !credentialInCreation">
+                               <div ng-include src="'tags/credential/azurermform.tag'"></div>
                             </form>
 
                             <form class="form-horizontal" role="form" name="gcpCredentialForm" ng-show="gcpCredential && !credentialInCreation">
@@ -89,6 +92,9 @@
                             <div class="panel-body" ng-if="credential.cloudPlatform == 'AZURE' ">
                                 <div ng-include src="'tags/credential/azurelist.tag'"></div>
                             </div>
+                            <div class="panel-body" ng-if="credential.cloudPlatform == 'AZURE_RM' ">
+                                <div ng-include src="'tags/credential/azurermlist.tag'"></div>
+                            </div>
 
                             <div class="panel-body" ng-if="credential.cloudPlatform == 'GCP' ">
                                 <div ng-include src="'tags/credential/gcplist.tag'"></div>
@@ -101,6 +107,7 @@
                             <div class="panel-body" ng-if="credential.cloudPlatform == 'OPENSTACK' ">
                               <div ng-include src="'tags/credential/openstacklist.tag'"></div>
                             </div>
+
                         </div>
                     </div>
                     <!-- .panel -->
