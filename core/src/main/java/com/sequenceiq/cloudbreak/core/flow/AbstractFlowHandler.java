@@ -51,7 +51,7 @@ public abstract class AbstractFlowHandler<T extends DefaultFlowContext> implemen
             success = true;
         } catch (Exception t) {
             if (t instanceof CancellationException || ExceptionUtils.getRootCause(t) instanceof CancellationException) {
-                LOGGER.warn("The flow has been cancelled: {}", t.getMessage());
+                LOGGER.warn("The flow has been cancelled.");
                 return;
             }
             // entry point to the event's custom error handler (if any)
