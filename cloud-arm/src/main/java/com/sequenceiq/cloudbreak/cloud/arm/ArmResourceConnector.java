@@ -60,18 +60,20 @@ public class ArmResourceConnector implements ResourceConnector {
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, ResourcePersistenceNotifier notifier) {
-        String stackName = authenticatedContext.getCloudContext().getStackName();
+        String stackName = armTemplateUtils.getStackName(authenticatedContext.getCloudContext());
         String template = armTemplateBuilder.build(stackName, authenticatedContext.getCloudCredential(), stack);
         String parameters = armTemplateBuilder.buildParameters(authenticatedContext.getCloudCredential(), stack.getNetwork(), stack.getImage());
 
         AzureRMClient access = armClient.createAccess(authenticatedContext.getCloudCredential());
         try {
-            Map<String, Object> wholeStack = access.createWholeStack(CloudRegion.valueOf(stack.getRegion()).value(), stackName, stackName, template, parameters);
+            access.createWholeStack(CloudRegion.valueOf(stack.getRegion()).value(), stackName, stackName, template, parameters);
+        } catch (HttpResponseException e) {
+            throw new CloudConnectorException(String.format("Error occured when creating stack: %s", e.getResponse().getData().toString()));
         } catch (Exception e) {
             throw new CloudConnectorException(String.format("Invalid provisiong type: %s", stackName));
         }
 
-        CloudResource cloudResource = new CloudResource(ResourceType.ARM_TEMPLATE, stackName, stackName);
+        CloudResource cloudResource = new CloudResource(ResourceType.ARM_TEMPLATE, stackName);
 
         Promise<ResourceAllocationPersisted> promise = notifier.notifyResourceAllocation(cloudResource, authenticatedContext.getCloudContext());
         try {
@@ -90,7 +92,7 @@ public class ArmResourceConnector implements ResourceConnector {
     public List<CloudResourceStatus> check(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
         List<CloudResourceStatus> result = new ArrayList<>();
         AzureRMClient access = armClient.createAccess(authenticatedContext.getCloudCredential());
-        String stackName = authenticatedContext.getCloudContext().getStackName();
+        String stackName = armTemplateUtils.getStackName(authenticatedContext.getCloudContext());
 
         for (CloudResource resource : resources) {
             switch (resource.getType()) {
@@ -103,9 +105,11 @@ public class ArmResourceConnector implements ResourceConnector {
                     } catch (HttpResponseException e) {
                         if (e.getStatusCode() == NOT_FOUND) {
                             result.add(new CloudResourceStatus(resource, ResourceStatus.DELETED));
+                        } else {
+                            throw new CloudConnectorException(e.getResponse().getData().toString(), e);
                         }
                     } catch (Exception e) {
-                        throw new CloudConnectorException(String.format("Invalid resource exception: %s", resource.getType()));
+                        throw new CloudConnectorException(String.format("Invalid resource exception: %s", e.getMessage()), e);
                     }
                     break;
                 default:
@@ -121,13 +125,11 @@ public class ArmResourceConnector implements ResourceConnector {
         AzureRMClient azureRMClient = armClient.createAccess(authenticatedContext.getCloudCredential());
         String osStorageName = armClient.getStorageName(authenticatedContext.getCloudCredential(), stack.getRegion());
         String storageGroup = armClient.getStorageGroup(authenticatedContext.getCloudCredential(), stack.getRegion());
-
-        String stackName = authenticatedContext.getCloudContext().getStackName();
         for (CloudResource resource : resources) {
             List<String> storageProfileDiskNames = new ArrayList<>();
 
             try {
-                Map<String, Object> virtualMachines = azureRMClient.getVirtualMachines(resource.getName());
+                Map<String, Object> virtualMachines = azureRMClient.getVirtualMachines(resource.getReference());
                 List<Map> values = (List<Map>) virtualMachines.get("value");
                 for (Map value : values) {
                     Map properties = (Map) value.get("properties");
@@ -143,21 +145,20 @@ public class ArmResourceConnector implements ResourceConnector {
                     Map vhds = (Map) osDisk.get("vhd");
                     storageProfileDiskNames.add(getNameFromConnectionString(vhds.get("uri").toString()));
                 }
-
-                azureRMClient.deleteResourceGroup(resource.getName());
+                azureRMClient.deleteResourceGroup(resource.getReference());
                 PollTask<BooleanResult> task = statusCheckFactory.newPollBooleanTerminationTask(authenticatedContext,
                         new ArmResourceGroupDeleteStatusCheckerTask(armClient, new ResourceGroupCheckerContext(
-                                new ArmCredentialView(authenticatedContext.getCloudCredential()), resource.getName())));
+                                new ArmCredentialView(authenticatedContext.getCloudCredential()), resource.getReference())));
                 BooleanResult statePollerResult = task.call();
                 if (!task.completed(statePollerResult)) {
-                    statePollerResult = syncPollingScheduler.schedule(task);
+                    syncPollingScheduler.schedule(task);
                 }
             } catch (HttpResponseException e) {
                 if (e.getStatusCode() != NOT_FOUND) {
-                    throw new CloudConnectorException(e.getResponse().getData().toString());
+                    throw new CloudConnectorException(e.getResponse().getData().toString(), e);
                 }
             } catch (Exception e) {
-                throw new CloudConnectorException(String.format("Could not delete resource group: %s", resource.getName()), e);
+                throw new CloudConnectorException(String.format("Could not delete resource group: %s", resource.getReference()), e);
             }
             deleteDisk(storageProfileDiskNames, azureRMClient, osStorageName, storageGroup);
         }
@@ -173,21 +174,21 @@ public class ArmResourceConnector implements ResourceConnector {
                     throw new CloudConnectorException(e.getResponse().getData().toString());
                 }
             } catch (Exception e) {
-                throw new CloudConnectorException(String.format("Could not delete blob: %s", storageProfileDiskName));
+                throw new CloudConnectorException(String.format("Could not delete blob: %s", storageProfileDiskName), e);
             }
         }
     }
 
     @Override
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
-        return null;
+        return new ArrayList<>();
     }
 
     @Override
     public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         AzureRMClient azureRMClient = armClient.createAccess(authenticatedContext.getCloudCredential());
 
-        String stackName = authenticatedContext.getCloudContext().getStackName();
+        String stackName = armTemplateUtils.getStackName(authenticatedContext.getCloudContext());
         String template = armTemplateBuilder.build(stackName, authenticatedContext.getCloudCredential(), stack);
         String parameters = armTemplateBuilder.buildParameters(authenticatedContext.getCloudCredential(), stack.getNetwork(), stack.getImage());
 
@@ -196,8 +197,10 @@ public class ArmResourceConnector implements ResourceConnector {
             List<CloudResourceStatus> check = new ArrayList<>();
             check.add(new CloudResourceStatus(resources.get(0), ResourceStatus.IN_PROGRESS));
             return check;
+        } catch (HttpResponseException e) {
+            throw new CloudConnectorException(e.getResponse().getData().toString(), e);
         } catch (Exception e) {
-            throw new CloudConnectorException(String.format("Could not upscale: %s", stackName));
+            throw new CloudConnectorException(String.format("Could not upscale: %s", stackName), e);
         }
     }
 
@@ -205,7 +208,7 @@ public class ArmResourceConnector implements ResourceConnector {
     public List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
             List<InstanceTemplate> vms) {
         AzureRMClient client = armClient.createAccess(authenticatedContext.getCloudCredential());
-        String stackName = authenticatedContext.getCloudContext().getStackName();
+        String stackName = armTemplateUtils.getStackName(authenticatedContext.getCloudContext());
         String osStorageName = armClient.getStorageName(authenticatedContext.getCloudCredential(), stack.getRegion());
         String storageGroup = armClient.getStorageGroup(authenticatedContext.getCloudCredential(), stack.getRegion());
 
@@ -215,7 +218,7 @@ public class ArmResourceConnector implements ResourceConnector {
             String privateInstanceId = armTemplateUtils.getPrivateInstanceId(stackName, vm.getGroupName(), String.valueOf(vm.getPrivateId()));
 
             try {
-                Map<String, Object> virtualMachine = client.getVirtualMachine(resources.get(0).getName(), privateInstanceId);
+                Map<String, Object> virtualMachine = client.getVirtualMachine(resources.get(0).getReference(), privateInstanceId);
 
                 Map properties = (Map) virtualMachine.get("properties");
 
@@ -239,10 +242,10 @@ public class ArmResourceConnector implements ResourceConnector {
                 storageProfileDiskNames.add(getNameFromConnectionString(vhds.get("uri").toString()));
             } catch (HttpResponseException e) {
                 if (e.getStatusCode() != NOT_FOUND) {
-                    throw new CloudConnectorException(e.getResponse().getData().toString());
+                    throw new CloudConnectorException(e.getResponse().getData().toString(), e);
                 }
             } catch (Exception e) {
-                throw new CloudConnectorException(String.format("Could not downscale: %s", stackName));
+                throw new CloudConnectorException(String.format("Could not downscale: %s", stackName), e);
             }
             try {
                 deallocateVirtualMachine(authenticatedContext, client, stackName, privateInstanceId);
@@ -268,11 +271,11 @@ public class ArmResourceConnector implements ResourceConnector {
                                 new NetworkInterfaceCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()),
                                 stackName, networkInterfacesName)));
                 if (!task.completed(statePollerResult)) {
-                    statePollerResult = syncPollingScheduler.schedule(task);
+                    syncPollingScheduler.schedule(task);
                 }
             } catch (HttpResponseException e) {
                 if (e.getStatusCode() != NOT_FOUND) {
-                    throw new CloudConnectorException(e.getResponse().getData().toString());
+                    throw new CloudConnectorException(e.getResponse().getData().toString(), e);
                 }
             } catch (Exception e) {
                 throw new CloudConnectorException(String.format("Could not delete network interface: %s", networkInterfacesName), e);
@@ -290,11 +293,11 @@ public class ArmResourceConnector implements ResourceConnector {
                             new VirtualMachineCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()),
                                     stackName, privateInstanceId)));
             if (!task.completed(statePollerResult)) {
-                statePollerResult = syncPollingScheduler.schedule(task);
+                syncPollingScheduler.schedule(task);
             }
         } catch (HttpResponseException e) {
             if (e.getStatusCode() != NOT_FOUND) {
-                throw new CloudConnectorException(e.getResponse().getData().toString());
+                throw new CloudConnectorException(e.getResponse().getData().toString(), e);
             }
         } catch (Exception e) {
             throw new CloudConnectorException(String.format("Could not delete virtual machine: %s", privateInstanceId), e);
@@ -311,11 +314,11 @@ public class ArmResourceConnector implements ResourceConnector {
                             new VirtualMachineCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()),
                                     stackName, privateInstanceId, "Succeeded")));
             if (!task.completed(statePollerResult)) {
-                statePollerResult = syncPollingScheduler.schedule(task);
+                syncPollingScheduler.schedule(task);
             }
         } catch (HttpResponseException e) {
             if (e.getStatusCode() != NOT_FOUND) {
-                throw new CloudConnectorException(e.getResponse().getData().toString());
+                throw new CloudConnectorException(e.getResponse().getData().toString(), e);
             }
         } catch (Exception e) {
             throw new CloudConnectorException(String.format("Could not deallocate machine: %s", privateInstanceId), e);

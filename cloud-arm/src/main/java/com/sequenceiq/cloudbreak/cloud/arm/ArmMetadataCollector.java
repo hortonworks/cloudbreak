@@ -20,6 +20,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 
+import groovyx.net.http.HttpResponseException;
+
 @Service
 public class ArmMetadataCollector {
 
@@ -37,27 +39,27 @@ public class ArmMetadataCollector {
 
         Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(vms, new Function<InstanceTemplate, String>() {
             public String apply(InstanceTemplate from) {
-                return armTemplateUtils.getPrivateInstanceId(resource.getName(), from.getGroupName(), Long.toString(from.getPrivateId()));
+                return armTemplateUtils.getPrivateInstanceId(resource.getReference(), from.getGroupName(), Long.toString(from.getPrivateId()));
             }
         });
 
         try {
             for (Map.Entry<String, InstanceTemplate> instance : templateMap.entrySet()) {
-                List<Map> network = (ArrayList<Map>) ((Map) ((Map) ((Map) access.getVirtualMachine(resource.getName(), instance.getKey()))
+                List<Map> network = (ArrayList<Map>) ((Map) ((Map) ((Map) access.getVirtualMachine(resource.getReference(), instance.getKey()))
                         .get("properties"))
                         .get("networkProfile"))
                         .get("networkInterfaces");
                 String networkInterfaceName = getNameFromConnectionString(network.get(0).get("id").toString());
-                Map networkInterface = (Map) access.getNetworkInterface(resource.getName(), networkInterfaceName);
+                Map networkInterface = (Map) access.getNetworkInterface(resource.getReference(), networkInterfaceName);
                 List ips = (ArrayList) ((Map) networkInterface.get("properties")).get("ipConfigurations");
                 Map properties = (Map) ((Map) ips.get(0)).get("properties");
                 String publicIp = null;
                 if (properties.get("publicIPAddress") == null) {
-                    publicIp = access.getLoadBalancerIp(resource.getName(), armTemplateUtils.getLoadBalancerId(resource.getName()));
+                    publicIp = access.getLoadBalancerIp(resource.getReference(), armTemplateUtils.getLoadBalancerId(resource.getReference()));
                 } else {
                     Map publicIPAddress = (Map) properties.get("publicIPAddress");
                     String publicIpName = publicIPAddress.get("id").toString();
-                    Map publicAdressObject = (Map) access.getPublicIpAddress(resource.getName(), getNameFromConnectionString(publicIpName));
+                    Map publicAdressObject = (Map) access.getPublicIpAddress(resource.getReference(), getNameFromConnectionString(publicIpName));
                     Map publicIpProperties = (Map) publicAdressObject.get("properties");
                     publicIp = publicIpProperties.get("ipAddress").toString();
                 }
@@ -77,6 +79,8 @@ public class ArmMetadataCollector {
             for (CloudInstance cloudInstance : cloudInstances) {
                 results.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED));
             }
+        } catch (HttpResponseException e) {
+            throw new CloudConnectorException(e.getResponse().getData().toString(), e);
         } catch (Exception e) {
             throw new CloudConnectorException(e.getMessage(), e);
         }

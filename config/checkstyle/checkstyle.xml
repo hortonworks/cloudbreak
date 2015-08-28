@@ -165,7 +165,7 @@
         </module>
         <module name="IllegalThrows" />
         <module name="IllegalCatch">
-            <property name="illegalClassNames" value="java.lang.NullPointerException, java.lang.IllegalStateException, java.lang.IllegalArgumentException" />
+            <property name="illegalClassNames" value="java.lang.IllegalStateException, java.lang.IllegalArgumentException" />
         </module>
         <module name="IllegalType">
             <property name="format" value="^$" />
