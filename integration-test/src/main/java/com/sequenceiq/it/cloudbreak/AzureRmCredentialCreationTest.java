@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.util.ResourceUtil;
 
-public class AzurRmCredentialCreationTest extends AbstractCloudbreakIntegrationTest {
+public class AzureRmCredentialCreationTest extends AbstractCloudbreakIntegrationTest {
     @Value("${integrationtest.azurermcredential.name}")
     private String defaultName;
     @Value("${integrationtest.azurermcredential.subscriptionId}")
