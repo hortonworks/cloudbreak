@@ -358,6 +358,11 @@ public class DefaultStackService implements StackService {
         return stackRepository.save(stack);
     }
 
+    @Override
+    public List<Stack> getAllAlive() {
+        return stackRepository.findAllAlive();
+    }
+
     private void validateScalingAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack) {
         if (0 == instanceGroupAdjustmentJson.getScalingAdjustment()) {
             throw new BadRequestException(String.format("Requested scaling adjustment on stack '%s' is 0. Nothing to do.", stack.getId()));

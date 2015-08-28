@@ -38,5 +38,6 @@
   "parameters": {
     "dedicatedInstances" : true
   },
-  "consulServerCount": 1
+  "consulServerCount": 1,
+  "created": 8000000
 }

@@ -55,4 +55,6 @@ public interface StackService {
     void validateStack(StackValidation stackValidation);
 
     Stack save(Stack stack);
+
+    List<Stack> getAllAlive();
 }

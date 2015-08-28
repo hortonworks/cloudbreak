@@ -129,5 +129,6 @@ public class OperationDescriptions {
     public static class AccountPreferencesDescription {
         public static final String GET_PRIVATE = "retrieve account preferences for admin user";
         public static final String PUT_PRIVATE = "update account preferences of admin user";
+        public static final String VALIDATE = "validate account preferences of all stacks";
     }
 }

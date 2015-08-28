@@ -10,8 +10,10 @@ import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.controller.json.AccountPreferencesJson;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
+import com.sequenceiq.cloudbreak.service.account.ScheduledAccountPreferencesValidator;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,6 +35,9 @@ public class AccountPreferencesController {
     private AccountPreferencesService service;
 
     @Inject
+    private ScheduledAccountPreferencesValidator validator;
+
+    @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
@@ -51,6 +56,17 @@ public class AccountPreferencesController {
     public ResponseEntity<String> updateAccountPreferences(@ModelAttribute("user") CbUser user, @Valid @RequestBody AccountPreferencesJson updateRequest) {
         MDCBuilder.buildUserMdcContext(user);
         service.saveOne(user, convert(updateRequest));
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @ApiOperation(value = OperationDescriptions.AccountPreferencesDescription.VALIDATE, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES)
+    @RequestMapping(value = "accountpreferences/validate", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<String> validate(@ModelAttribute("user") CbUser user) {
+        MDCBuilder.buildUserMdcContext(user);
+        if (user.getRoles().contains(CbUserRole.ADMIN)) {
+            validator.validate();
+        }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

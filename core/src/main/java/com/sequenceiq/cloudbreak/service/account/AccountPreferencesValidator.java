@@ -50,7 +50,7 @@ public class AccountPreferencesValidator {
     private void validateNumberOfNodesPerCluster(Integer nodeCount, AccountPreferences preferences) throws AccountPreferencesValidationFailed {
         Long maxNodeNumberPerCluster = preferences.getMaxNumberOfNodesPerCluster();
         if (needToValidateField(maxNodeNumberPerCluster) && nodeCount > maxNodeNumberPerCluster) {
-            throw new AccountPreferencesValidationFailed(String.format("Error: Cluster with maximum '%s' instances could be created within this account!",
+            throw new AccountPreferencesValidationFailed(String.format("Cluster with maximum '%s' instances could be created within this account!",
                     maxNodeNumberPerCluster));
         }
     }
@@ -73,7 +73,7 @@ public class AccountPreferencesValidator {
                 String instanceTypeName = ig.getTemplate().getInstanceTypeName();
                 if (!allowedInstanceTypes.contains(instanceTypeName)) {
                     throw new AccountPreferencesValidationFailed(
-                            String.format("Error: The '%s' instance type isn't allowed within the account!", instanceTypeName));
+                            String.format("The '%s' instance type isn't allowed within the account!", instanceTypeName));
                 }
             }
         }
@@ -90,14 +90,25 @@ public class AccountPreferencesValidator {
         }
     }
 
-    private void validateUserTimeToLive(String owner, AccountPreferences preferences) throws AccountPreferencesValidationFailed {
+    public void validateUserTimeToLive(String owner, AccountPreferences preferences) throws AccountPreferencesValidationFailed {
         Long userTimeToLive = preferences.getUserTimeToLive();
         if (needToValidateField(userTimeToLive)) {
             CbUser cbUser = userDetailsService.getDetails(owner, UserFilterField.USERID);
             long now = Calendar.getInstance().getTimeInMillis();
             long userActiveTime = now - cbUser.getCreated().getTime();
             if (userActiveTime > userTimeToLive) {
-                throw new AccountPreferencesValidationFailed("Cluster could no be created, the user demo time is expired!");
+                throw new AccountPreferencesValidationFailed("The user demo time is expired!");
+            }
+        }
+    }
+
+    public void validateClusterTimeToLive(Long created, AccountPreferences preferences) throws AccountPreferencesValidationFailed {
+        Long clusterTimeToLive = preferences.getClusterTimeToLive();
+        if (needToValidateField(clusterTimeToLive)) {
+            long now = Calendar.getInstance().getTimeInMillis();
+            long clusterRunningTime = now - created;
+            if (clusterRunningTime > clusterTimeToLive) {
+                throw new AccountPreferencesValidationFailed("The maximum running time that is configured for the account is exceeded by the cluster!");
             }
         }
     }
