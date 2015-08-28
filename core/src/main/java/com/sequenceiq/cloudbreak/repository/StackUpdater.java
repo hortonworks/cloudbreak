@@ -63,9 +63,8 @@ public class StackUpdater {
             InMemoryStateStore.put(stackId, statusToPollGroupConverter.convert(status));
             if (Status.DELETE_COMPLETED.equals(status)) {
                 InMemoryStateStore.delete(stackId);
-            } else {
-                stack = stackRepository.save(stack);
             }
+            stack = stackRepository.save(stack);
         }
         return stack;
     }
