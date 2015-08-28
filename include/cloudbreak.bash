@@ -1,6 +1,6 @@
 
 cloudbreak-config() {
-  env-import PRIVATE_IP $(docker run --rm alpine sh -c 'ip ro | grep default | cut -d" " -f 3')
+  env-import PRIVATE_IP $(bridge-ip)
   cloudbreak-conf-tags
   cloudbreak-conf-images
   cloudbreak-conf-cert
@@ -13,6 +13,10 @@ cloudbreak-config() {
   cloudbreak-conf-java
   cloudbreak-conf-baywatch
   cloudbreak-conf-consul
+}
+
+bridge-ip() {
+    echo ${BRIDGE_IP:=$(docker run --rm alpine sh -c 'ip ro | grep default | cut -d" " -f 3')}
 }
 
 cloudbreak-conf-tags() {
