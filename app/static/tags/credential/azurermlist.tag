@@ -27,7 +27,7 @@
         <!-- .col-sm-9 -->
     </div>
     <div class="form-group">
-            <label class="col-sm-3 control-label" for="accesKey">{{msg.credential_azure_rm_form_acces_key_id_label}}</label>
+            <label class="col-sm-3 control-label" for="accesKey">{{msg.credential_azure_rm_form_access_key_id_label}}</label>
 
             <div class="col-sm-9">
                 <p id="accesKey" class="form-control-static">{{credential.parameters.accesKey}}</p>
