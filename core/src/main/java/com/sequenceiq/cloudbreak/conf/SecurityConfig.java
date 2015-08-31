@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -63,8 +64,14 @@ public class SecurityConfig {
     @Configuration
     @EnableResourceServer
     protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
-
-        public static final Logger LOGGER = LoggerFactory.getLogger(ResourceServerConfiguration.class);
+        private static final Logger LOGGER = LoggerFactory.getLogger(ResourceServerConfiguration.class);
+        private static final String[] BLUEPRINT_URL_PATTERNS = new String[]{"/user/blueprints/**", "/account/blueprints/**", "/blueprints/**"};
+        private static final String[] TEMPLATE_URL_PATTERNS = new String[]{"/user/templates/**", "/account/templates/**", "/templates/**"};
+        private static final String[] CREDENTIAL_URL_PATTERNS = new String[]{"/user/credentials/**", "/account/credentials/**", "/credentials/**"};
+        private static final String[] RECIPE_URL_PATTERNS = new String[]{"/user/recipes/**", "/account/recipes/**", "/recipes/**"};
+        private static final String[] NETWORK_URL_PATTERNS = new String[]{"/user/networks/**", "/account/networks/**", "/networks/**"};
+        private static final String[] SECURITYGROUP_URL_PATTERNS = new String[]{"/user/securitygroups/**", "/account/securitygroups/**", "/securitygroups/**"};
+        private static final String[] STACK_URL_PATTERNS = new String[]{"/user/stacks/**", "/account/stacks/**", "/stacks/**", "/stacks/*/cluster/**"};
 
         @Value("${cb.client.id}")
         private String clientId;
@@ -108,34 +115,37 @@ public class SecurityConfig {
                     .and()
                     .addFilterAfter(new ScimAccountGroupReaderFilter(userDetailsService), AbstractPreAuthenticatedProcessingFilter.class)
                     .authorizeRequests()
+
+                    .antMatchers(HttpMethod.GET, BLUEPRINT_URL_PATTERNS)
+                        .access("#oauth2.hasScope('cloudbreak.blueprints.read') or #oauth2.hasScope('cloudbreak.blueprints')")
+                    .antMatchers(HttpMethod.GET, TEMPLATE_URL_PATTERNS)
+                        .access("#oauth2.hasScope('cloudbreak.templates.read') or #oauth2.hasScope('cloudbreak.templates')")
+                    .antMatchers(HttpMethod.GET, CREDENTIAL_URL_PATTERNS)
+                        .access("#oauth2.hasScope('cloudbreak.credentials.read') or #oauth2.hasScope('cloudbreak.credentials')")
+                    .antMatchers(HttpMethod.GET, RECIPE_URL_PATTERNS)
+                        .access("#oauth2.hasScope('cloudbreak.recipes.read') or #oauth2.hasScope('cloudbreak.recipes')")
+                    .antMatchers(HttpMethod.GET, NETWORK_URL_PATTERNS)
+                        .access("#oauth2.hasScope('cloudbreak.networks.read') or #oauth2.hasScope('cloudbreak.templates')")
+                    .antMatchers(HttpMethod.GET, SECURITYGROUP_URL_PATTERNS)
+                        .access("#oauth2.hasScope('cloudbreak.securitygroups.read') or #oauth2.hasScope('cloudbreak.templates')")
+                    .antMatchers(HttpMethod.GET, STACK_URL_PATTERNS)
+                        .access("#oauth2.hasScope('cloudbreak.stacks.read') or #oauth2.hasScope('cloudbreak.stacks')")
+
                     .antMatchers("/users/**").access("#oauth2.hasScope('openid')")
-                    .antMatchers("/user/blueprints").access("#oauth2.hasScope('cloudbreak.blueprints')")
-                    .antMatchers("/account/blueprints").access("#oauth2.hasScope('cloudbreak.blueprints')")
-                    .antMatchers("/blueprints/**").access("#oauth2.hasScope('cloudbreak.blueprints')")
-                    .antMatchers("/user/templates").access("#oauth2.hasScope('cloudbreak.templates')")
-                    .antMatchers("/account/templates").access("#oauth2.hasScope('cloudbreak.templates')")
-                    .antMatchers("/templates/**").access("#oauth2.hasScope('cloudbreak.templates')")
-                    .antMatchers("/user/credentials/**").access("#oauth2.hasScope('cloudbreak.credentials')")
-                    .antMatchers("/account/credentials/**").access("#oauth2.hasScope('cloudbreak.credentials')")
-                    .antMatchers("/credentials/**").access("#oauth2.hasScope('cloudbreak.credentials')")
-                    .antMatchers("/user/stacks/**").access("#oauth2.hasScope('cloudbreak.stacks')")
-                    .antMatchers("/account/stacks/**").access("#oauth2.hasScope('cloudbreak.stacks')")
-                    .antMatchers("/stacks/ambari").access("#oauth2.hasScope('cloudbreak.autoscale')")
-                    .antMatchers("/stacks/*/certificate").access("#oauth2.hasScope('cloudbreak.autoscale')")
-                    .antMatchers("/stacks/*").access("#oauth2.hasScope('cloudbreak.stacks') or #oauth2.hasScope('cloudbreak.autoscale')")
-                    .antMatchers("/stacks/*/cluster/**").access("#oauth2.hasScope('cloudbreak.stacks') or #oauth2.hasScope('cloudbreak.autoscale')")
+                    .antMatchers(BLUEPRINT_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.blueprints')")
+                    .antMatchers(TEMPLATE_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.templates')")
+                    .antMatchers(CREDENTIAL_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.credentials')")
+                    .antMatchers(RECIPE_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.recipes')")
+                    .antMatchers(NETWORK_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.templates')")
+                    .antMatchers(SECURITYGROUP_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.templates')")
+                    .antMatchers(STACK_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.stacks') or #oauth2.hasScope('cloudbreak.autoscale')")
+                    .antMatchers("/stacks/ambari", "/stacks/*/certificate").access("#oauth2.hasScope('cloudbreak.autoscale')")
                     .antMatchers("/events").access("#oauth2.hasScope('cloudbreak.events')")
                     .antMatchers("/usages/**").access("#oauth2.hasScope('cloudbreak.usages.global')")
                     .antMatchers("/account/usages/**").access("#oauth2.hasScope('cloudbreak.usages.account')")
                     .antMatchers("/user/usages/**").access("#oauth2.hasScope('cloudbreak.usages.user')")
                     .antMatchers("/subscription").access("#oauth2.hasScope('cloudbreak.subscribe')")
-                    .antMatchers("/user/recipes").access("#oauth2.hasScope('cloudbreak.recipes')")
-                    .antMatchers("/account/recipes").access("#oauth2.hasScope('cloudbreak.recipes')")
-                    .antMatchers("/recipes").access("#oauth2.hasScope('cloudbreak.recipes')")
-                    .antMatchers("/user/networks").access("#oauth2.hasScope('cloudbreak.templates')")
-                    .antMatchers("/account/networks").access("#oauth2.hasScope('cloudbreak.templates')")
-                    .antMatchers("/networks/**").access("#oauth2.hasScope('cloudbreak.templates')")
-                    .antMatchers("/accountpreferences").access("#oauth2.hasScope('cloudbreak.templates')");
+                    .antMatchers("/accountpreferences/*").access("#oauth2.hasScope('cloudbreak.templates') and #oauth2.hasScope('cloudbreak.stacks')");
         }
     }
 
