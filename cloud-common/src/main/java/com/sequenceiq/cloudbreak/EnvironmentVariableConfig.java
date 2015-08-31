@@ -53,7 +53,7 @@ public class EnvironmentVariableConfig {
     public static final String CB_BAYWATCH_EXTERN_LOCATION = "";
 
     public static final String CB_AZURE_IMAGE_URI = "https://102589fae040d8westeurope.blob.core.windows.net/images/cb-centos71-amb210-2015-08-25-centos7_2015-August-25_12-0-os-2015-08-25.vhd";
-    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-ea0686ea,ap-southeast-1:ami-de5c548c,ap-southeast-2:ami-c75914fd,eu-west-1:ami-38154e4f,sa-east-1:ami-5149c24c,us-east-1:ami-33318f58,us-west-1:ami-59ef171d,us-west-2:ami-a9958399";
+    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-ea0686ea,ap-southeast-1:ami-de5c548c,ap-southeast-2:ami-c75914fd,eu-west-1:ami-38154e4f,eu-central-1:ami-aeb3b5b3,sa-east-1:ami-5149c24c,us-east-1:ami-33318f58,us-west-1:ami-59ef171d,us-west-2:ami-a9958399";
     public static final String CB_OPENSTACK_IMAGE = "cb-centos71-amb210-2015-08-25";
     public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos71-amb210-2015-08-25-centos71.tar.gz";
     public static final String CB_AZURE_RM_IMAGE = "https://sequenceiqimages.blob.core.windows.net/images/cb-centos71-amb210-2015-08-25-centos7_2015-August-25_12-0-os-2015-08-25.vhd";
