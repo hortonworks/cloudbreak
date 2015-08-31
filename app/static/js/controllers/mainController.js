@@ -141,20 +141,11 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                     {key: 'US_WEST_1', value: 'US West (N. California)', cloud: 'AWS'},
                     {key: 'US_WEST_2', value: 'US West (Oregon)', cloud: 'AWS'},
                     {key: 'EU_WEST_1', value: 'EU (Ireland)', cloud: 'AWS'},
+                    {key: 'EU_CENTRAL_1', value: 'EU (Frankfurt)', cloud: 'AWS'},
                     {key: 'AP_SOUTHEAST_1', value: 'Asia Pacific (Singapore)', cloud: 'AWS'},
                     {key: 'AP_SOUTHEAST_2', value: 'Asia Pacific (Sydney)', cloud: 'AWS'},
                     {key: 'AP_NORTHEAST_1', value: 'Asia Pacific (Tokyo)', cloud: 'AWS'},
                     {key: 'SA_EAST_1', value: 'South America (São Paulo)', cloud: 'AWS'}
-                ],
-                amis: [
-                    {key: 'US_EAST_1', value: 'ami-b4eb9adc'},
-                    {key: 'US_WEST_1', value: 'ami-63283726'},
-                    {key: 'US_WEST_2', value: 'ami-632e7253'},
-                    {key: 'EU_WEST_1', value: 'ami-953cbbe2'},
-                    {key: 'AP_SOUTHEAST_1', value: 'ami-27bf9675'},
-                    {key: 'AP_SOUTHEAST_2', value: 'ami-9b86eca1'},
-                    {key: 'AP_NORTHEAST_1', value: 'ami-58627359'},
-                    {key: 'SA_EAST_1', value: 'ami-272c9e3a'}
                 ],
                 instanceType: [
                     {key: 'C3Large', value: 'C3Large', cloud: 'AWS', ephemeralVolumeSize: '16 GB SSD', maxEphemeralVolumeCount: 2},
