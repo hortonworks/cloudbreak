@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
@@ -48,7 +49,7 @@ public class ParameterGenerator {
         List<Group> groups = new ArrayList<>();
         Group g = new Group("master", InstanceGroupType.CORE);
         groups.add(g);
-        InstanceTemplate instance = new InstanceTemplate("m1.medium", g.getName(), 0);
+        InstanceTemplate instance = new InstanceTemplate("m1.medium", g.getName(), 0L, InstanceStatus.CREATE_REQUESTED);
         Volume v = new Volume("/hadoop/fs1", "HDD", 1);
         instance.addVolume(v);
         v = new Volume("/hadoop/fs2", "HDD", 1);
@@ -67,7 +68,7 @@ public class ParameterGenerator {
         List<SecurityRule> rules = Arrays.asList(new SecurityRule("0.0.0.0/0", new String[]{"22", "443"}, "tcp"));
         Security security = new Security(rules);
 
-        return new CloudStack(groups, network, security, image);
+        return new CloudStack(groups, network, security, image, "region");
     }
 
     public String getSshFingerprint() {

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CloudStack {
@@ -19,7 +20,7 @@ public class CloudStack {
     }
 
     public List<Group> getGroups() {
-        return groups;
+        return new ArrayList<>(groups);
     }
 
     public Network getNetwork() {

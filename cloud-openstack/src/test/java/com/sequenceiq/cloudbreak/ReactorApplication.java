@@ -110,7 +110,7 @@ public class ReactorApplication implements CommandLineRunner {
         List<Group> groups = new ArrayList<>();
         Group g = new Group("master", InstanceGroupType.CORE);
         groups.add(g);
-        InstanceTemplate instance = new InstanceTemplate("m1.medium", g.getName(), 0, InstanceStatus.CREATE_REQUESTED);
+        InstanceTemplate instance = new InstanceTemplate("m1.medium", g.getName(), 0L, InstanceStatus.CREATE_REQUESTED);
         Volume v = new Volume("/hadoop/fs1", "HDD", 1);
         instance.addVolume(v);
         v = new Volume("/hadoop/fs2", "HDD", 1);

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.adapter;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -41,7 +42,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
@@ -52,6 +55,10 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisioningService;
@@ -63,6 +70,7 @@ import reactor.bus.EventBus;
 public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceProviderConnectorAdapter.class);
+    private static final String ROLLBACK_MESSAGE = "stack.infrastructure.create.rollback";
 
     @Inject
     private EventBus eventBus;
@@ -74,6 +82,12 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     private CredentialToCloudCredentialConverter credentialConverter;
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
+    @Inject
+    private InstanceGroupRepository instanceGroupRepository;
+    @Inject
+    private CloudbreakEventService eventService;
+    @Inject
+    private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Override
     public Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties) {
@@ -93,7 +107,9 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
                 }
                 throw new OperationException(format("Failed to build the stack for %s due to: %s", cloudContext, res.getStatusReason()));
             }
-            return transformResults(res.getResults(), stack);
+            List<CloudResourceStatus> results = res.getResults();
+            updateNodeCount(stack.getId(), cloudStack.getGroups(), results);
+            return transformResults(results, stack);
         } catch (InterruptedException e) {
             LOGGER.error("Error while launching stack", e);
             throw new OperationException("Unexpected exception occurred during build stack", cloudContext, e);
@@ -181,7 +197,9 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
                 }
                 throw new OperationException(format("Failed to upscale the stack: %s due to: %s", cloudContext, res.getStatusReason()));
             }
-            return transformResults(res.getResults(), stack);
+            List<CloudResourceStatus> results = res.getResults();
+            updateNodeCount(stack.getId(), cloudStack.getGroups(), results);
+            return transformResults(results, stack);
         } catch (InterruptedException e) {
             LOGGER.error("Error while upscaling the stack", e);
             throw new OperationException("Unexpected exception occurred during add new instances", cloudContext, e);
@@ -328,6 +346,35 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             retSet.add(resource);
         }
         return retSet;
+    }
+
+    private void updateNodeCount(long stackId, List<Group> originalGroups, List<CloudResourceStatus> statuses) {
+        for (Group group : originalGroups) {
+            int nodeCount = group.getInstances().size();
+            int createdInstances = getCreatedInstanceCount(statuses, group);
+            int failedInstances = nodeCount - createdInstances;
+            if (createdInstances > 0 && failedInstances != 0) {
+                InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stackId, group.getName());
+                instanceGroup.setNodeCount(createdInstances);
+                instanceGroupRepository.save(instanceGroup);
+                String message = cloudbreakMessagesService.getMessage(ROLLBACK_MESSAGE, asList(failedInstances, group.getName()));
+                eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), message);
+            }
+        }
+    }
+
+    private int getCreatedInstanceCount(List<CloudResourceStatus> statuses, Group group) {
+        int nodeCount = 0;
+        for (InstanceTemplate instanceTemplate : group.getInstances()) {
+            Long privateId = instanceTemplate.getPrivateId();
+            for (CloudResourceStatus status : statuses) {
+                if (privateId == status.getPrivateId()) {
+                    nodeCount++;
+                    break;
+                }
+            }
+        }
+        return nodeCount;
     }
 
 }

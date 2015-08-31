@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.event.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.notification.ResourcePersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
@@ -35,7 +35,7 @@ public class ResourceDeleteThread implements Callable<ResourceRequestResult<List
     @Inject
     private PollTaskFactory statusCheckFactory;
     @Inject
-    private ResourcePersistenceNotifier resourceNotifier;
+    private PersistenceNotifier resourceNotifier;
 
     private final ResourceBuilderContext context;
     private final AuthenticatedContext auth;

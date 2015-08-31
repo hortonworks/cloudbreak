@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
-import com.sequenceiq.cloudbreak.cloud.notification.ResourcePersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
@@ -38,7 +38,7 @@ public class NetworkResourceService {
     @Inject
     private PollTaskFactory statusCheckFactory;
     @Inject
-    private ResourcePersistenceNotifier resourceNotifier;
+    private PersistenceNotifier resourceNotifier;
 
     public List<CloudResourceStatus> buildResources(ResourceBuilderContext context,
             AuthenticatedContext auth, Network network, Security security) throws Exception {

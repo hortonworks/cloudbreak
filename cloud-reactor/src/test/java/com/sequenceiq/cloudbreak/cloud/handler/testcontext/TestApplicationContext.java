@@ -23,8 +23,10 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
+import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
@@ -53,17 +55,22 @@ public class TestApplicationContext {
 
     private CloudInstance cloudInstance = new CloudInstance("instanceId",
             new CloudInstanceMetaData("privateIp", "publicIp"),
-            new InstanceTemplate("flavor", "groupName", 1L));
+            new InstanceTemplate("flavor", "groupName", 1L, InstanceStatus.CREATE_REQUESTED));
     private CloudInstance cloudInstanceBad = new CloudInstance("instanceIdBad",
             new CloudInstanceMetaData("privateIp", "publicIp"),
-            new InstanceTemplate("flavor", "groupName", 1L));
+            new InstanceTemplate("flavor", "groupName", 1L, InstanceStatus.CREATE_REQUESTED));
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
 
-
     @Mock
     private CloudConnector cloudConnector;
+
+    @Mock
+    private Authenticator authenticator;
+
+    @Mock
+    private MetadataCollector collector;
 
     @Mock
     private ResourceConnector resourceConnector;
@@ -112,9 +119,11 @@ public class TestApplicationContext {
     }
 
     @Bean
-    public CloudConnector cloudConnectors() {
+    public CloudConnector cloudConnectors() throws Exception {
         CloudResource resource = new CloudResource(ResourceType.HEAT_STACK, "ref");
-        when(cloudConnector.authenticate((CloudContext) any(), (CloudCredential) any())).thenReturn(g.createAuthenticatedContext());
+        when(cloudConnector.authentication()).thenReturn(authenticator);
+        when(instanceConnector.metadata()).thenReturn(collector);
+        when(authenticator.authenticate((CloudContext) any(), (CloudCredential) any())).thenReturn(g.createAuthenticatedContext());
         when(cloudConnector.platform()).thenReturn("TESTCONNECTOR");
         when(cloudConnector.resources()).thenReturn(resourceConnector);
         when(cloudConnector.instances()).thenReturn(instanceConnector);
@@ -130,11 +139,11 @@ public class TestApplicationContext {
                 .thenReturn(Arrays.asList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
         when(instanceConnector.check((AuthenticatedContext) any(), (List<CloudInstance>) any()))
                 .thenReturn(Arrays.asList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED)));
-        when(instanceConnector.collectMetadata((AuthenticatedContext) any(), (List<CloudResource>) any(), (List<InstanceTemplate>) any()))
+        when(collector.collect((AuthenticatedContext) any(), (List<CloudResource>) any(), (List<InstanceTemplate>) any()))
                 .thenReturn(Arrays.asList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS)));
-        when(instanceConnector.start((AuthenticatedContext) any(), (List<CloudInstance>) any()))
+        when(instanceConnector.start((AuthenticatedContext) any(), (List<CloudResource>) any(), (List<CloudInstance>) any()))
                 .thenReturn(Arrays.asList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED)));
-        when(instanceConnector.stop((AuthenticatedContext) any(), (List<CloudInstance>) any()))
+        when(instanceConnector.stop((AuthenticatedContext) any(), (List<CloudResource>) any(), (List<CloudInstance>) any()))
                 .thenReturn(Arrays.asList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STOPPED)));
         when(instanceConnector.getConsoleOutput((AuthenticatedContext) any(), eq(cloudInstance)))
                 .thenReturn(g.getSshFingerprint() + "    RSA/n-----END SSH HOST KEY FINGERPRINTS-----");
@@ -142,7 +151,6 @@ public class TestApplicationContext {
                 .thenReturn("XYZ    RSA/n-----END SSH HOST KEY FINGERPRINTS-----");
         return cloudConnector;
     }
-
 
     @Bean
     public Environment env() {

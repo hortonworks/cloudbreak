@@ -41,7 +41,7 @@ public class ArmTemplateBuilderTest {
     private CloudCredential cloudCredential;
     private final int volume1Size = 100;
     private final int volume2Size = 20;
-    private final int three = 3;
+    private final Long three = 3L;
 
     @Before
     public void setUp() throws Exception {
@@ -60,13 +60,13 @@ public class ArmTemplateBuilderTest {
         Volume volume1 = new Volume("test1", "blob", volume1Size);
         Volume volume2 = new Volume("test2", "blob", volume2Size);
 
-        InstanceTemplate instanceTemplate1 = new InstanceTemplate("Standard_A3", "cbgateway", 0, asList(volume1, volume2), InstanceStatus.CREATE_REQUESTED);
+        InstanceTemplate instanceTemplate1 = new InstanceTemplate("Standard_A3", "cbgateway", 0L, asList(volume1, volume2), InstanceStatus.CREATE_REQUESTED);
         Group cbgateway = new Group("cbgateway", GATEWAY, asList(instanceTemplate1));
 
-        InstanceTemplate instanceTemplate2 = new InstanceTemplate("Standard_A3", "master", 1, asList(volume1), InstanceStatus.CREATE_REQUESTED);
+        InstanceTemplate instanceTemplate2 = new InstanceTemplate("Standard_A3", "master", 1L, asList(volume1), InstanceStatus.CREATE_REQUESTED);
         Group master = new Group("master", CORE, asList(instanceTemplate2));
 
-        InstanceTemplate instanceTemplate3 = new InstanceTemplate("Standard_A3", "slave_1", 2, asList(volume1), InstanceStatus.CREATE_REQUESTED);
+        InstanceTemplate instanceTemplate3 = new InstanceTemplate("Standard_A3", "slave_1", 2L, asList(volume1), InstanceStatus.CREATE_REQUESTED);
         InstanceTemplate instanceTemplate4 = new InstanceTemplate("Standard_A3", "slave_1", three, asList(volume1), InstanceStatus.CREATE_REQUESTED);
         Group slave1 = new Group("slave_1", CORE, asList(instanceTemplate3, instanceTemplate4));
 

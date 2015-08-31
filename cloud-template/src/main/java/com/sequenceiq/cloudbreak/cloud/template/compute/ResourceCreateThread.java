@@ -19,7 +19,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.notification.ResourcePersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
@@ -42,7 +44,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
     @Inject
     private PollTaskFactory statusCheckFactory;
     @Inject
-    private ResourcePersistenceNotifier resourceNotifier;
+    private PersistenceNotifier resourceNotifier;
 
     private final long privateId;
     private final Group group;
@@ -61,19 +63,35 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
     @Override
     public ResourceRequestResult<List<CloudResourceStatus>> call() throws Exception {
         List<CloudResourceStatus> results = new ArrayList<>();
-        for (ComputeResourceBuilder builder : resourceBuilders.compute(auth.getCloudContext().getPlatform())) {
-            PollGroup pollGroup = InMemoryStateStore.get(auth.getCloudContext().getStackId());
-            if (pollGroup != null && CANCELLED.equals(pollGroup)) {
-                break;
+        List<CloudResource> buildableResources = new ArrayList<>();
+        try {
+            for (ComputeResourceBuilder builder : resourceBuilders.compute(auth.getCloudContext().getPlatform())) {
+                PollGroup pollGroup = InMemoryStateStore.get(auth.getCloudContext().getStackId());
+                if (pollGroup != null && CANCELLED.equals(pollGroup)) {
+                    break;
+                }
+                LOGGER.info("Building {} resources of {} instance group", builder.resourceType(), group.getName());
+                List<CloudResource> list = builder.create(context, privateId, auth, group, image);
+                buildableResources.addAll(list);
+                createResource(auth, list);
+
+                List<CloudResource> resources = builder.build(context, privateId, auth, group, image, list);
+                context.addComputeResources(privateId, resources);
+                PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(builder, auth, resources, context, true);
+                List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
+                for (CloudResourceStatus resourceStatus : pollerResult) {
+                    resourceStatus.setPrivateId(privateId);
+                }
+                results.addAll(pollerResult);
             }
-            LOGGER.info("Building {} resources of {} instance group", builder.resourceType(), group.getName());
-            List<CloudResource> buildableResources = builder.create(context, privateId, auth, group, image);
-            createResource(auth, buildableResources);
-            List<CloudResource> resources = builder.build(context, privateId, auth, group, image, buildableResources);
-            context.addComputeResources(privateId, resources);
-            PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(builder, auth, resources, context, true);
-            List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
-            results.addAll(pollerResult);
+        } catch (CancellationException e) {
+            throw e;
+        } catch (Exception e) {
+            results.clear();
+            for (CloudResource buildableResource : buildableResources) {
+                results.add(new CloudResourceStatus(buildableResource, ResourceStatus.FAILED, e.getMessage(), privateId));
+            }
+            return new ResourceRequestResult<>(FutureResult.FAILED, results);
         }
         return new ResourceRequestResult<>(FutureResult.SUCCESS, results);
     }

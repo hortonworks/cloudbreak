@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.event.context;
 
+import com.sequenceiq.cloudbreak.domain.AdjustmentType;
+import com.sequenceiq.cloudbreak.domain.OnFailureAction;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
 public class CloudContext {
@@ -10,6 +12,10 @@ public class CloudContext {
     private int parallelResourceRequest;
     private String owner;
     private String region;
+    private OnFailureAction onFailureAction = OnFailureAction.ROLLBACK;
+    private AdjustmentType adjustmentType;
+    private Long threshold;
+
 
     public CloudContext(Stack stack) {
         this.stackId = stack.getId();
@@ -18,6 +24,11 @@ public class CloudContext {
         this.region = stack.getRegion();
         this.owner = stack.getOwner();
         this.parallelResourceRequest = stack.cloudPlatform().parallelNumber();
+        this.onFailureAction = stack.getOnFailureActionAction();
+        if (stack.getFailurePolicy() != null) {
+            this.adjustmentType = stack.getFailurePolicy().getAdjustmentType();
+            this.threshold = stack.getFailurePolicy().getThreshold();
+        }
     }
 
     public CloudContext(Long stackId, String stackName, String platform, String owner) {
@@ -49,6 +60,18 @@ public class CloudContext {
 
     public int getParallelResourceRequest() {
         return parallelResourceRequest;
+    }
+
+    public OnFailureAction getOnFailureAction() {
+        return onFailureAction;
+    }
+
+    public AdjustmentType getAdjustmentType() {
+        return adjustmentType;
+    }
+
+    public Long getThreshold() {
+        return threshold;
     }
 
     @Override

@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 
 public class UpscaleStackComponentTest extends AbstractComponentTest<UpscaleStackResult> {
-    private static final int ADJUSTMENT = 5;
 
     @Test
     public void testUpscaleStack() {
@@ -33,6 +32,6 @@ public class UpscaleStackComponentTest extends AbstractComponentTest<UpscaleStac
 
     @Override
     protected CloudPlatformRequest getRequest() {
-        return new UpscaleStackRequest(g().createCloudContext(), g().createCloudCredential(), g().createCloudStack(), g().createCloudResourceList(), ADJUSTMENT);
+        return new UpscaleStackRequest(g().createCloudContext(), g().createCloudCredential(), g().createCloudStack(), g().createCloudResourceList());
     }
 }

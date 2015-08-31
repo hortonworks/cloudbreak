@@ -34,7 +34,11 @@ public class Group {
     }
 
     public List<InstanceTemplate> getInstances() {
-        return instances;
+        return new ArrayList<>(instances);
+    }
+
+    public void setInstances(List<InstanceTemplate> instances) {
+        this.instances = instances;
     }
 
     public void addInstance(InstanceTemplate instance) {

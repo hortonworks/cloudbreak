@@ -44,25 +44,36 @@ public class ComputeResourceService {
     private ApplicationContext applicationContext;
     @Inject
     private ResourceBuilders resourceBuilders;
+    @Inject
+    private CloudFailureHandler cloudFailureHandler;
 
     public List<CloudResourceStatus> buildResources(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image) throws Exception {
         List<CloudResourceStatus> results = new ArrayList<>();
+        List<CloudResourceStatus> fails = new ArrayList<>();
+        int fullNodeCount = getFullNodeCount(groups);
+
         CloudContext cloudContext = auth.getCloudContext();
         List<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
         List<ComputeResourceBuilder> builders = resourceBuilders.compute(cloudContext.getPlatform());
         for (Group group : getOrderedCopy(groups)) {
+            Group copyGroup = new Group(group.getName(), group.getType(), group.getInstances());
             List<InstanceTemplate> instances = group.getInstances();
             for (int i = 0; i < instances.size(); i++) {
                 ResourceCreateThread thread = createThread(ResourceCreateThread.NAME, instances.get(i).getPrivateId(), group, ctx, auth, image);
                 Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(thread);
                 futures.add(future);
                 if (isRequestFullWithCloudPlatform(builders.size(), futures.size(), ctx)) {
-                    results.addAll(flatList(waitForRequests(futures).get(FutureResult.SUCCESS)));
-                    //TODO rollback failed resources and decrease node count
+                    Map<FutureResult, List<List<CloudResourceStatus>>> futureResultListMap = waitForRequests(futures);
+                    results.addAll(flatList(futureResultListMap.get(FutureResult.SUCCESS)));
+                    fails.addAll(flatList(futureResultListMap.get(FutureResult.FAILED)));
+                    cloudFailureHandler.rollback(auth, fails, copyGroup, fullNodeCount, ctx, resourceBuilders);
                 }
             }
+            Map<FutureResult, List<List<CloudResourceStatus>>> futureResultListMap = waitForRequests(futures);
+            results.addAll(flatList(futureResultListMap.get(FutureResult.SUCCESS)));
+            fails.addAll(flatList(futureResultListMap.get(FutureResult.FAILED)));
+            cloudFailureHandler.rollback(auth, fails, copyGroup, fullNodeCount, ctx, resourceBuilders);
         }
-        results.addAll(flatList(waitForRequests(futures).get(FutureResult.SUCCESS)));
         return results;
     }
 
@@ -99,6 +110,14 @@ public class ComputeResourceService {
     public List<CloudVmInstanceStatus> startInstances(ResourceBuilderContext context, AuthenticatedContext auth,
             List<CloudResource> resources, List<CloudInstance> cloudInstances) throws Exception {
         return stopStart(context, auth, resources, cloudInstances);
+    }
+
+    private int getFullNodeCount(List<Group> groups) {
+        int fullNodeCount = 0;
+        for (Group group : groups) {
+            fullNodeCount += group.getInstances().size();
+        }
+        return fullNodeCount;
     }
 
     private List<CloudVmInstanceStatus> stopStart(ResourceBuilderContext context,
