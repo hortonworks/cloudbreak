@@ -161,4 +161,13 @@ public class ModelDescriptions {
         public static final String PROTOCOL = "protocol of the rule";
         public static final String MODIFIABLE = "flag for making the rule modifiable";
     }
+
+    public static class AccountPreferencesModelDescription {
+        public static final String MAX_NO_CLUSTERS = "max number of clusters in the account (0 when unlimited)";
+        public static final String MAX_NO_NODES_PER_CLUSTER = "max number of vms in a cluster of account (0 when unlimited)";
+        public static final String MAX_NO_CLUSTERS_PER_USER = "max number of clusters for user within the account (0 when unlimited)";
+        public static final String ALLOWED_INSTANCE_TYPES = "allowed instance types in the account (empty list for no restriction)";
+        public static final String CLUSTER_TIME_TO_LIVE = "lifecycle of the cluster in hours (0 for immortal clusters)";
+        public static final String ACCOUNT_TIME_TO_LIVE = "lifecycle of the account and its clusters in hours (0 for immortal account)";
+    }
 }

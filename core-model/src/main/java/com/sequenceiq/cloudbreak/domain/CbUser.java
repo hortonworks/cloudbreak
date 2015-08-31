@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.Date;
 import java.util.List;
 
 public class CbUser {
@@ -10,14 +11,16 @@ public class CbUser {
     private List<CbUserRole> roles;
     private String givenName;
     private String familyName;
+    private Date created;
 
-    public CbUser(String userId, String username, String account, List<CbUserRole> roles, String givenName, String familyName) {
+    public CbUser(String userId, String username, String account, List<CbUserRole> roles, String givenName, String familyName, Date created) {
         this.userId = userId;
         this.username = username;
         this.account = account;
         this.roles = roles;
         this.givenName = givenName;
         this.familyName = familyName;
+        this.created = created;
     }
 
     public String getUserId() {
@@ -46,5 +49,9 @@ public class CbUser {
 
     public String getFamilyName() {
         return familyName;
+    }
+
+    public Date getCreated() {
+        return created;
     }
 }

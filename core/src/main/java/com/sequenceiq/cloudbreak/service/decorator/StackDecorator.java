@@ -6,15 +6,10 @@ import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AZURE_RM_IM
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_GCP_SOURCE_IMAGE_PATH;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_OPENSTACK_IMAGE;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.amazonaws.regions.Regions;
 import com.google.common.base.Strings;
@@ -28,6 +23,10 @@ import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 @Service
 public class StackDecorator implements Decorator<Stack> {

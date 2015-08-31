@@ -1,23 +1,10 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.Map;
-import java.util.Set;
-
 import javax.inject.Inject;
 import javax.validation.Valid;
 
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import java.util.Map;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.controller.doc.ContentType;
 import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
@@ -35,10 +22,24 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationFailed;
+import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @Api(value = "/stack", description = ControllerDescription.STACK_DESCRIPTION, position = 3)
@@ -53,6 +54,9 @@ public class StackController {
 
     @Inject
     private Decorator<Stack> stackDecorator;
+
+    @Inject
+    private AccountPreferencesValidator accountPreferencesValidator;
 
     @ApiOperation(value = StackOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
     @RequestMapping(value = "user/stacks", method = RequestMethod.POST)
@@ -170,6 +174,8 @@ public class StackController {
             stackService.updateStatus(id, updateRequest.getStatus());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
+            Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
+            validateAccountPreferences(id, scalingAdjustment, user.getAccount(), user.getUserId());
             stackService.updateNodeCount(id, updateRequest.getInstanceGroupAdjustment());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -217,8 +223,25 @@ public class StackController {
         stack = stackDecorator.decorate(stack, stackRequest.getCredentialId(), stackRequest.getConsulServerCount(), stackRequest.getNetworkId(),
                 stackRequest.getSecurityGroupId());
         stack.setPublicInAccount(publicInAccount);
+        validateAccountPreferences(stack, user);
         stack = stackService.create(user, stack);
         return new ResponseEntity<>(new IdJson(stack.getId()), HttpStatus.CREATED);
+    }
+
+    private void validateAccountPreferences(Stack stack, CbUser user) {
+        try {
+            accountPreferencesValidator.validate(stack, user.getAccount(), user.getUserId());
+        } catch (AccountPreferencesValidationFailed e) {
+            throw new BadRequestException(e.getMessage(), e);
+        }
+    }
+
+    private void validateAccountPreferences(Long stackId, Integer scalingAdjustment, String account, String owner) {
+        try {
+            accountPreferencesValidator.validate(stackId, scalingAdjustment, account, owner);
+        } catch (AccountPreferencesValidationFailed e) {
+            throw new BadRequestException(e.getMessage(), e);
+        }
     }
 
 }

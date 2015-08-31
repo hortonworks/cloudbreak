@@ -127,7 +127,7 @@ public class TestUtil {
     }
 
     public static CbUser cbUser() {
-        return new CbUser("userid", "testuser", "testaccount", Arrays.asList(CbUserRole.ADMIN, CbUserRole.USER), "givenname", "familyname");
+        return new CbUser("userid", "testuser", "testaccount", Arrays.asList(CbUserRole.ADMIN, CbUserRole.USER), "givenname", "familyname", new Date());
     }
 
     public static Credential azureCredential() {

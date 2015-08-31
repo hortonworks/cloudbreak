@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         }
         stack.setFailurePolicy(getConversionService().convert(source.getFailurePolicy(), FailurePolicy.class));
         stack.setParameters(getValidParameters(source));
+        stack.setCreated(Calendar.getInstance().getTimeInMillis());
         return stack;
     }
 
