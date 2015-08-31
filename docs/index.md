@@ -18,12 +18,6 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 
 Blueprints are your declarative definition of a Hadoop cluster.
 
-_Note: Apache Ambari community is working on an auto-hostgroup assignment algorithm; in the meantime please follow our conventions and check the default blueprints as examples, or ask us to support you._
-
-_When you are creating a Multi node blueprint, all the worker node components (a.k.a. Slaves) will have to be grouped in host groups named `slave_*`. Replace * with the number of Slave hostgroups._
-
-_The default rule is that for multi node clusters there must be at least as many hosts as the number of host groups. Each NOT slave host groups (master, gateway, etc) will be launched with a cardinality of 1 (1 node per master, gateway, etc hosts), and all the rest of the nodes are equally distributed among Slave nodes (if there are multiple slave host groups)._
-
 
 ###Manage resources
 
