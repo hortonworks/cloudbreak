@@ -7,11 +7,16 @@
 ### Added
 
 - binary version of gnu-sed 4.2.2 is now included, to solve lot of osx/busybox issues
+- consul recursor test are added
 
 ### Removed
 
 ### Changed
 - sequenceiq/cloudbreak image updated to 1.0.3
+
+- debug() function made multiline capable. Use \n in messages
+- refactor bridge ip discovery to run helper docker command only once
+- consul recursor handling refactored to be more robust
 
 ## [v1.0.2] - 2015-08-25
 
