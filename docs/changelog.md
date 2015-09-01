@@ -11,6 +11,7 @@
 ### Removed
 
 ### Changed
+- sequenceiq/cloudbreak image updated to 1.0.3
 
 ## [v1.0.2] - 2015-08-25
 
