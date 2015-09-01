@@ -6,6 +6,8 @@
 
 ### Added
 
+- binary version of gnu-sed 4.2.2 is now included, to solve lot of osx/busybox issues
+
 ### Removed
 
 ### Changed
