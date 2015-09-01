@@ -1,17 +1,19 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
-import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.RecipeModelDescription;
-import com.sequenceiq.cloudbreak.controller.validation.TrustedPlugin;
-import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
-import com.wordnik.swagger.annotations.ApiModelProperty;
-import org.codehaus.jackson.annotate.JsonProperty;
+import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import java.util.Map;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.RecipeModelDescription;
+import com.sequenceiq.cloudbreak.controller.validation.ValidPlugin;
+import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 public abstract class RecipeBase implements JsonEntity {
     @Size(max = 100, min = 1, message = "The length of the recipe's name has to be in range of 1 to 100")
@@ -27,7 +29,7 @@ public abstract class RecipeBase implements JsonEntity {
     @ApiModelProperty(RecipeModelDescription.TIMEOUT)
     private Integer timeout;
 
-    @TrustedPlugin
+    @ValidPlugin
     @ApiModelProperty(value = RecipeModelDescription.PLUGINS, required = true)
     private Map<String, PluginExecutionType> plugins;
 

@@ -7,6 +7,7 @@ import static org.mockito.Matchers.anyString;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -27,26 +28,24 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TrustedPluginValidatorTest {
+public class PluginValidatorTest {
 
     @InjectMocks
-    private TrustedPluginValidator underTest;
+    private PluginValidator underTest;
 
     @Mock
     private ConstraintValidatorContext constraintValidatorContext;
 
     @Mock
-    private TrustedPlugin trustedPlugin;
+    private ValidPlugin validPlugin;
 
     @Before
     public void setUp() {
-        underTest.initialize(trustedPlugin);
-        ReflectionTestUtils.setField(underTest, "trustedSources", "all-accounts");
+        underTest.initialize(validPlugin);
         given(constraintValidatorContext.buildConstraintViolationWithTemplate(anyString())).willReturn(
                 new ConstraintValidatorContextImpl(
                         new ArrayList<String>(),
@@ -59,7 +58,9 @@ public class TrustedPluginValidatorTest {
     @Test
     public void validPluginJsonWillReturnTrue() {
         Map<String, PluginExecutionType> plugins = new HashMap<>();
+        plugins.put("http://github.com/user/consul-plugins-plugin1.git", PluginExecutionType.ALL_NODES);
         plugins.put("https://github.com/user/consul-plugins-plugin1.git", PluginExecutionType.ALL_NODES);
+        plugins.put("git://github.com/user/consul-plugins-plugin1.git", PluginExecutionType.ALL_NODES);
         assertEquals(underTest.isValid(plugins, constraintValidatorContext), true);
     }
 
@@ -69,26 +70,15 @@ public class TrustedPluginValidatorTest {
     }
 
     @Test
+    public void inValidPluginEmptyReturnFalse() {
+        assertEquals(underTest.isValid(Collections.<String, PluginExecutionType>emptyMap(), constraintValidatorContext), false);
+    }
+
+    @Test
     public void inValidPluginUrlJsonWillReturnFalse() {
         Map<String, PluginExecutionType> plugins = new HashMap<>();
-        plugins.put("https://github.com/user/plugin1.git", PluginExecutionType.ALL_NODES);
+        plugins.put("asd://github.com/user/plugin1.git", PluginExecutionType.ALL_NODES);
         assertEquals(underTest.isValid(plugins, constraintValidatorContext), false);
-    }
-
-    @Test
-    public void inValidTrustedPluginAccountJsonWillReturnFalse() {
-        Map<String, PluginExecutionType> plugins = new HashMap<>();
-        ReflectionTestUtils.setField(underTest, "trustedSources", "hwx");
-        plugins.put("https://github.com/user/consul-plugins-plugin1.git", PluginExecutionType.ALL_NODES);
-        assertEquals(underTest.isValid(plugins, constraintValidatorContext), false);
-    }
-
-    @Test
-    public void validTrustedPluginAccountJsonWillReturnFalse() {
-        Map<String, PluginExecutionType> plugins = new HashMap<>();
-        ReflectionTestUtils.setField(underTest, "trustedSources", "hwx");
-        plugins.put("https://github.com/hwx/consul-plugins-plugin1.git", PluginExecutionType.ALL_NODES);
-        assertEquals(underTest.isValid(plugins, constraintValidatorContext), true);
     }
 
     private class DummyAnnotation implements Annotation {
