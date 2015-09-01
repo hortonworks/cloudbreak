@@ -10,12 +10,12 @@ import javax.validation.Constraint;
 import javax.validation.Payload;
 
 @Documented
-@Constraint(validatedBy = TrustedPluginValidator.class)
+@Constraint(validatedBy = PluginValidator.class)
 @Target({ ElementType.METHOD, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface TrustedPlugin {
+public @interface ValidPlugin {
 
-    String message() default "Only plugins from a trusted Github source are accepted and the repository must follow the naming convention 'consul-plugins-*'.";
+    String message() default "Only plugins from http, https and git protocols are allowed.";
 
     Class<?>[] groups() default { };
 
