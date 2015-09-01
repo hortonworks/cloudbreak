@@ -1,62 +1,36 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
-import javax.inject.Inject;
+import java.util.List;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
-import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
-import com.sequenceiq.cloudbreak.cloud.handler.testcontext.TestApplicationContext;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 
-import reactor.bus.Event;
-
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = TestApplicationContext.class)
-public class LaunchStackComponentTest {
-
-
-    @Inject
-    private CloudConnector cloudConnector;
-
-    @Inject
-    private ResourceConnector resourceConnector;
-
-    @Inject
-    private ParameterGenerator g;
-
-    @Inject
-    private LaunchStackHandler launchStackHandler;
-
-
-    @Inject
-    private PersistenceNotifier notifier;
-
+public class LaunchStackComponentTest extends AbstractComponentTest<LaunchStackResult> {
 
     @Test
     public void testLaunchStack() {
-        CloudContext ctx = g.createCloudContext();
-        CloudCredential cred = g.createCloudCredential();
-        AuthenticatedContext ac = new AuthenticatedContext(ctx, cred);
-        CloudStack cs = g.createCloudStack();
-        LaunchStackRequest lr = new LaunchStackRequest(ctx, cred, cs);
+        LaunchStackResult lsr = sendCloudRequest();
+        List<CloudResourceStatus> r = lsr.getResults();
 
-        when(cloudConnector.authenticate(ctx, cred)).thenReturn(ac);
-
-        //when(resourceConnector.launch(ac, cs, notifier )).thenReturn(ac);
-
-        launchStackHandler.accept(Event.wrap(lr));
+        assertEquals(ResourceStatus.CREATED, r.get(0).getStatus());
+        assertNull(lsr.getException());
     }
 
+    @Override
+    protected String getTopicName() {
+        return "LAUNCHSTACKREQUEST";
+    }
 
+    @Override
+    protected CloudPlatformRequest getRequest() {
+        return new LaunchStackRequest(g().createCloudContext(), g().createCloudCredential(), g().createCloudStack());
+    }
 }
