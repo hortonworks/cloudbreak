@@ -194,8 +194,8 @@ _cloudbreak-shell() {
         -e BACKEND_9001=identity.service.consul \
         -e CLOUDBREAK_ADDRESS=http://backend:9000 \
         -e IDENTITY_ADDRESS=http://backend:9001 \
-        -e SEQUENCEIQ_USER=admin@example.com \
-        -e SEQUENCEIQ_PASSWORD=cloudbreak \
+        -e SEQUENCEIQ_USER=$UAA_DEFAULT_USER_EMAIL \
+        -e SEQUENCEIQ_PASSWORD=$UAA_DEFAULT_USER_PW \
         -v $PWD:/data \
         sequenceiq/cb-shell:$DOCKER_TAG_CLOUDBREAK_SHELL
 }
