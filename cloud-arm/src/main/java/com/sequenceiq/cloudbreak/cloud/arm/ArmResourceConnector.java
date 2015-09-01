@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.notification.ResourcePersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceAllocationPersisted;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
@@ -59,7 +59,7 @@ public class ArmResourceConnector implements ResourceConnector {
     private PollTaskFactory statusCheckFactory;
 
     @Override
-    public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, ResourcePersistenceNotifier notifier) {
+    public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier) {
         String stackName = armTemplateUtils.getStackName(authenticatedContext.getCloudContext());
         String template = armTemplateBuilder.build(stackName, authenticatedContext.getCloudCredential(), stack);
         String parameters = armTemplateBuilder.buildParameters(authenticatedContext.getCloudCredential(), stack.getNetwork(), stack.getImage());

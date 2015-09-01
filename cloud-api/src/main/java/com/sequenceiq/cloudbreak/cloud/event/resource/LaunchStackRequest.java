@@ -5,7 +5,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 public class LaunchStackRequest extends CloudStackRequest<LaunchStackResult> {
-
     public LaunchStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack) {
         super(cloudContext, cloudCredential, cloudStack);
     }

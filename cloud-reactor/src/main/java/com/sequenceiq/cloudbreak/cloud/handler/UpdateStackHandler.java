@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateStackResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.notification.ResourcePersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
@@ -41,7 +41,7 @@ public class UpdateStackHandler implements CloudPlatformEventHandler<UpdateStack
     private PollTaskFactory statusCheckFactory;
 
     @Inject
-    private ResourcePersistenceNotifier resourcePersistenceNotifier;
+    private PersistenceNotifier resourcePersistenceNotifier;
 
     @Override
     public Class<UpdateStackRequest> type() {
