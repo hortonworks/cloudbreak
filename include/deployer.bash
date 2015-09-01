@@ -219,6 +219,7 @@ main() {
     cbd-find-root
     deps-init
 	color-init
+    deps-require sed
     load-profile "$@"
 
     circle-init
