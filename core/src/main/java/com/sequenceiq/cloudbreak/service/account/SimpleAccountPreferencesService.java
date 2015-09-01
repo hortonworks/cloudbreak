@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.service.account;
 import javax.inject.Inject;
 
 import java.util.Collections;
+import java.util.concurrent.locks.Lock;
 
+import com.google.common.util.concurrent.Striped;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -15,9 +17,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class SimpleAccountPreferencesService implements AccountPreferencesService {
     private static final long ZERO = 0L;
+    private static final int STRIPES = 10;
 
     @Inject
     private AccountPreferencesRepository repository;
+
+    private Striped<Lock> locks = Striped.lazyWeakLock(STRIPES);
 
     @Override
     public AccountPreferences save(AccountPreferences accountPreferences) {
@@ -38,11 +43,17 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
 
     @Override
     public AccountPreferences getByAccount(String account) {
-        AccountPreferences accountPreferences = repository.findByAccount(account);
-        if (accountPreferences == null) {
-            accountPreferences = createDefaultAccountPreferences(account);
+        Lock lock = locks.get(account);
+        lock.lock();
+        try {
+            AccountPreferences accountPreferences = repository.findByAccount(account);
+            if (accountPreferences == null) {
+                accountPreferences = createDefaultAccountPreferences(account);
+            }
+            return accountPreferences;
+        } finally {
+            lock.unlock();
         }
-        return accountPreferences;
     }
 
     @Override
@@ -64,16 +75,21 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
     @PostAuthorize("hasPermission(returnObject,'read')")
     public AccountPreferences getOneByAccount(CbUser user) {
         String account = user.getAccount();
-        AccountPreferences accountPreferences = repository.findByAccount(account);
+        Lock lock = locks.get(account);
+        lock.lock();
+        try {
+            AccountPreferences accountPreferences = repository.findByAccount(account);
 
-        if (accountPreferences == null) {
-            accountPreferences = createDefaultAccountPreferences(account);
-        }
-
-        if (!user.getRoles().contains(CbUserRole.ADMIN)) {
-            throw new BadRequestException("AccountPreferences are only available for admin users!");
-        } else {
-            return accountPreferences;
+            if (accountPreferences == null) {
+                accountPreferences = createDefaultAccountPreferences(account);
+            }
+            if (!user.getRoles().contains(CbUserRole.ADMIN)) {
+                throw new BadRequestException("AccountPreferences are only available for admin users!");
+            } else {
+                return accountPreferences;
+            }
+        } finally {
+            lock.unlock();
         }
     }
 
