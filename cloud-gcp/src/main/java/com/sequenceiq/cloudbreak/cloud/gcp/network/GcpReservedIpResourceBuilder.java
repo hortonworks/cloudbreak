@@ -36,11 +36,15 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpNetworkBuilder {
         address.setName(resource.getName());
 
         Compute.Addresses.Insert networkInsert = context.getCompute().addresses().insert(projectId, region, address);
-        Operation operation = networkInsert.execute();
-        if (operation.getHttpErrorStatusCode() != null) {
-            throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), resource.getName());
+        try {
+            Operation operation = networkInsert.execute();
+            if (operation.getHttpErrorStatusCode() != null) {
+                throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), resource.getName());
+            }
+            return createOperationAwareCloudResource(resource, operation);
+        } catch (GoogleJsonResponseException e) {
+            throw new GcpResourceException(checkException(e), resourceType(), resource.getName());
         }
-        return createOperationAwareCloudResource(resource, operation);
     }
 
     @Override

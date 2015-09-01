@@ -58,7 +58,8 @@ public class ServiceProviderCredentialAdapter implements CredentialHandler<Crede
             CreateCredentialResult res = createCredentialRequest.await();
             LOGGER.info("Result: {}", res);
             if (res.getStatus() != EventStatus.OK) {
-                throw new OperationException("Failed to setup provisioning", cloudContext, res.getErrorDetails());
+                LOGGER.error("Failed to setup provisioning", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
             }
             if (CredentialStatus.FAILED.equals(res.getCloudCredentialStatus().getStatus())) {
                 throw new BadRequestException("Failed to setup provisioning: " + res.getCloudCredentialStatus().getStatusReason(),
@@ -66,7 +67,7 @@ public class ServiceProviderCredentialAdapter implements CredentialHandler<Crede
             }
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing provisioning setup", e);
-            throw new OperationException("Unexpected exception occurred during provisioning setup", cloudContext, e);
+            throw new OperationException(e);
         }
 
         return credential;
@@ -85,11 +86,12 @@ public class ServiceProviderCredentialAdapter implements CredentialHandler<Crede
             DeleteCredentialResult res = deleteCredentialRequest.await();
             LOGGER.info("Result: {}", res);
             if (res.getStatus() != EventStatus.OK) {
-                throw new OperationException("Failed to setup provisioning", cloudContext, res.getErrorDetails());
+                LOGGER.error("Failed to setup provisioning", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
             }
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing provisioning setup", e);
-            throw new OperationException("Unexpected exception occurred during provisioning setup", cloudContext, e);
+            throw new OperationException(e);
         }
 
         return true;

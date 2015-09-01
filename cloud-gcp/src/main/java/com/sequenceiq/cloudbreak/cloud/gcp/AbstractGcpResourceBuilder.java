@@ -15,6 +15,7 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
@@ -66,15 +67,21 @@ public abstract class AbstractGcpResourceBuilder {
     protected Operation check(GcpContext context, DynamicModel resource) throws IOException {
         String operation = resource.getStringParameter(OPERATION_ID);
         try {
-            return GcpStackUtil.globalOperations(context.getCompute(), context.getProjectId(), operation).execute();
+            Operation execute = GcpStackUtil.globalOperations(context.getCompute(), context.getProjectId(), operation).execute();
+            checkError(execute);
+            return execute;
         } catch (GoogleJsonResponseException e) {
             if (e.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND)) {
                 CloudRegion region = CloudRegion.valueOf(context.getRegion());
                 try {
-                    return GcpStackUtil.regionOperations(context.getCompute(), context.getProjectId(), operation, region).execute();
+                    Operation execute = GcpStackUtil.regionOperations(context.getCompute(), context.getProjectId(), operation, region).execute();
+                    checkError(execute);
+                    return execute;
                 } catch (GoogleJsonResponseException e1) {
                     if (e1.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND)) {
-                        return GcpStackUtil.zoneOperations(context.getCompute(), context.getProjectId(), operation, region).execute();
+                        Operation execute = GcpStackUtil.zoneOperations(context.getCompute(), context.getProjectId(), operation, region).execute();
+                        checkError(execute);
+                        return execute;
                     } else {
                         throw e1;
                     }
@@ -83,6 +90,24 @@ public abstract class AbstractGcpResourceBuilder {
                 throw e;
             }
         }
+    }
+
+    protected void checkError(Operation execute) {
+        if (execute.getError() != null) {
+            String msg = null;
+            StringBuilder error = new StringBuilder();
+            if (execute.getError().getErrors() != null) {
+                for (Operation.Error.Errors errors : execute.getError().getErrors()) {
+                    error.append(String.format("code: %s -> message: %s %s", errors.getCode(), errors.getMessage(), System.lineSeparator()));
+                }
+                msg = error.toString();
+            }
+            throw new CloudConnectorException(msg);
+        }
+    }
+
+    protected String checkException(GoogleJsonResponseException execute) {
+        return execute.getDetails().getMessage();
     }
 
     protected CloudResource createOperationAwareCloudResource(CloudResource resource, Operation operation) {
@@ -99,7 +124,7 @@ public abstract class AbstractGcpResourceBuilder {
         if (ex.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND)) {
             LOGGER.info("Resource {} not found: {}", resourceType, name);
         } else {
-            throw new GcpResourceException(ex.getMessage(), ex);
+            throw new GcpResourceException(ex.getDetails().getMessage(), ex);
         }
     }
 

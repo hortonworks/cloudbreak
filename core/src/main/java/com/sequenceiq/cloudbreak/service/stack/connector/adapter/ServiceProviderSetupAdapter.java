@@ -76,12 +76,13 @@ public class ServiceProviderSetupAdapter implements ProvisionSetup {
             SetupResult res = setupRequest.await();
             LOGGER.info("Result: {}", res);
             if (res.getErrorDetails() != null) {
-                throw new OperationException("Failed to setup provisioning", cloudContext, res.getErrorDetails());
+                LOGGER.error("Failed to setup provisioning", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
             }
             return new ProvisionSetupComplete(cloudPlatform, stack.getId()).withSetupProperties(res.getSetupProperties());
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing provisioning setup", e);
-            throw new OperationException("Unexpected exception occurred during provisioning setup", cloudContext, e);
+            throw new OperationException(e);
         }
     }
 

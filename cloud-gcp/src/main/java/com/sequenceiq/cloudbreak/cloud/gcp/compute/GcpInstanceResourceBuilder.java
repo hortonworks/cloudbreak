@@ -91,11 +91,15 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
         Compute.Instances.Insert insert = compute.instances().insert(projectId, region.value(), instance);
         insert.setPrettyPrint(Boolean.TRUE);
-        Operation operation = insert.execute();
-        if (operation.getHttpErrorStatusCode() != null) {
-            throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), buildableResource.get(0).getName());
+        try {
+            Operation operation = insert.execute();
+            if (operation.getHttpErrorStatusCode() != null) {
+                throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), buildableResource.get(0).getName());
+            }
+            return asList(createOperationAwareCloudResource(buildableResource.get(0), operation));
+        } catch (GoogleJsonResponseException e) {
+            throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
         }
-        return asList(createOperationAwareCloudResource(buildableResource.get(0), operation));
     }
 
     @Override

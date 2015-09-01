@@ -35,12 +35,16 @@ public class GcpNetworkResourceBuilder extends AbstractGcpNetworkBuilder {
         gcpNetwork.setIPv4Range(network.getSubnet().getCidr());
 
         Compute.Networks.Insert networkInsert = compute.networks().insert(projectId, gcpNetwork);
-        Operation operation = networkInsert.execute();
-        if (operation.getHttpErrorStatusCode() != null) {
-            throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), buildableResource.getName());
+        try {
+            Operation operation = networkInsert.execute();
+            if (operation.getHttpErrorStatusCode() != null) {
+                throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), buildableResource.getName());
+            }
+            context.putParameter(NETWORK_NAME, buildableResource.getName());
+            return createOperationAwareCloudResource(buildableResource, operation);
+        } catch (GoogleJsonResponseException e) {
+            throw new GcpResourceException(checkException(e), resourceType(), buildableResource.getName());
         }
-        context.putParameter(NETWORK_NAME, buildableResource.getName());
-        return createOperationAwareCloudResource(buildableResource, operation);
     }
 
     @Override

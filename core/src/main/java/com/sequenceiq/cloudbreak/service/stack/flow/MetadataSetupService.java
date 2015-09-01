@@ -90,21 +90,22 @@ public class MetadataSetupService {
 
     private String saveInstanceMetaData(Stack stack, Set<CoreInstanceMetaData> coreInstanceMetaData) {
         String ambariServerIP = null;
+        Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataRepository.findAllInStack(stack.getId());
         for (CoreInstanceMetaData coreInstanceMetadataEntry : coreInstanceMetaData) {
             long timeInMillis = Calendar.getInstance().getTimeInMillis();
             InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(
                     stack.getId(), coreInstanceMetadataEntry.getInstanceGroupName());
-            InstanceMetaData instanceMetaDataEntry = new InstanceMetaData();
+            Long privateId = coreInstanceMetadataEntry.getPrivateId();
+            InstanceMetaData instanceMetaDataEntry = createInstanceMetadataIfAbsent(allInstanceMetadata, privateId);
             instanceMetaDataEntry.setPrivateIp(coreInstanceMetadataEntry.getPrivateIp());
             instanceMetaDataEntry.setInstanceGroup(instanceGroup);
             instanceMetaDataEntry.setPublicIp(coreInstanceMetadataEntry.getPublicIp());
             instanceMetaDataEntry.setInstanceId(coreInstanceMetadataEntry.getInstanceId());
-            instanceMetaDataEntry.setPrivateId(coreInstanceMetadataEntry.getPrivateId());
+            instanceMetaDataEntry.setPrivateId(privateId);
             instanceMetaDataEntry.setVolumeCount(coreInstanceMetadataEntry.getVolumeCount());
             instanceMetaDataEntry.setDockerSubnet(null);
             instanceMetaDataEntry.setContainerCount(coreInstanceMetadataEntry.getContainerCount());
             instanceMetaDataEntry.setStartDate(timeInMillis);
-            instanceMetaDataEntry.setInstanceGroup(instanceGroup);
             if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
                 if (ambariServerIP == null) {
                     instanceMetaDataEntry.setAmbariServer(Boolean.TRUE);
@@ -113,7 +114,6 @@ public class MetadataSetupService {
                     instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
                 }
                 instanceMetaDataEntry.setInstanceStatus(InstanceStatus.REGISTERED);
-
             } else {
                 instanceMetaDataEntry.setInstanceStatus(InstanceStatus.UNREGISTERED);
                 instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
@@ -121,6 +121,15 @@ public class MetadataSetupService {
             instanceMetaDataRepository.save(instanceMetaDataEntry);
         }
         return ambariServerIP;
+    }
+
+    private InstanceMetaData createInstanceMetadataIfAbsent(Set<InstanceMetaData> allInstanceMetadata, long privateId) {
+        for (InstanceMetaData instanceMetaData : allInstanceMetadata) {
+            if (instanceMetaData.getPrivateId() == privateId) {
+                return instanceMetaData;
+            }
+        }
+        return new InstanceMetaData();
     }
 
     private Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resources, String instanceGroup, Integer scalingAdjustment) {

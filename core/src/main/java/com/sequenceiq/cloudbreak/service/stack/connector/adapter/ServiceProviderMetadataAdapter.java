@@ -82,7 +82,7 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
             return new HashSet<>(instanceConverter.convert(res.getResults()));
         } catch (InterruptedException e) {
             LOGGER.error(format("Error while executing collectMetadata, stack: %s", cloudContext), e);
-            throw new OperationException("Unexpected exception occurred during collecting the metadata", cloudContext, e);
+            throw new OperationException(e);
         }
     }
 
@@ -105,7 +105,7 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
             return new HashSet<>(instanceConverter.convert(res.getResults()));
         } catch (InterruptedException e) {
             LOGGER.error(format("Error while collecting new metadata for stack: %s", cloudContext), e);
-            throw new OperationException("Unexpected exception occurred during collecting the metadata", cloudContext, e);
+            throw new OperationException(e);
         }
     }
 
@@ -130,12 +130,13 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
                 GetInstancesStateResult res = stateRequest.await();
                 LOGGER.info("Result: {}", res);
                 if (res.isFailed()) {
-                    throw new OperationException("Failed to retrieve instance state", cloudContext, res.getException());
+                    LOGGER.error("Failed to retrieve instance state", res.getException());
+                    throw new OperationException(res.getException());
                 }
                 return transform(res.getStatuses().get(0).getStatus());
             } catch (InterruptedException e) {
                 LOGGER.error(format("Error while retrieving instance state of: %s", cloudContext), e);
-                throw new OperationException("Unexpected exception occurred during instance state retrieval", cloudContext, e);
+                throw new OperationException(e);
             }
         } else {
             return InstanceSyncState.DELETED;

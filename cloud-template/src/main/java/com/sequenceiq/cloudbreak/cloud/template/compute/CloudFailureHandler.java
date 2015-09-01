@@ -104,10 +104,9 @@ public class CloudFailureHandler {
     private void handleExceptions(AuthenticatedContext auth, List<CloudResourceStatus> cloudResourceStatuses, Group group,
             ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, Set<Long> ids) {
         List<CloudResource> resources = new ArrayList<>();
-        String statusReason = cloudResourceStatuses.get(0).getStatusReason();
-        LOGGER.error("Failed to create instance: " + statusReason);
         for (CloudResourceStatus exception : cloudResourceStatuses) {
             if (ResourceStatus.FAILED.equals(exception.getStatus()) || ids.contains(exception.getPrivateId())) {
+                LOGGER.error("Failed to create instance: " + exception.getStatusReason());
                 resources.add(exception.getCloudResource());
             }
         }
@@ -163,14 +162,8 @@ public class CloudFailureHandler {
         return (T) applicationContext.getBean(name, args);
     }
 
-    private void throwError(List<CloudResourceStatus> failedResourceRequestResults) {
-        StringBuilder sb = new StringBuilder();
-        for (CloudResourceStatus cloudResourceStatus : failedResourceRequestResults) {
-            if (cloudResourceStatus.getStatusReason() != null) {
-                sb.append(String.format("%s, ", cloudResourceStatus.getStatusReason()));
-            }
-        }
-        throw new CloudConnectorException(sb.toString());
+    private void throwError(List<CloudResourceStatus> statuses) {
+        throw new CloudConnectorException(statuses.get(0).getStatusReason());
     }
 
 }

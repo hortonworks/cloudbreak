@@ -46,6 +46,10 @@ public class CloudResourceStatus {
         this.status = status;
     }
 
+    public boolean isFailed() {
+        return ResourceStatus.FAILED == status;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("CloudResourceStatus{");

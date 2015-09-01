@@ -33,7 +33,9 @@ public class CloudResourcePersisterService extends AbstractCloudPersisterService
         CloudResource cloudResource = notification.getCloudResource();
         ResourceRepository repository = getResourceRepository();
         Resource resource = repository.findByStackIdAndNameAndType(stackId, cloudResource.getName(), cloudResource.getType());
-        repository.delete(resource);
+        if (resource != null) {
+            repository.delete(resource);
+        }
         return notification;
     }
 

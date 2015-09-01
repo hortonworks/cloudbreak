@@ -54,12 +54,15 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpNetworkBuilder {
                 projectId, context.getParameter(GcpNetworkResourceBuilder.NETWORK_NAME, String.class)));
 
         Compute.Firewalls.Insert firewallInsert = context.getCompute().firewalls().insert(projectId, firewall);
-        Operation operation = firewallInsert.execute();
-
-        if (operation.getHttpErrorStatusCode() != null) {
-            throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), buildableResource.getName());
+        try {
+            Operation operation = firewallInsert.execute();
+            if (operation.getHttpErrorStatusCode() != null) {
+                throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), buildableResource.getName());
+            }
+            return createOperationAwareCloudResource(buildableResource, operation);
+        } catch (GoogleJsonResponseException e) {
+            throw new GcpResourceException(checkException(e), resourceType(), buildableResource.getName());
         }
-        return createOperationAwareCloudResource(buildableResource, operation);
     }
 
     @Override

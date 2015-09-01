@@ -4,6 +4,7 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisioningService;
@@ -88,6 +90,8 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     private CloudbreakEventService eventService;
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
+    @Inject
+    private InstanceMetadataService instanceMetadataService;
 
     @Override
     public Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties) {
@@ -95,24 +99,20 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         CloudContext cloudContext = new CloudContext(stack);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
+        instanceMetadataService.saveInstanceRequests(stack, cloudStack.getGroups());
         LaunchStackRequest launchRequest = new LaunchStackRequest(cloudContext, cloudCredential, cloudStack);
         LOGGER.info("Triggering event: {}", launchRequest);
         eventBus.notify(launchRequest.selector(), Event.wrap(launchRequest));
         try {
             LaunchStackResult res = launchRequest.await();
             LOGGER.info("Result: {}", res);
-            if (res.isFailed()) {
-                if (res.getException() != null) {
-                    throw new OperationException("Failed to build the stack", cloudContext, res.getException());
-                }
-                throw new OperationException(format("Failed to build the stack for %s due to: %s", cloudContext, res.getStatusReason()));
-            }
+            validateResourceResults(cloudContext, res);
             List<CloudResourceStatus> results = res.getResults();
             updateNodeCount(stack.getId(), cloudStack.getGroups(), results);
             return transformResults(results, stack);
         } catch (InterruptedException e) {
             LOGGER.error("Error while launching stack", e);
-            throw new OperationException("Unexpected exception occurred during build stack", cloudContext, e);
+            throw new OperationException("Unexpected exception occurred during build stack: " + e.getMessage());
         }
     }
 
@@ -132,7 +132,7 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             if (res.isFailed()) {
                 Exception exception = res.getException();
                 LOGGER.error(format("Failed to start the stack: %s", cloudContext), exception);
-                throw new OperationException("Unexpected exception occurred during stack start", cloudContext, exception);
+                throw new OperationException(exception);
             } else {
                 for (CloudVmInstanceStatus instanceStatus : res.getResults().getResults()) {
                     if (instanceStatus.getStatus().equals(InstanceStatus.FAILED)) {
@@ -142,7 +142,7 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             }
         } catch (InterruptedException e) {
             LOGGER.error("Error while starting the stack", e);
-            throw new OperationException("Unexpected exception occurred during stack start", cloudContext, e);
+            throw new OperationException(e);
         }
     }
 
@@ -162,7 +162,7 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             if (res.isFailed()) {
                 Exception exception = res.getException();
                 LOGGER.error("Failed to stop the stack", exception);
-                throw new OperationException("Unexpected exception occurred during stack stop", cloudContext, exception);
+                throw new OperationException(exception);
             } else {
                 for (CloudVmInstanceStatus instanceStatus : res.getResults().getResults()) {
                     if (instanceStatus.getStatus().equals(InstanceStatus.FAILED)) {
@@ -172,7 +172,7 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             }
         } catch (InterruptedException e) {
             LOGGER.error("Error while stopping the stack", e);
-            throw new OperationException("Unexpected exception occurred during stack stop", cloudContext, e);
+            throw new OperationException(e);
         }
     }
 
@@ -193,7 +193,8 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             LOGGER.info("Upscale stack result: {}", res);
             if (res.isFailed()) {
                 if (res.getException() != null) {
-                    throw new OperationException("Failed to upscale the stack", cloudContext, res.getException());
+                    LOGGER.error("Failed to upscale the stack", res.getException());
+                    throw new OperationException(res.getException());
                 }
                 throw new OperationException(format("Failed to upscale the stack: %s due to: %s", cloudContext, res.getStatusReason()));
             }
@@ -202,7 +203,7 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             return transformResults(results, stack);
         } catch (InterruptedException e) {
             LOGGER.error("Error while upscaling the stack", e);
-            throw new OperationException("Unexpected exception occurred during add new instances", cloudContext, e);
+            throw new OperationException(e);
         }
     }
 
@@ -229,12 +230,13 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             DownscaleStackResult res = downscaleRequest.await();
             LOGGER.info("Downscale stack result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                throw new OperationException(res.getStatusReason(), cloudContext, res.getErrorDetails());
+                LOGGER.error("Failed to downscale the stack", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
             }
             return instanceIds;
         } catch (InterruptedException e) {
             LOGGER.error("Error while downscaling the stack", e);
-            throw new OperationException("Unexpected exception occurred during remove instances", cloudContext, e);
+            throw new OperationException(e);
         }
     }
 
@@ -253,13 +255,14 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             LOGGER.info("Terminate stack result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 if (res.getErrorDetails() != null) {
-                    throw new OperationException("Failed to terminate the stack", cloudContext, res.getErrorDetails());
+                    LOGGER.error("Failed to terminate the stack", res.getErrorDetails());
+                    throw new OperationException(res.getErrorDetails());
                 }
                 throw new OperationException(format("Failed to terminate the stack: %s due to %s", cloudContext, res.getStatusReason()));
             }
         } catch (InterruptedException e) {
             LOGGER.error("Error while terminating the stack", e);
-            throw new OperationException("Unexpected exception occurred during stack termination", cloudContext, e);
+            throw new OperationException(e);
         }
     }
 
@@ -283,13 +286,14 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             LOGGER.info("Update stack result: {}", res);
             if (res.isFailed()) {
                 if (res.getException() != null) {
-                    throw new OperationException("Failed to update the stack", cloudContext, res.getException());
+                    LOGGER.error("Failed to update the stack", res.getException());
+                    throw new OperationException(res.getException());
                 }
                 throw new OperationException(format("Failed to update the stack: %s due to: %s", cloudContext, res.getStatusReason()));
             }
         } catch (InterruptedException e) {
             LOGGER.error("Error while updating the stack: " + cloudContext, e);
-            throw new OperationException("Unexpected exception occurred during the stack updates", cloudContext, e);
+            throw new OperationException(e);
         }
     }
 
@@ -305,7 +309,7 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             return response.getUser();
         } catch (InterruptedException e) {
             LOGGER.error(format("Error while retrieving ssh user for stack: %s", cloudContext), e);
-            throw new OperationException("Unexpected exception occurred during retrieving the SSH user", cloudContext, e);
+            throw new OperationException(e);
         }
     }
 
@@ -329,12 +333,13 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             GetSSHFingerprintsResult res = sSHFingerprintReq.await();
             LOGGER.info("Get SSH fingerprints of gateway instance for stack result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                throw new OperationException(res.getStatusReason(), cloudContext, res.getErrorDetails());
+                LOGGER.error("Failed to get SSH fingerprint", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
             }
             result.addAll(res.getSshFingerprints());
         } catch (InterruptedException e) {
             LOGGER.error(format("Failed to get SSH fingerprints of gateway instance stack: %s", cloudContext), e);
-            throw new OperationException("Unexpected exception occurred during retrieving SSH fingerprints", cloudContext, e);
+            throw new OperationException(e);
         }
         return result;
     }
@@ -348,33 +353,52 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         return retSet;
     }
 
+    private void validateResourceResults(CloudContext cloudContext, LaunchStackResult res) {
+        if (res.isFailed()) {
+            LOGGER.error(format("Failed to create stack: %s", cloudContext), res.getException());
+            throw new OperationException(res.getException());
+        }
+        List<CloudResourceStatus> results = res.getResults();
+        if (results.size() == 1 && results.get(0).isFailed()) {
+            throw new OperationException(format("Failed to build the stack for %s due to: %s", cloudContext, results.get(0).getStatusReason()));
+        }
+    }
+
     private void updateNodeCount(long stackId, List<Group> originalGroups, List<CloudResourceStatus> statuses) {
         for (Group group : originalGroups) {
             int nodeCount = group.getInstances().size();
-            int createdInstances = getCreatedInstanceCount(statuses, group);
-            int failedInstances = nodeCount - createdInstances;
-            if (createdInstances > 0 && failedInstances != 0) {
+            List<CloudResourceStatus> failedResources = removeFailedMetadata(stackId, statuses, group);
+            if (!failedResources.isEmpty()) {
+                int failedCount = failedResources.size();
                 InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stackId, group.getName());
-                instanceGroup.setNodeCount(createdInstances);
+                instanceGroup.setNodeCount(nodeCount - failedCount);
                 instanceGroupRepository.save(instanceGroup);
-                String message = cloudbreakMessagesService.getMessage(ROLLBACK_MESSAGE, asList(failedInstances, group.getName()));
+                String message = cloudbreakMessagesService.getMessage(ROLLBACK_MESSAGE,
+                        asList(failedCount, group.getName(), failedResources.get(0).getStatusReason()));
                 eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), message);
             }
         }
     }
 
-    private int getCreatedInstanceCount(List<CloudResourceStatus> statuses, Group group) {
-        int nodeCount = 0;
-        for (InstanceTemplate instanceTemplate : group.getInstances()) {
-            Long privateId = instanceTemplate.getPrivateId();
-            for (CloudResourceStatus status : statuses) {
-                if (privateId == status.getPrivateId()) {
-                    nodeCount++;
-                    break;
-                }
+    private List<CloudResourceStatus> removeFailedMetadata(long stackId, List<CloudResourceStatus> statuses, Group group) {
+        Map<Long, CloudResourceStatus> failedResources = new HashMap<>();
+        Set<Long> groupPrivateIds = getPrivateIds(group);
+        for (CloudResourceStatus status : statuses) {
+            Long privateId = status.getPrivateId();
+            if (privateId != null && status.isFailed() && !failedResources.containsKey(privateId) && groupPrivateIds.contains(privateId)) {
+                failedResources.put(privateId, status);
+                instanceMetadataService.deleteInstanceRequest(stackId, privateId);
             }
         }
-        return nodeCount;
+        return new ArrayList<>(failedResources.values());
+    }
+
+    private Set<Long> getPrivateIds(Group group) {
+        Set<Long> ids = new HashSet<>();
+        for (InstanceTemplate template : group.getInstances()) {
+            ids.add(template.getPrivateId());
+        }
+        return ids;
     }
 
 }

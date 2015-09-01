@@ -46,11 +46,15 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
 
         Compute.Disks.Insert insDisk = context.getCompute().disks().insert(projectId, region.value(), disk);
         insDisk.setSourceImage(GcpStackUtil.getAmbariImage(projectId, image.getImageName()));
-        Operation operation = insDisk.execute();
-        if (operation.getHttpErrorStatusCode() != null) {
-            throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), buildableResources.get(0).getName());
+        try {
+            Operation operation = insDisk.execute();
+            if (operation.getHttpErrorStatusCode() != null) {
+                throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), buildableResources.get(0).getName());
+            }
+            return Arrays.asList(createOperationAwareCloudResource(buildableResources.get(0), operation));
+        } catch (GoogleJsonResponseException e) {
+            throw new GcpResourceException(checkException(e), resourceType(), buildableResources.get(0).getName());
         }
-        return Arrays.asList(createOperationAwareCloudResource(buildableResources.get(0), operation));
     }
 
     @Override

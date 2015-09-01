@@ -552,7 +552,8 @@ public class SimpleStackFacade implements StackFacade {
         final Stack stack = stackService.getById(actualContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
         try {
-            fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, UPDATE_IN_PROGRESS.name());
+            String errorReason = actualContext.getErrorReason();
+            fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, UPDATE_IN_PROGRESS.name(), errorReason);
             if (!stack.isStackInDeletionPhase()) {
                 final CloudPlatform cloudPlatform = actualContext.getCloudPlatform();
                 if (!stack.getOnFailureActionAction().equals(OnFailureAction.ROLLBACK)) {
@@ -560,10 +561,10 @@ public class SimpleStackFacade implements StackFacade {
                 } else {
                     stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
                     platformResolver.connector(cloudPlatform).rollback(stack, stack.getResources());
-                    fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, BILLING_STOPPED.name());
+                    fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, BILLING_STOPPED.name(), errorReason);
                 }
-                stackUpdater.updateStackStatus(stack.getId(), CREATE_FAILED, actualContext.getErrorReason());
-                fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, CREATE_FAILED.name(), actualContext.getErrorReason());
+                stackUpdater.updateStackStatus(stack.getId(), CREATE_FAILED, errorReason);
+                fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, CREATE_FAILED.name(), errorReason);
             }
 
             context = new ProvisioningContext.Builder().setDefaultParams(stack.getId(), stack.cloudPlatform()).build();

@@ -68,10 +68,14 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
                 @Override
                 public Void call() throws Exception {
                     Compute.Disks.Insert insDisk = compute.disks().insert(projectId, region.value(), disk);
-                    Operation operation = insDisk.execute();
-                    resources.add(createOperationAwareCloudResource(cloudResource, operation));
-                    if (operation.getHttpErrorStatusCode() != null) {
-                        throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), cloudResource.getName());
+                    try {
+                        Operation operation = insDisk.execute();
+                        resources.add(createOperationAwareCloudResource(cloudResource, operation));
+                        if (operation.getHttpErrorStatusCode() != null) {
+                            throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), cloudResource.getName());
+                        }
+                    } catch (GoogleJsonResponseException e) {
+                        throw new GcpResourceException(checkException(e), resourceType(), cloudResource.getName());
                     }
                     return null;
                 }

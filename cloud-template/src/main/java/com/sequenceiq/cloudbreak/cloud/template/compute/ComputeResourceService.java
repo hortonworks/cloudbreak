@@ -66,12 +66,14 @@ public class ComputeResourceService {
                     Map<FutureResult, List<List<CloudResourceStatus>>> futureResultListMap = waitForRequests(futures);
                     results.addAll(flatList(futureResultListMap.get(FutureResult.SUCCESS)));
                     fails.addAll(flatList(futureResultListMap.get(FutureResult.FAILED)));
+                    results.addAll(fails);
                     cloudFailureHandler.rollback(auth, fails, copyGroup, fullNodeCount, ctx, resourceBuilders);
                 }
             }
             Map<FutureResult, List<List<CloudResourceStatus>>> futureResultListMap = waitForRequests(futures);
             results.addAll(flatList(futureResultListMap.get(FutureResult.SUCCESS)));
             fails.addAll(flatList(futureResultListMap.get(FutureResult.FAILED)));
+            results.addAll(fails);
             cloudFailureHandler.rollback(auth, fails, copyGroup, fullNodeCount, ctx, resourceBuilders);
         }
         return results;
