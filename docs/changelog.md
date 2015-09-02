@@ -3,6 +3,7 @@
 ### Fixed
 
 - Authentication error with `cloudbreak-shell` and `cloudbreak-shell-quiet` is fixed
+- Command `cbd update <branch>` checks for artifact
 
 ### Added
 
