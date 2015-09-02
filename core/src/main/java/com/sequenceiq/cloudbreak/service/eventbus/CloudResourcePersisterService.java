@@ -21,7 +21,7 @@ public class CloudResourcePersisterService extends AbstractCloudPersisterService
         Long stackId = notification.getStackId();
         CloudResource cloudResource = notification.getCloudResource();
         Resource resource = getConversionService().convert(cloudResource, Resource.class);
-        resource.setStack(getStackRepository().findById(stackId));
+        resource.setStack(getStackRepository().findByIdLazy(stackId));
         getResourceRepository().save(resource);
         return notification;
     }

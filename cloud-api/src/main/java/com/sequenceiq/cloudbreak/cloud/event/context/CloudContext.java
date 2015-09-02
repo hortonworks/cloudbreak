@@ -74,6 +74,10 @@ public class CloudContext {
         return threshold;
     }
 
+    public void setAdjustmentType(AdjustmentType adjustmentType) {
+        this.adjustmentType = adjustmentType;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("CloudContext{");

@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
+import com.sequenceiq.cloudbreak.domain.AdjustmentType;
 
 public abstract class AbstractResourceConnector implements ResourceConnector {
 
@@ -45,7 +46,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         context.addNetworkResources(getCloudResources(networkStatuses));
 
         //compute
-        List<CloudResourceStatus> computeStatuses = computeResourceService.buildResources(context, auth, stack.getGroups(), stack.getImage());
+        List<CloudResourceStatus> computeStatuses = computeResourceService.buildResources(context, auth, stack.getGroups(), stack.getImage(), false);
 
         networkStatuses.addAll(computeStatuses);
         return networkStatuses;
@@ -83,8 +84,13 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         //compute
         String scalingGroup = getGroupName(stack);
         Group group = createScalingGroup(stack.getGroups(), scalingGroup);
-        List<CloudResourceStatus> computeResources = computeResourceService.buildResources(
-                context, auth, Arrays.asList(group), stack.getImage());
+
+        AdjustmentType adjustmentType = auth.getCloudContext().getAdjustmentType();
+        auth.getCloudContext().setAdjustmentType(AdjustmentType.BEST_EFFORT);
+
+        List<CloudResourceStatus> computeResources = computeResourceService.buildResources(context, auth, Arrays.asList(group), stack.getImage(), true);
+
+        auth.getCloudContext().setAdjustmentType(adjustmentType);
 
         return computeResources;
     }
@@ -132,12 +138,14 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
 
     private Group createScalingGroup(List<Group> originalGroups, String groupName) {
         Group scalingGroup = getGroup(originalGroups, groupName);
-        Iterator<InstanceTemplate> iterator = scalingGroup.getInstances().iterator();
+        List<InstanceTemplate> instances = scalingGroup.getInstances();
+        Iterator<InstanceTemplate> iterator = instances.iterator();
         while (iterator.hasNext()) {
             if (InstanceStatus.CREATE_REQUESTED != iterator.next().getStatus()) {
                 iterator.remove();
             }
         }
+        scalingGroup.setInstances(instances);
         return scalingGroup;
     }
 

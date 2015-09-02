@@ -184,6 +184,7 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         group.setNodeCount(group.getNodeCount() + adjustment);
         CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
+        instanceMetadataService.saveInstanceRequests(stack, cloudStack.getGroups());
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         UpscaleStackRequest<UpscaleStackResult> upscaleRequest = new UpscaleStackRequest<>(cloudContext, cloudCredential, cloudStack, resources);
         LOGGER.info("Triggering upscale stack event: {}", upscaleRequest);
@@ -191,13 +192,7 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         try {
             UpscaleStackResult res = upscaleRequest.await();
             LOGGER.info("Upscale stack result: {}", res);
-            if (res.isFailed()) {
-                if (res.getException() != null) {
-                    LOGGER.error("Failed to upscale the stack", res.getException());
-                    throw new OperationException(res.getException());
-                }
-                throw new OperationException(format("Failed to upscale the stack: %s due to: %s", cloudContext, res.getStatusReason()));
-            }
+            validateResourceResults(cloudContext, res);
             List<CloudResourceStatus> results = res.getResults();
             updateNodeCount(stack.getId(), cloudStack.getGroups(), results);
             return transformResults(results, stack);
@@ -354,13 +349,21 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     }
 
     private void validateResourceResults(CloudContext cloudContext, LaunchStackResult res) {
-        if (res.isFailed()) {
-            LOGGER.error(format("Failed to create stack: %s", cloudContext), res.getException());
-            throw new OperationException(res.getException());
+        validateResourceResults(cloudContext, res.getException(), res.getResults(), true);
+    }
+
+    private void validateResourceResults(CloudContext cloudContext, UpscaleStackResult res) {
+        validateResourceResults(cloudContext, res.getException(), res.getResults(), false);
+    }
+
+    private void validateResourceResults(CloudContext cloudContext, Exception exception, List<CloudResourceStatus> results, boolean create) {
+        String action = create ? "create" : "upscale";
+        if (exception != null) {
+            LOGGER.error(format("Failed to %s stack: %s", action, cloudContext), exception);
+            throw new OperationException(exception);
         }
-        List<CloudResourceStatus> results = res.getResults();
         if (results.size() == 1 && results.get(0).isFailed()) {
-            throw new OperationException(format("Failed to build the stack for %s due to: %s", cloudContext, results.get(0).getStatusReason()));
+            throw new OperationException(format("Failed to %s the stack for %s due to: %s", action, cloudContext, results.get(0).getStatusReason()));
         }
     }
 

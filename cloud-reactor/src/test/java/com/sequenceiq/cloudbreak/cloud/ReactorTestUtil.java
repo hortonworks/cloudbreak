@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak;
+package com.sequenceiq.cloudbreak.cloud;
 
 import static com.sequenceiq.cloudbreak.domain.Status.AVAILABLE;
 
@@ -64,13 +64,13 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.Template;
 
-public class TestUtil {
+public class ReactorTestUtil {
 
     public static final String DUMMY_ADDRESS_PREFIX_CIDR = "dummyAddressPrefixCIDR";
     public static final String DUMMY_DESCRIPTION = "dummyDescription";
     public static final String DUMMY_VPC_ID = "dummyVpcId";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReactorTestUtil.class);
 
     private static final String AZURE_CERTIFICATE_CONTENT =
             "MIICsDCCAhmgAwIBAgIJAPtq+czPZYU/MA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNV\n"
@@ -111,7 +111,7 @@ public class TestUtil {
     private static final String DUMMY_INTERNET_GATEWAT_ID = "dummyInternetGatewatId";
     private static final String DUMMY_SSH_LOCATION = "dummySshLocation";
 
-    private TestUtil() {
+    private ReactorTestUtil() {
     }
 
     public static String getFilePath(Class clazz, String fileName) {
@@ -421,7 +421,7 @@ public class TestUtil {
     public static List<Cluster> generateCluster(int count) {
         List<Cluster> clusters = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            clusters.add(cluster(TestUtil.blueprint(), stack(AVAILABLE, azureCredential()), (long) i));
+            clusters.add(cluster(ReactorTestUtil.blueprint(), stack(AVAILABLE, azureCredential()), (long) i));
         }
         return clusters;
     }
@@ -449,9 +449,9 @@ public class TestUtil {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setId(1L);
         hostGroup.setName(DUMMY_NAME);
-        hostGroup.setRecipes(TestUtil.recipes(1));
-        hostGroup.setHostMetadata(TestUtil.hostMetadata(hostGroup, 1));
-        hostGroup.setInstanceGroup(TestUtil.instanceGroup(1L, InstanceGroupType.CORE, TestUtil.azureTemplate(1L)));
+        hostGroup.setRecipes(ReactorTestUtil.recipes(1));
+        hostGroup.setHostMetadata(ReactorTestUtil.hostMetadata(hostGroup, 1));
+        hostGroup.setInstanceGroup(ReactorTestUtil.instanceGroup(1L, InstanceGroupType.CORE, ReactorTestUtil.azureTemplate(1L)));
         return hostGroup;
     }
 

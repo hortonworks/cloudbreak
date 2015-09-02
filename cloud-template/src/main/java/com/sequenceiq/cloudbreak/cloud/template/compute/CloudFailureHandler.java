@@ -39,15 +39,15 @@ public class CloudFailureHandler {
     private ApplicationContext applicationContext;
 
     public void rollback(AuthenticatedContext auth, List<CloudResourceStatus> failuresList, Group group, Integer fullNodeCount,
-            ResourceBuilderContext ctx, ResourceBuilders resourceBuilders) {
+            ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, Boolean upscale) {
         if (failuresList.isEmpty()) {
             return;
         }
-        doRollback(auth, failuresList, group, fullNodeCount, ctx, resourceBuilders);
+        doRollback(auth, failuresList, group, fullNodeCount, ctx, resourceBuilders, upscale);
     }
 
     private void doRollback(AuthenticatedContext auth, List<CloudResourceStatus> failuresList, Group group, Integer fullNodeCount,
-            ResourceBuilderContext ctx, ResourceBuilders resourceBuilders) {
+            ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, Boolean upscale) {
         CloudContext localStack = auth.getCloudContext();
         Set<Long> failures = failureCount(failuresList);
         if (localStack.getAdjustmentType() == null) {
@@ -63,7 +63,7 @@ public class CloudFailureHandler {
                         throwError(failuresList);
                     } else if (failures.size() != 0) {
                         LOGGER.info("Decrease node counts because threshold was higher");
-                        handleExceptions(auth, failuresList, group, ctx, resourceBuilders, failures);
+                        handleExceptions(auth, failuresList, group, ctx, resourceBuilders, failures, upscale);
                     }
                     break;
                 case PERCENTAGE:
@@ -72,12 +72,12 @@ public class CloudFailureHandler {
                         throwError(failuresList);
                     } else if (failures.size() != 0) {
                         LOGGER.info("Decrease node counts because threshold was higher");
-                        handleExceptions(auth, failuresList, group, ctx, resourceBuilders, failures);
+                        handleExceptions(auth, failuresList, group, ctx, resourceBuilders, failures, upscale);
                     }
                     break;
                 case BEST_EFFORT:
                     LOGGER.info("Decrease node counts because threshold was higher");
-                    handleExceptions(auth, failuresList, group, ctx, resourceBuilders, failures);
+                    handleExceptions(auth, failuresList, group, ctx, resourceBuilders, failures, upscale);
                     break;
                 default:
                     LOGGER.info("Unsupported adjustment type so error will throw");
@@ -102,7 +102,7 @@ public class CloudFailureHandler {
     }
 
     private void handleExceptions(AuthenticatedContext auth, List<CloudResourceStatus> cloudResourceStatuses, Group group,
-            ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, Set<Long> ids) {
+            ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, Set<Long> ids, Boolean upscale) {
         List<CloudResource> resources = new ArrayList<>();
         for (CloudResourceStatus exception : cloudResourceStatuses) {
             if (ResourceStatus.FAILED.equals(exception.getStatus()) || ids.contains(exception.getPrivateId())) {
@@ -112,17 +112,17 @@ public class CloudFailureHandler {
         }
         if (!resources.isEmpty()) {
             LOGGER.info("Resource list not empty so rollback will start.Resource list size is: " + resources.size());
-            doRollbackAndDecreaseNodeCount(auth, cloudResourceStatuses, ids, group, ctx, resourceBuilders);
+            doRollbackAndDecreaseNodeCount(auth, cloudResourceStatuses, ids, group, ctx, resourceBuilders, upscale);
         }
     }
 
     private void doRollbackAndDecreaseNodeCount(AuthenticatedContext auth, List<CloudResourceStatus> statuses, Set<Long> ids, Group group,
-            ResourceBuilderContext ctx, ResourceBuilders resourceBuilders) {
+            ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, Boolean upscale) {
         List<ComputeResourceBuilder> compute = resourceBuilders.compute(auth.getCloudContext().getPlatform());
         List<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
         LOGGER.info(String.format("InstanceGroup %s node count decreased with one so the new node size is: %s", group.getName(), group.getInstances().size()));
         group = removeFromList(group, ids);
-        if (group.getInstances().size() <= 0) {
+        if (group.getInstances().size() <= 0 && !upscale) {
             LOGGER.info("InstanceGroup node count lower than 1 which is incorrect so error will throw");
             throwError(statuses);
         } else {

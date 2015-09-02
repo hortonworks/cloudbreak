@@ -47,9 +47,9 @@ public class ComputeResourceService {
     @Inject
     private CloudFailureHandler cloudFailureHandler;
 
-    public List<CloudResourceStatus> buildResources(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image) throws Exception {
+    public List<CloudResourceStatus> buildResources(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image, Boolean upscale)
+            throws Exception {
         List<CloudResourceStatus> results = new ArrayList<>();
-        List<CloudResourceStatus> fails = new ArrayList<>();
         int fullNodeCount = getFullNodeCount(groups);
 
         CloudContext cloudContext = auth.getCloudContext();
@@ -65,16 +65,16 @@ public class ComputeResourceService {
                 if (isRequestFullWithCloudPlatform(builders.size(), futures.size(), ctx)) {
                     Map<FutureResult, List<List<CloudResourceStatus>>> futureResultListMap = waitForRequests(futures);
                     results.addAll(flatList(futureResultListMap.get(FutureResult.SUCCESS)));
-                    fails.addAll(flatList(futureResultListMap.get(FutureResult.FAILED)));
-                    results.addAll(fails);
-                    cloudFailureHandler.rollback(auth, fails, copyGroup, fullNodeCount, ctx, resourceBuilders);
+                    results.addAll(flatList(futureResultListMap.get(FutureResult.FAILED)));
+                    cloudFailureHandler.rollback(auth, flatList(futureResultListMap.get(FutureResult.FAILED)), copyGroup,
+                            fullNodeCount, ctx, resourceBuilders, upscale);
                 }
             }
             Map<FutureResult, List<List<CloudResourceStatus>>> futureResultListMap = waitForRequests(futures);
             results.addAll(flatList(futureResultListMap.get(FutureResult.SUCCESS)));
-            fails.addAll(flatList(futureResultListMap.get(FutureResult.FAILED)));
-            results.addAll(fails);
-            cloudFailureHandler.rollback(auth, fails, copyGroup, fullNodeCount, ctx, resourceBuilders);
+            results.addAll(flatList(futureResultListMap.get(FutureResult.FAILED)));
+            cloudFailureHandler.rollback(auth, flatList(futureResultListMap.get(FutureResult.FAILED)), copyGroup, fullNodeCount, ctx,
+                    resourceBuilders, upscale);
         }
         return results;
     }
@@ -95,7 +95,6 @@ public class ComputeResourceService {
                 futures.add(future);
                 if (isRequestFull(futures.size(), context)) {
                     results.addAll(flatList(waitForRequests(futures).get(FutureResult.SUCCESS)));
-                    //TODO rollback failed resources and decrease node count
                 }
             }
             // wait for builder type to finish before starting the next one
