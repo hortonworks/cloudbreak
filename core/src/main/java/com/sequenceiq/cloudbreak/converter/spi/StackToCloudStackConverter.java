@@ -50,7 +50,7 @@ public class StackToCloudStackConverter {
         return new CloudStack(instanceGroups, network, security, image, stack.getRegion());
     }
 
-    public List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, Set<String> deleteRequestedInstances) {
+    public List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, Set<String> deleteRequests) {
         // sort by name to avoid shuffling the different instance groups
         Collections.sort(instanceGroups);
         List<Group> groups = new ArrayList<>();
@@ -60,10 +60,9 @@ public class StackToCloudStackConverter {
             Template template = instanceGroup.getTemplate();
             int desiredNodeCount = instanceGroup.getNodeCount();
             // existing instances
-            for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
-                InstanceStatus status = deleteRequestedInstances.contains(
-                        instanceMetaData.getInstanceId()) ? InstanceStatus.DELETE_REQUESTED : InstanceStatus.CREATED;
-                group.addInstance(buildInstanceTemplate(template, instanceGroup.getGroupName(), instanceMetaData.getPrivateId(), status));
+            for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
+                InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
+                group.addInstance(buildInstanceTemplate(template, instanceGroup.getGroupName(), metaData.getPrivateId(), status));
             }
             // new instances
             int existingNodesSize = group.getInstances().size();
@@ -134,6 +133,12 @@ public class StackToCloudStackConverter {
             }
         }
         return highest == 0 ? 0 : highest + 1;
+    }
+
+    private InstanceStatus getInstanceStatus(InstanceMetaData metaData, Set<String> deleteRequests) {
+        return deleteRequests.contains(metaData.getInstanceId()) ? InstanceStatus.DELETE_REQUESTED
+                : metaData.getInstanceStatus() == com.sequenceiq.cloudbreak.domain.InstanceStatus.REQUESTED ? InstanceStatus.CREATE_REQUESTED
+                : InstanceStatus.CREATED;
     }
 
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.template.compute;
 
 import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
+import static java.lang.String.format;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,14 +67,15 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
         List<CloudResource> buildableResources = new ArrayList<>();
         try {
             for (ComputeResourceBuilder builder : resourceBuilders.compute(auth.getCloudContext().getPlatform())) {
-                PollGroup pollGroup = InMemoryStateStore.get(auth.getCloudContext().getStackId());
-                if (pollGroup != null && CANCELLED.equals(pollGroup)) {
-                    break;
-                }
                 LOGGER.info("Building {} resources of {} instance group", builder.resourceType(), group.getName());
                 List<CloudResource> list = builder.create(context, privateId, auth, group, image);
                 buildableResources.addAll(list);
                 createResource(auth, list);
+
+                PollGroup pollGroup = InMemoryStateStore.get(auth.getCloudContext().getStackId());
+                if (pollGroup != null && CANCELLED.equals(pollGroup)) {
+                    throw new CancellationException(format("Building of %s has been cancelled", list));
+                }
 
                 List<CloudResource> resources = builder.build(context, privateId, auth, group, image, list);
                 context.addComputeResources(privateId, resources);

@@ -90,7 +90,7 @@ public class MetadataSetupService {
 
     private String saveInstanceMetaData(Stack stack, Set<CoreInstanceMetaData> coreInstanceMetaData) {
         String ambariServerIP = null;
-        Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataRepository.findAllInStack(stack.getId());
+        Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
         for (CoreInstanceMetaData coreInstanceMetadataEntry : coreInstanceMetaData) {
             long timeInMillis = Calendar.getInstance().getTimeInMillis();
             InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(

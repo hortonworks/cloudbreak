@@ -42,9 +42,9 @@ public class GcpMetadataCollector implements MetadataCollector {
             if (ResourceType.GCP_INSTANCE == resource.getType()) {
                 try {
                     String resourceName = resource.getName();
-                    Instance executeInstance = getInstance(cloudContext, credential, compute, resourceName);
                     InstanceTemplate template = templateMap.get(resourceName);
                     if (template != null) {
+                        Instance executeInstance = getInstance(cloudContext, credential, compute, resourceName);
                         CloudInstanceMetaData metaData = new CloudInstanceMetaData(
                                 executeInstance.getNetworkInterfaces().get(0).getNetworkIP(),
                                 executeInstance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP());

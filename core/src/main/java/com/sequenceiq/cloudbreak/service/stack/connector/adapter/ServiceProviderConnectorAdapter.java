@@ -108,7 +108,7 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             LOGGER.info("Result: {}", res);
             validateResourceResults(cloudContext, res);
             List<CloudResourceStatus> results = res.getResults();
-            updateNodeCount(stack.getId(), cloudStack.getGroups(), results);
+            updateNodeCount(stack.getId(), cloudStack.getGroups(), results, true);
             return transformResults(results, stack);
         } catch (InterruptedException e) {
             LOGGER.error("Error while launching stack", e);
@@ -192,10 +192,14 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         try {
             UpscaleStackResult res = upscaleRequest.await();
             LOGGER.info("Upscale stack result: {}", res);
-            validateResourceResults(cloudContext, res);
             List<CloudResourceStatus> results = res.getResults();
-            updateNodeCount(stack.getId(), cloudStack.getGroups(), results);
-            return transformResults(results, stack);
+            updateNodeCount(stack.getId(), cloudStack.getGroups(), results, false);
+            validateResourceResults(cloudContext, res);
+            Set<Resource> resourceSet = transformResults(results, stack);
+            if (resourceSet.isEmpty()) {
+                throw new OperationException("Failed to upscale the cluster since all create request failed: " + results.get(0).getStatusReason());
+            }
+            return resourceSet;
         } catch (InterruptedException e) {
             LOGGER.error("Error while upscaling the stack", e);
             throw new OperationException(e);
@@ -342,8 +346,10 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     private Set<Resource> transformResults(List<CloudResourceStatus> cloudResourceStatuses, Stack stack) {
         Set<Resource> retSet = new HashSet<>();
         for (CloudResourceStatus cloudResourceStatus : cloudResourceStatuses) {
-            Resource resource = new Resource(cloudResourceStatus.getCloudResource().getType(), cloudResourceStatus.getCloudResource().getName(), stack);
-            retSet.add(resource);
+            if (!cloudResourceStatus.isFailed()) {
+                Resource resource = new Resource(cloudResourceStatus.getCloudResource().getType(), cloudResourceStatus.getCloudResource().getName(), stack);
+                retSet.add(resource);
+            }
         }
         return retSet;
     }
@@ -367,11 +373,11 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         }
     }
 
-    private void updateNodeCount(long stackId, List<Group> originalGroups, List<CloudResourceStatus> statuses) {
+    private void updateNodeCount(long stackId, List<Group> originalGroups, List<CloudResourceStatus> statuses, boolean create) {
         for (Group group : originalGroups) {
             int nodeCount = group.getInstances().size();
             List<CloudResourceStatus> failedResources = removeFailedMetadata(stackId, statuses, group);
-            if (!failedResources.isEmpty()) {
+            if (!failedResources.isEmpty() && create) {
                 int failedCount = failedResources.size();
                 InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stackId, group.getName());
                 instanceGroup.setNodeCount(nodeCount - failedCount);

@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.stack.connector.adapter;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -90,7 +89,7 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
     public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroupName, Integer scalingAdjustment) {
         CloudContext cloudContext = new CloudContext(stack);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-        List<InstanceTemplate> instanceTemplates = getNewInstanceTemplates(stack, instanceGroupName, scalingAdjustment);
+        List<InstanceTemplate> instanceTemplates = getNewInstanceTemplates(stack);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
         CollectMetadataRequest<CollectMetadataResult> cmr = new CollectMetadataRequest<>(cloudContext, cloudCredential, cloudResources, instanceTemplates);
         LOGGER.info("Triggering event: {}", cmr);
@@ -154,17 +153,11 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
     }
 
 
-    private List<InstanceTemplate> getNewInstanceTemplates(Stack stack, String instanceGroupName, Integer scalingAdjustment) {
-        List<Long> existingIds = new ArrayList<>();
-        for (InstanceMetaData data : stack.getInstanceMetaDataAsList()) {
-            existingIds.add(data.getPrivateId());
-        }
-        InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
-        group.setNodeCount(group.getNodeCount() + scalingAdjustment);
+    private List<InstanceTemplate> getNewInstanceTemplates(Stack stack) {
         List<InstanceTemplate> instanceTemplates = cloudStackConverter.buildInstanceTemplates(stack);
         Iterator<InstanceTemplate> iterator = instanceTemplates.iterator();
         while (iterator.hasNext()) {
-            if (existingIds.contains(iterator.next().getPrivateId())) {
+            if (iterator.next().getStatus() != InstanceStatus.CREATE_REQUESTED) {
                 iterator.remove();
             }
         }
