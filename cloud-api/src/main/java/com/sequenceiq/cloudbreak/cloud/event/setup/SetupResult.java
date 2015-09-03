@@ -1,17 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.event.setup;
 
-import java.util.Map;
-
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 
 public class SetupResult extends CloudPlatformResult {
 
-    private Map<String, Object> setupProperties;
-
-    public SetupResult(CloudPlatformRequest<?> request, Map<String, Object> setupProperties) {
+    public SetupResult(CloudPlatformRequest<?> request) {
         super(request);
-        this.setupProperties = setupProperties;
     }
 
     public SetupResult(Exception errorDetails, CloudPlatformRequest<?> request) {
@@ -22,7 +17,4 @@ public class SetupResult extends CloudPlatformResult {
         super(statusReason, errorDetails, request);
     }
 
-    public Map<String, Object> getSetupProperties() {
-        return setupProperties;
-    }
 }

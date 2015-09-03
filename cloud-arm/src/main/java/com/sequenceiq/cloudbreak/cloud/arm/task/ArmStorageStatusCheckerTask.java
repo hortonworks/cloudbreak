@@ -1,9 +1,9 @@
-package com.sequenceiq.cloudbreak.cloud.arm.poller;
+package com.sequenceiq.cloudbreak.cloud.arm.task;
 
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.cloud.BooleanStateConnector;
 import com.sequenceiq.cloudbreak.cloud.arm.ArmClient;
-import com.sequenceiq.cloudbreak.cloud.arm.poller.context.StorageCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.arm.context.StorageCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 
 public class ArmStorageStatusCheckerTask implements BooleanStateConnector {

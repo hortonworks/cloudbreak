@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
+import java.util.HashMap;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -69,7 +71,7 @@ public class SimpleFlowFacade implements FlowFacade {
             LOGGER.debug("Provisioning setup DONE.");
             return new ProvisioningContext.Builder()
                     .setDefaultParams(setupComplete.getStackId(), setupComplete.getCloudPlatform())
-                    .setProvisionSetupProperties(setupComplete.getSetupProperties())
+                    .setProvisionSetupProperties(new HashMap<String, Object>())
                     .build();
         } catch (Exception e) {
             LOGGER.error("Exception during provisioning setup: {}", e.getMessage());

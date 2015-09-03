@@ -18,8 +18,8 @@ public class PollResourcesStateTask extends PollTask<ResourcesStatePollerResult>
 
     @Inject
     public PollResourcesStateTask(AuthenticatedContext authenticatedContext, ResourceConnector resourceConnector,
-            List<CloudResource> cloudResource) {
-        super(authenticatedContext);
+            List<CloudResource> cloudResource, boolean cancellable) {
+        super(authenticatedContext, cancellable);
         this.cloudResource = cloudResource;
         this.resourceConnector = resourceConnector;
     }

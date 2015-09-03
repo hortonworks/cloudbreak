@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.arm.poller;
+package com.sequenceiq.cloudbreak.cloud.arm.task;
 
 import static com.sequenceiq.cloudbreak.cloud.arm.ArmTemplateUtils.NOT_FOUND;
 
@@ -7,27 +7,28 @@ import java.util.Map;
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.cloud.BooleanStateConnector;
 import com.sequenceiq.cloudbreak.cloud.arm.ArmClient;
-import com.sequenceiq.cloudbreak.cloud.arm.poller.context.ResourceGroupCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.arm.context.VirtualMachineCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
 import groovyx.net.http.HttpResponseException;
 
-public class ArmResourceGroupDeleteStatusCheckerTask implements BooleanStateConnector {
+public class ArmVirtualMachineDeleteStatusCheckerTask implements BooleanStateConnector {
 
-    private ResourceGroupCheckerContext resourceGroupDeleteCheckerContext;
+    private VirtualMachineCheckerContext virtualMachineCheckerContext;
     private ArmClient armClient;
 
-    public ArmResourceGroupDeleteStatusCheckerTask(ArmClient armClient, ResourceGroupCheckerContext resourceGroupDeleteCheckerContext) {
+    public ArmVirtualMachineDeleteStatusCheckerTask(ArmClient armClient, VirtualMachineCheckerContext virtualMachineCheckerContext) {
         this.armClient = armClient;
-        this.resourceGroupDeleteCheckerContext = resourceGroupDeleteCheckerContext;
+        this.virtualMachineCheckerContext = virtualMachineCheckerContext;
     }
 
     @Override
     public Boolean check(AuthenticatedContext authenticatedContext) {
-        AzureRMClient client = armClient.createAccess(resourceGroupDeleteCheckerContext.getArmCredentialView());
+        AzureRMClient client = armClient.createAccess(virtualMachineCheckerContext.getArmCredentialView());
         try {
-            Map<String, Object> resourceGroup = client.getResourceGroup(resourceGroupDeleteCheckerContext.getGroupName());
+            Map virtualMachine = client.getVirtualMachine(virtualMachineCheckerContext.getGroupName(),
+                    virtualMachineCheckerContext.getVirtualMachine());
         } catch (HttpResponseException e) {
             if (e.getStatusCode() != NOT_FOUND) {
                 throw new CloudConnectorException(e.getResponse().getData().toString());

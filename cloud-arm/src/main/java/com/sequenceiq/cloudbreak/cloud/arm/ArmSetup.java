@@ -1,22 +1,23 @@
 package com.sequenceiq.cloudbreak.cloud.arm;
 
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.cloud.Setup;
-import com.sequenceiq.cloudbreak.cloud.arm.poller.ArmImageCopyStatusCheckerTask;
-import com.sequenceiq.cloudbreak.cloud.arm.poller.ArmStorageStatusCheckerTask;
-import com.sequenceiq.cloudbreak.cloud.arm.poller.context.ImageCheckerContext;
-import com.sequenceiq.cloudbreak.cloud.arm.poller.context.StorageCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.arm.task.ArmImageCopyStatusCheckerTask;
+import com.sequenceiq.cloudbreak.cloud.arm.task.ArmStorageStatusCheckerTask;
+import com.sequenceiq.cloudbreak.cloud.arm.context.ImageCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.arm.context.StorageCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.BooleanResult;
@@ -33,8 +34,10 @@ import groovyx.net.http.HttpResponseException;
 @Component
 public class ArmSetup implements Setup {
 
-    public static final String IMAGES = "images";
     public static final String VHDS = "vhds";
+    public static final String IMAGES = "images";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArmSetup.class);
 
     @Inject
     private ArmClient armClient;
@@ -46,7 +49,8 @@ public class ArmSetup implements Setup {
     private ArmTemplateUtils armTemplateUtils;
 
     @Override
-    public Map<String, Object> execute(AuthenticatedContext authenticatedContext, CloudStack stack) throws Exception {
+    public void execute(AuthenticatedContext authenticatedContext, CloudStack stack) {
+        checkResourceGroups(authenticatedContext);
         String osStorageName = armClient.getStorageName(authenticatedContext.getCloudContext());
         String storageGroup = armTemplateUtils.getStackName(authenticatedContext.getCloudContext());
         AzureRMClient client = armClient.createAccess(authenticatedContext.getCloudCredential());
@@ -81,11 +85,11 @@ public class ArmSetup implements Setup {
         } catch (Exception ex) {
             throw new CloudConnectorException(ex);
         }
-        return new HashMap<>();
+
+        LOGGER.debug("setup has been executed");
     }
 
-    @Override
-    public String preCheck(AuthenticatedContext authenticatedContext, CloudStack stack) {
+    private void checkResourceGroups(AuthenticatedContext authenticatedContext) {
         AzureRMClient client = armClient.createAccess(authenticatedContext.getCloudCredential());
         try {
             client.getResourceGroups();
@@ -94,7 +98,7 @@ public class ArmSetup implements Setup {
         } catch (Exception e) {
             throw new CloudConnectorException("Could not authenticate to azure", e);
         }
-        return null;
+        LOGGER.debug("preCheck has been executed");
     }
 
     private boolean resourceGroupExist(AzureRMClient client, String groupName) {

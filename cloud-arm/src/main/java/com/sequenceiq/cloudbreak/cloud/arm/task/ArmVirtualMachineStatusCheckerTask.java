@@ -1,11 +1,11 @@
-package com.sequenceiq.cloudbreak.cloud.arm.poller;
+package com.sequenceiq.cloudbreak.cloud.arm.task;
 
 import java.util.Map;
 
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.cloud.BooleanStateConnector;
 import com.sequenceiq.cloudbreak.cloud.arm.ArmClient;
-import com.sequenceiq.cloudbreak.cloud.arm.poller.context.VirtualMachineCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.arm.context.VirtualMachineCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 
 public class ArmVirtualMachineStatusCheckerTask implements BooleanStateConnector {

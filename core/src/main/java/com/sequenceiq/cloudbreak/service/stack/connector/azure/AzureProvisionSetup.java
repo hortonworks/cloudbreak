@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
-import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.CREDENTIAL;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NOT_FOUND;
 
 import java.io.IOException;
@@ -80,8 +79,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
 
         Map<Integer, String[]> accountIndexKeys = createImages(stack, azureLocation, azureClient, affinityGroupName);
         createImageLinks(stack, azureLocation, azureClient, accountIndexKeys);
-        return new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
-                .withSetupProperty(CREDENTIAL, stack.getCredential());
+        return new ProvisionSetupComplete(getCloudPlatform(), stack.getId());
     }
 
     @Override

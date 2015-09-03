@@ -13,15 +13,13 @@ public class PollResourceTask extends PollTask<List<CloudResourceStatus>> {
     private ResourceChecker checker;
     private List<CloudResource> cloudResources;
     private ResourceBuilderContext context;
-    private boolean cancellable;
 
     public PollResourceTask(AuthenticatedContext authenticatedContext, ResourceChecker checker,
             List<CloudResource> cloudResources, ResourceBuilderContext context, boolean cancellable) {
-        super(authenticatedContext);
+        super(authenticatedContext, cancellable);
         this.checker = checker;
         this.cloudResources = cloudResources;
         this.context = context;
-        this.cancellable = cancellable;
     }
 
     @Override
@@ -39,8 +37,4 @@ public class PollResourceTask extends PollTask<List<CloudResourceStatus>> {
         return true;
     }
 
-    @Override
-    public boolean cancelled() {
-        return cancellable && super.cancelled();
-    }
 }

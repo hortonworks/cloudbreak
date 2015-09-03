@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.task;
 
-public interface CheckResult<T> {
+public interface Check<T> {
 
     boolean completed(T t);
 

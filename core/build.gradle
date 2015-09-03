@@ -55,7 +55,7 @@ dependencies {
     compile group: 'org.bouncycastle',              name: 'bcprov-jdk15on',                 version: '1.47'
     compile group: 'org.bouncycastle',              name: 'bcpkix-jdk15on',                 version: '1.47'
     compile group: 'org.jasypt',                    name: 'jasypt',                         version: '1.9.2'
-    compile group: 'com.google.guava',              name: 'guava',                          version: '16.0.1'
+    compile group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
     compile group: 'com.wordnik',                   name: 'swagger-core',                   version: '1.5.2-M1'
     compile group: 'com.mangofactory',              name: 'swagger-springmvc',              version: '1.0.2'
     compile group: 'com.google.http-client',        name: 'google-http-client-jackson2',    version: '1.17.0-rc'

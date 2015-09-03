@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AWS_SPOTINSTANCE_ENABLED;
 
-import java.util.HashMap;
-
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -37,8 +35,7 @@ public class AwsProvisionSetup implements ProvisionSetup {
 
     @Override
     public ProvisionEvent setupProvisioning(Stack stack) {
-        return new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
-                .withSetupProperties(new HashMap<String, Object>());
+        return new ProvisionSetupComplete(getCloudPlatform(), stack.getId());
     }
 
     @Override

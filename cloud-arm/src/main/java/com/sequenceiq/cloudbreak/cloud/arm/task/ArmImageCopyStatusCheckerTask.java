@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.arm.poller;
+package com.sequenceiq.cloudbreak.cloud.arm.task;
 
 import static com.sequenceiq.cloudbreak.cloud.arm.ArmTemplateUtils.NOT_FOUND;
 
@@ -10,7 +10,7 @@ import com.microsoft.azure.storage.blob.CopyStatus;
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.cloud.BooleanStateConnector;
 import com.sequenceiq.cloudbreak.cloud.arm.ArmClient;
-import com.sequenceiq.cloudbreak.cloud.arm.poller.context.ImageCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.arm.context.ImageCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 

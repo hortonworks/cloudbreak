@@ -8,10 +8,7 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getProjectId
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getTarName;
 import static com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults.transformToFalseBooleanResult;
 
-import java.io.IOException;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -30,6 +27,7 @@ import com.google.api.services.storage.model.StorageObject;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.BooleanResult;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.task.GcpImageCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -48,12 +46,7 @@ public class GcpProvisionSetup implements Setup {
     private PollTaskFactory statusCheckFactory;
 
     @Override
-    public String preCheck(AuthenticatedContext authenticatedContext, CloudStack stack) {
-        return null;
-    }
-
-    @Override
-    public Map<String, Object> execute(AuthenticatedContext authenticatedContext, CloudStack stack) throws Exception {
+    public void execute(AuthenticatedContext authenticatedContext, CloudStack stack) {
         long stackId = authenticatedContext.getCloudContext().getStackId();
         CloudCredential credential = authenticatedContext.getCloudCredential();
         try {
@@ -93,11 +86,12 @@ public class GcpProvisionSetup implements Setup {
                     syncPollingScheduler.schedule(task);
                 }
             }
-        } catch (IOException e) {
-            LOGGER.error(String.format("Error occurs on %s stack under the setup", stackId), e);
-            throw e;
+        } catch (Exception e) {
+            String msg = String.format("Error occurred on %s stack during the setup: %s", stackId, e.getMessage());
+            LOGGER.error(msg, e);
+            throw new CloudConnectorException(msg, e);
         }
-        return new HashMap<>();
+        LOGGER.debug("setup has been executed");
     }
 
     private boolean containsSpecificImage(ImageList imageList, String imageUrl) {

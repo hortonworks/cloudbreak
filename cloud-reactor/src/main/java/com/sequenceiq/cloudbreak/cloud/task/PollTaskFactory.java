@@ -3,13 +3,19 @@ package com.sequenceiq.cloudbreak.cloud.task;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.BooleanStateConnector;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.BooleanResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.InstanceConsoleOutputResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.InstancesStatusResult;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -18,27 +24,44 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.ResourceChecker;
 
-public interface PollTaskFactory {
+@Component
+public class PollTaskFactory {
 
-    PollTask<ResourcesStatePollerResult> newPollResourcesStateTask(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResource);
+    @Inject
+    private CloudPlatformConnectors cloudPlatformConnectors;
 
-    PollTask<ResourcesStatePollerResult> newPollResourceTerminationTask(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResource);
+    public PollTask<ResourcesStatePollerResult> newPollResourcesStateTask(AuthenticatedContext authenticatedContext,
+            List<CloudResource> cloudResource, boolean cancellable) {
+        CloudConnector connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatform());
+        return new PollResourcesStateTask(authenticatedContext, connector.resources(), cloudResource, cancellable);
+    }
 
-    PollTask<InstancesStatusResult> newPollInstanceStateTask(AuthenticatedContext authenticatedContext, List<CloudInstance> instances);
+    public PollTask<InstancesStatusResult> newPollInstanceStateTask(AuthenticatedContext authenticatedContext, List<CloudInstance> instances,
+            Set<InstanceStatus> completedStatuses) {
+        CloudConnector connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatform());
+        return new PollInstancesStateTask(authenticatedContext, connector.instances(), instances, completedStatuses);
+    }
 
-    PollTask<InstancesStatusResult> newPollInstanceStateTask(AuthenticatedContext authenticatedContext, List<CloudInstance> instances,
-            Set<InstanceStatus> completedStatuses);
+    public PollTask<InstanceConsoleOutputResult> newPollConsoleOutputTask(InstanceConnector instanceConnector,
+            AuthenticatedContext authenticatedContext, CloudInstance instance) {
+        return new PollInstanceConsoleOutputTask(instanceConnector, authenticatedContext, instance);
+    }
 
-    PollTask<InstanceConsoleOutputResult> newPollConsoleOutputTask(InstanceConnector instanceConnector,
-            AuthenticatedContext authenticatedContext, CloudInstance instance);
+    public PollTask<List<CloudResourceStatus>> newPollResourceTask(ResourceChecker checker, AuthenticatedContext authenticatedContext,
+            List<CloudResource> cloudResource, ResourceBuilderContext context, boolean cancellable) {
+        return new PollResourceTask(authenticatedContext, checker, cloudResource, context, cancellable);
+    }
 
-    PollTask<List<CloudResourceStatus>> newPollResourceTask(ResourceChecker checker, AuthenticatedContext authenticatedContext,
-            List<CloudResource> cloudResource, ResourceBuilderContext context, boolean cancellable);
+    public PollTask<List<CloudVmInstanceStatus>> newPollComputeStatusTask(ComputeResourceBuilder builder, AuthenticatedContext authenticatedContext,
+            ResourceBuilderContext context, CloudInstance instance) {
+        return new PollComputeStatusTask(authenticatedContext, builder, context, instance);
+    }
 
-    PollTask<List<CloudVmInstanceStatus>> newPollComputeStatusTask(ComputeResourceBuilder builder, AuthenticatedContext authenticatedContext,
-            ResourceBuilderContext context, CloudInstance instance);
+    public PollTask<BooleanResult> newPollBooleanStateTask(AuthenticatedContext authenticatedContext, BooleanStateConnector connector) {
+        return new PollBooleanStateTask(authenticatedContext, connector);
+    }
 
-    PollTask<BooleanResult> newPollBooleanStateTask(AuthenticatedContext authenticatedContext, BooleanStateConnector connector);
-
-    PollTask<BooleanResult> newPollBooleanTerminationTask(AuthenticatedContext authenticatedContext, BooleanStateConnector connector);
+    public PollTask<BooleanResult> newPollBooleanTerminationTask(AuthenticatedContext authenticatedContext, BooleanStateConnector connector) {
+        return new PollBooleanTerminationTask(authenticatedContext, connector);
+    }
 }
