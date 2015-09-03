@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.controller.json.RecipeRequest;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.controller.json.RecipeRequest;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @Component

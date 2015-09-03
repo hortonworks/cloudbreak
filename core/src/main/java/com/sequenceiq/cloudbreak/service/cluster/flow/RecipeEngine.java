@@ -10,14 +10,16 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -26,12 +28,14 @@ import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 @Component
 public class RecipeEngine {
 
     public static final int DEFAULT_RECIPE_TIMEOUT = 15;
+    public static final String RECIPE_KEY_PREFIX = "consul-watch-plugin/";
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeEngine.class);
 
     @Inject
@@ -44,8 +48,23 @@ public class RecipeEngine {
     private TlsSecurityService tlsSecurityService;
 
     public void setupRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakSecuritySetupException {
-        Set<InstanceMetaData> instances = instanceMetadataRepository.findNotTerminatedForStack(stack.getId());
+        TLSClientConfig clientConfig = null;
+        for (Recipe recipe : getRecipesInHostGroups(hostGroups)) {
+            for (String plugin : recipe.getPlugins().keySet()) {
+                if (plugin.startsWith("base64://")) {
+                    Map<String, String> keyValues = new HashMap<>();
+                    keyValues.put(getPluginConsulKey(recipe, plugin), new String(Base64.decodeBase64(plugin.replaceFirst("base64://", ""))));
+                    if (clientConfig == null) {
+                        InstanceGroup gateway = stack.getGatewayInstanceGroup();
+                        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+                        clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+                    }
+                    pluginManager.prepareKeyValues(clientConfig, keyValues);
+                }
+            }
+        }
         setupProperties(stack, hostGroups);
+        Set<InstanceMetaData> instances = instanceMetadataRepository.findNotTerminatedForStack(stack.getId());
         installPlugins(stack, hostGroups, instances);
     }
 
@@ -80,6 +99,16 @@ public class RecipeEngine {
                 getHostnames(hostMetadata));
     }
 
+    private Iterable<Recipe> getRecipesInHostGroups(Set<HostGroup> hostGroups) {
+        return Iterables.concat(Collections2.transform(hostGroups, new Function<HostGroup, Set<Recipe>>() {
+            @Nullable
+            @Override
+            public Set<Recipe> apply(@Nullable HostGroup input) {
+                return input.getRecipes();
+            }
+        }));
+    }
+
     private void setupProperties(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakSecuritySetupException {
         LOGGER.info("Setting up recipe properties.");
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
@@ -95,13 +124,21 @@ public class RecipeEngine {
         }
     }
 
+    private String getPluginConsulKey(Recipe recipe, String plugin) {
+        return RECIPE_KEY_PREFIX + recipe.getName() + plugin.hashCode();
+    }
+
     private void installPluginsOnHosts(Stack stack, Set<Recipe> recipes, Set<HostMetadata> hostMetadata, Set<InstanceMetaData> instances,
             boolean existingHostGroup) throws CloudbreakSecuritySetupException {
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
         TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
         for (Recipe recipe : recipes) {
-            Map<String, PluginExecutionType> plugins = recipe.getPlugins();
+            Map<String, PluginExecutionType> plugins = new HashMap<>();
+            for (Map.Entry<String, PluginExecutionType> entry : recipe.getPlugins().entrySet()) {
+                String url = entry.getKey().startsWith("base64://") ? "consul://" + getPluginConsulKey(recipe, entry.getKey())  : entry.getKey();
+                plugins.put(url, entry.getValue());
+            }
             Map<String, Set<String>> eventIdMap = pluginManager.installPlugins(clientConfig, plugins, getHostnames(hostMetadata), existingHostGroup);
             pluginManager.waitForEventFinish(stack, instances, eventIdMap, recipe.getTimeout());
         }

@@ -15,7 +15,7 @@ import javax.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidPlugin {
 
-    String message() default "Only plugins from http, https and git protocols are allowed.";
+    String message() default "Only plugins from http, https, git and consul protocols are allowed and base64 encoded plugins with base64:// prefix.";
 
     Class<?>[] groups() default { };
 
