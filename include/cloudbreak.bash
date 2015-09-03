@@ -327,9 +327,18 @@ util-local-dev() {
     declare port=${1:-9091}
 
     cloudbreak-config
+    migrate-config
+
+    if [ "$CB_SCHEMA_SCRIPTS_LOCATION" = "container" ]; then
+      warn "CB_SCHEMA_SCRIPTS_LOCATION environment variable must be set and points to the cloudbreak project's schema location"
+      exit 127
+    fi
 
     debug stopping original cloudbreak container
     dockerCompose stop cloudbreak
+
+    migrate-one-db cbdb up
+    migrate-one-db cbdb pending
 
     debug starting an ambassador to be registered as cloudbreak.service.consul.
     debug "all traffic to ambassador will be proxied to localhost (192.168.59.3):$port"
