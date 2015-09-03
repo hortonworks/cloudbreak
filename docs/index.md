@@ -267,7 +267,7 @@ You can do this on the management console, or - if you have aws-cli configured -
 Once this is configured, Cloudbreak is ready to launch Hadoop clusters on your behalf. The only thing Cloudbreak requires is the `Role ARN` (Role for Cross-Account access).
 
 
-###Configuring the Microsoft Azure account
+###Configuring the Microsoft Azure account (deprecated)
 
 In order to launch Hadoop clusters on the  Microsoft Azure cloud platform you'll need to link your Azure account with Cloudbreak. This can be achieved by creating a new `Azure Credential` in Cloudbreak.
 
@@ -303,6 +303,42 @@ _3. Create a VM image from the copied VHD blob._
 
 _This process will take 20 minutes so be patient - but this step will have do be done once and only once._
 
+
+###Configuring the Microsoft Azure Resource manager account
+
+In order to launch Hadoop clusters on the  Microsoft Azure RM cloud platform you'll need to link your Azure RM account with Cloudbreak. This can be achieved by creating a new `Azure Credential` in Cloudbreak.
+
+You'll need an X509 certificate with a 2048-bit RSA keypair.
+
+Generate these artifacts with `openssl` by running the following command, and answering the questions in the command prompt:
+
+```
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout my_azure_private.key -out my_azure_cert.pem
+```
+
+The command generates the following files into the directory you run the command from: `my_azure_private.key` and `my_azure_cert.pem`
+
+Fill the form by providing your Azure `Subscription Id`, and the **content** of the previously generated certificate (my_azure_cert.pem).
+
+You have to create an active directory application in Azure (The example shows the [azure-cli](https://github.com/Azure/azure-xplat-cli) commands)
+
+```
+azure ad app create --name mynewapp --home-page http://mynewapp --identifier-uris http://mynewapp --password mypassword
+azure ad sp create <Application Id>
+azure role assignment create --objectId <Object Id> -o Owner -c /subscriptions/<subscription-id>
+azure provider list
+azure provider register Microsoft.Compute
+azure provider register Microsoft.Network
+azure provider register Microsoft.Storage
+```
+
+You are done - from now on Cloudbreak can launch Azure instances on your behalf.
+
+_1. Copy the VHD blob from above (community images) into your storage account_
+
+_2. Create a VM image from the copied VHD blob._
+
+_This process will quite fast but be patient - this step will have do be done once and only once in every region just before your provisioning. For sure if we upgrade the image then this copy phase will automatically refresh your image so copy again._
 
 ###Configuring the Google Cloud account
 
