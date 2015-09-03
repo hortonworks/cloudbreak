@@ -267,11 +267,11 @@ You can do this on the management console, or - if you have aws-cli configured -
 Once this is configured, Cloudbreak is ready to launch Hadoop clusters on your behalf. The only thing Cloudbreak requires is the `Role ARN` (Role for Cross-Account access).
 
 
-###Configuring the Microsoft Azure account
+###Configuring the Microsoft Azure account(deprecated)
 
 In order to launch Hadoop clusters on the  Microsoft Azure cloud platform you'll need to link your Azure account with Cloudbreak. This can be achieved by creating a new `Azure Credential` in Cloudbreak.
 
-You'll need an X509 certificate with a 2048-bit RSA keypair.
+You'll need an X509 certificate with a 2048-bit RSA keypair as in the older Azure implementation.
 
 Generate these artifacts with `openssl` by running the following command, and answering the questions in the command prompt:
 
@@ -283,25 +283,31 @@ The command generates the following files into the directory you run the command
 
 Fill the form by providing your Azure `Subscription Id`, and the **content** of the previously generated certificate (my_azure_cert.pem).
 
-_Note:_ Cloudbreak will generate a `JKS` file (stored by the backend) and a `certificate` with the `passphrase`. You will need to upload the generated certificate (that is automatically downloaded to you after the form submission, alternatively you can download it any time from Cloudbreak) to your Azure account:
+You have to create an active directory application in Azure (The example shows the [azure-cli](https://github.com/Azure/azure-xplat-cli) commands)
 
-On your `Azure Management Console`, `Settings` menu, click the `Management Certificates` tab and upload the downloaded `cert` file
-
-The JKS file and certificate will be used to encrypt the communication between Cloudbreak and Azure in both directions.
+```
+azure ad app create --name mynewapp --home-page http://mynewapp --identifier-uris http://mynewapp --password mypassword
+azure ad sp create <Application Id>
+azure role assignment create --objectId <Object Id> -o Owner -c /subscriptions/<subscription-id>
+```
 
 You are done - from now on Cloudbreak can launch Azure instances on your behalf.
 
 _Note:_ Cloudbreak does not store any login details for these instances - you can specify a `password` or `SSH Public key` that can be used to login into the launched instances.
 
-_Note:_ Because Azure does not directly support third party public images Cloudbreak will copy the used image from VM Depot into your storage account. The steps below need to be finished ONCE and only ONCE before any stack is created for every affinity group - **this is an automated step**  - it's only highlighted here as an explanation of why provisioning takes longer at first time:
+_Note:_ Because Azure does not directly support third party public images Cloudbreak will copy the used image from our storage account into your storage account. The steps below need to be finished ONCE and only ONCE before any stack is created for every affinity group - **this is an automated step**  - it's only highlighted here as an explanation of why provisioning takes longer at first time:
 
-_1. Get the VM image - http://vmdepot.msopentech.com/Vhd/Show?vhdId=42480&version=43564_
+_1. Copy the VHD blob from above (community images) into your storage account_
 
-_2. Copy the VHD blob from above (community images) into your storage account_
+_2. Using the copied blob under your provisioning as source image_
 
-_3. Create a VM image from the copied VHD blob._
+_This process will quite fast but be patient - this step will have do be done once and only once in every region just before your provisioning. For sure if we upgrade the image then this copy phase will automatically refresh your image so copy again._
 
-_This process will take 20 minutes so be patient - but this step will have do be done once and only once._
+
+###Configuring the Microsoft Azure Resource Manager account
+
+In order to launch Hadoop clusters on the  Microsoft Azure cloud platform you'll need to link your Azure account with Cloudbreak. This can be achieved by creating a new `Azure RM Credential` in Cloudbreak.
+
 
 
 ###Configuring the Google Cloud account
