@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.connector.gcp;
+package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import org.junit.Assert;
 import org.junit.Test;
