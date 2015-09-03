@@ -672,8 +672,12 @@ Cloudbreak comes with default base images - based on CentOS/RHEL 7. Should you w
 
 ##Kerberos security
 
-Ambari supports Kerberos security for internal communication. To activate Kerberos with Cloudbreak you have enable security option and fill kerberos master key, kerberos admin and kerberos password too.
-To run a job on the cluster, you should use one of the default Hadoop users, like ambari-qa, as usual. To create custom user please follow the steps below.
+Ambari supports Kerberos security for internal communication. To activate Kerberos with Cloudbreak you have enable security option and fill the `kerberos master key`, `kerberos admin` and `kerberos password` too.
+To run a job on the cluster, you can use one of the default Hadoop users, like `ambari-qa`, as usual. 
+
+**Optional**
+
+To create custom users please follow the steps below.
 
   * Log in via SSH to the Cloudbreak gateway node (IP address is the same as the Ambari UI)
 
