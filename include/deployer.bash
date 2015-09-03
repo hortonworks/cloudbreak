@@ -198,7 +198,6 @@ deployer-regenerate() {
     generate_uaa_config
 }
 
-
 deployer-login() {
     declare desc="Shows Uluwatu (Cloudbreak UI) login url and credentials"
 
@@ -212,6 +211,27 @@ deployer-login() {
     echo "  $UAA_DEFAULT_USER_PW" | blue
 }
 
+start-and-migrate-cmd() {
+    declare desc="Starts containers with docker-compose and migrates the databases, migration can be skipped with --no-migration arg"
+
+    deployer-generate
+
+    declare isMigration=true
+    [[ "$1" == "--no-migration" || "$SKIP_DB_MIGRATION_ON_START" == true ]] && isMigration=false
+    [[ "$1" == "--no-migration" ]] && shift
+    declare services="$@"
+
+    [[ "$isMigration" == true ]] && migrate
+
+    create-logfile
+    compose-up $services
+
+    info "CloudBreak containers are started ..."
+    info "In a couple of minutes you can reach the UI (called Uluwatu)"
+    echo "  $ULU_HOST_ADDRESS" | blue
+    warn "Credentials are not printed here. You can get them by:"
+    echo '  cbd env show|grep "UAA_DEFAULT_USER_PW\|UAA_DEFAULT_USER_EMAIL"' | blue
+}
 
 main() {
 	set -eo pipefail; [[ "$TRACE" ]] && set -x
@@ -243,14 +263,14 @@ main() {
         cmd-export deployer-regenerate regenerate
         cmd-export deployer-delete delete
         cmd-export compose-ps ps
-        cmd-export compose-up start
+        cmd-export start-and-migrate-cmd start
         cmd-export compose-kill kill
         cmd-export compose-logs logs
         cmd-export compose-pull pull
         cmd-export compose-pull-parallel pull-parallel
         cmd-export deployer-login login
 
-        cmd-export migrate-startdb startdb
+        cmd-export migrate-startdb-cmd startdb
         cmd-export migrate-cmd migrate
 
         cmd-export-ns aws "Amazon Webservice namespace"

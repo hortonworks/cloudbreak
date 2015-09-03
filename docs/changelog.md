@@ -4,6 +4,7 @@
 
 - Authentication error with `cloudbreak-shell` and `cloudbreak-shell-quiet` is fixed
 - Command `cbd update <branch>` checks for artifact
+- Command `cbd start` will execute the migration by default. In case of `cbd start --no-migration` command or if SKIP_DB_MIGRATION_ON_START envvar set to true in Profile, the migration will be skipped
 
 ### Added
 

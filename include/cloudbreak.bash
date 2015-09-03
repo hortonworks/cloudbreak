@@ -13,6 +13,7 @@ cloudbreak-config() {
   cloudbreak-conf-java
   cloudbreak-conf-baywatch
   cloudbreak-conf-consul
+  migrate-config
 }
 
 bridge-ip() {
