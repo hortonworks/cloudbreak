@@ -1,6 +1,6 @@
 
 cloudbreak-config() {
-  env-import PRIVATE_IP $(docker run --rm alpine sh -c 'ip ro | grep default | cut -d" " -f 3')
+  env-import PRIVATE_IP $(bridge-ip)
   cloudbreak-conf-tags
   cloudbreak-conf-images
   cloudbreak-conf-cert
@@ -15,6 +15,10 @@ cloudbreak-config() {
   cloudbreak-conf-consul
 }
 
+bridge-ip() {
+    echo ${BRIDGE_IP:=$(docker run --rm alpine sh -c 'ip ro | grep default | cut -d" " -f 3')}
+}
+
 cloudbreak-conf-tags() {
     declare desc="Defines docker image tags"
 
@@ -22,7 +26,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_CONSUL 0.5
     env-import DOCKER_TAG_REGISTRATOR v5
     env-import DOCKER_TAG_POSTGRES 9.4.1
-    env-import DOCKER_TAG_CLOUDBREAK 1.0.2
+    env-import DOCKER_TAG_CLOUDBREAK 1.0.3
     env-import DOCKER_TAG_CBDB 1.0.0
     env-import DOCKER_TAG_PERISCOPE 0.5.6
     env-import DOCKER_TAG_PCDB 0.5.6
@@ -37,19 +41,21 @@ cloudbreak-conf-tags() {
     env-import CB_DOCKER_CONTAINER_AMBARI_WARM ""
 }
 
+consul-recursors() {
+    declare desc="Generates consul agent recursor option, by reading the hosts resolv.conf"
+    declare resolvConf=${1:? 'required 1.param: resolv.conf file'}
+    declare bridge=${2:? 'required 2.param: bridge ip'}
+
+    local nameservers=$(sed -n "/nameserver/ s/^.*nameserver[^0-9]*//p;" $resolvConf)
+    debug "nameservers on host:\n$nameservers"
+    debug bridge=$bridge
+    echo "$nameservers" | grep -v $bridge | sed -n '{s/^/ -recursor /;H;}; $ {x;s/[\n\r]//g;p}'
+}
+
 cloudbreak-conf-consul() {
     env-import DOCKER_CONSUL_OPTIONS ""
     if ! [[ $DOCKER_CONSUL_OPTIONS =~ .*recursor.* ]]; then
-        local consulRecursors=$(docker run -it --rm \
-            --net=host \
-            alpine \
-            sed -n "/nameserver/ {s/^.*nameserver[^0-9]*/-recursor /;H}; $ {x;s/\n/ /gp}" /etc/resolv.conf \
-             | sed "s/\r//g"
-        )
-        if [[ "$consulRecursors" ]]; then
-            debug "Consul recursors found on host: $consulRecursors"
-            DOCKER_CONSUL_OPTIONS="$DOCKER_CONSUL_OPTIONS $consulRecursors"
-        fi
+        DOCKER_CONSUL_OPTIONS="$DOCKER_CONSUL_OPTIONS $(consul-recursors <(docker run -it --rm --net=host alpine cat /etc/resolv.conf) $(bridge-ip))"
     fi
     debug "DOCKER_CONSUL_OPTIONS=$DOCKER_CONSUL_OPTIONS"
 }
@@ -194,8 +200,8 @@ _cloudbreak-shell() {
         -e BACKEND_9001=identity.service.consul \
         -e CLOUDBREAK_ADDRESS=http://backend:9000 \
         -e IDENTITY_ADDRESS=http://backend:9001 \
-        -e SEQUENCEIQ_USER=admin@example.com \
-        -e SEQUENCEIQ_PASSWORD=cloudbreak \
+        -e SEQUENCEIQ_USER=$UAA_DEFAULT_USER_EMAIL \
+        -e SEQUENCEIQ_PASSWORD=$UAA_DEFAULT_USER_PW \
         -v $PWD:/data \
         sequenceiq/cb-shell:$DOCKER_TAG_CLOUDBREAK_SHELL
 }
