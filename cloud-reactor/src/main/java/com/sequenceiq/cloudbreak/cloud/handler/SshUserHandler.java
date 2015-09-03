@@ -34,7 +34,6 @@ public class SshUserHandler implements CloudPlatformEventHandler<SshUserRequest>
         CloudContext cloudContext = request.getCloudContext();
         String platform = cloudContext.getPlatform();
         CloudConnector connector = cloudPlatformConnectors.get(platform);
-        SshUserResponse result = new SshUserResponse(cloudContext, connector.sshUser());
-        request.getResult().onNext(result);
+        request.getResult().onNext(new SshUserResponse(cloudContext, connector.sshUser()));
     }
 }

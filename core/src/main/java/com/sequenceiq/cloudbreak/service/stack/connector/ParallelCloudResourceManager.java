@@ -67,9 +67,9 @@ public class ParallelCloudResourceManager {
     @Qualifier("upscaleFailureHandlerService")
     private FailureHandlerService upscaleFailureHandlerService;
     @javax.annotation.Resource
-    private Map<CloudPlatform, List<ResourceBuilder>> networkResourceBuilders;
+    private Map<CloudPlatform, List<ResourceBuilder>> networkBuilders;
     @javax.annotation.Resource
-    private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
+    private Map<CloudPlatform, List<ResourceBuilder>> instanceBuilders;
 
     public Set<Resource> buildStackResources(Stack stack, String gateWayUserData, String coreUserData, ResourceBuilderInit resourceBuilderInit) {
         try {
@@ -77,7 +77,7 @@ public class ParallelCloudResourceManager {
             Set<Resource> resourceSet = new HashSet<>();
             CloudPlatform cloudPlatform = stack.cloudPlatform();
             final ProvisionContextObject pCO = resourceBuilderInit.provisionInit(stack);
-            for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
+            for (ResourceBuilder resourceBuilder : networkBuilders.get(cloudPlatform)) {
                 List<Resource> buildResources = resourceBuilder.buildResources(pCO, 0, Arrays.asList(resourceSet), Optional.<InstanceGroup>absent());
                 CreateResourceRequest createResourceRequest = resourceBuilder.buildCreateRequest(pCO, Lists.newArrayList(resourceSet), buildResources, 0,
                         Optional.<InstanceGroup>absent(), Optional.<String>absent());
@@ -97,7 +97,7 @@ public class ParallelCloudResourceManager {
                             ProvisionContextCallable.ProvisionContextCallableBuilder.builder()
                                     .withIndex(index)
                                     .withInstanceGroup(instanceGroupEntry)
-                                    .withInstanceResourceBuilders(instanceResourceBuilders)
+                                    .withInstanceResourceBuilders(instanceBuilders)
                                     .withProvisionContextObject(pCO)
                                     .withStack(finalStack)
                                     .withStackUpdater(stackUpdater)
@@ -109,13 +109,13 @@ public class ParallelCloudResourceManager {
                     futures.add(submit);
                     fullIndex++;
                     if (provisionUtil.isRequestFullWithCloudPlatform(stack, futures.size() + 1)) {
-                        resourceRequestResults.addAll(provisionUtil.waitForRequestToFinish(stack.getId(), futures).get(FutureResult.FAILED));
+                        resourceRequestResults.addAll(provisionUtil.waitForRequestToFinish(futures).get(FutureResult.FAILED));
                         stackFailureHandlerService.handleFailure(stack, resourceRequestResults);
                         futures = new ArrayList<>();
                     }
                 }
             }
-            resourceRequestResults.addAll(provisionUtil.waitForRequestToFinish(stack.getId(), futures).get(FutureResult.FAILED));
+            resourceRequestResults.addAll(provisionUtil.waitForRequestToFinish(futures).get(FutureResult.FAILED));
             stackFailureHandlerService.handleFailure(stack, resourceRequestResults);
             if (!stackRepository.findByIdLazy(stack.getId()).isStackInDeletionPhase()) {
                 return resourceSet;
@@ -133,7 +133,7 @@ public class ParallelCloudResourceManager {
         try {
             Map<String, String> ctxMap = MDC.getCopyOfContextMap();
             final ProvisionContextObject provisionContextObject = resourceBuilderInit.provisionInit(stack);
-            for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(stack.cloudPlatform())) {
+            for (ResourceBuilder resourceBuilder : networkBuilders.get(stack.cloudPlatform())) {
                 provisionContextObject.getNetworkResources().addAll(stack.getResourcesByType(resourceBuilder.resourceType()));
             }
             List<Future<ResourceRequestResult>> futures = new ArrayList<>();
@@ -147,7 +147,7 @@ public class ParallelCloudResourceManager {
                                 .withStackUpdater(stackUpdater)
                                 .withIndex(index)
                                 .withProvisionContextObject(provisionContextObject)
-                                .withInstanceResourceBuilders(instanceResourceBuilders)
+                                .withInstanceResourceBuilders(instanceBuilders)
                                 .withInstanceGroup(instanceGroup)
                                 .withUserData(userDataScript)
                                 .withMdcContextMap(ctxMap)
@@ -155,14 +155,14 @@ public class ParallelCloudResourceManager {
                 );
                 futures.add(submit);
                 if (provisionUtil.isRequestFullWithCloudPlatform(stack, futures.size() + 1)) {
-                    Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
+                    Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(futures);
                     successResourceRequestResults.addAll(result.get(FutureResult.SUCCESS));
                     failedResourceRequestResults.addAll(result.get(FutureResult.FAILED));
                     upscaleFailureHandlerService.handleFailure(stack, failedResourceRequestResults);
                     futures = new ArrayList<>();
                 }
             }
-            Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
+            Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(futures);
             successResourceRequestResults.addAll(result.get(FutureResult.SUCCESS));
             failedResourceRequestResults.addAll(result.get(FutureResult.FAILED));
             upscaleFailureHandlerService.handleFailure(stack, failedResourceRequestResults);
@@ -182,10 +182,11 @@ public class ParallelCloudResourceManager {
             Set<String> instanceIds = new HashSet<>(origInstanceIds);
             final DeleteContextObject deleteContextObject = resourceBuilderInit.decommissionInit(stack, instanceIds);
             List<ResourceRequestResult> failedResourceList = new ArrayList<>();
-            for (int j = instanceResourceBuilders.get(stack.cloudPlatform()).size() - 1; j >= 0; j--) {
+            List<ResourceBuilder> resourceBuilders = instanceBuilders.get(stack.cloudPlatform());
+            for (int j = resourceBuilders.size() - 1; j >= 0; j--) {
                 List<Future<ResourceRequestResult>> futures = new ArrayList<>();
                 final int index = j;
-                final ResourceBuilder resourceBuilder = instanceResourceBuilders.get(stack.cloudPlatform()).get(index);
+                final ResourceBuilder resourceBuilder = resourceBuilders.get(index);
                 for (final Resource resource : getResourcesByType(resourceBuilder.resourceType(), deleteContextObject.getDecommissionResources())) {
                     Future<ResourceRequestResult> submit = resourceBuilderExecutor.submit(
                             DownScaleCallable.DownScaleCallableBuilder.builder()
@@ -198,12 +199,12 @@ public class ParallelCloudResourceManager {
                     );
                     futures.add(submit);
                     if (provisionUtil.isRequestFull(stack, futures.size() + 1)) {
-                        Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
+                        Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(futures);
                         failedResourceList.addAll(result.get(FutureResult.FAILED));
                         futures = new ArrayList<>();
                     }
                 }
-                Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
+                Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(futures);
                 failedResourceList.addAll(result.get(FutureResult.FAILED));
             }
             instanceIds = filterFailedResources(failedResourceList, instanceIds);
@@ -226,16 +227,17 @@ public class ParallelCloudResourceManager {
             final CloudPlatform cloudPlatform = stack.cloudPlatform();
             final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
             List<Future<ResourceRequestResult>> futures = new ArrayList<>();
-            for (int i = instanceResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
-                final int index = i;
-                List<Resource> resourceByType = stack.getResourcesByType(instanceResourceBuilders.get(cloudPlatform).get(i).resourceType());
+            List<ResourceBuilder> resourceBuilders = instanceBuilders.get(cloudPlatform);
+            for (int i = resourceBuilders.size() - 1; i >= 0; i--) {
+                final ResourceBuilder resourceBuilder = resourceBuilders.get(i);
+                List<Resource> resourceByType = stack.getResourcesByType(resourceBuilder.resourceType());
                 for (final Resource resource : resourceByType) {
                     Future<ResourceRequestResult> submit = resourceBuilderExecutor.submit(new Callable<ResourceRequestResult>() {
                         @Override
                         public ResourceRequestResult call() throws Exception {
                             try {
                                 MDC.setContextMap(mdcCtxMap);
-                                instanceResourceBuilders.get(cloudPlatform).get(index).delete(resource, dCO, stack.getRegion());
+                                resourceBuilder.delete(resource, dCO, stack.getRegion());
                                 stackUpdater.removeStackResources(Arrays.asList(resource));
                                 return ResourceRequestResult.ResourceRequestResultBuilder.builder()
                                         .withFutureResult(FutureResult.SUCCESS)
@@ -252,17 +254,19 @@ public class ParallelCloudResourceManager {
                     });
                     futures.add(submit);
                     if (provisionUtil.isRequestFull(stack, futures.size() + 1)) {
-                        Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
+                        Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(futures);
                         checkErrorOccurred(result);
                         futures = new ArrayList<>();
                     }
                 }
             }
-            Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
+            Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(futures);
             checkErrorOccurred(result);
-            for (int i = networkResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
-                for (Resource resource : stack.getResourcesByType(networkResourceBuilders.get(cloudPlatform).get(i).resourceType())) {
-                    networkResourceBuilders.get(cloudPlatform).get(i).delete(resource, dCO, stack.getRegion());
+            List<ResourceBuilder> networkResourceBuilders = networkBuilders.get(cloudPlatform);
+            for (int i = networkResourceBuilders.size() - 1; i >= 0; i--) {
+                ResourceBuilder resourceBuilder = networkResourceBuilders.get(i);
+                for (Resource resource : stack.getResourcesByType(resourceBuilder.resourceType())) {
+                    resourceBuilder.delete(resource, dCO, stack.getRegion());
                     stackUpdater.removeStackResources(Arrays.asList(resource));
                 }
             }
@@ -277,17 +281,19 @@ public class ParallelCloudResourceManager {
             final Map<String, String> mdcCtxMap = MDC.getCopyOfContextMap();
             final CloudPlatform cloudPlatform = stack.cloudPlatform();
             final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
-            for (int i = instanceResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
+            List<ResourceBuilder> instanceResourceBuilders = instanceBuilders.get(cloudPlatform);
+            for (int i = instanceResourceBuilders.size() - 1; i >= 0; i--) {
                 List<Future<Boolean>> futures = new ArrayList<>();
                 final int index = i;
+                final ResourceBuilder resourceBuilder = instanceResourceBuilders.get(i);
                 List<Resource> resourceByType =
-                        stack.getResourcesByType(instanceResourceBuilders.get(cloudPlatform).get(i).resourceType());
+                        stack.getResourcesByType(resourceBuilder.resourceType());
                 for (final Resource resource : resourceByType) {
                     Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
                         @Override
                         public Boolean call() throws Exception {
                             MDC.setContextMap(mdcCtxMap);
-                            instanceResourceBuilders.get(cloudPlatform).get(index).rollback(resource, dCO, stack.getRegion());
+                            resourceBuilder.rollback(resource, dCO, stack.getRegion());
                             stackUpdater.removeStackResources(Arrays.asList(resource));
                             return true;
                         }
@@ -298,10 +304,12 @@ public class ParallelCloudResourceManager {
                     future.get();
                 }
             }
-            for (int i = networkResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
+            List<ResourceBuilder> networkResourceBuilders = networkBuilders.get(cloudPlatform);
+            for (int i = networkResourceBuilders.size() - 1; i >= 0; i--) {
+                ResourceBuilder resourceBuilder = networkResourceBuilders.get(i);
                 for (Resource resource
-                        : stack.getResourcesByType(networkResourceBuilders.get(cloudPlatform).get(i).resourceType())) {
-                    networkResourceBuilders.get(cloudPlatform).get(i).rollback(resource, dCO, stack.getRegion());
+                        : stack.getResourcesByType(resourceBuilder.resourceType())) {
+                    resourceBuilder.rollback(resource, dCO, stack.getRegion());
                 }
             }
         } catch (Exception e) {
@@ -311,13 +319,11 @@ public class ParallelCloudResourceManager {
     }
 
     public void startStopResources(Stack stack, final boolean start, ResourceBuilderInit resourceBuilderInit) {
-        boolean finished = true;
         CloudPlatform cloudPlatform = stack.cloudPlatform();
         final Map<String, String> mdcCtxMap = MDC.getCopyOfContextMap();
         try {
             final StartStopContextObject sSCO = resourceBuilderInit.startStopInit(stack);
-
-            for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
+            for (ResourceBuilder resourceBuilder : networkBuilders.get(cloudPlatform)) {
                 for (Resource resource : stack.getResourcesByType(resourceBuilder.resourceType())) {
                     if (start) {
                         resourceBuilder.start(sSCO, resource, stack.getRegion());
@@ -327,7 +333,7 @@ public class ParallelCloudResourceManager {
                 }
             }
             List<Future<Void>> futures = new ArrayList<>();
-            for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
+            for (final ResourceBuilder resourceBuilder : instanceBuilders.get(cloudPlatform)) {
                 List<Resource> resourceByType = stack.getResourcesByType(resourceBuilder.resourceType());
                 for (final Resource resource : resourceByType) {
                     final Stack finalStack = stack;
@@ -372,7 +378,7 @@ public class ParallelCloudResourceManager {
 
     public void updateAllowedSubnets(Stack stack, ResourceBuilderInit resourceBuilderInit) {
         UpdateContextObject updateContext = resourceBuilderInit.updateInit(stack);
-        for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(stack.cloudPlatform())) {
+        for (ResourceBuilder resourceBuilder : networkBuilders.get(stack.cloudPlatform())) {
             resourceBuilder.update(updateContext);
         }
     }

@@ -7,6 +7,9 @@ public enum InstanceStatus {
     STOPPED(StatusGroup.PERMANENT),
     FAILED(StatusGroup.PERMANENT),
     TERMINATED(StatusGroup.PERMANENT),
+    UNKNOWN(StatusGroup.PERMANENT),
+    CREATE_REQUESTED(StatusGroup.PERMANENT),
+    DELETE_REQUESTED(StatusGroup.PERMANENT),
     IN_PROGRESS(StatusGroup.TRANSIENT);
 
     private StatusGroup statusGroup;

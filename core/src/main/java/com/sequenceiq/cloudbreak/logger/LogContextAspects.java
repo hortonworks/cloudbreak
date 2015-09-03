@@ -30,7 +30,7 @@ public class LogContextAspects {
         CloudPlatformRequest cloudPlatformRequest = event.getData();
         CloudContext cloudContext = cloudPlatformRequest.getCloudContext();
         MDCBuilder.buildMdcContext(String.valueOf(cloudContext.getStackId()), cloudContext.getStackName(), cloudContext.getOwner());
-        LOGGER.info("A Reactor event handler's 'accept' method has been intercepted: {}, MDC logger context is build.", joinPoint.toShortString());
+        LOGGER.info("A Reactor event handler's 'accept' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
     }
 
     @Before("com.sequenceiq.cloudbreak.logger.LogContextAspects.interceptFetchTasksCallMethod()")
@@ -38,6 +38,6 @@ public class LogContextAspects {
         FetchTask task = (FetchTask) joinPoint.getArgs()[0];
         CloudContext cloudContext = task.getCloudContext();
         MDCBuilder.buildMdcContext(String.valueOf(cloudContext.getStackId()), cloudContext.getStackName(), cloudContext.getOwner());
-        LOGGER.info("A FetchTask's 'call' method has been intercepted: {}, MDC logger context is build.", joinPoint.toShortString());
+        LOGGER.info("A FetchTask's 'call' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
     }
 }

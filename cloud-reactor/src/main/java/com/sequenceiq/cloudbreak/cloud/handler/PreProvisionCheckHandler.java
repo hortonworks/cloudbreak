@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PreProvisionCheckRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PreProvisionCheckResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 import reactor.bus.Event;
 
@@ -33,11 +34,12 @@ public class PreProvisionCheckHandler implements CloudPlatformEventHandler<PrePr
         LOGGER.info("Received event: {}", event);
         PreProvisionCheckRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
+        CloudStack cloudStack = request.getCloudStack();
         try {
             String platform = cloudContext.getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
-            AuthenticatedContext authenticatedContext = connector.authenticate(cloudContext, request.getCloudCredential());
-            String message = connector.setup().preCheck(authenticatedContext, request.getCloudStack());
+            AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
+            String message = connector.setup().preCheck(auth, cloudStack);
             request.getResult().onNext(new PreProvisionCheckResult(message, null, request));
             LOGGER.info("Pre-provision check finished for {}", cloudContext);
         } catch (Exception e) {

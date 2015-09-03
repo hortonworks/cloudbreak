@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
+import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -23,7 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import groovyx.net.http.HttpResponseException;
 
 @Service
-public class ArmMetadataCollector {
+public class ArmMetadataCollector implements MetadataCollector {
 
     @Inject
     private ArmClient armClient;
@@ -31,7 +32,8 @@ public class ArmMetadataCollector {
     @Inject
     private ArmTemplateUtils armTemplateUtils;
 
-    public List<CloudVmInstanceStatus> collectVmMetadata(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<InstanceTemplate> vms) {
+    @Override
+    public List<CloudVmInstanceStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<InstanceTemplate> vms) {
         AzureRMClient access = armClient.createAccess(authenticatedContext.getCloudCredential());
         final CloudResource resource = armTemplateUtils.getTemplateResource(resources);
         List<CloudVmInstanceStatus> results = new ArrayList<>();
@@ -39,27 +41,27 @@ public class ArmMetadataCollector {
 
         Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(vms, new Function<InstanceTemplate, String>() {
             public String apply(InstanceTemplate from) {
-                return armTemplateUtils.getPrivateInstanceId(resource.getReference(), from.getGroupName(), Long.toString(from.getPrivateId()));
+                return armTemplateUtils.getPrivateInstanceId(resource.getName(), from.getGroupName(), Long.toString(from.getPrivateId()));
             }
         });
 
         try {
             for (Map.Entry<String, InstanceTemplate> instance : templateMap.entrySet()) {
-                List<Map> network = (ArrayList<Map>) ((Map) ((Map) ((Map) access.getVirtualMachine(resource.getReference(), instance.getKey()))
+                List<Map> network = (ArrayList<Map>) ((Map) ((Map) ((Map) access.getVirtualMachine(resource.getName(), instance.getKey()))
                         .get("properties"))
                         .get("networkProfile"))
                         .get("networkInterfaces");
                 String networkInterfaceName = getNameFromConnectionString(network.get(0).get("id").toString());
-                Map networkInterface = (Map) access.getNetworkInterface(resource.getReference(), networkInterfaceName);
+                Map networkInterface = (Map) access.getNetworkInterface(resource.getName(), networkInterfaceName);
                 List ips = (ArrayList) ((Map) networkInterface.get("properties")).get("ipConfigurations");
                 Map properties = (Map) ((Map) ips.get(0)).get("properties");
                 String publicIp = null;
                 if (properties.get("publicIPAddress") == null) {
-                    publicIp = access.getLoadBalancerIp(resource.getReference(), armTemplateUtils.getLoadBalancerId(resource.getReference()));
+                    publicIp = access.getLoadBalancerIp(resource.getName(), armTemplateUtils.getLoadBalancerId(resource.getName()));
                 } else {
                     Map publicIPAddress = (Map) properties.get("publicIPAddress");
                     String publicIpName = publicIPAddress.get("id").toString();
-                    Map publicAdressObject = (Map) access.getPublicIpAddress(resource.getReference(), getNameFromConnectionString(publicIpName));
+                    Map publicAdressObject = (Map) access.getPublicIpAddress(resource.getName(), getNameFromConnectionString(publicIpName));
                     Map publicIpProperties = (Map) publicAdressObject.get("properties");
                     publicIp = publicIpProperties.get("ipAddress").toString();
                 }

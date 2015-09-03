@@ -19,6 +19,10 @@ public class DynamicModel {
         return (T) parameters.get(clazz.getName());
     }
 
+    public String getStringParameter(String key) {
+        return getParameter(key, String.class);
+    }
+
     public void putParameter(String key, Object value) {
         parameters.put(key, value);
     }

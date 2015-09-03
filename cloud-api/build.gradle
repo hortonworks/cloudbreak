@@ -17,7 +17,6 @@ dependencies {
     compile project(':cloud-common')
 
     compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
-    compile group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
     compile group: 'io.projectreactor',             name: 'reactor-core',                   version: eventBusVersion
     compile group: 'io.projectreactor',             name: 'reactor-bus',                    version: eventBusVersion
     compile group: 'io.projectreactor',             name: 'reactor-stream',                 version: eventBusVersion

@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.adapter;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +43,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
@@ -53,6 +56,11 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisioningService;
@@ -64,6 +72,7 @@ import reactor.bus.EventBus;
 public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceProviderConnectorAdapter.class);
+    private static final String ROLLBACK_MESSAGE = "stack.infrastructure.create.rollback";
 
     @Inject
     private EventBus eventBus;
@@ -75,41 +84,46 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     private CredentialToCloudCredentialConverter credentialConverter;
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
-
+    @Inject
+    private InstanceGroupRepository instanceGroupRepository;
+    @Inject
+    private CloudbreakEventService eventService;
+    @Inject
+    private CloudbreakMessagesService cloudbreakMessagesService;
+    @Inject
+    private InstanceMetadataService instanceMetadataService;
 
     @Override
     public Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties) {
         LOGGER.info("Assembling launch request for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
+        CloudContext cloudContext = new CloudContext(stack);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
-
+        instanceMetadataService.saveInstanceRequests(stack, cloudStack.getGroups());
         LaunchStackRequest launchRequest = new LaunchStackRequest(cloudContext, cloudCredential, cloudStack);
         LOGGER.info("Triggering event: {}", launchRequest);
         eventBus.notify(launchRequest.selector(), Event.wrap(launchRequest));
         try {
             LaunchStackResult res = launchRequest.await();
             LOGGER.info("Result: {}", res);
-            if (res.isFailed()) {
-                if (res.getException() != null) {
-                    throw new OperationException("Failed to build the stack", cloudContext, res.getException());
-                }
-                throw new OperationException(format("Failed to build the stack for %s due to: %s", cloudContext, res.getStatusReason()));
-            }
-            return transformResults(res.getResults(), stack);
+            validateResourceResults(cloudContext, res);
+            List<CloudResourceStatus> results = res.getResults();
+            updateNodeCount(stack.getId(), cloudStack.getGroups(), results, true);
+            return transformResults(results, stack);
         } catch (InterruptedException e) {
             LOGGER.error("Error while launching stack", e);
-            throw new OperationException("Unexpected exception occurred during build stack", cloudContext, e);
+            throw new OperationException("Unexpected exception occurred during build stack: " + e.getMessage());
         }
     }
 
     @Override
     public void startAll(Stack stack) {
         LOGGER.info("Assembling start request for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
+        CloudContext cloudContext = new CloudContext(stack);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<CloudInstance> instances = metadataConverter.convert(stack.getInstanceMetaDataAsList());
-        StartInstancesRequest startRequest = new StartInstancesRequest(cloudContext, cloudCredential, instances);
+        List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
+        StartInstancesRequest startRequest = new StartInstancesRequest(cloudContext, cloudCredential, resources, instances);
         LOGGER.info("Triggering event: {}", startRequest);
         eventBus.notify(startRequest.selector(), Event.wrap(startRequest));
         try {
@@ -118,7 +132,7 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             if (res.isFailed()) {
                 Exception exception = res.getException();
                 LOGGER.error(format("Failed to start the stack: %s", cloudContext), exception);
-                throw new OperationException("Unexpected exception occurred during stack start", cloudContext, exception);
+                throw new OperationException(exception);
             } else {
                 for (CloudVmInstanceStatus instanceStatus : res.getResults().getResults()) {
                     if (instanceStatus.getStatus().equals(InstanceStatus.FAILED)) {
@@ -128,17 +142,18 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             }
         } catch (InterruptedException e) {
             LOGGER.error("Error while starting the stack", e);
-            throw new OperationException("Unexpected exception occurred during stack start", cloudContext, e);
+            throw new OperationException(e);
         }
     }
 
     @Override
     public void stopAll(Stack stack) {
         LOGGER.info("Assembling stop request for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
+        CloudContext cloudContext = new CloudContext(stack);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<CloudInstance> instances = metadataConverter.convert(stack.getInstanceMetaDataAsList());
-        StopInstancesRequest<StopInstancesResult> stopRequest = new StopInstancesRequest<>(cloudContext, cloudCredential, instances);
+        List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
+        StopInstancesRequest<StopInstancesResult> stopRequest = new StopInstancesRequest<>(cloudContext, cloudCredential, resources, instances);
         LOGGER.info("Triggering event: {}", stopRequest);
         eventBus.notify(stopRequest.selector(), Event.wrap(stopRequest));
         try {
@@ -147,7 +162,7 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             if (res.isFailed()) {
                 Exception exception = res.getException();
                 LOGGER.error("Failed to stop the stack", exception);
-                throw new OperationException("Unexpected exception occurred during stack stop", cloudContext, exception);
+                throw new OperationException(exception);
             } else {
                 for (CloudVmInstanceStatus instanceStatus : res.getResults().getResults()) {
                     if (instanceStatus.getStatus().equals(InstanceStatus.FAILED)) {
@@ -157,88 +172,78 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             }
         } catch (InterruptedException e) {
             LOGGER.error("Error while stopping the stack", e);
-            throw new OperationException("Unexpected exception occurred during stack stop", cloudContext, e);
+            throw new OperationException(e);
         }
     }
 
     @Override
     public Set<Resource> addInstances(Stack stack, String gateWayUserData, String coreUserData, Integer adjustment, String instanceGroup) {
         LOGGER.debug("Assembling upscale stack event for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
+        CloudContext cloudContext = new CloudContext(stack);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         group.setNodeCount(group.getNodeCount() + adjustment);
         CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
-        //TODO which resources?
+        instanceMetadataService.saveInstanceRequests(stack, cloudStack.getGroups());
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
-        UpscaleStackRequest<UpscaleStackResult> upscaleRequest = new UpscaleStackRequest<>(cloudContext, cloudCredential, cloudStack, resources, adjustment);
+        UpscaleStackRequest<UpscaleStackResult> upscaleRequest = new UpscaleStackRequest<>(cloudContext, cloudCredential, cloudStack, resources);
         LOGGER.info("Triggering upscale stack event: {}", upscaleRequest);
         eventBus.notify(upscaleRequest.selector(), Event.wrap(upscaleRequest));
         try {
             UpscaleStackResult res = upscaleRequest.await();
             LOGGER.info("Upscale stack result: {}", res);
-            if (res.isFailed()) {
-                if (res.getException() != null) {
-                    throw new OperationException("Failed to upscale the stack", cloudContext, res.getException());
-                }
-                throw new OperationException(format("Failed to upscale the stack: %s due to: %s", cloudContext, res.getStatusReason()));
+            List<CloudResourceStatus> results = res.getResults();
+            updateNodeCount(stack.getId(), cloudStack.getGroups(), results, false);
+            validateResourceResults(cloudContext, res);
+            Set<Resource> resourceSet = transformResults(results, stack);
+            if (resourceSet.isEmpty()) {
+                throw new OperationException("Failed to upscale the cluster since all create request failed: " + results.get(0).getStatusReason());
             }
-            return transformResults(res.getResults(), stack);
+            return resourceSet;
         } catch (InterruptedException e) {
             LOGGER.error("Error while upscaling the stack", e);
-            throw new OperationException("Unexpected exception occurred during add new instances", cloudContext, e);
+            throw new OperationException(e);
         }
     }
 
     @Override
     public Set<String> removeInstances(Stack stack, String gateWayUserData, String coreUserData, Set<String> instanceIds, String instanceGroup) {
         LOGGER.debug("Assembling downscale stack event for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
+        CloudContext cloudContext = new CloudContext(stack);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
-        List<InstanceTemplate> instanceTemplates = new ArrayList<>();
+        List<CloudInstance> instances = new ArrayList<>();
         InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
-        List<InstanceMetaData> temporarilyRemovedInstances = new ArrayList<>();
         for (InstanceMetaData metaData : group.getAllInstanceMetaData()) {
             if (instanceIds.contains(metaData.getInstanceId())) {
                 CloudInstance cloudInstance = metadataConverter.convert(metaData);
-                instanceTemplates.add(cloudInstance.getTemplate());
-                metaData.setInstanceStatus(com.sequenceiq.cloudbreak.domain.InstanceStatus.TERMINATED);
-                temporarilyRemovedInstances.add(metaData);
+                instances.add(cloudInstance);
             }
         }
-        Integer originalGroupNodeCount = group.getNodeCount();
-        //hacking node count for the appropriate CloudStack conversion
-        group.setNodeCount(originalGroupNodeCount - instanceIds.size());
-        CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
-        //set back original node count
-        group.setNodeCount(originalGroupNodeCount);
-        for (InstanceMetaData metaData : temporarilyRemovedInstances) {
-            metaData.setInstanceStatus(com.sequenceiq.cloudbreak.domain.InstanceStatus.UNREGISTERED);
-        }
+        CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData, instanceIds);
         DownscaleStackRequest<DownscaleStackResult> downscaleRequest = new DownscaleStackRequest<>(cloudContext,
-                cloudCredential, cloudStack, resources, instanceTemplates);
+                cloudCredential, cloudStack, resources, instances);
         LOGGER.info("Triggering downscale stack event: {}", downscaleRequest);
         eventBus.notify(downscaleRequest.selector(), Event.wrap(downscaleRequest));
         try {
             DownscaleStackResult res = downscaleRequest.await();
             LOGGER.info("Downscale stack result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                throw new OperationException(res.getStatusReason(), cloudContext, res.getErrorDetails());
+                LOGGER.error("Failed to downscale the stack", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
             }
             return instanceIds;
         } catch (InterruptedException e) {
             LOGGER.error("Error while downscaling the stack", e);
-            throw new OperationException("Unexpected exception occurred during remove instances", cloudContext, e);
+            throw new OperationException(e);
         }
     }
 
     @Override
     public void deleteStack(Stack stack, Credential credential) {
         LOGGER.debug("Assembling terminate stack event for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
+        CloudContext cloudContext = new CloudContext(stack);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-        //TODO which resources?
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         CloudStack cloudStack = cloudStackConverter.convert(stack, "", "");
         TerminateStackRequest<TerminateStackResult> terminateRequest = new TerminateStackRequest<>(cloudContext, cloudStack, cloudCredential, resources);
@@ -247,16 +252,16 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         try {
             TerminateStackResult res = terminateRequest.await();
             LOGGER.info("Terminate stack result: {}", res);
-            //TODO shouldn't we allow cluster delete then, what if someone deletes the stack by hand?
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 if (res.getErrorDetails() != null) {
-                    throw new OperationException("Failed to terminate the stack", cloudContext, res.getErrorDetails());
+                    LOGGER.error("Failed to terminate the stack", res.getErrorDetails());
+                    throw new OperationException(res.getErrorDetails());
                 }
                 throw new OperationException(format("Failed to terminate the stack: %s due to %s", cloudContext, res.getStatusReason()));
             }
         } catch (InterruptedException e) {
             LOGGER.error("Error while terminating the stack", e);
-            throw new OperationException("Unexpected exception occurred during stack termination", cloudContext, e);
+            throw new OperationException(e);
         }
     }
 
@@ -269,10 +274,9 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     @Override
     public void updateAllowedSubnets(Stack stack, String gateWayUserData, String coreUserData) {
         LOGGER.debug("Assembling update subnet event for: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
+        CloudContext cloudContext = new CloudContext(stack);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
-        //TODO which resources?
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         UpdateStackRequest<UpdateStackResult> updateRequest = new UpdateStackRequest<>(cloudContext, cloudCredential, cloudStack, resources);
         eventBus.notify(updateRequest.selector(), Event.wrap(updateRequest));
@@ -281,13 +285,14 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             LOGGER.info("Update stack result: {}", res);
             if (res.isFailed()) {
                 if (res.getException() != null) {
-                    throw new OperationException("Failed to update the stack", cloudContext, res.getException());
+                    LOGGER.error("Failed to update the stack", res.getException());
+                    throw new OperationException(res.getException());
                 }
                 throw new OperationException(format("Failed to update the stack: %s due to: %s", cloudContext, res.getStatusReason()));
             }
         } catch (InterruptedException e) {
             LOGGER.error("Error while updating the stack: " + cloudContext, e);
-            throw new OperationException("Unexpected exception occurred during the stack updates", cloudContext, e);
+            throw new OperationException(e);
         }
     }
 
@@ -303,10 +308,9 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             return response.getUser();
         } catch (InterruptedException e) {
             LOGGER.error(format("Error while retrieving ssh user for stack: %s", cloudContext), e);
-            throw new OperationException("Unexpected exception occurred during retrieving the SSH user", cloudContext, e);
+            throw new OperationException(e);
         }
     }
-
 
     @Override
     public CloudPlatform getCloudPlatform() {
@@ -317,7 +321,7 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     public Set<String> getSSHFingerprints(Stack stack, String gateway) {
         Set<String> result = new HashSet<>();
         LOGGER.debug("Get SSH fingerprints of gateway instance for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
+        CloudContext cloudContext = new CloudContext(stack);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         InstanceMetaData gatewayMetaData = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
         CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData);
@@ -328,25 +332,82 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             GetSSHFingerprintsResult res = sSHFingerprintReq.await();
             LOGGER.info("Get SSH fingerprints of gateway instance for stack result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                throw new OperationException(res.getStatusReason(), cloudContext, res.getErrorDetails());
+                LOGGER.error("Failed to get SSH fingerprint", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
             }
             result.addAll(res.getSshFingerprints());
         } catch (InterruptedException e) {
             LOGGER.error(format("Failed to get SSH fingerprints of gateway instance stack: %s", cloudContext), e);
-            throw new OperationException("Unexpected exception occurred during retrieving SSH fingerprints", cloudContext, e);
+            throw new OperationException(e);
         }
         return result;
     }
 
-
     private Set<Resource> transformResults(List<CloudResourceStatus> cloudResourceStatuses, Stack stack) {
         Set<Resource> retSet = new HashSet<>();
         for (CloudResourceStatus cloudResourceStatus : cloudResourceStatuses) {
-            Resource resource = new Resource(cloudResourceStatus.getCloudResource().getType(), cloudResourceStatus.getCloudResource().getReference(), stack);
-            retSet.add(resource);
+            if (!cloudResourceStatus.isFailed()) {
+                Resource resource = new Resource(cloudResourceStatus.getCloudResource().getType(), cloudResourceStatus.getCloudResource().getName(), stack);
+                retSet.add(resource);
+            }
         }
         return retSet;
     }
 
+    private void validateResourceResults(CloudContext cloudContext, LaunchStackResult res) {
+        validateResourceResults(cloudContext, res.getException(), res.getResults(), true);
+    }
+
+    private void validateResourceResults(CloudContext cloudContext, UpscaleStackResult res) {
+        validateResourceResults(cloudContext, res.getException(), res.getResults(), false);
+    }
+
+    private void validateResourceResults(CloudContext cloudContext, Exception exception, List<CloudResourceStatus> results, boolean create) {
+        String action = create ? "create" : "upscale";
+        if (exception != null) {
+            LOGGER.error(format("Failed to %s stack: %s", action, cloudContext), exception);
+            throw new OperationException(exception);
+        }
+        if (results.size() == 1 && results.get(0).isFailed()) {
+            throw new OperationException(format("Failed to %s the stack for %s due to: %s", action, cloudContext, results.get(0).getStatusReason()));
+        }
+    }
+
+    private void updateNodeCount(long stackId, List<Group> originalGroups, List<CloudResourceStatus> statuses, boolean create) {
+        for (Group group : originalGroups) {
+            int nodeCount = group.getInstances().size();
+            List<CloudResourceStatus> failedResources = removeFailedMetadata(stackId, statuses, group);
+            if (!failedResources.isEmpty() && create) {
+                int failedCount = failedResources.size();
+                InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stackId, group.getName());
+                instanceGroup.setNodeCount(nodeCount - failedCount);
+                instanceGroupRepository.save(instanceGroup);
+                String message = cloudbreakMessagesService.getMessage(ROLLBACK_MESSAGE,
+                        asList(failedCount, group.getName(), failedResources.get(0).getStatusReason()));
+                eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), message);
+            }
+        }
+    }
+
+    private List<CloudResourceStatus> removeFailedMetadata(long stackId, List<CloudResourceStatus> statuses, Group group) {
+        Map<Long, CloudResourceStatus> failedResources = new HashMap<>();
+        Set<Long> groupPrivateIds = getPrivateIds(group);
+        for (CloudResourceStatus status : statuses) {
+            Long privateId = status.getPrivateId();
+            if (privateId != null && status.isFailed() && !failedResources.containsKey(privateId) && groupPrivateIds.contains(privateId)) {
+                failedResources.put(privateId, status);
+                instanceMetadataService.deleteInstanceRequest(stackId, privateId);
+            }
+        }
+        return new ArrayList<>(failedResources.values());
+    }
+
+    private Set<Long> getPrivateIds(Group group) {
+        Set<Long> ids = new HashSet<>();
+        for (InstanceTemplate template : group.getInstances()) {
+            ids.add(template.getPrivateId());
+        }
+        return ids;
+    }
 
 }

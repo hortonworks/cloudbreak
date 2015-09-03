@@ -7,21 +7,24 @@ public class InstanceTemplate {
 
     private String flavor;
     private String groupName;
-    private long privateId;
+    private Long privateId;
     private List<Volume> volumes;
+    private InstanceStatus status;
 
-    public InstanceTemplate(String flavor, String groupName, long privateId) {
+    public InstanceTemplate(String flavor, String groupName, Long privateId, InstanceStatus status) {
         this.flavor = flavor;
         this.groupName = groupName;
         this.privateId = privateId;
+        this.status = status;
         volumes = new ArrayList<>();
     }
 
-    public InstanceTemplate(String flavor, String groupName, int privateId, List<Volume> volumes) {
+    public InstanceTemplate(String flavor, String groupName, Long privateId, List<Volume> volumes, InstanceStatus status) {
         this.flavor = flavor;
         this.groupName = groupName;
         this.privateId = privateId;
         this.volumes = volumes;
+        this.status = status;
     }
 
     public String getFlavor() {
@@ -36,12 +39,16 @@ public class InstanceTemplate {
         return groupName;
     }
 
-    public long getPrivateId() {
+    public Long getPrivateId() {
         return privateId;
     }
 
     public void addVolume(Volume volume) {
         volumes.add(volume);
+    }
+
+    public InstanceStatus getStatus() {
+        return status;
     }
 
     @Override
@@ -51,6 +58,7 @@ public class InstanceTemplate {
         sb.append(", groupName='").append(groupName).append('\'');
         sb.append(", privateId=").append(privateId);
         sb.append(", volumes=").append(volumes);
+        sb.append(", status=").append(status);
         sb.append('}');
         return sb.toString();
     }

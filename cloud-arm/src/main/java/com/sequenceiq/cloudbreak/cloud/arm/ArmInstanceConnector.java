@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
+import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.arm.status.ArmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -17,7 +18,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudOperationNotSupportedException
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -39,12 +39,12 @@ public class ArmInstanceConnector implements InstanceConnector {
     }
 
     @Override
-    public List<CloudVmInstanceStatus> collectMetadata(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<InstanceTemplate> vms) {
-        return armMetadataCollector.collectVmMetadata(authenticatedContext, resources, vms);
+    public MetadataCollector metadata() {
+        return armMetadataCollector;
     }
 
     @Override
-    public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudInstance> vms) {
+    public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         AzureRMClient azureRMClient = armClient.createAccess(ac.getCloudCredential());
         String stackName = armTemplateUtils.getStackName(ac.getCloudContext());
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
@@ -63,7 +63,7 @@ public class ArmInstanceConnector implements InstanceConnector {
     }
 
     @Override
-    public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudInstance> vms) {
+    public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         AzureRMClient azureRMClient = armClient.createAccess(ac.getCloudCredential());
         String stackName = armTemplateUtils.getStackName(ac.getCloudContext());
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();

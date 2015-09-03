@@ -6,25 +6,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceAllocationNotification;
-import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceAllocationPersisted;
+import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceNotification;
+import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.cloud.service.Persister;
 
 import reactor.bus.Event;
 import reactor.fn.Consumer;
 
 @Component
-public class ResourcePersistenceHandler implements Consumer<Event<ResourceAllocationNotification>> {
+public class ResourcePersistenceHandler implements Consumer<Event<ResourceNotification>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourcePersistenceHandler.class);
 
     @Inject
-    private Persister<ResourceAllocationNotification> cloudResourcePersisterService;
+    private Persister<ResourceNotification> cloudResourcePersisterService;
 
     @Override
-    public void accept(Event<ResourceAllocationNotification> resourceAllocationNotificationEvent) {
-        LOGGER.info("ResourceAllocationNotification received: {}", resourceAllocationNotificationEvent);
-        ResourceAllocationNotification notification = resourceAllocationNotificationEvent.getData();
-        notification = cloudResourcePersisterService.persist(notification);
-        notification.getPromise().onNext(new ResourceAllocationPersisted(notification));
+    public void accept(Event<ResourceNotification> event) {
+        LOGGER.info("Resource notification event received: {}", event);
+        ResourceNotification notification = event.getData();
+        notification = notification.isCreate() ? cloudResourcePersisterService.persist(notification)
+                : cloudResourcePersisterService.delete(notification);
+        notification.getPromise().onNext(new ResourcePersisted(notification));
     }
 }

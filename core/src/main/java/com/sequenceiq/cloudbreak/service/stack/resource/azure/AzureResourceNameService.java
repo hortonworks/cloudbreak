@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceNameService;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
-import com.sequenceiq.cloudbreak.service.stack.resource.CloudbreakResourceNameService;
 
 @Service("AzureResourceNameService")
 public class AzureResourceNameService extends CloudbreakResourceNameService {

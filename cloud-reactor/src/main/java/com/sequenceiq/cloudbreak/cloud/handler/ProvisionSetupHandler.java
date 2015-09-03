@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 import reactor.bus.Event;
 
@@ -38,8 +39,9 @@ public class ProvisionSetupHandler implements CloudPlatformEventHandler<SetupReq
         try {
             String platform = cloudContext.getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
-            AuthenticatedContext authenticatedContext = connector.authenticate(cloudContext, request.getCloudCredential());
-            Map<String, Object> provisionSetupResult = connector.setup().execute(authenticatedContext, request.getCloudStack());
+            AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
+            CloudStack cloudStack = request.getCloudStack();
+            Map<String, Object> provisionSetupResult = connector.setup().execute(auth, cloudStack);
             request.getResult().onNext(new SetupResult(request, provisionSetupResult));
             LOGGER.info("Provision setup finished for {}", cloudContext);
         } catch (Exception e) {

@@ -12,7 +12,6 @@ jar {
 }
 
 dependencies {
-//  compile project(':core-model')
   compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
   compile group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
 

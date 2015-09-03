@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
@@ -109,7 +110,7 @@ public class ReactorApplication implements CommandLineRunner {
         List<Group> groups = new ArrayList<>();
         Group g = new Group("master", InstanceGroupType.CORE);
         groups.add(g);
-        InstanceTemplate instance = new InstanceTemplate("m1.medium", g.getName(), 0);
+        InstanceTemplate instance = new InstanceTemplate("m1.medium", g.getName(), 0L, InstanceStatus.CREATE_REQUESTED);
         Volume v = new Volume("/hadoop/fs1", "HDD", 1);
         instance.addVolume(v);
         v = new Volume("/hadoop/fs2", "HDD", 1);
@@ -133,7 +134,7 @@ public class ReactorApplication implements CommandLineRunner {
 
         CloudContext cloudContext = new CloudContext(0L, "stack-name_" + ts, "OPENSTACK", "TEST_USER");
 
-        CloudStack cs = new CloudStack(groups, network, security, image);
+        CloudStack cs = new CloudStack(groups, network, security, image, "local");
         LaunchStackRequest lr = new LaunchStackRequest(cloudContext, c, cs);
         LOGGER.debug("Launchrequest: {}", lr);
         return lr;

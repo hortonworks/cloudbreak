@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceNameService;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -26,7 +27,6 @@ import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureResourceException;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
-import com.sequenceiq.cloudbreak.service.stack.resource.ResourceNameService;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureCreateResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureDeleteResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourcePollerObject;
@@ -51,7 +51,6 @@ public class AzureReservedIpResourceBuilder extends AzureSimpleNetworkResourceBu
     private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
     @Inject
     private AzureDeleteResourceStatusCheckerTask azureDeleteResourceStatusCheckerTask;
-
     @Inject
     @Named("AzureResourceNameService")
     private ResourceNameService resourceNameService;

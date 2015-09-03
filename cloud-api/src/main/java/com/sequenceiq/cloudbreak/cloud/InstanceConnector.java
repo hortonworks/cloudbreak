@@ -6,21 +6,17 @@ import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 
 public interface InstanceConnector {
 
-    // VM
+    List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) throws Exception;
 
-    String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm);
+    List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) throws Exception;
 
-    List<CloudVmInstanceStatus> collectMetadata(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<InstanceTemplate> vms);
-
-    List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudInstance> vms);
-
-    List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudInstance> vms);
+    MetadataCollector metadata();
 
     List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms);
 
+    String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm);
 
 }

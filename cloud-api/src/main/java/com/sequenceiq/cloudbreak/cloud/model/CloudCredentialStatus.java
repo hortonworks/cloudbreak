@@ -8,14 +8,17 @@ public class CloudCredentialStatus {
 
     private String statusReason;
 
+    private Exception exception;
+
     public CloudCredentialStatus(CloudCredential cloudResource, CredentialStatus status) {
-        this(cloudResource, status, null);
+        this(cloudResource, status, null, null);
     }
 
-    public CloudCredentialStatus(CloudCredential cloudCredential, CredentialStatus status, String statusReason) {
+    public CloudCredentialStatus(CloudCredential cloudCredential, CredentialStatus status, Exception exception, String statusReason) {
         this.cloudCredential = cloudCredential;
         this.status = status;
         this.statusReason = statusReason;
+        this.exception = exception;
     }
 
     public CloudCredential getCloudCredential() {
@@ -28,6 +31,10 @@ public class CloudCredentialStatus {
 
     public String getStatusReason() {
         return statusReason;
+    }
+
+    public Exception getException() {
+        return exception;
     }
 
     //BEGIN GENERATED CODE

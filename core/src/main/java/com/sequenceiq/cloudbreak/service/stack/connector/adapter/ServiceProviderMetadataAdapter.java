@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.stack.connector.adapter;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -63,11 +62,9 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
 
-
-
     @Override
     public Set<CoreInstanceMetaData> collectMetadata(Stack stack) {
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
+        CloudContext cloudContext = new CloudContext(stack);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<InstanceTemplate> instanceTemplates = cloudStackConverter.buildInstanceTemplates(stack);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
@@ -84,15 +81,15 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
             return new HashSet<>(instanceConverter.convert(res.getResults()));
         } catch (InterruptedException e) {
             LOGGER.error(format("Error while executing collectMetadata, stack: %s", cloudContext), e);
-            throw new OperationException("Unexpected exception occurred during collecting the metadata", cloudContext, e);
+            throw new OperationException(e);
         }
     }
 
     @Override
     public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroupName, Integer scalingAdjustment) {
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
+        CloudContext cloudContext = new CloudContext(stack);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-        List<InstanceTemplate> instanceTemplates = getNewInstanceTemplates(stack, instanceGroupName, scalingAdjustment);
+        List<InstanceTemplate> instanceTemplates = getNewInstanceTemplates(stack);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
         CollectMetadataRequest<CollectMetadataResult> cmr = new CollectMetadataRequest<>(cloudContext, cloudCredential, cloudResources, instanceTemplates);
         LOGGER.info("Triggering event: {}", cmr);
@@ -107,13 +104,13 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
             return new HashSet<>(instanceConverter.convert(res.getResults()));
         } catch (InterruptedException e) {
             LOGGER.error(format("Error while collecting new metadata for stack: %s", cloudContext), e);
-            throw new OperationException("Unexpected exception occurred during collecting the metadata", cloudContext, e);
+            throw new OperationException(e);
         }
     }
 
     @Override
     public InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId) {
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner());
+        CloudContext cloudContext = new CloudContext(stack);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         InstanceGroup ig = stack.getInstanceGroupByInstanceGroupName(instanceGroup.getGroupName());
         CloudInstance instance = null;
@@ -132,12 +129,13 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
                 GetInstancesStateResult res = stateRequest.await();
                 LOGGER.info("Result: {}", res);
                 if (res.isFailed()) {
-                    throw new OperationException("Failed to retrieve instance state", cloudContext, res.getException());
+                    LOGGER.error("Failed to retrieve instance state", res.getException());
+                    throw new OperationException(res.getException());
                 }
                 return transform(res.getStatuses().get(0).getStatus());
             } catch (InterruptedException e) {
                 LOGGER.error(format("Error while retrieving instance state of: %s", cloudContext), e);
-                throw new OperationException("Unexpected exception occurred during instance state retrieval", cloudContext, e);
+                throw new OperationException(e);
             }
         } else {
             return InstanceSyncState.DELETED;
@@ -155,17 +153,11 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
     }
 
 
-    private List<InstanceTemplate> getNewInstanceTemplates(Stack stack, String instanceGroupName, Integer scalingAdjustment) {
-        List<Long> existingIds = new ArrayList<>();
-        for (InstanceMetaData data : stack.getInstanceMetaDataAsList()) {
-            existingIds.add(data.getPrivateId());
-        }
-        InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
-        group.setNodeCount(group.getNodeCount() + scalingAdjustment);
+    private List<InstanceTemplate> getNewInstanceTemplates(Stack stack) {
         List<InstanceTemplate> instanceTemplates = cloudStackConverter.buildInstanceTemplates(stack);
         Iterator<InstanceTemplate> iterator = instanceTemplates.iterator();
         while (iterator.hasNext()) {
-            if (existingIds.contains(iterator.next().getPrivateId())) {
+            if (iterator.next().getStatus() != InstanceStatus.CREATE_REQUESTED) {
                 iterator.remove();
             }
         }

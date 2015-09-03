@@ -16,13 +16,12 @@ public class CloudReactorInitializer {
     @Inject
     private EventBus eventBus;
 
-
     @Inject
     private ResourcePersistenceHandler resourcePersistenceHandler;
 
     @PostConstruct
     public void initialize() {
-        eventBus.on(Selectors.$("resource-allocation-persisted"), resourcePersistenceHandler);
+        eventBus.on(Selectors.$("resource-persisted"), resourcePersistenceHandler);
     }
 
 }

@@ -20,18 +20,17 @@ public class ProvisionUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisionUtil.class);
 
     @javax.annotation.Resource
-    private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
+    private Map<CloudPlatform, List<ResourceBuilder>> instanceBuilders;
 
     public boolean isRequestFull(Stack stack, int fullIndex) {
         return fullIndex % stack.cloudPlatform().parallelNumber() == 0;
     }
 
     public boolean isRequestFullWithCloudPlatform(Stack stack, int fullIndex) {
-        return (fullIndex * instanceResourceBuilders.get(stack.cloudPlatform()).size()) % stack.cloudPlatform().parallelNumber() == 0;
+        return (fullIndex * instanceBuilders.get(stack.cloudPlatform()).size()) % stack.cloudPlatform().parallelNumber() == 0;
     }
 
-    public Map<FutureResult, List<ResourceRequestResult>> waitForRequestToFinish(Long stackId, List<Future<ResourceRequestResult>> futures)
-            throws Exception {
+    public Map<FutureResult, List<ResourceRequestResult>> waitForRequestToFinish(List<Future<ResourceRequestResult>> futures) throws Exception {
         Map<FutureResult, List<ResourceRequestResult>> result = new HashMap<>();
         result.put(FutureResult.FAILED, new ArrayList<ResourceRequestResult>());
         result.put(FutureResult.SUCCESS, new ArrayList<ResourceRequestResult>());

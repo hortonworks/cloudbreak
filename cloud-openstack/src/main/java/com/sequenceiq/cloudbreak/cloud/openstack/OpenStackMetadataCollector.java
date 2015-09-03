@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
@@ -24,10 +25,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 
-
 @Component
-public class OpenStackMetadataCollector {
-
+public class OpenStackMetadataCollector implements MetadataCollector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackMetadataCollector.class);
 
@@ -37,13 +36,11 @@ public class OpenStackMetadataCollector {
     @Inject
     private OpenStackHeatUtils utils;
 
-
-    public List<CloudVmInstanceStatus> collectVmMetadata(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<InstanceTemplate> vms) {
-
+    public List<CloudVmInstanceStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<InstanceTemplate> vms) {
         CloudResource resource = utils.getHeatResource(resources);
 
         String stackName = authenticatedContext.getCloudContext().getStackName();
-        String heatStackId = resource.getReference();
+        String heatStackId = resource.getName();
 
         Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(vms, new Function<InstanceTemplate, String>() {
             public String apply(InstanceTemplate from) {
@@ -73,9 +70,7 @@ public class OpenStackMetadataCollector {
         return results;
     }
 
-
     private CloudInstance createInstanceMetaData(Server server, String instanceId, InstanceTemplate template) {
-
         String privateIp = null;
         String floatingIp = null;
 

@@ -12,7 +12,8 @@ import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 
 public class ResourcesStatePollerResults {
 
-    private ResourcesStatePollerResults() { }
+    private ResourcesStatePollerResults() {
+    }
 
     public static ResourcesStatePollerResult build(CloudContext context, List<CloudResourceStatus> results) {
         CloudResourceStatus status = ResourceStatusLists.aggregate(results);
@@ -20,7 +21,7 @@ public class ResourcesStatePollerResults {
     }
 
     public static LaunchStackResult transformToLaunchStackResult(ResourcesStatePollerResult result) {
-        return new LaunchStackResult(result.getCloudContext(), result.getStatus(), result.getStatusReason(), result.getResults());
+        return new LaunchStackResult(result.getCloudContext(), result.getResults());
     }
 
     public static UpscaleStackResult transformToUpscaleStackResult(ResourcesStatePollerResult result) {

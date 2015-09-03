@@ -32,10 +32,8 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
 
     @Inject
     private PollTaskFactory statusCheckFactory;
-
     @Inject
     private SyncPollingScheduler<InstanceConsoleOutputResult> syncPollingScheduler;
-
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
@@ -53,12 +51,12 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
             String platform = cloudContext.getPlatform();
             CloudInstance cloudInstance = fingerprintsRequest.getCloudInstance();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
-            AuthenticatedContext ac = connector.authenticate(cloudContext, fingerprintsRequest.getCloudCredential());
+            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, fingerprintsRequest.getCloudCredential());
             GetSSHFingerprintsResult fingerprintsResult;
             try {
                 String initialConsoleOutput = connector.instances().getConsoleOutput(ac, cloudInstance);
                 InstanceConsoleOutputResult consoleOutputResult = new InstanceConsoleOutputResult(cloudContext, cloudInstance, initialConsoleOutput);
-                PollTask<InstanceConsoleOutputResult> outputPollerTask = statusCheckFactory.newPollInstanceConsoleOutputTask(ac, cloudInstance);
+                PollTask<InstanceConsoleOutputResult> outputPollerTask = statusCheckFactory.newPollConsoleOutputTask(connector.instances(), ac, cloudInstance);
                 if (!outputPollerTask.completed(consoleOutputResult)) {
                     consoleOutputResult = syncPollingScheduler.schedule(outputPollerTask);
                 }
@@ -79,7 +77,8 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
         }
     }
 
-    private static class FingerprintParserUtil {
+    //TODO remove it from here and core and move it to a common module
+    public static class FingerprintParserUtil {
 
         private static final Logger LOGGER = LoggerFactory.getLogger(FingerprintParserUtil.class);
 

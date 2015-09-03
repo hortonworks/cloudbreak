@@ -31,10 +31,8 @@ public class DownscaleStackHandler implements CloudPlatformEventHandler<Downscal
 
     @Inject
     private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
-
     @Inject
     private PollTaskFactory statusCheckFactory;
-
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
@@ -51,26 +49,22 @@ public class DownscaleStackHandler implements CloudPlatformEventHandler<Downscal
         try {
             String platform = cloudContext.getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
-            AuthenticatedContext ac = connector.authenticate(cloudContext, request.getCloudCredential());
-
+            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudResourceStatus> resourceStatus = connector.resources()
-                    .downscale(ac, request.getCloudStack(), request.getCloudResources(), request.getInstanceTemplates());
-
+                    .downscale(ac, request.getCloudStack(), request.getCloudResources(), request.getInstances());
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
-
             PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources);
             ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatus);
             if (!task.completed(statePollerResult)) {
                 statePollerResult = syncPollingScheduler.schedule(task);
             }
-
             request.getResult().onNext(new DownscaleStackResult(request, ResourceLists.transform(statePollerResult.getResults())));
             LOGGER.info("Downscale successfully finished for {}", cloudContext);
-
         } catch (Exception e) {
             LOGGER.error("Failed to handle DownscaleStackRequest.", e);
             request.getResult().onNext(new DownscaleStackResult(e.getMessage(), e, request));
         }
         LOGGER.info("DownscaleStackRequest finished");
     }
+
 }

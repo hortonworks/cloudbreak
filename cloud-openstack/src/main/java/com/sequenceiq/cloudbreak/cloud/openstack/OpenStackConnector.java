@@ -6,14 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
-import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 @Service
 public class OpenStackConnector implements CloudConnector {
@@ -23,16 +21,14 @@ public class OpenStackConnector implements CloudConnector {
 
     @Inject
     private OpenStackCredentialConnector credentialConnector;
-
+    @Inject
+    private OpenStackAuthenticator authenticator;
     @Inject
     private OpenStackClient openStackClient;
-
     @Inject
     private OpenStackResourceConnector resourceConnector;
-
     @Inject
     private OpenStackInstanceConnector instanceConnector;
-
     @Inject
     private OpenStackSetup openStackSetup;
 
@@ -47,9 +43,8 @@ public class OpenStackConnector implements CloudConnector {
     }
 
     @Override
-    public AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential) {
-        LOGGER.info("Authenticating to openstack ...");
-        return openStackClient.createAuthenticatedContext(cloudContext, cloudCredential);
+    public Authenticator authentication() {
+        return authenticator;
     }
 
     @Override

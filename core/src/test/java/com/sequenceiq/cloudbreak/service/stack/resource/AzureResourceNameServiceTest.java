@@ -4,9 +4,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceNameService;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceNameService;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourceNameService;
-
 
 public class AzureResourceNameServiceTest {
     private ResourceNameService resourceNameService;
@@ -59,7 +60,7 @@ public class AzureResourceNameServiceTest {
         Long stackId = 1L;
 
         // when
-        String resourceName = ((CloudbreakResourceNameService) resourceNameService).resourceName(ResourceType.AZURE_RESERVED_IP, stackId);
+        String resourceName = resourceNameService.resourceName(ResourceType.AZURE_RESERVED_IP, stackId);
 
         // then
         Assert.assertEquals("the shortened name is not as expected", "reserved-ip-1", resourceName);

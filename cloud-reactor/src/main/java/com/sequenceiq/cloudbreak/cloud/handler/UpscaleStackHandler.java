@@ -33,13 +33,10 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
-
     @Inject
     private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
-
     @Inject
     private PollTaskFactory statusCheckFactory;
-
     @Inject
     private PersistenceNotifier persistenceNotifier;
 
@@ -56,12 +53,9 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
         try {
             String platform = cloudContext.getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
-            AuthenticatedContext ac = connector.authenticate(cloudContext, request.getCloudCredential());
-
+            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudResourceStatus> resourceStatus = connector.resources().upscale(ac, request.getCloudStack(), request.getResourceList());
-
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
-
             PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources);
             ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatus);
             if (!task.completed(statePollerResult)) {

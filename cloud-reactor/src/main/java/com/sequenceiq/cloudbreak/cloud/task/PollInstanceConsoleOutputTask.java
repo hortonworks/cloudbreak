@@ -1,11 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.task;
 
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.InstanceConsoleOutputResult;
+import com.sequenceiq.cloudbreak.cloud.handler.GetSSHFingerprintsHandler;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 
 public class PollInstanceConsoleOutputTask extends PollTask<InstanceConsoleOutputResult> {
@@ -17,8 +20,8 @@ public class PollInstanceConsoleOutputTask extends PollTask<InstanceConsoleOutpu
 
     public PollInstanceConsoleOutputTask(InstanceConnector instanceConnector, AuthenticatedContext authenticatedContext, CloudInstance instance) {
         super(authenticatedContext);
-        this.instance = instance;
         this.instanceConnector = instanceConnector;
+        this.instance = instance;
     }
 
     @Override
@@ -30,6 +33,12 @@ public class PollInstanceConsoleOutputTask extends PollTask<InstanceConsoleOutpu
 
     @Override
     public boolean completed(InstanceConsoleOutputResult instanceConsoleOutputResult) {
-        return instanceConsoleOutputResult.getConsoleOutput().contains(CB_FINGERPRINT_END);
+        String output = instanceConsoleOutputResult.getConsoleOutput();
+        boolean contains = output.contains(CB_FINGERPRINT_END);
+        if (contains) {
+            return true;
+        }
+        Set<String> fingerprints = GetSSHFingerprintsHandler.FingerprintParserUtil.parseFingerprints(output);
+        return !fingerprints.isEmpty();
     }
 }

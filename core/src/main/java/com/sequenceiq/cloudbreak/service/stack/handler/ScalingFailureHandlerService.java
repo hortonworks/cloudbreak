@@ -34,7 +34,7 @@ public class ScalingFailureHandlerService implements FailureHandlerService {
     private ResourceRepository resourceRepository;
 
     @javax.annotation.Resource
-    private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
+    private Map<CloudPlatform, List<ResourceBuilder>> instanceBuilders;
 
     @javax.annotation.Resource
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
@@ -79,15 +79,17 @@ public class ScalingFailureHandlerService implements FailureHandlerService {
         ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
         try {
             final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
-            for (int i = instanceResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
-                ResourceType resourceType = instanceResourceBuilders.get(cloudPlatform).get(i).resourceType();
+            List<ResourceBuilder> resourceBuilders = instanceBuilders.get(cloudPlatform);
+            for (int i = resourceBuilders.size() - 1; i >= 0; i--) {
+                ResourceBuilder resourceBuilder = resourceBuilders.get(i);
+                ResourceType resourceType = resourceBuilder.resourceType();
                 for (Resource tmpResource : resourceList) {
                     if (resourceType.equals(tmpResource.getResourceType())) {
                         String message = String.format("Resource will be rolled back because provision failed on the resource: %s",
                                 tmpResource.getResourceName());
                         eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), message);
                         LOGGER.info(message);
-                        instanceResourceBuilders.get(cloudPlatform).get(i).delete(tmpResource, dCO, stack.getRegion());
+                        resourceBuilder.delete(tmpResource, dCO, stack.getRegion());
                     }
                 }
             }

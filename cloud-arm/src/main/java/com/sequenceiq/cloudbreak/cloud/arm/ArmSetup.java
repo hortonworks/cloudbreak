@@ -36,10 +36,6 @@ public class ArmSetup implements Setup {
     public static final String IMAGES = "images";
     public static final String VHDS = "vhds";
 
-    private static final int ARM_POLLING_INTERVAL = 5000;
-    private static final int MAX_ATTEMPTS_FOR_HOSTS = 240;
-    private static final int MAX_FAILURE_COUNT = 5;
-
     @Inject
     private ArmClient armClient;
 

@@ -33,13 +33,10 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
-
     @Inject
     private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
-
     @Inject
     private PollTaskFactory statusCheckFactory;
-
     @Inject
     private PersistenceNotifier persistenceNotifier;
 
@@ -51,24 +48,23 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
     @Override
     public void accept(Event<LaunchStackRequest> launchStackRequestEvent) {
         LOGGER.info("Received event: {}", launchStackRequestEvent);
-        LaunchStackRequest launchStackRequest = launchStackRequestEvent.getData();
-        CloudContext cloudContext = launchStackRequest.getCloudContext();
+        LaunchStackRequest request = launchStackRequestEvent.getData();
+        CloudContext cloudContext = request.getCloudContext();
         try {
             String platform = cloudContext.getPlatform();
             CloudConnector connector = cloudPlatformConnectors.get(platform);
-            AuthenticatedContext ac = connector.authenticate(cloudContext, launchStackRequest.getCloudCredential());
-            List<CloudResourceStatus> resourceStatus = connector.resources().launch(ac, launchStackRequest.getCloudStack(),
-                    persistenceNotifier);
+            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
+            List<CloudResourceStatus> resourceStatus = connector.resources().launch(ac, request.getCloudStack(), persistenceNotifier);
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
             PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources);
             ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatus);
             if (!task.completed(statePollerResult)) {
                 statePollerResult = syncPollingScheduler.schedule(task);
             }
-            launchStackRequest.getResult().onNext(ResourcesStatePollerResults.transformToLaunchStackResult(statePollerResult));
+            request.getResult().onNext(ResourcesStatePollerResults.transformToLaunchStackResult(statePollerResult));
             LOGGER.info("Launching the stack successfully finished for {}", cloudContext);
         } catch (Exception e) {
-            launchStackRequest.getResult().onNext(new LaunchStackResult(cloudContext, e));
+            request.getResult().onNext(new LaunchStackResult(cloudContext, e));
         }
     }
 

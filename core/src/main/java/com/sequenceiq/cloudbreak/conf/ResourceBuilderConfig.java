@@ -34,7 +34,7 @@ public class ResourceBuilderConfig {
     }
 
     @Bean
-    Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders() {
+    Map<CloudPlatform, List<ResourceBuilder>> instanceBuilders() {
         Map<CloudPlatform, List<ResourceBuilder>> returnResourceBuilders = new HashMap<>();
         for (CloudPlatform cloudPlatform : CloudPlatform.values()) {
             if (!cloudPlatform.isWithTemplate()) {
@@ -53,7 +53,7 @@ public class ResourceBuilderConfig {
     }
 
     @Bean
-    Map<CloudPlatform, List<ResourceBuilder>> networkResourceBuilders() {
+    Map<CloudPlatform, List<ResourceBuilder>> networkBuilders() {
         Map<CloudPlatform, List<ResourceBuilder>> returnResourceBuilders = new HashMap<>();
         for (CloudPlatform cloudPlatform : CloudPlatform.values()) {
             if (!cloudPlatform.isWithTemplate()) {
