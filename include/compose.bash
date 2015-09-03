@@ -159,14 +159,6 @@ registrator:
         - consul
     command: consul://consul:8500
 
-ambassador:
-    privileged: true
-    volumes:
-        - "/var/run/docker.sock:/var/run/docker.sock"
-    dns: $PRIVATE_IP
-    image: sequenceiq/ambassadord:$DOCKER_TAG_AMBASSADOR
-    command: --omnimode
-
 logsink:
     ports:
         - 3333
@@ -183,23 +175,16 @@ logspout:
     environment:
         - SERVICE_NAME=logspout
         - DEBUG=true
-        - BACKEND_1111=logsink.service.consul
         - LOGSPOUT=ignore
-        - ROUTE_URIS=tcp://backend:1111
+        - ROUTE_URIS=tcp://logsink:3333
         - "RAW_FORMAT={{.Container.Name}} | {{.Data}}\n"
     links:
-        - ambassador:backend
+        - logsink
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     image: gliderlabs/logspout:master
     entrypoint: ["/bin/sh"]
     command: -c 'sleep 1; /bin/logspout'
-
-ambassadorips:
-    privileged: true
-    net: container:ambassador
-    image: sequenceiq/ambassadord:$DOCKER_TAG_AMBASSADOR
-    command: --setup-iptables
 
 uaadb:
     privileged: true
@@ -219,9 +204,8 @@ identity:
         - SERVICE_NAME=identity
         # - SERVICE_CHECK_HTTP=/login
         - IDENTITY_DB_URL=mydb:5432
-        - BACKEND_5432=uaadb.service.consul
     links:
-        - ambassador:mydb
+        - uaadb:mydb
     volumes:
       - ./uaa.yml:/uaa/uaa.yml
     image: sequenceiq/uaa:$DOCKER_TAG_UAA
