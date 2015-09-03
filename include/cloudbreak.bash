@@ -27,13 +27,13 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_CONSUL 0.5
     env-import DOCKER_TAG_REGISTRATOR v5
     env-import DOCKER_TAG_POSTGRES 9.4.1
-    env-import DOCKER_TAG_CLOUDBREAK 1.0.3
+    env-import DOCKER_TAG_CLOUDBREAK 1.1.0-dev.14
     env-import DOCKER_TAG_CBDB 1.0.0
-    env-import DOCKER_TAG_PERISCOPE 0.5.6
+    env-import DOCKER_TAG_PERISCOPE 0.6.0-dev.4
     env-import DOCKER_TAG_PCDB 0.5.6
     env-import DOCKER_TAG_UAA 1.8.1-v2
-    env-import DOCKER_TAG_ULUWATU 1.0.1
-    env-import DOCKER_TAG_SULTANS 1.0.1
+    env-import DOCKER_TAG_ULUWATU 1.0.8
+    env-import DOCKER_TAG_SULTANS 1.0.3
     env-import DOCKER_TAG_AMBASSADOR 0.5.0
     env-import DOCKER_TAG_CERT_TOOL 0.0.3
     env-import DOCKER_TAG_CLOUDBREAK_SHELL 0.5.1
@@ -149,6 +149,7 @@ cloudbreak-conf-defaults() {
     env-import CB_HOST_ADDR $PUBLIC_IP
     env-import CB_BLUEPRINT_DEFAULTS "hdp-small-default,hdp-spark-cluster,hdp-streaming-cluster"
     env-import CB_TEMPLATE_DEFAULTS "minviable-gcp,minviable-azure,minviable-aws"
+    env-import ADDRESS_RESOLVING_TIMEOUT 120000
 }
 
 cloudbreak-conf-cloud-provider() {
