@@ -45,7 +45,12 @@ import javax.persistence.UniqueConstraint;
                 name = "Cluster.findOneWithLists",
                 query = "SELECT c FROM Cluster c "
                         + "LEFT JOIN FETCH c.hostGroups "
-                        + "WHERE c.id= :id")
+                        + "WHERE c.id= :id"),
+        @NamedQuery(
+                name = "Cluster.findByStatus",
+                query = "SELECT c FROM Cluster c "
+                        + "WHERE c.status= :status"
+        )
 })
 public class Cluster implements ProvisionEntity {
 
