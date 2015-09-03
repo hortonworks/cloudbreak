@@ -123,7 +123,7 @@ public class MetadataSetupService {
         return ambariServerIP;
     }
 
-    private InstanceMetaData createInstanceMetadataIfAbsent(Set<InstanceMetaData> allInstanceMetadata, long privateId) {
+    private InstanceMetaData createInstanceMetadataIfAbsent(Set<InstanceMetaData> allInstanceMetadata, Long privateId) {
         for (InstanceMetaData instanceMetaData : allInstanceMetadata) {
             if (instanceMetaData.getPrivateId() == privateId) {
                 return instanceMetaData;
