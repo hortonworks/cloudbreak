@@ -14,6 +14,12 @@ import static com.sequenceiq.cloudbreak.domain.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_IN_PROGRESS;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -34,12 +40,6 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @Entity
 @Table(name = "Stack", uniqueConstraints = {
@@ -192,7 +192,12 @@ import java.util.Set;
         @NamedQuery(
                 name = "Stack.findAllAlive",
                 query = "SELECT s FROM Stack s "
-                        + "WHERE s.status <> 'DELETE_COMPLETED' ")
+                        + "WHERE s.status <> 'DELETE_COMPLETED' "),
+        @NamedQuery(
+                name = "Stack.findByStatus",
+                query = "SELECT s FROM Stack s "
+                        + "WHERE s.status= :status"
+        )
 })
 public class Stack implements ProvisionEntity {
 

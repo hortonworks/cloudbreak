@@ -21,7 +21,8 @@ public enum Status {
     STOP_IN_PROGRESS,
     START_IN_PROGRESS,
     START_FAILED,
-    STOP_FAILED;
+    STOP_FAILED,
+    WAIT_FOR_SYNC;
 
     public static List<Status> stopStatusesForUpdate() {
         return Arrays.asList(START_FAILED, START_IN_PROGRESS, START_REQUESTED);
