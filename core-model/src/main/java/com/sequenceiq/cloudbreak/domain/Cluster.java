@@ -102,6 +102,9 @@ public class Cluster implements ProvisionEntity {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private AmbariStackDetails ambariStackDetails;
 
+    @ManyToOne
+    private FileSystem fileSystem;
+
     public Stack getStack() {
         return stack;
     }
@@ -256,6 +259,14 @@ public class Cluster implements ProvisionEntity {
 
     public void setAmbariStackDetails(AmbariStackDetails ambariStackDetails) {
         this.ambariStackDetails = ambariStackDetails;
+    }
+
+    public FileSystem getFileSystem() {
+        return fileSystem;
+    }
+
+    public void setFileSystem(FileSystem fileSystem) {
+        this.fileSystem = fileSystem;
     }
 
     public String getUserName() {

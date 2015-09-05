@@ -77,6 +77,13 @@ public class ModelDescriptions {
         public static final String VERIFY = "whether to verify or not the repo url";
     }
 
+    public static class FileSystem {
+        public static final String NAME = "name of the filesystem";
+        public static final String TYPE = "type of the filesystem";
+        public static final String DEFAULT = "true if fs.defaultFS should point to this filesystem";
+        public static final String PROPERTIES = "configuration of the filesystem access as key-value pairs";
+    }
+
     public static class RecipeModelDescription {
         public static final String TIMEOUT = "recipe timeout in minutes";
         public static final String PLUGINS = "list of consul plugins with execution types";

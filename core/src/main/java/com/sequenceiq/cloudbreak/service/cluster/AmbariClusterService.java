@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.FileSystemRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -84,6 +85,9 @@ public class AmbariClusterService implements ClusterService {
 
     @Inject
     private ClusterRepository clusterRepository;
+
+    @Inject
+    private FileSystemRepository fileSystemRepository;
 
     @Inject
     private HostMetadataRepository hostMetadataRepository;
@@ -132,7 +136,7 @@ public class AmbariClusterService implements ClusterService {
         public String code() {
             return code;
         }
-        }
+    }
 
 
     @Override
@@ -142,6 +146,9 @@ public class AmbariClusterService implements ClusterService {
         if (stack.getCluster() != null) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster()
                     .getName()));
+        }
+        if (cluster.getFileSystem() != null) {
+            fileSystemRepository.save(cluster.getFileSystem());
         }
         cluster.setStack(stack);
         cluster.setOwner(user.getUserId());
