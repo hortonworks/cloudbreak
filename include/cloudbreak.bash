@@ -328,7 +328,6 @@ util-local-dev() {
     declare port=${1:-9091}
 
     cloudbreak-config
-    migrate-config
 
     if [ "$CB_SCHEMA_SCRIPTS_LOCATION" = "container" ]; then
       warn "CB_SCHEMA_SCRIPTS_LOCATION environment variable must be set and points to the cloudbreak project's schema location"
@@ -338,6 +337,7 @@ util-local-dev() {
     debug stopping original cloudbreak container
     dockerCompose stop cloudbreak
 
+    create-migrate-log
     migrate-one-db cbdb up
     migrate-one-db cbdb pending
 

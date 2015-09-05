@@ -9,7 +9,7 @@
 
 - binary version of gnu-sed 4.2.2 is now included, to solve lot of osx/busybox issues
 - consul recursor test are added
-- Command `cbd start` will execute the migration by default. In case of `cbd start --no-migration` command or if SKIP_DB_MIGRATION_ON_START envvar set to true in Profile, the migration will be skipped
+- Command `cbd start` will execute the migration by default. If SKIP_DB_MIGRATION_ON_START envvar set to true in Profile, the migration will be skipped
 - Using Dns SRV record in our services instead of ambassador
 - Using docker linking system in third party services instead of ambassador
 

@@ -213,15 +213,11 @@ deployer-login() {
 
 start-and-migrate-cmd() {
     declare desc="Starts containers with docker-compose and migrates the databases, migration can be skipped with --no-migration arg"
+    declare services="$@"
 
     deployer-generate
 
-    declare isMigration=true
-    [[ "$1" == "--no-migration" || "$SKIP_DB_MIGRATION_ON_START" == true ]] && isMigration=false
-    [[ "$1" == "--no-migration" ]] && shift
-    declare services="$@"
-
-    [[ "$isMigration" == true ]] && migrate
+    [[ "$SKIP_DB_MIGRATION_ON_START" != true ]] && migrate
 
     create-logfile
     compose-up $services
