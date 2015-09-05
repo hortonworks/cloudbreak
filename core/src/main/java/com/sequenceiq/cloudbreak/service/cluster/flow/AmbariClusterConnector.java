@@ -26,6 +26,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -48,6 +49,8 @@ import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.FileSystemType;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -135,6 +138,8 @@ public class AmbariClusterConnector {
     private HostMetadataRepository hostMetadataRepository;
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
+    @Resource
+    private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
 
     private enum Msg {
         AMBARI_CLUSTER_RESETTING_AMBARI_DATABASE("ambari.cluster.resetting.ambari.database"),
@@ -161,6 +166,20 @@ public class AmbariClusterConnector {
         try {
             cluster.setCreationStarted(new Date().getTime());
             cluster = clusterRepository.save(cluster);
+
+            FileSystem fs = cluster.getFileSystem();
+            if (fs != null) {
+                FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(fs.getType());
+                List<BlueprintConfigurationEntry> bpConfigEntries = fsConfigurator.getBlueprintProperties(fs.getProperties());
+                String defaultFsValue = null;
+                if (fs.isDefaultFs()){
+                    defaultFsValue = fsConfigurator.getDefaultFsValue(fs.getProperties());
+                }
+                // bpProcessor.addProperties(bpProperties, defaultFsValue)
+                LOGGER.info(bpConfigEntries.toString());
+                LOGGER.info(defaultFsValue);
+            }
+
             TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
             AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
             setBaseRepoURL(cluster, ambariClient);
