@@ -38,7 +38,7 @@ public class JsonToClusterConverterTest extends AbstractJsonConverterTest<Cluste
         Cluster result = underTest.convert(getRequest("stack/cluster.json"));
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted",
-                "creationFinished", "upSince", "statusReason", "ambariIp", "ambariStackDetails"));
+                "creationFinished", "upSince", "statusReason", "ambariIp", "ambariStackDetails", "fileSystem"));
     }
 
     @Test
@@ -49,7 +49,7 @@ public class JsonToClusterConverterTest extends AbstractJsonConverterTest<Cluste
         Cluster result = underTest.convert(getRequest("stack/cluster-with-ambari-stack-details.json"));
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted",
-                "creationFinished", "upSince", "statusReason", "ambariIp"));
+                "creationFinished", "upSince", "statusReason", "ambariIp", "fileSystem"));
     }
 
     @Override

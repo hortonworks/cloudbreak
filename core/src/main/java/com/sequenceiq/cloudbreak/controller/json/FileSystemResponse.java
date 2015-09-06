@@ -7,7 +7,7 @@ import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class FileSystemResponse extends FileSystemBase{
+public class FileSystemResponse extends FileSystemBase {
 
     @ApiModelProperty(ModelDescriptions.ID)
     private String id;

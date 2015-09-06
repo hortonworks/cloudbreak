@@ -13,7 +13,7 @@ public abstract class AbstractFileSystemConfigurator implements FileSystemConfig
     public List<FileSystemScript> getScripts() {
         List<FileSystemScript> scripts = new ArrayList<>();
         try {
-            for (FileSystemScriptConfig fsScriptConfig : getScriptConfigs()){
+            for (FileSystemScriptConfig fsScriptConfig : getScriptConfigs()) {
                 String script = FileReaderUtils.readFileFromClasspath(fsScriptConfig.getScriptLocation());
                 scripts.add(new FileSystemScript(script, fsScriptConfig.getClusterLifecycleEvent(), fsScriptConfig.getExecutionType()));
             }

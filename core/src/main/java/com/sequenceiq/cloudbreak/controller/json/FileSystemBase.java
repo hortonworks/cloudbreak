@@ -24,7 +24,7 @@ public abstract class FileSystemBase {
     private boolean defaultFs;
 
     @ApiModelProperty(value = ModelDescriptions.FileSystem.PROPERTIES, required = true)
-    private Map<String,String> properties;
+    private Map<String, String> properties;
 
     public String getName() {
         return name;

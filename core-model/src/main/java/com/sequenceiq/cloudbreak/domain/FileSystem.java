@@ -27,7 +27,7 @@ public class FileSystem {
     @Enumerated(EnumType.STRING)
     private FileSystemType type;
 
-    private boolean defaultFs = false;
+    private boolean defaultFs;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "key")

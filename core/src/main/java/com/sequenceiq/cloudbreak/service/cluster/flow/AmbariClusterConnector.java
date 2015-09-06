@@ -47,7 +47,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.ClusterException;
 import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.FileSystemType;
@@ -140,6 +139,8 @@ public class AmbariClusterConnector {
     private CloudbreakMessagesService cloudbreakMessagesService;
     @Resource
     private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
+    @Inject
+    private BlueprintProcessor blueprintProcessor;
 
     private enum Msg {
         AMBARI_CLUSTER_RESETTING_AMBARI_DATABASE("ambari.cluster.resetting.ambari.database"),
@@ -167,23 +168,22 @@ public class AmbariClusterConnector {
             cluster.setCreationStarted(new Date().getTime());
             cluster = clusterRepository.save(cluster);
 
+            String blueprintText = cluster.getBlueprint().getBlueprintText();
             FileSystem fs = cluster.getFileSystem();
             if (fs != null) {
                 FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(fs.getType());
                 List<BlueprintConfigurationEntry> bpConfigEntries = fsConfigurator.getBlueprintProperties(fs.getProperties());
-                String defaultFsValue = null;
-                if (fs.isDefaultFs()){
-                    defaultFsValue = fsConfigurator.getDefaultFsValue(fs.getProperties());
+                if (fs.isDefaultFs()) {
+                    String defaultFsValue = fsConfigurator.getDefaultFsValue(fs.getProperties());
+                    blueprintText = blueprintProcessor.addDefaultFs(blueprintText, defaultFsValue);
                 }
-                // bpProcessor.addProperties(bpProperties, defaultFsValue)
-                LOGGER.info(bpConfigEntries.toString());
-                LOGGER.info(defaultFsValue);
+                blueprintText = blueprintProcessor.addConfigEntries(blueprintText, bpConfigEntries);
             }
 
             TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
             AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
             setBaseRepoURL(cluster, ambariClient);
-            addBlueprint(stack, ambariClient, cluster.getBlueprint());
+            addBlueprint(stack, ambariClient, blueprintText);
             int nodeCount = stack.getFullNodeCountWithoutDecommissionedNodes() - stack.getGateWayNodeCount();
 
             Set<HostGroup> hostGroups = hostGroupRepository.findHostGroupsInCluster(cluster.getId());
@@ -803,16 +803,15 @@ public class AmbariClusterConnector {
         client.addStackRepository(stack, version, os, repoId, repoUrl, verify);
     }
 
-    private void addBlueprint(Stack stack, AmbariClient ambariClient, Blueprint blueprint) {
+    private void addBlueprint(Stack stack, AmbariClient ambariClient, String blueprintText) {
         try {
             Cluster cluster = stack.getCluster();
-            String blueprintText = blueprint.getBlueprintText();
             Map<String, Map<String, Map<String, String>>> hostGroupConfig = hadoopConfigurationService.getHostGroupConfiguration(cluster);
             blueprintText = ambariClient.extendBlueprintHostGroupConfiguration(blueprintText, hostGroupConfig);
             Map<String, Map<String, String>> globalConfig = hadoopConfigurationService.getGlobalConfiguration(cluster);
             blueprintText = ambariClient.extendBlueprintGlobalConfiguration(blueprintText, globalConfig);
             ambariClient.addBlueprint(blueprintText);
-            LOGGER.info("Blueprint added [Stack: {}, blueprint id: {}]", stack.getId(), blueprint.getId());
+            LOGGER.info("Blueprint added to Ambari.");
         } catch (IOException e) {
             if ("Conflict".equals(e.getMessage())) {
                 throw new BadRequestException("Ambari blueprint already exists.", e);
