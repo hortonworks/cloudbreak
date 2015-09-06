@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static com.sequenceiq.cloudbreak.domain.FileSystemType.DASH;
+import static com.sequenceiq.cloudbreak.domain.PluginExecutionType.ALL_NODES;
+import static com.sequenceiq.cloudbreak.domain.PluginExecutionType.ONE_NODE;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.ClusterLifecycleEvent.POST_INSTALL;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,10 +12,9 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.FileSystemType;
-import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @Component
-public class DashFileSystemConfigurator implements FileSystemConfigurator {
+public class DashFileSystemConfigurator extends AbstractFileSystemConfigurator {
 
     @Override
     public List<BlueprintConfigurationEntry> getBlueprintProperties(Map<String, String> fsProperties) {
@@ -27,18 +29,21 @@ public class DashFileSystemConfigurator implements FileSystemConfigurator {
     }
 
     @Override
-    public String getDefaultFsValue(Map<String, String> fsProperties){
+    public String getDefaultFsValue(Map<String, String> fsProperties) {
         String dashAccountName = fsProperties.get("account.name");
         return "wasb://cloudbreak@" + dashAccountName + ".cloudapp.net";
     }
 
     @Override
-    public List<Recipe> getRecipes(Map<String, String> fsProperties) {
-        return null;
+    public FileSystemType getFileSystemType() {
+        return DASH;
     }
 
     @Override
-    public FileSystemType getFileSystemType() {
-        return DASH;
+    protected List<FileSystemScriptConfig> getScriptConfigs() {
+        List<FileSystemScriptConfig> scriptConfigs = new ArrayList<>();
+        scriptConfigs.add(new FileSystemScriptConfig("scripts/dash-local.sh", POST_INSTALL, ALL_NODES));
+        scriptConfigs.add(new FileSystemScriptConfig("scripts/dash-hdfs.sh", POST_INSTALL, ONE_NODE));
+        return scriptConfigs;
     }
 }

@@ -194,7 +194,17 @@ public class AmbariClusterConnector {
             PollingResult waitForHostsResult = waitForHosts(stack, ambariClient, nodeCount, hostsInCluster);
             checkPollingResult(waitForHostsResult, "Error while waiting for hosts to connect. Polling result: " + waitForHostsResult.name());
 
-            final boolean recipesFound = recipesFound(hostGroups);
+            if (fs != null) {
+                FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(fs.getType());
+                List<FileSystemScript> fileSystemScripts = fsConfigurator.getScripts();
+                // List<Recipe> fsRecipes = recipeBuilder.buildRecipes(fileSystemScripts, fs.getProperties())
+                LOGGER.info(fileSystemScripts.toString());
+            }
+
+            // add fsRecipes to hostgroups
+
+            boolean recipesFound = recipesFound(hostGroups);
+
             if (recipesFound) {
                 recipeEngine.setupRecipes(stack, hostGroups);
                 recipeEngine.executePreInstall(stack);

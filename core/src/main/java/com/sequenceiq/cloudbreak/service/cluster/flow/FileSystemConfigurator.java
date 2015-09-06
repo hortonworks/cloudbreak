@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.domain.FileSystemType;
-import com.sequenceiq.cloudbreak.domain.Recipe;
 
 public interface FileSystemConfigurator {
 
@@ -12,7 +11,7 @@ public interface FileSystemConfigurator {
 
     String getDefaultFsValue(Map<String, String> fsProperties);
 
-    List<Recipe> getRecipes(Map<String, String> fsProperties);
+    List<FileSystemScript> getScripts();
 
     FileSystemType getFileSystemType();
 }
