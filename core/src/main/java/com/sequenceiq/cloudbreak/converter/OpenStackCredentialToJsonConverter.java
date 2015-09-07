@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.converter;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.controller.json.CredentialResponse;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.controller.json.CredentialResponse;
 import com.sequenceiq.cloudbreak.controller.validation.OpenStackCredentialParam;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
@@ -25,6 +25,7 @@ public class OpenStackCredentialToJsonConverter extends AbstractConversionServic
         parameters.put(OpenStackCredentialParam.TENANT_NAME.getName(), source.getTenantName());
         parameters.put(OpenStackCredentialParam.ENDPOINT.getName(), source.getEndpoint());
         credentialJson.setParameters(parameters);
+        credentialJson.setLoginUserName(source.getLoginUserName());
         return credentialJson;
     }
 }

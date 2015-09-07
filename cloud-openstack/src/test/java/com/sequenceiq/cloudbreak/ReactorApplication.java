@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -101,7 +102,7 @@ public class ReactorApplication implements CommandLineRunner {
     }
 
     private LaunchStackRequest request() {
-        CloudCredential c = new CloudCredential("opencred", "somekey");
+        CloudCredential c = new CloudCredential("opencred", "somekey", "cloudbreak");
         c.putParameter("userName", userName);
         c.putParameter("password", password);
         c.putParameter("tenantName", tenantName);
@@ -134,7 +135,7 @@ public class ReactorApplication implements CommandLineRunner {
 
         CloudContext cloudContext = new CloudContext(0L, "stack-name_" + ts, "OPENSTACK", "TEST_USER");
 
-        CloudStack cs = new CloudStack(groups, network, security, image, "local");
+        CloudStack cs = new CloudStack(groups, network, security, image, "local", new HashMap<String, String>());
         LaunchStackRequest lr = new LaunchStackRequest(cloudContext, c, cs);
         LOGGER.debug("Launchrequest: {}", lr);
         return lr;

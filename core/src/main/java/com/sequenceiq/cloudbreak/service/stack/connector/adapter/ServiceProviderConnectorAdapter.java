@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
@@ -35,8 +34,6 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
-import com.sequenceiq.cloudbreak.cloud.event.setup.SshUserRequest;
-import com.sequenceiq.cloudbreak.cloud.event.setup.SshUserResponse;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -63,7 +60,6 @@ import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
-import com.sequenceiq.cloudbreak.service.stack.flow.ProvisioningService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -292,22 +288,6 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             }
         } catch (InterruptedException e) {
             LOGGER.error("Error while updating the stack: " + cloudContext, e);
-            throw new OperationException(e);
-        }
-    }
-
-    @Override
-    public String getSSHUser(Map<String, String> context) {
-        CloudContext cloudContext = new CloudContext(null, null, context.get(ProvisioningService.PLATFORM), null);
-        SshUserRequest<SshUserResponse> sshUserRequest = new SshUserRequest<>(cloudContext);
-        LOGGER.info("Triggering event: {}", sshUserRequest);
-        eventBus.notify(CloudPlatformRequest.selector(SshUserRequest.class), Event.wrap(sshUserRequest));
-        try {
-            SshUserResponse response = sshUserRequest.await();
-            LOGGER.info("Result: {}", response);
-            return response.getUser();
-        } catch (InterruptedException e) {
-            LOGGER.error(format("Error while retrieving ssh user for stack: %s", cloudContext), e);
             throw new OperationException(e);
         }
     }

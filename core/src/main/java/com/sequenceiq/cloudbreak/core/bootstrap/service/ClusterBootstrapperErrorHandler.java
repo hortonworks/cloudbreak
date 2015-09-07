@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
-import static java.util.Collections.singletonMap;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -41,7 +39,6 @@ import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
-import com.sequenceiq.cloudbreak.service.stack.flow.ProvisioningService;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 
 @Component
@@ -159,8 +156,7 @@ public class ClusterBootstrapperErrorHandler {
 
     private Map<InstanceGroupType, String> buildUserData(Stack stack, CloudPlatform platform, CloudPlatformConnector connector) {
         try {
-            return userDataBuilder.buildUserData(platform,
-                    tlsSecurityService.readPublicSshKey(stack.getId()), connector.getSSHUser(singletonMap(ProvisioningService.PLATFORM, platform.name())));
+            return userDataBuilder.buildUserData(platform, tlsSecurityService.readPublicSshKey(stack.getId()), stack.getCredential().getLoginUserName());
         } catch (CloudbreakSecuritySetupException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }

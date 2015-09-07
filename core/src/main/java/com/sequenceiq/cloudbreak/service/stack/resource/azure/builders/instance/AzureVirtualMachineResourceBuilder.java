@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.azure.builders.instance;
 
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_GCP_AND_AZURE_USER_NAME;
 import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateway;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.PORTS;
@@ -123,7 +122,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             props.put(IMAGENAME, azureStackUtil.getOsImageName(stack, azureLocation, storageIndex));
             props.put(IMAGESTOREURI, buildImageStoreUri(osStorageName, resourceName));
             props.put(HOSTNAME, resourceName);
-            props.put(USERNAME, CB_GCP_AND_AZURE_USER_NAME);
+            props.put(USERNAME, azureCredential.getLoginUserName());
             props.put(SSHKEYS, prepareKeys(provisionContextObject, buildResources, azureCredential));
             props.put(STORAGE_NAME, osStorageName);
             props.put(AFFINITYGROUP, provisionContextObject.getAffinityGroupName());
@@ -149,7 +148,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     private List<SshKey> prepareKeys(AzureProvisionContextObject provisionObject, List<Resource> resources, AzureCredential credential) throws Exception {
         List<SshKey> result = new ArrayList<>();
         result.add(new SshKey(azureStackUtil.createX509Certificate(credential).getSha1Fingerprint().toUpperCase(),
-                String.format("/home/%s/.ssh/authorized_keys", CB_GCP_AND_AZURE_USER_NAME)));
+                String.format("/home/%s/.ssh/authorized_keys", credential.getLoginUserName())));
         return result;
     }
 

@@ -8,10 +8,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -38,9 +39,9 @@ public class ArmTemplateBuilder {
     @Value("${cb.arm.parameter.path:" + CB_ARM_PARAMETER_PATH + "}")
     private String armTemplateParametersPath;
 
-    @Autowired
+    @Inject
     private Configuration freemarkerConfiguration;
-    @Autowired
+    @Inject
     private ArmClient armClient;
 
     public String build(String stackName, CloudCredential cloudCredential, CloudStack cloudStack) {
@@ -54,7 +55,7 @@ public class ArmTemplateBuilder {
             model.put("image_storage_container_name", ArmSetup.IMAGES);
             model.put("storage_container_name", ArmSetup.VHDS);
             model.put("storage_vhd_name", split[2]);
-            model.put("admin_user_name", "cloudbreak");
+            model.put("admin_user_name", cloudCredential.getLoginUserName());
             model.put("stackname", stackName);
             model.put("ssh_key", armCredentialView.getPublicKey());
             model.put("region", CloudRegion.valueOf(cloudStack.getRegion()).value());
@@ -65,6 +66,8 @@ public class ArmTemplateBuilder {
             model.put("port_protocol", cloudStack.getSecurity().getRules().get(0).getProtocol());
             model.put("corecustomData", base64EncodedUserData(cloudStack.getImage().getUserData(InstanceGroupType.CORE)));
             model.put("gatewaycustomData", base64EncodedUserData(cloudStack.getImage().getUserData(InstanceGroupType.GATEWAY)));
+            model.put("disablePasswordAuthentication", !armCredentialView.passwordAuthenticationRequired());
+            model.put("adminPassword", armCredentialView.getPassword());
             String generatedTemplate = processTemplateIntoString(freemarkerConfiguration.getTemplate(armTemplatePath, "UTF-8"), model);
             LOGGER.debug("Generated Arm template: {}", generatedTemplate);
             return generatedTemplate;

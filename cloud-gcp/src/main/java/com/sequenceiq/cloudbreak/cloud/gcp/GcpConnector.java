@@ -56,8 +56,4 @@ public class GcpConnector implements CloudConnector {
         return CloudPlatform.GCP.name();
     }
 
-    @Override
-    public String sshUser() {
-        return "cloudbreak";
-    }
 }

@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.EnvironmentVariableConfig;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -122,11 +121,6 @@ public class AzureConnector implements CloudPlatformConnector {
     public void updateAllowedSubnets(Stack stack, String gateWayUserData, String coreUserData) {
         UpdateAllowedSubnetsOperation updateOperation = buildAzureOperation(new UpdateAllowedSubnetsOperation.Builder(), stack).build();
         updateOperation.execute();
-    }
-
-    @Override
-    public String getSSHUser(Map<String, String> context) {
-        return EnvironmentVariableConfig.CB_GCP_AND_AZURE_USER_NAME;
     }
 
     @Override

@@ -15,7 +15,6 @@ import static com.sequenceiq.cloudbreak.domain.Status.STOP_FAILED;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_IN_PROGRESS;
-import static java.util.Collections.singletonMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -479,7 +478,7 @@ public class SimpleStackFacade implements StackFacade {
             CloudPlatform cloudPlatform = stack.cloudPlatform();
             CloudPlatformConnector connector = platformResolver.connector(cloudPlatform);
             Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(cloudPlatform,
-                    tlsSecurityService.readPublicSshKey(stack.getId()), connector.getSSHUser(singletonMap(ProvisioningService.PLATFORM, cloudPlatform.name())));
+                    tlsSecurityService.readPublicSshKey(stack.getId()), stack.getCredential().getLoginUserName());
             Map<String, Set<SecurityRule>> modifiedSubnets = getModifiedSubnetList(stack, actualContext.getAllowedSecurityRules());
             Set<SecurityRule> newSecurityRules = modifiedSubnets.get(UPDATED_SUBNETS);
             stack.getSecurityGroup().setSecurityRules(newSecurityRules);

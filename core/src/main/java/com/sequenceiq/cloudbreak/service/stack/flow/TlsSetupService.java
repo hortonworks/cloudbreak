@@ -2,12 +2,14 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_CERT_DIR;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_TLS_CERT_FILE;
-import static java.util.Collections.singletonMap;
+import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processTemplateIntoString;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -22,6 +24,7 @@ import com.amazonaws.util.Base64;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -31,8 +34,9 @@ import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
+import freemarker.template.Configuration;
+import freemarker.template.TemplateException;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.common.IOUtils;
 import net.schmizz.sshj.connection.channel.direct.Session;
@@ -66,6 +70,9 @@ public class TlsSetupService {
     @Inject
     private SshCheckerTask sshCheckerTask;
 
+    @Inject
+    private Configuration freemarkerConfiguration;
+
     @Value("#{'${cb.cert.dir:" + CB_CERT_DIR + "}' + '/' + '${cb.tls.cert.file:" + CB_TLS_CERT_FILE + "}'}")
     private String tlsCertificatePath;
 
@@ -75,7 +82,7 @@ public class TlsSetupService {
         LOGGER.info("SSH into gateway node to setup certificates on gateway.");
         Set<String> sshFingerprints = connector.getSSHFingerprints(stack, gateway.getInstanceId());
         LOGGER.info("Fingerprint has been determined: {}", sshFingerprints);
-        setupTls(stack, gateway.getPublicIp(), connector.getSSHUser(singletonMap(ProvisioningService.PLATFORM, cloudPlatform.name())), sshFingerprints);
+        setupTls(stack, gateway.getPublicIp(), stack.getCredential().getLoginUserName(), sshFingerprints);
     }
 
     private void setupTls(Stack stack, String publicIp, String user, Set<String> sshFingerprints) throws
@@ -86,13 +93,15 @@ public class TlsSetupService {
         HostKeyVerifier hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints, stack.cloudPlatform());
         try {
             waitForSsh(stack, publicIp, hostKeyVerifier, user, privateKeyLocation);
-            setupTemporarySsh(ssh, publicIp, hostKeyVerifier, user, privateKeyLocation);
-            uploadTlsSetupScript(ssh, publicIp);
+            setupTemporarySsh(ssh, publicIp, hostKeyVerifier, user, privateKeyLocation, stack.getCredential());
+            uploadTlsSetupScript(ssh, publicIp, stack.getCredential());
             executeTlsSetupScript(ssh);
-            removeTemporarySShKey(ssh, user);
+            removeTemporarySShKey(ssh, user, stack.getCredential());
             downloadAndSavePrivateKey(stack, ssh);
         } catch (IOException e) {
             throw new CloudbreakException("Failed to setup TLS through temporary SSH.", e);
+        } catch (TemplateException e) {
+            throw new CloudbreakException("Failed to generate TLS setup script.", e);
         } finally {
             try {
                 ssh.disconnect();
@@ -110,21 +119,32 @@ public class TlsSetupService {
                 SSH_MAX_ATTEMPTS_FOR_HOSTS);
     }
 
-    private void setupTemporarySsh(SSHClient ssh, String publicIp, HostKeyVerifier hostKeyVerifier, String user, String privateKeyLocation)
+    private void setupTemporarySsh(SSHClient ssh, String ip, HostKeyVerifier hostKeyVerifier, String user, String privateKeyLocation, Credential credential)
         throws IOException {
         LOGGER.info("Setting up temporary ssh...");
         ssh.addHostKeyVerifier(hostKeyVerifier);
-        ssh.connect(publicIp, SSH_PORT);
-        ssh.authPublickey(user, privateKeyLocation);
+        ssh.connect(ip, SSH_PORT);
+        if (credential.passwordAuthenticationRequired()) {
+            ssh.authPassword(user, credential.getLoginPassword());
+        } else {
+            ssh.authPublickey(user, privateKeyLocation);
+        }
         String remoteTlsCertificatePath = "/tmp/cb-client.pem";
         ssh.newSCPFileTransfer().upload(tlsCertificatePath, remoteTlsCertificatePath);
         LOGGER.info("Temporary ssh setup finished succesfully, public key is uploaded to {}", remoteTlsCertificatePath);
     }
 
-    private void uploadTlsSetupScript(SSHClient ssh, String publicIp) throws IOException {
+    private void uploadTlsSetupScript(SSHClient ssh, String publicIp, Credential credential) throws IOException, TemplateException {
         LOGGER.info("Uploading tls-setup.sh to the gateway...");
-        String tlsSetupScript = FileReaderUtils.readFileFromClasspath("init/tls-setup.sh").replace("$PUBLIC_IP", publicIp);
-        final byte[] tlsScriptBytes = tlsSetupScript.getBytes(StandardCharsets.UTF_8);
+        Map<String, Object> model = new HashMap<>();
+        model.put("publicIp", publicIp);
+        model.put("username", credential.getLoginUserName());
+        model.put("sudopre", credential.passwordAuthenticationRequired() ? String.format("echo '%s'|", credential.getLoginPassword()) : "");
+        model.put("sudocheck", credential.passwordAuthenticationRequired() ? "-S" : "");
+
+        String generatedTemplate = processTemplateIntoString(freemarkerConfiguration.getTemplate("init/tls-setup.sh", "UTF-8"), model);
+
+        final byte[] tlsScriptBytes = generatedTemplate.getBytes(StandardCharsets.UTF_8);
         InMemorySourceFile scriptFile = new InMemorySourceFile() {
             @Override
             public String getName() {
@@ -142,7 +162,7 @@ public class TlsSetupService {
             }
         };
         ssh.newSCPFileTransfer().upload(scriptFile, "/tmp/tls-setup.sh");
-        LOGGER.info("tls-setup.sh uploaded to /tmp/tls-setup.sh. Content: {}", tlsSetupScript);
+        LOGGER.info("tls-setup.sh uploaded to /tmp/tls-setup.sh. Content: {}", generatedTemplate);
     }
 
     private void executeTlsSetupScript(SSHClient ssh) throws IOException, CloudbreakException {
@@ -154,13 +174,15 @@ public class TlsSetupService {
         }
     }
 
-    private void removeTemporarySShKey(SSHClient ssh, String user) throws IOException, CloudbreakException {
-        LOGGER.info("Removing temporary sshkey from the gateway...");
-        String removeCommand = String.format("sudo sed -i '/#tmpssh_start/,/#tmpssh_end/{s/./ /g}' /home/%s/.ssh/authorized_keys", user);
-        int exitStatus = executeSshCommand(ssh, removeCommand, false, "");
-        LOGGER.info("Temporary sshkey removed from the gateway, exitcode: {}", exitStatus);
-        if (exitStatus != 0) {
-            throw new CloudbreakException(String.format("Failed to remove temp SSH key. Error code: %s", exitStatus));
+    private void removeTemporarySShKey(SSHClient ssh, String user, Credential credential) throws IOException, CloudbreakException {
+        if (!credential.passwordAuthenticationRequired()) {
+            LOGGER.info("Removing temporary sshkey from the gateway...");
+            String removeCommand = String.format("sudo sed -i '/#tmpssh_start/,/#tmpssh_end/{s/./ /g}' /home/%s/.ssh/authorized_keys", user);
+            int exitStatus = executeSshCommand(ssh, removeCommand, false, "");
+            LOGGER.info("Temporary sshkey removed from the gateway, exitcode: {}", exitStatus);
+            if (exitStatus != 0) {
+                throw new CloudbreakException(String.format("Failed to remove temp SSH key. Error code: %s", exitStatus));
+            }
         }
     }
 

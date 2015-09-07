@@ -47,7 +47,7 @@ public class StackToCloudStackConverter {
         Image image = buildImage(stack, coreUserData, gateWayUserData);
         Network network = buildNetwork(stack);
         Security security = buildSecurity(stack);
-        return new CloudStack(instanceGroups, network, security, image, stack.getRegion());
+        return new CloudStack(instanceGroups, network, security, image, stack.getRegion(), stack.getParameters());
     }
 
     public List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, Set<String> deleteRequests) {

@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import static com.sequenceiq.cloudbreak.domain.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.domain.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_IN_PROGRESS;
-import static java.util.Collections.singletonMap;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -189,8 +188,7 @@ public class StackScalingService {
 
     private Map<InstanceGroupType, String> buildUserData(Stack stack, CloudPlatform platform, CloudPlatformConnector connector)
             throws CloudbreakSecuritySetupException {
-        return userDataBuilder.buildUserData(platform,
-                    tlsSecurityService.readPublicSshKey(stack.getId()), connector.getSSHUser(singletonMap(ProvisioningService.PLATFORM, platform.name())));
+        return userDataBuilder.buildUserData(platform, tlsSecurityService.readPublicSshKey(stack.getId()), stack.getCredential().getLoginUserName());
     }
 
     private void updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) throws CloudbreakSecuritySetupException {

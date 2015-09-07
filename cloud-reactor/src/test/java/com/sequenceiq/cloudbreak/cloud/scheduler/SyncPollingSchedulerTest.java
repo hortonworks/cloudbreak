@@ -99,7 +99,7 @@ public class SyncPollingSchedulerTest {
         private BooleanStateConnector booleanStateConnector;
 
         public PollTestBooleanStateTask(BooleanStateConnector booleanStateConnector) {
-            super(new AuthenticatedContext(new CloudContext(ReactorTestUtil.stack()), new CloudCredential("a", "b")));
+            super(new AuthenticatedContext(new CloudContext(ReactorTestUtil.stack()), new CloudCredential("a", "b", "cloudbreak")));
             this.booleanStateConnector = booleanStateConnector;
         }
 

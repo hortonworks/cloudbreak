@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.converter;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.controller.json.CredentialResponse;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.controller.json.CredentialResponse;
 import com.sequenceiq.cloudbreak.controller.validation.RequiredAzureCredentialParam;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -24,6 +24,7 @@ public class AzureCredentialToJsonConverter extends AbstractConversionServiceAwa
         Map<String, Object> params = new HashMap<>();
         params.put(RequiredAzureCredentialParam.SUBSCRIPTION_ID.getName(), source.getSubscriptionId());
         credentialJson.setParameters(params);
+        credentialJson.setLoginUserName(source.getLoginUserName());
         return credentialJson;
     }
 }
