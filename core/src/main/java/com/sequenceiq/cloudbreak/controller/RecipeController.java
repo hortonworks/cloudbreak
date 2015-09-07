@@ -141,5 +141,4 @@ public class RecipeController {
         return (Set<RecipeResponse>) conversionService.convert(recipes, TypeDescriptor.forObject(recipes),
                 TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(RecipeResponse.class)));
     }
-
 }

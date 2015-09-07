@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import static com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.RecipeModelDescription;
+
 import java.util.Map;
 
 import javax.validation.constraints.NotNull;
@@ -10,12 +12,11 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
-import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.RecipeModelDescription;
 import com.sequenceiq.cloudbreak.controller.validation.ValidPlugin;
 import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
-public abstract class RecipeBase implements JsonEntity {
+abstract class RecipeBase implements JsonEntity {
     @Size(max = 100, min = 1, message = "The length of the recipe's name has to be in range of 1 to 100")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "The recipe's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
@@ -25,12 +26,13 @@ public abstract class RecipeBase implements JsonEntity {
     @Size(max = 1000)
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
+
     @JsonPropertyDescription("Recipe timeout in minutes.")
     @ApiModelProperty(RecipeModelDescription.TIMEOUT)
     private Integer timeout;
 
     @ValidPlugin
-    @ApiModelProperty(value = RecipeModelDescription.PLUGINS, required = true)
+    @ApiModelProperty(value = ModelDescriptions.RecipeModelDescription.PLUGINS, required = true)
     private Map<String, PluginExecutionType> plugins;
 
     @JsonProperty("properties")
@@ -53,12 +55,12 @@ public abstract class RecipeBase implements JsonEntity {
         this.description = description;
     }
 
-    public Map<String, String> getProperties() {
-        return properties;
+    public Integer getTimeout() {
+        return timeout;
     }
 
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
+    public void setTimeout(Integer timeout) {
+        this.timeout = timeout;
     }
 
     public Map<String, PluginExecutionType> getPlugins() {
@@ -69,11 +71,11 @@ public abstract class RecipeBase implements JsonEntity {
         this.plugins = plugins;
     }
 
-    public Integer getTimeout() {
-        return timeout;
+    public Map<String, String> getProperties() {
+        return properties;
     }
 
-    public void setTimeout(Integer timeout) {
-        this.timeout = timeout;
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
     }
 }

@@ -20,6 +20,7 @@ import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
 import javax.validation.metadata.ConstraintDescriptor;
 
+import org.apache.commons.codec.binary.Base64;
 import org.hibernate.validator.internal.engine.constraintvalidation.ConstraintValidatorContextImpl;
 import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.junit.Before;
@@ -61,6 +62,7 @@ public class PluginValidatorTest {
         plugins.put("http://github.com/user/consul-plugins-plugin1.git", PluginExecutionType.ALL_NODES);
         plugins.put("https://github.com/user/consul-plugins-plugin1.git", PluginExecutionType.ALL_NODES);
         plugins.put("git://github.com/user/consul-plugins-plugin1.git", PluginExecutionType.ALL_NODES);
+        plugins.put("base64://" + Base64.encodeBase64String("plugin.toml:\nrecipe-pre-install:".getBytes()), PluginExecutionType.ALL_NODES);
         assertEquals(underTest.isValid(plugins, constraintValidatorContext), true);
     }
 
@@ -78,6 +80,20 @@ public class PluginValidatorTest {
     public void inValidPluginUrlJsonWillReturnFalse() {
         Map<String, PluginExecutionType> plugins = new HashMap<>();
         plugins.put("asd://github.com/user/plugin1.git", PluginExecutionType.ALL_NODES);
+        assertEquals(underTest.isValid(plugins, constraintValidatorContext), false);
+    }
+
+    @Test
+    public void inValidBase64MissingScriptWillReturnFalse() {
+        Map<String, PluginExecutionType> plugins = new HashMap<>();
+        plugins.put("base64://" + Base64.encodeBase64String("plugin.toml:".getBytes()), PluginExecutionType.ALL_NODES);
+        assertEquals(underTest.isValid(plugins, constraintValidatorContext), false);
+    }
+
+    @Test
+    public void inValidBase64MissingPluginDotTomlWillReturnFalse() {
+        Map<String, PluginExecutionType> plugins = new HashMap<>();
+        plugins.put("base64://" + Base64.encodeBase64String("recipe-pre-install:\nrecipe-post-install:".getBytes()), PluginExecutionType.ALL_NODES);
         assertEquals(underTest.isValid(plugins, constraintValidatorContext), false);
     }
 
