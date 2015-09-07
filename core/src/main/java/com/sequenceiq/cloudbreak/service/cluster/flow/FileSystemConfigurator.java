@@ -11,7 +11,7 @@ public interface FileSystemConfigurator {
 
     String getDefaultFsValue(Map<String, String> fsProperties);
 
-    List<FileSystemScript> getScripts();
+    List<RecipeScript> getScripts();
 
     FileSystemType getFileSystemType();
 }

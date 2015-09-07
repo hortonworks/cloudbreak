@@ -1,7 +1,4 @@
 package com.sequenceiq.cloudbreak.controller.json;
-
-import static com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.RecipeModelDescription;
-
 import java.util.Map;
 
 import javax.validation.constraints.NotNull;

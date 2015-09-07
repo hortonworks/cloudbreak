@@ -55,6 +55,8 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
+import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
+import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
@@ -141,6 +143,8 @@ public class AmbariClusterConnector {
     private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
     @Inject
     private BlueprintProcessor blueprintProcessor;
+    @Inject
+    private RecipeBuilder recipeBuilder;
 
     private enum Msg {
         AMBARI_CLUSTER_RESETTING_AMBARI_DATABASE("ambari.cluster.resetting.ambari.database"),
@@ -196,12 +200,30 @@ public class AmbariClusterConnector {
 
             if (fs != null) {
                 FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(fs.getType());
-                List<FileSystemScript> fileSystemScripts = fsConfigurator.getScripts();
-                // List<Recipe> fsRecipes = recipeBuilder.buildRecipes(fileSystemScripts, fs.getProperties())
-                LOGGER.info(fileSystemScripts.toString());
+                List<RecipeScript> recipeScripts = fsConfigurator.getScripts();
+                List<Recipe> fsRecipes = recipeBuilder.buildRecipes(recipeScripts, fs.getProperties());
+                for (Recipe recipe : fsRecipes) {
+                    boolean oneNode = false;
+                    for (Entry<String, PluginExecutionType> pluginEntries : recipe.getPlugins().entrySet()) {
+                        if (PluginExecutionType.ONE_NODE.equals(pluginEntries.getValue())) {
+                            oneNode = true;
+                        }
+                    }
+                    if (oneNode) {
+                        for (HostGroup hostGroup : hostGroups) {
+                            Set<String> components = blueprintProcessor.getServicesInHostgroup(blueprintText, hostGroup.getName());
+                            if (components.contains("HDFS_CLIENT")) {
+                                hostGroup.addRecipe(recipe);
+                                break;
+                            }
+                        }
+                    } else {
+                        for (HostGroup hostGroup : hostGroups) {
+                            hostGroup.addRecipe(recipe);
+                        }
+                    }
+                }
             }
-
-            // add fsRecipes to hostgroups
 
             boolean recipesFound = recipesFound(hostGroups);
 
@@ -213,13 +235,13 @@ public class AmbariClusterConnector {
             PollingResult pollingResult = waitForClusterInstall(stack, ambariClient);
             checkPollingResult(pollingResult, "Cluster installation failed. Polling result: " + pollingResult.name());
 
+            if (recipesFound) {
+                recipeEngine.executePostInstall(stack);
+            }
             pollingResult = runSmokeTest(stack, ambariClient);
             checkPollingResult(pollingResult, "Ambari Smoke tests failed. Polling result: " + pollingResult.name());
 
             cluster = handleClusterCreationSuccess(stack, cluster);
-            if (recipesFound) {
-                recipeEngine.executePostInstall(stack);
-            }
             return cluster;
         } catch (CancellationException cancellationException) {
             throw cancellationException;

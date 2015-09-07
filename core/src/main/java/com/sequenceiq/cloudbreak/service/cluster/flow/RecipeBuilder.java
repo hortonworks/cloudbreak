@@ -7,6 +7,6 @@ import com.sequenceiq.cloudbreak.domain.Recipe;
 
 public interface RecipeBuilder {
 
-    List<Recipe> buildRecipes(List<FileSystemScript> fileSystemScripts, Map<String, String> properties)
+    List<Recipe> buildRecipes(List<RecipeScript> recipeScripts, Map<String, String> properties);
 
 }
