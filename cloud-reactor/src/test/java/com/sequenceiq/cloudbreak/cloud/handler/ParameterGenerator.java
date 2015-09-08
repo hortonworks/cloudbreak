@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.handler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -36,7 +37,7 @@ public class ParameterGenerator {
     }
 
     public CloudCredential createCloudCredential() {
-        CloudCredential c = new CloudCredential("opencred", "public_key");
+        CloudCredential c = new CloudCredential("opencred", "public_key", "cloudbreak");
         c.putParameter("userName", "userName");
         c.putParameter("password", "password");
         c.putParameter("tenantName", "tenantName");
@@ -68,7 +69,7 @@ public class ParameterGenerator {
         List<SecurityRule> rules = Arrays.asList(new SecurityRule("0.0.0.0/0", new String[]{"22", "443"}, "tcp"));
         Security security = new Security(rules);
 
-        return new CloudStack(groups, network, security, image, "region");
+        return new CloudStack(groups, network, security, image, "region", new HashMap<String, String>());
     }
 
     public String getSshFingerprint() {

@@ -242,14 +242,19 @@
                     "osProfile": {
                         "computername": "[concat('vm', '${instanceGroup.name?replace('_', '')}', '${instance.privateId}')]",
                         "adminUsername": "[parameters('adminUsername')]",
+                        <#if disablePasswordAuthentication == false>
+                        "adminPassword": "${adminPassword}",
+                        </#if>
                         "linuxConfiguration": {
-                            "disablePasswordAuthentication": "true",
+                            "disablePasswordAuthentication": "${disablePasswordAuthentication?c}",
                             "ssh": {
                                 "publicKeys": [
+                                 <#if disablePasswordAuthentication == true>
                                     {
                                         "path": "[variables('sshKeyPath')]",
                                         "keyData": "[parameters('sshKeyData')]"
                                     }
+                                 </#if>
                                 ]
                             }
                         },

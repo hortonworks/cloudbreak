@@ -135,6 +135,7 @@ public class TestUtil {
         azureCredential.setArchived(false);
         azureCredential.setSubscriptionId("subscription-id");
         azureCredential.setId(1L);
+        azureCredential.setLoginUserName("cb");
         return azureCredential;
     }
 
@@ -146,6 +147,7 @@ public class TestUtil {
         awsCredential.setRoleArn("rolearn");
         awsCredential.setDescription(DUMMY_DESCRIPTION);
         awsCredential.setId(1L);
+        awsCredential.setLoginUserName("cb");
         awsCredential.setName(DUMMY_NAME);
         return awsCredential;
     }
@@ -158,6 +160,7 @@ public class TestUtil {
         credential.setPublicKey(AZURE_PUB_KEY);
         credential.setId(1L);
         credential.setName(DUMMY_NAME);
+        credential.setLoginUserName("cb");
         credential.setPublicInAccount(true);
         credential.setDescription(DUMMY_DESCRIPTION);
         return credential;
@@ -171,6 +174,7 @@ public class TestUtil {
         credential.setTenantName("dummyTenant");
         credential.setDescription(DUMMY_DESCRIPTION);
         credential.setId(1L);
+        credential.setLoginUserName("cb");
         credential.setName(DUMMY_NAME);
         credential.setPublicInAccount(true);
         return credential;

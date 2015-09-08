@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.cloud.Setup;
 public class OpenStackConnector implements CloudConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackConnector.class);
-    private static final String SSH_USER = "ec2-user";
 
     @Inject
     private OpenStackCredentialConnector credentialConnector;
@@ -35,11 +34,6 @@ public class OpenStackConnector implements CloudConnector {
     @Override
     public String platform() {
         return OpenStackConstants.OPENSTACK;
-    }
-
-    @Override
-    public String sshUser() {
-        return SSH_USER;
     }
 
     @Override

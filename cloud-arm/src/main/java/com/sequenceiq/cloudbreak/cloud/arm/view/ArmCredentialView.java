@@ -34,6 +34,11 @@ public class ArmCredentialView {
         return cloudCredential.getParameter("tenantId", String.class);
     }
 
+    public boolean passwordAuthenticationRequired() {
+        return cloudCredential.getPublicKey().startsWith("Basic: ");
+    }
 
-
+    public String getPassword() {
+        return cloudCredential.getPublicKey().replaceAll("Basic: ", "");
+    }
 }

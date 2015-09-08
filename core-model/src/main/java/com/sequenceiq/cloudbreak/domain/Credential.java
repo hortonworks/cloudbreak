@@ -70,6 +70,8 @@ public abstract class Credential {
     private String owner;
     private String account;
 
+    private String loginUserName;
+
     private boolean publicInAccount;
 
     @Column(columnDefinition = "TEXT")
@@ -144,7 +146,23 @@ public abstract class Credential {
         return archived;
     }
 
+    public String getLoginUserName() {
+        return loginUserName;
+    }
+
+    public void setLoginUserName(String loginUserName) {
+        this.loginUserName = loginUserName;
+    }
+
     public void setArchived(boolean archived) {
         this.archived = archived;
+    }
+
+    public boolean passwordAuthenticationRequired() {
+        return publicKey.startsWith("Basic:");
+    }
+
+    public String getLoginPassword() {
+        return publicKey.replaceAll("Basic:", "").trim();
     }
 }

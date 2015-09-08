@@ -121,7 +121,6 @@ public class AwsConnector implements CloudPlatformConnector {
     private static final int INFINITE_ATTEMPTS = -1;
     private static final String CLOUDBREAK_EBS_SNAPSHOT = "cloudbreak-ebs-snapshot";
     private static final int SNAPSHOT_VOLUME_SIZE = 10;
-    private static final String DEFAULT_SSH_USER = "ec2-user";
 
     private static final List<String> SUSPENDED_PROCESSES = Arrays.asList("Launch", "HealthCheck", "ReplaceUnhealthy", "AZRebalance", "AlarmNotification",
             "ScheduledActions", "AddToLoadBalancer", "RemoveFromLoadBalancerLowPriority");
@@ -363,11 +362,6 @@ public class AwsConnector implements CloudPlatformConnector {
             throw new AwsResourceException(String.format("CloudFormation update failed. polling result: '%s', stack id: '%s' ",
                     pollingResult, stack.getId()));
         }
-    }
-
-    @Override
-    public String getSSHUser(Map<String, String> context) {
-        return DEFAULT_SSH_USER;
     }
 
     @Override

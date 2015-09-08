@@ -56,8 +56,6 @@ public class EnvironmentVariableConfig {
     public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos71-amb210-2015-09-08-centos71.tar.gz";
     public static final String CB_AZURE_RM_IMAGE = "https://sequenceiqimages.blob.core.windows.net/images/cb-centos71-amb210-2015-09-08-centos7_2015-September-8_9-28-os-2015-09-08.vhd";
 
-    public static final String CB_GCP_AND_AZURE_USER_NAME = "cloudbreak";
-
     public static final String CB_ARM_TEMPLATE_PATH = "templates/arm-v2.ftl";
     public static final String CB_ARM_PARAMETER_PATH = "templates/parameters.ftl";
 

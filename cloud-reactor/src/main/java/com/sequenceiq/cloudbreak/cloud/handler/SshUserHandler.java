@@ -6,11 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SshUserRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SshUserResponse;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 import reactor.bus.Event;
 
@@ -32,8 +32,7 @@ public class SshUserHandler implements CloudPlatformEventHandler<SshUserRequest>
         LOGGER.info("Received event: {}", event);
         SshUserRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
-        String platform = cloudContext.getPlatform();
-        CloudConnector connector = cloudPlatformConnectors.get(platform);
-        request.getResult().onNext(new SshUserResponse(cloudContext, connector.sshUser()));
+        CloudCredential cloudCredential = request.getCloudCredential();
+        request.getResult().onNext(new SshUserResponse(cloudContext, cloudCredential.getLoginUserName()));
     }
 }

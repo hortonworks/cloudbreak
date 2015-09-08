@@ -1,15 +1,16 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.wordnik.swagger.annotations.ApiModel;
-import com.wordnik.swagger.annotations.ApiModelProperty;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import java.util.HashMap;
-import java.util.Map;
+
+import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 public class CredentialBase implements JsonEntity {
@@ -26,6 +27,8 @@ public class CredentialBase implements JsonEntity {
     @Size(max = 1000)
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
+    @ApiModelProperty(ModelDescriptions.CredentialModelDescription.LOGIN_USERNAME)
+    private String loginUserName;
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.CredentialModelDescription.PUBLIC_KEY, required = true)
     private String publicKey;
@@ -68,5 +71,13 @@ public class CredentialBase implements JsonEntity {
 
     public void setParameters(Map<String, Object> parameters) {
         this.parameters = parameters;
+    }
+
+    public String getLoginUserName() {
+        return loginUserName;
+    }
+
+    public void setLoginUserName(String loginUserName) {
+        this.loginUserName = loginUserName;
     }
 }

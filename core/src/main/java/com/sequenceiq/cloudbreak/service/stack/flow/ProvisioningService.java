@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static java.util.Collections.singletonMap;
-
 import java.util.Map;
 import java.util.Set;
 
@@ -45,7 +43,7 @@ public class ProvisioningService {
         stack = stackRepository.findOneWithLists(stack.getId());
         CloudPlatformConnector connector = cloudPlatformResolver.connector(cloudPlatform);
         Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(cloudPlatform, tlsSecurityService.readPublicSshKey(stack.getId()),
-                connector.getSSHUser(singletonMap(PLATFORM, cloudPlatform.name())));
+                stack.getCredential().getLoginUserName());
         Set<Resource> resources = connector.buildStack(stack, userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE), setupProperties);
         return new ProvisionComplete(cloudPlatform, stack.getId(), resources);
     }

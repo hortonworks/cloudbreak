@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class CloudStack {
 
@@ -10,13 +11,15 @@ public class CloudStack {
     private Security security;
     private Image image;
     private String region;
+    private Map<String, String> parameters;
 
-    public CloudStack(List<Group> groups, Network network, Security security, Image image, String region) {
+    public CloudStack(List<Group> groups, Network network, Security security, Image image, String region, Map<String, String> parameters) {
         this.groups = groups;
         this.network = network;
         this.security = security;
         this.image = image;
         this.region = region;
+        this.parameters = parameters;
     }
 
     public List<Group> getGroups() {
@@ -37,6 +40,10 @@ public class CloudStack {
 
     public String getRegion() {
         return region;
+    }
+
+    public Map<String, String> getParameters() {
+        return parameters;
     }
 
     @Override

@@ -12,5 +12,4 @@ public interface CloudConnector extends CloudPlatformAware {
 
     InstanceConnector instances();
 
-    String sshUser();
 }

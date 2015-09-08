@@ -53,7 +53,7 @@ public class ArmTemplateBuilderTest {
     private CloudCredential createCloudCredential() {
         Map<String, Object> credentialMap = new HashMap<>();
         credentialMap.put("sshKey", "sshkey....");
-        return new CloudCredential("testcredential", "pubkey", credentialMap);
+        return new CloudCredential("testcredential", "pubkey", "cloudbreak", credentialMap);
     }
 
     private CloudStack createCloudStack() {
@@ -78,7 +78,7 @@ public class ArmTemplateBuilderTest {
 
         Image image = new Image("https://krisztian.blob.core.windows.net/images/cb-centos71-amb210-2015-07-22-b1470.vhd");
 
-        return new CloudStack(asList(cbgateway, master, slave1), network, security, image, "West US");
+        return new CloudStack(asList(cbgateway, master, slave1), network, security, image, "West US", new HashMap<String, String>());
     }
 
     @Ignore

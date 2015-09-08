@@ -22,6 +22,7 @@ public class ModelDescriptions {
 
     public static class CredentialModelDescription {
         public static final String PUBLIC_KEY = "public key for accessing instances";
+        public static final String LOGIN_USERNAME = "authentication name for machines";
         public static final String PARAMETERS = "cloud specific parameters for credential";
     }
 

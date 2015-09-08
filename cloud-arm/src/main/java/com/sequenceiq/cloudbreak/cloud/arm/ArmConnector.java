@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.cloud.Setup;
 public class ArmConnector implements CloudConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArmConnector.class);
-    private static final String SSH_USER = "cloudbreak";
 
     @Inject
     private ArmClient armClient;
@@ -36,11 +35,6 @@ public class ArmConnector implements CloudConnector {
     @Override
     public String platform() {
         return ArmConstants.AZURE_RM;
-    }
-
-    @Override
-    public String sshUser() {
-        return SSH_USER;
     }
 
     @Override
