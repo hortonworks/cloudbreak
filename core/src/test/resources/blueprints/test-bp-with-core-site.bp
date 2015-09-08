@@ -1,8 +1,9 @@
 {
   "configurations": [
     {
-      "nagios-env": {
-        "nagios_contact": "admin@localhost"
+      "core-site": {
+        "fs.trash.interval": "360",
+        "io.file.buffer.size": "131072"
       }
     }
   ],
