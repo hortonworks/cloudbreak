@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.init;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -10,9 +11,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 @Component
@@ -24,6 +28,9 @@ public class CloudbreakInitStates {
 
     @Inject
     private ClusterRepository clusterRepository;
+
+    @Inject
+    private InstanceMetaDataRepository instanceMetaDataRepository;
 
     @PostConstruct
     public void resetInProgressStates() {
@@ -46,8 +53,17 @@ public class CloudbreakInitStates {
             LOGGER.info("Stack {} status is updated from {} to {} at CB start.", stack.getId(), stack.getStatus(), Status.WAIT_FOR_SYNC);
             stack.setStatus(Status.WAIT_FOR_SYNC);
             stackRepository.save(stack);
+            cleanInstanceMetaData(instanceMetaDataRepository.findAllInStack(stack.getId()));
         }
     }
 
+    private void cleanInstanceMetaData(Set<InstanceMetaData> metadataSet) {
+        for (InstanceMetaData metadata : metadataSet) {
+            if (InstanceStatus.REQUESTED.equals(metadata.getInstanceStatus()) && metadata.getInstanceId() == null) {
+                LOGGER.info("InstanceMetaData [privateId: '{}'] is deleted at CB start.", metadata.getPrivateId());
+                instanceMetaDataRepository.delete(metadata);
+            }
+        }
+    }
 
 }
