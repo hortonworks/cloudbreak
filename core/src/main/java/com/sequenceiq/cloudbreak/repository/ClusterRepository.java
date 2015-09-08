@@ -20,4 +20,6 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     List<Cluster> findByStatus(@Param("status") Status status);
 
+    Cluster findByNameInAccount(@Param("name") String name, @Param("account") String account);
+
 }

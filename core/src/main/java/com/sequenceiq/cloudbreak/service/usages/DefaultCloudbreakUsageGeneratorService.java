@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventSpecifications;
 import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
+import com.sequenceiq.cloudbreak.repository.FileSystemRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 
@@ -48,6 +49,9 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
 
     @Inject
     private TemplateRepository templateRepository;
+
+    @Inject
+    private FileSystemRepository fileSystemRepository;
 
     @Override
     @Scheduled(cron = "0 01 0 * * *")
@@ -110,8 +114,15 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
         for (Long stackId : stackIds) {
             Stack stack = stackRepository.findById(stackId);
             if (stack != null && stack.isDeleteCompleted()) {
+                Long fsId = null;
+                if (stack.getCluster() != null && stack.getCluster().getFileSystem() != null) {
+                    fsId = stack.getCluster().getFileSystem().getId();
+                }
                 stackRepository.delete(stack);
                 deleteTemplatesOfStack(stack);
+                if (fsId != null) {
+                    fileSystemRepository.delete(fsId);
+                }
                 eventRepository.delete(eventRepository.findCloudbreakEventsForStack(stackId));
             }
         }

@@ -50,7 +50,11 @@ import javax.persistence.UniqueConstraint;
                 name = "Cluster.findByStatus",
                 query = "SELECT c FROM Cluster c "
                         + "WHERE c.status= :status"
-        )
+        ),
+        @NamedQuery(
+                name = "Cluster.findByNameInAccount",
+                query = "SELECT c FROM Cluster c "
+                        + "WHERE c.name= :name and c.account= :account")
 })
 public class Cluster implements ProvisionEntity {
 

@@ -147,6 +147,9 @@ public class AmbariClusterService implements ClusterService {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster()
                     .getName()));
         }
+        if (clusterRepository.findByNameInAccount(cluster.getName(), user.getAccount()) != null) {
+            throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName());
+        }
         if (cluster.getFileSystem() != null) {
             fileSystemRepository.save(cluster.getFileSystem());
         }

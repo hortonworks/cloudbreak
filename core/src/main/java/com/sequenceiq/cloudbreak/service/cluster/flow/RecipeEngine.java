@@ -48,8 +48,15 @@ public class RecipeEngine {
     private TlsSecurityService tlsSecurityService;
 
     public void setupRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakSecuritySetupException {
+        uploadConsulRecipes(stack, getRecipesInHostGroups(hostGroups));
+        setupProperties(stack, hostGroups);
+        Set<InstanceMetaData> instances = instanceMetadataRepository.findNotTerminatedForStack(stack.getId());
+        installPlugins(stack, hostGroups, instances);
+    }
+
+    private void uploadConsulRecipes(Stack stack, Iterable<Recipe> recipes) throws CloudbreakSecuritySetupException {
         TLSClientConfig clientConfig = null;
-        for (Recipe recipe : getRecipesInHostGroups(hostGroups)) {
+        for (Recipe recipe : recipes) {
             for (String plugin : recipe.getPlugins().keySet()) {
                 if (plugin.startsWith("base64://")) {
                     Map<String, String> keyValues = new HashMap<>();
@@ -63,12 +70,10 @@ public class RecipeEngine {
                 }
             }
         }
-        setupProperties(stack, hostGroups);
-        Set<InstanceMetaData> instances = instanceMetadataRepository.findNotTerminatedForStack(stack.getId());
-        installPlugins(stack, hostGroups, instances);
     }
 
     public void setupRecipesOnHosts(Stack stack, Set<Recipe> recipes, Set<HostMetadata> hostMetadata) throws CloudbreakSecuritySetupException {
+        uploadConsulRecipes(stack, recipes);
         Set<InstanceMetaData> instances = instanceMetadataRepository.findNotTerminatedForStack(stack.getId());
         installPluginsOnHosts(stack, recipes, hostMetadata, instances, true);
     }

@@ -175,13 +175,7 @@ public class AmbariClusterConnector {
             String blueprintText = cluster.getBlueprint().getBlueprintText();
             FileSystem fs = cluster.getFileSystem();
             if (fs != null) {
-                FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(fs.getType());
-                List<BlueprintConfigurationEntry> bpConfigEntries = fsConfigurator.getBlueprintProperties(fs.getProperties());
-                if (fs.isDefaultFs()) {
-                    String defaultFsValue = fsConfigurator.getDefaultFsValue(fs.getProperties());
-                    blueprintText = blueprintProcessor.addDefaultFs(blueprintText, defaultFsValue);
-                }
-                blueprintText = blueprintProcessor.addConfigEntries(blueprintText, bpConfigEntries);
+                blueprintText = extendBlueprintWithFsConfig(blueprintText, fs);
             }
 
             TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
@@ -199,30 +193,7 @@ public class AmbariClusterConnector {
             checkPollingResult(waitForHostsResult, "Error while waiting for hosts to connect. Polling result: " + waitForHostsResult.name());
 
             if (fs != null) {
-                FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(fs.getType());
-                List<RecipeScript> recipeScripts = fsConfigurator.getScripts();
-                List<Recipe> fsRecipes = recipeBuilder.buildRecipes(recipeScripts, fs.getProperties());
-                for (Recipe recipe : fsRecipes) {
-                    boolean oneNode = false;
-                    for (Entry<String, PluginExecutionType> pluginEntries : recipe.getPlugins().entrySet()) {
-                        if (PluginExecutionType.ONE_NODE.equals(pluginEntries.getValue())) {
-                            oneNode = true;
-                        }
-                    }
-                    if (oneNode) {
-                        for (HostGroup hostGroup : hostGroups) {
-                            Set<String> components = blueprintProcessor.getServicesInHostgroup(blueprintText, hostGroup.getName());
-                            if (components.contains("HDFS_CLIENT")) {
-                                hostGroup.addRecipe(recipe);
-                                break;
-                            }
-                        }
-                    } else {
-                        for (HostGroup hostGroup : hostGroups) {
-                            hostGroup.addRecipe(recipe);
-                        }
-                    }
-                }
+                addFsRecipes(blueprintText, fs, hostGroups);
             }
 
             boolean recipesFound = recipesFound(hostGroups);
@@ -273,6 +244,9 @@ public class AmbariClusterConnector {
         HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
         List<String> hosts = findFreeHosts(stack.getId(), hostGroup, hostGroupAdjustment.getScalingAdjustment());
         Set<HostGroup> hostGroupAsSet = Sets.newHashSet(hostGroup);
+        if (cluster.getFileSystem() != null) {
+            addFsRecipes(cluster.getBlueprint().getBlueprintText(), cluster.getFileSystem(), hostGroupAsSet);
+        }
         Set<HostMetadata> hostMetadata = addHostMetadata(cluster, hosts, hostGroupAdjustment);
         Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
         PollingResult pollingResult = waitForHosts(stack, ambariClient, nodeCount, hostsInCluster);
@@ -457,6 +431,44 @@ public class AmbariClusterConnector {
             hostDeleted = true;
         }
         return hostDeleted;
+    }
+
+    private String extendBlueprintWithFsConfig(String blueprintText, FileSystem fs) {
+        FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(fs.getType());
+        List<BlueprintConfigurationEntry> bpConfigEntries = fsConfigurator.getBlueprintProperties(fs.getProperties());
+        if (fs.isDefaultFs()) {
+            String defaultFsValue = fsConfigurator.getDefaultFsValue(fs.getProperties());
+            blueprintText = blueprintProcessor.addDefaultFs(blueprintText, defaultFsValue);
+        }
+        blueprintText = blueprintProcessor.addConfigEntries(blueprintText, bpConfigEntries);
+        return blueprintText;
+    }
+
+    private void addFsRecipes(String blueprintText, FileSystem fs, Set<HostGroup> hostGroups) {
+        FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(fs.getType());
+        List<RecipeScript> recipeScripts = fsConfigurator.getScripts();
+        List<Recipe> fsRecipes = recipeBuilder.buildRecipes(recipeScripts, fs.getProperties());
+        for (Recipe recipe : fsRecipes) {
+            boolean oneNode = false;
+            for (Entry<String, PluginExecutionType> pluginEntries : recipe.getPlugins().entrySet()) {
+                if (PluginExecutionType.ONE_NODE.equals(pluginEntries.getValue())) {
+                    oneNode = true;
+                }
+            }
+            if (oneNode) {
+                for (HostGroup hostGroup : hostGroups) {
+                    Set<String> components = blueprintProcessor.getServicesInHostgroup(blueprintText, hostGroup.getName());
+                    if (components.contains("HDFS_CLIENT")) {
+                        hostGroup.addRecipe(recipe);
+                        break;
+                    }
+                }
+            } else {
+                for (HostGroup hostGroup : hostGroups) {
+                    hostGroup.addRecipe(recipe);
+                }
+            }
+        }
     }
 
     private void rollback(Stack stack, Cluster cluster, AmbariClient ambariClient, HostGroupAdjustmentJson hostGroupAdjustment,
