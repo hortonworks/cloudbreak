@@ -1,5 +1,5 @@
 # GCP credential name must be specified
-name: Gcp_simple_kerberostest
+name: Gcp_simple_recipetest
 parameters: {
   cloudProvider: GCP
 }
@@ -10,9 +10,18 @@ tests:
       - com.sequenceiq.it.TestSuiteInitializer
       - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
 
+  - name: create recipe
+    parameters: {
+      name: it-gcp-recipe,
+      preScript: touch /pre-install-fingerprint,
+      postScript: touch /post-install-fingerprint
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.RecipeCreationTest
+
   - name: create gateway template
     parameters: {
-      gcpName: it-gcp-kerberos-gateway,
+      gcpName: it-gcp-recipe-gateway,
       gcpInstanceType: N1_STANDARD_4,
       volumeType: HDD,
       volumeCount: 1,
@@ -24,7 +33,7 @@ tests:
 
   - name: create master template
     parameters: {
-      gcpName: it-gcp-kerberos-master,
+      gcpName: it-gcp-recipe-master,
       gcpInstanceType: N1_HIGHMEM_8,
       volumeType: HDD,
       volumeCount: 2,
@@ -36,7 +45,7 @@ tests:
 
   - name: create slave template
     parameters: {
-      gcpName: it-gcp-kerberos-slave,
+      gcpName: it-gcp-recipe-slave,
       gcpInstanceType: N1_HIGHCPU_4,
       volumeType: SSD,
       volumeCount: 3,
@@ -48,31 +57,14 @@ tests:
 
   - name: create cluster
     parameters: {
-      stackName: it-gcp-kerberos-stack,
+      stackName: it-gcp-recipe-stack,
       region: EUROPE_WEST1_B,
-      clusterName: it-gcp-kerberos-cluster,
-      enableSecurity: true,
-      kerberosMasterKey: masterkey,
-      kerberosAdmin: admin,
-      kerberosPassword: admin
+      clusterName: it-gcp-recipe-cluster,
+      runRecipesOnHosts: "master,slave_1"
     }
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterCreationTest
-
-  - name: stop cluster
-    parameters: {
-      newStatus: STOPPED
-    }
-    classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
-
-  - name: start cluster
-    parameters: {
-      newStatus: STARTED
-    }
-    classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
 
   - name: upscale
     parameters: {
@@ -82,10 +74,11 @@ tests:
     classes:
       - com.sequenceiq.it.cloudbreak.ScalingTest
 
-  - name: downscale
+  - name: count recipe results
     parameters: {
-      instanceGroup: slave_1,
-      scalingAdjustment: -1
+      searchRecipesOnHosts: "master,slave_1",
+      lookingFor: "/pre-install-fingerprint,/post-install-fingerprint",
+      require: 10
     }
     classes:
-      - com.sequenceiq.it.cloudbreak.ScalingTest
+      - com.sequenceiq.it.cloudbreak.CountRecipeResultsTest

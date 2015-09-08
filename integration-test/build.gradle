@@ -29,7 +29,9 @@ dependencies {
     compile "org.springframework:spring-context-support:4.1.4.RELEASE"
     compile "org.apache.httpcomponents:httpclient:4.3.5"
     compile 'javax:javaee-api:7.0'
-    compile "org.apache.velocity:velocity:1.7"
+    compile 'org.apache.velocity:velocity:1.7'
+    compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.13'
+    compile 'com.jcraft:jsch:0.1.53'
     compile "org.testng:testng:6.8.21"
     compile ("org.uncommons:reportng:1.1.4") {
         exclude group: "velocity"

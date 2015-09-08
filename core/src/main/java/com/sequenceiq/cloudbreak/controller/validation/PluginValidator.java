@@ -39,6 +39,9 @@ public class PluginValidator implements ConstraintValidator<ValidPlugin, Map<Str
     }
 
     private boolean isValidBase64Plugin(String pluginContent) {
+        if (!Base64.isBase64(pluginContent)) {
+            return false;
+        }
         String content = new String(Base64.decodeBase64(pluginContent));
         if (content.isEmpty()) {
             return false;
