@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
@@ -17,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
@@ -51,7 +53,8 @@ public class StartStackHandler implements CloudPlatformEventHandler<StartInstanc
             AuthenticatedContext authenticatedContext = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudInstance> instances = request.getCloudInstances();
             List<CloudVmInstanceStatus> instanceStatuses = connector.instances().start(authenticatedContext, request.getResources(), instances);
-            PollTask<InstancesStatusResult> task = statusCheckFactory.newPollInstanceStateTask(authenticatedContext, instances);
+            PollTask<InstancesStatusResult> task = statusCheckFactory.newPollInstanceStateTask(authenticatedContext, instances,
+                    Sets.newHashSet(InstanceStatus.STARTED, InstanceStatus.FAILED));
             InstancesStatusResult statusResult = new InstancesStatusResult(cloudContext, instanceStatuses);
             if (!task.completed(statusResult)) {
                 statusResult = syncPollingScheduler.schedule(task);
