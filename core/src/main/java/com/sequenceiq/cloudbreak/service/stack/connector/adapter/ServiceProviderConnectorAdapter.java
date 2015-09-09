@@ -348,7 +348,7 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             LOGGER.error(format("Failed to %s stack: %s", action, cloudContext), exception);
             throw new OperationException(exception);
         }
-        if (results.size() == 1 && results.get(0).isFailed()) {
+        if (results.size() == 1 && (results.get(0).isFailed() || results.get(0).isDeleted())) {
             throw new OperationException(format("Failed to %s the stack for %s due to: %s", action, cloudContext, results.get(0).getStatusReason()));
         }
     }

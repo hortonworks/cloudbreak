@@ -66,16 +66,16 @@ public class OpenStackResourceConnector implements ResourceConnector {
         CloudResource cloudResource = new CloudResource(ResourceType.HEAT_STACK, heatStack.getId());
         Promise<ResourcePersisted> promise = notifier.notifyAllocation(cloudResource, authenticatedContext.getCloudContext());
         try {
-            promise.await();
+            promise.awaitSuccess();
         } catch (Exception e) {
             //Rollback
             terminate(authenticatedContext, stack, Arrays.asList(cloudResource));
         }
-
         List<CloudResourceStatus> resources = check(authenticatedContext, Arrays.asList(cloudResource));
         LOGGER.debug("Launched resources: {}", resources);
         return resources;
     }
+
 
     @Override
     public List<CloudResourceStatus> check(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
