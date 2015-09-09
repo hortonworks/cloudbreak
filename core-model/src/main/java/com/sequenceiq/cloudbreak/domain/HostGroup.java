@@ -107,4 +107,8 @@ public class HostGroup {
     public void setRecipes(Set<Recipe> recipes) {
         this.recipes = recipes;
     }
+
+    public void addRecipe(Recipe recipe) {
+        this.recipes.add(recipe);
+    }
 }

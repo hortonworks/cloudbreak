@@ -51,6 +51,8 @@ public class ClusterRequest {
     private Boolean validateBlueprint = true;
     @Valid
     private AmbariStackDetailsJson ambariStackDetails;
+    @Valid
+    private FileSystemRequest fileSystem;
 
     public String getDescription() {
         return description;
@@ -154,5 +156,13 @@ public class ClusterRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public FileSystemRequest getFileSystem() {
+        return fileSystem;
+    }
+
+    public void setFileSystem(FileSystemRequest fileSystem) {
+        this.fileSystem = fileSystem;
     }
 }

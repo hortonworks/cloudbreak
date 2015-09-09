@@ -1,5 +1,4 @@
 package com.sequenceiq.cloudbreak.controller.json;
-
 import static com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.RecipeModelDescription;
 
 import java.util.Map;
@@ -32,7 +31,7 @@ abstract class RecipeBase implements JsonEntity {
     private Integer timeout;
 
     @ValidPlugin
-    @ApiModelProperty(value = ModelDescriptions.RecipeModelDescription.PLUGINS, required = true)
+    @ApiModelProperty(value = RecipeModelDescription.PLUGINS, required = true)
     private Map<String, PluginExecutionType> plugins;
 
     @JsonProperty("properties")

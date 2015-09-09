@@ -26,6 +26,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -46,13 +47,16 @@ import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.ClusterException;
 import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.FileSystemType;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
+import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
+import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
@@ -135,6 +139,12 @@ public class AmbariClusterConnector {
     private HostMetadataRepository hostMetadataRepository;
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
+    @Resource
+    private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
+    @Inject
+    private BlueprintProcessor blueprintProcessor;
+    @Inject
+    private RecipeBuilder recipeBuilder;
 
     private enum Msg {
         AMBARI_CLUSTER_RESETTING_AMBARI_DATABASE("ambari.cluster.resetting.ambari.database"),
@@ -161,10 +171,17 @@ public class AmbariClusterConnector {
         try {
             cluster.setCreationStarted(new Date().getTime());
             cluster = clusterRepository.save(cluster);
+
+            String blueprintText = cluster.getBlueprint().getBlueprintText();
+            FileSystem fs = cluster.getFileSystem();
+            if (fs != null) {
+                blueprintText = extendBlueprintWithFsConfig(blueprintText, fs);
+            }
+
             TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
             AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
             setBaseRepoURL(cluster, ambariClient);
-            addBlueprint(stack, ambariClient, cluster.getBlueprint());
+            addBlueprint(stack, ambariClient, blueprintText);
             int nodeCount = stack.getFullNodeCountWithoutDecommissionedNodes() - stack.getGateWayNodeCount();
 
             Set<HostGroup> hostGroups = hostGroupRepository.findHostGroupsInCluster(cluster.getId());
@@ -175,7 +192,12 @@ public class AmbariClusterConnector {
             PollingResult waitForHostsResult = waitForHosts(stack, ambariClient, nodeCount, hostsInCluster);
             checkPollingResult(waitForHostsResult, "Error while waiting for hosts to connect. Polling result: " + waitForHostsResult.name());
 
-            final boolean recipesFound = recipesFound(hostGroups);
+            if (fs != null) {
+                addFsRecipes(blueprintText, fs, hostGroups);
+            }
+
+            boolean recipesFound = recipesFound(hostGroups);
+
             if (recipesFound) {
                 recipeEngine.setupRecipes(stack, hostGroups);
                 recipeEngine.executePreInstall(stack);
@@ -184,13 +206,13 @@ public class AmbariClusterConnector {
             PollingResult pollingResult = waitForClusterInstall(stack, ambariClient);
             checkPollingResult(pollingResult, "Cluster installation failed. Polling result: " + pollingResult.name());
 
+            if (recipesFound) {
+                recipeEngine.executePostInstall(stack);
+            }
             pollingResult = runSmokeTest(stack, ambariClient);
             checkPollingResult(pollingResult, "Ambari Smoke tests failed. Polling result: " + pollingResult.name());
 
             cluster = handleClusterCreationSuccess(stack, cluster);
-            if (recipesFound) {
-                recipeEngine.executePostInstall(stack);
-            }
             return cluster;
         } catch (CancellationException cancellationException) {
             throw cancellationException;
@@ -222,6 +244,9 @@ public class AmbariClusterConnector {
         HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
         List<String> hosts = findFreeHosts(stack.getId(), hostGroup, hostGroupAdjustment.getScalingAdjustment());
         Set<HostGroup> hostGroupAsSet = Sets.newHashSet(hostGroup);
+        if (cluster.getFileSystem() != null) {
+            addFsRecipes(cluster.getBlueprint().getBlueprintText(), cluster.getFileSystem(), hostGroupAsSet);
+        }
         Set<HostMetadata> hostMetadata = addHostMetadata(cluster, hosts, hostGroupAdjustment);
         Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
         PollingResult pollingResult = waitForHosts(stack, ambariClient, nodeCount, hostsInCluster);
@@ -406,6 +431,44 @@ public class AmbariClusterConnector {
             hostDeleted = true;
         }
         return hostDeleted;
+    }
+
+    private String extendBlueprintWithFsConfig(String blueprintText, FileSystem fs) {
+        FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(fs.getType());
+        List<BlueprintConfigurationEntry> bpConfigEntries = fsConfigurator.getBlueprintProperties(fs.getProperties());
+        if (fs.isDefaultFs()) {
+            String defaultFsValue = fsConfigurator.getDefaultFsValue(fs.getProperties());
+            blueprintText = blueprintProcessor.addDefaultFs(blueprintText, defaultFsValue);
+        }
+        blueprintText = blueprintProcessor.addConfigEntries(blueprintText, bpConfigEntries);
+        return blueprintText;
+    }
+
+    private void addFsRecipes(String blueprintText, FileSystem fs, Set<HostGroup> hostGroups) {
+        FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(fs.getType());
+        List<RecipeScript> recipeScripts = fsConfigurator.getScripts();
+        List<Recipe> fsRecipes = recipeBuilder.buildRecipes(recipeScripts, fs.getProperties());
+        for (Recipe recipe : fsRecipes) {
+            boolean oneNode = false;
+            for (Entry<String, PluginExecutionType> pluginEntries : recipe.getPlugins().entrySet()) {
+                if (PluginExecutionType.ONE_NODE.equals(pluginEntries.getValue())) {
+                    oneNode = true;
+                }
+            }
+            if (oneNode) {
+                for (HostGroup hostGroup : hostGroups) {
+                    Set<String> components = blueprintProcessor.getServicesInHostgroup(blueprintText, hostGroup.getName());
+                    if (components.contains("HDFS_CLIENT")) {
+                        hostGroup.addRecipe(recipe);
+                        break;
+                    }
+                }
+            } else {
+                for (HostGroup hostGroup : hostGroups) {
+                    hostGroup.addRecipe(recipe);
+                }
+            }
+        }
     }
 
     private void rollback(Stack stack, Cluster cluster, AmbariClient ambariClient, HostGroupAdjustmentJson hostGroupAdjustment,
@@ -774,16 +837,15 @@ public class AmbariClusterConnector {
         client.addStackRepository(stack, version, os, repoId, repoUrl, verify);
     }
 
-    private void addBlueprint(Stack stack, AmbariClient ambariClient, Blueprint blueprint) {
+    private void addBlueprint(Stack stack, AmbariClient ambariClient, String blueprintText) {
         try {
             Cluster cluster = stack.getCluster();
-            String blueprintText = blueprint.getBlueprintText();
             Map<String, Map<String, Map<String, String>>> hostGroupConfig = hadoopConfigurationService.getHostGroupConfiguration(cluster);
             blueprintText = ambariClient.extendBlueprintHostGroupConfiguration(blueprintText, hostGroupConfig);
             Map<String, Map<String, String>> globalConfig = hadoopConfigurationService.getGlobalConfiguration(cluster);
             blueprintText = ambariClient.extendBlueprintGlobalConfiguration(blueprintText, globalConfig);
             ambariClient.addBlueprint(blueprintText);
-            LOGGER.info("Blueprint added [Stack: {}, blueprint id: {}]", stack.getId(), blueprint.getId());
+            LOGGER.info("Blueprint added to Ambari.");
         } catch (IOException e) {
             if ("Conflict".equals(e.getMessage())) {
                 throw new BadRequestException("Ambari blueprint already exists.", e);

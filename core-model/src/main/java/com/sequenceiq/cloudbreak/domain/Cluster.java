@@ -50,7 +50,11 @@ import javax.persistence.UniqueConstraint;
                 name = "Cluster.findByStatus",
                 query = "SELECT c FROM Cluster c "
                         + "WHERE c.status= :status"
-        )
+        ),
+        @NamedQuery(
+                name = "Cluster.findByNameInAccount",
+                query = "SELECT c FROM Cluster c "
+                        + "WHERE c.name= :name and c.account= :account")
 })
 public class Cluster implements ProvisionEntity {
 
@@ -101,6 +105,9 @@ public class Cluster implements ProvisionEntity {
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private AmbariStackDetails ambariStackDetails;
+
+    @ManyToOne
+    private FileSystem fileSystem;
 
     public Stack getStack() {
         return stack;
@@ -256,6 +263,14 @@ public class Cluster implements ProvisionEntity {
 
     public void setAmbariStackDetails(AmbariStackDetails ambariStackDetails) {
         this.ambariStackDetails = ambariStackDetails;
+    }
+
+    public FileSystem getFileSystem() {
+        return fileSystem;
+    }
+
+    public void setFileSystem(FileSystem fileSystem) {
+        this.fileSystem = fileSystem;
     }
 
     public String getUserName() {

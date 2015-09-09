@@ -1,11 +1,4 @@
 {
-  "configurations": [
-    {
-      "nagios-env": {
-        "nagios_contact": "admin@localhost"
-      }
-    }
-  ],
   "host_groups": [
     {
       "name": "master",

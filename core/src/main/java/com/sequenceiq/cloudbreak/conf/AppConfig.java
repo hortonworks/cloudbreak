@@ -45,9 +45,11 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.ExecutorBasedParallelCon
 import com.sequenceiq.cloudbreak.core.bootstrap.service.StackDeletionBasedExitCriteria;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.FileSystemType;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
+import com.sequenceiq.cloudbreak.service.cluster.flow.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
@@ -91,6 +93,9 @@ public class AppConfig {
 
     @Inject
     private List<CredentialHandler<? extends Credential>> credentialHandlers;
+
+    @Inject
+    private List<FileSystemConfigurator> fileSystemConfigurators;
 
     @PostConstruct
     public void init() {
@@ -168,6 +173,15 @@ public class AppConfig {
         Map<CloudPlatform, CredentialHandler> map = new HashMap<>();
         for (CredentialHandler credentialHandler : credentialHandlers) {
             map.put(credentialHandler.getCloudPlatform(), credentialHandler);
+        }
+        return map;
+    }
+
+    @Bean
+    public Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators() {
+        Map<FileSystemType, FileSystemConfigurator> map = new HashMap<>();
+        for (FileSystemConfigurator fileSystemConfigurator : fileSystemConfigurators) {
+            map.put(fileSystemConfigurator.getFileSystemType(), fileSystemConfigurator);
         }
         return map;
     }
