@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.HashMap;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.FileSystemRequest;
@@ -13,7 +15,11 @@ public class JsonToFileSystemConverter extends AbstractConversionServiceAwareCon
         fs.setName(source.getName());
         fs.setType(source.getType());
         fs.setDefaultFs(source.isDefaultFs());
-        fs.setProperties(source.getProperties());
+        if (source.getProperties() != null) {
+            fs.setProperties(source.getProperties());
+        } else {
+            fs.setProperties(new HashMap<String, String>());
+        }
         return fs;
     }
 }
