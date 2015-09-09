@@ -1,13 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.task;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.BooleanStateConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.ResourceChecker;
 
@@ -31,7 +33,6 @@ public class PollTaskConfig {
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Bean
-    @Scope(value = "prototype")
     public PollTaskFactory newFetchStateTask() {
         return new PollTaskFactory() {
             @Override
@@ -50,8 +51,14 @@ public class PollTaskConfig {
 
             @Override
             public PollTask<InstancesStatusResult> newPollInstanceStateTask(AuthenticatedContext authenticatedContext, List<CloudInstance> instances) {
+                return newPollInstanceStateTask(authenticatedContext, instances, Sets.<InstanceStatus>newHashSet());
+            }
+
+            @Override
+            public PollTask<InstancesStatusResult> newPollInstanceStateTask(AuthenticatedContext authenticatedContext, List<CloudInstance> instances,
+                    Set<InstanceStatus> completedStatuses) {
                 CloudConnector connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatform());
-                return new PollInstancesStateTask(authenticatedContext, connector.instances(), instances);
+                return new PollInstancesStateTask(authenticatedContext, connector.instances(), instances, completedStatuses);
             }
 
             @Override
