@@ -2,6 +2,8 @@
 
 ### Fixed
 
+- consul recursor now exculdes both docker ip and bridge ip to avoid recursive dns recursor chain
+
 ### Added
 
 - Command `cbd start` will execute the migration by default. If SKIP_DB_MIGRATION_ON_START envvar set to true in Profile, the migration will be skipped

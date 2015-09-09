@@ -42,21 +42,31 @@ cloudbreak-conf-tags() {
     env-import CB_DOCKER_CONTAINER_AMBARI_WARM ""
 }
 
+docker-ip() {
+    if [[ $DOCKER_HOST =~ "tcp://" ]];then
+        local dip=${DOCKER_HOST#*//}
+        echo ${dip%:*}
+    else
+        echo none
+    fi
+}
+
 consul-recursors() {
     declare desc="Generates consul agent recursor option, by reading the hosts resolv.conf"
     declare resolvConf=${1:? 'required 1.param: resolv.conf file'}
     declare bridge=${2:? 'required 2.param: bridge ip'}
+    declare dockerIP=${3:- none}
 
     local nameservers=$(sed -n "/nameserver/ s/^.*nameserver[^0-9]*//p;" $resolvConf)
     debug "nameservers on host:\n$nameservers"
     debug bridge=$bridge
-    echo "$nameservers" | grep -v $bridge | sed -n '{s/^/ -recursor /;H;}; $ {x;s/[\n\r]//g;p}'
+    echo "$nameservers" | grep -v "$bridge\|$dockerIP" | sed -n '{s/^/ -recursor /;H;}; $ {x;s/[\n\r]//g;p}'
 }
 
 cloudbreak-conf-consul() {
     env-import DOCKER_CONSUL_OPTIONS ""
     if ! [[ $DOCKER_CONSUL_OPTIONS =~ .*recursor.* ]]; then
-        DOCKER_CONSUL_OPTIONS="$DOCKER_CONSUL_OPTIONS $(consul-recursors <(docker run -it --rm --net=host alpine cat /etc/resolv.conf) $(bridge-ip))"
+        DOCKER_CONSUL_OPTIONS="$DOCKER_CONSUL_OPTIONS $(consul-recursors <(docker run -it --rm --net=host alpine cat /etc/resolv.conf) $(bridge-ip) $(docker-ip))"
     fi
     debug "DOCKER_CONSUL_OPTIONS=$DOCKER_CONSUL_OPTIONS"
 }
