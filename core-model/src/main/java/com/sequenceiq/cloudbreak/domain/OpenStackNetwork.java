@@ -20,6 +20,6 @@ public class OpenStackNetwork extends Network {
 
     @Override
     public List<CloudPlatform> cloudPlatform() {
-        return Arrays.asList(CloudPlatform.OPENSTACK);
+        return Arrays.asList(CloudPlatform.OPENSTACK, CloudPlatform.OPENSTACK_NATIVE);
     }
 }

@@ -67,7 +67,7 @@ public class ArmResourceConnector implements ResourceConnector {
             throw new CloudConnectorException(String.format("Invalid provisiong type: %s", stackName));
         }
 
-        CloudResource cloudResource = new CloudResource(ResourceType.ARM_TEMPLATE, stackName);
+        CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.ARM_TEMPLATE).name(stackName).build();
 
         Promise<ResourcePersisted> promise = notifier.notifyAllocation(cloudResource, authenticatedContext.getCloudContext());
         try {

@@ -34,8 +34,20 @@ public class ResourcePersistenceHandler implements Consumer<Event<ResourceNotifi
                 .retry(new RetryTask() {
                     @Override
                     public void run() throws Exception {
-                        ResourceNotification notificationPersisted = notification.isCreate() ? cloudResourcePersisterService.persist(notification)
-                                : cloudResourcePersisterService.delete(notification);
+                        ResourceNotification notificationPersisted = null;
+                        switch (notification.getType()) {
+                            case CREATE:
+                                notificationPersisted = cloudResourcePersisterService.persist(notification);
+                                break;
+                            case UPDATE:
+                                notificationPersisted = cloudResourcePersisterService.update(notification);
+                                break;
+                            case DELETE:
+                                notificationPersisted = cloudResourcePersisterService.delete(notification);
+                                break;
+                            default:
+                                throw new IllegalArgumentException("Unsupported notification type: " + notification.getType());
+                        }
                         notificationPersisted.getPromise().onNext(new ResourcePersisted(notificationPersisted));
                     }
                 })

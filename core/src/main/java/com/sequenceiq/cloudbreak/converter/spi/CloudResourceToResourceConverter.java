@@ -13,6 +13,8 @@ public class CloudResourceToResourceConverter extends AbstractConversionServiceA
         Resource domainResource = new Resource();
         domainResource.setResourceType(source.getType());
         domainResource.setResourceName(source.getName());
+        domainResource.setResourceReference(source.getReference());
+        domainResource.setResourceStatus(source.getStatus());
         return domainResource;
     }
 }

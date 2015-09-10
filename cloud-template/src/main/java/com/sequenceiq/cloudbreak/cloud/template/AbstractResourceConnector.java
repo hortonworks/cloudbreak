@@ -58,7 +58,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         String platform = cloudContext.getPlatform();
 
         //context
-        ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, false);
+        ResourceBuilderContext context = contextBuilders.get(platform).terminationContextInit(cloudContext, auth, cloudResources);
 
         //compute
         List<CloudResourceStatus> computeStatuses = computeResourceService.deleteResources(context, auth, cloudResources, false);

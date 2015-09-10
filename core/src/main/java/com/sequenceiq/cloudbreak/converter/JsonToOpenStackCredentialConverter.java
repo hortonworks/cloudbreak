@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
 @Component
 public class JsonToOpenStackCredentialConverter extends AbstractConversionServiceAwareConverter<CredentialRequest, OpenStackCredential> {
 
-    private static final String SSH_USER = "ec2-user";
+    private static final String SSH_USER = "centos";
 
     @Inject
     private PBEStringCleanablePasswordEncryptor encryptor;

@@ -34,6 +34,9 @@ public abstract class AbstractCloudPersisterService<T> implements Persister<T> {
     public abstract T persist(T data);
 
     @Override
+    public abstract T update(T data);
+
+    @Override
     public abstract T retrieve(T data);
 
     @PostConstruct

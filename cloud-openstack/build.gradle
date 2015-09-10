@@ -15,6 +15,7 @@ dependencies {
 
     compile project(':cloud-api')
     compile project(':cloud-common')
+    compile project(':cloud-template')
     testCompile project(':cloud-reactor')
 
     compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
@@ -22,4 +23,5 @@ dependencies {
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
     compile group: 'org.pacesys',                   name: 'openstack4j',                    version: '2.0.3'
     compile group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
+    compile group: 'commons-codec',                 name: 'commons-codec',                  version: '1.10'
 }

@@ -120,7 +120,7 @@ public class TestApplicationContext {
 
     @Bean
     public CloudConnector cloudConnectors() throws Exception {
-        CloudResource resource = new CloudResource(ResourceType.HEAT_STACK, "ref");
+        CloudResource resource = new CloudResource.Builder().type(ResourceType.HEAT_STACK).name("ref").build();
         when(cloudConnector.authentication()).thenReturn(authenticator);
         when(instanceConnector.metadata()).thenReturn(collector);
         when(authenticator.authenticate((CloudContext) any(), (CloudCredential) any())).thenReturn(g.createAuthenticatedContext());

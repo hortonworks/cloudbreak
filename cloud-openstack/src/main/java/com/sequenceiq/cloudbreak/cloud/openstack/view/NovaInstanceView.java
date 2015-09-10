@@ -50,6 +50,10 @@ public class NovaInstanceView {
         return list;
     }
 
+    public Map<String, String> getMetadataMap() {
+        return generateMetadata();
+    }
+
     public String getMetadata() {
         try {
             return new ObjectMapper().writeValueAsString(generateMetadata());

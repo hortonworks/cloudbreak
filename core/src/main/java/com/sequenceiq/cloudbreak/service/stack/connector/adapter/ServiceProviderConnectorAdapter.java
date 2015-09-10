@@ -327,7 +327,9 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         Set<Resource> retSet = new HashSet<>();
         for (CloudResourceStatus cloudResourceStatus : cloudResourceStatuses) {
             if (!cloudResourceStatus.isFailed()) {
-                Resource resource = new Resource(cloudResourceStatus.getCloudResource().getType(), cloudResourceStatus.getCloudResource().getName(), stack);
+                CloudResource cloudResource = cloudResourceStatus.getCloudResource();
+                Resource resource = new Resource(cloudResource.getType(), cloudResource.getName(), cloudResource.getReference(), cloudResource.getStatus(),
+                        stack, null);
                 retSet.add(resource);
             }
         }

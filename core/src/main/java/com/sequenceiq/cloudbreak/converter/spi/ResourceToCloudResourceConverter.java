@@ -8,11 +8,13 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 
 @Component
 public class ResourceToCloudResourceConverter extends AbstractConversionServiceAwareConverter<Resource, CloudResource> {
-
     @Override
     public CloudResource convert(Resource resource) {
-        return new CloudResource(resource.getResourceType(), resource.getResourceName());
+        return new CloudResource.Builder()
+                .type(resource.getResourceType())
+                .name(resource.getResourceName())
+                .reference(resource.getResourceReference())
+                .status(resource.getResourceStatus())
+                .build();
     }
-
-
 }

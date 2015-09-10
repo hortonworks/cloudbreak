@@ -52,6 +52,7 @@ public class NetworkResourceService {
             CloudResource buildableResource = builder.create(context, auth, network, security);
             createResource(auth, buildableResource);
             CloudResource resource = builder.build(context, auth, network, security, buildableResource);
+            updateResource(auth, resource);
             PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(builder, auth, asList(resource), context, true);
             List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
             results.addAll(pollerResult);
@@ -107,7 +108,16 @@ public class NetworkResourceService {
     }
 
     protected CloudResource createResource(AuthenticatedContext auth, CloudResource buildableResource) throws Exception {
-        resourceNotifier.notifyAllocation(buildableResource, auth.getCloudContext()).await();
+        if (buildableResource.isPersistent()) {
+            resourceNotifier.notifyAllocation(buildableResource, auth.getCloudContext()).await();
+        }
+        return buildableResource;
+    }
+
+    protected CloudResource updateResource(AuthenticatedContext auth, CloudResource buildableResource) throws Exception {
+        if (buildableResource.isPersistent()) {
+            resourceNotifier.notifyUpdate(buildableResource, auth.getCloudContext()).await();
+        }
         return buildableResource;
     }
 

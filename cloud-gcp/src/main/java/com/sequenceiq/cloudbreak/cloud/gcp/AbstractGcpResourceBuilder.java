@@ -110,9 +110,16 @@ public abstract class AbstractGcpResourceBuilder {
         return execute.getDetails().getMessage();
     }
 
+    protected CloudResource createNamedResource(ResourceType type, String name) {
+        return new CloudResource.Builder().type(type).name(name).build();
+    }
+
     protected CloudResource createOperationAwareCloudResource(CloudResource resource, Operation operation) {
-        return new CloudResource(resource.getType(), resource.getName(),
-                Collections.<String, Object>singletonMap(OPERATION_ID, operation.getName()));
+        return new CloudResource.Builder()
+                .cloudResource(resource)
+                .params(Collections.<String, Object>singletonMap(OPERATION_ID, operation.getName()))
+                .persistent(false)
+                .build();
     }
 
     protected CloudInstance createOperationAwareCloudInstance(CloudInstance instance, Operation operation) {
