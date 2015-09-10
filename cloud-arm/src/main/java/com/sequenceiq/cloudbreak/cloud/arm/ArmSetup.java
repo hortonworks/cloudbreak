@@ -38,16 +38,17 @@ public class ArmSetup implements Setup {
 
     @Inject
     private ArmClient armClient;
-
     @Inject
     private SyncPollingScheduler<BooleanResult> syncPollingScheduler;
     @Inject
     private PollTaskFactory statusCheckFactory;
+    @Inject
+    private ArmTemplateUtils armTemplateUtils;
 
     @Override
     public Map<String, Object> execute(AuthenticatedContext authenticatedContext, CloudStack stack) throws Exception {
-        String osStorageName = armClient.getStorageName(authenticatedContext.getCloudCredential(), stack.getRegion());
-        String storageGroup = armClient.getStorageGroup(authenticatedContext.getCloudCredential(), stack.getRegion());
+        String osStorageName = armClient.getStorageName(authenticatedContext.getCloudContext());
+        String storageGroup = armTemplateUtils.getStackName(authenticatedContext.getCloudContext());
         AzureRMClient client = armClient.createAccess(authenticatedContext.getCloudCredential());
         try {
             if (!resourceGroupExist(client, storageGroup)) {
