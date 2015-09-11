@@ -7,6 +7,7 @@ import javax.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -41,6 +42,17 @@ public class ExceptionControllerAdvice {
         MDCBuilder.buildMdcContext();
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({ ConversionFailedException.class })
+    public ResponseEntity<ExceptionResult> conversionFailed(Exception e) {
+        MDCBuilder.buildMdcContext();
+        LOGGER.error(e.getMessage(), e);
+        if (e.getCause() != null) {
+            return new ResponseEntity<>(new ExceptionResult(e.getCause().getMessage()), HttpStatus.BAD_REQUEST);
+        } else {
+            return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @ExceptionHandler({ AccessDeniedException.class, org.springframework.security.access.AccessDeniedException.class })

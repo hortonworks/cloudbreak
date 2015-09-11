@@ -5,8 +5,6 @@ import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -24,8 +22,7 @@ public class FileSystem {
 
     private String name;
 
-    @Enumerated(EnumType.STRING)
-    private FileSystemType type;
+    private String type;
 
     private boolean defaultFs;
 
@@ -37,7 +34,7 @@ public class FileSystem {
     public FileSystem() {
     }
 
-    public FileSystem(String name, FileSystemType type, boolean defaultFs) {
+    public FileSystem(String name, String type, boolean defaultFs) {
         this.name = name;
         this.type = type;
         this.defaultFs = defaultFs;
@@ -59,11 +56,11 @@ public class FileSystem {
         this.name = name;
     }
 
-    public FileSystemType getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(FileSystemType type) {
+    public void setType(String type) {
         this.type = type;
     }
 

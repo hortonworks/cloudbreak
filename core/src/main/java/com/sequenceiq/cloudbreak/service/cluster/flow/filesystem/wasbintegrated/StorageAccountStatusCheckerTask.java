@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cluster.flow;
+package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.wasbintegrated;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
-import com.sequenceiq.cloudbreak.service.cluster.FileSystemConfigException;
+import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigException;
 
 @Component
 public class StorageAccountStatusCheckerTask implements StatusCheckerTask<StorageAccountCheckerContext> {
