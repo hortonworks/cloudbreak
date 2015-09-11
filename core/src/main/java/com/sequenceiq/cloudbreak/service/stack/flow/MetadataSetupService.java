@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -126,7 +127,7 @@ public class MetadataSetupService {
     private InstanceMetaData createInstanceMetadataIfAbsent(Set<InstanceMetaData> allInstanceMetadata, Long privateId) {
         if (privateId != null) {
             for (InstanceMetaData instanceMetaData : allInstanceMetadata) {
-                if (instanceMetaData.getPrivateId() == privateId) {
+                if (Objects.equals(instanceMetaData.getPrivateId(), privateId)) {
                     return instanceMetaData;
                 }
             }
