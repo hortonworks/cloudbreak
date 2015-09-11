@@ -1,0 +1,182 @@
+{
+  "Blueprints": {
+    "blueprint_name": "datadev-default",
+    "stack_name": "HDP",
+    "stack_version": "2.3"
+  },
+  "configurations": [
+    {
+      "zeppelin-config": {
+        "mvn.dir": "/usr/local/maven/bin/mvn",
+        "install.dir": "/root",
+        "stack.port": "9998",
+        "stack.dir": "/var/lib/ambari-server/resources/stacks/HDP/2.2/services/zeppelin-stack",
+        "stack.log": "/var/log/zeppelin-notebook-setup.log"
+      }
+    },
+    {
+      "zeppelin-env": {
+        "pid_dir": "/var/run/zeppelin-notebook"
+      }
+    },
+    {
+      "mapred-site": {
+        "properties": {
+          "mapreduce.admin.map.child.java.opts": "-server -XX:NewRatio=8 -Djava.net.preferIPv4Stack=true -Dhdp.version=${hdp.version}",
+          "mapreduce.admin.reduce.child.java.opts": "-server -XX:NewRatio=8 -Djava.net.preferIPv4Stack=true -Dhdp.version=${hdp.version}",
+          "mapreduce.admin.user.env": "LD_LIBRARY_PATH=/usr/hdp/${hdp.version}/hadoop/lib/native:/usr/hdp/${hdp.version}/hadoop/lib/native/Linux-amd64-64",
+          "mapreduce.am.max-attempts": "2",
+          "mapreduce.application.classpath": "$PWD/mr-framework/hadoop/share/hadoop/mapreduce/*:$PWD/mr-framework/hadoop/share/hadoop/mapreduce/lib/*:$PWD/mr-framework/hadoop/share/hadoop/common/*:$PWD/mr-framework/hadoop/share/hadoop/common/lib/*:$PWD/mr-framework/hadoop/share/hadoop/yarn/*:$PWD/mr-framework/hadoop/share/hadoop/yarn/lib/*:$PWD/mr-framework/hadoop/share/hadoop/hdfs/*:$PWD/mr-framework/hadoop/share/hadoop/hdfs/lib/*:/usr/hdp/${hdp.version}/hadoop/lib/hadoop-lzo-0.6.0.${hdp.version}.jar:/etc/hadoop/conf/secure",
+          "mapreduce.application.framework.path": "/hdp/apps/${hdp.version}/mapreduce/mapreduce.tar.gz#mr-framework",
+          "mapreduce.cluster.administrators": " hadoop",
+          "mapreduce.framework.name": "yarn",
+          "mapreduce.job.emit-timeline-data": "false",
+          "mapreduce.job.reduce.slowstart.completedmaps": "0.05",
+          "mapreduce.jobhistory.address": "%HOSTGROUP::host_group_master_1%:10020",
+          "mapreduce.jobhistory.bind-host": "0.0.0.0",
+          "mapreduce.jobhistory.done-dir": "/mr-history/done",
+          "mapreduce.jobhistory.intermediate-done-dir": "/mr-history/tmp",
+          "mapreduce.jobhistory.webapp.address": "%HOSTGROUP::host_group_master_1%:19888",
+          "mapreduce.map.java.opts": "-Xmx546m",
+          "mapreduce.map.log.level": "INFO",
+          "mapreduce.map.memory.mb": "682",
+          "mapreduce.map.output.compress": "false",
+          "mapreduce.map.sort.spill.percent": "0.7",
+          "mapreduce.map.speculative": "false",
+          "mapreduce.output.fileoutputformat.compress": "false",
+          "mapreduce.output.fileoutputformat.compress.type": "BLOCK",
+          "mapreduce.reduce.input.buffer.percent": "0.0",
+          "mapreduce.reduce.java.opts": "-Xmx546m",
+          "mapreduce.reduce.log.level": "INFO",
+          "mapreduce.reduce.memory.mb": "682",
+          "mapreduce.reduce.shuffle.fetch.retry.enabled": "1",
+          "mapreduce.reduce.shuffle.fetch.retry.interval-ms": "1000",
+          "mapreduce.reduce.shuffle.fetch.retry.timeout-ms": "30000",
+          "mapreduce.reduce.shuffle.input.buffer.percent": "0.7",
+          "mapreduce.reduce.shuffle.merge.percent": "0.66",
+          "mapreduce.reduce.shuffle.parallelcopies": "30",
+          "mapreduce.reduce.speculative": "false",
+          "mapreduce.shuffle.port": "13562",
+          "mapreduce.task.io.sort.factor": "100",
+          "mapreduce.task.io.sort.mb": "273",
+          "mapreduce.task.timeout": "300000",
+          "yarn.app.mapreduce.am.admin-command-opts": "-Dhdp.version=${hdp.version}",
+          "yarn.app.mapreduce.am.command-opts": "-Xmx546m -Dhdp.version=${hdp.version}",
+          "yarn.app.mapreduce.am.log.level": "INFO",
+          "yarn.app.mapreduce.am.resource.mb": "682",
+          "yarn.app.mapreduce.am.staging-dir": "/user"
+        }
+      }
+    }
+  ],
+  "host_groups": [
+    {
+      "name": "client",
+      "components": [
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "METRICS_COLLECTOR"
+        },
+        {
+          "name": "HBASE_CLIENT"
+        },
+        {
+          "name": "HCAT"
+        },
+        {
+          "name": "HDFS_CLIENT"
+        },
+        {
+          "name": "HIVE_CLIENT"
+        },
+        {
+          "name": "MAPREDUCE2_CLIENT"
+        },
+        {
+          "name": "PIG"
+        },
+        {
+          "name": "SPARK_CLIENT"
+        },
+        {
+          "name": "TEZ_CLIENT"
+        },
+        {
+          "name": "YARN_CLIENT"
+        },
+        {
+          "name": "ZOOKEEPER_CLIENT"
+        }
+      ]
+    },
+    {
+      "name": "master_1",
+      "components": [
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "HISTORYSERVER"
+        },
+        {
+          "name": "JOURNALNODE"
+        },
+        {
+          "name": "NAMENODE"
+        },
+        {
+          "name": "ZOOKEEPER_SERVER"
+        },
+        {
+          "name": "APP_TIMELINE_SERVER"
+        },
+        {
+          "name": "RESOURCEMANAGER"
+        },
+        {
+          "name": "HBASE_MASTER"
+        },
+        {
+          "name": "HIVE_METASTORE"
+        },
+        {
+          "name": "HIVE_SERVER"
+        },
+        {
+          "name": "MYSQL_SERVER"
+        },
+        {
+          "name": "SECONDARY_NAMENODE"
+        },
+        {
+          "name": "WEBHCAT_SERVER"
+        },
+        {
+          "name": "SPARK_JOBHISTORYSERVER"
+        },
+        {
+          "name": "ZEPPELIN_MASTER"
+        }
+      ]
+    },
+    {
+      "name": "slave_1",
+      "components": [
+        {
+          "name": "NODEMANAGER"
+        },
+        {
+          "name": "HBASE_REGIONSERVER"
+        },
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "DATANODE"
+        }
+      ]
+    }
+  ]
+}
