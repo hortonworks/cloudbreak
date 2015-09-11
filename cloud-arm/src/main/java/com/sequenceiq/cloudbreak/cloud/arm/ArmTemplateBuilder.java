@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
+import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -44,14 +45,14 @@ public class ArmTemplateBuilder {
     @Inject
     private ArmClient armClient;
 
-    public String build(String stackName, CloudCredential cloudCredential, CloudStack cloudStack) {
+    public String build(String stackName, CloudCredential cloudCredential, CloudContext cloudContext, CloudStack cloudStack) {
         try {
             String imageName = cloudStack.getImage().getImageName();
             imageName = imageName.replace("https://", "");
             String[] split = imageName.split("/");
             ArmCredentialView armCredentialView = new ArmCredentialView(cloudCredential);
             Map<String, Object> model = new HashMap<>();
-            model.put("storage_account_name", armClient.getStorageName(cloudCredential, cloudStack.getRegion()));
+            model.put("storage_account_name", armClient.getStorageName(cloudContext));
             model.put("image_storage_container_name", ArmSetup.IMAGES);
             model.put("storage_container_name", ArmSetup.VHDS);
             model.put("storage_vhd_name", split[2]);

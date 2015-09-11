@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
-import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 
 import groovyx.net.http.HttpResponseException;
@@ -61,12 +60,12 @@ public class ArmResourceConnector implements ResourceConnector {
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier) {
         String stackName = armTemplateUtils.getStackName(authenticatedContext.getCloudContext());
-        String template = armTemplateBuilder.build(stackName, authenticatedContext.getCloudCredential(), stack);
+        String template = armTemplateBuilder.build(stackName, authenticatedContext.getCloudCredential(), authenticatedContext.getCloudContext(), stack);
         String parameters = armTemplateBuilder.buildParameters(authenticatedContext.getCloudCredential(), stack.getNetwork(), stack.getImage());
 
         AzureRMClient access = armClient.createAccess(authenticatedContext.getCloudCredential());
         try {
-            access.createWholeStack(CloudRegion.valueOf(stack.getRegion()).value(), stackName, stackName, template, parameters);
+            access.createTemplateDeployment(stackName, stackName, template, parameters);
         } catch (HttpResponseException e) {
             throw new CloudConnectorException(String.format("Error occured when creating stack: %s", e.getResponse().getData().toString()));
         } catch (Exception e) {
@@ -100,7 +99,7 @@ public class ArmResourceConnector implements ResourceConnector {
                     LOGGER.info("Checking Arm group stack status of: {}", stackName);
                     try {
                         Map<String, Object> resourceGroup = access.getTemplateDeployment(stackName, stackName);
-                        CloudResourceStatus templateResourceStatus = armTemplateUtils.templateStatus(resource, resourceGroup);
+                        CloudResourceStatus templateResourceStatus = armTemplateUtils.templateStatus(resource, resourceGroup, access, stackName);
                         result.add(templateResourceStatus);
                     } catch (HttpResponseException e) {
                         if (e.getStatusCode() == NOT_FOUND) {
@@ -123,28 +122,8 @@ public class ArmResourceConnector implements ResourceConnector {
     @Override
     public List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         AzureRMClient azureRMClient = armClient.createAccess(authenticatedContext.getCloudCredential());
-        String osStorageName = armClient.getStorageName(authenticatedContext.getCloudCredential(), stack.getRegion());
-        String storageGroup = armClient.getStorageGroup(authenticatedContext.getCloudCredential(), stack.getRegion());
         for (CloudResource resource : resources) {
-            List<String> storageProfileDiskNames = new ArrayList<>();
-
             try {
-                Map<String, Object> virtualMachines = azureRMClient.getVirtualMachines(resource.getName());
-                List<Map> values = (List<Map>) virtualMachines.get("value");
-                for (Map value : values) {
-                    Map properties = (Map) value.get("properties");
-                    Map storageProfile = (Map) properties.get("storageProfile");
-
-                    Map osDisk = (Map) storageProfile.get("osDisk");
-                    List<Map> dataDisks = (List<Map>) storageProfile.get("dataDisks");
-
-                    for (Map datadisk : dataDisks) {
-                        Map vhds = (Map) datadisk.get("vhd");
-                        storageProfileDiskNames.add(getNameFromConnectionString(vhds.get("uri").toString()));
-                    }
-                    Map vhds = (Map) osDisk.get("vhd");
-                    storageProfileDiskNames.add(getNameFromConnectionString(vhds.get("uri").toString()));
-                }
                 azureRMClient.deleteResourceGroup(resource.getName());
                 PollTask<BooleanResult> task = statusCheckFactory.newPollBooleanTerminationTask(authenticatedContext,
                         new ArmResourceGroupDeleteStatusCheckerTask(armClient, new ResourceGroupCheckerContext(
@@ -160,7 +139,6 @@ public class ArmResourceConnector implements ResourceConnector {
             } catch (Exception e) {
                 throw new CloudConnectorException(String.format("Could not delete resource group: %s", resource.getName()), e);
             }
-            deleteDisk(storageProfileDiskNames, azureRMClient, osStorageName, storageGroup);
         }
         return check(authenticatedContext, resources);
     }
@@ -189,7 +167,7 @@ public class ArmResourceConnector implements ResourceConnector {
         AzureRMClient azureRMClient = armClient.createAccess(authenticatedContext.getCloudCredential());
 
         String stackName = armTemplateUtils.getStackName(authenticatedContext.getCloudContext());
-        String template = armTemplateBuilder.build(stackName, authenticatedContext.getCloudCredential(), stack);
+        String template = armTemplateBuilder.build(stackName, authenticatedContext.getCloudCredential(), authenticatedContext.getCloudContext(), stack);
         String parameters = armTemplateBuilder.buildParameters(authenticatedContext.getCloudCredential(), stack.getNetwork(), stack.getImage());
 
         try {
@@ -208,8 +186,8 @@ public class ArmResourceConnector implements ResourceConnector {
     public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms) {
         AzureRMClient client = armClient.createAccess(auth.getCloudCredential());
         String stackName = armTemplateUtils.getStackName(auth.getCloudContext());
-        String osStorageName = armClient.getStorageName(auth.getCloudCredential(), stack.getRegion());
-        String storageGroup = armClient.getStorageGroup(auth.getCloudCredential(), stack.getRegion());
+        String osStorageName = armClient.getStorageName(auth.getCloudContext());
+        String storageGroup = armTemplateUtils.getStackName(auth.getCloudContext());
 
         for (CloudInstance instance : vms) {
             List<String> networkInterfacesNames = new ArrayList<>();

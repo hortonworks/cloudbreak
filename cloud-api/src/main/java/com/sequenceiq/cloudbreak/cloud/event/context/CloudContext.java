@@ -15,7 +15,7 @@ public class CloudContext {
     private OnFailureAction onFailureAction = OnFailureAction.ROLLBACK;
     private AdjustmentType adjustmentType;
     private Long threshold;
-
+    private Long created;
 
     public CloudContext(Stack stack) {
         this.stackId = stack.getId();
@@ -25,6 +25,7 @@ public class CloudContext {
         this.owner = stack.getOwner();
         this.parallelResourceRequest = stack.cloudPlatform().parallelNumber();
         this.onFailureAction = stack.getOnFailureActionAction();
+        this.created = stack.getCreated();
         if (stack.getFailurePolicy() != null) {
             this.adjustmentType = stack.getFailurePolicy().getAdjustmentType();
             this.threshold = stack.getFailurePolicy().getThreshold();
@@ -76,6 +77,10 @@ public class CloudContext {
 
     public void setAdjustmentType(AdjustmentType adjustmentType) {
         this.adjustmentType = adjustmentType;
+    }
+
+    public Long getCreated() {
+        return created;
     }
 
     @Override

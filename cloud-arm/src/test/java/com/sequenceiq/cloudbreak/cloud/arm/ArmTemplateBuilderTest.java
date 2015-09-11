@@ -18,6 +18,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -38,6 +39,7 @@ public class ArmTemplateBuilderTest {
     private ArmTemplateBuilder underTest;
 
     private CloudStack cloudStack;
+    private CloudContext cloudContext;
     private CloudCredential cloudCredential;
     private final int volume1Size = 100;
     private final int volume2Size = 20;
@@ -47,6 +49,7 @@ public class ArmTemplateBuilderTest {
     public void setUp() throws Exception {
         ReflectionTestUtils.setField(underTest, "armTemplatePath", "templates/arm-v2.ftl");
         cloudStack = createCloudStack();
+        cloudContext = createCloudContext();
         cloudCredential = createCloudCredential();
     }
 
@@ -81,10 +84,14 @@ public class ArmTemplateBuilderTest {
         return new CloudStack(asList(cbgateway, master, slave1), network, security, image, "West US", new HashMap<String, String>());
     }
 
+    private CloudContext createCloudContext() {
+        return new CloudContext(TestUtil.stack());
+    }
+
     @Ignore
     @Test
     public void test1() {
-        String result = underTest.build("teststack1", cloudCredential, cloudStack);
+        String result = underTest.build("teststack1", cloudCredential, cloudContext, cloudStack);
     }
 
 
