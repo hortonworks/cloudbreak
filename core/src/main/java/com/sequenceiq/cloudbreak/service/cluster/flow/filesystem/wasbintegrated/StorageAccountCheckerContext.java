@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cluster.flow;
+package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.wasbintegrated;
 
 public class StorageAccountCheckerContext {
     private String tenantId;

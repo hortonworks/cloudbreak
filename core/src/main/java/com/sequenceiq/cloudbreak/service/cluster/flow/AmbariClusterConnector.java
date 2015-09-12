@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
@@ -49,7 +50,6 @@ import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.FileSystemType;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -71,6 +71,9 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfiguration;
+import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
+import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
@@ -433,19 +436,24 @@ public class AmbariClusterConnector {
         return hostDeleted;
     }
 
-    private String extendBlueprintWithFsConfig(String blueprintText, FileSystem fs) {
-        FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(fs.getType());
-        List<BlueprintConfigurationEntry> bpConfigEntries = fsConfigurator.getBlueprintProperties(fs.getProperties());
+    private String extendBlueprintWithFsConfig(String blueprintText, FileSystem fs) throws IOException {
+        FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(FileSystemType.valueOf(fs.getType()));
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(fs.getProperties());
+        FileSystemConfiguration fsConfiguration = (FileSystemConfiguration) mapper.readValue(json, FileSystemType.valueOf(fs.getType()).getClazz());
+        List<BlueprintConfigurationEntry> bpConfigEntries = fsConfigurator.getBlueprintProperties(fsConfiguration);
         if (fs.isDefaultFs()) {
-            String defaultFsValue = fsConfigurator.getDefaultFsValue(fs.getProperties());
+            String defaultFsValue = fsConfigurator.getDefaultFsValue(fsConfiguration);
             blueprintText = blueprintProcessor.addDefaultFs(blueprintText, defaultFsValue);
         }
         blueprintText = blueprintProcessor.addConfigEntries(blueprintText, bpConfigEntries);
         return blueprintText;
+
+
     }
 
     private void addFsRecipes(String blueprintText, FileSystem fs, Set<HostGroup> hostGroups) {
-        FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(fs.getType());
+        FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(FileSystemType.valueOf(fs.getType()));
         List<RecipeScript> recipeScripts = fsConfigurator.getScripts();
         List<Recipe> fsRecipes = recipeBuilder.buildRecipes(recipeScripts, fs.getProperties());
         for (Recipe recipe : fsRecipes) {

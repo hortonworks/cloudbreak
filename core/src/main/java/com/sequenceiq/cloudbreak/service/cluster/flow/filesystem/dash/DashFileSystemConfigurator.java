@@ -1,26 +1,28 @@
-package com.sequenceiq.cloudbreak.service.cluster.flow;
+package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.dash;
 
-import static com.sequenceiq.cloudbreak.domain.FileSystemType.DASH;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType.DASH;
 import static com.sequenceiq.cloudbreak.domain.PluginExecutionType.ALL_NODES;
 import static com.sequenceiq.cloudbreak.domain.PluginExecutionType.ONE_NODE;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.ClusterLifecycleEvent.POST_INSTALL;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.domain.FileSystemType;
+import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.service.cluster.flow.BlueprintConfigurationEntry;
+import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.AbstractFileSystemConfigurator;
+import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemScriptConfig;
 
 @Component
-public class DashFileSystemConfigurator extends AbstractFileSystemConfigurator {
+public class DashFileSystemConfigurator extends AbstractFileSystemConfigurator<DashFileSystemConfiguration> {
 
     @Override
-    public List<BlueprintConfigurationEntry> getBlueprintProperties(Map<String, String> fsProperties) {
+    public List<BlueprintConfigurationEntry> getBlueprintProperties(DashFileSystemConfiguration fsConfig) {
         List<BlueprintConfigurationEntry> bpConfigs = new ArrayList<>();
-        String dashAccountName = fsProperties.get("account.name");
-        String dashAccountKey = fsProperties.get("account.key");
+        String dashAccountName = fsConfig.getAccountName();
+        String dashAccountKey = fsConfig.getAccountKey();
         bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.AbstractFileSystem.wasb.impl", "org.apache.hadoop.fs.azure.Wasb"));
         bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.azure.account.key." + dashAccountName + ".cloudapp.net", dashAccountKey));
         bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.azure.selfthrottling.read.factor", "1.0"));
@@ -29,9 +31,8 @@ public class DashFileSystemConfigurator extends AbstractFileSystemConfigurator {
     }
 
     @Override
-    public String getDefaultFsValue(Map<String, String> fsProperties) {
-        String dashAccountName = fsProperties.get("account.name");
-        return "wasb://cloudbreak@" + dashAccountName + ".cloudapp.net";
+    public String getDefaultFsValue(DashFileSystemConfiguration fsConfig) {
+        return "wasb://cloudbreak@" + fsConfig.getAccountName() + ".cloudapp.net";
     }
 
     @Override
@@ -46,4 +47,5 @@ public class DashFileSystemConfigurator extends AbstractFileSystemConfigurator {
         scriptConfigs.add(new FileSystemScriptConfig("scripts/dash-hdfs.sh", POST_INSTALL, ONE_NODE));
         return scriptConfigs;
     }
+
 }

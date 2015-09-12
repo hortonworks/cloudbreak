@@ -1,6 +1,6 @@
-package com.sequenceiq.cloudbreak.service.cluster.flow;
+package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.wasbintegrated;
 
-import static com.sequenceiq.cloudbreak.domain.FileSystemType.WASB_INTEGRATED;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType.WASB_INTEGRATED;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,14 +11,17 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
-import com.sequenceiq.cloudbreak.domain.FileSystemType;
+import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.cluster.FileSystemConfigException;
+import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigException;
+import com.sequenceiq.cloudbreak.service.cluster.flow.BlueprintConfigurationEntry;
+import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.AbstractFileSystemConfigurator;
+import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemScriptConfig;
 
 import groovyx.net.http.HttpResponseException;
 
 @Component
-public class WasbIntegratedFileSystemConfigurator extends AbstractFileSystemConfigurator {
+public class WasbIntegratedFileSystemConfigurator extends AbstractFileSystemConfigurator<WasbIntegratedFileSystemConfiguration> {
 
     private static final int POLLING_INTERVAL = 5000;
     private static final int MAX_ATTEMPTS = 50;
@@ -30,15 +33,15 @@ public class WasbIntegratedFileSystemConfigurator extends AbstractFileSystemConf
     private PollingService<StorageAccountCheckerContext> storagePollingService;
 
     @Override
-    public List<BlueprintConfigurationEntry> getBlueprintProperties(Map<String, String> fsProperties) {
+    public List<BlueprintConfigurationEntry> getBlueprintProperties(WasbIntegratedFileSystemConfiguration fsConfig) {
         List<BlueprintConfigurationEntry> bpConfigs = new ArrayList<>();
 
-        String tenantId = fsProperties.get("tenant.id");
-        String subscriptionId = fsProperties.get("subscription.id");
-        String appId = fsProperties.get("app.id");
-        String appPassword = fsProperties.get("app.password");
-        String region = fsProperties.get("storage.region");
-        String storageName = fsProperties.get("storage.name");
+        String tenantId = fsConfig.getTenantId();
+        String subscriptionId = fsConfig.getSubscriptionId();
+        String appId = fsConfig.getAppId();
+        String appPassword = fsConfig.getAppPassword();
+        String region = fsConfig.getRegion();
+        String storageName = fsConfig.getStorageName();
 
         AzureRMClient azureClient = new AzureRMClient(tenantId, appId, appPassword, subscriptionId);
         try {
@@ -68,9 +71,8 @@ public class WasbIntegratedFileSystemConfigurator extends AbstractFileSystemConf
     }
 
     @Override
-    public String getDefaultFsValue(Map<String, String> fsProperties) {
-        String storageName = fsProperties.get("storage.name");
-        return "wasb://cloudbreak@" + storageName + ".blob.core.windows.net";
+    public String getDefaultFsValue(WasbIntegratedFileSystemConfiguration fsConfig) {
+        return "wasb://cloudbreak@" + fsConfig.getStorageName() + ".blob.core.windows.net";
     }
 
     @Override

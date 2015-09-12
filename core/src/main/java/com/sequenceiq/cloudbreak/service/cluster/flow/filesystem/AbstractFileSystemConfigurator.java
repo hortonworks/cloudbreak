@@ -1,13 +1,13 @@
-package com.sequenceiq.cloudbreak.service.cluster.flow;
+package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.service.cluster.FileSystemConfigException;
+import com.sequenceiq.cloudbreak.service.cluster.flow.RecipeScript;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
-public abstract class AbstractFileSystemConfigurator implements FileSystemConfigurator {
+public abstract class AbstractFileSystemConfigurator<T extends FileSystemConfiguration> implements FileSystemConfigurator<T> {
 
     @Override
     public List<RecipeScript> getScripts() {
