@@ -54,7 +54,7 @@ public class AmbariServerBootstrap implements ContainerBootstrap {
                         "POSTGRES_DB=localhost",
                         String.format("CLOUD_PLATFORM=%s", cloudPlatform),
                         "SERVICE_NAME=ambari-8080")
-                .withCmd("/start-server"));
+                .withCmd("/start-server"), nodeName);
 
         startContainer(docker, name);
 

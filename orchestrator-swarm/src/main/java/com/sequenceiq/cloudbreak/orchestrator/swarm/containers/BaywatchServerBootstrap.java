@@ -52,7 +52,7 @@ public class BaywatchServerBootstrap implements ContainerBootstrap {
                         String.format("ES_CLUSTER_NAME=%s", CLUSTER_NAME),
                         String.format("ES_DATA_PATH=%s", ES_DATA_PATH),
                         String.format("ES_WORK_PATH=%s", ES_WORK_PATH))
-                .withHostConfig(hostConfig));
+                .withHostConfig(hostConfig), nodeName);
 
         startContainer(docker, name);
 

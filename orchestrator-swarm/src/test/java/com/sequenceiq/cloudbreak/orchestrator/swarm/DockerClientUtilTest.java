@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.orchestrator.swarm;
 
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil.createContainer;
-import static com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil.forceRemove;
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil.startContainer;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -70,8 +70,9 @@ public class DockerClientUtilTest {
     public void removeContainerIExistWhenInspectReturnWithNull() throws Exception {
         when(client.inspectContainerCmd(anyString())).thenReturn(inspectContainerCmd);
         when(inspectContainerCmd.exec()).thenReturn(null);
+        when(createContainerCmd.getName()).thenReturn("ambari-server");
 
-        forceRemove(client, "ambari-server");
+        createContainer(client, createContainerCmd, "vm1");
 
         verify(client, times(1)).inspectContainerCmd(anyString());
         verify(client, times(0)).removeContainerCmd(anyString());
@@ -80,8 +81,9 @@ public class DockerClientUtilTest {
     @Test
     public void removeContainerIExistWhenInspectDropNotFoundException() throws Exception {
         when(client.inspectContainerCmd(anyString())).thenThrow(new NotFoundException("notfound"));
+        when(createContainerCmd.getName()).thenReturn("ambari-server");
 
-        forceRemove(client, "ambari-server");
+        createContainer(client, createContainerCmd, "vm1");
 
         verify(client, times(1)).inspectContainerCmd(anyString());
         verify(client, times(0)).removeContainerCmd(anyString());
@@ -90,8 +92,9 @@ public class DockerClientUtilTest {
     @Test(expected = IllegalArgumentException.class)
     public void removeContainerIExistWhenInspectDropActualException() throws Exception {
         when(client.inspectContainerCmd(anyString())).thenThrow(new IllegalArgumentException("illegal argument"));
+        when(createContainerCmd.getName()).thenReturn("ambari-server");
 
-        forceRemove(client, "ambari-server");
+        createContainer(client, createContainerCmd, "vm1");
     }
 
     @Test
@@ -99,11 +102,15 @@ public class DockerClientUtilTest {
         when(client.inspectContainerCmd(anyString())).thenReturn(inspectContainerCmd);
         when(inspectContainerCmd.exec()).thenReturn(inspectContainerResponse);
         when(inspectContainerResponse.getId()).thenReturn("xx666xx");
+        InspectContainerResponse.ContainerState state = mock(InspectContainerResponse.ContainerState.class);
+        when(inspectContainerResponse.getState()).thenReturn(state);
+        when(state.isRunning()).thenReturn(false);
         when(client.removeContainerCmd(anyString())).thenReturn(removeContainerCmd);
         when(removeContainerCmd.withForce(anyBoolean())).thenReturn(removeContainerCmd);
         when(removeContainerCmd.exec()).thenReturn(null);
+        when(createContainerCmd.getName()).thenReturn("ambari-server");
 
-        forceRemove(client, "ambari-server");
+        createContainer(client, createContainerCmd, "vm1");
 
         verify(client, times(1)).inspectContainerCmd(anyString());
         verify(client, times(1)).removeContainerCmd(anyString());
@@ -140,7 +147,7 @@ public class DockerClientUtilTest {
         when(inspectContainerCmd.exec()).thenReturn(inspectContainerResponse);
         when(createContainerCmd.exec()).thenReturn(createContainerResponse);
 
-        createContainer(client, createContainerCmd);
+        createContainer(client, createContainerCmd, "vm12");
 
         //No exception
     }

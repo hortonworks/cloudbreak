@@ -44,7 +44,7 @@ public class RegistratorBootstrap implements ContainerBootstrap {
                 .withEnv(String.format("constraint:node==%s", nodeName))
                 .withHostConfig(hostConfig)
                 .withName(name)
-                .withCmd(String.format("consul://%s:8500", privateIp)));
+                .withCmd(String.format("consul://%s:8500", privateIp)), nodeName);
 
         startContainer(docker, name);
         LOGGER.info(String.format("Registrator started successfully on node %s.", nodeName));

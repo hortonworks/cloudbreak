@@ -49,10 +49,9 @@ public class ContainerBootstrapRunner implements Callable<Boolean> {
                 containerBootstrap.call();
                 long elapsedTime = System.currentTimeMillis() - startTime;
                 success = true;
-                LOGGER.info("Container {} successfully! Elapsed time: {} ms, additional info: {}", type, elapsedTime, containerBootstrap);
+                LOGGER.info("Container {} successfully started! Elapsed time: {} ms, additional info: {}", type, elapsedTime, containerBootstrap);
             } catch (Exception ex) {
                 long elapsedTime = System.currentTimeMillis() - startTime;
-                // Swarm is not extremely stable so we retry aggressively in every case
                 actualException = ex;
                 retryCount++;
                 LOGGER.error("Container {} failed to start, retrying [{}/{}] Elapsed time: {} ms; Reason: {}, additional info: {}", type,

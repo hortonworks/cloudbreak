@@ -43,7 +43,7 @@ public class LogrotateBootsrap implements ContainerBootstrap {
         createContainer(docker, docker.createContainerCmd(imageName)
                 .withEnv(String.format("constraint:node==%s", nodeName))
                 .withHostConfig(hostConfig)
-                .withName(name));
+                .withName(name), nodeName);
         startContainer(docker, name);
         LOGGER.info("Logrotate container started successfully");
 
