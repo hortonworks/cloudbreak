@@ -60,16 +60,58 @@ public class JacksonBlueprintProcessorTest {
         configurationEntries.add(new BlueprintConfigurationEntry("core-site", "io.serializations", "org.apache.hadoop.io.serializer.WritableSerialization"));
         String result = underTest.addConfigEntries(testBlueprint, configurationEntries);
 
-        String configValue1 = new ObjectMapper().readTree(result).findPath("core-site").findPath("fs.AbstractFileSystem.wasb.impl").textValue();
+        String configValue1 = new ObjectMapper().readTree(result).findPath("core-site").path("fs.AbstractFileSystem.wasb.impl").textValue();
         Assert.assertEquals("org.apache.hadoop.fs.azure.Wasb", configValue1);
 
-        String configValue2 = new ObjectMapper().readTree(result).findPath("core-site").findPath("io.serializations").textValue();
+        String configValue2 = new ObjectMapper().readTree(result).findPath("core-site").path("io.serializations").textValue();
         Assert.assertEquals("org.apache.hadoop.io.serializer.WritableSerialization", configValue2);
 
-        String configValue3 = new ObjectMapper().readTree(result).findPath("core-site").findPath("fs.trash.interval").textValue();
+        String configValue3 = new ObjectMapper().readTree(result).findPath("core-site").path("fs.trash.interval").textValue();
         Assert.assertEquals("360", configValue3);
 
-        String configValue4 = new ObjectMapper().readTree(result).findPath("core-site").findPath("io.file.buffer.size").textValue();
+        String configValue4 = new ObjectMapper().readTree(result).findPath("core-site").path("io.file.buffer.size").textValue();
+        Assert.assertEquals("131072", configValue4);
+    }
+
+    @Test
+    public void testAddConfigEntriesAddsConfigEntriesToExistingConfigPropertiesBlockAndKeepsExistingEntries() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-with-core-site-properties.bp");
+        List<BlueprintConfigurationEntry> configurationEntries = new ArrayList<>();
+        configurationEntries.add(new BlueprintConfigurationEntry("core-site", "fs.AbstractFileSystem.wasb.impl", "org.apache.hadoop.fs.azure.Wasb"));
+        configurationEntries.add(new BlueprintConfigurationEntry("core-site", "io.serializations", "org.apache.hadoop.io.serializer.WritableSerialization"));
+        String result = underTest.addConfigEntries(testBlueprint, configurationEntries);
+
+        String configValue1 = new ObjectMapper().readTree(result).findPath("core-site").path("properties").path("fs.AbstractFileSystem.wasb.impl").textValue();
+        Assert.assertEquals("org.apache.hadoop.fs.azure.Wasb", configValue1);
+
+        String configValue2 = new ObjectMapper().readTree(result).findPath("core-site").path("properties").path("io.serializations").textValue();
+        Assert.assertEquals("org.apache.hadoop.io.serializer.WritableSerialization", configValue2);
+
+        String configValue3 = new ObjectMapper().readTree(result).findPath("core-site").path("properties").path("fs.trash.interval").textValue();
+        Assert.assertEquals("360", configValue3);
+
+        String configValue4 = new ObjectMapper().readTree(result).findPath("core-site").path("properties").path("io.file.buffer.size").textValue();
+        Assert.assertEquals("131072", configValue4);
+    }
+
+    @Test
+    public void testAddConfigEntriesAddsConfigEntriesToExistingConfigPropertiesBlockAndUpdatesExistingEntries() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-with-core-site-properties.bp");
+        List<BlueprintConfigurationEntry> configurationEntries = new ArrayList<>();
+        configurationEntries.add(new BlueprintConfigurationEntry("core-site", "fs.defaultFS", "wasb://cloudbreak@dduihoab6jt1jl.cloudapp.net"));
+        configurationEntries.add(new BlueprintConfigurationEntry("core-site", "io.serializations", "org.apache.hadoop.io.serializer.WritableSerialization"));
+        String result = underTest.addConfigEntries(testBlueprint, configurationEntries);
+
+        String configValue1 = new ObjectMapper().readTree(result).findPath("core-site").path("properties").path("fs.defaultFS").textValue();
+        Assert.assertEquals("wasb://cloudbreak@dduihoab6jt1jl.cloudapp.net", configValue1);
+
+        String configValue2 = new ObjectMapper().readTree(result).findPath("core-site").path("properties").path("io.serializations").textValue();
+        Assert.assertEquals("org.apache.hadoop.io.serializer.WritableSerialization", configValue2);
+
+        String configValue3 = new ObjectMapper().readTree(result).findPath("core-site").path("properties").path("fs.trash.interval").textValue();
+        Assert.assertEquals("360", configValue3);
+
+        String configValue4 = new ObjectMapper().readTree(result).findPath("core-site").path("properties").path("io.file.buffer.size").textValue();
         Assert.assertEquals("131072", configValue4);
     }
 
