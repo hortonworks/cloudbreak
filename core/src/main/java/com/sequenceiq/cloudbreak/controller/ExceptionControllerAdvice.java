@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.controller;
 import java.nio.file.AccessDeniedException;
 
 import javax.persistence.EntityNotFoundException;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,22 +39,26 @@ public class ExceptionControllerAdvice {
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler({ TypeMismatchException.class, HttpMessageNotReadableException.class, BadRequestException.class })
+    @ExceptionHandler({ TypeMismatchException.class, HttpMessageNotReadableException.class, BadRequestException.class, ConversionFailedException.class  })
     public ResponseEntity<ExceptionResult> badRequest(Exception e) {
         MDCBuilder.buildMdcContext();
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({ ConversionFailedException.class })
-    public ResponseEntity<ExceptionResult> conversionFailed(Exception e) {
+    @ExceptionHandler({ ConstraintViolationException.class })
+    public ResponseEntity<ValidationResult> constraintViolation(ConstraintViolationException e) {
         MDCBuilder.buildMdcContext();
-        LOGGER.error(e.getMessage(), e);
-        if (e.getCause() != null) {
-            return new ResponseEntity<>(new ExceptionResult(e.getCause().getMessage()), HttpStatus.BAD_REQUEST);
-        } else {
-            return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.BAD_REQUEST);
+        ValidationResult result = new ValidationResult();
+        for (ConstraintViolation violation : e.getConstraintViolations()) {
+            String key = "";
+            if (violation.getPropertyPath() != null) {
+                key = violation.getPropertyPath().toString();
+            }
+            result.addValidationError(key, violation.getMessage());
         }
+        LOGGER.error("Constraint validation failed:", e);
+        return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({ AccessDeniedException.class, org.springframework.security.access.AccessDeniedException.class })

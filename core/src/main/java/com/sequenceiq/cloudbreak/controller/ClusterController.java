@@ -1,10 +1,16 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.controller.doc.ContentType;
 import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.controller.doc.Notes;
@@ -27,6 +34,7 @@ import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions.ClusterOpD
 import com.sequenceiq.cloudbreak.controller.json.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
+import com.sequenceiq.cloudbreak.controller.json.FileSystemRequest;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupJson;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.json.UpdateClusterJson;
@@ -82,10 +90,31 @@ public class ClusterController {
         }
 
         MDCBuilder.buildUserMdcContext(user);
+        if (request.getFileSystem() != null) {
+            validateFilesystemRequest(request.getFileSystem());
+        }
         Cluster cluster = conversionService.convert(request, Cluster.class);
         cluster = clusterDecorator.decorate(cluster, stackId, request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint());
         clusterService.create(user, stackId, cluster);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    private void validateFilesystemRequest(FileSystemRequest fileSystemRequest) {
+        ObjectMapper mapper = new ObjectMapper();
+        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
+        Validator validator = validatorFactory.getValidator();
+        try {
+            if (fileSystemRequest != null) {
+                String json = mapper.writeValueAsString(fileSystemRequest.getProperties());
+                Object fsConfig = mapper.readValue(json, fileSystemRequest.getType().getClazz());
+                Set<ConstraintViolation<Object>> violations = validator.validate(fsConfig);
+                if (!violations.isEmpty()) {
+                    throw new ConstraintViolationException(violations);
+                }
+            }
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage(), e);
+        }
     }
 
     @ApiOperation(value = ClusterOpDescription.GET_BY_STACK_ID, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES)
