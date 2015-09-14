@@ -56,7 +56,7 @@ cbd-update-release() {
 
     if [[ ${binver} != ${lastver} ]]; then
         debug upgrade needed |yellow
-        
+
         local url=https://github.com/sequenceiq/cloudbreak-deployer/releases/download/v${lastver}/cloudbreak-deployer_${lastver}_${osarch}.tgz
         info "Updating $SELF_EXECUTABLE from url: $url"
         curl -Ls $url | tar -zx -C /tmp
@@ -127,7 +127,7 @@ init-profile() {
         fi
         exit 2
     fi
-    
+
     doctor
 }
 
@@ -144,7 +144,7 @@ load-profile() {
             echo "cbd init" | blue
         fi
     fi
-    
+
     if [[ "$CBD_DEFAULT_PROFILE" && -f "Profile.$CBD_DEFAULT_PROFILE" ]]; then
         CBD_PROFILE="Profile.$CBD_DEFAULT_PROFILE"
 
@@ -274,6 +274,10 @@ main() {
         cmd-export aws-generate-role
         cmd-export aws-delete-role
 
+        cmd-export-ns azure "Azure namespace"
+        cmd-export azure-deploy-dash
+        cmd-export azure-configure-arm
+
         cmd-export-ns util "Util namespace"
         cmd-export util-cloudbreak-shell
         cmd-export util-cloudbreak-shell-quiet
@@ -285,7 +289,7 @@ main() {
     if [[ "$DEBUG" ]]; then
         cmd-export fn-call fn
     fi
-    
+
 	if [[ "${!#}" == "-h" || "${!#}" == "--help" ]]; then
 		local args=("$@")
 		unset args[${#args[@]}-1]
