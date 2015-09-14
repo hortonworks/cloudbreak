@@ -10,6 +10,9 @@ import org.openstack4j.api.OSClient;
 import org.openstack4j.model.compute.Address;
 import org.openstack4j.model.compute.Server;
 import org.openstack4j.model.heat.Stack;
+import org.openstack4j.model.network.NetFloatingIP;
+import org.openstack4j.model.network.Port;
+import org.openstack4j.model.network.options.PortListOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -54,6 +57,7 @@ public class OpenStackMetadataCollector implements MetadataCollector {
 
         List<CloudVmInstanceStatus> results = new ArrayList<>();
 
+
         List<Map<String, Object>> outputs = heatStack.getOutputs();
         for (Map<String, Object> map : outputs) {
             String instanceUUID = (String) map.get("output_value");
@@ -62,7 +66,7 @@ public class OpenStackMetadataCollector implements MetadataCollector {
             String privateInstanceId = utils.getPrivateInstanceId(metadata);
             InstanceTemplate template = templateMap.get(privateInstanceId);
             if (template != null) {
-                CloudInstance cloudInstance = createInstanceMetaData(server, instanceUUID, template);
+                CloudInstance cloudInstance = createInstanceMetaData(client, server, instanceUUID, template);
                 results.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED));
             }
         }
@@ -70,36 +74,107 @@ public class OpenStackMetadataCollector implements MetadataCollector {
         return results;
     }
 
-    private CloudInstance createInstanceMetaData(Server server, String instanceId, InstanceTemplate template) {
-        String privateIp = null;
-        String floatingIp = null;
+    private CloudInstance createInstanceMetaData(OSClient client, Server server, String instanceId, InstanceTemplate template) {
+        CloudInstanceMetaData md = CloudInstanceMetaDataExtractor.getMetadataExtractor(client, server, instanceId).extract();
+        return new CloudInstance(instanceId, md, template);
+    }
 
-        Map<String, List<? extends Address>> adrMap = server.getAddresses().getAddresses();
-        LOGGER.debug("Address map: {} of instance: {}", adrMap, server.getName());
-        for (String key : adrMap.keySet()) {
-            LOGGER.debug("Network resource key: {} of instance: {}", key, server.getName());
-            List<? extends Address> adrList = adrMap.get(key);
-            for (Address adr : adrList) {
-                LOGGER.debug("Network resource key: {} of instance: {}, address: {}", key, adr);
-                switch (adr.getType()) {
-                    case "fixed":
-                        privateIp = adr.getAddr();
-                        LOGGER.info("PrivateIp of instance: {} is {}", server.getName(), server.getName(), privateIp);
-                        break;
-                    case "floating":
-                        floatingIp = adr.getAddr();
-                        LOGGER.info("FloatingIp of instance: {} is {}", server.getName(), floatingIp);
-                        break;
-                    default:
-                        LOGGER.error("No such network resource type: {}, instance: {}", adr.getType(), server.getName());
-                }
+    private abstract static class CloudInstanceMetaDataExtractor {
+
+        private final OSClient client;
+        private final Server server;
+        private final String instanceId;
+
+        private CloudInstanceMetaDataExtractor(OSClient client, Server server, String instanceId) {
+            this.client = client;
+            this.server = server;
+            this.instanceId = instanceId;
+        }
+
+        private static CloudInstanceMetaDataExtractor getMetadataExtractor(OSClient client, Server server, String instanceId) {
+            if (server.getAddresses().getAddresses().isEmpty()) {
+                return new PortApiExtractor(client, server, instanceId);
+            } else {
+                return new ComputeApiExtractor(client, server, instanceId);
             }
         }
 
-        CloudInstanceMetaData md = new CloudInstanceMetaData(
-                privateIp,
-                floatingIp);
+        public abstract CloudInstanceMetaData extract();
 
-        return new CloudInstance(instanceId, md, template);
+        public OSClient getClient() {
+            return client;
+        }
+
+        public Server getServer() {
+            return server;
+        }
+
+        public String getInstanceId() {
+            return instanceId;
+        }
+
+        private static class PortApiExtractor extends CloudInstanceMetaDataExtractor {
+
+            public PortApiExtractor(OSClient client, Server server, String instanceId) {
+                super(client, server, instanceId);
+            }
+
+            @Override
+            public CloudInstanceMetaData extract() {
+                LOGGER.debug("Address map was empty, trying to extract ips");
+                List<? extends Port> ports = getClient().networking().port().list(getPortListOptions());
+                String portId = ports.get(0).getId();
+                List<? extends NetFloatingIP> floatingIps = getClient().networking().floatingip().list(getFloatingIpListOptions(portId));
+                NetFloatingIP ips = floatingIps.get(0);
+                LOGGER.info("PrivateIp of instance: {} is {}", getServer().getName(), ips.getFixedIpAddress());
+                LOGGER.info("FloatingIp of instance: {} is {}", getServer().getName(), ips.getFloatingIpAddress());
+                return new CloudInstanceMetaData(ips.getFixedIpAddress(), ips.getFloatingIpAddress());
+            }
+
+            private PortListOptions getPortListOptions() {
+                return PortListOptions.create().deviceId(getInstanceId());
+            }
+
+            private Map<String, String> getFloatingIpListOptions(String portId) {
+                Map<String, String> paramMap = Maps.newHashMap();
+                paramMap.put("port_id", portId);
+                return paramMap;
+            }
+        }
+
+        private static class ComputeApiExtractor extends CloudInstanceMetaDataExtractor {
+
+            public ComputeApiExtractor(OSClient client, Server server, String instanceId) {
+                super(client, server, instanceId);
+            }
+
+            @Override
+            public CloudInstanceMetaData extract() {
+                String privateIp = null;
+                String floatingIp = null;
+                Map<String, List<? extends Address>> adrMap = getServer().getAddresses().getAddresses();
+                LOGGER.debug("Address map: {} of instance: {}", adrMap, getServer().getName());
+                for (String key : adrMap.keySet()) {
+                    LOGGER.debug("Network resource key: {} of instance: {}", key, getServer().getName());
+                    List<? extends Address> adrList = adrMap.get(key);
+                    for (Address adr : adrList) {
+                        LOGGER.debug("Network resource key: {} of instance: {}, address: {}", key, getServer().getName(), adr);
+                        switch (adr.getType()) {
+                            case "fixed":
+                                privateIp = adr.getAddr();
+                                LOGGER.info("PrivateIp of instance: {} is {}", getServer().getName(), privateIp);
+                                break;
+                            case "floating":
+                                floatingIp = adr.getAddr();
+                                LOGGER.info("FloatingIp of instance: {} is {}", getServer().getName(), floatingIp);
+                                break;
+                            default:
+                                LOGGER.error("No such network resource type: {}, instance: {}", adr.getType(), getServer().getName());
+                        }
+                    }
+                }
+                return new CloudInstanceMetaData(privateIp, floatingIp);
+            }
+        }
     }
 }
