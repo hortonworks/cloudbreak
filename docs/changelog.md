@@ -6,6 +6,8 @@
 
 ### Added
 
+- Command `cbd azure configure-arm` will create your arm application which can used by cloudbreak
+- Command `cbd azure deploy-dash` will deploy a dash application in your Azure account
 - Command `cbd start` will execute the migration by default. If SKIP_DB_MIGRATION_ON_START envvar set to true in Profile, the migration will be skipped
 - Using Dns SRV record in our services instead of ambassador
 - Using docker linking system in third party services instead of ambassador

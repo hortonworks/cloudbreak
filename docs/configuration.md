@@ -68,7 +68,7 @@ You can pass any additional consul configuration by defining a `DOCKER_CONSUL_OP
 - **CB_AWS_AMI_MAP** : tbd
 - **CB_AZURE_IMAGE_URI** : tbd
 - **CB_BLUEPRINT_DEFAULTS** : tbd
-- **CB_TEMPLATE_DEFAULTS** : tbd 
+- **CB_TEMPLATE_DEFAULTS** : tbd
 - **CB_DB_ENV_DB** : tbd
 - **CB_DB_ENV_PASS** : tbd
 - **CB_DB_ENV_USER** : tbd
@@ -86,6 +86,11 @@ You can pass any additional consul configuration by defining a `DOCKER_CONSUL_OP
 - **DOCKER_TAG_UAA** : tbd
 - **DOCKER_TAG_ULUWATU** : tbd
 - **PERISCOPE_DB_HBM2DDL_STRATEGY** : tbd
+
+## Azure Resource manager command
+- **cbd azure configure-arm**
+- **cbd azure deploy-dash**
+See the documentation here
 
 ## Caveats
 
