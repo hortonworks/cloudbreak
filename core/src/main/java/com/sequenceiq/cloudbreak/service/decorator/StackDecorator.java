@@ -6,10 +6,15 @@ import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AZURE_RM_IM
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_GCP_SOURCE_IMAGE_PATH;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_OPENSTACK_IMAGE;
 
-import javax.inject.Inject;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import com.amazonaws.regions.Regions;
 import com.google.common.base.Strings;
@@ -23,10 +28,6 @@ import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 @Service
 public class StackDecorator implements Decorator<Stack> {
@@ -106,7 +107,7 @@ public class StackDecorator implements Decorator<Stack> {
                 selectedImage = determineImageName(openStackImage, CB_OPENSTACK_IMAGE);
                 break;
             case AZURE_RM:
-                selectedImage = determineImageName(azureRmImage, CB_AZURE_RM_IMAGE);
+                selectedImage = prepareAzureRmImages().get(stack.getRegion());
                 break;
             default:
                 throw new BadRequestException(String.format("Not supported cloud platform: %s", stack.cloudPlatform()));
@@ -123,6 +124,15 @@ public class StackDecorator implements Decorator<Stack> {
             amisMap.put(s.split(":")[0], s.split(":")[1]);
         }
         return amisMap;
+    }
+
+    private Map<String, String> prepareAzureRmImages() {
+        Map<String, String> azureMap = new HashMap<>();
+        String azureImageNames = determineImageName(azureRmImage, CB_AZURE_RM_IMAGE);
+        for (String s : azureImageNames.split(",")) {
+            azureMap.put(s.split(":")[0], s.split(":")[1]);
+        }
+        return azureMap;
     }
 
     private String determineImageName(String imageName, String defaultImageName) {
