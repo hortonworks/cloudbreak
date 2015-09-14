@@ -45,7 +45,7 @@ import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.RegistratorBootst
 
 public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     private static final Logger LOGGER = LoggerFactory.getLogger(SwarmContainerOrchestrator.class);
-    private static final int READ_TIMEOUT = 120000;
+    private static final int READ_TIMEOUT = 180_000;
     private static final String MUNCHAUSEN_WAIT = "3600";
     private static final String MUNCHAUSEN_DOCKER_IMAGE = "sequenceiq/munchausen:0.5.5";
     private static final int MAX_IP_FOR_ONE_REQUEST = 600;
@@ -293,7 +293,9 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             }
             return privateAddresses;
         } catch (Exception e) {
-            LOGGER.warn(String.format("Cannot connect to Swarm manager, maybe it hasn't started yet: %s", e.getMessage()));
+            String defaultErrorMessage = "502 Bad Gateway";
+            String errorMessage = e.getMessage().contains(defaultErrorMessage) ? defaultErrorMessage : e.getMessage();
+            LOGGER.warn(String.format("Cannot connect to Swarm manager, maybe it hasn't started yet: %s", errorMessage));
             return privateAddresses;
         }
     }

@@ -53,7 +53,7 @@ public class AmbariServerDatabaseBootstrap implements ContainerBootstrap {
                         String.format("POSTGRES_USER=%s", "ambari"),
                         String.format("constraint:node==%s", nodeName))
                 .withHostConfig(hostConfig)
-                .withName(name));
+                .withName(name), nodeName);
 
         startContainer(docker, name);
 

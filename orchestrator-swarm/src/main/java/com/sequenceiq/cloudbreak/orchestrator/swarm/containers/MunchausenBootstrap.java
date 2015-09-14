@@ -42,7 +42,7 @@ public class MunchausenBootstrap implements ContainerBootstrap {
         createContainer(docker, docker.createContainerCmd(containerName)
                 .withName(name)
                 .withHostConfig(hostConfig)
-                .withCmd(cmd));
+                .withCmd(cmd), name);
 
         startContainer(docker, name);
         LOGGER.info("Munchausen bootstrap container started.");

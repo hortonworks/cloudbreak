@@ -50,11 +50,11 @@ public class EnvironmentVariableConfig {
     public static final String CB_BAYWATCH_ENABLED = "true";
     public static final String CB_BAYWATCH_EXTERN_LOCATION = "";
 
-    public static final String CB_AZURE_IMAGE_URI = "https://102589fae040d8westeurope.blob.core.windows.net/images/cb-centos71-amb210-2015-09-08-centos7_2015-September-8_9-28-os-2015-09-08.vhd";
-    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-9aca419a,ap-southeast-1:ami-2e28227c,ap-southeast-2:ami-5b094661,eu-central-1:ami-024c4c1f,eu-west-1:ami-27ba9b50,sa-east-1:ami-f53fb5e8,us-east-1:ami-97442bf2,us-west-1:ami-fdce34b9,us-west-2:ami-4f475a7f";
-    public static final String CB_OPENSTACK_IMAGE = "cb-centos71-amb210-2015-09-08";
-    public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos71-amb210-2015-09-08-centos71.tar.gz";
-    public static final String CB_AZURE_RM_IMAGE = "https://sequenceiqimages.blob.core.windows.net/images/cb-centos71-amb210-2015-09-08-centos7_2015-September-8_9-28-os-2015-09-08.vhd";
+    public static final String CB_AZURE_IMAGE_URI = "https://102589fae040d8westeurope.blob.core.windows.net/images/cb-centos71-amb210-2015-09-11-103_2015-September-11_17-55-os-2015-09-11.vhd";
+    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-b2f762b2,ap-southeast-1:ami-60b7bd32,ap-southeast-2:ami-398dc203,eu-central-1:ami-be2e2ea3,eu-west-1:ami-49eecd3e,sa-east-1:ami-5380154e,us-east-1:ami-07355e62,us-west-1:ami-bb8346ff,us-west-2:ami-f31e02c3";
+    public static final String CB_OPENSTACK_IMAGE = "cb-centos71-amb210-2015-09-11";
+    public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos71-amb210-2015-09-11126.tar.gz";
+    public static final String CB_AZURE_RM_IMAGE = "https://sequenceiqimages.blob.core.windows.net/images/cb-centos71-amb210-2015-09-11-103_2015-September-11_17-55-os-2015-09-11.vhd";
 
     public static final String CB_ARM_TEMPLATE_PATH = "templates/arm-v2.ftl";
     public static final String CB_ARM_PARAMETER_PATH = "templates/parameters.ftl";

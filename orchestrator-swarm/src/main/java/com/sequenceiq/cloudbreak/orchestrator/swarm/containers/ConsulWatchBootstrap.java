@@ -54,7 +54,7 @@ public class ConsulWatchBootstrap implements ContainerBootstrap {
                 .withHostConfig(hostConfig)
                 .withName(name)
                 .withEnv(format("constraint:node==%s", node.getHostname()), format("CONSUL_HOST=%s", ip))
-                .withCmd(format("consul://%s:8500", ip)));
+                .withCmd(format("consul://%s:8500", ip)), node.getHostname());
 
         long elapsedTime = System.currentTimeMillis() - createStartTime;
 

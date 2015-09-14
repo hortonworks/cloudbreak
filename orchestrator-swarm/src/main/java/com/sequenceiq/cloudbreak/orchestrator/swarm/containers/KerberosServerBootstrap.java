@@ -45,18 +45,18 @@ public class KerberosServerBootstrap implements ContainerBootstrap {
 
         String name = KERBEROS.getName();
         createContainer(docker, docker.createContainerCmd(imageName)
-                .withHostConfig(hostConfig)
-                .withName(name)
-                .withEnv(
-                        String.format("constraint:node==%s", nodeName),
-                        String.format("SERVICE_NAME=%s", name),
-                        "NAMESERVER_IP=127.0.0.1",
-                        String.format("REALM=%s", REALM),
-                        String.format("DOMAIN_REALM=%s", DOMAIN_REALM),
-                        String.format("KERB_MASTER_KEY=%s", config.getMasterKey()),
-                        String.format("KERB_ADMIN_USER=%s", config.getUser()),
-                        String.format("KERB_ADMIN_PASS=%s", config.getPassword())
-                )
+                        .withHostConfig(hostConfig)
+                        .withName(name)
+                        .withEnv(
+                                String.format("constraint:node==%s", nodeName),
+                                String.format("SERVICE_NAME=%s", name),
+                                "NAMESERVER_IP=127.0.0.1",
+                                String.format("REALM=%s", REALM),
+                                String.format("DOMAIN_REALM=%s", DOMAIN_REALM),
+                                String.format("KERB_MASTER_KEY=%s", config.getMasterKey()),
+                                String.format("KERB_ADMIN_USER=%s", config.getUser()),
+                                String.format("KERB_ADMIN_PASS=%s", config.getPassword())
+                        ), nodeName
         );
 
         startContainer(docker, name);
