@@ -39,7 +39,12 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
                     configFileNode = arrayElementNode.putObject(configurationEntry.getConfigFile());
 
                 }
-                ((ObjectNode) configFileNode).put(configurationEntry.getKey(), configurationEntry.getValue());
+                JsonNode propertiesNode = configFileNode.path("properties");
+                if (!propertiesNode.isMissingNode()) {
+                    ((ObjectNode) propertiesNode).put(configurationEntry.getKey(), configurationEntry.getValue());
+                } else {
+                    ((ObjectNode) configFileNode).put(configurationEntry.getKey(), configurationEntry.getValue());
+                }
             }
             return mapper.writeValueAsString(root);
         } catch (IOException e) {
