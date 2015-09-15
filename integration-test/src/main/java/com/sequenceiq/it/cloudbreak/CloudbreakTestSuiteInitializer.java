@@ -204,6 +204,12 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
                     }
                 }
             }
+            Set<Long> recipeIds = itContext.getContextParam(CloudbreakITContextConstants.RECIPE_ID, Set.class);
+            if (recipeIds != null) {
+                for (Long recipeId : recipeIds) {
+                    deleteRecipe(client, recipeId);
+                }
+            }
             deleteCredential(client, itContext.getCleanUpParameter(CloudbreakITContextConstants.CREDENTIAL_ID));
             deleteBlueprint(client, itContext.getCleanUpParameter(CloudbreakITContextConstants.BLUEPRINT_ID));
             deleteNetwork(client, itContext.getCleanUpParameter(CloudbreakITContextConstants.NETWORK_ID));
@@ -253,6 +259,11 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             result = true;
         }
         return result;
+    }
+
+    private boolean deleteRecipe(CloudbreakClient client, Long recipeId) throws Exception {
+        client.deleteRecipe(recipeId.toString());
+        return true;
     }
 
     private boolean isCleanUpNeeded(boolean cleanUp) {
