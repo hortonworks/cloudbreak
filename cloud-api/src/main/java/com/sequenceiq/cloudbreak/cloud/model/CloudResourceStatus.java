@@ -50,6 +50,10 @@ public class CloudResourceStatus {
         return ResourceStatus.FAILED == status;
     }
 
+    public boolean isDeleted() {
+        return ResourceStatus.DELETED == status;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("CloudResourceStatus{");
