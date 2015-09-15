@@ -42,6 +42,16 @@ uluwatuServices.factory('GlobalBlueprint', ['$resource',
         return $resource('blueprints/:id');
     }]);
 
+uluwatuServices.factory('UserRecipe', ['$resource',
+    function ($resource) {
+        return $resource('user/recipes');
+    }]);
+
+uluwatuServices.factory('AccountRecipe', ['$resource',
+    function ($resource) {
+        return $resource('account/recipes');
+    }]);
+
 uluwatuServices.factory('UserCredential', ['$resource',
     function ($resource) {
         return $resource('user/credentials');

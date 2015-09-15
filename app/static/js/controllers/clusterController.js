@@ -590,4 +590,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             $scope.selectedCluster = cluster
         }
 
+        $scope.recipesToShow = [];
+        $scope.toggleRecipes = function(index) {
+          $scope.recipesToShow[index] = $scope.recipesToShow[index] ? false : true;
+        }
     }]);
