@@ -54,7 +54,22 @@ public class EnvironmentVariableConfig {
     public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-b2f762b2,ap-southeast-1:ami-60b7bd32,ap-southeast-2:ami-398dc203,eu-central-1:ami-be2e2ea3,eu-west-1:ami-49eecd3e,sa-east-1:ami-5380154e,us-east-1:ami-07355e62,us-west-1:ami-bb8346ff,us-west-2:ami-f31e02c3";
     public static final String CB_OPENSTACK_IMAGE = "cb-centos71-amb210-2015-09-11";
     public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos71-amb210-2015-09-11126.tar.gz";
-    public static final String CB_AZURE_RM_IMAGE = "https://sequenceiqimages.blob.core.windows.net/images/cb-centos71-amb210-2015-09-11-103_2015-September-11_17-55-os-2015-09-11.vhd";
+    public static final String CB_AZURE_RM_IMAGE_NAME = "cb-centos71-amb210-2015-09-11-103_2015-September-11_17-55-os-2015-09-11.vhd";
+
+    public static final String CB_AZURE_RM_IMAGE = new StringBuilder()
+            .append(String.format("EAST_ASIA:https://sequenceiqeastasia.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
+            .append(String.format("EAST_US:https://sequenceiqeastus.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
+            .append(String.format("CENTRAL_US:https://sequenceiqcentralus.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
+            .append(String.format("NORTH_EUROPE:https://sequenceiqnortheurope.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
+            .append(String.format("SOUTH_CENTRAL_US:https://sequenceiqsouthcentralus.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
+            .append(String.format("NORTH_CENTRAL_US:https://sequenceiqnorthcentralus.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
+            .append(String.format("EAST_US_2:https://sequenceiqeastus2.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
+            .append(String.format("JAPAN_EAST:https://sequenceiqjapaneast.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
+            .append(String.format("JAPAN_WEST:https://sequenceiqjapanwest.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
+            .append(String.format("SOUTHEAST_ASIA:https://sequenceiqsoutheastasia.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
+            .append(String.format("WEST_US:https://sequenceiqwestus.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
+            .append(String.format("WEST_EUROPE:https://sequenceiqwesteurope.blob.core.windows.net/images/%s", CB_AZURE_RM_IMAGE_NAME))
+            .toString();
 
     public static final String CB_ARM_TEMPLATE_PATH = "templates/arm-v2.ftl";
     public static final String CB_ARM_PARAMETER_PATH = "templates/parameters.ftl";
