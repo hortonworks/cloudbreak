@@ -14,7 +14,7 @@ public class RecipeToJsonConverter extends AbstractConversionServiceAwareConvert
         json.setDescription(recipe.getDescription());
         json.setProperties(recipe.getKeyValues());
         json.setPlugins(recipe.getPlugins());
-        json.setId(recipe.getId().toString());
+        json.setId(recipe.getId());
         json.setTimeout(recipe.getTimeout());
         return json;
     }

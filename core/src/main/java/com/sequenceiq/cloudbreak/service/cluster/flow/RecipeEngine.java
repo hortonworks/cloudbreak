@@ -19,6 +19,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
+import com.sequenceiq.cloudbreak.core.CloudbreakRecipeSetupException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
@@ -48,9 +50,10 @@ public class RecipeEngine {
     private TlsSecurityService tlsSecurityService;
 
     public void setupRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakSecuritySetupException {
+        Set<InstanceMetaData> instances = instanceMetadataRepository.findNotTerminatedForStack(stack.getId());
+        cleanupPlugins(stack, hostGroups, instances);
         uploadConsulRecipes(stack, getRecipesInHostGroups(hostGroups));
         setupProperties(stack, hostGroups);
-        Set<InstanceMetaData> instances = instanceMetadataRepository.findNotTerminatedForStack(stack.getId());
         installPlugins(stack, hostGroups, instances);
     }
 
@@ -78,8 +81,12 @@ public class RecipeEngine {
         installPluginsOnHosts(stack, recipes, hostMetadata, instances, true);
     }
 
-    public void executePreInstall(Stack stack) throws CloudbreakSecuritySetupException {
-        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.PRE_INSTALL, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
+    public void executePreInstall(Stack stack) throws CloudbreakSecuritySetupException, CloudbreakRecipeSetupException {
+        try {
+            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.PRE_INSTALL, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
+        } catch (CloudbreakServiceException  e) {
+            throw new CloudbreakRecipeSetupException("Recipe pre install failed: " + e.getMessage());
+        }
     }
 
     public void executePreInstall(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakSecuritySetupException {
@@ -91,8 +98,12 @@ public class RecipeEngine {
                 getHostnames(hostMetadata));
     }
 
-    public void executePostInstall(Stack stack) throws CloudbreakSecuritySetupException {
-        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.POST_INSTALL, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
+    public void executePostInstall(Stack stack) throws CloudbreakSecuritySetupException, CloudbreakRecipeSetupException {
+        try {
+            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.POST_INSTALL, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
+        } catch (CloudbreakServiceException  e) {
+            throw new CloudbreakRecipeSetupException("Recipe post install failed: " + e.getMessage());
+        }
     }
 
     public void executePostInstall(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakSecuritySetupException {
@@ -129,10 +140,6 @@ public class RecipeEngine {
         }
     }
 
-    private String getPluginConsulKey(Recipe recipe, String plugin) {
-        return RECIPE_KEY_PREFIX + recipe.getName() + plugin.hashCode();
-    }
-
     private void installPluginsOnHosts(Stack stack, Set<Recipe> recipes, Set<HostMetadata> hostMetadata, Set<InstanceMetaData> instances,
             boolean existingHostGroup) throws CloudbreakSecuritySetupException {
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
@@ -147,6 +154,25 @@ public class RecipeEngine {
             Map<String, Set<String>> eventIdMap = pluginManager.installPlugins(clientConfig, plugins, getHostnames(hostMetadata), existingHostGroup);
             pluginManager.waitForEventFinish(stack, instances, eventIdMap, recipe.getTimeout());
         }
+    }
+
+    private void cleanupPlugins(Stack stack, Set<HostGroup> hostGroups, Set<InstanceMetaData> instances) throws CloudbreakSecuritySetupException {
+        for (HostGroup hostGroup : hostGroups) {
+            LOGGER.info("Cleanup plugins on hostgroup {}.", hostGroup.getName());
+            cleanupPluginsOnHosts(stack, hostGroup.getHostMetadata(), instances);
+        }
+    }
+
+    private void cleanupPluginsOnHosts(Stack stack, Set<HostMetadata> hostMetadata, Set<InstanceMetaData> instances) throws CloudbreakSecuritySetupException {
+        InstanceGroup gateway = stack.getGatewayInstanceGroup();
+        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+        Map<String, Set<String>> eventIdMap = pluginManager.cleanupPlugins(clientConfig, getHostnames(hostMetadata));
+        pluginManager.waitForEventFinish(stack, instances, eventIdMap, DEFAULT_RECIPE_TIMEOUT);
+    }
+
+    private String getPluginConsulKey(Recipe recipe, String plugin) {
+        return RECIPE_KEY_PREFIX + recipe.getName() + plugin.hashCode();
     }
 
     private Map<String, String> getAllPropertiesFromRecipes(Set<HostGroup> hostGroups) {

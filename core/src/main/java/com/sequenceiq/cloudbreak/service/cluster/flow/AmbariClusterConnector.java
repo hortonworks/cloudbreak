@@ -199,7 +199,7 @@ public class AmbariClusterConnector {
                 addFsRecipes(blueprintText, fs, hostGroups);
             }
 
-            boolean recipesFound = recipesFound(hostGroups);
+            final boolean recipesFound = recipesFound(hostGroups);
 
             if (recipesFound) {
                 recipeEngine.setupRecipes(stack, hostGroups);

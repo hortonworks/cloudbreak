@@ -22,7 +22,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
@@ -30,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.PluginFailureException;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 public class ConsulPluginManager implements PluginManager {
 
     public static final String INSTALL_PLUGIN_EVENT = "install-plugin";
+    public static final String CLEANUP_PLUGIN_EVENT = "cleanup-plugin";
     public static final String FINISH_SIGNAL = "FINISHED";
     public static final String FAILED_SIGNAL = "FAILED";
     public static final int POLLING_INTERVAL = 5000;
@@ -90,13 +91,27 @@ public class ConsulPluginManager implements PluginManager {
                 eventParams.setNode(nodeFilter.getKey());
                 String eventId = ConsulUtils.fireEvent(client, INSTALL_PLUGIN_EVENT, "TRIGGER_PLUGN " + plugin.getKey() + " " + getPluginName(plugin.getKey()),
                         eventParams, null);
-                if (eventId != null) {
-                    eventIdMap.put(eventId, nodeFilter.getValue());
-                } else {
+                if (eventId == null) {
                     throw new PluginFailureException("Failed to install plugins, Consul client couldn't fire the event or failed to retrieve an event ID."
                             + "Maybe the payload was too long (max. 512 bytes)?");
                 }
+                eventIdMap.put(eventId, nodeFilter.getValue());
             }
+        }
+        return eventIdMap;
+    }
+
+    public Map<String, Set<String>> cleanupPlugins(TLSClientConfig clientConfig, Set<String> hosts) {
+        Map<String, Set<String>> eventIdMap = new HashMap<>();
+        ConsulClient client = ConsulUtils.createClient(clientConfig);
+        for (Map.Entry<String, Set<String>> nodeFilter : getNodeFilters(hosts).entrySet()) {
+            EventParams eventParams = new EventParams();
+            eventParams.setNode(nodeFilter.getKey());
+            String eventId = ConsulUtils.fireEvent(client, CLEANUP_PLUGIN_EVENT, "TRIGGER_PLUGN", eventParams, null);
+            if (eventId == null) {
+                throw new PluginFailureException("Failed to cleanup plugins, Consul client couldn't fire the event or failed to retrieve an event ID.");
+            }
+            eventIdMap.put(eventId, nodeFilter.getValue());
         }
         return eventIdMap;
     }

@@ -19,6 +19,8 @@ public interface PluginManager {
     Map<String, Set<String>> installPlugins(TLSClientConfig clientConfig, Map<String, PluginExecutionType> plugins, Set<String> hosts,
             boolean existingHostGroup);
 
+    Map<String, Set<String>> cleanupPlugins(TLSClientConfig clientConfig, Set<String> hosts);
+
     void waitForEventFinish(Stack stack, Collection<InstanceMetaData> instanceMetaData, Map<String, Set<String>> eventIds, Integer timeout)
             throws CloudbreakSecuritySetupException;
 
