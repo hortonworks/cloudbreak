@@ -130,7 +130,7 @@ public class StackDecorator implements Decorator<Stack> {
         Map<String, String> azureMap = new HashMap<>();
         String azureImageNames = determineImageName(azureRmImage, CB_AZURE_RM_IMAGE);
         for (String s : azureImageNames.split(",")) {
-            azureMap.put(s.split(":")[0], s.split(":")[1]);
+            azureMap.put(s.split(":")[0], s.split(":")[1] + ":" + s.split(":")[2]);
         }
         return azureMap;
     }
