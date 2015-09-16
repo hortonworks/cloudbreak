@@ -34,12 +34,14 @@ public class CloudbreakEventsJson implements JsonEntity {
     private Long stackId;
     @ApiModelProperty(StackModelDescription.STACK_NAME)
     private String stackName;
-    @ApiModelProperty(StackModelDescription.STATUS)
+    @ApiModelProperty(StackModelDescription.STACK_STATUS)
     private Status stackStatus;
     @ApiModelProperty(InstanceGroupModelDescription.NODE_COUNT)
     private Integer nodeCount;
     @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_GROUP_NAME)
     private String instanceGroup;
+    @ApiModelProperty(StackModelDescription.CLUSTER_STATUS)
+    private Status clusterStatus;
 
     public Integer getNodeCount() {
         return nodeCount;
@@ -151,5 +153,13 @@ public class CloudbreakEventsJson implements JsonEntity {
 
     public void setInstanceGroup(String instanceGroup) {
         this.instanceGroup = instanceGroup;
+    }
+
+    public Status getClusterStatus() {
+        return clusterStatus;
+    }
+
+    public void setClusterStatus(Status clusterStatus) {
+        this.clusterStatus = clusterStatus;
     }
 }

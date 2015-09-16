@@ -12,5 +12,6 @@
   "stackName" : "myStack",
   "stackStatus" : "AVAILABLE",
   "nodeCount" : 10,
-  "instanceGroup" : "slave_1"
+  "instanceGroup" : "slave_1",
+  "clusterStatus" : "AVAILABLE"
 }

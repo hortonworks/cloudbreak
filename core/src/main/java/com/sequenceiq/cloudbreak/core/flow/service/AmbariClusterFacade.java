@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.core.flow.service;
 import static com.sequenceiq.cloudbreak.domain.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.domain.Status.CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.domain.Status.ENABLE_SECURITY_FAILED;
-import static com.sequenceiq.cloudbreak.domain.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.START_FAILED;
 import static com.sequenceiq.cloudbreak.domain.Status.START_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.Status.START_REQUESTED;
@@ -345,7 +344,6 @@ public class AmbariClusterFacade implements ClusterFacade {
         MDCBuilder.buildMdcContext(cluster);
         fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_RESET, UPDATE_IN_PROGRESS.name());
         ambariClusterConnector.resetAmbariCluster(stack.getId());
-        clusterService.updateClusterStatusByStackId(stack.getId(), REQUESTED);
         context = new ProvisioningContext.Builder()
                 .withProvisioningContext(actualContext)
                 .setAmbariIp(stack.getAmbariIp())

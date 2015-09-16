@@ -569,6 +569,7 @@ public class TestUtil {
         cloudbreakEvent.setBlueprintId(1L);
         cloudbreakEvent.setStackStatus(Status.AVAILABLE);
         cloudbreakEvent.setNodeCount(1);
+        cloudbreakEvent.setClusterStatus(Status.AVAILABLE);
         return cloudbreakEvent;
     }
 

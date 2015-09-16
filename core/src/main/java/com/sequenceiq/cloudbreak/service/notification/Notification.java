@@ -20,6 +20,7 @@ public class Notification {
     private Status stackStatus;
     private Integer nodeCount;
     private String instanceGroup;
+    private Status clusterStatus;
 
     public Notification() {
     }
@@ -135,5 +136,13 @@ public class Notification {
 
     public void setInstanceGroup(String instanceGroup) {
         this.instanceGroup = instanceGroup;
+    }
+
+    public Status getClusterStatus() {
+        return clusterStatus;
+    }
+
+    public void setClusterStatus(Status clusterStatus) {
+        this.clusterStatus = clusterStatus;
     }
 }
