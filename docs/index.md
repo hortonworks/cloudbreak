@@ -72,11 +72,9 @@ It will take some time, depending on your network connection, so you can grab a 
 
 ## Default Credentials
 
-If you check the output of `cbd env` you can see the default principal/credential combination:
-- user: **admin@example.com**
-- password: **cloudbreak**
+The default credentials can be revealed by `cbd login`
 
-These values are generated in the `uaa.yml` end section. To change these values, add 2 lines into your Profile:
+These values are used in the `uaa.yml` end section. To change these values, add 2 lines into your Profile:
 
 ```
 export UAA_DEFAULT_USER_EMAIL=myself@example.com

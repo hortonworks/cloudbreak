@@ -226,7 +226,7 @@ start-and-migrate-cmd() {
     info "In a couple of minutes you can reach the UI (called Uluwatu)"
     echo "  $ULU_HOST_ADDRESS" | blue
     warn "Credentials are not printed here. You can get them by:"
-    echo '  cbd env show|grep "UAA_DEFAULT_USER_PW\|UAA_DEFAULT_USER_EMAIL"' | blue
+    echo '  cbd login' | blue
 }
 
 main() {

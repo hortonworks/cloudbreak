@@ -3,6 +3,7 @@
 ### Fixed
 
 - consul recursor now exculdes both docker ip and bridge ip to avoid recursive dns recursor chain
+- docs fixed about getting default credentials (cbd login)
 
 ### Added
 
