@@ -65,15 +65,18 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
                 throw new BadRequestException(String.format("Cannot define hostgroup on gateway in stack '%s'", instanceGroupName, stackId));
             }
             subject.setInstanceGroup(instanceGroup);
-            if (receipeIds != null) {
-                for (Long recipeId : receipeIds) {
-                    Recipe recipe = recipeService.get(recipeId);
-                    subject.getRecipes().add(recipe);
-                }
-            }
         } else {
             subject = reloadHostGroup(stackId, instanceGroupName, subject.getName());
         }
+
+        subject.getRecipes().clear();
+        if (receipeIds != null) {
+            for (Long recipeId : receipeIds) {
+                Recipe recipe = recipeService.get(recipeId);
+                subject.getRecipes().add(recipe);
+            }
+        }
+
         return subject;
     }
 

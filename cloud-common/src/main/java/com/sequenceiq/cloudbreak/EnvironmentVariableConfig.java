@@ -40,7 +40,7 @@ public class EnvironmentVariableConfig {
     public static final String CB_DOCKER_CONTAINER_AMBARI_WARMUP = "sequenceiq/ambari-warmup:2.1.0-consul";
     public static final String CB_DOCKER_CONTAINER_AMBARI = "sequenceiq/ambari:2.1.0-consul";
     public static final String CB_DOCKER_CONTAINER_REGISTRATOR = "sequenceiq/registrator:v5.2";
-    public static final String CB_DOCKER_CONTAINER_DOCKER_CONSUL_WATCH_PLUGN = "sequenceiq/docker-consul-watch-plugn:2.0.1-consul";
+    public static final String CB_DOCKER_CONTAINER_DOCKER_CONSUL_WATCH_PLUGN = "sequenceiq/docker-consul-watch-plugn:2.0.2-consul";
     public static final String CB_DOCKER_CONTAINER_AMBARI_DB = "postgres:9.4.1";
     public static final String CB_DOCKER_CONTAINER_KERBEROS = "sequenceiq/kerberos:2.1.0-consul";
     public static final String CB_DOCKER_CONTAINER_BAYWATCH_SERVER = "sequenceiq/baywatch:v0.5.3";
@@ -50,26 +50,25 @@ public class EnvironmentVariableConfig {
     public static final String CB_BAYWATCH_ENABLED = "true";
     public static final String CB_BAYWATCH_EXTERN_LOCATION = "";
 
-    public static final String CB_AZURE_IMAGE_URI = "https://102589fae040d8westeurope.blob.core.windows.net/images/cb-centos71-amb210-2015-09-11-103_2015-September-11_17-55-os-2015-09-11.vhd";
-    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-b2f762b2,ap-southeast-1:ami-60b7bd32,ap-southeast-2:ami-398dc203,eu-central-1:ami-be2e2ea3,eu-west-1:ami-49eecd3e,sa-east-1:ami-5380154e,us-east-1:ami-07355e62,us-west-1:ami-bb8346ff,us-west-2:ami-f31e02c3";
-    public static final String CB_OPENSTACK_IMAGE = "cb-centos71-amb210-2015-09-11";
-    public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos71-amb210-2015-09-11126.tar.gz";
-    public static final String CB_AZURE_RM_IMAGE_NAME = "cb-centos71-amb210-2015-09-11-103_2015-September-11_17-55-os-2015-09-11.vhd";
-
+    public static final String CB_AZURE_IMAGE_NAME = "cb-centos71-amb210-2015-09-16104_2015-September-16_4-22-os-2015-09-16.vhd";
+    public static final String CB_AZURE_IMAGE_URI = "https://102589fae040d8westeurope.blob.core.windows.net/images/" + CB_AZURE_IMAGE_NAME;
     public static final String CB_AZURE_RM_IMAGE = new StringBuilder()
-            .append(String.format("EAST_ASIA:https://sequenceiqeastasia.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
-            .append(String.format("EAST_US:https://sequenceiqeastus.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
-            .append(String.format("CENTRAL_US:https://sequenceiqcentralus.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
-            .append(String.format("NORTH_EUROPE:https://sequenceiqnortheurope.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
-            .append(String.format("SOUTH_CENTRAL_US:https://sequenceiqsouthcentralus.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
-            .append(String.format("NORTH_CENTRAL_US:https://sequenceiqnorthcentralus.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
-            .append(String.format("EAST_US_2:https://sequenceiqeastus2.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
-            .append(String.format("JAPAN_EAST:https://sequenceiqjapaneast.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
-            .append(String.format("JAPAN_WEST:https://sequenceiqjapanwest.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
-            .append(String.format("SOUTHEAST_ASIA:https://sequenceiqsoutheastasia.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
-            .append(String.format("WEST_US:https://sequenceiqwestus.blob.core.windows.net/images/%s,", CB_AZURE_RM_IMAGE_NAME))
-            .append(String.format("WEST_EUROPE:https://sequenceiqwesteurope.blob.core.windows.net/images/%s", CB_AZURE_RM_IMAGE_NAME))
+            .append(String.format("EAST_ASIA:https://sequenceiqeastasia.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("EAST_US:https://sequenceiqeastus.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("CENTRAL_US:https://sequenceiqcentralus.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("NORTH_EUROPE:https://sequenceiqnortheurope.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("SOUTH_CENTRAL_US:https://sequenceiqsouthcentralus.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("NORTH_CENTRAL_US:https://sequenceiqnorthcentralus.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("EAST_US_2:https://sequenceiqeastus2.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("JAPAN_EAST:https://sequenceiqjapaneast.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("JAPAN_WEST:https://sequenceiqjapanwest.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("SOUTHEAST_ASIA:https://sequenceiqsoutheastasia.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("WEST_US:https://sequenceiqwestus.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("WEST_EUROPE:https://sequenceiqwesteurope.blob.core.windows.net/images/%s", CB_AZURE_IMAGE_NAME))
             .toString();
+    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-8c6bfc8c,ap-southeast-1:ami-a2fbeef0,ap-southeast-2:ami-310a440b,eu-central-1:ami-68a5a575,eu-west-1:ami-13f2df64,sa-east-1:ami-111e8b0c,us-east-1:ami-d793e4b2,us-west-1:ami-4929ec0d,us-west-2:ami-c3dac5f3";
+    public static final String CB_OPENSTACK_IMAGE = "cb-centos71-amb210-2015-09-16";
+    public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos71-amb210-2015-09-16127.tar.gz";
 
     public static final String CB_ARM_TEMPLATE_PATH = "templates/arm-v2.ftl";
     public static final String CB_ARM_PARAMETER_PATH = "templates/parameters.ftl";
