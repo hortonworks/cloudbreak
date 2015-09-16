@@ -109,6 +109,22 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             return angular.isUndefined(variable) || variable === null;
         }
 
+        $scope.selectedFileSystemChange = function() {
+            if($scope.cluster.fileSystem.type == "DASH") {
+                $scope.cluster.ambariStackDetails = {};
+                $scope.cluster.ambariStackDetails.stack = "HDP";
+                $scope.cluster.ambariStackDetails.version = "2.3";
+                $scope.cluster.ambariStackDetails.os = "redhat6";
+                $scope.cluster.ambariStackDetails.stackRepoId = "HDP-2.3";
+                $scope.cluster.ambariStackDetails.verify = true;
+                $scope.cluster.ambariStackDetails.stackBaseURL = "http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.3.0.1";
+                $scope.cluster.ambariStackDetails.utilsRepoId = "HDP-UTILS-1.1.0.20";
+                $scope.cluster.ambariStackDetails.utilsBaseURL = "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/centos6";
+            } else {
+                $scope.cluster.ambariStackDetails = {};
+            }
+        }
+
         $scope.createCluster = function () {
             var blueprint = $filter('filter')($rootScope.blueprints, {id: $scope.cluster.blueprintId}, true)[0];
 
@@ -131,6 +147,21 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 delete $scope.cluster.fileSystem;
             } else if (!$scope.isUndefined($scope.cluster.fileSystem) && $scope.cluster.fileSystem.type != "LOCAL") {
                 $scope.cluster.fileSystem.name = $scope.cluster.name;
+                if ($scope.errorInFileSystemConfig()) {
+                     $scope.showErrorMessage($rootScope.msg.filesystem_config_error);
+                     return;
+                }
+                if (!$scope.isUndefined($scope.cluster.fileSystem) && $scope.cluster.fileSystem.type == "DASH" && $scope.isUndefined($scope.cluster.ambariStackDetails)) {
+                    $scope.cluster.ambariStackDetails = {};
+                    $scope.cluster.ambariStackDetails.stack = "HDP";
+                    $scope.cluster.ambariStackDetails.version = "2.3";
+                    $scope.cluster.ambariStackDetails.os = "redhat6";
+                    $scope.cluster.ambariStackDetails.stackRepoId = "HDP-2.3";
+                    $scope.cluster.ambariStackDetails.verify = true;
+                    $scope.cluster.ambariStackDetails.stackBaseURL = "http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.3.0.1";
+                    $scope.cluster.ambariStackDetails.utilsRepoId = "HDP-UTILS-1.1.0.20";
+                    $scope.cluster.ambariStackDetails.utilsBaseURL = "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/centos6";
+                }
             }
             if ($rootScope.activeCredential.cloudPlatform == 'AWS' || $rootScope.activeCredential.cloudPlatform == 'OPENSTACK') {
                 delete $scope.cluster.fileSystem;
@@ -185,6 +216,21 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }, function(failure) {
                 $scope.showError(failure, $rootScope.msg.cluster_failed);
             });
+        }
+
+        $scope.errorInFileSystemConfig = function() {
+            if ($scope.cluster.fileSystem.type == 'DASH') {
+                if(!$scope.isUndefined($scope.cluster.fileSystem.properties.accountName) && !$scope.isUndefined($scope.cluster.fileSystem.properties.accountKey)) {
+                    return false;
+                }
+            } else if ($scope.cluster.fileSystem.type == 'GCS') {
+                if(!$scope.isUndefined($scope.cluster.fileSystem.properties.projectId) && !$scope.isUndefined($scope.cluster.fileSystem.properties.serviceAccountEmail)
+                && !$scope.isUndefined($scope.cluster.fileSystem.properties.privateKeyEncoded) && !$scope.isUndefined($scope.cluster.fileSystem.properties.defaultBucketName)) {
+                    return false;
+                }
+            }
+            return true;
+
         }
 
         $scope.prepareParameters = function (cluster) {
@@ -293,6 +339,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.cluster.failurePolicy.threshold = null;
                 $scope.cluster.parameters = {};
                 setFileSystem();
+                $scope.selectedFileSystemChange();
             }
         });
 
@@ -300,7 +347,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             if ($rootScope.activeCredential != undefined && $rootScope.activeCredential.cloudPlatform != undefined) {
                 if ($rootScope.activeCredential.cloudPlatform == 'AZURE' || $rootScope.activeCredential.cloudPlatform == 'AZURE_RM') {
                     $scope.cluster.fileSystem = {};
-                    $scope.cluster.fileSystem.type = "LOCAL";
+                    $scope.cluster.fileSystem.type = "DASH";
+                    $scope.cluster.fileSystem.defaultFs = true;
                 } else if ($rootScope.activeCredential.cloudPlatform == 'GCP') {
                     $scope.cluster.fileSystem = {};
                     $scope.cluster.fileSystem.type = "LOCAL";
