@@ -14,8 +14,10 @@ main(){
     curl "https://www.dash-update.net/client/Latest/StorageSDK2.0/$STORAGE_JAR" > "$SOURCE_JAR";
   fi
 
-  echo "Finding $MR_TAR_NAME on HDFS"
-  MR_TAR_PATH="$(hadoop fs -ls /hdp/apps | sed '1d;s/  */ /g' | cut -d\  -f8)/mapreduce/$MR_TAR_NAME"
+  hdp_version=$(ls /usr/hdp/ | head -1);
+  echo "Found HDP version: $hdp_version"
+  MR_TAR_PATH="/hdp/apps/$hdp_version/mapreduce/$MR_TAR_NAME"
+  echo "HDFS path to $MR_TAR_NAME: $MR_TAR_PATH"
 
   echo "Copying $MR_TAR_NAME from HDFS to local fs."
   [[ -f "/tmp/$MR_TAR_NAME" ]] && rm "/tmp/$MR_TAR_NAME"
