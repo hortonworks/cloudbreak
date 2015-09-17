@@ -6,6 +6,8 @@ var $jq = jQuery.noConflict();
 angular.module('uluwatuControllers').controller('mainController', ['$scope', '$rootScope', '$filter', '$interval',
     function ($scope, $rootScope, $filter, $interval) {
 
+        $rootScope.fileReadAvailable = window.File && window.FileReader && window.FileList && window.Blob ? true : false;
+
         $scope.showManagement = true;
         $scope.showAccountPanel = false;
 
@@ -182,6 +184,17 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
               regions : [
                 {key: 'LOCAL', value: 'local', cloud: 'OPENSTACK'}
               ]
+            },
+            'RECIPE_TYPE': {
+                content_types : [
+                    {key: 'SCRIPT', value: 'SCRIPT'},
+                    {key: 'FILE', value: 'FILE'},
+                    {key: 'URL', value: 'URL'}
+                ],
+                execution_types : [
+                    {key: 'ALL_NODES', value: 'ALL_NODES'},
+                    {key: 'ONE_NODE', value: 'ONE_NODE'}
+                ]
             },
             'EVENT_TYPE': {
                 "REQUESTED": "requested",

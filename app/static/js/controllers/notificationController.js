@@ -61,7 +61,6 @@ function ($scope, $rootScope, $filter, Cluster, GlobalStack) {
           actCluster.cluster.status = notification.clusterStatus;
           actCluster.cluster.statusReason = notification.eventMessage;
         }
-
         addNotificationToGlobalEvents(notification);
       }
     }

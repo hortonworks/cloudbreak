@@ -226,6 +226,16 @@
                                         </select>
                                       </div>
                                     </div>
+                                    <div class="form-group" ng-hide="instanceGroup.type=='GATEWAY' || !showAdvancedOptionForm || $root.recipes.length === 0">
+                                        <label class="col-sm-3 control-label" for="recipenames{{$index}}">Recipe</label>
+                                        <div class="col-sm-9">
+                                            <div id="recipenames{{$index}}" name="recipenames{{$index}}">
+                                                <div class="radio" ng-repeat="recipe in $root.recipes">
+                                                    <label><input type="checkbox" style="margin-right: 10px;" ng-model="$index_recipe.id" name="{{$index}}_{{recipe.id}}" ng-change="changeRecipeRun(recipe.id, instanceGroup.group, $index_recipe.id)">{{recipe.name}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
