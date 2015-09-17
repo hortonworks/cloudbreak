@@ -186,7 +186,7 @@ function continueInit() {
   isUaaSession = function(req) {
       return (getCookie(req, 'uaa_cookie') != null)
   }
-
+  
   parseCookies = function (request) {
       var list = {},
           rc = request.headers.cookie;
@@ -312,15 +312,56 @@ function continueInit() {
       postGroup(token, userId, 'sequenceiq.account.' + userId + '.' + company)
   }
 
-  updateCloudbreakGroups = function (token, userId) {
-      updateGroup(token, userId, 'cloudbreak.templates')
-      updateGroup(token, userId, 'cloudbreak.stacks')
-      updateGroup(token, userId, 'cloudbreak.blueprints')
-      updateGroup(token, userId, 'cloudbreak.credentials')
-      updateGroup(token, userId, 'cloudbreak.events')
-      updateGroup(token, userId, 'cloudbreak.recipes')
-      updateGroup(token, userId, 'cloudbreak.usages.user')
-      updateGroup(token, userId, 'periscope.cluster')
+  updateCloudbreakGroups = function (token, userId, requestedScopes) {
+      if (requestedScopes == undefined || requestedScopes == null) {
+          updateGroup(token, userId, 'cloudbreak.templates')
+          updateGroup(token, userId, 'cloudbreak.stacks')
+          updateGroup(token, userId, 'cloudbreak.blueprints')
+          updateGroup(token, userId, 'cloudbreak.credentials')
+          updateGroup(token, userId, 'cloudbreak.events')
+          updateGroup(token, userId, 'cloudbreak.recipes')
+          updateGroup(token, userId, 'cloudbreak.usages.user')
+          updateGroup(token, userId, 'periscope.cluster')
+      } else {
+          if (requestedScopes.blueprints.write) {
+            updateGroup(token, userId, 'cloudbreak.blueprints')
+          } else {
+            updateGroup(token, userId, 'cloudbreak.blueprints.read')
+          }
+          if (requestedScopes.recipes.write) {
+            updateGroup(token, userId, 'cloudbreak.recipes')
+          } else {
+            updateGroup(token, userId, 'cloudbreak.recipes.read')
+          }
+          if (requestedScopes.credentials.write) {
+            updateGroup(token, userId, 'cloudbreak.credentials')
+          } else {
+            updateGroup(token, userId, 'cloudbreak.credentials.read')
+          }
+          if (requestedScopes.templates.write) {
+            updateGroup(token, userId, 'cloudbreak.templates')
+          } else {
+            updateGroup(token, userId, 'cloudbreak.templates.read')
+          }
+          if (requestedScopes.stacks.write) {
+            updateGroup(token, userId, 'cloudbreak.stacks')
+          } else {
+            updateGroup(token, userId, 'cloudbreak.stacks.read')
+          }
+          if (requestedScopes.securitygroups.write) {
+            updateGroup(token, userId, 'cloudbreak.securitygroups')
+          } else {
+            updateGroup(token, userId, 'cloudbreak.securitygroups.read')
+          }
+          if (requestedScopes.networks.write) {
+            updateGroup(token, userId, 'cloudbreak.networks')
+          } else {
+            updateGroup(token, userId, 'cloudbreak.networks.read')
+          }
+          updateGroup(token, userId, 'cloudbreak.usages.user')
+          updateGroup(token, userId, 'periscope.cluster')
+          updateGroup(token, userId, 'cloudbreak.events')
+      }
   }
 
   updateGroup = function(token, userId, displayName) {
@@ -462,13 +503,14 @@ function continueInit() {
   });
 
   app.post('/invite', function (req, res){
-      var inviteEmail = req.body.invite_email
+      var inviteEmail = req.body.invite_email;
+      var requestedScopes = req.body.groups;
       if (validator.validateEmail(inviteEmail)){
           getUserName(req, res, function(adminUserName){
              getToken(req, res, function(token){
                 getUserByName(req, res, token, adminUserName, 'id,userName,groups', function(userData){
                   isUserAdmin(req, res, userData, function(companyId){
-                     inviteUser(req, res, token, inviteEmail, adminUserName, companyId)
+                     inviteUser(req, res, token, inviteEmail, requestedScopes, adminUserName, companyId)
                   });
                 });
               });
@@ -580,7 +622,7 @@ function continueInit() {
   app.get('/account/details', function(req, res){
       getUserName(req, res, function(userName){
           getToken(req, res, function(token){
-              getUserByName(req, res, token, userName, 'userName,familyName,givenName,groups', function(userData){
+              getUserByName(req, res, token, userName, 'userName,familyName,givenName,groups,meta', function(userData){
                   var companyName = null
                   var groups = userData.groups
                   var adminUserId = null
@@ -600,10 +642,10 @@ function continueInit() {
                    }
                    needle.get(config.uaaAddress + '/Users/' + userData.id, usrOptions, function(err, adminUserData) {
                       if (adminUserData.statusCode == 200) {
-                         res.json({userName: userData.userName, givenName: userData.givenName, familyName: userData.familyName, company: companyName, companyOwner: adminUserData.userName})
+                         res.json({userName: userData.userName, givenName: userData.givenName, familyName: userData.familyName, company: companyName, companyOwner: adminUserData.userName, meta: userData.meta, groups: userData.groups})
                       } else {
                           // workaround for default users
-                         res.json({userName: userData.userName, givenName: userData.givenName, familyName: userData.familyName, company: companyName, companyOwner: 'DEFAULT_USER'})
+                         res.json({userName: userData.userName, givenName: userData.givenName, familyName: userData.familyName, company: companyName, companyOwner: 'DEFAULT_USER', meta: userData.meta, groups: userData.groups})
                       }
                    });
               });
@@ -690,7 +732,7 @@ function continueInit() {
                                   groupMemberIds.forEach(function(groupMember) {
                                       request({
                                       method: 'GET',
-                                      url: config.uaaAddress + '/Users?attributes=id,userName,active&filter=id eq  "' + groupMember.value + '"',
+                                      url: config.uaaAddress + '/Users?attributes=id,userName,groups,active&filter=id eq  "' + groupMember.value + '"',
                                       headers: {'Accept' : 'application/json',
                                            'Authorization' : 'Bearer ' + token,
                                             'Content-Type' : 'application/json'
@@ -699,7 +741,7 @@ function continueInit() {
                                           if (response.statusCode == 200){
                                               var resultResource = JSON.parse(body).resources[0]
                                               var isAdmin = (adminGroupMemberIds.indexOf(resultResource.id) == -1) ? false : true
-                                              users.push({id: resultResource.id, username: resultResource.userName, active: resultResource.active, admin: isAdmin})
+                                              users.push({id: resultResource.id, username: resultResource.userName, active: resultResource.active, admin: isAdmin, groups: resultResource.groups})
                                           }
                                           completed_requests++;
                                           if (completed_requests == groupMemberIds.length){
@@ -1047,7 +1089,7 @@ function continueInit() {
       }
   }
 
-  inviteUser = function(req, res, token, inviteEmail, adminUserName, companyId) {
+  inviteUser = function(req, res, token, inviteEmail, requestedScopes, adminUserName, companyId) {
       var userTempToken = Math.random().toString(20)
       var tempRegOptions = {
           headers: {
@@ -1073,7 +1115,7 @@ function continueInit() {
              console.log('User created with ' + createResp.body.id + '(id) and name: ' + inviteEmail)
              updateGroup(token, createResp.body.id, 'sequenceiq.cloudbreak.user')
              updateGroup(token, createResp.body.id, companyId)
-             updateCloudbreakGroups(token, createResp.body.id)
+             updateCloudbreakGroups(token, createResp.body.id, requestedScopes)
 
              var templateFile = path.join(__dirname,'templates','invite-email.jade')
              mailer.sendMail(req.body.invite_email, 'Cloudbreak invite' , templateFile, {user: adminUserName,

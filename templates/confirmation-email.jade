@@ -1,13 +1,170 @@
-doctype
+doctype html
 html
   head
-    title= 'Welcome to SequenceIQ!'
-  body
-    h1 Hello #{user}!
-    br
-    p Welcome to SequenceIQ. To activate your account please click on the following link: <a href="#{confirm}">here</a>
-    p
-        p Thank you,
-        br
-        br
-        p The SequenceIQ Team
+    meta(http-equiv='Content-Type', content='text/html; charset=utf-8')
+    meta(content='width=device-width, minimal-ui, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;', name='viewport')
+    meta(content='telephone=no', name='format-detection')
+    title Confirmation
+    style(type='text/css').
+      p {
+      margin: 0 0 25px 0;
+      padding: 0;
+      }
+      a[x-apple-data-detectors] {
+      color: inherit !important;
+      text-decoration: none !important;
+      font-size: inherit !important;
+      font-family: inherit !important;
+      font-weight: inherit !important;
+      line-height: inherit !important;
+      }
+      table td {
+      border-collapse: collapse;
+      }
+      table {
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+      }
+      body {
+      -webkit-text-size-adjust: 100%;
+      }
+      ul li {
+      font-size: 16px;
+      line-height: 24px;
+      color: #333333;
+      font-family: Arial, Helvetica, sans-serif;
+      }
+      * {
+      -webkit-text-size-adjust: none
+      }
+      @media only screen and (max-width: 640px) {
+      *[class].deviceWidth {
+      width: 440px!important;
+      padding: 0;
+      }
+      *[class].deviceWidth1 {
+      width: 410px !important;
+      }
+      *[class].deviceWidth2 {
+      width: 380px !important;
+      }
+      *[class].deviceWidth4 {
+      width: 100% !important;
+      }
+      *[class].top-pad {
+      padding-top: 15px !important;
+      }
+      *[class].block {
+      display: block !important;
+      margin: 0 auto !important;
+      text-align:left !important;
+      }
+      *[class].responsive img {
+      width: 100%;
+      height: auto;
+      }
+      *[class].fontt {
+      font-size:25px !important;
+      }
+      *[class].hide {
+      display:none !important;
+      }
+      }
+      @media only screen and (max-width: 479px) {
+      *[class].deviceWidth {
+      width: 280px!important;
+      }
+      *[class].deviceWidth1 {
+      width: 250px !important;
+      }
+      *[class].deviceWidth2 {
+      width: 248px !important;
+      }
+      }
+  body(style='font-size:16px; line-height:24px; color:#333333; font-family:Arial, Helvetica, sans-serif; ')
+    table(width='100%', cellpadding='0', cellspacing='0', border='0', align='center', style='margin:0 auto; ')
+      tr
+        td
+          table.deviceWidth(width='580', cellpadding='0', cellspacing='0', border='0', align='center', style='margin:0 auto; border:1px solid #dbdbdb; ')
+            tr
+              td.responsive.hide(style='font-size:1px; line-height:0px; ')
+                #banner-above.mktEditable
+                  img(src='http://info.hortonworks.com/rs/h2source/images/banner-above.jpg', alt='', border='0')
+            tr
+              td(style='background:#69be28; ')
+                table.deviceWidth1(width='540', cellpadding='0', cellspacing='0', border='0', align='center', style='margin:0 auto; ')
+                  tr
+                    td(style='line-height:1px; font-size:1px;', height='24', colspan='2')  
+                  tr
+                    td.block(style='font-size:1px; line-height:1px; ')
+                      #logo.mktEditable
+                        a(href='http://hortonworks.com/')
+                          img(src='http://info.hortonworks.com/rs/h2source/images/logo.jpg', alt='', border='0')
+                    td.block.top-pad.fontt(style='font-size:22px; line-height:30px; font-family:Arial, Helvetica, sans-serif; color:#ffffff; text-align:right; ')
+                  tr
+                    td(style='line-height:1px; font-size:1px;', height='24', colspan='2')  
+            tr
+              td.responsive.hide(style='font-size:1px; line-height:0px; ')
+                #banner-below.mktEditable
+                  img(src='http://info.hortonworks.com/rs/h2source/images/banner-below.jpg', alt='', border='0')
+            tr
+              td
+                table.deviceWidth1(width='540', cellpadding='0', cellspacing='0', border='0', align='center', style='margin:0 auto; ')
+                  tr
+                    td(style='line-height:1px; font-size:1px;', height='34')  
+                  tr
+                    td(style='font-size:30px; line-height:35px; font-family:Arial, Helvetica, sans-serif; color:#69be28; text-align:center; ')
+                      #heading.mktEditable
+                        strong Hello #{user}
+                  tr
+                    td(style='line-height:1px; font-size:1px;', height='5')  
+                  tr
+                    td(style='font-size:20px; line-height:24px; font-family:Arial, Helvetica, sans-serif; color:#333333; text-align:center; ')
+                      #sub-heading.mktEditable
+                        em Welcome to Cloudbreak
+                  tr
+                    td(style='font-size:1px; line-height:1px;', height='18')  
+                  tr
+                    td
+                      table.deviceWidth4(width='380', cellpadding='0', cellspacing='0', align='center', style='margin:0 auto; border-top:1px solid #d5dadd;', border='0')
+                        tr
+                          td(style='font-size:1px; line-height:1px;')  
+                  tr
+                    td(style='font-size:1px; line-height:1px;', height='14')  
+                  tr
+                    td(style='font-size:16px; line-height:24px; color:#333333; font-family:Arial, Helvetica, sans-serif; text-align:center; ')
+                      #text.mktEditable
+                        p
+                          | To activate your account please click on the following link
+                          br
+                          br
+                        table(style='margin: 0 auto; background: #e17000; border-radius: 4px;', border='0', cellspacing='0', cellpadding='0', align='center')
+                          tbody
+                            tr
+                              td(style='padding: 13px 29px; font-size: 17px; line-height: 17px; font-family: Arial, Helvetica, sans-serif; text-align: center; color: #ffffff;')
+                                a(style='color: white; text-decoration: none;', href='#{confirm}') Activate
+                  tr
+                    td(style='font-size:1px; line-height:1px;', height='40')  
+            tr
+              td(style='background:#333333; ')
+                table.deviceWidth1(width='540', cellpadding='0', cellspacing='0', border='0', align='center', style='margin:0 auto; ')
+                  tr
+                    td(style='line-height:1px; font-size:1px;', height='15', colspan='2')  
+                  tr
+                    td.block(style='font-size:11px; line-height:16px; font-family:Arial, Helvetica, sans-serif; text-align:left; color:#ffffff; ')
+                      #footer.mktEditable
+                        | © 2011-2015 Hortonworks Inc. All Rights Reserved.
+                        br
+                        a(href='http://hortonworks.com/agreements/privacy-policy/', style='text-decoration:none; color:#ffffff;') Privacy Policy
+                        |   
+                        a(href='http://info.hortonworks.com/Subscription-Center.html', style='text-decoration:none; color:#ffffff;') Subscription Center
+                    td.block.top-pad(style='text-align:right; padding-top:5px; ', valign='middle')
+                      #social-icons.mktEditable
+                        a(href='https://www.facebook.com/hortonworks')
+                          img(src='http://info.hortonworks.com/rs/h2source/images/facebook-icon-white.jpg', alt='Facebook', border='0')
+                        a(href='https://twitter.com/hortonworks')
+                          img(src='http://info.hortonworks.com/rs/h2source/images/twitter-icon-white.jpg', alt='Twitter', border='0')
+                        a(href='https://www.linkedin.com/company/hortonworks')
+                          img(src='http://info.hortonworks.com/rs/h2source/images/linkedin-icon-white.jpg', alt='Linkedin', border='0')
+                  tr
+                    td(style='line-height:1px; font-size:1px;', height='15', colspan='2')
