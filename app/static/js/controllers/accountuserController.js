@@ -11,10 +11,10 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
         getUsersForAccount();
 
         $scope.inviteUser = function() {
-            UserInvite.save({ invite_email: $scope.invite.mail }, function (result) {
+            UserInvite.save({ invite_email: $scope.invite.mail, groups: $scope.invite.scopes }, function (result) {
                 var newUser = $filter('filter')($scope.accountUsers, { username: $scope.invite.mail })[0];
                 if (newUser == null) {
-                    $scope.accountUsers.push({active: false, username: $scope.invite.mail, idx:  $scope.invite.mail.toString().replace(/\./g, '').replace(/@/g, '')});
+                    $scope.accountUsers.push({active: false, groups: $scope.invite.scopes, username: $scope.invite.mail, idx:  $scope.invite.mail.toString().replace(/\./g, '').replace(/@/g, '')});
                 }
                 $scope.inviteForm.$setPristine();
                 $scope.showSuccess($filter("format")($rootScope.msg.user_form_invite_success, $scope.invite.mail))
@@ -25,6 +25,44 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
                 $scope.showError(error);
             });
         }
+
+        $scope.contains = function(str, suffix) {
+            if (str != undefined && str.indexOf(suffix) !== -1) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        $scope.endsWith = function(str, suffix) {
+            if (str != undefined && str.indexOf(suffix, str.length - suffix.length) !== -1) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        $scope.searchScopeElement = function(element, groups) {
+             var result = null;
+             if(groups != undefined && groups != null ) {
+                 angular.forEach(groups, function(item) {
+                    if($scope.endsWith(item.display, element)) {
+                        result = item;
+                        return result;
+                    }
+                 });
+             }
+             return result;
+        }
+
+        $scope.isWriteScope = function(name, groups) {
+            if ($scope.searchScopeElement(name, groups) != null) {
+               return true;
+            } else {
+                return false;
+            }
+        }
+
 
         $scope.getUsers = function() {
             $rootScope.accountUsers =  AccountUsers.query(function (result) {
@@ -79,7 +117,37 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
 
         function initInvite() {
             $scope.invite = {
-                mail: ""
+                mail: "",
+                scopes: {
+                    blueprints: {
+                        write: false,
+                        read: true
+                    },
+                    recipes: {
+                        write: false,
+                        read: true
+                    },
+                    credentials: {
+                        write: false,
+                        read: true
+                    },
+                    templates: {
+                        write: false,
+                        read: true
+                    },
+                    stacks: {
+                        write: false,
+                        read: true
+                    },
+                    securitygroups: {
+                        write: false,
+                        read: true
+                    },
+                    networks: {
+                        write: false,
+                        read: true
+                    }
+                }
             };
         }
 
