@@ -24,7 +24,7 @@ public class StackResponse extends StackBase {
     private String account;
     @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount;
-    @ApiModelProperty(StackModelDescription.STATUS)
+    @ApiModelProperty(StackModelDescription.STACK_STATUS)
     private Status status;
     private ClusterResponse cluster;
     @ApiModelProperty(StackModelDescription.STATUS_REASON)

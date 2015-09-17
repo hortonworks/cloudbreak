@@ -48,10 +48,11 @@ public class CloudbreakEvent implements ProvisionEntity {
     private Long stackId;
     private String stackName;
     private String instanceGroup;
-
     @Enumerated(EnumType.STRING)
     private Status stackStatus;
     private Integer nodeCount;
+    @Enumerated(EnumType.STRING)
+    private Status clusterStatus;
 
     public Long getId() {
         return id;
@@ -171,6 +172,14 @@ public class CloudbreakEvent implements ProvisionEntity {
 
     public void setInstanceGroup(String instanceGroup) {
         this.instanceGroup = instanceGroup;
+    }
+
+    public Status getClusterStatus() {
+        return clusterStatus;
+    }
+
+    public void setClusterStatus(Status clusterStatus) {
+        this.clusterStatus = clusterStatus;
     }
 
     @Override

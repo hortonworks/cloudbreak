@@ -109,6 +109,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         if (null != stack.getCluster()) {
             stackEvent.setBlueprintId(stack.getCluster().getBlueprint().getId());
             stackEvent.setBlueprintName(stack.getCluster().getBlueprint().getBlueprintName());
+            stackEvent.setClusterStatus(stack.getCluster().getStatus());
         } else {
             LOGGER.debug("No cluster data available for the stack: {}", stack.getId());
         }

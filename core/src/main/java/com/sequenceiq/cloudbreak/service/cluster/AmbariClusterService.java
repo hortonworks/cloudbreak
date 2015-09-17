@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
 import static com.sequenceiq.cloudbreak.domain.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.domain.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_REQUESTED;
@@ -401,6 +402,7 @@ public class AmbariClusterService implements ClusterService {
             cluster.setAmbariStackDetails(ambariStackDetails);
         }
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
+        cluster.setStatus(REQUESTED);
         clusterRepository.save(cluster);
         flowManager.triggerClusterReInstall(new ProvisionRequest(stack.cloudPlatform(), stack.getId()));
         return stack.getCluster();
