@@ -8,28 +8,29 @@ import org.slf4j.LoggerFactory;
 import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.CopyStatus;
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
-import com.sequenceiq.cloudbreak.cloud.BooleanStateConnector;
 import com.sequenceiq.cloudbreak.cloud.arm.ArmClient;
 import com.sequenceiq.cloudbreak.cloud.arm.context.ImageCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 
 import groovyx.net.http.HttpResponseException;
 
-public class ArmImageCopyStatusCheckerTask implements BooleanStateConnector {
+public class ArmImageCopyStatusCheckerTask extends PollBooleanStateTask {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArmImageCopyStatusCheckerTask.class);
 
     private ImageCheckerContext imageCheckerContext;
     private ArmClient armClient;
 
-    public ArmImageCopyStatusCheckerTask(ArmClient armClient, ImageCheckerContext imageCheckerContext) {
+    public ArmImageCopyStatusCheckerTask(AuthenticatedContext ac, ArmClient armClient, ImageCheckerContext imageCheckerContext) {
+        super(ac, true);
         this.imageCheckerContext = imageCheckerContext;
         this.armClient = armClient;
     }
 
     @Override
-    public Boolean check(AuthenticatedContext authenticatedContext) {
+    public Boolean call() {
         AzureRMClient client = armClient.createAccess(imageCheckerContext.getArmCredentialView());
         try {
 
@@ -54,4 +55,5 @@ public class ArmImageCopyStatusCheckerTask implements BooleanStateConnector {
         }
         return false;
     }
+
 }

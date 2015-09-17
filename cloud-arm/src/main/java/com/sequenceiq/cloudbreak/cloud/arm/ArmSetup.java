@@ -14,19 +14,16 @@ import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.cloud.Setup;
-import com.sequenceiq.cloudbreak.cloud.arm.task.ArmImageCopyStatusCheckerTask;
-import com.sequenceiq.cloudbreak.cloud.arm.task.ArmStorageStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.arm.context.ImageCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.context.StorageCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.arm.task.ArmImageCopyStatusCheckerTask;
+import com.sequenceiq.cloudbreak.cloud.arm.task.ArmStorageStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.event.instance.BooleanResult;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
-import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
-import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
 import com.sequenceiq.cloudbreak.domain.CloudRegion;
 
 import groovyx.net.http.HttpResponseException;
@@ -42,9 +39,7 @@ public class ArmSetup implements Setup {
     @Inject
     private ArmClient armClient;
     @Inject
-    private SyncPollingScheduler<BooleanResult> syncPollingScheduler;
-    @Inject
-    private PollTaskFactory statusCheckFactory;
+    private SyncPollingScheduler<Boolean> syncPollingScheduler;
     @Inject
     private ArmTemplateUtils armTemplateUtils;
 
@@ -60,25 +55,18 @@ public class ArmSetup implements Setup {
             }
             if (!storageAccountExist(client, osStorageName)) {
                 client.createStorageAccount(storageGroup, osStorageName, CloudRegion.valueOf(stack.getRegion()).value());
-                BooleanResult statePollerResult = ResourcesStatePollerResults.transformToFalseBooleanResult(authenticatedContext.getCloudContext());
-                PollTask<BooleanResult> task = statusCheckFactory.newPollBooleanStateTask(authenticatedContext,
-                        new ArmStorageStatusCheckerTask(armClient,
-                                new StorageCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()), storageGroup, osStorageName)));
-                if (!task.completed(statePollerResult)) {
-                    syncPollingScheduler.schedule(task);
-                }
+                PollTask<Boolean> task = new ArmStorageStatusCheckerTask(authenticatedContext, armClient,
+                        new StorageCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()), storageGroup, osStorageName));
+                syncPollingScheduler.schedule(task);
             }
             client.createContainerInStorage(storageGroup, osStorageName, IMAGES);
             if (!storageContainsImage(client, storageGroup, osStorageName, stack.getImage().getImageName())) {
                 client.copyImageBlobInStorageContainer(storageGroup, osStorageName, IMAGES, stack.getImage().getImageName());
-                BooleanResult statePollerResult = ResourcesStatePollerResults.transformToFalseBooleanResult(authenticatedContext.getCloudContext());
-                PollTask<BooleanResult> task = statusCheckFactory.newPollBooleanStateTask(authenticatedContext,
-                        new ArmImageCopyStatusCheckerTask(armClient,
-                                new ImageCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()), storageGroup, osStorageName,
-                                        IMAGES, stack.getImage().getImageName())));
-                if (!task.completed(statePollerResult)) {
-                    syncPollingScheduler.schedule(task);
-                }
+                PollTask<Boolean> task = new ArmImageCopyStatusCheckerTask(authenticatedContext, armClient,
+                        new ImageCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()), storageGroup, osStorageName,
+                                IMAGES, stack.getImage().getImageName()));
+
+                syncPollingScheduler.schedule(task);
             }
         } catch (HttpResponseException ex) {
             throw new CloudConnectorException(ex.getResponse().getData().toString(), ex);

@@ -7,12 +7,10 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.BooleanStateConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.ResourceBuilderContext;
-import com.sequenceiq.cloudbreak.cloud.event.instance.BooleanResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.InstanceConsoleOutputResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.InstancesStatusResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -57,11 +55,4 @@ public class PollTaskFactory {
         return new PollComputeStatusTask(authenticatedContext, builder, context, instance);
     }
 
-    public PollTask<BooleanResult> newPollBooleanStateTask(AuthenticatedContext authenticatedContext, BooleanStateConnector connector) {
-        return new PollBooleanStateTask(authenticatedContext, connector);
-    }
-
-    public PollTask<BooleanResult> newPollBooleanTerminationTask(AuthenticatedContext authenticatedContext, BooleanStateConnector connector) {
-        return new PollBooleanTerminationTask(authenticatedContext, connector);
-    }
 }

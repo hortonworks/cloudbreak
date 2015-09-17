@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getBucket;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getImageName;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getProjectId;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getTarName;
-import static com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults.transformToFalseBooleanResult;
 
 import java.util.Date;
 
@@ -26,14 +25,12 @@ import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.StorageObject;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.event.instance.BooleanResult;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.task.GcpImageCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
-import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 
 @Service
 public class GcpProvisionSetup implements Setup {
@@ -41,9 +38,7 @@ public class GcpProvisionSetup implements Setup {
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpProvisionSetup.class);
 
     @Inject
-    private SyncPollingScheduler<BooleanResult> syncPollingScheduler;
-    @Inject
-    private PollTaskFactory statusCheckFactory;
+    private SyncPollingScheduler<Boolean> syncPollingScheduler;
 
     @Override
     public void execute(AuthenticatedContext authenticatedContext, CloudStack stack) {
@@ -79,12 +74,8 @@ public class GcpProvisionSetup implements Setup {
                 image.setRawDisk(rawDisk);
                 Compute.Images.Insert ins1 = compute.images().insert(projectId, image);
                 ins1.execute();
-                BooleanResult statePollerResult = transformToFalseBooleanResult(authenticatedContext.getCloudContext());
-                PollTask<BooleanResult> task = statusCheckFactory.newPollBooleanStateTask(authenticatedContext,
-                        new GcpImageCheckerTask(projectId, image.getName(), compute));
-                if (!task.completed(statePollerResult)) {
-                    syncPollingScheduler.schedule(task);
-                }
+                PollTask<Boolean> task = new GcpImageCheckerTask(authenticatedContext, projectId, image.getName(), compute);
+                syncPollingScheduler.schedule(task);
             }
         } catch (Exception e) {
             String msg = String.format("Error occurred on %s stack during the setup: %s", stackId, e.getMessage());
