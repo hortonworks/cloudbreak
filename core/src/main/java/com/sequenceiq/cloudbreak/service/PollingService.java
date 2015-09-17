@@ -38,6 +38,7 @@ public class PollingService<T> {
             if (failures >= maxFailure) {
                 LOGGER.info("Polling failure reached the limit which was {}, poller will drop the last exception.", maxFailure);
                 statusCheckerTask.handleException(actual);
+                return PollingResult.FAILURE;
             }
             if (success) {
                 LOGGER.info(statusCheckerTask.successMessage(t));

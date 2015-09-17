@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_SERVER;
 import static com.sequenceiq.cloudbreak.service.PollingResult.SUCCESS;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isFailure;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isTimeout;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.AMBARI_POLLING_INTERVAL;
@@ -155,7 +156,10 @@ public class AmbariClusterConnector {
         AMBARI_CLUSTER_RESTARTING_AMBARI_SERVER("ambari.cluster.restarting.ambari.server"),
         AMBARI_CLUSTER_AMBARI_SERVER_RESTARTED("ambari.cluster.ambari.server.restarted"),
         AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP("ambari.cluster.removing.node.from.hostgroup"),
-        AMBARI_CLUSTER_ADDING_NODE_TO_HOSTGROUP("ambari.cluster.adding.node.to.hostgroup");
+        AMBARI_CLUSTER_ADDING_NODE_TO_HOSTGROUP("ambari.cluster.adding.node.to.hostgroup"),
+        AMBARI_CLUSTER_HOST_JOIN_FAILED("ambari.cluster.host.join.failed"),
+        AMBARI_CLUSTER_INSTALL_FAILED("ambari.cluster.install.failed"),
+        AMBARI_CLUSTER_MR_SMOKE_FAILED("ambari.cluster.mr.smoke.failed");
 
         private String code;
 
@@ -193,7 +197,7 @@ public class AmbariClusterConnector {
 
             Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
             PollingResult waitForHostsResult = waitForHosts(stack, ambariClient, nodeCount, hostsInCluster);
-            checkPollingResult(waitForHostsResult, "Error while waiting for hosts to connect. Polling result: " + waitForHostsResult.name());
+            checkPollingResult(waitForHostsResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_JOIN_FAILED.code()));
 
             if (fs != null) {
                 addFsRecipes(blueprintText, fs, hostGroups);
@@ -207,14 +211,18 @@ public class AmbariClusterConnector {
             }
             ambariClient.createCluster(cluster.getName(), cluster.getBlueprint().getBlueprintName(), hostGroupMappings);
             PollingResult pollingResult = waitForClusterInstall(stack, ambariClient);
-            checkPollingResult(pollingResult, "Cluster installation failed. Polling result: " + pollingResult.name());
+            checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
 
             if (recipesFound) {
                 recipeEngine.executePostInstall(stack);
             }
             pollingResult = runSmokeTest(stack, ambariClient);
-            checkPollingResult(pollingResult, "Ambari Smoke tests failed. Polling result: " + pollingResult.name());
-
+            if (isExited(pollingResult)) {
+                throw new CancellationException("Stack or cluster in delete in progress phase.");
+            } else if (isFailure(pollingResult) || isTimeout(pollingResult)) {
+                eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
+                        cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_MR_SMOKE_FAILED.code()));
+            }
             cluster = handleClusterCreationSuccess(stack, cluster);
             return cluster;
         } catch (CancellationException cancellationException) {
@@ -228,10 +236,10 @@ public class AmbariClusterConnector {
         }
     }
 
-    private void checkPollingResult(PollingResult waitForHostsResult, String message) throws ClusterException {
-        if (isExited(waitForHostsResult)) {
+    private void checkPollingResult(PollingResult pollingResult, String message) throws ClusterException {
+        if (isExited(pollingResult)) {
             throw new CancellationException("Stack or cluster in delete in progress phase.");
-        } else if (!isSuccess(waitForHostsResult)) {
+        } else if (isTimeout(pollingResult) || isFailure(pollingResult)) {
             throw new ClusterException(message);
         }
     }
