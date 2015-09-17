@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -33,9 +34,22 @@ public class UserDataBuilderTest {
     public void testBuildUserDataAzure() throws IOException {
         String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-init.sh");
         String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-init.sh");
-        Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(CloudPlatform.AZURE, "ssh-rsa test", "cloudbreak");
+        Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(CloudPlatform.AZURE, "ssh-rsa test", "cloudbreak", getPlatformParameters());
         Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
         Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
     }
 
+    public PlatformParameters getPlatformParameters() {
+        return new PlatformParameters() {
+            @Override
+            public String diskPrefix() {
+                return "sd";
+            }
+
+            @Override
+            public Integer startLabel() {
+                return 98;
+            }
+        };
+    }
 }

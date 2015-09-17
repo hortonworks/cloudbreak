@@ -105,7 +105,8 @@ public class InstanceTerminationHandler {
 
     private Map<InstanceGroupType, String> buildUserData(Stack stack, CloudPlatform platform, CloudPlatformConnector connector) {
         try {
-            return userDataBuilder.buildUserData(platform, tlsSecurityService.readPublicSshKey(stack.getId()), stack.getCredential().getLoginUserName());
+            return userDataBuilder.buildUserData(platform, tlsSecurityService.readPublicSshKey(stack.getId()), stack.getCredential().getLoginUserName(),
+                    connector.getPlatformParameters(stack));
         } catch (CloudbreakSecuritySetupException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }

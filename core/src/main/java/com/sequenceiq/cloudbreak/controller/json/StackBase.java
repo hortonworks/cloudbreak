@@ -32,6 +32,8 @@ public abstract class StackBase implements JsonEntity {
     private String region;
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private CloudPlatform cloudPlatform;
+    @ApiModelProperty(StackModelDescription.PLATFORM_VARIANT)
+    private String platformVariant;
     @NotNull
     @ApiModelProperty(value = StackModelDescription.CREDENTIAL_ID, required = true)
     private Long credentialId;
@@ -141,5 +143,13 @@ public abstract class StackBase implements JsonEntity {
 
     public void setSecurityGroupId(Long securityGroupId) {
         this.securityGroupId = securityGroupId;
+    }
+
+    public String getPlatformVariant() {
+        return platformVariant;
+    }
+
+    public void setPlatformVariant(String platformVariant) {
+        this.platformVariant = platformVariant;
     }
 }

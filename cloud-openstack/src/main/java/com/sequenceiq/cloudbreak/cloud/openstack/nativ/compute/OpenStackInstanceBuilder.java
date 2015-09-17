@@ -117,6 +117,11 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
     }
 
     @Override
+    public String platform() {
+        return OpenStackConstants.OPENSTACK;
+    }
+
+    @Override
     public int order() {
         return 1;
     }

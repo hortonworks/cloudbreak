@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.event.context;
 
+import com.sequenceiq.cloudbreak.cloud.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.domain.AdjustmentType;
 import com.sequenceiq.cloudbreak.domain.OnFailureAction;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -9,7 +10,7 @@ public class CloudContext {
     private Long stackId;
     private String stackName;
     private String platform;
-    private int parallelResourceRequest;
+    private String variant;
     private String owner;
     private String region;
     private OnFailureAction onFailureAction = OnFailureAction.ROLLBACK;
@@ -21,9 +22,9 @@ public class CloudContext {
         this.stackId = stack.getId();
         this.stackName = stack.getName();
         this.platform = stack.cloudPlatform().name();
+        this.variant = stack.getPlatformVariant();
         this.region = stack.getRegion();
         this.owner = stack.getOwner();
-        this.parallelResourceRequest = stack.cloudPlatform().parallelNumber();
         this.onFailureAction = stack.getOnFailureActionAction();
         this.created = stack.getCreated();
         if (stack.getFailurePolicy() != null) {
@@ -39,6 +40,14 @@ public class CloudContext {
         this.owner = owner;
     }
 
+    public CloudContext(Long stackId, String stackName, String platform, String variant, String owner) {
+        this.stackId = stackId;
+        this.stackName = stackName;
+        this.platform = platform;
+        this.variant = variant;
+        this.owner = owner;
+    }
+
     public Long getStackId() {
         return stackId;
     }
@@ -51,16 +60,20 @@ public class CloudContext {
         return platform;
     }
 
+    public String getVariant() {
+        return variant;
+    }
+
+    public CloudPlatformVariant getPlatformVariant() {
+        return new CloudPlatformVariant(platform, variant);
+    }
+
     public String getOwner() {
         return owner;
     }
 
     public String getRegion() {
         return region;
-    }
-
-    public int getParallelResourceRequest() {
-        return parallelResourceRequest;
     }
 
     public OnFailureAction getOnFailureAction() {
@@ -89,7 +102,6 @@ public class CloudContext {
         sb.append("stackId=").append(stackId);
         sb.append(", stackName='").append(stackName).append('\'');
         sb.append(", platform='").append(platform).append('\'');
-        sb.append(", parallelResourceAction=").append(parallelResourceRequest);
         sb.append(", region='").append(region).append('\'');
         sb.append('}');
         return sb.toString();

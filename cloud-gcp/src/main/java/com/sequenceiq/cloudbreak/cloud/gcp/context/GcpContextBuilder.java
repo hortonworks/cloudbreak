@@ -15,6 +15,9 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 
 @Service
 public class GcpContextBuilder implements ResourceContextBuilder<GcpContext> {
+
+    public static final int PARALLEL_RESOURCE_REQUEST = 30;
+
     @Override
     public GcpContext contextInit(CloudContext context, AuthenticatedContext auth, boolean build) {
         return initContext(context, auth, build);
@@ -29,7 +32,7 @@ public class GcpContextBuilder implements ResourceContextBuilder<GcpContext> {
         CloudCredential credential = auth.getCloudCredential();
         String projectId = GcpStackUtil.getProjectId(credential);
         Compute compute = GcpStackUtil.buildCompute(credential);
-        return new GcpContext(context.getStackName(), context.getRegion(), projectId, compute, context.getParallelResourceRequest(), build);
+        return new GcpContext(context.getStackName(), context.getRegion(), projectId, compute, PARALLEL_RESOURCE_REQUEST, build);
     }
 
     @Override

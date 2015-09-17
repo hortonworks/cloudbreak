@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
@@ -24,6 +25,10 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
+import com.sequenceiq.cloudbreak.cloud.event.platform.CheckPlatformVariantRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.CheckPlatformVariantResult;
+import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParameterRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParameterResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
@@ -321,6 +326,48 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             throw new OperationException(e);
         }
         return result;
+    }
+
+    @Override
+    public PlatformParameters getPlatformParameters(Stack stack) {
+        LOGGER.debug("Get platform parameters for: {}", stack);
+        CloudContext cloudContext = new CloudContext(stack);
+        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        PlatformParameterRequest parameterRequest = new PlatformParameterRequest(cloudContext, cloudCredential);
+        eventBus.notify(parameterRequest.selector(), Event.wrap(parameterRequest));
+        try {
+            PlatformParameterResult res = parameterRequest.await();
+            LOGGER.info("Platform parameter result: {}", res);
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.error("Failed to get platform parameters", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
+            }
+            return res.getPlatformParameters();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting platform parameters: " + cloudContext, e);
+            throw new OperationException(e);
+        }
+    }
+
+    @Override
+    public String checkAndGetPlatformVariant(Stack stack) {
+        LOGGER.debug("Get platform variant for: {}", stack);
+        CloudContext cloudContext = new CloudContext(stack);
+        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        CheckPlatformVariantRequest checkPlatformVariantRequest = new CheckPlatformVariantRequest(cloudContext, cloudCredential);
+        eventBus.notify(checkPlatformVariantRequest.selector(), Event.wrap(checkPlatformVariantRequest));
+        try {
+            CheckPlatformVariantResult res = checkPlatformVariantRequest.await();
+            LOGGER.info("Platform variant result: {}", res);
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.error("Failed to get platform variant", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
+            }
+            return res.getDefaultPlatformVariant();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting the platform variant: " + cloudContext, e);
+            throw new OperationException(e);
+        }
     }
 
     private Set<Resource> transformResults(List<CloudResourceStatus> cloudResourceStatuses, Stack stack) {

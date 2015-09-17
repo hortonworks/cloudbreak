@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
@@ -27,27 +28,27 @@ public class UserDataBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    public Map<InstanceGroupType, String> buildUserData(CloudPlatform cloudPlatform, String tmpSshKey, String sshUser) {
+    public Map<InstanceGroupType, String> buildUserData(CloudPlatform cloudPlatform, String tmpSshKey, String sshUser, PlatformParameters parameters) {
         Map<InstanceGroupType, String> result = new HashMap<>();
-        result.put(InstanceGroupType.GATEWAY, buildGatewayUserdata(cloudPlatform, tmpSshKey, sshUser));
-        result.put(InstanceGroupType.CORE, buildCoreUserdata(cloudPlatform));
+        result.put(InstanceGroupType.GATEWAY, buildGatewayUserdata(cloudPlatform, tmpSshKey, sshUser, parameters));
+        result.put(InstanceGroupType.CORE, buildCoreUserdata(cloudPlatform, parameters));
         return result;
     }
 
-    public String buildGatewayUserdata(CloudPlatform cloudPlatform, String tmpSshKey, String sshUser) {
+    public String buildGatewayUserdata(CloudPlatform cloudPlatform, String tmpSshKey, String sshUser, PlatformParameters params) {
         Map<String, Object> model = new HashMap<>();
-        model.put("platformDiskPrefix", cloudPlatform.getDiskPrefix());
-        model.put("platformDiskStartLabel", cloudPlatform.startLabel());
+        model.put("platformDiskPrefix", params.diskPrefix());
+        model.put("platformDiskStartLabel", params.startLabel());
         model.put("gateway", true);
         model.put("tmpSshKey", tmpSshKey);
         model.put("sshUser", sshUser);
         return build(model);
     }
 
-    public String buildCoreUserdata(CloudPlatform cloudPlatform) {
+    public String buildCoreUserdata(CloudPlatform cloudPlatform, PlatformParameters params) {
         Map<String, Object> model = new HashMap<>();
-        model.put("platformDiskPrefix", cloudPlatform.getDiskPrefix());
-        model.put("platformDiskStartLabel", cloudPlatform.startLabel());
+        model.put("platformDiskPrefix", params.diskPrefix());
+        model.put("platformDiskStartLabel", params.startLabel());
         model.put("gateway", false);
         return build(model);
     }

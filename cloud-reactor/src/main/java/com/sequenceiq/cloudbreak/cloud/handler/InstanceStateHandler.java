@@ -38,8 +38,7 @@ public class InstanceStateHandler implements CloudPlatformEventHandler<GetInstan
         GetInstancesStateRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
-            String platform = cloudContext.getPlatform();
-            CloudConnector connector = cloudPlatformConnectors.get(platform);
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudInstance> instances = request.getInstances();
             List<CloudVmInstanceStatus> instanceStatuses = connector.instances().check(auth, instances);

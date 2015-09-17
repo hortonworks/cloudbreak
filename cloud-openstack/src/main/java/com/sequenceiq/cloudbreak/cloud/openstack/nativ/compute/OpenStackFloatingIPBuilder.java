@@ -57,6 +57,11 @@ public class OpenStackFloatingIPBuilder extends AbstractOpenStackComputeResource
     }
 
     @Override
+    public String platform() {
+        return OpenStackConstants.OPENSTACK;
+    }
+
+    @Override
     public int order() {
         return 2;
     }

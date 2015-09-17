@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.openstack;
 
 public class OpenStackConstants {
     public static final String OPENSTACK = "OPENSTACK";
-    public static final String OPENSTACK_NATIVE = "OPENSTACK_NATIVE";
 
     public static final String TENANT_ID = "tenantId";
     public static final String NETWORK_ID = "networkId";
@@ -17,5 +16,10 @@ public class OpenStackConstants {
     public static final String FLOATING_IP_IDS = "floatingIpIds";
 
     private OpenStackConstants() {
+    }
+
+    public enum Variant {
+        HEAT,
+        NATIVE
     }
 }

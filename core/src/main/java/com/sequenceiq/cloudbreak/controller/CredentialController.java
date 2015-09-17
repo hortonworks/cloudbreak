@@ -230,8 +230,6 @@ public class CredentialController {
             return conversionService.convert((GcpCredential) credential, CredentialResponse.class);
         case OPENSTACK:
             return conversionService.convert((OpenStackCredential) credential, CredentialResponse.class);
-        case OPENSTACK_NATIVE:
-            return conversionService.convert((OpenStackCredential) credential, CredentialResponse.class);
         case AZURE_RM:
             return conversionService.convert((AzureRmCredential) credential, CredentialResponse.class);
         default:

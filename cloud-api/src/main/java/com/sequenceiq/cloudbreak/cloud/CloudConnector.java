@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud;
 
-public interface CloudConnector extends CloudPlatformAware {
+public interface CloudConnector extends CloudPlatformVariantAware {
 
     Authenticator authentication();
 
@@ -11,5 +11,7 @@ public interface CloudConnector extends CloudPlatformAware {
     ResourceConnector resources();
 
     InstanceConnector instances();
+
+    PlatformParameters parameters();
 
 }

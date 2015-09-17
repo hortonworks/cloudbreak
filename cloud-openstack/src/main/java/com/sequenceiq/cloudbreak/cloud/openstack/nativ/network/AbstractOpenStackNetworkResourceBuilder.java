@@ -36,7 +36,7 @@ public abstract class AbstractOpenStackNetworkResourceBuilder extends AbstractOp
 
     @Override
     public String platform() {
-        return OpenStackConstants.OPENSTACK_NATIVE;
+        return OpenStackConstants.OPENSTACK;
     }
 
     @Override

@@ -36,7 +36,7 @@ public class ProvisionSetupHandler implements CloudPlatformEventHandler<SetupReq
         CloudContext cloudContext = request.getCloudContext();
         try {
             String platform = cloudContext.getPlatform();
-            CloudConnector connector = cloudPlatformConnectors.get(platform);
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             CloudStack cloudStack = request.getCloudStack();
             connector.setup().execute(auth, cloudStack);

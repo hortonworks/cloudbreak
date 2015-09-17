@@ -46,8 +46,7 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
         LOGGER.info("Received event: {}", terminateStackRequestEvent);
         TerminateStackRequest request = terminateStackRequestEvent.getData();
         try {
-            String platform = request.getCloudContext().getPlatform();
-            CloudConnector connector = cloudPlatformConnectors.get(platform);
+            CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
             List<CloudResourceStatus> resourceStatus = connector.resources().terminate(ac, request.getCloudStack(), request.getCloudResources());
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);

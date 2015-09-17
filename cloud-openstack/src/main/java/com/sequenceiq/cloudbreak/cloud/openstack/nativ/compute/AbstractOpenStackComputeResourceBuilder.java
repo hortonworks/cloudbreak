@@ -58,7 +58,7 @@ public abstract class AbstractOpenStackComputeResourceBuilder extends AbstractOp
 
     @Override
     public String platform() {
-        return OpenStackConstants.OPENSTACK_NATIVE;
+        return OpenStackConstants.OPENSTACK;
     }
 
     protected InstanceTemplate getInstanceTemplate(Group group, long privateId) {

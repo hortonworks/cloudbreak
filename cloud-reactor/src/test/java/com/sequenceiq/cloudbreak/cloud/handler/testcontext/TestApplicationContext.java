@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.handler.testcontext;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -25,6 +24,7 @@ import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -114,7 +114,7 @@ public class TestApplicationContext {
 
     @Bean
     public CloudPlatformConnectors cloudPlatformConnectors() {
-        when(cloudPlatformConnectors.get(anyString())).thenReturn(cloudConnector);
+        when(cloudPlatformConnectors.get((CloudPlatformVariant) any())).thenReturn(cloudConnector);
         return cloudPlatformConnectors;
     }
 
@@ -125,6 +125,7 @@ public class TestApplicationContext {
         when(instanceConnector.metadata()).thenReturn(collector);
         when(authenticator.authenticate((CloudContext) any(), (CloudCredential) any())).thenReturn(g.createAuthenticatedContext());
         when(cloudConnector.platform()).thenReturn("TESTCONNECTOR");
+        when(cloudConnector.variant()).thenReturn("TESTVARIANT");
         when(cloudConnector.resources()).thenReturn(resourceConnector);
         when(cloudConnector.instances()).thenReturn(instanceConnector);
         when(resourceConnector.launch((AuthenticatedContext) any(), (CloudStack) any(), (PersistenceNotifier) any()))

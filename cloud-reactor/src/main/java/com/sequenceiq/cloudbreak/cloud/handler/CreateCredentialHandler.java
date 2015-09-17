@@ -33,8 +33,7 @@ public class CreateCredentialHandler implements CloudPlatformEventHandler<Create
         LOGGER.info("Received event: {}", createCredentialRequestEvent);
         CreateCredentialRequest request = createCredentialRequestEvent.getData();
         try {
-            String platform = request.getCloudContext().getPlatform();
-            CloudConnector connector = cloudPlatformConnectors.get(platform);
+            CloudConnector connector = cloudPlatformConnectors.getDefault(request.getCloudContext().getPlatform());
             AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
             CloudCredentialStatus cloudCredentialStatus = connector.credentials().create(ac);
             CreateCredentialResult createCredentialResult = new CreateCredentialResult(request, cloudCredentialStatus);

@@ -107,6 +107,11 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
     }
 
     @Override
+    public String platform() {
+        return OpenStackConstants.OPENSTACK;
+    }
+
+    @Override
     public int order() {
         return 0;
     }

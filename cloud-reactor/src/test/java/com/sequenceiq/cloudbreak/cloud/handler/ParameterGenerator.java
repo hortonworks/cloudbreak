@@ -33,7 +33,7 @@ public class ParameterGenerator {
     private static final long STACK_ID = 5L;
 
     public CloudContext createCloudContext() {
-        return new CloudContext(STACK_ID, "teststack", "TESTCONNECTOR", "owner");
+        return new CloudContext(STACK_ID, "teststack", "TESTCONNECTOR", "TESTVARIANT", "owner");
     }
 
     public CloudCredential createCloudCredential() {

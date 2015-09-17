@@ -478,7 +478,7 @@ public class SimpleStackFacade implements StackFacade {
             CloudPlatform cloudPlatform = stack.cloudPlatform();
             CloudPlatformConnector connector = platformResolver.connector(cloudPlatform);
             Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(cloudPlatform,
-                    tlsSecurityService.readPublicSshKey(stack.getId()), stack.getCredential().getLoginUserName());
+                    tlsSecurityService.readPublicSshKey(stack.getId()), stack.getCredential().getLoginUserName(), connector.getPlatformParameters(stack));
             Map<String, Set<SecurityRule>> modifiedSubnets = getModifiedSubnetList(stack, actualContext.getAllowedSecurityRules());
             Set<SecurityRule> newSecurityRules = modifiedSubnets.get(UPDATED_SUBNETS);
             stack.getSecurityGroup().setSecurityRules(newSecurityRules);

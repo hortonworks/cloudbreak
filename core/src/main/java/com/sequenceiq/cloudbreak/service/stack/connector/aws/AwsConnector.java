@@ -85,6 +85,7 @@ import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsNetwork;
@@ -124,6 +125,8 @@ public class AwsConnector implements CloudPlatformConnector {
 
     private static final List<String> SUSPENDED_PROCESSES = Arrays.asList("Launch", "HealthCheck", "ReplaceUnhealthy", "AZRebalance", "AlarmNotification",
             "ScheduledActions", "AddToLoadBalancer", "RemoveFromLoadBalancerLowPriority");
+
+    private static final PlatformParameters AWS_PLATFORM_PARAMETERS = new AwsPlatformParameters();
 
     @Value("${cb.aws.cf.template.path:" + CB_AWS_CF_TEMPLATE_PATH + "}")
     private String awsCloudformationTemplatePath;
@@ -387,6 +390,11 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
+    public PlatformParameters getPlatformParameters(Stack stack) {
+        return AWS_PLATFORM_PARAMETERS;
+    }
+
+    @Override
     public void startAll(Stack stack) {
         setStackState(stack, false);
     }
@@ -603,8 +611,25 @@ public class AwsConnector implements CloudPlatformConnector {
         return CloudPlatform.AWS;
     }
 
+    @Override
+    public String checkAndGetPlatformVariant(Stack stack) {
+        return getCloudPlatform().name();
+    }
+
     protected CreateStackRequest createStackRequest() {
         return new CreateStackRequest();
     }
 
+    private static class AwsPlatformParameters implements PlatformParameters {
+        private static final Integer START_LABEL = Integer.valueOf(97);
+        @Override
+        public String diskPrefix() {
+            return "xvd";
+        }
+
+        @Override
+        public Integer startLabel() {
+            return START_LABEL;
+        }
+    }
 }

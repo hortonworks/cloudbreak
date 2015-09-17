@@ -51,7 +51,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // WHEN
         StackResponse result = underTest.convert(getSource());
         // THEN
-        assertAllFieldsNotNull(result);
+        assertAllFieldsNotNull(result, Arrays.asList("platformVariant"));
     }
 
     @Test
@@ -65,7 +65,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // WHEN
         StackResponse result = underTest.convert(getSource());
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("credentialId", "cloudPlatform"));
+        assertAllFieldsNotNull(result, Arrays.asList("credentialId", "cloudPlatform", "platformVariant"));
     }
 
     @Test
@@ -80,7 +80,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // WHEN
         StackResponse result = underTest.convert(getSource());
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("cluster"));
+        assertAllFieldsNotNull(result, Arrays.asList("cluster", "platformVariant"));
     }
 
     @Test
@@ -94,7 +94,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // WHEN
         StackResponse result = underTest.convert(getSource());
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("failurePolicy"));
+        assertAllFieldsNotNull(result, Arrays.asList("failurePolicy", "platformVariant"));
     }
 
     @Test
@@ -109,7 +109,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // WHEN
         StackResponse result = underTest.convert(getSource());
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("networkId"));
+        assertAllFieldsNotNull(result, Arrays.asList("networkId", "platformVariant"));
     }
 
     @Override

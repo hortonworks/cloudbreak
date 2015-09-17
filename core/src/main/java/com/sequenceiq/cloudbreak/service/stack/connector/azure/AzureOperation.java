@@ -7,7 +7,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.service.stack.connector.ParallelCloudResourceManager;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.builders.AzureResourceBuilderInit;
 
 public abstract class AzureOperation<T> {

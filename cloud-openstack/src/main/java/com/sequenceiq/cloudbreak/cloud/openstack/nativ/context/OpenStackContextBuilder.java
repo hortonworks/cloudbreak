@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 
 @Service
 public class OpenStackContextBuilder implements ResourceContextBuilder<OpenStackContext> {
+    public static final int PARALLEL_RESOURCE_REQUEST = 30;
     @Inject
     private OpenStackClient openStackClient;
 
@@ -45,11 +46,11 @@ public class OpenStackContextBuilder implements ResourceContextBuilder<OpenStack
     }
 
     private OpenStackContext initContext(CloudContext context, boolean build) {
-        return new OpenStackContext(context.getStackName(), context.getRegion(), context.getParallelResourceRequest(), build);
+        return new OpenStackContext(context.getStackName(), context.getRegion(), PARALLEL_RESOURCE_REQUEST, build);
     }
 
     @Override
     public String platform() {
-        return OpenStackConstants.OPENSTACK_NATIVE;
+        return OpenStackConstants.OPENSTACK;
     }
 }
