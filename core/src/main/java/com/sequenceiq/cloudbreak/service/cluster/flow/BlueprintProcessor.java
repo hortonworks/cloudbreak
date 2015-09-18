@@ -5,7 +5,7 @@ import java.util.Set;
 
 public interface BlueprintProcessor {
 
-    String addConfigEntries(String originalBlueprint, List<BlueprintConfigurationEntry> properties);
+    String addConfigEntries(String originalBlueprint, List<BlueprintConfigurationEntry> properties, boolean override);
 
     String addDefaultFs(String originalBlueprint, String defaultFs);
 

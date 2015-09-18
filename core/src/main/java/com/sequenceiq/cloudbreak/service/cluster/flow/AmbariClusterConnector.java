@@ -149,6 +149,8 @@ public class AmbariClusterConnector {
     private BlueprintProcessor blueprintProcessor;
     @Inject
     private RecipeBuilder recipeBuilder;
+    @Inject
+    private DefaultConfigProvider defaultConfigProvider;
 
     private enum Msg {
         AMBARI_CLUSTER_RESETTING_AMBARI_DATABASE("ambari.cluster.resetting.ambari.database"),
@@ -184,6 +186,8 @@ public class AmbariClusterConnector {
             if (fs != null) {
                 blueprintText = extendBlueprintWithFsConfig(blueprintText, fs);
             }
+
+            blueprintText = blueprintProcessor.addConfigEntries(blueprintText, defaultConfigProvider.getDefaultConfigs(), false);
 
             TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
             AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
@@ -454,7 +458,7 @@ public class AmbariClusterConnector {
             String defaultFsValue = fsConfigurator.getDefaultFsValue(fsConfiguration);
             blueprintText = blueprintProcessor.addDefaultFs(blueprintText, defaultFsValue);
         }
-        blueprintText = blueprintProcessor.addConfigEntries(blueprintText, bpConfigEntries);
+        blueprintText = blueprintProcessor.addConfigEntries(blueprintText, bpConfigEntries, true);
         return blueprintText;
 
 

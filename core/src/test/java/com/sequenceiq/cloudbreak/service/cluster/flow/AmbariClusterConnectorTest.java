@@ -105,6 +105,12 @@ public class AmbariClusterConnectorTest {
     @Mock
     private CloudbreakMessagesService messagesService;
 
+    @Mock
+    private BlueprintProcessor blueprintProcessor;
+
+    @Mock
+    private DefaultConfigProvider defaultConfigProvider;
+
     @InjectMocks
     @Spy
     private AmbariClusterConnector underTest = new AmbariClusterConnector();
