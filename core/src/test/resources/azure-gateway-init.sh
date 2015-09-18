@@ -49,6 +49,33 @@ format_disks() {
   cd /hadoopfs/fs1 && mkdir logs logs/ambari-server logs/ambari-agent logs/consul-watch logs/kerberos
 }
 
+release_udev_cookie() {
+cat>/tmp/cookie.sh<<"EOF"
+: ${LOGFILE:=/var/log/cookie.log}
+: ${LAST_CONTAINER:=baywatch}
+: ${TIMEOUT:=2}
+echo "Cookie script started at $(date)" >> $LOGFILE
+while [ $(docker ps 2>/dev/null | grep $LAST_CONTAINER -c) -eq 0 ]; do
+  dmsetup udevcookies | grep -v Semid | while read line; do
+    COOKIE=$(echo $line|cut -f 1 -d ' ')
+    COOKIE_UPDATE=$(echo $line | awk '{print $4,$5,$6,$7,$8}')
+    ELAPSED_SEC=$((`date +%s`-`date -d "$COOKIE_UPDATE" +%s`))
+    ELAPSED_MIN=$((ELAPSED_SEC/60))
+    echo "Elapsed time for cookie: $COOKIE is: $ELAPSED_MIN min" >> $LOGFILE
+    if [ $ELAPSED_MIN -gt $TIMEOUT ]; then
+      echo "Cookie ($COOKIE) stuck, release it" >> $LOGFILE
+      dmsetup udevcomplete $COOKIE
+    fi
+  done
+  sleep 65
+done
+echo "Cookie script finished at $(date)" >> $LOGFILE
+EOF
+chmod +x /tmp/cookie.sh
+nohup /tmp/cookie.sh &
+}
+
+
 reload_sysconf() {
   sysctl -p
 }
@@ -63,6 +90,7 @@ main() {
     extend_rootfs
     format_disks
     fix_hostname
+    release_udev_cookie
     touch /var/cb-init-executed
     echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/cb-init-executed
   fi
