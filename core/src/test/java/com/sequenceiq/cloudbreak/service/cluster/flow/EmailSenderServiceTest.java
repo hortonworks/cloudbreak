@@ -3,25 +3,28 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Properties;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
+import com.google.common.io.CharStreams;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
@@ -30,48 +33,92 @@ import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 
-@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class EmailSenderServiceTest {
 
     @Mock
     private UserDetailsService userDetailsService;
 
+    @Mock
+    private JavaMailSender mailSender;
+
     @InjectMocks
     private EmailSenderService emailSenderService = new EmailSenderService();
 
+    private CbUser cbUser;
+    @Mock
+    private MimeMessagePreparator mimeMessagePreparator;
+
+    @Mock
+    private EmailMimeMessagePreparator emailMimeMessagePreparator;
+
     @Before
     public void before() throws IOException, TemplateException {
+        cbUser = new CbUser("sdf", "testuser", "testaccount", new ArrayList<CbUserRole>(), "familyname", "givenName", new Date());
         ReflectionTestUtils.setField(emailSenderService, "msgFrom", "no-reply@sequenceiq.com");
         ReflectionTestUtils.setField(emailSenderService, "freemarkerConfiguration", freemarkerConfiguration());
 
         ReflectionTestUtils.setField(emailSenderService, "successClusterMailTemplatePath", "templates/launch-cluster-installer-mail-success.ftl");
         ReflectionTestUtils.setField(emailSenderService, "failedClusterMailTemplatePath", "templates/launch-cluster-installer-mail-fail.ftl");
 
-        ReflectionTestUtils.setField(emailSenderService, "mailSender", mailSender());
         when(userDetailsService.getDetails(anyString(), any(UserFilterField.class)))
-                .thenReturn(new CbUser("sdf", "testuser", "testaccount", new ArrayList<CbUserRole>(), "familyname", "givenName", new Date()));
+                .thenReturn(cbUser);
 
     }
 
-    public JavaMailSender mailSender() {
-        JavaMailSender mailSender = null;
-        mailSender = new JavaMailSenderImpl();
-        ((JavaMailSenderImpl) mailSender).setHost("smtp.gmail.com");
-        ((JavaMailSenderImpl) mailSender).setPort(587);
-        ((JavaMailSenderImpl) mailSender).setUsername("xxx");
-        ((JavaMailSenderImpl) mailSender).setPassword("xxx");
-        ((JavaMailSenderImpl) mailSender).setJavaMailProperties(getJavaMailProperties());
-        return mailSender;
+    @Test
+    public void testSendTerminationSuccessEmail() throws IOException {
+        // GIVEN
+        String content = getFileContent("mail/termination-success-email");
+        when(emailMimeMessagePreparator.prepareMessage(cbUser, "Cloudbreak - cloudbreak cluster termination", content)).thenReturn(mimeMessagePreparator);
+        // WHEN
+        emailSenderService.sendTerminationSuccessEmail("xxx", "123.123.123.123");
+        // THEN
+        verify(emailMimeMessagePreparator, times(1)).prepareMessage(cbUser, "Cloudbreak - cloudbreak cluster termination",
+                getFileContent("mail/termination-success-email"));
+        verify(mailSender, times(1)).send(mimeMessagePreparator);
     }
 
-    private Properties getJavaMailProperties() {
-        Properties props = new Properties();
-        props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", true);
-        props.put("mail.smtp.starttls.enable", true);
-        props.put("mail.debug", true);
-        return props;
+    @Test
+    public void testSendTerminationFailureEmail() throws IOException {
+        // GIVEN
+        String content = getFileContent("mail/termination-failure-email");
+        when(emailMimeMessagePreparator.prepareMessage(cbUser, "Cloudbreak - cloudbreak cluster termination", content)).thenReturn(mimeMessagePreparator);
+        //WHEN
+        emailSenderService.sendTerminationFailureEmail("xxx", "123.123.123.123");
+        //THEN
+        verify(emailMimeMessagePreparator, times(1)).prepareMessage(cbUser, "Cloudbreak - cloudbreak cluster termination",
+                getFileContent("mail/termination-failure-email"));
+        verify(mailSender, times(1)).send(mimeMessagePreparator);
+
+    }
+
+    @Test
+    public void testSendProvisioningFailureEmail() throws IOException {
+        //GIVEN
+        String contenct = getFileContent("mail/provisioning-failure-email");
+        when(emailMimeMessagePreparator.prepareMessage(cbUser, "Cloudbreak - cloudbreak cluster installation", contenct)).thenReturn(mimeMessagePreparator);
+        //WHEN
+        emailSenderService.sendProvisioningFailureEmail("xxx");
+        //THEN
+        verify(emailMimeMessagePreparator, times(1)).prepareMessage(cbUser, "Cloudbreak - cloudbreak cluster installation",
+                getFileContent("mail/provisioning-failure-email"));
+        verify(mailSender, times(1)).send(mimeMessagePreparator);
+
+    }
+
+    @Test
+    public void testSendProvisioningSuccessEmail() throws IOException {
+        //GIVEN
+        String contenct = getFileContent("mail/provisioning-success-email");
+        when(emailMimeMessagePreparator.prepareMessage(cbUser, "Cloudbreak - cloudbreak cluster installation", contenct)).thenReturn(mimeMessagePreparator);
+        //WHEN
+        emailSenderService.sendProvisioningSuccessEmail("xxx", "123.123.123.123");
+        //THEN
+        verify(emailMimeMessagePreparator, times(1)).prepareMessage(cbUser, "Cloudbreak - cloudbreak cluster installation",
+                getFileContent("mail/provisioning-success-email"));
+        verify(mailSender, times(1)).send(mimeMessagePreparator);
+
     }
 
     Configuration freemarkerConfiguration() throws IOException, TemplateException {
@@ -82,9 +129,8 @@ public class EmailSenderServiceTest {
         return factoryBean.getObject();
     }
 
-    @Test
-    public void test1() {
-        emailSenderService.sendProvisioningSuccessEmail("rdoktorics@hortonworks.com", "123.123.123.123");
+    private String getFileContent(String path) throws IOException {
+        return CharStreams.toString(new InputStreamReader(new ClassPathResource(path).getInputStream()));
     }
 
 }
