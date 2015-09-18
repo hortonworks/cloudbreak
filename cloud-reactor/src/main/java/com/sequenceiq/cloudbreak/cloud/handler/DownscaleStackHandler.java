@@ -53,7 +53,7 @@ public class DownscaleStackHandler implements CloudPlatformEventHandler<Downscal
             List<CloudResourceStatus> resourceStatus = connector.resources()
                     .downscale(ac, request.getCloudStack(), request.getCloudResources(), request.getInstances());
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
-            PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources);
+            PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources, true);
             ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatus);
             if (!task.completed(statePollerResult)) {
                 statePollerResult = syncPollingScheduler.schedule(task);

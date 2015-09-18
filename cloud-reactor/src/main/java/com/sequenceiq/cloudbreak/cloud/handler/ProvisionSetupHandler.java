@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
-import java.util.Map;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -41,8 +39,8 @@ public class ProvisionSetupHandler implements CloudPlatformEventHandler<SetupReq
             CloudConnector connector = cloudPlatformConnectors.get(platform);
             AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             CloudStack cloudStack = request.getCloudStack();
-            Map<String, Object> provisionSetupResult = connector.setup().execute(auth, cloudStack);
-            request.getResult().onNext(new SetupResult(request, provisionSetupResult));
+            connector.setup().execute(auth, cloudStack);
+            request.getResult().onNext(new SetupResult(request));
             LOGGER.info("Provision setup finished for {}", cloudContext);
         } catch (Exception e) {
             request.getResult().onNext(new SetupResult(e, request));

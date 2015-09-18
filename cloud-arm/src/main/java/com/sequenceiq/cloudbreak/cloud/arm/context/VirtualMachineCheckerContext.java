@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.arm.poller.context;
+package com.sequenceiq.cloudbreak.cloud.arm.context;
 
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
 

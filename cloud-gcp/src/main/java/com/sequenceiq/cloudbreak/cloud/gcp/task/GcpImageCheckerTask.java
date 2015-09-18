@@ -6,10 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.api.services.compute.Compute;
-import com.sequenceiq.cloudbreak.cloud.BooleanStateConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 
-public class GcpImageCheckerTask implements BooleanStateConnector {
+public class GcpImageCheckerTask extends PollBooleanStateTask {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpImageCheckerTask.class);
     private static final String READY = "READY";
@@ -17,14 +17,15 @@ public class GcpImageCheckerTask implements BooleanStateConnector {
     private String name;
     private Compute compute;
 
-    public GcpImageCheckerTask(String projectId, String name, Compute compute) {
+    public GcpImageCheckerTask(AuthenticatedContext ac, String projectId, String name, Compute compute) {
+        super(ac, true);
         this.projectId = projectId;
         this.name = name;
         this.compute = compute;
     }
 
     @Override
-    public Boolean check(AuthenticatedContext authenticatedContext) {
+    public Boolean call() {
         LOGGER.info("Checking status of Gcp image '{}' copy", name);
         try {
             Compute.Images.Get getImages = compute.images().get(projectId, name);

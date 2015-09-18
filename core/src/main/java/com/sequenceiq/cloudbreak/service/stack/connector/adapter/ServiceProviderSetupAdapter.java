@@ -7,8 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.event.setup.PreProvisionCheckRequest;
-import com.sequenceiq.cloudbreak.cloud.event.setup.PreProvisionCheckResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -44,23 +42,8 @@ public class ServiceProviderSetupAdapter implements ProvisionSetup {
 
     @Override
     public String preProvisionCheck(Stack stack) {
-        CloudContext cloudContext = new CloudContext(stack);
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-        CloudStack cloudStack = cloudStackConverter.convert(stack);
-        PreProvisionCheckRequest<PreProvisionCheckResult> preProvisionCheckRequest = new PreProvisionCheckRequest<>(cloudContext, cloudCredential, cloudStack);
-        LOGGER.info("Triggering event: {}", preProvisionCheckRequest);
-        eventBus.notify(preProvisionCheckRequest.selector(), Event.wrap(preProvisionCheckRequest));
-        try {
-            PreProvisionCheckResult res = preProvisionCheckRequest.await();
-            LOGGER.info("Result: {}", res);
-            if (res.getErrorDetails() != null) {
-                return res.getErrorDetails().getMessage();
-            }
-            return res.getStatusReason();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while executing pre-provision check", e);
-            return e.getMessage();
-        }
+        //There is no pre-provision check in SPI
+        return null;
     }
 
     @Override
@@ -79,7 +62,7 @@ public class ServiceProviderSetupAdapter implements ProvisionSetup {
                 LOGGER.error("Failed to setup provisioning", res.getErrorDetails());
                 throw new OperationException(res.getErrorDetails());
             }
-            return new ProvisionSetupComplete(cloudPlatform, stack.getId()).withSetupProperties(res.getSetupProperties());
+            return new ProvisionSetupComplete(cloudPlatform, stack.getId());
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing provisioning setup", e);
             throw new OperationException(e);

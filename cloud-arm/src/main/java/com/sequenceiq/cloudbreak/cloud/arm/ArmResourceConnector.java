@@ -15,16 +15,15 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
-import com.sequenceiq.cloudbreak.cloud.arm.poller.ArmNetworkInterfaceDeleteStatusCheckerTask;
-import com.sequenceiq.cloudbreak.cloud.arm.poller.ArmResourceGroupDeleteStatusCheckerTask;
-import com.sequenceiq.cloudbreak.cloud.arm.poller.ArmVirtualMachineDeleteStatusCheckerTask;
-import com.sequenceiq.cloudbreak.cloud.arm.poller.ArmVirtualMachineStatusCheckerTask;
-import com.sequenceiq.cloudbreak.cloud.arm.poller.context.NetworkInterfaceCheckerContext;
-import com.sequenceiq.cloudbreak.cloud.arm.poller.context.ResourceGroupCheckerContext;
-import com.sequenceiq.cloudbreak.cloud.arm.poller.context.VirtualMachineCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.arm.context.NetworkInterfaceCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.arm.context.ResourceGroupCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.arm.context.VirtualMachineCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.arm.task.ArmNetworkInterfaceDeleteStatusCheckerTask;
+import com.sequenceiq.cloudbreak.cloud.arm.task.ArmResourceGroupDeleteStatusCheckerTask;
+import com.sequenceiq.cloudbreak.cloud.arm.task.ArmVirtualMachineDeleteStatusCheckerTask;
+import com.sequenceiq.cloudbreak.cloud.arm.task.ArmVirtualMachineStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.event.instance.BooleanResult;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -35,8 +34,6 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
-import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
-import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 
 import groovyx.net.http.HttpResponseException;
@@ -53,9 +50,7 @@ public class ArmResourceConnector implements ResourceConnector {
     @Inject
     private ArmTemplateUtils armTemplateUtils;
     @Inject
-    private SyncPollingScheduler<BooleanResult> syncPollingScheduler;
-    @Inject
-    private PollTaskFactory statusCheckFactory;
+    private SyncPollingScheduler<Boolean> syncPollingScheduler;
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier) {
@@ -124,10 +119,9 @@ public class ArmResourceConnector implements ResourceConnector {
         for (CloudResource resource : resources) {
             try {
                 azureRMClient.deleteResourceGroup(resource.getName());
-                PollTask<BooleanResult> task = statusCheckFactory.newPollBooleanTerminationTask(authenticatedContext,
-                        new ArmResourceGroupDeleteStatusCheckerTask(armClient, new ResourceGroupCheckerContext(
-                                new ArmCredentialView(authenticatedContext.getCloudCredential()), resource.getName())));
-                BooleanResult statePollerResult = task.call();
+                PollTask<Boolean> task = new ArmResourceGroupDeleteStatusCheckerTask(authenticatedContext, armClient, new ResourceGroupCheckerContext(
+                        new ArmCredentialView(authenticatedContext.getCloudCredential()), resource.getName()));
+                Boolean statePollerResult = task.call();
                 if (!task.completed(statePollerResult)) {
                     syncPollingScheduler.schedule(task);
                 }
@@ -241,14 +235,12 @@ public class ArmResourceConnector implements ResourceConnector {
         for (String networkInterfacesName : networkInterfacesNames) {
             try {
                 client.deleteNetworkInterface(stackName, networkInterfacesName);
-                BooleanResult statePollerResult = ResourcesStatePollerResults.transformToFalseBooleanResult(authenticatedContext.getCloudContext());
-                PollTask<BooleanResult> task = statusCheckFactory.newPollBooleanStateTask(authenticatedContext,
-                        new ArmNetworkInterfaceDeleteStatusCheckerTask(armClient,
-                                new NetworkInterfaceCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()),
-                                        stackName, networkInterfacesName)));
-                if (!task.completed(statePollerResult)) {
-                    syncPollingScheduler.schedule(task);
-                }
+                PollTask<Boolean> task = new ArmNetworkInterfaceDeleteStatusCheckerTask(authenticatedContext, armClient,
+                        new NetworkInterfaceCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()),
+                                stackName, networkInterfacesName));
+
+                syncPollingScheduler.schedule(task);
+
             } catch (HttpResponseException e) {
                 if (e.getStatusCode() != NOT_FOUND) {
                     throw new CloudConnectorException(e.getResponse().getData().toString(), e);
@@ -263,14 +255,11 @@ public class ArmResourceConnector implements ResourceConnector {
             throws CloudConnectorException {
         try {
             client.deleteVirtualMachine(stackName, privateInstanceId);
-            BooleanResult statePollerResult = ResourcesStatePollerResults.transformToFalseBooleanResult(authenticatedContext.getCloudContext());
-            PollTask<BooleanResult> task = statusCheckFactory.newPollBooleanStateTask(authenticatedContext,
-                    new ArmVirtualMachineDeleteStatusCheckerTask(armClient,
-                            new VirtualMachineCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()),
-                                    stackName, privateInstanceId)));
-            if (!task.completed(statePollerResult)) {
-                syncPollingScheduler.schedule(task);
-            }
+            PollTask<Boolean> task = new ArmVirtualMachineDeleteStatusCheckerTask(authenticatedContext, armClient,
+                    new VirtualMachineCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()),
+                            stackName, privateInstanceId));
+            syncPollingScheduler.schedule(task);
+
         } catch (HttpResponseException e) {
             if (e.getStatusCode() != NOT_FOUND) {
                 throw new CloudConnectorException(e.getResponse().getData().toString(), e);
@@ -284,14 +273,11 @@ public class ArmResourceConnector implements ResourceConnector {
             throws CloudConnectorException {
         try {
             client.deallocateVirtualMachine(stackName, privateInstanceId);
-            BooleanResult statePollerResult = ResourcesStatePollerResults.transformToFalseBooleanResult(authenticatedContext.getCloudContext());
-            PollTask<BooleanResult> task = statusCheckFactory.newPollBooleanStateTask(authenticatedContext,
-                    new ArmVirtualMachineStatusCheckerTask(armClient,
-                            new VirtualMachineCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()),
-                                    stackName, privateInstanceId, "Succeeded")));
-            if (!task.completed(statePollerResult)) {
-                syncPollingScheduler.schedule(task);
-            }
+            PollTask<Boolean> task = new ArmVirtualMachineStatusCheckerTask(authenticatedContext, armClient,
+                    new VirtualMachineCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()),
+                            stackName, privateInstanceId, "Succeeded"));
+            syncPollingScheduler.schedule(task);
+
         } catch (HttpResponseException e) {
             if (e.getStatusCode() != NOT_FOUND) {
                 throw new CloudConnectorException(e.getResponse().getData().toString(), e);

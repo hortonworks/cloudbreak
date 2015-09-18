@@ -1,25 +1,27 @@
-package com.sequenceiq.cloudbreak.cloud.arm.poller;
+package com.sequenceiq.cloudbreak.cloud.arm.task;
 
 import java.util.Map;
 
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
-import com.sequenceiq.cloudbreak.cloud.BooleanStateConnector;
 import com.sequenceiq.cloudbreak.cloud.arm.ArmClient;
-import com.sequenceiq.cloudbreak.cloud.arm.poller.context.VirtualMachineCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.arm.context.VirtualMachineCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 
-public class ArmVirtualMachineStatusCheckerTask implements BooleanStateConnector {
+public class ArmVirtualMachineStatusCheckerTask extends PollBooleanStateTask {
 
     private VirtualMachineCheckerContext virtualMachineCheckerContext;
     private ArmClient armClient;
 
-    public ArmVirtualMachineStatusCheckerTask(ArmClient armClient, VirtualMachineCheckerContext virtualMachineCheckerContext) {
+    public ArmVirtualMachineStatusCheckerTask(AuthenticatedContext authenticatedContext, ArmClient armClient, VirtualMachineCheckerContext
+            virtualMachineCheckerContext) {
+        super(authenticatedContext, true);
         this.armClient = armClient;
         this.virtualMachineCheckerContext = virtualMachineCheckerContext;
     }
 
     @Override
-    public Boolean check(AuthenticatedContext authenticatedContext) {
+    public Boolean call() {
         AzureRMClient client = armClient.createAccess(virtualMachineCheckerContext.getArmCredentialView());
         try {
             Map virtualMachine = client.getVirtualMachine(virtualMachineCheckerContext.getGroupName(), virtualMachineCheckerContext.getVirtualMachine());
