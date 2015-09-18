@@ -238,21 +238,47 @@ cloudbreak-generate-cert() {
     fi
 }
 
-generate_uaa_config() {
-    cloudbreak-config
+generate_uaa_check_diff() {
+    local verbose="$1"
 
     if [ -f uaa.yml ]; then
 
         generate_uaa_config_force /tmp/uaa-delme.yml
         if diff /tmp/uaa-delme.yml uaa.yml &> /dev/null; then
             debug "uaa.yml exists and generate wouldn't change it"
+            return 0
         else
-            warn "uaa.yml already exists, BUT generate would create a MODIFIED one."
-            warn "if you want to regenerate, remove it first:"
+            warn "uaa.yml already exists, BUT generate would create a DIFFERENT one."
+            warn "please regenerate it:"
             echo "  cbd regenerate" | blue
+            if [[ "$verbose" ]]; then
             warn "expected change:"
+                diff /tmp/uaa-delme.yml uaa.yml || true
+            else
+                debug "expected change:"
+                (diff /tmp/uaa-delme.yml uaa.yml || true) | debug-cat
+            fi
+            return 1
 
-            (diff /tmp/uaa-delme.yml uaa.yml || true) | cyan
+        fi
+    else
+        info "generating uaa.yml"
+        generate_uaa_config_force uaa.yml
+    fi
+    return 0
+
+}
+
+generate_uaa_config() {
+    cloudbreak-config
+
+    if [ -f uaa.yml ]; then
+        if ! generate_uaa_check_diff; then
+            if [[ "$CBD_FORCE_START" ]]; then
+                warn "You have forced to start ..."
+            else
+                exit 1
+            fi
         fi
     else
         info "generating uaa.yml"

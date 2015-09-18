@@ -19,6 +19,10 @@
 
 ### Changed
 
+- `cbd generate` is less verbose, diff doesnt shown
+- `cbd doctor` shows diff if generate would change
+- `cbd regenerate` creates backup files if changes detected
+
 ## [v1.0.3] - 2015-09-03
 
 ### Fixed

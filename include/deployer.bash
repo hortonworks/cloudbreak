@@ -4,6 +4,14 @@ debug() {
   fi
 }
 
+debug-cat() {
+  if [[ "$DEBUG" ]]; then
+      gray 1>&2
+  else
+      cat &> /dev/null
+  fi
+}
+
 info() {
     echo "$*" | green 1>&2
 }
@@ -164,7 +172,7 @@ doctor() {
     fi
 
     docker-check-version
-    deployer-generate
+    compose-generate-check-diff verbose
 }
 
 cbd-find-root() {
@@ -174,11 +182,7 @@ cbd-find-root() {
 deployer-delete() {
     declare desc="Deletes yaml files, and all dbs"
     cloudbreak-delete-dbs
-    deployer-delete-yamls
-}
-
-deployer-delete-yamls() {
-    rm -f uaa.yml docker-compose.yml
+    rm -f *.yml
 }
 
 deployer-generate() {
@@ -190,11 +194,21 @@ deployer-generate() {
 }
 
 deployer-regenerate() {
-    declare desc="Deletes and generates docker-compose.yml and uaa.yml"
+    declare desc="Backups and generates new docker-compose.yml and uaa.yml"
 
-    deployer-delete-yamls
+    : ${datetime:=$(date +%Y%m%d-%H%M%S)}
     cloudbreak-generate-cert
+
+    if ! compose-generate-check-diff; then
+        info renaming: docker-compose.yml to: docker-compose-${datetime}.yml
+        mv docker-compose.yml docker-compose-${datetime}.yml
+    fi
     compose-generate-yaml
+    
+    if ! generate_uaa_check_diff; then
+        info renaming: uaa.yml to: uaa-${datetime}.uml
+        mv uaa.yml uaa-${datetime}.uml
+    fi
     generate_uaa_config
 }
 

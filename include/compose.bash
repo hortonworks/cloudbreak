@@ -111,22 +111,45 @@ compose-logs() {
     dockerCompose logs "$@"
 }
 
+compose-generate-check-diff() {
+    cloudbreak-config
+    local verbose="$1"
+
+    if [ -f docker-compose.yml ]; then
+         compose-generate-yaml-force /tmp/docker-compose-delme.yml
+         if diff /tmp/docker-compose-delme.yml docker-compose.yml &>/dev/null; then
+             debug "docker-compose.yml already exist, and generate wouldn't change it."
+             return 0
+        else
+            warn "docker-compose.yml already exists, BUT generate would create a DIFFERENT one!"
+            warn "please regenerate it:"
+            echo "  cbd regenerate" | blue
+            if [[ "$verbose" ]]; then
+                warn "expected change:"
+                diff /tmp/docker-compose-delme.yml docker-compose.yml || true
+            else
+                debug "expected change:"
+                (diff /tmp/docker-compose-delme.yml docker-compose.yml || true) | debug-cat
+            fi
+            return 1
+         fi
+    fi
+    return 0
+}
+
 compose-generate-yaml() {
     declare desc="Generating docker-compose.yml based on Profile settings"
 
     cloudbreak-config
 
     if [ -f docker-compose.yml ]; then
-         compose-generate-yaml-force /tmp/docker-compose-delme.yml
-         if diff /tmp/docker-compose-delme.yml docker-compose.yml &>/dev/null; then
-             debug "docker-compose.yml already exist, and generate wouldn't change it."
-        else
-            warn "docker-compose.yml already exists, BUT generate would create a DIFFERENT one!"
-            warn "if you want to regenerate, remove it first:"
-            echo "  cbd regenerate" | blue
-            warn "expected change:"
-            (diff /tmp/docker-compose-delme.yml docker-compose.yml || true) | cyan
-         fi
+        if ! compose-generate-check-diff; then
+            if [[ "$CBD_FORCE_START" ]]; then
+                warn "You have forced to start ..."
+            else
+                exit 1
+            fi
+        fi
     else
         info "generating docker-compose.yml"
         compose-generate-yaml-force docker-compose.yml
