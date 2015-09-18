@@ -14,6 +14,7 @@
 - Using docker linking system in third party services instead of ambassador
 - Integration tests are added, where cbd binary is called, not only sourced functions
 - Docker based CentOS integration test make target added
+- Uaa db migration
 
 ### Removed
 

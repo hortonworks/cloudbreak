@@ -235,6 +235,8 @@ start-and-migrate-cmd() {
 
     create-logfile
     compose-up $services
+    migrate-one-db uaadb up
+    migrate-one-db uaadb pending
 
     info "CloudBreak containers are started ..."
     info "In a couple of minutes you can reach the UI (called Uluwatu)"
