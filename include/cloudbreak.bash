@@ -64,11 +64,14 @@ consul-recursors() {
 }
 
 cloudbreak-conf-consul() {
+    [[ "$cloudbreak-conf-consul-executed" ]] && return
+    
     env-import DOCKER_CONSUL_OPTIONS ""
     if ! [[ $DOCKER_CONSUL_OPTIONS =~ .*recursor.* ]]; then
         DOCKER_CONSUL_OPTIONS="$DOCKER_CONSUL_OPTIONS $(consul-recursors <(docker run -it --rm --net=host alpine cat /etc/resolv.conf) $(bridge-ip) $(docker-ip))"
     fi
     debug "DOCKER_CONSUL_OPTIONS=$DOCKER_CONSUL_OPTIONS"
+    cloudbreak-conf-consul-executed=1
 }
 
 cloudbreak-conf-images() {
@@ -252,7 +255,7 @@ generate_uaa_check_diff() {
             warn "please regenerate it:"
             echo "  cbd regenerate" | blue
             if [[ "$verbose" ]]; then
-            warn "expected change:"
+                warn "expected change:"
                 diff /tmp/uaa-delme.yml uaa.yml || true
             else
                 debug "expected change:"
