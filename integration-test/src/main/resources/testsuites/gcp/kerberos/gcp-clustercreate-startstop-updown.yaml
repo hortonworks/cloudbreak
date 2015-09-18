@@ -77,7 +77,7 @@ tests:
   - name: upscale
     parameters: {
       instanceGroup: slave_1,
-      scalingAdjustment: 1
+      scalingAdjustment: 2
     }
     classes:
       - com.sequenceiq.it.cloudbreak.ScalingTest
