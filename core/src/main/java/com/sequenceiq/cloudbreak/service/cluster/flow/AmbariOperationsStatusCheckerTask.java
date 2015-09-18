@@ -58,4 +58,9 @@ public class AmbariOperationsStatusCheckerTask extends StackBasedStatusCheckerTa
         return String.format("Requested Ambari operations completed: %s", t.getRequests().toString());
     }
 
+    @Override
+    public void handleException(Exception e) {
+        LOGGER.error("Ambari operation failed.", e);
+    }
+
 }

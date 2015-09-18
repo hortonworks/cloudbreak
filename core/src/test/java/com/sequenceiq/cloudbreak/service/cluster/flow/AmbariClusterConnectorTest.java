@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
+import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 
 import groovyx.net.http.HttpResponseException;
@@ -100,6 +101,9 @@ public class AmbariClusterConnectorTest {
 
     @Mock
     private HostGroup hostGroup;
+
+    @Mock
+    private CloudbreakMessagesService messagesService;
 
     @InjectMocks
     @Spy

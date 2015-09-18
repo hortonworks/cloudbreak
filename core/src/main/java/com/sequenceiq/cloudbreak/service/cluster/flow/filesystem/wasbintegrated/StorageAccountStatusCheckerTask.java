@@ -44,7 +44,7 @@ public class StorageAccountStatusCheckerTask implements StatusCheckerTask<Storag
     }
 
     @Override
-    public boolean handleException(Exception e) {
+    public void handleException(Exception e) {
         throw new FileSystemConfigException("Exception occurred while creating Azure storage account for the WASB filesystem.", e);
     }
 }
