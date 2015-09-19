@@ -12,6 +12,7 @@
 - Command `cbd start` will execute the migration by default. If SKIP_DB_MIGRATION_ON_START envvar set to true in Profile, the migration will be skipped
 - Using Dns SRV record in our services instead of ambassador
 - Using docker linking system in third party services instead of ambassador
+- Integration tests are added, where cbd binary is called, not only sourced functions
 
 ### Removed
 

@@ -41,6 +41,9 @@ deps:
 tests:
 	basht include/*.bash test/*.bash
 
+integration-tests:
+	basht include/*.bash integration-test/*.bash
+
 install-test:
 	docker rmi cbd:delme 2>/dev/null || true
 	docker build -f Dockerfile.installtest -t cbd:delme . 
