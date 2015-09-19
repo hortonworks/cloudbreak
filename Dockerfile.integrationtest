@@ -1,0 +1,8 @@
+FROM centos
+
+RUN yum install -y\
+    sudo \
+    make \
+    && curl -L https://github.com/progrium/basht/releases/download/v0.1.0/basht_0.1.0_Linux_x86_64.tgz | tar -xz -C /usr/bin/
+
+
