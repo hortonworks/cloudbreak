@@ -111,7 +111,7 @@ init-profile() {
             else
                 echo "boot2docker isn't running, please start it, with the following 2 commands:" | red
                 echo "boot2docker start" | blue
-                echo '$(boot2docker shellinit)' | blue
+                echo ' eval "$(boot2docker shellinit)"' | blue
             fi
         else
             # this is for linux
