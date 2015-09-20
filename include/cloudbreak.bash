@@ -64,14 +64,14 @@ consul-recursors() {
 }
 
 cloudbreak-conf-consul() {
-    [[ "$cloudbreak-conf-consul-executed" ]] && return
+    [[ "$cloudbreakConfConsulExecuted" ]] && return
     
     env-import DOCKER_CONSUL_OPTIONS ""
     if ! [[ $DOCKER_CONSUL_OPTIONS =~ .*recursor.* ]]; then
         DOCKER_CONSUL_OPTIONS="$DOCKER_CONSUL_OPTIONS $(consul-recursors <(docker run -it --rm --net=host alpine cat /etc/resolv.conf) $(bridge-ip) $(docker-ip))"
     fi
     debug "DOCKER_CONSUL_OPTIONS=$DOCKER_CONSUL_OPTIONS"
-    cloudbreak-conf-consul-executed=1
+    cloudbreakConfConsulExecuted=1
 }
 
 cloudbreak-conf-images() {
