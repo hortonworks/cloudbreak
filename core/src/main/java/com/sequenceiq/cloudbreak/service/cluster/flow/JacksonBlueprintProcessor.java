@@ -23,7 +23,7 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
     private static final String HOST_GROUPS_NODE = "host_groups";
 
     @Override
-    public String addConfigEntries(String originalBlueprint, List<BlueprintConfigurationEntry> configurationEntries) {
+    public String addConfigEntries(String originalBlueprint, List<BlueprintConfigurationEntry> configurationEntries, boolean override) {
         ObjectMapper mapper = new ObjectMapper();
         try {
             ObjectNode root = (ObjectNode) mapper.readTree(originalBlueprint);
@@ -34,16 +34,17 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
             ArrayNode configurationsArrayNode = (ArrayNode) configurationsNode;
             for (BlueprintConfigurationEntry configurationEntry : configurationEntries) {
                 JsonNode configFileNode = configurationsArrayNode.findPath(configurationEntry.getConfigFile());
-                if (configFileNode.isMissingNode()) {
-                    ObjectNode arrayElementNode = configurationsArrayNode.addObject();
-                    configFileNode = arrayElementNode.putObject(configurationEntry.getConfigFile());
-
-                }
-                JsonNode propertiesNode = configFileNode.path("properties");
-                if (!propertiesNode.isMissingNode()) {
-                    ((ObjectNode) propertiesNode).put(configurationEntry.getKey(), configurationEntry.getValue());
-                } else {
-                    ((ObjectNode) configFileNode).put(configurationEntry.getKey(), configurationEntry.getValue());
+                if (override || configFileNode.path("properties").findPath(configurationEntry.getKey()).isMissingNode()) {
+                    if (configFileNode.isMissingNode()) {
+                        ObjectNode arrayElementNode = configurationsArrayNode.addObject();
+                        configFileNode = arrayElementNode.putObject(configurationEntry.getConfigFile());
+                    }
+                    JsonNode propertiesNode = configFileNode.path("properties");
+                    if (!propertiesNode.isMissingNode()) {
+                        ((ObjectNode) propertiesNode).put(configurationEntry.getKey(), configurationEntry.getValue());
+                    } else {
+                        ((ObjectNode) configFileNode).put(configurationEntry.getKey(), configurationEntry.getValue());
+                    }
                 }
             }
             return mapper.writeValueAsString(root);
@@ -56,7 +57,7 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
     public String addDefaultFs(String originalBlueprint, String defaultFs) {
         List<BlueprintConfigurationEntry> configurationEntries = new ArrayList<>();
         configurationEntries.add(new BlueprintConfigurationEntry(CORE_SITE_NODE, DEFAULT_FS_KEY, defaultFs));
-        return addConfigEntries(originalBlueprint, configurationEntries);
+        return addConfigEntries(originalBlueprint, configurationEntries, true);
     }
 
     @Override
