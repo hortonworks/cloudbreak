@@ -146,6 +146,7 @@ public class SimpleCredentialService implements CredentialService {
                 LOGGER.error("Error during deleting cloud provider credential. Archiving local credential.", e);
                 notificationSender.send(getCredentialNotification(credential, Status.DELETE_FAILED.name(),
                         "Error during deleting cloud provider credential. Please delete the cloud provider credential manually."));
+            } finally {
                 archiveCredential(credential);
             }
         } else {
