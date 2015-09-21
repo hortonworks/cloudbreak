@@ -732,9 +732,10 @@ The command first creates the namespace account and the scaleout storage account
 #### Configuring DASH from Cloudbreak
 
 When an Azure credential is selected in Cloudbreak the default filesystem is set to "WASB with DASH”. The *Account Name* and *Account Key* displayed by cbd must be copied to the corresponding fields.
-*Important:* For better performance DASH service and the Cloudbreak cluster must be in the same Azure region.
 
-<screenshot>
+**Important:** For better performance DASH service and the Cloudbreak cluster must be in the same Azure region.
+
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/dashui.png)
 
 The WASB filesystem configured with DASH can be used as a data lake - when multiple clusters are deployed with the same DASH filesystem configuration the same data can be accessed from all the clusters, but every cluster can have a different service configured as well. In that case deploy as many DASH services with cbd as clusters with Cloudbreak and configure them accordingly.
 
