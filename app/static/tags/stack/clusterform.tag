@@ -130,6 +130,73 @@
                             </select>
                         </div>
                     </div>
+
+                    <!--Filesystem definition if azure or google-->
+
+                    <div class="form-group" ng-show="activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'AZURE_RM' || activeCredential.cloudPlatform == 'GCP'">
+                        <label class="col-sm-3 control-label" for="selectFileSystem">{{msg.filesystem_label}}</label>
+                        <div class="col-sm-9">
+                            <select class="form-control" id="selectFileSystem" ng-model="cluster.fileSystem.type" ng-change="selectedFileSystemChange()">
+                                <option value="LOCAL">{{msg.filesystem_local_label}}</option>
+                                <option value="DASH" ng-if="activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'AZURE_RM'">{{msg.filesystem_dash_label}}</option>
+                                <!--<option value="GCS" ng-if="activeCredential.cloudPlatform == 'GCP'">{{msg.filesystem_gcs_label}}</option>-->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!--Azure required properties-->
+                    <div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'AZURE_RM') && cluster.fileSystem.type == 'DASH'">
+                        <label class="col-sm-3 control-label" for="armaccountname">{{msg.filesystem_azure_account_name_label}}</label>
+                        <div class="col-sm-9">
+                            <input class="form-control" type="text" id="armaccountname" ng-model="cluster.fileSystem.properties.accountName">
+                        </div>
+                    </div>
+                    <div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'AZURE_RM') && cluster.fileSystem.type == 'DASH'">
+                        <label class="col-sm-3 control-label" for="armaccountkey">{{msg.filesystem_azure_account_key_label}}</label>
+                        <div class="col-sm-9">
+                            <input class="form-control" type="text" id="armaccountkey" ng-model="cluster.fileSystem.properties.accountKey">
+                        </div>
+                    </div>
+
+                    <!--Gcp required properties-->
+
+                    <div class="form-group" ng-show="(activeCredential.cloudPlatform == 'GCP') && cluster.fileSystem.type == 'GCS'">
+                        <label class="col-sm-3 control-label" for="projectId">{{msg.credential_gcp_form_project_id_label}}</label>
+                        <div class="col-sm-9">
+                            <input class="form-control" type="text" id="projectId" disabled ng-model="cluster.fileSystem.properties.projectId">
+                        </div>
+                    </div>
+
+
+                    <div class="form-group" ng-show="(activeCredential.cloudPlatform == 'GCP') && cluster.fileSystem.type == 'GCS'">
+                        <label class="col-sm-3 control-label" for="serviceAccountEmail">{{msg.credential_gcp_form_service_account_label}}</label>
+                        <div class="col-sm-9">
+                            <input class="form-control" type="text" id="serviceAccountEmail" disabled ng-model="cluster.fileSystem.properties.serviceAccountEmail">
+                        </div>
+                    </div>
+
+                    <div class="form-group" ng-show="(activeCredential.cloudPlatform == 'GCP') && cluster.fileSystem.type == 'GCS'">
+                        <label class="col-sm-3 control-label" for="privateKeyEncoded">{{msg.credential_gcp_form_p12_label}}</label>
+                        <div class="col-sm-9">
+                            <input class="form-control" type="text" id="privateKeyEncoded" disabled ng-model="cluster.fileSystem.properties.privateKeyEncoded">
+                        </div>
+                    </div>
+
+
+                    <div class="form-group" ng-show="(activeCredential.cloudPlatform == 'GCP') && cluster.fileSystem.type == 'GCS'">
+                        <label class="col-sm-3 control-label" for="defaultBucketName">{{msg.filesystem_gcs_bucket_label}}</label>
+                        <div class="col-sm-9">
+                            <input class="form-control" type="text" id="defaultBucketName" ng-model="cluster.fileSystem.properties.defaultBucketName">
+                        </div>
+                    </div>
+
+                    <div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'AZURE_RM' || activeCredential.cloudPlatform == 'GCP') && cluster.fileSystem.type != 'LOCAL'">
+                        <label class="col-sm-3 control-label" for="asdefaultfs">{{msg.filesystem_default_fs}}</label>
+                        <div class="col-sm-9">
+                            <input type="checkbox" id="asdefaultfs" ng-model="cluster.fileSystem.defaultFs" name="asdefaultfs">
+                        </div>
+                    </div>
+
                     <div class="form-group" ng-show="cluster.instanceGroups">
                       <label class="col-sm-3 control-label" for="hostgroupconfig">{{msg.cluster_form_hostgroup_label}}</label>
                       <div class="col-sm-8 col-sm-offset-1">
