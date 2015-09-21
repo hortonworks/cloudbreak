@@ -1,16 +1,5 @@
 package com.sequenceiq.it.cloudbreak;
 
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
-import com.sequenceiq.it.IntegrationTestContext;
-import org.springframework.beans.factory.annotation.Value;
-import org.testng.Assert;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +14,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.testng.Assert;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.it.IntegrationTestContext;
+
 public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
 
     @Value("${integrationtest.defaultPrivateKeyFile}")
@@ -33,7 +34,7 @@ public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
     @Test
     @Parameters({ "searchRecipesOnHosts", "lookingFor", "require" })
     public void testFetchRecipeResult(String searchRecipesOnHosts, String lookingFor, Integer require) throws Exception {
-        Assert.assertTrue(new File(defaultPrivateKeyFile).exists());
+        Assert.assertEquals(new File(defaultPrivateKeyFile).exists(), true, "Private cert file not found: " + defaultPrivateKeyFile);
         Assert.assertFalse(lookingFor.isEmpty());
 
         CloudbreakClient client = getClient();
