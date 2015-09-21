@@ -35,6 +35,7 @@ public class ArmSetup implements Setup {
     public static final String IMAGES = "images";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArmSetup.class);
+    private static final String LOCALLY_REDUNDANT_STORAGE = "Standard_LRS";
 
     @Inject
     private ArmClient armClient;
@@ -54,7 +55,7 @@ public class ArmSetup implements Setup {
                 client.createResourceGroup(storageGroup, CloudRegion.valueOf(stack.getRegion()).value());
             }
             if (!storageAccountExist(client, osStorageName)) {
-                client.createStorageAccount(storageGroup, osStorageName, CloudRegion.valueOf(stack.getRegion()).value());
+                client.createStorageAccount(storageGroup, osStorageName, CloudRegion.valueOf(stack.getRegion()).value(), LOCALLY_REDUNDANT_STORAGE);
                 PollTask<Boolean> task = new ArmStorageStatusCheckerTask(authenticatedContext, armClient,
                         new StorageCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()), storageGroup, osStorageName));
                 syncPollingScheduler.schedule(task);
