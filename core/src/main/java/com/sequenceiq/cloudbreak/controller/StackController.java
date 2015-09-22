@@ -175,7 +175,7 @@ public class StackController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
-            validateAccountPreferences(id, scalingAdjustment, user.getAccount(), user.getUserId());
+            validateAccountPreferences(id, scalingAdjustment);
             stackService.updateNodeCount(id, updateRequest.getInstanceGroupAdjustment());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -236,9 +236,9 @@ public class StackController {
         }
     }
 
-    private void validateAccountPreferences(Long stackId, Integer scalingAdjustment, String account, String owner) {
+    private void validateAccountPreferences(Long stackId, Integer scalingAdjustment) {
         try {
-            accountPreferencesValidator.validate(stackId, scalingAdjustment, account, owner);
+            accountPreferencesValidator.validate(stackId, scalingAdjustment);
         } catch (AccountPreferencesValidationFailed e) {
             throw new BadRequestException(e.getMessage(), e);
         }
