@@ -7,4 +7,7 @@ EXPOSE 3001
 ADD . /sultans
 CMD rm -rf /sultans/.git
 RUN cd /sultans && npm install
+RUN cp -R /sultans/schema /
+
+
 CMD ["/sultans/start-docker.sh"]
