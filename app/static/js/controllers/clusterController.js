@@ -200,6 +200,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 result.blueprintId = parseFloat(result.blueprintId);
 
                 var existingCluster = $filter('filter')($rootScope.clusters, {id: result.id}, true)[0];
+                if (result !== undefined && result.id !== undefined) {
+                    GlobalStack.get({ id: result.id }, function(success) {
+                        result.platformVariant = success.platformVariant;
+                    });
+                }
                 if (existingCluster != undefined) {
                     existingCluster = result;
                 } else {

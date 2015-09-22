@@ -82,6 +82,12 @@
                         <input class="form-control" type="number" id="consulServerCount" ng-model="cluster.consulServerCount">
                       </div>
                     </div>
+                    <div class="form-group" ng-show="showAdvancedOptionForm">
+                      <label class="col-sm-3 control-label" for="platformVariant">{{msg.cluster_form_platform_variant_label}}</label>
+                      <div class="col-sm-3">
+                        <input class="form-control" type="text" id="platformVariant" ng-model="cluster.platformVariant">
+                      </div>
+                    </div>
                     <div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE'">
                       <label class="col-sm-3 control-label" for="diskPerStorageAccount">{{msg.cluster_form_disk_per_storage_label}}</label>
                       <div class="col-sm-3">

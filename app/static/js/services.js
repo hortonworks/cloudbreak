@@ -208,7 +208,8 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         parameters: cluster.parameters,
                         consulServerCount: cluster.consulServerCount,
                         networkId: cluster.networkId,
-                        securityGroupId: cluster.securityGroupId
+                        securityGroupId: cluster.securityGroupId,
+                        platformVariant: cluster.platformVariant
                     }
                     if (cluster.public) {
                         AccountStack.save(stack, function (result) {

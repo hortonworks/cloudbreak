@@ -50,6 +50,12 @@
                                 </div>
                             </div>
                             <div class="form-group">
+                                <label class="col-sm-3 control-label" for="sl_platformVariant">{{msg.active_cluster_variant_label}}</label>
+                                <div class="col-sm-9">
+                                    <p id="sl_platformVariant" class="form-control-static">{{activeCluster.platformVariant}}</p>
+                                </div>
+                            </div>
+                            <div class="form-group">
                                 <label class="col-sm-3 control-label" for="sl_username"></i>{{msg.active_cluster_username_label}}</label>
                                 <div class="col-sm-9">
                                     <p id="sl_username" class="form-control-static">{{activeCluster.cluster.userName}}
