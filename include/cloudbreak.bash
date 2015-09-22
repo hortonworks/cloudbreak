@@ -26,14 +26,14 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_ALPINE 3.1
     env-import DOCKER_TAG_CONSUL 0.5
     env-import DOCKER_TAG_REGISTRATOR v5
-    env-import DOCKER_TAG_POSTGRES 9.4.1
     env-import DOCKER_TAG_CLOUDBREAK 1.1.0-dev.14
     env-import DOCKER_TAG_CBDB 1.0.0
+    env-import DOCKER_TAG_POSTGRES 9.4.1
     env-import DOCKER_TAG_PERISCOPE 0.6.0-dev.4
     env-import DOCKER_TAG_PCDB 0.5.6
     env-import DOCKER_TAG_UAA 1.8.1-v2
-    env-import DOCKER_TAG_ULUWATU 1.0.8
-    env-import DOCKER_TAG_SULTANS 1.0.3
+    env-import DOCKER_TAG_ULUWATU 1.0.17
+    env-import DOCKER_TAG_SULTANS 1.0.4
     env-import DOCKER_TAG_AMBASSADOR 0.5.0
     env-import DOCKER_TAG_CERT_TOOL 0.0.3
     env-import DOCKER_TAG_CLOUDBREAK_SHELL 0.5.1
@@ -320,7 +320,7 @@ oauth:
       id: ${UAA_ULUWATU_ID}
       secret: ${UAA_ULUWATU_SECRET}
       authorized-grant-types: authorization_code,client_credentials
-      scope: cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,cloudbreak.templates,openid,password.write,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,cloudbreak.events,periscope.cluster,cloudbreak.recipes
+      scope: cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,cloudbreak.templates,openid,password.write,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,cloudbreak.events,periscope.cluster,cloudbreak.recipes,cloudbreak.blueprints.read,cloudbreak.templates.read,cloudbreak.credentials.read,cloudbreak.recipes.read,cloudbreak.networks.read,cloudbreak.securitygroups.read,cloudbreak.stacks.read
       authorities: cloudbreak.subscribe
       redirect-uri: ${ULU_OAUTH_REDIRECT_URI}
     ${UAA_CLOUDBREAK_ID}:
@@ -338,14 +338,14 @@ oauth:
     ${UAA_CLOUDBREAK_SHELL_ID}:
       id: ${UAA_CLOUDBREAK_SHELL_ID}
       authorized-grant-types: implicit
-      scope: cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,cloudbreak.recipes,openid,password.write
+      scope: cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,cloudbreak.recipes,openid,password.write,cloudbreak.blueprints.read,cloudbreak.templates.read,cloudbreak.credentials.read,cloudbreak.recipes.read,cloudbreak.networks.read,cloudbreak.securitygroups.read,cloudbreak.stacks.read
       authorities: uaa.none
       redirect-uri: http://cloudbreak.shell
 
 scim:
   username_pattern: '[a-z0-9+\-_.@]+'
   users:
-    - ${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_PW}|${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_FIRSTNAME}|${UAA_DEFAULT_USER_LASTNAME}|openid,cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,sequenceiq.cloudbreak.admin,sequenceiq.cloudbreak.user,sequenceiq.account.seq1234567.SequenceIQ,cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,periscope.cluster,cloudbreak.recipes
+    - ${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_PW}|${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_FIRSTNAME}|${UAA_DEFAULT_USER_LASTNAME}|openid,cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,sequenceiq.cloudbreak.admin,sequenceiq.cloudbreak.user,sequenceiq.account.seq1234567.SequenceIQ,cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,periscope.cluster,cloudbreak.recipes,cloudbreak.blueprints.read,cloudbreak.templates.read,cloudbreak.credentials.read,cloudbreak.recipes.read,cloudbreak.networks.read,cloudbreak.securitygroups.read,cloudbreak.stacks.read
 
 EOF
 }

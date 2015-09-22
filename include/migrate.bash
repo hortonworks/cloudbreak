@@ -5,6 +5,7 @@ migrate-config() {
     env-import DOCKER_TAG_MIGRATION 1.0.0
     env-import CB_SCHEMA_SCRIPTS_LOCATION "container"
     env-import PERISCOPE_SCHEMA_SCRIPTS_LOCATION "container"
+    env-import UAA_SCHEMA_SCRIPTS_LOCATION "container"
     env-import SKIP_DB_MIGRATION_ON_START false
     env-import DB_MIGRATION_LOG "db_migration.log"
 }
@@ -31,7 +32,16 @@ migrate-execute-mybatis-migrations() {
     fi
     local scripts_location=$1 && shift
     debug "Scripts location:  $scripts_location" 2> >(tee -a "$DB_MIGRATION_LOG" >&2)
-
+    if [ "$service_name" = "uaadb" ]; then
+        flag=false
+        while [ "$flag" != "true" ]; do
+            flag=$(check_uaa_running)
+            sleep 3
+            if [ "$flag" = "false" ]; then
+              info "Uaa currently not updated the database. Waiting..."
+            fi
+        done
+    fi
     if [ "$scripts_location" = "container" ]; then
         info "Schema will be extracted from image:  $docker_image_name" 2> >(tee -a "$DB_MIGRATION_LOG" >&2)
         local scripts_location=$(pwd)/.schema/$service_name
@@ -39,10 +49,23 @@ migrate-execute-mybatis-migrations() {
         mkdir -p $scripts_location
         docker run --rm --entrypoint bash -v $scripts_location:/migrate/scripts $docker_image_name -c "cp /schema/* /migrate/scripts/"
     fi
-
     info "Scripts location:  $scripts_location" 2> >(tee -a "$DB_MIGRATION_LOG" >&2)
     docker run --rm --link $container_name:db -v $scripts_location:/migrate/scripts sequenceiq/mybatis-migrations:$DOCKER_TAG_MIGRATION $@ \
       | tee -a "$DB_MIGRATION_LOG" | grep "Applying\|MyBatis Migrations SUCCESS\|MyBatis Migrations FAILURE" 2>/dev/null
+}
+
+check_uaa_running() {
+    uaa_running=false;
+    uaa_info=$(docker exec -it cbreak_uaadb_1 bash -c "psql -U postgres -c 'select count(scope) from oauth_client_details;'"|head -3|tail -1)
+    uaa_info=$(echo $uaa_info|sed 's, ,,g'|head -1)
+    if [[ $uaa_info = *[[:digit:]]* ]]; then
+        if [[ "$uaa_info" > 1 ]]; then
+          uaa_running=true;
+        fi
+    else
+      uaa_running=false;
+    fi
+    echo "$uaa_running"
 }
 
 migrate-one-db() {
@@ -56,6 +79,10 @@ migrate-one-db() {
         pcdb)
             local scripts_location=${PERISCOPE_SCHEMA_SCRIPTS_LOCATION}
             local docker_image_name=sequenceiq/periscope:${DOCKER_TAG_PERISCOPE}
+            ;;
+        uaadb)
+            local scripts_location=${UAA_SCHEMA_SCRIPTS_LOCATION}
+            local docker_image_name=sequenceiq/sultans-bin:${DOCKER_TAG_SULTANS}
             ;;
         *)
             error "Invalid database service name: $service_name. Supported databases: cbdb and pcdb" 2> >(tee -a "$DB_MIGRATION_LOG" >&2)

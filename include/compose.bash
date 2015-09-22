@@ -27,7 +27,7 @@ compose-pull-parallel() {
     declare desc="Pulls service images parallel"
 
     [ -f docker-compose.yml ] || deployer-generate
-    
+
     sed -n "s/.*image: //p" docker-compose.yml | xargs -n1 -P 20 docker pull
 }
 
