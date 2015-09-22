@@ -32,10 +32,10 @@ public class AccountPreferencesValidator {
         validate(stack.getInstanceGroups(), stack.getFullNodeCount(), account, owner);
     }
 
-    public void validate(Long stackId, Integer scalingAdjustment, String account, String owner) throws AccountPreferencesValidationFailed {
+    public void validate(Long stackId, Integer scalingAdjustment) throws AccountPreferencesValidationFailed {
         Stack stack = stackService.getById(stackId);
         Integer newNodeCount = stack.getFullNodeCount() + scalingAdjustment;
-        validate(stack.getInstanceGroups(), newNodeCount, account, owner);
+        validate(stack.getInstanceGroups(), newNodeCount, stack.getAccount(), stack.getOwner());
     }
 
     private void validate(Set<InstanceGroup> instanceGroups, Integer nodeCount, String account, String owner) throws AccountPreferencesValidationFailed {
