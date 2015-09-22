@@ -507,6 +507,18 @@
                                                     <select class="form-control" id="newhostgroupsdiv" ng-model="newhostgroup.name" required ng-options="hgvalue.name as hgvalue.name for hgvalue in $root.reinstallClusterObject.fullBp.ambariBlueprint.host_groups">
                                                     </select>
                                                 </div>
+                                                <div ng-show="recipes && recipes.length">
+                                                  <label class="col-sm-3 control-label" for="templateNodeCount{{$index}}">{{msg.active_cluster_details_show_recipes}}</label>
+                                                  <div class="col-sm-9">
+                                                      <input type="checkbox" ng-click="toggleRecipes($index)" />
+                                                  </div>
+                                                  <div ng-show="recipesToShow[$index]">
+                                                    <div class="col-sm-9">
+                                                        <select class="form-control" id="newhostgroupsdiv" ng-model="newhostgroup.recipeIds" ng-options="rvalue.id as rvalue.name for rvalue in $root.recipes" multiple="true">
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                              </div>
                                             </div>
                                         </div>
                                     </div>

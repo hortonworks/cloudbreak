@@ -99,7 +99,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
           instanceGroups.push({templateId: tmpTemplateId, group: "cbgateway", nodeCount: 1, type: "GATEWAY"});
           actualBp[0].ambariBlueprint.host_groups.forEach(function(k){
             instanceGroups.push({templateId: tmpTemplateId, group: k.name, nodeCount: 1, type: "CORE"});
-            hostGroups.push({name: k.name, instanceGroupName: k.name})
+            hostGroups.push({name: k.name, instanceGroupName: k.name, recipeIds: []})
           });
           $scope.cluster.instanceGroups = instanceGroups;
           $scope.cluster.hostGroups = hostGroups;
@@ -122,6 +122,17 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.cluster.ambariStackDetails.utilsBaseURL = "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/centos6";
             } else {
                 $scope.cluster.ambariStackDetails = {};
+            }
+        }
+
+        $scope.changeRecipeRun = function (recipeId, hostGroupName, model) {
+            var recipe = $filter('filter')($rootScope.recipes, {id: recipeId}, true)[0];
+            if (model === true) {
+                $filter('filter')($scope.cluster.hostGroups, {name: hostGroupName}, true)[0].recipeIds.push(recipe.id);
+            } else {
+                var recipeList = $filter('filter')($scope.cluster.hostGroups, {name: hostGroupName}, true)[0];
+                var index = recipeList.recipeIds.indexOf(recipe.id);
+                $filter('filter')($scope.cluster.hostGroups, {name: hostGroupName}, true)[0].recipeIds.splice(index, 1);
             }
         }
 
@@ -590,4 +601,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             $scope.selectedCluster = cluster
         }
 
+        $scope.recipesToShow = [];
+        $scope.toggleRecipes = function(index) {
+          $scope.recipesToShow[index] = $scope.recipesToShow[index] ? false : true;
+        }
     }]);

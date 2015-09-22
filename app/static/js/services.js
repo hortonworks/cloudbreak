@@ -42,6 +42,21 @@ uluwatuServices.factory('GlobalBlueprint', ['$resource',
         return $resource('blueprints/:id');
     }]);
 
+uluwatuServices.factory('UserRecipe', ['$resource',
+    function ($resource) {
+        return $resource('user/recipes');
+    }]);
+
+uluwatuServices.factory('AccountRecipe', ['$resource',
+    function ($resource) {
+        return $resource('account/recipes');
+    }]);
+
+uluwatuServices.factory('GlobalRecipe', ['$resource',
+    function ($resource) {
+        return $resource('recipes/:id');
+    }]);
+
 uluwatuServices.factory('UserCredential', ['$resource',
     function ($resource) {
         return $resource('user/credentials');
@@ -329,6 +344,7 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
             }
         }
     });
+
     uluwatuServices.factory('UserNetwork', ['$resource',
     function ($resource) {
         return $resource('user/networks');
@@ -353,3 +369,20 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
     function ($resource) {
         return $resource('securitygroups/:id');
     }]);
+
+    uluwatuServices.factory('File', function() {
+        return {
+            getBase64ContentById: function (inputId, callback) {
+              var input = document.getElementById(inputId);
+              var reader = new FileReader();
+              try {
+                reader.readAsDataURL(input.files[0]);
+                reader.onloadend = function(event){
+                  callback(event.target.result.substr(event.target.result.indexOf(',') + 1));
+                }
+              } catch (e) {
+                callback(null);
+              }
+            }
+        }
+    });

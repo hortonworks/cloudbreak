@@ -51,6 +51,7 @@ var config = {
     '+cloudbreak.templates' +
     '+cloudbreak.credentials' +
     '+cloudbreak.blueprints' +
+    '+cloudbreak.recipes' +
     '+cloudbreak.stacks' +
     '+periscope.cluster' +
     '+cloudbreak.events' +
@@ -269,7 +270,7 @@ function continueInit() {
   function preventNoCachInResponse(res) {
     res.header("Cache-Control", "no-cache, no-store, must-revalidate");
     res.header("Pragma", "no-cache");
-    res.header("Expires",0); 
+    res.header("Expires",0);
   }
 
   // wildcards should be proxied =================================================
