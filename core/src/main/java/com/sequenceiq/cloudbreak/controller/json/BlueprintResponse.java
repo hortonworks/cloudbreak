@@ -3,8 +3,10 @@ package com.sequenceiq.cloudbreak.controller.json;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.BlueprintModelDescription;
+import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
+@ApiModel
 public class BlueprintResponse extends BlueprintBase {
     @ApiModelProperty(value = ModelDescriptions.ID)
     private String id;

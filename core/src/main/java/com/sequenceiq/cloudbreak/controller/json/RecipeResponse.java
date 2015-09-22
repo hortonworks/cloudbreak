@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
@@ -11,6 +10,8 @@ public class RecipeResponse extends RecipeBase {
 
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
+    @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
+    private boolean publicInAccount;
 
     @JsonProperty("id")
     public Long getId() {
@@ -19,5 +20,14 @@ public class RecipeResponse extends RecipeBase {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    @JsonProperty("public")
+    public boolean isPublicInAccount() {
+        return publicInAccount;
+    }
+
+    public void setPublicInAccount(boolean publicInAccount) {
+        this.publicInAccount = publicInAccount;
     }
 }
