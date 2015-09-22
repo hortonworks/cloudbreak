@@ -13,8 +13,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.controller.validation.ValidPlugin;
 import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
+import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
+@ApiModel
 abstract class RecipeBase implements JsonEntity {
     @Size(max = 100, min = 1, message = "The length of the recipe's name has to be in range of 1 to 100")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
