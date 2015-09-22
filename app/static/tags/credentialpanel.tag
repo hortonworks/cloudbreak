@@ -70,7 +70,7 @@
 
                     <!-- ............. CREDENTIAL ............................................... -->
 
-                      <div class="panel panel-default" ng-repeat="credential in $root.credentials">
+                      <div class="panel panel-default" ng-repeat="credential in $root.credentials  | orderBy:['cloudPlatform', 'name']">
                         <div class="panel-heading">
                             <h5><a href="" data-toggle="collapse" data-parent="#credential-list-accordion"
                                    data-target="#panel-credential-collapse{{credential.id}}"><i class="fa fa-tag fa-fw"></i>{{credential.name}}</a>
