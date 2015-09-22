@@ -20,9 +20,11 @@ public class GcpCredentialToJsonConverter extends AbstractConversionServiceAware
         credentialJson.setCloudPlatform(CloudPlatform.GCP);
         credentialJson.setName(source.getName());
         credentialJson.setPublicInAccount(source.isPublicInAccount());
+        credentialJson.setPublicKey(source.getPublicKey());
         Map<String, Object> params = new HashMap<>();
         params.put(GcpCredentialParam.SERVICE_ACCOUNT_ID.getName(), source.getServiceAccountId());
         params.put(GcpCredentialParam.PROJECTID.getName(), source.getProjectId());
+        params.put(GcpCredentialParam.SERVICE_ACCOUNT_PRIVATE_KEY.getName(), source.getServiceAccountPrivateKey());
         credentialJson.setParameters(params);
         credentialJson.setDescription(source.getDescription() == null ? "" : source.getDescription());
         credentialJson.setLoginUserName(source.getLoginUserName());
