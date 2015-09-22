@@ -63,7 +63,7 @@
 
                     <!-- .............. TEMPLATE .............................................. -->
 
-                    <div class="panel panel-default" ng-repeat="template in $root.templates">
+                    <div class="panel panel-default" ng-repeat="template in $root.templates | orderBy:['cloudPlatform', 'name']">
 
                         <div class="panel-heading">
                             <h5>

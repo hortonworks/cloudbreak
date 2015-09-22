@@ -44,7 +44,7 @@
 
                     <!-- .............. BLUEPRINTS .............................................. -->
 
-                    <div class="panel panel-default" ng-repeat="blueprint in $root.blueprints">
+                    <div class="panel panel-default" ng-repeat="blueprint in $root.blueprints | orderBy:'name'">
 
                         <div class="panel-heading">
                             <h5>
