@@ -27,7 +27,54 @@
                                         </div>
                                     </div>
 
-                                </div><!-- .form-group -->
+                                </div>
+
+                                <div class="form-group" >
+                                    <label class="col-sm-3 control-label" for="scopes">Scopes</label>
+                                    <div class="col-sm-4">
+                                       <table class="table table-bordered table-striped responsive-utilities">
+                                            <thead>
+                                                <tr>
+                                                    <th>Ability to</th>
+                                                    <th>Create</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                    <tr>
+                                                        <th scope="row">Blueprints</th>
+                                                        <td class="is-visible"><input type="checkbox" name="bpch1" id="bpch1" ng-model="invite.scopes.blueprints.write"></td>
+                                                    </tr>
+                                                    <tr>
+                                                    <th scope="row">Recipes</th>
+                                                        <td class="is-visible"><input type="checkbox" name="recch1" id="recch1" ng-model="invite.scopes.recipes.write"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Templates</th>
+                                                        <td class="is-visible"><input type="checkbox" name="tmch1" id="tmch1" ng-model="invite.scopes.templates.write"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Credentials</th>
+                                                        <td class="is-visible"><input type="checkbox" name="crch1" id="crch1" ng-model="invite.scopes.credentials.write"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Stacks</th>
+                                                        <td class="is-visible"><input type="checkbox" name="stch1" id="stch1" ng-model="invite.scopes.stacks.write"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Networks</th>
+                                                        <td class="is-visible"><input type="checkbox" name="stch1" id="stch1" ng-model="invite.scopes.networks.write"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Security Groups</th>
+                                                        <td class="is-visible"><input type="checkbox" name="stch1" id="stch1" ng-model="invite.scopes.securitygroups.write"></td>
+                                                    </tr>
+                                            </tbody>
+                                       </table>
+                                    </div>
+
+                                </div>
+
+                                <!-- .form-group -->
 
                                 <div class="row btn-row">
                                     <div class="col-sm-9 col-sm-offset-3">
@@ -50,6 +97,7 @@
 
                     <div class="panel panel-default" ng-show="user.email !== actualuser.username" ng-repeat="actualuser in $root.accountUsers|filter: { active: true } ">
                         <div class="panel-heading">
+                            <span class="badge pull-right ng-binding">{{actualuser.id}}</span>
                             <h5><a data-toggle="collapse" data-parent="#user-list-accordion" data-target="#panel-user-collapse{{actualuser.idx}}"><i class="fa fa-user fa-fw"></i>{{actualuser.username}}</a></h5>
                         </div>
                         <div id="panel-user-collapse{{actualuser.idx}}" class="panel-collapse collapse">
@@ -57,13 +105,57 @@
                             <p class="btn-row-over-panel pull-right" ng-hide="actualuser.admin"><a class="btn btn-info" ng-click="makeAdmin(actualuser.id, actualuser.username, actualuser.idx)" role="button"><i class="fa fa-plus fa-fw"></i>{{msg.users_form_make_admin_command_label}}</a></p>
                             <p class="btn-row-over-panel pull-right" ng-hide="actualuser.admin"><a class="btn btn-danger" ng-click="removeUser(actualuser.username, actualuser.id)" role="button"><i class="fa fa-minus fa-fw"></i>{{msg.users_form_delete_user_command_label}}</a></p>
                             <div class="panel-body">
-                                <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+                                <form class="form-horizontal" role="form" style="padding-top: 2em !important">
                                     <div class="form-group">
-                                        <label class="col-sm-3 control-label" for="parameter">{{msg.users_form_email_label}}</label>
-                                        <div class="col-sm-9">
-                                            <p id="parameter" class="form-control-static">{{actualuser.username}}</p>
-                                        </div><!-- .col-sm-9 -->
-                                    </div><!-- .form-group -->
+                                        <label class="col-sm-3 control-label" for="emailuser">{{msg.users_form_email_label}}</label>
+                                        <div class="col-sm-6">
+                                            <p id="emailuser" class="form-control-static">{{actualuser.username}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+
+                                        <label class="col-sm-3 control-label" for="emailuser">Scopes</label>
+                                        <div class="col-sm-4">
+                                            <table class="table table-bordered table-striped responsive-utilities">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Ability to</th>
+                                                        <th>Create</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody >
+                                                        <tr>
+                                                            <th scope="row">Blueprints</th>
+                                                            <td class="is-visible"><input type="checkbox" disabled name="bpch1" id="bpch1" ng-checked="isWriteScope('blueprints', actualuser.groups)"></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Recipes</th>
+                                                            <td class="is-visible"><input type="checkbox" disabled name="recch1" id="recch1" ng-checked="isWriteScope('recipes', actualuser.groups)"></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Template</th>
+                                                            <td class="is-visible"><input type="checkbox" disabled name="tmch1" id="tmch1" ng-checked="isWriteScope('templates', actualuser.groups)"></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Credentials</th>
+                                                            <td class="is-visible"><input type="checkbox" disabled name="crch1" id="crch1" ng-checked="isWriteScope('credentials', actualuser.groups)"></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Stacks</th>
+                                                            <td class="is-visible"><input type="checkbox" disabled name="stch1" id="stch1" ng-checked="isWriteScope('stacks', actualuser.groups)"></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Networks</th>
+                                                            <td class="is-visible"><input type="checkbox" disabled name="nwch1" id="nwch1" ng-checked="isWriteScope('templates', actualuser.groups)"></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Security Groups</th>
+                                                            <td class="is-visible"><input type="checkbox" disabled name="stgch1" id="stgch1" ng-checked="isWriteScope('templates', actualuser.groups)"></td>
+                                                        </tr>
+                                                    </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </form>
                             </div>
                         </div>
@@ -75,6 +167,7 @@
 
                     <div class="panel panel-default" ng-repeat="actualuser in $root.accountUsers|filter: { active: false } ">
                         <div class="panel-heading">
+                            <span class="badge pull-right ng-binding">{{actualuser.id}}</span>
                             <h5><a data-toggle="collapse" data-parent="#user-list-accordion" data-target="#panel-user-collapse{{actualuser.idx}}"><i class="fa fa-user fa-fw"></i>{{actualuser.username}}</a></h5>
                         </div>
                         <div id="panel-user-collapse{{actualuser.idx}}" class="panel-collapse collapse">
@@ -83,14 +176,56 @@
                             <p class="btn-row-over-panel pull-right" ng-hide="actualuser.admin"><a class="btn btn-danger" ng-click="removeUser(actualuser.username, actualuser.id)" role="button"><i class="fa fa-minus fa-fw"></i>{{msg.users_form_delete_user_command_label}}</a></p>
                             <div class="panel-body">
 
-
-                                <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
-                                    <div class="form-group">
+                                <form class="form-horizontal" role="form" style="padding-top: 2em !important">
+                                    <div class="form-group" >
                                         <label class="col-sm-3 control-label" for="parameter">{{msg.users_form_email_label}}</label>
-                                        <div class="col-sm-9">
+                                        <div class="col-sm-6">
                                             <p id="parameter" class="form-control-static">{{actualuser.username}}</p>
-                                        </div><!-- .col-sm-9 -->
-                                    </div><!-- .form-group -->
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-3 control-label" for="emailuser">Scopes</label>
+                                        <div class="col-sm-4">
+                                            <table class="table table-bordered table-striped responsive-utilities">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Ability to</th>
+                                                        <th>Create</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody >
+                                                        <tr>
+                                                            <th scope="row">Blueprints</th>
+                                                            <td class="is-visible"><input type="checkbox" disabled name="bpch1" id="bpch1" ng-checked="isWriteScope('blueprints', actualuser.groups)"></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Recipes</th>
+                                                            <td class="is-visible"><input type="checkbox" disabled name="recch1" id="recch1" ng-checked="isWriteScope('recipes', actualuser.groups)"></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Templates</th>
+                                                            <td class="is-visible"><input type="checkbox" disabled name="tmch1" id="tmch1" ng-checked="isWriteScope('templates', actualuser.groups)"></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Credentials</th>
+                                                            <td class="is-visible"><input type="checkbox" disabled name="crch1" id="crch1" ng-checked="isWriteScope('credentials', actualuser.groups)"></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Stacks</th>
+                                                            <td class="is-visible"><input type="checkbox" disabled name="stch1" id="stch1" ng-checked="isWriteScope('stacks', actualuser.groups)"></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Networks</th>
+                                                            <td class="is-visible"><input type="checkbox" disabled name="nwch1" id="nwch1" ng-checked="isWriteScope('templates', actualuser.groups)"></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Security Groups</th>
+                                                            <td class="is-visible"><input type="checkbox" disabled name="stgch1" id="stgch1" ng-checked="isWriteScope('templates', actualuser.groups)"></td>
+                                                        </tr>
+                                                    </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </form>
                             </div>
                         </div>

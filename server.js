@@ -53,7 +53,16 @@ var config = {
     '+cloudbreak.blueprints' +
     '+cloudbreak.stacks' +
     '+periscope.cluster' +
-    '+cloudbreak.events+cloudbreak.usages.account+cloudbreak.usages.user',
+    '+cloudbreak.events' +
+    '+cloudbreak.usages.account' +
+    '+cloudbreak.usages.user' +
+    '+cloudbreak.blueprints.read' +
+    '+cloudbreak.templates.read' +
+    '+cloudbreak.credentials.read' +
+    '+cloudbreak.recipes.read' +
+    '+cloudbreak.networks.read' +
+    '+cloudbreak.securitygroups.read' +
+    '+cloudbreak.stacks.read',
   hostAddress: process.env.ULU_HOST_ADDRESS,
   addressResolvingRetryCount: process.env.ULU_ADDRESS_RESOLVING_TIMEOUT ? process.env.ULU_ADDRESS_RESOLVING_TIMEOUT / 2000 : 30,
   subscriptionAddress: null,
