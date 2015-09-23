@@ -22,6 +22,7 @@
 
 ### Changed
 
+- `cbd start` doesn’t start if compose yaml regeneration is needed
 - `cbd generate` is less verbose, diff doesnt shown
 - `cbd doctor` shows diff if generate would change
 - `cbd regenerate` creates backup files if changes detected
