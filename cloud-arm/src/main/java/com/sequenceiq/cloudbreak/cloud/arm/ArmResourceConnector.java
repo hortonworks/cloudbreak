@@ -31,13 +31,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 
 import groovyx.net.http.HttpResponseException;
-import reactor.rx.Promise;
 
 @Service
 public class ArmResourceConnector implements ResourceConnector {
@@ -68,14 +66,6 @@ public class ArmResourceConnector implements ResourceConnector {
         }
 
         CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.ARM_TEMPLATE).name(stackName).build();
-
-        Promise<ResourcePersisted> promise = notifier.notifyAllocation(cloudResource, authenticatedContext.getCloudContext());
-        try {
-            promise.awaitSuccess();
-        } catch (Exception e) {
-            //Rollback
-            terminate(authenticatedContext, stack, Arrays.asList(cloudResource));
-        }
         List<CloudResourceStatus> resources = check(authenticatedContext, Arrays.asList(cloudResource));
         LOGGER.debug("Launched resources: {}", resources);
         return resources;
@@ -128,6 +118,8 @@ public class ArmResourceConnector implements ResourceConnector {
             } catch (HttpResponseException e) {
                 if (e.getStatusCode() != NOT_FOUND) {
                     throw new CloudConnectorException(e.getResponse().getData().toString(), e);
+                } else {
+                    return check(authenticatedContext, new ArrayList<CloudResource>());
                 }
             } catch (Exception e) {
                 throw new CloudConnectorException(String.format("Could not delete resource group: %s", resource.getName()), e);

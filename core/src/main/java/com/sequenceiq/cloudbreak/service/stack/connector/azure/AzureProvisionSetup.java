@@ -22,11 +22,14 @@ import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.ImageStatus;
+import com.sequenceiq.cloudbreak.domain.ImageStatusResult;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
+import com.sequenceiq.cloudbreak.service.stack.event.PrepareImageComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureCreateResourceStatusCheckerTask;
@@ -50,7 +53,6 @@ public class AzureProvisionSetup implements ProvisionSetup {
     private static final int MILLIS = 30000;
     private static final String PENDING = "pending";
     private static final String SUCCESS = "success";
-    private static final int ONE_HUNDRED = 100;
     private static final int CONTAINER_EXISTS = 409;
     private static final int POLLING_INTERVAL = 5000;
     private static final int MAX_POLLING_ATTEMPTS = 60;
@@ -80,6 +82,16 @@ public class AzureProvisionSetup implements ProvisionSetup {
         Map<Integer, String[]> accountIndexKeys = createImages(stack, azureLocation, azureClient, affinityGroupName);
         createImageLinks(stack, azureLocation, azureClient, accountIndexKeys);
         return new ProvisionSetupComplete(getCloudPlatform(), stack.getId());
+    }
+
+    @Override
+    public ProvisionEvent prepareImage(Stack stack) throws Exception {
+        return new PrepareImageComplete(stack.cloudPlatform(), stack.getId());
+    }
+
+    @Override
+    public ImageStatusResult checkImage(Stack stack) throws Exception {
+        return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
     }
 
     @Override
@@ -180,7 +192,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
             copyStatus = copyStatusFromServer.get("status");
             Long copied = Long.valueOf(copyStatusFromServer.get("copiedBytes"));
             Long total = Long.valueOf(copyStatusFromServer.get("totalBytes"));
-            double copyPercentage = (long) ((float) copied / total * ONE_HUNDRED);
+            double copyPercentage = (long) ((float) copied / total * ImageStatusResult.COMPLETED);
             LOGGER.info(String.format("copy progress=%s / %s percentage: %s%%.", copied, total, copyPercentage));
             stackUpdater.updateStackStatus(stack.getId(), stack.getStatus(), String.format("The copy status is: %s%%.", copyPercentage));
             try {
