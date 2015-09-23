@@ -147,6 +147,9 @@ compose-generate-yaml() {
             if [[ "$CBD_FORCE_START" ]]; then
                 warn "You have forced to start ..."
             else
+                warn "Please check the expected config changes with:"
+                echo "  cbd doctor" | blue
+                debug "If you want to ignore the changes, set the CBD_FORCE_START to true in Profile"
                 exit 1
             fi
         fi

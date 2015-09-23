@@ -173,6 +173,7 @@ doctor() {
 
     docker-check-version
     compose-generate-check-diff verbose
+    generate_uaa_check_diff verbose
 }
 
 cbd-find-root() {
