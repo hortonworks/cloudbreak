@@ -2,8 +2,8 @@
 
 var log = log4javascript.getLogger("notificationController-logger");
 
-angular.module('uluwatuControllers').controller('notificationController', ['$scope', '$rootScope', '$filter', 'Cluster', 'GlobalStack',
-function ($scope, $rootScope, $filter, Cluster, GlobalStack) {
+angular.module('uluwatuControllers').controller('notificationController', ['$scope', '$rootScope', '$filter', 'Cluster', 'GlobalStack', 'UluwatuCluster',
+  function ($scope, $rootScope, $filter, Cluster, GlobalStack, UluwatuCluster) {
     var successEvents = [ "REQUESTED",
                           "CREATE_IN_PROGRESS",
                           "START_REQUESTED",
@@ -55,14 +55,18 @@ function ($scope, $rootScope, $filter, Cluster, GlobalStack) {
 
     function handleStatusChange(notification){
       var actCluster = $filter('filter')($rootScope.clusters, { id: notification.stackId })[0];
-      if (actCluster != undefined) {
+      if (actCluster == undefined) {
+        UluwatuCluster.get(notification.stackId, function (cluster) {
+            $rootScope.clusters.push(cluster);
+            $scope.$parent.orderClusters();
+        });
+      } else {
         actCluster.status = notification.stackStatus;
-        if (typeof actCluster.cluster != "undefined") {
-          actCluster.cluster.status = notification.clusterStatus;
-          actCluster.cluster.statusReason = notification.eventMessage;
-        }
-        addNotificationToGlobalEvents(notification);
+        actCluster.cluster = actCluster.cluster || {};
+        actCluster.cluster.status = notification.clusterStatus;
+        actCluster.cluster.statusReason = notification.eventMessage;
       }
+      addNotificationToGlobalEvents(notification);
     }
 
     function handleAvailableNotification(notification) {
