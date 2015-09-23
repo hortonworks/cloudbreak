@@ -139,7 +139,7 @@
                             <select class="form-control" id="selectFileSystem" ng-model="cluster.fileSystem.type" ng-change="selectedFileSystemChange()">
                                 <option value="LOCAL">{{msg.filesystem_local_label}}</option>
                                 <option value="DASH" ng-if="activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'AZURE_RM'">{{msg.filesystem_dash_label}}</option>
-                                <!--<option value="GCS" ng-if="activeCredential.cloudPlatform == 'GCP'">{{msg.filesystem_gcs_label}}</option>-->
+                                <option value="GCS" ng-if="activeCredential.cloudPlatform == 'GCP'">{{msg.filesystem_gcs_label}}</option>
                             </select>
                         </div>
                     </div>
@@ -175,7 +175,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group" ng-show="(activeCredential.cloudPlatform == 'GCP') && cluster.fileSystem.type == 'GCS'">
+                    <div class="form-group" ng-show="false">
                         <label class="col-sm-3 control-label" for="privateKeyEncoded">{{msg.credential_gcp_form_p12_label}}</label>
                         <div class="col-sm-9">
                             <input class="form-control" type="text" id="privateKeyEncoded" disabled ng-model="cluster.fileSystem.properties.privateKeyEncoded">
@@ -193,7 +193,7 @@
                     <div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'AZURE_RM' || activeCredential.cloudPlatform == 'GCP') && cluster.fileSystem.type != 'LOCAL'">
                         <label class="col-sm-3 control-label" for="asdefaultfs">{{msg.filesystem_default_fs}}</label>
                         <div class="col-sm-9">
-                            <input type="checkbox" id="asdefaultfs" ng-model="cluster.fileSystem.defaultFs" name="asdefaultfs">
+                            <input type="checkbox" id="asdefaultfs" ng-model="cluster.fileSystem.defaultFs" ng-disabled="activeCredential.cloudPlatform == 'GCP'" name="asdefaultfs">
                         </div>
                     </div>
 

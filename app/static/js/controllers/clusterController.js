@@ -235,6 +235,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     return false;
                 }
             } else if ($scope.cluster.fileSystem.type == 'GCS') {
+
                 if(!$scope.isUndefined($scope.cluster.fileSystem.properties.projectId) && !$scope.isUndefined($scope.cluster.fileSystem.properties.serviceAccountEmail)
                 && !$scope.isUndefined($scope.cluster.fileSystem.properties.privateKeyEncoded) && !$scope.isUndefined($scope.cluster.fileSystem.properties.defaultBucketName)) {
                     return false;
@@ -366,7 +367,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     $scope.cluster.fileSystem.properties = {};
                     $scope.cluster.fileSystem.properties.projectId = $rootScope.activeCredential.parameters.projectId;
                     $scope.cluster.fileSystem.properties.serviceAccountEmail = $rootScope.activeCredential.parameters.serviceAccountId;
-                    $scope.cluster.fileSystem.properties.privateKeyEncoded = "";
+                    $scope.cluster.fileSystem.properties.privateKeyEncoded = $rootScope.activeCredential.parameters.serviceAccountPrivateKey;
                 }else {
                     delete $scope.cluster.fileSystem;
                 }
