@@ -251,7 +251,7 @@ generate_uaa_check_diff() {
             debug "uaa.yml exists and generate wouldn't change it"
             return 0
         else
-            warn "uaa.yml already exists, BUT generate would create a DIFFERENT one."
+            warn "uaa.yml already exists, BUT generate would create a DIFFERENT one!"
             warn "please regenerate it:"
             echo "  cbd regenerate" | blue
             if [[ "$verbose" ]]; then
