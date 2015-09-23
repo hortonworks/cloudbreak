@@ -43,7 +43,7 @@ public class ProvisioningService {
         stack = stackRepository.findOneWithLists(stack.getId());
         CloudPlatformConnector connector = cloudPlatformResolver.connector(cloudPlatform);
         Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(cloudPlatform, tlsSecurityService.readPublicSshKey(stack.getId()),
-                stack.getCredential().getLoginUserName());
+                stack.getCredential().getLoginUserName(), connector.getPlatformParameters(stack));
         Set<Resource> resources = connector.buildStack(stack, userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE), setupProperties);
         return new ProvisionComplete(cloudPlatform, stack.getId(), resources);
     }

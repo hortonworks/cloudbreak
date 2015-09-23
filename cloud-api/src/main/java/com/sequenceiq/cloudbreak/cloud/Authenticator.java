@@ -7,4 +7,5 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 public interface Authenticator extends CloudPlatformAware {
 
     AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential);
+
 }

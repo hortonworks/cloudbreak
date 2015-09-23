@@ -225,6 +225,8 @@ public class Stack implements ProvisionEntity {
     private Map<String, String> parameters;
     @OneToOne
     private Credential credential;
+    @Column(columnDefinition = "TEXT")
+    private String platformVariant;
     @OneToOne(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Cluster cluster;
     @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
@@ -395,6 +397,14 @@ public class Stack implements ProvisionEntity {
 
     public void setSecurityConfig(SecurityConfig securityConfig) {
         this.securityConfig = securityConfig;
+    }
+
+    public String getPlatformVariant() {
+        return platformVariant;
+    }
+
+    public void setPlatformVariant(String platformVariant) {
+        this.platformVariant = platformVariant;
     }
 
     public List<Resource> getResourcesByType(ResourceType resourceType) {

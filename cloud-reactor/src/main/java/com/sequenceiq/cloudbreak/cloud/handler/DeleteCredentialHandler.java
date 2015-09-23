@@ -33,8 +33,7 @@ public class DeleteCredentialHandler implements CloudPlatformEventHandler<Delete
         LOGGER.info("Received event: {}", deleteCredentialRequestEvent);
         DeleteCredentialRequest request = deleteCredentialRequestEvent.getData();
         try {
-            String platform = request.getCloudContext().getPlatform();
-            CloudConnector connector = cloudPlatformConnectors.get(platform);
+            CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
             CloudCredentialStatus cloudCredentialStatus = connector.credentials().delete(ac);
             DeleteCredentialResult deleteCredentialResult = new DeleteCredentialResult(request, cloudCredentialStatus);

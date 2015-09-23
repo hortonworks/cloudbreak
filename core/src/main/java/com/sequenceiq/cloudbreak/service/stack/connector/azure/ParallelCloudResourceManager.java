@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.connector;
+package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
 import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateway;
 
@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.FailureHandlerService;
 import com.sequenceiq.cloudbreak.service.stack.flow.FutureResult;
-import com.sequenceiq.cloudbreak.service.stack.flow.ProvisionUtil;
 import com.sequenceiq.cloudbreak.service.stack.flow.ResourceRequestResult;
 import com.sequenceiq.cloudbreak.service.stack.flow.ScalingFailedException;
 import com.sequenceiq.cloudbreak.service.stack.flow.callable.DownScaleCallable;

@@ -54,6 +54,7 @@ public class ModelDescriptions {
         public static final String NETWORK_ID = "network resource id for the stack";
         public static final String CERTIFICATE = "certificate used by the gateway";
         public static final String CLUSTER_STATUS = "status of the cluster";
+        public static final String PLATFORM_VARIANT = "cloud provider api variant";
     }
 
     public static class ClusterModelDescription {

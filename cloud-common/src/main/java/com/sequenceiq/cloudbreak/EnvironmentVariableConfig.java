@@ -84,6 +84,8 @@ public class EnvironmentVariableConfig {
 
     public static final String CB_ADDRESS_RESOLVING_TIMEOUT = "60000";
 
+    public static final String CB_PLATFORM_DEFAULT_VARIANTS = "OPENSTACK:HEAT";
+
     private EnvironmentVariableConfig() {
 
     }

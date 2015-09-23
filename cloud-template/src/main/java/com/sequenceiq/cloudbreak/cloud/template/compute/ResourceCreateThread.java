@@ -78,6 +78,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
                 }
 
                 List<CloudResource> resources = builder.build(context, privateId, auth, group, image, list);
+                updateResource(auth, resources);
                 context.addComputeResources(privateId, resources);
                 PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(builder, auth, resources, context, true);
                 List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
@@ -89,6 +90,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
         } catch (CancellationException e) {
             throw e;
         } catch (Exception e) {
+            LOGGER.error("", e);
             results.clear();
             for (CloudResource buildableResource : buildableResources) {
                 results.add(new CloudResourceStatus(buildableResource, ResourceStatus.FAILED, e.getMessage(), privateId));
@@ -100,9 +102,19 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
 
     private List<CloudResource> createResource(AuthenticatedContext auth, List<CloudResource> cloudResources) throws Exception {
         for (CloudResource cloudResource : cloudResources) {
-            resourceNotifier.notifyAllocation(cloudResource, auth.getCloudContext()).await();
+            if (cloudResource.isPersistent()) {
+                resourceNotifier.notifyAllocation(cloudResource, auth.getCloudContext()).await();
+            }
         }
         return cloudResources;
     }
 
+    private List<CloudResource> updateResource(AuthenticatedContext auth, List<CloudResource> cloudResources) throws Exception {
+        for (CloudResource cloudResource : cloudResources) {
+            if (cloudResource.isPersistent()) {
+                resourceNotifier.notifyUpdate(cloudResource, auth.getCloudContext()).await();
+            }
+        }
+        return cloudResources;
+    }
 }

@@ -34,6 +34,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         stack.setFailurePolicy(getConversionService().convert(source.getFailurePolicy(), FailurePolicy.class));
         stack.setParameters(getValidParameters(source));
         stack.setCreated(Calendar.getInstance().getTimeInMillis());
+        stack.setPlatformVariant(source.getPlatformVariant());
         return stack;
     }
 

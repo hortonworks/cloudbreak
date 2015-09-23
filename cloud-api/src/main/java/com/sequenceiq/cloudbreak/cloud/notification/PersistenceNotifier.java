@@ -9,6 +9,8 @@ public interface PersistenceNotifier<T> {
 
     Promise<T> notifyAllocation(CloudResource cloudResource, CloudContext cloudContext);
 
+    Promise<T> notifyUpdate(CloudResource cloudResource, CloudContext cloudContext);
+
     Promise<T> notifyDeletion(CloudResource cloudResource, CloudContext cloudContext);
 
 }

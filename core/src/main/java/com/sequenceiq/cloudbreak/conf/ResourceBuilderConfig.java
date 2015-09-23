@@ -37,17 +37,15 @@ public class ResourceBuilderConfig {
     Map<CloudPlatform, List<ResourceBuilder>> instanceBuilders() {
         Map<CloudPlatform, List<ResourceBuilder>> returnResourceBuilders = new HashMap<>();
         for (CloudPlatform cloudPlatform : CloudPlatform.values()) {
-            if (!cloudPlatform.isWithTemplate()) {
-                List<ResourceBuilder> mainInstanceResourceBuilders = new ArrayList<>();
-                for (ResourceBuilder instanceResourceBuilderElement : resourceBuilders) {
-                    if (ResourceBuilderType.INSTANCE_RESOURCE.equals(instanceResourceBuilderElement.resourceBuilderType())) {
-                        if (cloudPlatform.equals(instanceResourceBuilderElement.cloudPlatform())) {
-                            mainInstanceResourceBuilders.add(instanceResourceBuilderElement);
-                        }
+            List<ResourceBuilder> mainInstanceResourceBuilders = new ArrayList<>();
+            for (ResourceBuilder instanceResourceBuilderElement : resourceBuilders) {
+                if (ResourceBuilderType.INSTANCE_RESOURCE.equals(instanceResourceBuilderElement.resourceBuilderType())) {
+                    if (cloudPlatform.equals(instanceResourceBuilderElement.cloudPlatform())) {
+                        mainInstanceResourceBuilders.add(instanceResourceBuilderElement);
                     }
                 }
-                returnResourceBuilders.put(cloudPlatform, mainInstanceResourceBuilders);
             }
+            returnResourceBuilders.put(cloudPlatform, mainInstanceResourceBuilders);
         }
         return returnResourceBuilders;
     }
@@ -56,17 +54,15 @@ public class ResourceBuilderConfig {
     Map<CloudPlatform, List<ResourceBuilder>> networkBuilders() {
         Map<CloudPlatform, List<ResourceBuilder>> returnResourceBuilders = new HashMap<>();
         for (CloudPlatform cloudPlatform : CloudPlatform.values()) {
-            if (!cloudPlatform.isWithTemplate()) {
-                List<ResourceBuilder> mainNetworkResourceBuilders = new ArrayList<>();
-                for (ResourceBuilder networkResourceBuilderElement : resourceBuilders) {
-                    if (ResourceBuilderType.NETWORK_RESOURCE.equals(networkResourceBuilderElement.resourceBuilderType())) {
-                        if (cloudPlatform.equals(networkResourceBuilderElement.cloudPlatform())) {
-                            mainNetworkResourceBuilders.add(networkResourceBuilderElement);
-                        }
+            List<ResourceBuilder> mainNetworkResourceBuilders = new ArrayList<>();
+            for (ResourceBuilder networkResourceBuilderElement : resourceBuilders) {
+                if (ResourceBuilderType.NETWORK_RESOURCE.equals(networkResourceBuilderElement.resourceBuilderType())) {
+                    if (cloudPlatform.equals(networkResourceBuilderElement.cloudPlatform())) {
+                        mainNetworkResourceBuilders.add(networkResourceBuilderElement);
                     }
                 }
-                returnResourceBuilders.put(cloudPlatform, mainNetworkResourceBuilders);
             }
+            returnResourceBuilders.put(cloudPlatform, mainNetworkResourceBuilders);
         }
         return returnResourceBuilders;
     }

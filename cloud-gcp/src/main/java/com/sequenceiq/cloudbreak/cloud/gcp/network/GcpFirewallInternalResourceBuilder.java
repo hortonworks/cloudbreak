@@ -22,7 +22,7 @@ public class GcpFirewallInternalResourceBuilder extends AbstractGcpNetworkBuilde
     @Override
     public CloudResource create(GcpContext context, AuthenticatedContext auth, Network network, Security security) {
         String resourceName = getResourceNameService().resourceName(resourceType(), context.getName());
-        return new CloudResource(resourceType(), resourceName);
+        return createNamedResource(resourceType(), resourceName);
     }
 
     @Override

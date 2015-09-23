@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -31,7 +32,6 @@ import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
-import com.sequenceiq.cloudbreak.service.stack.connector.ParallelCloudResourceManager;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.builders.AzureResourceBuilderInit;
 
 @Service
@@ -39,6 +39,7 @@ public class AzureConnector implements CloudPlatformConnector {
     protected static final int POLLING_INTERVAL = 8000;
     private static final int AZURE_THUMBPRINT_POLLING_ATTEMPTS = 120;
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final PlatformParameters AZURE_PLATFORM_PARAMETERS = new AzurePlatformParameters();
 
     @Inject
     private AzureResourceBuilderInit azureResourceBuilderInit;
@@ -155,6 +156,11 @@ public class AzureConnector implements CloudPlatformConnector {
         return results;
     }
 
+    @Override
+    public PlatformParameters getPlatformParameters(Stack stack) {
+        return AZURE_PLATFORM_PARAMETERS;
+    }
+
     private String formatFingerprint(String text, String insert, int period) {
         Pattern p = Pattern.compile("(.{" + period + "})", Pattern.DOTALL);
         Matcher m = p.matcher(text);
@@ -166,6 +172,11 @@ public class AzureConnector implements CloudPlatformConnector {
         return CloudPlatform.AZURE;
     }
 
+    @Override
+    public String checkAndGetPlatformVariant(Stack stack) {
+        return getCloudPlatform().name();
+    }
+
     private <T extends AzureOperation.Builder> T buildAzureOperation(T builder, Stack stack) {
         builder.withCloudbreakEventService(cloudbreakEventService)
                 .withLockMap(lockMap)
@@ -174,5 +185,19 @@ public class AzureConnector implements CloudPlatformConnector {
                 .withStack(stack)
                 .withQueued(true);
         return builder;
+    }
+
+    private static class AzurePlatformParameters implements PlatformParameters {
+        private static final Integer START_LABEL = Integer.valueOf(98);
+
+        @Override
+        public String diskPrefix() {
+            return "sd";
+        }
+
+        @Override
+        public Integer startLabel() {
+            return START_LABEL;
+        }
     }
 }

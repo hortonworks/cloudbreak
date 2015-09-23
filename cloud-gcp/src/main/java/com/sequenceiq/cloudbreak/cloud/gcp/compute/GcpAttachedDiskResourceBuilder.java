@@ -46,7 +46,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         final String stackName = cloudContext.getStackName();
         for (int i = 0; i < template.getVolumes().size(); i++) {
             final String resourceName = resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, i);
-            cloudResources.add(new CloudResource(resourceType(), resourceName));
+            cloudResources.add(createNamedResource(resourceType(), resourceName));
         }
         return cloudResources;
     }

@@ -1,0 +1,83 @@
+package com.sequenceiq.cloudbreak.cloud.openstack.nativ.compute;
+
+import java.util.Collections;
+import java.util.List;
+
+import org.openstack4j.api.OSClient;
+import org.openstack4j.api.exceptions.OS4JException;
+import org.openstack4j.model.compute.ActionResponse;
+import org.openstack4j.model.compute.FloatingIP;
+import org.openstack4j.model.compute.Server;
+import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackConstants;
+import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
+import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
+import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
+
+@Service
+public class OpenStackFloatingIPBuilder extends AbstractOpenStackComputeResourceBuilder implements ComputeResourceBuilder<OpenStackContext> {
+    @Override
+    public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
+            List<CloudResource> buildableResource) throws Exception {
+        CloudResource resource = buildableResource.get(0);
+        try {
+            OSClient osClient = createOSClient(auth);
+            List<CloudResource> computeResources = context.getComputeResources(privateId);
+            CloudResource instance = getInstance(computeResources);
+            List<? extends FloatingIP> ips = osClient.compute().floatingIps().list();
+            String pool = osClient.compute().floatingIps().getPoolNames().get(0);
+            FloatingIP unusedIp = osClient.compute().floatingIps().allocateIP(pool);
+            ActionResponse response = osClient.compute().floatingIps().addFloatingIP(instance.getParameter(OpenStackConstants.SERVER, Server.class),
+                    unusedIp.getFloatingIpAddress());
+            if (!response.isSuccess()) {
+                throw new OpenStackResourceException("Add floating-ip to server failed", resourceType(), resource.getName(),
+                        auth.getCloudContext().getStackId(), response.getFault());
+            }
+            return Collections.singletonList(createPersistedResource(resource, unusedIp.getId()));
+        } catch (OS4JException ex) {
+            throw new OpenStackResourceException("Add floating-ip to server failed", resourceType(), resource.getName(), ex);
+        }
+    }
+
+    @Override
+    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
+        context.getParameter(OpenStackConstants.FLOATING_IP_IDS, List.class).add(resource.getReference());
+        return null;
+    }
+
+    @Override
+    public ResourceType resourceType() {
+        return ResourceType.OPENSTACK_FLOATING_IP;
+    }
+
+    @Override
+    public String platform() {
+        return OpenStackConstants.OPENSTACK;
+    }
+
+    @Override
+    public int order() {
+        return 2;
+    }
+
+    @Override
+    protected boolean checkStatus(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) {
+        return true;
+    }
+
+    private CloudResource getInstance(List<CloudResource> computeResources) {
+        CloudResource instance = null;
+        for (CloudResource computeResource : computeResources) {
+            if (computeResource.getType() == ResourceType.OPENSTACK_INSTANCE) {
+                instance = computeResource;
+            }
+        }
+        return instance;
+    }
+}

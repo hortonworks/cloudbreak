@@ -11,6 +11,9 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
 @Entity
+//@Table(uniqueConstraints = {
+//        @UniqueConstraint(columnNames = { "resourceType", "resourceName", "resource_stack" })
+//})
 @NamedQueries({
         @NamedQuery(
                 name = "Resource.findByStackIdAndNameAndType",
@@ -18,6 +21,10 @@ import javax.persistence.NamedQuery;
                         + "WHERE r.stack.id = :stackId AND r.resourceName = :name AND r.resourceType = :type")
 })
 public class Resource implements ProvisionEntity {
+    public enum Status {
+        REQUESTED,
+        CREATED
+    }
 
     @Id
     @GeneratedValue
@@ -26,8 +33,11 @@ public class Resource implements ProvisionEntity {
 
     @Enumerated(EnumType.STRING)
     private ResourceType resourceType;
+    @Enumerated(EnumType.STRING)
+    private Resource.Status resourceStatus;
 
     private String resourceName;
+    private String resourceReference;
 
     @ManyToOne
     @JoinColumn(name = "resource_stack")
@@ -38,12 +48,18 @@ public class Resource implements ProvisionEntity {
     }
 
     public Resource(ResourceType resourceType, String resourceName, Stack stack) {
-        this(resourceType, resourceName, stack, null);
+        this(resourceType, resourceName, null, Status.CREATED, stack, null);
     }
 
     public Resource(ResourceType resourceType, String resourceName, Stack stack, String instanceGroup) {
+        this(resourceType, resourceName, null, Status.CREATED, stack, instanceGroup);
+    }
+
+    public Resource(ResourceType resourceType, String resourceName, String resourceReference, Status status, Stack stack, String instanceGroup) {
         this.resourceType = resourceType;
         this.resourceName = resourceName;
+        this.resourceReference = resourceReference;
+        this.resourceStatus = status;
         this.instanceGroup = instanceGroup;
         this.stack = stack;
     }
@@ -78,6 +94,22 @@ public class Resource implements ProvisionEntity {
 
     public void setResourceName(String resourceName) {
         this.resourceName = resourceName;
+    }
+
+    public Status getResourceStatus() {
+        return resourceStatus;
+    }
+
+    public void setResourceStatus(Status resourceStatus) {
+        this.resourceStatus = resourceStatus;
+    }
+
+    public String getResourceReference() {
+        return resourceReference;
+    }
+
+    public void setResourceReference(String resourceReference) {
+        this.resourceReference = resourceReference;
     }
 
     public Stack getStack() {

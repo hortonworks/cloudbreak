@@ -30,13 +30,13 @@ public class PollTaskFactory {
 
     public PollTask<ResourcesStatePollerResult> newPollResourcesStateTask(AuthenticatedContext authenticatedContext,
             List<CloudResource> cloudResource, boolean cancellable) {
-        CloudConnector connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatform());
+        CloudConnector connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatformVariant());
         return new PollResourcesStateTask(authenticatedContext, connector.resources(), cloudResource, cancellable);
     }
 
     public PollTask<InstancesStatusResult> newPollInstanceStateTask(AuthenticatedContext authenticatedContext, List<CloudInstance> instances,
             Set<InstanceStatus> completedStatuses) {
-        CloudConnector connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatform());
+        CloudConnector connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatformVariant());
         return new PollInstancesStateTask(authenticatedContext, connector.instances(), instances, completedStatuses);
     }
 

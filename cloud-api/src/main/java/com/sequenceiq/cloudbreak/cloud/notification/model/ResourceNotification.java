@@ -9,13 +9,13 @@ public class ResourceNotification {
     private CloudResource cloudResource;
     private Promise<ResourcePersisted> promise;
     private Long stackId;
-    private boolean create;
+    private ResourceNotificationType type;
 
-    public ResourceNotification(CloudResource cloudResource, Long stackId, Promise<ResourcePersisted> promise, boolean create) {
+    public ResourceNotification(CloudResource cloudResource, Long stackId, Promise<ResourcePersisted> promise, ResourceNotificationType type) {
         this.cloudResource = cloudResource;
         this.stackId = stackId;
         this.promise = promise;
-        this.create = create;
+        this.type = type;
     }
 
     public CloudResource getCloudResource() {
@@ -30,8 +30,8 @@ public class ResourceNotification {
         return stackId;
     }
 
-    public boolean isCreate() {
-        return create;
+    public ResourceNotificationType getType() {
+        return type;
     }
 
     @Override
@@ -40,7 +40,7 @@ public class ResourceNotification {
         sb.append("cloudResource=").append(cloudResource);
         sb.append(", promise=").append(promise);
         sb.append(", stackId=").append(stackId);
-        sb.append(", create=").append(create);
+        sb.append(", type=").append(type);
         sb.append('}');
         return sb.toString();
     }

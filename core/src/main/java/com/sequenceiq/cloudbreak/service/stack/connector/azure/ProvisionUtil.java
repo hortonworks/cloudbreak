@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.flow;
+package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,22 +12,25 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.stack.flow.FutureResult;
+import com.sequenceiq.cloudbreak.service.stack.flow.ResourceRequestResult;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 
 @Component
 public class ProvisionUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisionUtil.class);
+    private static final int PARALLEL_NUMBER = 6;
 
     @javax.annotation.Resource
     private Map<CloudPlatform, List<ResourceBuilder>> instanceBuilders;
 
     public boolean isRequestFull(Stack stack, int fullIndex) {
-        return fullIndex % stack.cloudPlatform().parallelNumber() == 0;
+        return fullIndex % PARALLEL_NUMBER == 0;
     }
 
     public boolean isRequestFullWithCloudPlatform(Stack stack, int fullIndex) {
-        return (fullIndex * instanceBuilders.get(stack.cloudPlatform()).size()) % stack.cloudPlatform().parallelNumber() == 0;
+        return (fullIndex * instanceBuilders.get(stack.cloudPlatform()).size()) % PARALLEL_NUMBER == 0;
     }
 
     public Map<FutureResult, List<ResourceRequestResult>> waitForRequestToFinish(List<Future<ResourceRequestResult>> futures) throws Exception {

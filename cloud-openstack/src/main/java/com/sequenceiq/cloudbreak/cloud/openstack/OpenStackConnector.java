@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 
@@ -30,10 +31,17 @@ public class OpenStackConnector implements CloudConnector {
     private OpenStackInstanceConnector instanceConnector;
     @Inject
     private OpenStackSetup openStackSetup;
+    @Inject
+    private OpenStackParameters openStackParameters;
 
     @Override
     public String platform() {
         return OpenStackConstants.OPENSTACK;
+    }
+
+    @Override
+    public String variant() {
+        return OpenStackConstants.Variant.HEAT.name();
     }
 
     @Override
@@ -49,6 +57,11 @@ public class OpenStackConnector implements CloudConnector {
     @Override
     public InstanceConnector instances() {
         return instanceConnector;
+    }
+
+    @Override
+    public PlatformParameters parameters() {
+        return openStackParameters;
     }
 
     @Override

@@ -33,7 +33,7 @@ public class ParameterGenerator {
     private static final long STACK_ID = 5L;
 
     public CloudContext createCloudContext() {
-        return new CloudContext(STACK_ID, "teststack", "TESTCONNECTOR", "owner");
+        return new CloudContext(STACK_ID, "teststack", "TESTCONNECTOR", "TESTVARIANT", "owner");
     }
 
     public CloudCredential createCloudCredential() {
@@ -77,7 +77,7 @@ public class ParameterGenerator {
     }
 
     public List<CloudResource> createCloudResourceList() {
-        CloudResource cr = new CloudResource(ResourceType.HEAT_STACK, "testref");
+        CloudResource cr = new CloudResource.Builder().type(ResourceType.HEAT_STACK).name("testref").build();
         return Lists.newArrayList(cr);
     }
 

@@ -27,6 +27,20 @@ public class CloudResourcePersisterService extends AbstractCloudPersisterService
     }
 
     @Override
+    public ResourceNotification update(ResourceNotification notification) {
+        LOGGER.debug("Resource update notification received: {}", notification);
+        Long stackId = notification.getStackId();
+        CloudResource cloudResource = notification.getCloudResource();
+        ResourceRepository repository = getResourceRepository();
+        Resource persistedResource = repository.findByStackIdAndNameAndType(stackId, cloudResource.getName(), cloudResource.getType());
+        Resource resource = getConversionService().convert(cloudResource, Resource.class);
+        updateWithPersistedFields(resource, persistedResource);
+        resource.setStack(getStackRepository().findByIdLazy(stackId));
+        repository.save(resource);
+        return notification;
+    }
+
+    @Override
     public ResourceNotification delete(ResourceNotification notification) {
         LOGGER.debug("Resource deletion notification received: {}", notification);
         Long stackId = notification.getStackId();
@@ -50,5 +64,13 @@ public class CloudResourcePersisterService extends AbstractCloudPersisterService
 
     private ResourceRepository getResourceRepository() {
         return getRepositoryForEntity(Resource.class);
+    }
+
+    private Resource updateWithPersistedFields(Resource resource, Resource persistedResource) {
+        if (persistedResource != null) {
+            resource.setId(persistedResource.getId());
+            resource.setInstanceGroup(persistedResource.getInstanceGroup());
+        }
+        return resource;
     }
 }

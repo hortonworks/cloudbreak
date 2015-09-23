@@ -63,7 +63,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
                         .parameters(parameters).timeoutMins(OPERATION_TIMEOUT).build());
 
 
-        CloudResource cloudResource = new CloudResource(ResourceType.HEAT_STACK, heatStack.getId());
+        CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.HEAT_STACK).name(heatStack.getId()).build();
         Promise<ResourcePersisted> promise = notifier.notifyAllocation(cloudResource, authenticatedContext.getCloudContext());
         try {
             promise.awaitSuccess();

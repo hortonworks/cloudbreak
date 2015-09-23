@@ -7,10 +7,19 @@ import static com.sequenceiq.cloudbreak.domain.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_REQUESTED;
 
-import javax.inject.Inject;
-
 import java.util.List;
 import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.stereotype.Service;
+import org.springframework.util.DigestUtils;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
@@ -48,14 +57,6 @@ import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateAllowedSubnetsRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
 
 @Service
 public class DefaultStackService implements StackService {
@@ -205,6 +206,7 @@ public class DefaultStackService implements StackService {
         Stack savedStack = null;
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
+        setPlatformVariant(stack);
         MDCBuilder.buildMdcContext(stack);
         String result = platformResolver.provisioning(stack.cloudPlatform()).preProvisionCheck(stack);
         if (null != result) {
@@ -220,6 +222,10 @@ public class DefaultStackService implements StackService {
             }
             return savedStack;
         }
+    }
+
+    private void setPlatformVariant(Stack stack) {
+        stack.setPlatformVariant(platformResolver.connector(stack.cloudPlatform()).checkAndGetPlatformVariant(stack));
     }
 
     @Override

@@ -68,6 +68,7 @@ ${core_user_data}
       image: { get_param: image_id }
       flavor: ${agent.flavor}
       key_name: { get_param: key_name }
+      admin_user: centos
       metadata: ${agent.metadata}
       networks:
         - port: { get_resource: ambari_app_port_${agent.instanceId} }

@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 
@@ -26,6 +27,8 @@ public class ArmConnector implements CloudConnector {
     private ArmInstanceConnector armInstanceConnector;
     @Inject
     private ArmCredentialConnector armCredentialConnector;
+    @Inject
+    private ArmPlatformParameters armPlatformParameters;
 
     @Inject
     private ArmSetup armSetup;
@@ -34,6 +37,11 @@ public class ArmConnector implements CloudConnector {
 
     @Override
     public String platform() {
+        return ArmConstants.AZURE_RM;
+    }
+
+    @Override
+    public String variant() {
         return ArmConstants.AZURE_RM;
     }
 
@@ -50,6 +58,11 @@ public class ArmConnector implements CloudConnector {
     @Override
     public InstanceConnector instances() {
         return armInstanceConnector;
+    }
+
+    @Override
+    public PlatformParameters parameters() {
+        return armPlatformParameters;
     }
 
     @Override

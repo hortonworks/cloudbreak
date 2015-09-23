@@ -230,7 +230,7 @@ public class CredentialController {
             return conversionService.convert((GcpCredential) credential, CredentialResponse.class);
         case OPENSTACK:
             return conversionService.convert((OpenStackCredential) credential, CredentialResponse.class);
-            case AZURE_RM:
+        case AZURE_RM:
             return conversionService.convert((AzureRmCredential) credential, CredentialResponse.class);
         default:
             throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credential.cloudPlatform()));
