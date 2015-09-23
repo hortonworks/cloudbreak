@@ -75,7 +75,7 @@ public class MetricEvaluator extends AbstractEventPublisher implements Evaluator
     }
 
     private boolean isAlertStateMet(String currentState, MetricAlert alert) {
-        return currentState.equalsIgnoreCase(alert.getAlertState().name());
+        return currentState.equalsIgnoreCase(alert.getAlertState().getValue());
     }
 
     private long getPeriod(Map<String, Object> history) {
