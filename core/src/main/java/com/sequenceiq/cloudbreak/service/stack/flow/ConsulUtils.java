@@ -175,7 +175,9 @@ public final class ConsulUtils {
     }
 
     public static int getConsulServerCount(int nodeCount) {
-        if (nodeCount < ConsulServers.NODE_COUNT_LOW.getMax()) {
+        if (nodeCount < ConsulServers.SINGLE_NODE_COUNT_LOW.getMax()) {
+            return ConsulServers.SINGLE_NODE_COUNT_LOW.getConsulServerCount();
+        } else if (nodeCount < ConsulServers.NODE_COUNT_LOW.getMax()) {
             return ConsulServers.NODE_COUNT_LOW.getConsulServerCount();
         } else if (nodeCount < ConsulServers.NODE_COUNT_MEDIUM.getMax()) {
             return ConsulServers.NODE_COUNT_MEDIUM.getConsulServerCount();
@@ -185,6 +187,7 @@ public final class ConsulUtils {
     }
 
     public enum ConsulServers {
+        SINGLE_NODE_COUNT_LOW(1, 2, 1),
         NODE_COUNT_LOW(3, 1000, 3),
         NODE_COUNT_MEDIUM(1001, 5000, 5),
         NODE_COUNT_HIGH(5001, 100_000, 7);

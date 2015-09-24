@@ -7,6 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageRequest;
+import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
+import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
+import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -14,9 +18,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.ImageStatusResult;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
+import com.sequenceiq.cloudbreak.service.stack.event.PrepareImageComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 
@@ -47,6 +53,51 @@ public class ServiceProviderSetupAdapter implements ProvisionSetup {
     }
 
     @Override
+    public ProvisionEvent prepareImage(Stack stack) throws Exception {
+        CloudPlatform cloudPlatform = stack.cloudPlatform();
+        CloudContext cloudContext = new CloudContext(stack);
+        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        CloudStack cloudStack = cloudStackConverter.convert(stack);
+        PrepareImageRequest<PrepareImageResult> prepareImageRequest = new PrepareImageRequest<>(cloudContext, cloudCredential, cloudStack);
+        LOGGER.info("Triggering event: {}", prepareImageRequest);
+        eventBus.notify(prepareImageRequest.selector(), Event.wrap(prepareImageRequest));
+        try {
+            PrepareImageResult res = prepareImageRequest.await();
+            LOGGER.info("Result: {}", res);
+            if (res.getErrorDetails() != null) {
+                LOGGER.error("Failed to prepare image", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
+            }
+            return new PrepareImageComplete(cloudPlatform, stack.getId());
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while executing prepare image", e);
+            throw new OperationException(e);
+        }
+    }
+
+    @Override
+    public ImageStatusResult checkImage(Stack stack) throws Exception {
+        CloudContext cloudContext = new CloudContext(stack);
+        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        CloudStack cloudStack = cloudStackConverter.convert(stack);
+        CheckImageRequest<CheckImageResult> checkImageRequest = new CheckImageRequest<>(cloudContext, cloudCredential, cloudStack);
+        LOGGER.info("Triggering event: {}", checkImageRequest);
+        eventBus.notify(checkImageRequest.selector(), Event.wrap(checkImageRequest));
+        try {
+            CheckImageResult res = checkImageRequest.await();
+            LOGGER.info("Result: {}", res);
+            if (res.getErrorDetails() != null) {
+                LOGGER.error("Failed to check image state", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
+            }
+            return new ImageStatusResult(res.getImageStatus(), res.getStatusProgressValue());
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while executing check image", e);
+            throw new OperationException(e);
+        }
+    }
+
+    @Override
     public ProvisionEvent setupProvisioning(Stack stack) throws Exception {
         CloudPlatform cloudPlatform = stack.cloudPlatform();
         CloudContext cloudContext = new CloudContext(stack);
@@ -68,6 +119,9 @@ public class ServiceProviderSetupAdapter implements ProvisionSetup {
             throw new OperationException(e);
         }
     }
+
+
+
 
 
 }

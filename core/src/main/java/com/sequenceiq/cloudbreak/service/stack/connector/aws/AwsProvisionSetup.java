@@ -16,9 +16,12 @@ import com.amazonaws.services.ec2.model.InternetGatewayAttachment;
 import com.sequenceiq.cloudbreak.domain.AwsNetwork;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.ImageStatus;
+import com.sequenceiq.cloudbreak.domain.ImageStatusResult;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
+import com.sequenceiq.cloudbreak.service.stack.event.PrepareImageComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 
@@ -36,6 +39,16 @@ public class AwsProvisionSetup implements ProvisionSetup {
     @Override
     public ProvisionEvent setupProvisioning(Stack stack) {
         return new ProvisionSetupComplete(getCloudPlatform(), stack.getId());
+    }
+
+    @Override
+    public ProvisionEvent prepareImage(Stack stack) throws Exception {
+        return new PrepareImageComplete(stack.cloudPlatform(), stack.getId());
+    }
+
+    @Override
+    public ImageStatusResult checkImage(Stack stack) throws Exception {
+        return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
     }
 
     @Override

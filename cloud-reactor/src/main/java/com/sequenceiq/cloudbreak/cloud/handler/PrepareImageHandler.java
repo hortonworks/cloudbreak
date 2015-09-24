@@ -9,41 +9,40 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.event.setup.SetupRequest;
-import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
+import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
+import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 import reactor.bus.Event;
 
 @Component
-public class ProvisionSetupHandler implements CloudPlatformEventHandler<SetupRequest> {
+public class PrepareImageHandler implements CloudPlatformEventHandler<PrepareImageRequest> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProvisionSetupHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrepareImageHandler.class);
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
-
     @Override
-    public Class<SetupRequest> type() {
-        return SetupRequest.class;
+    public Class<PrepareImageRequest> type() {
+        return PrepareImageRequest.class;
     }
 
     @Override
-    public void accept(Event<SetupRequest> event) {
+    public void accept(Event<PrepareImageRequest> event) {
         LOGGER.info("Received event: {}", event);
-        SetupRequest request = event.getData();
+        PrepareImageRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
-            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             CloudStack cloudStack = request.getCloudStack();
-            connector.setup().execute(auth, cloudStack);
+            connector.setup().prepareImage(auth, cloudStack);
 
-            request.getResult().onNext(new SetupResult(request));
-            LOGGER.info("Provision setup finished for {}", cloudContext);
+            request.getResult().onNext(new PrepareImageResult(request));
+            LOGGER.info("Prepare image finished for {}", cloudContext);
         } catch (Exception e) {
-            request.getResult().onNext(new SetupResult(e, request));
+            request.getResult().onNext(new PrepareImageResult(e, request));
         }
     }
 }

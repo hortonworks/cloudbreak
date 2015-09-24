@@ -89,4 +89,9 @@ public interface FlowFacade {
     FlowContext handleStackSync(FlowContext context) throws CloudbreakException;
 
     FlowContext credentialChange(FlowContext context) throws CloudbreakException;
+
+    FlowContext checkImage(FlowContext context) throws CloudbreakException;
+
+    FlowContext prepareImage(FlowContext context) throws CloudbreakException;
+
 }

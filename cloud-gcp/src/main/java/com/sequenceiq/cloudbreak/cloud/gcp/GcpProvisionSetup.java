@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getImageName
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getProjectId;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getTarName;
 
+import java.io.IOException;
 import java.util.Date;
 
 import javax.inject.Inject;
@@ -25,23 +26,24 @@ import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.StorageObject;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.domain.ImageStatusResult;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.gcp.task.GcpImageCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
-import com.sequenceiq.cloudbreak.cloud.task.PollTask;
+import com.sequenceiq.cloudbreak.domain.ImageStatus;
 
 @Service
 public class GcpProvisionSetup implements Setup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpProvisionSetup.class);
+    private static final String READY = "READY";
 
     @Inject
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
 
     @Override
-    public void execute(AuthenticatedContext authenticatedContext, CloudStack stack) {
+    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack) {
         long stackId = authenticatedContext.getCloudContext().getStackId();
         CloudCredential credential = authenticatedContext.getCloudCredential();
         try {
@@ -74,14 +76,38 @@ public class GcpProvisionSetup implements Setup {
                 image.setRawDisk(rawDisk);
                 Compute.Images.Insert ins1 = compute.images().insert(projectId, image);
                 ins1.execute();
-                PollTask<Boolean> task = new GcpImageCheckerTask(authenticatedContext, projectId, image.getName(), compute);
-                syncPollingScheduler.schedule(task);
             }
         } catch (Exception e) {
             String msg = String.format("Error occurred on %s stack during the setup: %s", stackId, e.getMessage());
             LOGGER.error(msg, e);
             throw new CloudConnectorException(msg, e);
         }
+    }
+
+    @Override
+    public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack) {
+        CloudCredential credential = authenticatedContext.getCloudCredential();
+        String projectId = getProjectId(credential);
+        String imageName = stack.getImage().getImageName();
+        try {
+            Image image = new Image();
+            image.setName(getImageName(imageName));
+            Compute compute = buildCompute(credential);
+            Compute.Images.Get getImages = compute.images().get(projectId, image.getName());
+            String status = getImages.execute().getStatus();
+            LOGGER.info("Status of image {} copy: {}", image.getName(), status);
+            if (READY.equals(status)) {
+                return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
+            }
+        } catch (IOException e) {
+            LOGGER.warn("Failed to retrieve image copy status", e);
+            return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);
+        }
+        return new ImageStatusResult(ImageStatus.IN_PROGRESS, ImageStatusResult.HALF);
+    }
+
+    @Override
+    public void execute(AuthenticatedContext authenticatedContext, CloudStack stack) {
         LOGGER.debug("setup has been executed");
     }
 

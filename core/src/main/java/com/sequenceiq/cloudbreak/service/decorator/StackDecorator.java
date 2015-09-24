@@ -146,7 +146,7 @@ public class StackDecorator implements Decorator<Stack> {
         if (stack.getGatewayInstanceGroup() == null) {
             throw new BadRequestException("Gateway instance group not configured");
         }
-        int minNodeCount = ConsulUtils.ConsulServers.NODE_COUNT_LOW.getMin();
+        int minNodeCount = ConsulUtils.ConsulServers.SINGLE_NODE_COUNT_LOW.getMin();
         int fullNodeCount = stack.getFullNodeCount();
         if (fullNodeCount < minNodeCount) {
             throw new BadRequestException(String.format("At least %s nodes are required to launch the stack", minNodeCount));

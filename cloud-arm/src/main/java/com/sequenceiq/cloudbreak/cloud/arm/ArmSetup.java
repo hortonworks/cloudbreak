@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.arm;
 
+import static com.sequenceiq.cloudbreak.cloud.arm.ArmTemplateUtils.NOT_FOUND;
+
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
@@ -11,20 +13,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.blob.CopyState;
+import com.microsoft.azure.storage.blob.CopyStatus;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.cloud.Setup;
-import com.sequenceiq.cloudbreak.cloud.arm.context.ImageCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.context.StorageCheckerContext;
-import com.sequenceiq.cloudbreak.cloud.arm.task.ArmImageCopyStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.arm.task.ArmStorageStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.domain.ImageStatusResult;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.domain.CloudRegion;
+import com.sequenceiq.cloudbreak.domain.ImageStatus;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -43,6 +50,54 @@ public class ArmSetup implements Setup {
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
     @Inject
     private ArmTemplateUtils armTemplateUtils;
+    @Inject
+    private ResourceNotifier resourceNotifier;
+
+    @Override
+    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack) {
+        String osStorageName = armClient.getStorageName(authenticatedContext.getCloudContext());
+        String storageGroup = armTemplateUtils.getStackName(authenticatedContext.getCloudContext());
+        AzureRMClient client = armClient.createAccess(authenticatedContext.getCloudCredential());
+        try {
+            if (!storageContainsImage(client, storageGroup, osStorageName, stack.getImage().getImageName())) {
+                client.copyImageBlobInStorageContainer(storageGroup, osStorageName, IMAGES, stack.getImage().getImageName());
+            }
+        } catch (HttpResponseException ex) {
+            throw new CloudConnectorException(ex.getResponse().getData().toString(), ex);
+        } catch (Exception ex) {
+            throw new CloudConnectorException(ex);
+        }
+        LOGGER.debug("prepare image has been executed");
+    }
+
+    @Override
+    public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack) {
+        String osStorageName = armClient.getStorageName(authenticatedContext.getCloudContext());
+        String storageGroup = armTemplateUtils.getStackName(authenticatedContext.getCloudContext());
+        ArmCredentialView armCredentialView = new ArmCredentialView(authenticatedContext.getCloudCredential());
+        AzureRMClient client = armClient.createAccess(armCredentialView);
+        try {
+
+            CopyState copyState = client.getCopyStatus(storageGroup, osStorageName, IMAGES, stack.getImage().getImageName());
+            if (CopyStatus.SUCCESS.equals(copyState.getStatus())) {
+                return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
+            } else if (CopyStatus.ABORTED.equals(copyState.getStatus()) || CopyStatus.INVALID.equals(copyState.getStatus())) {
+                return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);
+            } else {
+                int percentage = (int) (((double) copyState.getBytesCopied() * ImageStatusResult.COMPLETED) / (double) copyState.getTotalBytes());
+                LOGGER.info(String.format("CopyStatus Pending %s byte/%s byte: %.4s %%", copyState.getTotalBytes(), copyState.getBytesCopied(), percentage));
+                return new ImageStatusResult(ImageStatus.IN_PROGRESS, percentage);
+            }
+        } catch (HttpResponseException e) {
+            if (e.getStatusCode() != NOT_FOUND) {
+                throw new CloudConnectorException(e.getResponse().getData().toString());
+            } else {
+                return new ImageStatusResult(ImageStatus.IN_PROGRESS, ImageStatusResult.HALF);
+            }
+        } catch (Exception ex) {
+            return new ImageStatusResult(ImageStatus.IN_PROGRESS, ImageStatusResult.HALF);
+        }
+    }
 
     @Override
     public void execute(AuthenticatedContext authenticatedContext, CloudStack stack) {
@@ -50,7 +105,9 @@ public class ArmSetup implements Setup {
         String osStorageName = armClient.getStorageName(authenticatedContext.getCloudContext());
         String storageGroup = armTemplateUtils.getStackName(authenticatedContext.getCloudContext());
         AzureRMClient client = armClient.createAccess(authenticatedContext.getCloudCredential());
+        CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.ARM_TEMPLATE).name(storageGroup).build();
         try {
+            resourceNotifier.notifyAllocation(cloudResource, authenticatedContext.getCloudContext());
             if (!resourceGroupExist(client, storageGroup)) {
                 client.createResourceGroup(storageGroup, CloudRegion.valueOf(stack.getRegion()).value());
             }
@@ -61,20 +118,11 @@ public class ArmSetup implements Setup {
                 syncPollingScheduler.schedule(task);
             }
             client.createContainerInStorage(storageGroup, osStorageName, IMAGES);
-            if (!storageContainsImage(client, storageGroup, osStorageName, stack.getImage().getImageName())) {
-                client.copyImageBlobInStorageContainer(storageGroup, osStorageName, IMAGES, stack.getImage().getImageName());
-                PollTask<Boolean> task = new ArmImageCopyStatusCheckerTask(authenticatedContext, armClient,
-                        new ImageCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()), storageGroup, osStorageName,
-                                IMAGES, stack.getImage().getImageName()));
-
-                syncPollingScheduler.schedule(task);
-            }
         } catch (HttpResponseException ex) {
             throw new CloudConnectorException(ex.getResponse().getData().toString(), ex);
         } catch (Exception ex) {
             throw new CloudConnectorException(ex);
         }
-
         LOGGER.debug("setup has been executed");
     }
 

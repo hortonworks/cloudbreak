@@ -15,8 +15,9 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.AddInstancesHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.BootstrapClusterHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.BootstrapNewNodesHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterCredentialChangeHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.CheckImageStatusHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterContainersHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterCredentialChangeHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterDownscaleHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterInstallHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterResetHandler;
@@ -31,6 +32,7 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.ConsulMetadataSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ExtendConsulMetadataHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ExtendMetadataHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.MetadataSetupHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.PrepareProvisionImageHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ProvisioningHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ProvisioningSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.RemoveInstanceHandler;
@@ -80,6 +82,8 @@ public class FlowInitializer implements InitializingBean {
         registerAuthenticationClusterChangeFlows();
 
         reactor.on($(FlowPhases.PROVISIONING_SETUP.name()), getHandlerForClass(ProvisioningSetupHandler.class));
+        reactor.on($(FlowPhases.PREPARE_IMAGE.name()), getHandlerForClass(PrepareProvisionImageHandler.class));
+        reactor.on($(FlowPhases.CHECK_IMAGE.name()), getHandlerForClass(CheckImageStatusHandler.class));
         reactor.on($(FlowPhases.PROVISIONING.name()), getHandlerForClass(ProvisioningHandler.class));
         reactor.on($(FlowPhases.METADATA_SETUP.name()), getHandlerForClass(MetadataSetupHandler.class));
         reactor.on($(FlowPhases.TLS_SETUP.name()), getHandlerForClass(TlsSetupHandler.class));
@@ -133,7 +137,13 @@ public class FlowInitializer implements InitializingBean {
 
     private void registerProvisioningFlows() {
         transitionKeyService.registerTransition(ProvisioningSetupHandler.class, TransitionFactory
-                .createTransition(FlowPhases.PROVISIONING_SETUP.name(), FlowPhases.PROVISIONING.name(), FlowPhases.STACK_CREATION_FAILED.name()));
+                .createTransition(FlowPhases.PROVISIONING_SETUP.name(), FlowPhases.PREPARE_IMAGE.name(), FlowPhases.STACK_CREATION_FAILED.name()));
+
+        transitionKeyService.registerTransition(PrepareProvisionImageHandler.class, TransitionFactory
+                .createTransition(FlowPhases.PREPARE_IMAGE.name(), FlowPhases.CHECK_IMAGE.name(), FlowPhases.STACK_CREATION_FAILED.name()));
+
+        transitionKeyService.registerTransition(CheckImageStatusHandler.class, TransitionFactory
+                .createTransition(FlowPhases.CHECK_IMAGE.name(), FlowPhases.PROVISIONING.name(), FlowPhases.STACK_CREATION_FAILED.name()));
 
         transitionKeyService.registerTransition(ProvisioningHandler.class, TransitionFactory
                 .createTransition(FlowPhases.PROVISIONING.name(), FlowPhases.METADATA_SETUP.name(), FlowPhases.STACK_CREATION_FAILED.name()));

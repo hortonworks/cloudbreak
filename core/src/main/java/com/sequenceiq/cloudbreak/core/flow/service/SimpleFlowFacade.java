@@ -1,9 +1,14 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
+import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_IN_PROGRESS;
+
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -17,6 +22,8 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.event.CheckImageComplete;
+import com.sequenceiq.cloudbreak.service.stack.event.PrepareImageComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 
@@ -47,7 +54,9 @@ public class SimpleFlowFacade implements FlowFacade {
 
     private enum Msg {
 
-        FLOW_STACK_PROVISIONED("flow.stack.provisioned");
+        FLOW_STACK_PROVISIONED("flow.stack.provisioned"),
+        FLOW_STACK_SETUP_START("stack.setup.start"),
+        FLOW_STACK_SETUP("stack.setup.time");
 
         private String code;
 
@@ -75,6 +84,50 @@ public class SimpleFlowFacade implements FlowFacade {
                     .build();
         } catch (Exception e) {
             LOGGER.error("Exception during provisioning setup: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext prepareImage(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Prepare Image. Context: {}", context);
+        try {
+            ProvisioningContext provisioningContext = (ProvisioningContext) context;
+            Stack stack = stackService.getById(provisioningContext.getStackId());
+            MDCBuilder.buildMdcContext(stack);
+            PrepareImageComplete setupComplete = provisioningSetupService.prepareImage(stack);
+            fireEventAndLog(stack.getId(), context, Msg.FLOW_STACK_SETUP_START, UPDATE_IN_PROGRESS.name(), Arrays.asList());
+            LOGGER.debug("Prepare Image DONE.");
+            return new ProvisioningContext.Builder()
+                    .setDefaultParams(setupComplete.getStackId(), setupComplete.getCloudPlatform())
+                    .setProvisionSetupProperties(new HashMap<String, Object>())
+                    .build();
+        } catch (Exception e) {
+            LOGGER.error("Exception during prepare Image: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext checkImage(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Check Image. Context: {}", context);
+        try {
+
+            ProvisioningContext provisioningContext = (ProvisioningContext) context;
+            Date startDate = new Date();
+            Stack stack = stackService.getById(provisioningContext.getStackId());
+            MDCBuilder.buildMdcContext(stack);
+            CheckImageComplete setupComplete = provisioningSetupService.checkImage(stack);
+            LOGGER.debug("Check Image DONE.");
+            Date endDate = new Date();
+            long seconds = (endDate.getTime() - startDate.getTime()) / DateUtils.MILLIS_PER_SECOND;
+            fireEventAndLog(stack.getId(), context, Msg.FLOW_STACK_SETUP, UPDATE_IN_PROGRESS.name(), Arrays.asList(String.valueOf(seconds)));
+            return new ProvisioningContext.Builder()
+                    .setDefaultParams(setupComplete.getStackId(), setupComplete.getCloudPlatform())
+                    .setProvisionSetupProperties(new HashMap<String, Object>())
+                    .build();
+        } catch (Exception e) {
+            LOGGER.error("Exception during check Image: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }
@@ -615,6 +668,12 @@ public class SimpleFlowFacade implements FlowFacade {
             LOGGER.error("Exception during cluster authentication change!: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
+    }
+
+    private void fireEventAndLog(Long stackId, FlowContext context, Msg msgCode, String eventType, Object... args) {
+        LOGGER.debug("{} [STACK_FLOW_STEP]. Context: {}", msgCode, context);
+        String message = cloudbreakMessagesService.getMessage(msgCode.code(), Arrays.asList(args));
+        cloudbreakEventService.fireCloudbreakEvent(stackId, eventType, message);
     }
 
 }

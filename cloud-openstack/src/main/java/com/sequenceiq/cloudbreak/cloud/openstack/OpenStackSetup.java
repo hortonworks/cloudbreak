@@ -15,9 +15,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.domain.ImageStatusResult;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.domain.ImageStatus;
 
 @Component
 public class OpenStackSetup implements Setup {
@@ -28,11 +30,21 @@ public class OpenStackSetup implements Setup {
     private OpenStackClient openStackClient;
 
     @Override
-    public void execute(AuthenticatedContext authenticatedContext, CloudStack stack) {
+    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack) {
         String imageName = stack.getImage().getImageName();
         OSClient osClient = openStackClient.createOSClient(authenticatedContext);
-        verifyFlavors(osClient, stack.getGroups());
         verifyImage(osClient, imageName);
+    }
+
+    @Override
+    public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack) {
+        return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
+    }
+
+    @Override
+    public void execute(AuthenticatedContext authenticatedContext, CloudStack stack) {
+        OSClient osClient = openStackClient.createOSClient(authenticatedContext);
+        verifyFlavors(osClient, stack.getGroups());
         LOGGER.debug("setup has been executed");
     }
 
