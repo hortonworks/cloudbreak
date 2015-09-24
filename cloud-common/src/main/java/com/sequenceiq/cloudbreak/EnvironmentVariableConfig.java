@@ -72,6 +72,7 @@ public class EnvironmentVariableConfig {
     public static final String CB_OPENSTACK_IMAGE = "cb-centos71-amb210-2015-09-25";
     public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos71-amb210-2015-09-25130.tar.gz";
 
+    public static final String CB_ARM_CENTRAL_STORAGE = "cbstore";
     public static final String CB_ARM_TEMPLATE_PATH = "templates/arm-v2.ftl";
     public static final String CB_ARM_PARAMETER_PATH = "templates/parameters.ftl";
 

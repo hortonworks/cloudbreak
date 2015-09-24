@@ -31,7 +31,7 @@ public class ArmInstanceConnector implements InstanceConnector {
     private ArmMetadataCollector armMetadataCollector;
 
     @Inject
-    private ArmTemplateUtils armTemplateUtils;
+    private ArmUtils armTemplateUtils;
 
     @Override
     public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm) {

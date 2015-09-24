@@ -45,6 +45,9 @@ public class ArmTemplateBuilder {
     @Inject
     private ArmClient armClient;
 
+    @Inject
+    private ArmUtils armUtils;
+
     public String build(String stackName, CloudCredential cloudCredential, CloudContext cloudContext, CloudStack cloudStack) {
         try {
             String imageName = cloudStack.getImage().getImageName();
@@ -52,9 +55,9 @@ public class ArmTemplateBuilder {
             String[] split = imageName.split("/");
             ArmCredentialView armCredentialView = new ArmCredentialView(cloudCredential);
             Map<String, Object> model = new HashMap<>();
-            model.put("storage_account_name", armClient.getStorageName(cloudContext));
+            model.put("storage_account_name", armUtils.getStorageName(cloudCredential, cloudContext, cloudStack.getRegion()));
             model.put("image_storage_container_name", ArmSetup.IMAGES);
-            model.put("storage_container_name", ArmSetup.VHDS);
+            model.put("storage_container_name", armUtils.getDiskContainerName(cloudContext));
             model.put("storage_vhd_name", split[2]);
             model.put("admin_user_name", cloudCredential.getLoginUserName());
             model.put("stackname", stackName);
@@ -79,7 +82,7 @@ public class ArmTemplateBuilder {
 
     public String buildParameters(CloudCredential credential, Network network, Image image) {
         try {
-            return processTemplateIntoString(freemarkerConfiguration.getTemplate(armTemplateParametersPath, "UTF-8"),  new HashMap<>());
+            return processTemplateIntoString(freemarkerConfiguration.getTemplate(armTemplateParametersPath, "UTF-8"), new HashMap<>());
         } catch (IOException | TemplateException e) {
             throw new CloudConnectorException("Failed to process the Arm TemplateParameterBuilder", e);
         }
