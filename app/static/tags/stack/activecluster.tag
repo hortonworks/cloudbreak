@@ -137,9 +137,9 @@
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            <tr ng-repeat="(key, value) in activeCluster.cluster.serviceEndPoints">
-                                                                <td data-title="'servicename'" class="col-md-4">{{key}}</td>
-                                                                <td data-title="'address'" class="col-md-3"><a target="_blank" href="http://{{value}}">{{value}}</a></td>
+                                                            <tr ng-repeat="(key, value) in activeCluster.cluster.serviceEndPoints" ng-show="visibleServiceValue(value)">
+                                                                <td data-title="'servicename'" class="col-md-4" >{{key}}</td>
+                                                                <td data-title="'address'" class="col-md-3"><a target="_blank" href="http://{{value}}" >{{value}}</a></td>
                                                             </tr>
                                                         </tbody>
                                                     </table>
@@ -173,8 +173,7 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="panel panel-default">
+                        <div class="panel panel-default" ng-show="filteredActiveClusterData.length !== 0">
                             <div class="panel-heading">
                                 <h5><a href="" data-toggle="collapse" data-target="#panel-collapse0002"><i class="fa fa-align-justify fa-fw"></i>{{msg.active_cluster_stack_description_title_prefix_label}} {{activeCluster.name}}</a></h5>
                             </div>
