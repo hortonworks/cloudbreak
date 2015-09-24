@@ -1,4 +1,5 @@
-<form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+<form class="form-horizontal" role="document">
+    <!-- role: 'document' - non-editable "form" -->
 
     <div class="form-group">
         <label class="col-sm-3 control-label" for="name">{{msg.name_label}}</label>

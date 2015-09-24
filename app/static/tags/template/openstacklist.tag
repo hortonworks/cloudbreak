@@ -1,4 +1,5 @@
-<form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+<form class="form-horizontal" role="document">
+    <!-- role: 'document' - non-editable "form" -->
     <div class="form-group">
         <label class="col-sm-3 control-label" for="openstackclusterName">{{msg.name_label}}</label>
 
@@ -16,12 +17,12 @@
         <!-- .col-sm-9 -->
     </div>
     <div class="form-group">
-      <label class="col-sm-3 control-label" for="openstackinstanceType">{{msg.template_form_instance_type_label}}</label>
+        <label class="col-sm-3 control-label" for="openstackinstanceType">{{msg.template_form_instance_type_label}}</label>
 
-      <div class="col-sm-9">
-        <p id="openstackinstanceType" class="form-control-static">{{template.parameters.instanceType}}</p>
-      </div>
-      <!-- .col-sm-9 -->
+        <div class="col-sm-9">
+            <p id="openstackinstanceType" class="form-control-static">{{template.parameters.instanceType}}</p>
+        </div>
+        <!-- .col-sm-9 -->
     </div>
     <div class="form-group">
         <label class="col-sm-3 control-label" for="openstackvolumecount">{{msg.template_form_volume_count_label}}</label>

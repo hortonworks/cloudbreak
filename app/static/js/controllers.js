@@ -15,17 +15,17 @@ var uluwatuControllers = angular.module('uluwatuControllers', ['cgNotify']);
     - html: {{ "message : {0} {1}" | format:"0":"1"}}
     - controller: $filter("format")("message: {0} {1}", "0", "1")
  */
-uluwatuControllers.filter("format", function () {
-    return function (input) {
-      var args = arguments;
-      return input.replace(/\{(\d+)\}/g, function (match, capture) {
-          return args[1*capture + 1];
-      });
+uluwatuControllers.filter("format", function() {
+    return function(input) {
+        var args = arguments;
+        return input.replace(/\{(\d+)\}/g, function(match, capture) {
+            return args[1 * capture + 1];
+        });
     };
 });
 
 uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '$rootScope', '$filter', 'UserPermission', 'ErrorHandler', 'notify',
-    function ($scope, $http, User, $rootScope, $filter, UserPermission, ErrorHandler, notify) {
+    function($scope, $http, User, $rootScope, $filter, UserPermission, ErrorHandler, notify) {
         var orderBy = $filter('orderBy');
         $scope.user = User.get();
 
@@ -48,7 +48,7 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             var now = new Date();
             var date = now.toTimeString().split(" ")[0];
             if (name) {
-                $scope.statusMessage = date + " " + name +  ": " + message;
+                $scope.statusMessage = date + " " + name + ": " + message;
             } else {
                 $scope.statusMessage = date + " " + message;
             }
@@ -61,7 +61,7 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
 
         $scope.showError = function(error, prefix) {
             var errorMsg = ErrorHandler.handleError(error);
-            if (prefix){
+            if (prefix) {
                 $scope.showErrorMessage(errorMsg, prefix)
             } else {
                 $scope.showErrorMessage(errorMsg);
@@ -75,15 +75,15 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
         }
 
         $scope.showWarningMessage = function(message) {
-          $scope.modifyStatusMessage(message);
-          $scope.modifyStatusClass("has-warning");
-          $scope.popupWarning($scope.statusMessage);
+            $scope.modifyStatusMessage(message);
+            $scope.modifyStatusClass("has-warning");
+            $scope.popupWarning($scope.statusMessage);
         }
 
         $scope.showSuccess = function(message, prefix) {
-          $scope.modifyStatusMessage(message);
-          $scope.modifyStatusClass("has-success");
-          $scope.popupSuccess($scope.statusMessage);
+            $scope.modifyStatusMessage(message);
+            $scope.modifyStatusClass("has-success");
+            $scope.popupSuccess($scope.statusMessage);
         }
 
         $scope.popup = function(message, modifyClass) {
@@ -118,19 +118,19 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
         }
 
         $scope.addPanelJQueryEventListeners = function(panel) {
-          addPanelJQueryEventListeners(panel);
+            addPanelJQueryEventListeners(panel);
         }
 
         $scope.addClusterFormJQEventListeners = function() {
-          addClusterFormJQEventListeners();
+            addClusterFormJQEventListeners();
         }
 
         $scope.addActiveClusterJQEventListeners = function() {
-          addActiveClusterJQEventListeners();
+            addActiveClusterJQEventListeners();
         }
 
         $scope.addClusterListPanelJQEventListeners = function() {
-           addClusterListPanelJQEventListeners();
+            addClusterListPanelJQEventListeners();
         }
 
         $scope.addDatePickerPanelJQueryEventListeners = function() {
@@ -138,25 +138,25 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
         }
 
         $scope.addCrudControls = function() {
-          addCrudControls();
+            addCrudControls();
         }
 
         $scope.order = function(predicate, reverse) {
-          $scope.lastOrderPredicate = predicate;
-          $rootScope.clusters = orderBy($rootScope.clusters, predicate, reverse);
+            $scope.lastOrderPredicate = predicate;
+            $rootScope.clusters = orderBy($rootScope.clusters, predicate, reverse);
         }
 
         $scope.orderByUptime = function() {
-          $scope.lastOrderPredicate = 'uptime';
-          $rootScope.clusters = orderBy($rootScope.clusters,
-            function(element) {
-                return parseInt(element.hoursUp * 60 + element.minutesUp);
-            },
-            false);
+            $scope.lastOrderPredicate = 'uptime';
+            $rootScope.clusters = orderBy($rootScope.clusters,
+                function(element) {
+                    return parseInt(element.hoursUp * 60 + element.minutesUp);
+                },
+                false);
         }
 
         $scope.orderClusters = function() {
-            if($scope.lastOrderPredicate == 'uptime') {
+            if ($scope.lastOrderPredicate == 'uptime') {
                 $scope.orderByUptime();
             } else {
                 $scope.order($scope.lastOrderPredicate, false);
@@ -164,13 +164,13 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
         };
 
         $scope.eventTimestampAsFloat = function(element) {
-          return parseFloat(element.eventTimestamp);
+            return parseFloat(element.eventTimestamp);
         }
 
-        function getUserPermission(){
-          UserPermission.get(function(success){
-            $scope.user.admin = success.admin;
-          });
+        function getUserPermission() {
+            UserPermission.get(function(success) {
+                $scope.user.admin = success.admin;
+            });
         }
     }
 ]);

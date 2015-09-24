@@ -4,15 +4,14 @@
 
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
-            <a href="" id="securitygroup-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"
-               data-target="#panel-securitygroup-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
+            <a href="" id="securitygroup-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse" data-target="#panel-securitygroup-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
             <h4><span class="badge pull-right">{{$root.securitygroups.length}}</span> {{msg.securitygroup_manage_title}}</h4>
         </div>
 
         <div id="panel-securitygroup-collapse" class="panel-btn-in-header-collapse collapse">
             <div class="panel-body">
 
-               <!--  <p class="btn-row-over-panel">
+                <!--  <p class="btn-row-over-panel">
                     <a href="" id="panel-create-securitygroup-collapse-btn" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-securitygroup-collapse">
                         <i class="fa fa-plus fa-fw"></i><span> {{msg.securitygroup_form_create}}</span>
                     </a>
@@ -20,7 +19,7 @@
 
                 <!-- ............ CREATE FORM ............................................. -->
 
-              <!--   <div class="panel panel-default">
+                <!--   <div class="panel panel-default">
                     <div id="panel-create-securitygroup-collapse" class="panel-collapse panel-under-btn-collapse collapse">
                         <div class="panel-body">
                             <div class="row " style="padding-bottom: 10px">

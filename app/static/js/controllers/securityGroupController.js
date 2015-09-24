@@ -1,7 +1,8 @@
 'use strict';
 
 angular.module('uluwatuControllers').controller('securityGroupController', ['$scope', '$rootScope', '$filter', 'UserSecurityGroup',
-    'AccountSecurityGroup', 'GlobalSecurityGroup',function($scope, $rootScope, $filter, UserSecurityGroup, AccountSecurityGroup, GlobalSecurityGroup) {
+    'AccountSecurityGroup', 'GlobalSecurityGroup',
+    function($scope, $rootScope, $filter, UserSecurityGroup, AccountSecurityGroup, GlobalSecurityGroup) {
 
         $rootScope.securitygroups = AccountSecurityGroup.query();
         $scope.securitygroup = {};

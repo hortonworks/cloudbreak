@@ -52,11 +52,11 @@
 </div>
 
 <div class="form-group">
-      <label class="col-sm-3 control-label" for="credPublic">{{msg.public_in_account_label}}</label>
-      <div class="col-sm-9">
-          <input type="checkbox" name="credPublic" id="credPublic" ng-model="credentialAws.public">
-      </div>
-       <!-- .col-sm-9 -->
+    <label class="col-sm-3 control-label" for="credPublic">{{msg.public_in_account_label}}</label>
+    <div class="col-sm-9">
+        <input type="checkbox" name="credPublic" id="credPublic" ng-model="credentialAws.public">
+    </div>
+    <!-- .col-sm-9 -->
 </div>
 
 <div class="row btn-row">

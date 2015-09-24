@@ -1,4 +1,5 @@
-<form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+<form class="form-horizontal" role="document">
+    <!-- role: 'document' - non-editable "form" -->
 
     <div class="form-group">
         <label class="col-sm-3 control-label" for="name">{{msg.name_label}}</label>
@@ -27,12 +28,12 @@
         <!-- .col-sm-9 -->
     </div>
     <div class="form-group">
-            <label class="col-sm-3 control-label" for="accesKey">{{msg.credential_azure_rm_form_access_key_id_label}}</label>
+        <label class="col-sm-3 control-label" for="accesKey">{{msg.credential_azure_rm_form_access_key_id_label}}</label>
 
-            <div class="col-sm-9">
-                <p id="accesKey" class="form-control-static">{{credential.parameters.accesKey}}</p>
-            </div>
-            <!-- .col-sm-9 -->
+        <div class="col-sm-9">
+            <p id="accesKey" class="form-control-static">{{credential.parameters.accesKey}}</p>
+        </div>
+        <!-- .col-sm-9 -->
     </div>
     <div class="form-group">
         <label class="col-sm-3 control-label" for="secretKey">{{msg.credential_azure_rm_form_secret_key_id_label}}</label>

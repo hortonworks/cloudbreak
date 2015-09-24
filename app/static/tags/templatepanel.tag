@@ -4,8 +4,7 @@
 
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
-            <a href="" id="templates-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"
-               data-target="#panel-templates-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
+            <a href="" id="templates-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse" data-target="#panel-templates-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
             <h4><span class="badge pull-right">{{$root.templates.length}}</span> {{msg.template_manage_title}}</h4>
         </div>
 
@@ -30,8 +29,8 @@
                                         <a id="azureTemplateChange" class="btn btn-default" role="button" ng-click="createAzureTemplateRequest()">{{msg.azure_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified">
-                                      <a id="gcpTemplateChange" class="btn btn-default" role="button" ng-click="createGcpTemplateRequest()">{{msg.gcp_label}}</a>
-                                      <a id="openstackTemplateChange" class="btn btn-default" role="button" ng-click="createOpenstackTemplateRequest()">{{msg.openstack_label}}</a>
+                                        <a id="gcpTemplateChange" class="btn btn-default" role="button" ng-click="createGcpTemplateRequest()">{{msg.gcp_label}}</a>
+                                        <a id="openstackTemplateChange" class="btn btn-default" role="button" ng-click="createOpenstackTemplateRequest()">{{msg.openstack_label}}</a>
                                     </div>
                                 </div>
                             </div>
@@ -50,7 +49,7 @@
                                 <div ng-include src="'tags/template/gcpform.tag'"></div>
                             </form>
                             <form class="form-horizontal" role="form" ng-show="openstackTemplate" name="openstackTemplateForm" ng-show="openstackTemplate">
-                              <div ng-include src="'tags/template/openstackform.tag'"></div>
+                                <div ng-include src="'tags/template/openstackform.tag'"></div>
                             </form>
                         </div>
                     </div>
@@ -93,7 +92,7 @@
                             </div>
 
                             <div class="panel-body" ng-if="template.cloudPlatform == 'OPENSTACK' ">
-                              <div ng-include src="'tags/template/openstacklist.tag'"></div>
+                                <div ng-include src="'tags/template/openstacklist.tag'"></div>
                             </div>
 
                         </div>

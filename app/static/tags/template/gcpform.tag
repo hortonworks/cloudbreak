@@ -34,8 +34,7 @@
     <label class="col-sm-3 control-label" for="gcp_tvolumecount">{{msg.template_form_volume_count_label}}</label>
     <div class="col-sm-9">
         <input type="number" name="gcp_tvolumecount" class="form-control" id="gcp_tvolumecount" min="1" ng-model="gcpTemp.volumeCount" placeholder="{{msg.template_form_volume_count_placeholder}}" max="12" required>
-        <div class="help-block"  ng-show="gcpTemplateForm.gcp_tvolumecount.$dirty && gcpTemplateForm.gcp_tvolumecount.$invalid"><i class="fa fa-warning"></i>
-            {{msg.volume_count_invalid}}
+        <div class="help-block" ng-show="gcpTemplateForm.gcp_tvolumecount.$dirty && gcpTemplateForm.gcp_tvolumecount.$invalid"><i class="fa fa-warning"></i> {{msg.volume_count_invalid}}
         </div>
     </div>
 </div>
@@ -43,18 +42,16 @@
     <label class="col-sm-3 control-label" for="gcp_tvolumesize">{{msg.template_form_volume_size_label}}</label>
     <div class="col-sm-9">
         <input type="number" name="gcp_tvolumesize" class="form-control" ng-model="gcpTemp.volumeSize" id="gcp_tvolumesize" min="10" max="1000" placeholder="{{msg.template_form_volume_size_placeholder}}" required>
-        <div class="help-block"
-             ng-show="gcpTemplateForm.gcp_tvolumesize.$dirty && gcpTemplateForm.gcp_tvolumesize.$invalid"><i class="fa fa-warning"></i>
-            {{msg.volume_size_invalid}}
+        <div class="help-block" ng-show="gcpTemplateForm.gcp_tvolumesize.$dirty && gcpTemplateForm.gcp_tvolumesize.$invalid"><i class="fa fa-warning"></i> {{msg.volume_size_invalid}}
         </div>
     </div>
 </div>
 <div class="form-group">
-      <label class="col-sm-3 control-label" for="gcp_publicInAccount">{{msg.public_in_account_label}}</label>
-      <div class="col-sm-9">
-          <input type="checkbox" name="gcp_publicInAccount" id="gcp_publicInAccount" ng-model="gcpTemp.public">
-      </div>
-       <!-- .col-sm-9 -->
+    <label class="col-sm-3 control-label" for="gcp_publicInAccount">{{msg.public_in_account_label}}</label>
+    <div class="col-sm-9">
+        <input type="checkbox" name="gcp_publicInAccount" id="gcp_publicInAccount" ng-model="gcpTemp.public">
+    </div>
+    <!-- .col-sm-9 -->
 </div>
 <div class="row btn-row">
     <div class="col-sm-9 col-sm-offset-3">

@@ -1,8 +1,7 @@
 <div id="panel-events" class="col-md-12 col-lg-11" ng-controller="eventController">
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
-            <a href="" id="events-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"
-               data-target="#panel-events-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
+            <a href="" id="events-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse" data-target="#panel-events-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
             <h4>{{msg.events_form_title}}</h4>
         </div>
 
@@ -31,7 +30,7 @@
 
                         <div>
                             <div class="input-group">
-                                        <span class="input-group-addon">
+                                <span class="input-group-addon">
                                             <i class="fa fa-search"></i>
                                         </span>
                                 <input class="form-control input-sm" type="text" ng-model="localFilter.user" id="user">
@@ -45,7 +44,7 @@
                             <select class="form-control input-sm" id="eventType" ng-model="localFilter.eventType">
                                 <option>{{msg.usage_events_form_all_label}}</option>
 
-                                <option ng-repeat="(key, value) in $root.config.EVENT_TYPE"  value="{{key}}">{{value}}</option>
+                                <option ng-repeat="(key, value) in $root.config.EVENT_TYPE" value="{{key}}">{{value}}</option>
                             </select>
                         </div>
                     </div>
@@ -55,7 +54,7 @@
                     <div class="col-xs-6 col-sm-3 col-md-2">
                         <a id="btnGenReport" ng-click="loadEvents()" class="btn btn-success btn-block" role="button">
                             <i class="fa fa-fw fa-refresh"></i>
-                            <!-- <i class="fa fa-circle-o-notch fa-spin fa-fw"></i> --> </a>
+                            <!-- <i class="fa fa-circle-o-notch fa-spin fa-fw"></i> --></a>
                     </div>
 
                 </form>
@@ -64,13 +63,13 @@
                 <div class="table-responsive" ng-show="(events.length != 0) && events">
                     <table class="table table-report table-sortable-cols table-with-pagination ">
                         <thead>
-                        <tr>
-                            <th>{{msg.usage_events_list_cloud_label}}</th>
-                            <th>{{msg.usage_events_form_user_label}}</th>
-                            <th>{{msg.events_list_type_label}}</th>
-                            <th>{{msg.events_list_timestamp_label}}</th>
-                            <th style="width: 25%;">{{msg.events_list_message_label}}</th>
-                        </tr>
+                            <tr>
+                                <th>{{msg.usage_events_list_cloud_label}}</th>
+                                <th>{{msg.usage_events_form_user_label}}</th>
+                                <th>{{msg.events_list_type_label}}</th>
+                                <th>{{msg.events_list_timestamp_label}}</th>
+                                <th style="width: 25%;">{{msg.events_list_message_label}}</th>
+                            </tr>
                         </thead>
                         <tbody>
                             <tr ng-repeat="event in events| filter:eventFilterFunction">
