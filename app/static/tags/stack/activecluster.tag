@@ -49,6 +49,16 @@
                                     <p id="sl_cloudPlatform" class="form-control-static">{{activeCluster.cloudPlatform}}</p>
                                 </div>
                             </div>
+                            <div class="form-group" ng-show="activeCluster.copyState && activeCluster.copyState!=100 && (activeCluster.status != 'AVAILABLE' || activeCluster.status != 'DELETE_IN_PROGRESS' || activeCluster.status != 'CREATE_FAILED')">
+                                <label class="col-sm-3 control-label" for="sl_imagecopy">{{msg.active_cluster_image_copy_label}}</label>
+                                <div class="col-sm-6" style="padding-left: 10px;">
+                                    <div class="progress" style="height: 25px;margin-bottom: 0px;">
+                                      <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="{{activeCluster.copyState}}" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em;width: {{activeCluster.copyState}}%;;padding-top: 4px;">
+                                        {{activeCluster.copyState}}%
+                                      </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="form-group">
                                 <label class="col-sm-3 control-label" for="sl_platformVariant">{{msg.active_cluster_variant_label}}</label>
                                 <div class="col-sm-9">
@@ -127,9 +137,9 @@
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            <tr ng-repeat="(key, value) in activeCluster.cluster.serviceEndPoints">
-                                                                <td data-title="'servicename'" class="col-md-4">{{key}}</td>
-                                                                <td data-title="'address'" class="col-md-3"><a target="_blank" href="http://{{value}}">{{value}}</a></td>
+                                                            <tr ng-repeat="(key, value) in activeCluster.cluster.serviceEndPoints" ng-show="visibleServiceValue(value)">
+                                                                <td data-title="'servicename'" class="col-md-4" >{{key}}</td>
+                                                                <td data-title="'address'" class="col-md-3"><a target="_blank" href="http://{{value}}" >{{value}}</a></td>
                                                             </tr>
                                                         </tbody>
                                                     </table>
@@ -163,8 +173,7 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="panel panel-default">
+                        <div class="panel panel-default" ng-show="filteredActiveClusterData.length !== 0">
                             <div class="panel-heading">
                                 <h5><a href="" data-toggle="collapse" data-target="#panel-collapse0002"><i class="fa fa-align-justify fa-fw"></i>{{msg.active_cluster_stack_description_title_prefix_label}} {{activeCluster.name}}</a></h5>
                             </div>

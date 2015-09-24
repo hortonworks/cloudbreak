@@ -38,6 +38,9 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
             $scope.showSuccess(notification.eventMessage, notification.stackName);
             $rootScope.clusters = $filter('filter')($rootScope.clusters, function(value, index) { return value.id != notification.stackId;});
             break;
+          case "IMAGE_COPY_STATE":
+            handleCopyStatus(notification);
+            break;
           case "AVAILABLE":
             handleAvailableNotification(notification);
             break;
@@ -67,6 +70,13 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
         actCluster.cluster.statusReason = notification.eventMessage;
       }
       addNotificationToGlobalEvents(notification);
+    }
+
+    function handleCopyStatus(notification){
+          var actCluster = $filter('filter')($rootScope.clusters, { id: notification.stackId })[0];
+          if (actCluster != undefined) {
+             actCluster.copyState = notification.eventMessage;
+          }
     }
 
     function handleAvailableNotification(notification) {

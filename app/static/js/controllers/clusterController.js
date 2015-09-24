@@ -136,16 +136,26 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }
         }
 
+        $scope.visibleServiceValue = function(element) {
+            return element.indexOf("null") !== 0;
+        }
+
         $scope.createCluster = function () {
             var blueprint = $filter('filter')($rootScope.blueprints, {id: $scope.cluster.blueprintId}, true)[0];
-
-            if (blueprint.hostGroupCount > $scope.cluster.nodeCount) {
+            var tmpNodeCount = 0;
+            angular.forEach($scope.cluster.instanceGroups, function(group) {
+                tmpNodeCount += group.nodeCount;
+            });
+            if (blueprint.hostGroupCount > tmpNodeCount) {
                 $scope.showErrorMessage($rootScope.msg.hostgroup_invalid_node_count);
                 return;
             }
-            if (blueprint.hostGroupCount === 1 && $scope.cluster.nodeCount != 1) {
+            if (blueprint.hostGroupCount === 1 && tmpNodeCount != 2) {
                 $scope.showErrorMessage($rootScope.msg.hostgroup_single_invalid);
                 return;
+            }
+            if (blueprint.hostGroupCount === 1) {
+                $scope.cluster.consulServerCount = 1;
             }
             if (!$scope.isUndefined($scope.cluster.ambariStackDetails)) {
                  for (var item in $scope.cluster.ambariStackDetails) {
@@ -551,6 +561,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 failurePolicy: {
                   adjustmentType: "BEST_EFFORT",
                 }
+
             };
             setFileSystem();
         }
