@@ -183,14 +183,35 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
     function (StackValidation, UserStack, AccountStack, Cluster, GlobalStack) {
         function AggregateCluster(UserStack, AccountStack, Cluster) {
 
+            var decorateCluster = function(cluster) {
+              cluster.hoursUp = cluster.cluster.hoursUp;
+              cluster.minutesUp = cluster.cluster.minutesUp;
+              cluster.blueprintId = cluster.cluster.blueprintId;
+              cluster.nodeCount = 0;
+              angular.forEach(cluster.instanceGroups, function(group) {
+                  cluster.nodeCount += group.nodeCount;
+              });
+              cluster.metadata = [];
+              angular.forEach(cluster.instanceGroups, function(group) {
+                angular.forEach(group.metadata, function(metadata) {
+                  cluster.metadata.push(metadata);
+                });
+              });
+            };
+
+            this.get = function (clusterId, successHandler) {
+              GlobalStack.get({ id: clusterId }, function(success) {
+                decorateCluster(success);
+                successHandler(success);
+              });
+            }
+
             this.query = function (successHandler) {
                 AccountStack.query(function (stacks) {
                     var clusters = [];
                     for (var i = 0; i < stacks.length; i++) {
                         clusters[i] = stacks[i];
-                        clusters[i].hoursUp = stacks[i].cluster.hoursUp;
-                        clusters[i].minutesUp = stacks[i].cluster.minutesUp;
-                        clusters[i].blueprintId = stacks[i].cluster.blueprintId;
+                        decorateCluster(clusters[i]);
                     }
                     successHandler(clusters);
                 });

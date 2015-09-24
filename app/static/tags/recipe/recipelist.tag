@@ -16,20 +16,18 @@
 
     <div class="form-group" ng-hide="isEmpty(recipe.properties)">
         <label class="col-sm-3 control-label" for="recipeproperties">{{msg.properties_label}}</label>
-        <div class="col-sm-7">
-            <table id="recipeproperties" class="table table-report table-sortable-cols table-with-pagination table-condensed form-control-static" style="margin-top: 0px;background-color: transparent;">
+        <div class="col-sm-9">
+            <table id="recipeproperties" class="table table-report table-sortable-cols table-with-pagination table-condensed form-control-static" style="table-layout: fixed; margin-top: 0px;background-color: transparent;">
                 <thead>
                     <tr>
-                        <th class="text-center">{{msg.values_label}}</th>
+                        <th class="text-center" style='width: 50%'>{{msg.name_label}}</th>
+                        <th class="text-center">{{msg.value_label}}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr ng-repeat="(key, value) in recipe.properties | orderBy:'key'">
-                        <td class="text-center">
-                            <h5>
-                                {{key}}: <span class="label label-default">{{value}}</span>
-                            </h5>
-                        </td>
+                        <td class="text-center" style="overflow: auto;">{{key}}</td>
+                        <td class="text-center" style="overflow: auto;"><span class="label label-default">{{value}}</span></td>
                     </tr>
                 </tbody>
             </table>

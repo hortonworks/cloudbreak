@@ -72,7 +72,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.selectBlueprintreinstallChange = function () {
-          var actualBp = $filter('filter')($rootScope.blueprints, { id: $rootScope.reinstallClusterObject.blueprintId}, true);
+          var actualBp = $filter('filter')($rootScope.blueprints, { id: $rootScope.reinstallClusterObject.blueprintId }, true);
           var hostGroups = [];
           var index = 0;
           $rootScope.activeCluster.instanceGroups.forEach(function(value) {
@@ -220,6 +220,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     existingCluster = result;
                 } else {
                     $rootScope.clusters.push(result);
+                    $scope.$parent.orderClusters();
                     $jq('.carousel').carousel(0);
                     // enable toolbar buttons
                     $jq('#toggle-cluster-block-btn').removeClass('disabled');
@@ -300,6 +301,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.deleteCluster = function (cluster) {
+            $rootScope.activeCluster = {};
             UluwatuCluster.delete(cluster, function (result) {
                 var actCluster = $filter('filter')($rootScope.clusters, { id: cluster.id }, true)[0];
                 actCluster.status = "DELETE_IN_PROGRESS";
@@ -309,39 +311,39 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             });
         }
 
-        $scope.changeActiveCluster = function (clusterId) {
-            $scope.newCredential = {};
-            $rootScope.activeCluster = $filter('filter')($rootScope.clusters, { id: clusterId })[0];
-            $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, { id: $rootScope.activeCluster.blueprintId})[0];
-            $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {id: $rootScope.activeCluster.credentialId}, true)[0];
-            $rootScope.activeClusterNetwork = $filter('filter')($rootScope.networks, {id: $rootScope.activeCluster.networkId})[0];
-            $rootScope.activeClusterSecurityGroup = $filter('filter')($rootScope.securitygroups, {id: $rootScope.activeCluster.securityGroupId})[0];
-            $rootScope.activeCluster.cloudPlatform =  $rootScope.activeClusterCredential.cloudPlatform;
-            $rootScope.activeCluster.metadata = [];
-            $scope.newCredential.newUserName = $rootScope.activeCluster.cluster.userName;
-            $rootScope.reinstallClusterObject = {
-              validateBlueprint: true,
-              blueprintId: $rootScope.activeClusterBlueprint.id,
-              hostgroups: $rootScope.activeCluster.cluster != undefined ? $rootScope.activeCluster.cluster.hostGroups : [],
-              ambariStackDetails: $rootScope.activeCluster.cluster != undefined ? $rootScope.activeCluster.cluster.ambariStackDetails : '',
-              fullBp: $rootScope.activeClusterBlueprint,
-            };
-            GlobalStack.get({ id: clusterId }, function(success) {
-                    var metadata = []
-                    angular.forEach(success.instanceGroups, function(item) {
-                      angular.forEach(item.metadata, function(item1) {
-                        metadata.push(item1)
-                      });
-                    });
+        $scope.deselectActiveCluster = function() {
+          $rootScope.activeCluster = {};
+        };
+
+        $scope.selectActiveCluster = function (clusterId) {
+            UluwatuCluster.get(clusterId, function(success) {
                     $scope.pagination = {
-                                currentPage: 1,
-                                itemsPerPage: 10,
-                                totalItems: $rootScope.activeCluster.metadata.length
+                      currentPage: 1,
+                      itemsPerPage: 10,
+                      totalItems: success.metadata.length
                     }
-                    $rootScope.activeCluster.metadata = metadata
+                    var actClusterIndex = $rootScope.clusters.indexOf($filter('filter')($rootScope.clusters, { id: clusterId })[0]);
+                    $rootScope.activeCluster = $rootScope.clusters[actClusterIndex] = success;
+                    $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, { id: $rootScope.activeCluster.blueprintId})[0];
+                    $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {id: $rootScope.activeCluster.credentialId}, true)[0];
+                    $rootScope.activeClusterNetwork = $filter('filter')($rootScope.networks, {id: $rootScope.activeCluster.networkId})[0];
+                    $rootScope.activeClusterSecurityGroup = $filter('filter')($rootScope.securitygroups, {id: $rootScope.activeCluster.securityGroupId})[0];
+                    $rootScope.activeCluster.cloudPlatform =  $rootScope.activeClusterCredential.cloudPlatform;
+                    $scope.newCredential = {};
+                    $scope.newCredential.newUserName = $rootScope.activeCluster.cluster.userName;
                 }
             );
-        }
+        };
+
+        $scope.initReinstallClusterObject = function() {
+          $rootScope.reinstallClusterObject = {
+            validateBlueprint: true,
+            blueprintId: $rootScope.activeClusterBlueprint.id,
+            hostgroups: $rootScope.activeCluster.cluster != undefined ? $rootScope.activeCluster.cluster.hostGroups : [],
+            ambariStackDetails: $rootScope.activeCluster.cluster != undefined ? $rootScope.activeCluster.cluster.ambariStackDetails : '',
+            fullBp: $rootScope.activeClusterBlueprint,
+          };
+        };
 
         $scope.$watch('pagination.currentPage + pagination.itemsPerPage', function(){
             if ($rootScope.activeCluster.metadata != null) {
@@ -533,13 +535,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         function getUluwatuClusters(){
           UluwatuCluster.query(function (clusters) {
               $rootScope.clusters = clusters;
-              angular.forEach($rootScope.clusters, function(item) {
-                   var nodeCount = 0;
-                   angular.forEach(item.instanceGroups, function(group) {
-                       nodeCount += group.nodeCount;
-                   });
-                   item.nodeCount = nodeCount;
-              });
               $scope.$parent.orderClusters();
           });
         }

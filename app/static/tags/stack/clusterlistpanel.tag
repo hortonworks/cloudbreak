@@ -5,7 +5,7 @@
 
             <div class="cluster" id="cluster-{{cluster.id}}" ng-repeat="cluster in $root.clusters">
                 <h4>
-                    <a href="" class="btn btn-cluster btn-block" role="button" ng-click="changeActiveCluster(cluster.id)">{{cluster.name}}<i class="fa fa-angle-right fa-25x"></i></a>
+                    <a href="" class="btn btn-cluster btn-block" role="button" ng-click="selectActiveCluster(cluster.id)">{{cluster.name}}<i class="fa fa-angle-right fa-25x"></i></a>
                 </h4>
                 <dl class="row" style="padding-bottom: 4px;height: 25px;">
                   <div class="col-md-6">

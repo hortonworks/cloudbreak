@@ -1,7 +1,7 @@
 <div id="active-cluster-panel" class="col-sm-11 col-md-11 col-lg-11">
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
-            <a href="" id="cluster-details-back-btn" class="btn btn-info btn-fa-2x" role="button"><i class="fa fa-angle-left fa-2x fa-fw-forced"></i></a>
+            <a href="" id="cluster-details-back-btn" class="btn btn-info btn-fa-2x" role="button" ng-click="deselectActiveCluster()"><i class="fa fa-angle-left fa-2x fa-fw-forced"></i></a>
             <h4>{{activeCluster.name}}</h4>
         </div>
         <div id="cluster-details-panel-collapse">
@@ -16,7 +16,7 @@
                             <a href="" class="btn btn-info" role="button" data-toggle="modal" data-target="#modal-sync-cluster">
                                 <i class="fa fa-refresh fa-fw"></i><span> {{msg.active_cluster_command_sync_label}}</span>
                             </a>
-                            <a href="" class="btn btn-success" role="button" ng-show="activeCluster.cluster.status == 'CREATE_FAILED'" data-toggle="modal" data-target="#modal-reset-cluster">
+                            <a href="" class="btn btn-success" role="button" ng-show="activeCluster.cluster.status == 'CREATE_FAILED'" data-toggle="modal" data-target="#modal-reset-cluster" ng-click="initReinstallClusterObject()">
                                 <i class="fa fa-undo fa-fw"></i><span> {{msg.active_cluster_command_reinstall_label}}</span>
                             </a>
                             <a href="" class="btn btn-success" role="button" ng-show="activeCluster.status == 'STOPPED' || (activeCluster.cluster.status == 'START_REQUESTED' && activeCluster.status == 'AVAILABLE')" data-toggle="modal" data-target="#modal-start-cluster">
