@@ -1,3 +1,5 @@
+
+shorten_function() {
   local max=25
   local context=3
   local word="$*"
@@ -11,7 +13,11 @@
 }
 debug() {
   if [[ "$DEBUG" ]]; then
-      echo -e "[DEBUG] $*" | gray 1>&2
+      if [[ "$DEBUG" -eq 2 ]]; then
+          printf "[DEBUG][%-25s] %s\n" $(shorten_function "${FUNCNAME[1]}") "$*" | gray 1>&2
+      else
+        echo -e "[DEBUG] $*" | gray 1>&2
+      fi
   fi
 }
 
