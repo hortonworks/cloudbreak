@@ -3,7 +3,7 @@
 var log = log4javascript.getLogger("templateController-logger");
 
 angular.module('uluwatuControllers').controller('templateController', ['$scope', '$rootScope', '$filter', 'UserTemplate', 'AccountTemplate', 'GlobalTemplate',
-    function ($scope, $rootScope, $filter, UserTemplate, AccountTemplate, GlobalTemplate) {
+    function($scope, $rootScope, $filter, UserTemplate, AccountTemplate, GlobalTemplate) {
 
         $rootScope.templates = AccountTemplate.query();
         $scope.awsTemplateForm = {};
@@ -17,48 +17,48 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
         $scope.showAlert = false;
         $scope.alertMessage = "";
 
-        $scope.createAwsTemplateRequest = function () {
+        $scope.createAwsTemplateRequest = function() {
             $scope.azureTemplate = false;
             $scope.awsTemplate = true;
             $scope.gcpTemplate = false;
             $scope.openstackTemplate = false;
         }
 
-        $scope.createAzureTemplateRequest = function () {
+        $scope.createAzureTemplateRequest = function() {
             $scope.azureTemplate = true;
             $scope.awsTemplate = false;
             $scope.gcpTemplate = false;
             $scope.openstackTemplate = false;
         }
 
-        $scope.createGcpTemplateRequest = function () {
+        $scope.createGcpTemplateRequest = function() {
             $scope.azureTemplate = false;
             $scope.awsTemplate = false;
             $scope.gcpTemplate = true;
             $scope.openstackTemplate = false;
         }
 
-        $scope.createOpenstackTemplateRequest = function () {
-          $scope.azureTemplate = false;
-          $scope.awsTemplate = false;
-          $scope.gcpTemplate = false;
-          $scope.openstackTemplate = true;
+        $scope.createOpenstackTemplateRequest = function() {
+            $scope.azureTemplate = false;
+            $scope.awsTemplate = false;
+            $scope.gcpTemplate = false;
+            $scope.openstackTemplate = true;
         }
 
-        $scope.createAwsTemplate = function () {
+        $scope.createAwsTemplate = function() {
             $scope.awsTemp.cloudPlatform = 'AWS';
             $scope.awsTemp.parameters.sshLocation = '0.0.0.0/0';
             if ($scope.awsTemp.public) {
-                AccountTemplate.save($scope.awsTemp, function (result) {
+                AccountTemplate.save($scope.awsTemp, function(result) {
                     handleAwsTemplateSuccess(result)
-                }, function (error) {
+                }, function(error) {
                     $scope.showErrorMessageAlert(error, $rootScope.msg.aws_template_failed);
                     $scope.showErrorMessageAlert();
                 });
             } else {
-                UserTemplate.save($scope.awsTemp, function (result) {
+                UserTemplate.save($scope.awsTemp, function(result) {
                     handleAwsTemplateSuccess(result)
-                }, function (error) {
+                }, function(error) {
                     $scope.showErrorMessageAlert(error, $rootScope.msg.aws_template_failed);
                     $scope.showErrorMessageAlert();
                 });
@@ -75,49 +75,49 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             }
         }
 
-        $scope.createOpenstackTemplate = function () {
-          $scope.openstackTemp.cloudPlatform = 'OPENSTACK';
-          if ($scope.openstackTemp.public) {
-            AccountTemplate.save($scope.openstackTemp, function (result) {
-              handleOpenstackTemplateSuccess(result)
-            }, function (error) {
-              $scope.showError(error, $rootScope.msg.openstack_template_failed);
-              $scope.showErrorMessageAlert();
-            });
-          } else {
-            UserTemplate.save($scope.openstackTemp, function (result) {
-              handleOpenstackTemplateSuccess(result)
-            }, function (error) {
-              $scope.showError(error, $rootScope.msg.openstack_template_failed);
-              $scope.showErrorMessageAlert();
-            });
-          }
+        $scope.createOpenstackTemplate = function() {
+            $scope.openstackTemp.cloudPlatform = 'OPENSTACK';
+            if ($scope.openstackTemp.public) {
+                AccountTemplate.save($scope.openstackTemp, function(result) {
+                    handleOpenstackTemplateSuccess(result)
+                }, function(error) {
+                    $scope.showError(error, $rootScope.msg.openstack_template_failed);
+                    $scope.showErrorMessageAlert();
+                });
+            } else {
+                UserTemplate.save($scope.openstackTemp, function(result) {
+                    handleOpenstackTemplateSuccess(result)
+                }, function(error) {
+                    $scope.showError(error, $rootScope.msg.openstack_template_failed);
+                    $scope.showErrorMessageAlert();
+                });
+            }
 
-          function handleOpenstackTemplateSuccess(result) {
-            $scope.openstackTemp.id = result.id;
-            $rootScope.templates.push($scope.openstackTemp);
-            initializeOpenstackTemp();
-            $scope.showSuccess($filter("format")($rootScope.msg.openstack_template_success, String(result.id)));
-            $scope.openstackTemplateForm.$setPristine();
-            collapseCreateTemplateFormPanel();
-            $scope.unShowErrorMessageAlert()
-          }
+            function handleOpenstackTemplateSuccess(result) {
+                $scope.openstackTemp.id = result.id;
+                $rootScope.templates.push($scope.openstackTemp);
+                initializeOpenstackTemp();
+                $scope.showSuccess($filter("format")($rootScope.msg.openstack_template_success, String(result.id)));
+                $scope.openstackTemplateForm.$setPristine();
+                collapseCreateTemplateFormPanel();
+                $scope.unShowErrorMessageAlert()
+            }
 
         }
 
-        $scope.createGcpTemplate = function () {
+        $scope.createGcpTemplate = function() {
             $scope.gcpTemp.cloudPlatform = 'GCP';
             if ($scope.gcpTemp.public) {
-                AccountTemplate.save($scope.gcpTemp, function (result) {
+                AccountTemplate.save($scope.gcpTemp, function(result) {
                     handleGcpTemplateSuccess(result)
-                }, function (error) {
+                }, function(error) {
                     $scope.showError(error, $rootScope.msg.gcp_template_failed);
                     $scope.showErrorMessageAlert();
                 });
             } else {
-                UserTemplate.save($scope.gcpTemp, function (result) {
+                UserTemplate.save($scope.gcpTemp, function(result) {
                     handleGcpTemplateSuccess(result)
-                }, function (error) {
+                }, function(error) {
                     $scope.showError(error, $rootScope.msg.gcp_template_failed);
                     $scope.showErrorMessageAlert();
                 });
@@ -134,22 +134,22 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             }
         }
 
-        $scope.createAzureTemplate = function () {
+        $scope.createAzureTemplate = function() {
             $scope.azureTemp.cloudPlatform = "AZURE";
-            if($scope.azureTemp.public) {
-                AccountTemplate.save($scope.azureTemp, function (result) {
-                  handleAzureTemplateSuccess(result)
-               }, function (error) {
-                  $scope.showError(error, $rootScope.msg.azure_template_failed);
-                  $scope.showErrorMessageAlert();
-               });
+            if ($scope.azureTemp.public) {
+                AccountTemplate.save($scope.azureTemp, function(result) {
+                    handleAzureTemplateSuccess(result)
+                }, function(error) {
+                    $scope.showError(error, $rootScope.msg.azure_template_failed);
+                    $scope.showErrorMessageAlert();
+                });
             } else {
-               UserTemplate.save($scope.azureTemp, function (result) {
-                  handleAzureTemplateSuccess(result)
-               }, function (error) {
-                  $scope.showError(error, $rootScope.msg.azure_template_failed);
-                  $scope.showErrorMessageAlert();
-               });
+                UserTemplate.save($scope.azureTemp, function(result) {
+                    handleAzureTemplateSuccess(result)
+                }, function(error) {
+                    $scope.showError(error, $rootScope.msg.azure_template_failed);
+                    $scope.showErrorMessageAlert();
+                });
             }
 
             function handleAzureTemplateSuccess(result) {
@@ -163,21 +163,23 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             }
         }
 
-        $scope.deleteTemplate = function (template) {
-            GlobalTemplate.delete({ id: template.id }, function (success) {
+        $scope.deleteTemplate = function(template) {
+            GlobalTemplate.delete({
+                id: template.id
+            }, function(success) {
                 $rootScope.templates.splice($rootScope.templates.indexOf(template), 1);
                 $scope.showSuccess($filter("format")($rootScope.msg.template_delete_success, String(template.id)));
-            }, function (error) {
+            }, function(error) {
                 $scope.showError(error, $rootScope.msg.template_delete_failed)
             });
         }
 
-        $scope.filterByVolumetype = function (element) {
+        $scope.filterByVolumetype = function(element) {
             try {
-              if((element.encryptable && $scope.awsTemp.parameters.encrypted) || !$scope.awsTemp.parameters.encrypted) {
-                 return true;
-              }
-              return false;
+                if ((element.encryptable && $scope.awsTemp.parameters.encrypted) || !$scope.awsTemp.parameters.encrypted) {
+                    return true;
+                }
+                return false;
             } catch (err) {
                 return true;
             }
@@ -185,14 +187,16 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
 
         $scope.changeAwsInstanceType = function() {
             var instanceType = $scope.awsTemp.parameters.instanceType;
-            $scope.awsInstanceType = $filter('filter')($rootScope.config.AWS.instanceType, {key: instanceType}, true)[0];
+            $scope.awsInstanceType = $filter('filter')($rootScope.config.AWS.instanceType, {
+                key: instanceType
+            }, true)[0];
             if ($scope.awsTemp.parameters.volumeType == 'Ephemeral') {
-              $scope.awsTemp.parameters.encrypted = false;
+                $scope.awsTemp.parameters.encrypted = false;
             }
         }
 
         function collapseCreateTemplateFormPanel() {
-          angular.element(document.querySelector('#panel-create-templates-collapse-btn')).click();
+            angular.element(document.querySelector('#panel-create-templates-collapse-btn')).click();
         }
 
         function initializeAwsTemp() {
@@ -220,12 +224,11 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
         }
 
         function initializeOpenstackTemp() {
-          $scope.openstackTemp = {
-            volumeCount: 1,
-            volumeSize: 100,
-            parameters: {
+            $scope.openstackTemp = {
+                volumeCount: 1,
+                volumeSize: 100,
+                parameters: {}
             }
-          }
         }
 
         function initializeGcpTemp() {
@@ -240,13 +243,13 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
         }
 
         $scope.unShowErrorMessageAlert = function() {
-           $scope.showAlert = false;
-           $scope.alertMessage = "";
+            $scope.showAlert = false;
+            $scope.alertMessage = "";
         }
 
         $scope.showErrorMessageAlert = function() {
-           $scope.showAlert = true;
-           $scope.alertMessage = $scope.statusMessage;
+            $scope.showAlert = true;
+            $scope.alertMessage = $scope.statusMessage;
         }
     }
 ]);

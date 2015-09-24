@@ -15,7 +15,7 @@
     <label class="col-sm-3 control-label" for="cdescription">{{msg.description_label}}</label>
 
     <div class="col-sm-9">
-        <input type="text" class="form-control" ng-model="credentialAzure.description" id="cdescription" name="cdescription" ng-maxlength="1000"  placeholder="{{msg.credential_form_description_placeholder}}">
+        <input type="text" class="form-control" ng-model="credentialAzure.description" id="cdescription" name="cdescription" ng-maxlength="1000" placeholder="{{msg.credential_form_description_placeholder}}">
         <div class="help-block" ng-show="azureCredentialForm.cdescription.$dirty && azureCredentialForm.cdescription.$invalid">
             <i class="fa fa-warning"></i> {{msg.credential_description_invalid}}
         </div>
@@ -52,11 +52,11 @@
 </div>
 
 <div class="form-group">
-      <label class="col-sm-3 control-label" for="azureCred_publicInAccount">{{msg.public_in_account_label}}</label>
-      <div class="col-sm-9">
-          <input type="checkbox" name="azureCred_publicInAccount" id="azureCred_publicInAccount" ng-model="credentialAzure.public">
-      </div>
-       <!-- .col-sm-9 -->
+    <label class="col-sm-3 control-label" for="azureCred_publicInAccount">{{msg.public_in_account_label}}</label>
+    <div class="col-sm-9">
+        <input type="checkbox" name="azureCred_publicInAccount" id="azureCred_publicInAccount" ng-model="credentialAzure.public">
+    </div>
+    <!-- .col-sm-9 -->
 </div>
 
 <div class="row btn-row">

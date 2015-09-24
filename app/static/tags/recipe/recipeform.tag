@@ -4,8 +4,7 @@
         <label class="col-sm-3 control-label" for="recipename">{{msg.name_label}}</label>
         <div class="col-sm-9">
             <input type="text" class="form-control" name="recipename" ng-model="recipe.name" id="recipename" placeholder="{{msg.recipe_name_placeholder}}" ng-pattern="/^[a-z0-9]*[-a-z0-9]*$/" ng-maxlength="100" required>
-            <div class="help-block"
-                 ng-show="recipeCreationForm.recipename.$dirty && recipeCreationForm.recipename.$invalid"><i class="fa fa-warning"></i> {{msg.recipe_name_invalid}}
+            <div class="help-block" ng-show="recipeCreationForm.recipename.$dirty && recipeCreationForm.recipename.$invalid"><i class="fa fa-warning"></i> {{msg.recipe_name_invalid}}
             </div>
         </div>
     </div>
@@ -18,13 +17,12 @@
     </div>
 
     <div class="form-group" ng-class="{ 'has-error': recipeCreationForm.recipetimeout.$dirty && recipeCreationForm.recipetimeout.$invalid }">
-            <label class="col-sm-3 control-label" for="recipetimeout">{{msg.timeout_label}}</label>
-            <div class="col-sm-9">
-                <input type="number" class="form-control" name="recipetimeout" ng-model="recipe.timeout" ng-min="1" ng-max="100000" id="recipetimeout" placeholder="{{msg.recipe_timeout_placeholder}}">
-                <div class="help-block"
-                     ng-show="recipeCreationForm.recipetimeout.$dirty && recipeCreationForm.recipetimeout.$invalid"><i class="fa fa-warning"></i> {{msg.recipe_timeout_placeholder}}
-                </div>
+        <label class="col-sm-3 control-label" for="recipetimeout">{{msg.timeout_label}}</label>
+        <div class="col-sm-9">
+            <input type="number" class="form-control" name="recipetimeout" ng-model="recipe.timeout" ng-min="1" ng-max="100000" id="recipetimeout" placeholder="{{msg.recipe_timeout_placeholder}}">
+            <div class="help-block" ng-show="recipeCreationForm.recipetimeout.$dirty && recipeCreationForm.recipetimeout.$invalid"><i class="fa fa-warning"></i> {{msg.recipe_timeout_placeholder}}
             </div>
+        </div>
     </div>
 
     <div class="form-group">
@@ -32,10 +30,10 @@
         <div class="col-sm-9">
             <div id="recipetype" name="recipetype" class="row">
                 <div class="col-md-3">
-                    <select class="form-control" id="recipetype" name="recipetype" ng-options="recipeType.key as recipeType.value for recipeType in $root.config.RECIPE_TYPE.content_types" ng-model="recipeType" ></select>
+                    <select class="form-control" id="recipetype" name="recipetype" ng-options="recipeType.key as recipeType.value for recipeType in $root.config.RECIPE_TYPE.content_types" ng-model="recipeType"></select>
                 </div>
                 <div class="col-md-3">
-                     <select class="form-control" id="recipeexecutiontype" name="recipeexecutiontype" ng-options="executionType.key as executionType.value for executionType in $root.config.RECIPE_TYPE.execution_types" ng-model="recipePlugin.type" required></select>
+                    <select class="form-control" id="recipeexecutiontype" name="recipeexecutiontype" ng-options="executionType.key as executionType.value for executionType in $root.config.RECIPE_TYPE.execution_types" ng-model="recipePlugin.type" required></select>
                 </div>
             </div>
         </div>
@@ -45,8 +43,7 @@
         <label class="col-sm-3 control-label" for="recipeurl" style="border-bottom: 0">{{msg.recipe_pre_install_file}}</label>
         <div class="col-sm-9">
             <input type="file" name="preInstallFile" id="preInstallFile" onchange="angular.element(this).scope().generateStoredPluginFromFile()" ng-disabled="{{!fileReadAvailable}}" />
-            <div class="help-block"
-                 ng-show="!fileReadAvailable"><i class="fa fa-warning"></i> {{msg.file_upload_not_allowed}}
+            <div class="help-block" ng-show="!fileReadAvailable"><i class="fa fa-warning"></i> {{msg.file_upload_not_allowed}}
             </div>
         </div>
     </div>
@@ -55,8 +52,7 @@
         <label class="col-sm-3 control-label" for="postInstallFile" style="border-bottom: 0">{{msg.recipe_post_install_file}}</label>
         <div class="col-sm-9">
             <input type="file" name="postInstallFile" id="postInstallFile" onchange="angular.element(this).scope().generateStoredPluginFromFile()" ng-disabled="{{!fileReadAvailable}}" />
-            <div class="help-block"
-                 ng-show="!fileReadAvailable"><i class="fa fa-warning"></i> {{msg.file_upload_not_allowed}}
+            <div class="help-block" ng-show="!fileReadAvailable"><i class="fa fa-warning"></i> {{msg.file_upload_not_allowed}}
             </div>
         </div>
     </div>
@@ -78,10 +74,9 @@
     <div class="form-group" ng-show="recipeType == 'URL'" ng-class="{ 'has-error': recipeCreationForm.recipeurl.$dirty && recipeCreationForm.recipeurl.$invalid }">
         <label class="col-sm-3 control-label" for="recipeurl" style="border-bottom: 0"></label>
         <div class="col-sm-9">
-          <input type="text" class="form-control" name="recipeurl" id="recipeurl" ng-model="recipePlugin.url" placeholder="{{msg.recipe_plugin_url_placeholder}}" ng-pattern="/^(http|https|git):\/\/.*\.[a-z]{2,4}.*|^base64://[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=]+/" required>
-          <div class="help-block"
-               ng-show="recipeCreationForm.recipeurl.$dirty && recipeCreationForm.recipeurl.$invalid"><i class="fa fa-warning"></i> {{msg.recipe_plugin_url_invalid}}
-          </div>
+            <input type="text" class="form-control" name="recipeurl" id="recipeurl" ng-model="recipePlugin.url" placeholder="{{msg.recipe_plugin_url_placeholder}}" ng-pattern="/^(http|https|git):\/\/.*\.[a-z]{2,4}.*|^base64://[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=]+/" required>
+            <div class="help-block" ng-show="recipeCreationForm.recipeurl.$dirty && recipeCreationForm.recipeurl.$invalid"><i class="fa fa-warning"></i> {{msg.recipe_plugin_url_invalid}}
+            </div>
         </div>
     </div>
 
@@ -104,12 +99,12 @@
             </div>
         </div>
     </div>
-     <div class="form-group">
-          <label class="col-sm-3 control-label" for="recipe_public">{{msg.public_in_account_label}}</label>
-          <div class="col-sm-9">
-              <input type="checkbox" name="recipe_public" id="recipe_public" ng-model="$parent.recipePublicInAccount">
-          </div>
-      </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="recipe_public">{{msg.public_in_account_label}}</label>
+        <div class="col-sm-9">
+            <input type="checkbox" name="recipe_public" id="recipe_public" ng-model="$parent.recipePublicInAccount">
+        </div>
+    </div>
 
     <div class="row btn-row">
         <div class="col-sm-9 col-sm-offset-3">

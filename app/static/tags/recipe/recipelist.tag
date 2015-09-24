@@ -1,4 +1,5 @@
-<form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+<form class="form-horizontal" role="document">
+    <!-- role: 'document' - non-editable "form" -->
 
     <div class="form-group">
         <label class="col-sm-3 control-label" for="name">{{msg.name_label}}</label>
@@ -47,13 +48,14 @@
                 <tbody>
                     <tr ng-repeat="(key, value) in recipe.plugins">
                         <td data-title="'pluginkey'" class="col-md-4 text-center">
-                          <ul ng-if="recipe.pluginContents[key]" class="nav">
-                            <li ng-repeat="(file, content) in recipe.pluginContents[key]">
-                              {{file}}<br />
-                              <textarea disabled style="width: 100%; height: 200px;">{{content}}</textarea>
-                            </li>
-                          </ul>
-                          <a ng-if="!recipe.pluginContents[key]" href="{{key}}" target="_blank">{{key}}</a>
+                            <ul ng-if="recipe.pluginContents[key]" class="nav">
+                                <li ng-repeat="(file, content) in recipe.pluginContents[key]">
+                                    {{file}}
+                                    <br />
+                                    <textarea disabled style="width: 100%; height: 200px;">{{content}}</textarea>
+                                </li>
+                            </ul>
+                            <a ng-if="!recipe.pluginContents[key]" href="{{key}}" target="_blank">{{key}}</a>
                         </td>
                         <td data-title="'pluginValue'" class="col-md-3 text-center" style="width: 1%;">{{value}}</td>
                     </tr>

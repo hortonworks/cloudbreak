@@ -6,16 +6,16 @@ var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'base64', 'block
 
 
 cloudbreakApp.directive('match', function($parse) {
-  return {
-    require: 'ngModel',
-    link: function(scope, elem, attrs, ctrl) {
-      scope.$watch(function() {
-        return $parse(attrs.match)(scope) === ctrl.$modelValue;
-      }, function(currentValue) {
-        ctrl.$setValidity('mismatch', currentValue);
-      });
-    }
-  };
+    return {
+        require: 'ngModel',
+        link: function(scope, elem, attrs, ctrl) {
+            scope.$watch(function() {
+                return $parse(attrs.match)(scope) === ctrl.$modelValue;
+            }, function(currentValue) {
+                ctrl.$setValidity('mismatch', currentValue);
+            });
+        }
+    };
 });
 
 cloudbreakApp.directive('validjson', function($parse) {
@@ -28,7 +28,7 @@ cloudbreakApp.directive('validjson', function($parse) {
                 try {
                     json = JSON.parse(viewValue);
                     valid = true;
-                } catch (err){}
+                } catch (err) {}
                 ctrl.$setValidity('validjson', valid);
                 return valid ? json : undefined;
             });
@@ -36,13 +36,13 @@ cloudbreakApp.directive('validjson', function($parse) {
     };
 });
 
-cloudbreakApp.directive('file', function(){
+cloudbreakApp.directive('file', function() {
     return {
         scope: {
             file: '='
         },
-        link: function(scope, el, attrs){
-             el.bind('change', function(event){
+        link: function(scope, el, attrs) {
+            el.bind('change', function(event) {
                 scope.file = event.target.files[0];
                 scope.$apply();
             });
@@ -51,48 +51,45 @@ cloudbreakApp.directive('file', function(){
 });
 
 
-cloudbreakApp.config([ '$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
+cloudbreakApp.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
     $routeProvider.when('/', {
         templateUrl: 'partials/dashboard.html',
         controller: 'uluwatuController'
-    }) .otherwise({
-        redirectTo : '/'
+    }).otherwise({
+        redirectTo: '/'
     });
-    }]).factory('authHttpResponseInterceptor',['$q', '$window', function ($q, $window) {
-         return {
-             response: function(response){
-                 if (response.status === 401){
-                    $window.location.href = '/logout';
-                 }
-                 return response || $q.when(response);
-             },
-             responseError: function(response) {
-                 if (response.status === 401){
-                     $window.location.href = '/logout';
-                 }
-                 return $q.reject(response);
-             }
-         }
-     }]).config(['$httpProvider',function($httpProvider) {
-         $httpProvider.interceptors.push('authHttpResponseInterceptor');
-     }]).config(function(blockUIConfig) {
-          blockUIConfig.autoInjectBodyBlock = false
-          blockUIConfig.requestFilter = function(config) {
-            var block = false
-            if (config.url.match(/^(.*)templates($|\/).*/) || config.url.match(/^(.*)blueprints($|\/).*/)
-            || config.url.match(/^(.*)credentials($|\/).*/) || config.url.match(/^(.*)users($|\?).*/)
-            || config.url.match(/^(.*)permission($|\?).*/) || config.url.match(/^(.*)stacks($|\/).*/)
-            || config.url.match(/^periscope\/clusters($|\/).*/) || config.url.match(/^(.*)usages($|\?).*/)){
-                block = true
+}]).factory('authHttpResponseInterceptor', ['$q', '$window', function($q, $window) {
+    return {
+        response: function(response) {
+            if (response.status === 401) {
+                $window.location.href = '/logout';
             }
-            if (!block) {
-                return block
+            return response || $q.when(response);
+        },
+        responseError: function(response) {
+            if (response.status === 401) {
+                $window.location.href = '/logout';
             }
-          };
-     });
+            return $q.reject(response);
+        }
+    }
+}]).config(['$httpProvider', function($httpProvider) {
+    $httpProvider.interceptors.push('authHttpResponseInterceptor');
+}]).config(function(blockUIConfig) {
+    blockUIConfig.autoInjectBodyBlock = false
+    blockUIConfig.requestFilter = function(config) {
+        var block = false
+        if (config.url.match(/^(.*)templates($|\/).*/) || config.url.match(/^(.*)blueprints($|\/).*/) || config.url.match(/^(.*)credentials($|\/).*/) || config.url.match(/^(.*)users($|\?).*/) || config.url.match(/^(.*)permission($|\?).*/) || config.url.match(/^(.*)stacks($|\/).*/) || config.url.match(/^periscope\/clusters($|\/).*/) || config.url.match(/^(.*)usages($|\?).*/)) {
+            block = true
+        }
+        if (!block) {
+            return block
+        }
+    };
+});
 
-cloudbreakApp.run(function ($rootScope, $http) {
-    $http.get('messages.properties').then(function (messages) {
+cloudbreakApp.run(function($rootScope, $http) {
+    $http.get('messages.properties').then(function(messages) {
         $rootScope.msg = messages.data
         $rootScope.titleStatus = {
             "REQUESTED": $rootScope.msg.title_requested,
@@ -107,40 +104,40 @@ cloudbreakApp.run(function ($rootScope, $http) {
 });
 
 cloudbreakApp.directive('startdatevalidation', function($parse) {
-  return {
-    require: 'ngModel',
-    link: function(scope, elem, attrs, ctrl) {
-      scope.$watch(function() {
-        return $parse(attrs.startdatevalidation)(scope.usageFilter) >= ctrl.$modelValue;
-      }, function(currentValue) {
-        ctrl.$setValidity('startDateInvalid', currentValue);
-      });
-    }
-  };
+    return {
+        require: 'ngModel',
+        link: function(scope, elem, attrs, ctrl) {
+            scope.$watch(function() {
+                return $parse(attrs.startdatevalidation)(scope.usageFilter) >= ctrl.$modelValue;
+            }, function(currentValue) {
+                ctrl.$setValidity('startDateInvalid', currentValue);
+            });
+        }
+    };
 });
 
 cloudbreakApp.directive('enddatevalidation', function($parse) {
-  return {
-    require: 'ngModel',
-    link: function(scope, elem, attrs, ctrl) {
-      scope.$watch(function() {
-        return (new Date) > ctrl.$modelValue;
-      }, function(currentValue) {
-        ctrl.$setValidity('endDateInvalid', currentValue);
-      });
-    }
-  };
+    return {
+        require: 'ngModel',
+        link: function(scope, elem, attrs, ctrl) {
+            scope.$watch(function() {
+                return (new Date) > ctrl.$modelValue;
+            }, function(currentValue) {
+                ctrl.$setValidity('endDateInvalid', currentValue);
+            });
+        }
+    };
 });
 
 cloudbreakApp.directive('match', function($parse) {
-  return {
-    require: 'ngModel',
-    link: function(scope, elem, attrs, ctrl) {
-      scope.$watch(function() {
-        return $parse(attrs.match)(scope) === ctrl.$modelValue;
-      }, function(currentValue) {
-        ctrl.$setValidity('mismatch', currentValue);
-      });
-    }
-  };
+    return {
+        require: 'ngModel',
+        link: function(scope, elem, attrs, ctrl) {
+            scope.$watch(function() {
+                return $parse(attrs.match)(scope) === ctrl.$modelValue;
+            }, function(currentValue) {
+                ctrl.$setValidity('mismatch', currentValue);
+            });
+        }
+    };
 });

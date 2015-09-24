@@ -1,4 +1,5 @@
-<form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+<form class="form-horizontal" role="document">
+    <!-- role: 'document' - non-editable "form" -->
     <div ng-include src="'tags/network/commonnetworkfieldslist.tag'"></div>
     <div class="form-group" ng-if="network.parameters.vpcId">
         <label class="col-sm-3 control-label" for="{{network.name}}-vpcid">{{msg.network_aws_form_vpc_id_label}}</label>

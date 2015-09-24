@@ -4,8 +4,7 @@
 
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
-            <a href="" id="blueprints-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"
-               data-target="#panel-blueprints-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
+            <a href="" id="blueprints-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse" data-target="#panel-blueprints-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
             <h4><span class="badge pull-right">{{$root.blueprints.length}}</span> {{msg.blueprint_manage_title}}</h4>
         </div>
 
@@ -55,9 +54,9 @@
                         <div id="panel-blueprint-collapse{{blueprint.id}}" class="panel-collapse collapse">
 
                             <p class="btn-row-over-panel pull-left">
-                                 <a href="" class="btn btn-info" role="button" ng-click="copyAndEditBlueprint(blueprint)">
+                                <a href="" class="btn btn-info" role="button" ng-click="copyAndEditBlueprint(blueprint)">
                                     <i class="fa fa-copy fa-fw"></i><span> {{msg.blueprint_list_copy}}</span>
-                                 </a>
+                                </a>
                             </p>
                             <p class="btn-row-over-panel">
                                 <a href="" class="btn btn-danger" role="button" ng-click="deleteBlueprint(blueprint)">

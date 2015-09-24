@@ -36,7 +36,7 @@
     <label class="col-sm-3 control-label" for="azure_tvolumescount">{{msg.template_form_volume_count_label}}</label>
 
     <div class="col-sm-9">
-        <input type="number" class="form-control" id="azure_tvolumescount" name="azure_tvolumescount" ng-model="azureTemp.volumeCount"  placeholder="{{msg.template_form_volume_count_placeholder}}" min="1" max="12" required>
+        <input type="number" class="form-control" id="azure_tvolumescount" name="azure_tvolumescount" ng-model="azureTemp.volumeCount" placeholder="{{msg.template_form_volume_count_placeholder}}" min="1" max="12" required>
         <div class="help-block" ng-show="azureTemplateForm.azure_tvolumescount.$dirty && azureTemplateForm.azure_tvolumescount.$invalid">
             <i class="fa fa-warning"></i> {{msg.volume_count_invalid}}
         </div>
@@ -49,7 +49,7 @@
     <label class="col-sm-3 control-label" for="azure_tvolumesize">{{msg.template_form_volume_size_label}}</label>
 
     <div class="col-sm-9">
-        <input type="number" class="form-control" id="azure_tvolumesize" name="azure_tvolumesize" ng-model="azureTemp.volumeSize"  placeholder="{{msg.template_form_volume_size_placeholder}}" min="10" max="1000" required>
+        <input type="number" class="form-control" id="azure_tvolumesize" name="azure_tvolumesize" ng-model="azureTemp.volumeSize" placeholder="{{msg.template_form_volume_size_placeholder}}" min="10" max="1000" required>
         <div class="help-block" ng-show="azureTemplateForm.azure_tvolumesize.$dirty && azureTemplateForm.azure_tvolumesize.$invalid">
             <i class="fa fa-warning"></i> {{msg.volume_size_invalid}}
         </div>
@@ -58,11 +58,11 @@
 
 </div>
 <div class="form-group">
-      <label class="col-sm-3 control-label" for="azure_publicInAccount">{{msg.public_in_account_label}}</label>
-      <div class="col-sm-9">
-          <input type="checkbox" name="azure_publicInAccount" id="azure_publicInAccount" ng-model="azureTemp.public">
-      </div>
-       <!-- .col-sm-9 -->
+    <label class="col-sm-3 control-label" for="azure_publicInAccount">{{msg.public_in_account_label}}</label>
+    <div class="col-sm-9">
+        <input type="checkbox" name="azure_publicInAccount" id="azure_publicInAccount" ng-model="azureTemp.public">
+    </div>
+    <!-- .col-sm-9 -->
 </div>
 
 <div class="row btn-row">

@@ -4,8 +4,7 @@
 
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
-            <a href="" id="network-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"
-               data-target="#panel-network-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
+            <a href="" id="network-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse" data-target="#panel-network-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
             <h4><span class="badge pull-right">{{$root.networks.length}}</span> {{msg.network_manage_title}}</h4>
         </div>
 
@@ -30,8 +29,8 @@
                                         <a id="azureNetworkChange" class="btn btn-default" role="button" ng-click="createAzureNetworkRequest()">{{msg.azure_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified">
-                                      <a id="gcpNetworkChange" class="btn btn-default" role="button" ng-click="createGcpNetworkRequest()">{{msg.gcp_label}}</a>
-                                      <a id="openstackNetworkChange" class="btn btn-default" role="button" ng-click="createOpenstackNetworkRequest()">{{msg.openstack_label}}</a>
+                                        <a id="gcpNetworkChange" class="btn btn-default" role="button" ng-click="createGcpNetworkRequest()">{{msg.gcp_label}}</a>
+                                        <a id="openstackNetworkChange" class="btn btn-default" role="button" ng-click="createOpenstackNetworkRequest()">{{msg.openstack_label}}</a>
                                     </div>
                                 </div>
                             </div>
@@ -50,7 +49,7 @@
                                 <div ng-include src="'tags/network/gcpnetworkform.tag'"></div>
                             </form>
                             <form class="form-horizontal" role="form" ng-show="openstackNetwork" name="openstackNetworkForm" ng-show="openstackNetwork">
-                              <div ng-include src="'tags/network/openstacknetworkform.tag'"></div>
+                                <div ng-include src="'tags/network/openstacknetworkform.tag'"></div>
                             </form>
                         </div>
                     </div>
@@ -93,7 +92,7 @@
                             </div>
 
                             <div class="panel-body" ng-if="network.cloudPlatform == 'OPENSTACK' ">
-                              <div ng-include src="'tags/network/openstacknetworklist.tag'"></div>
+                                <div ng-include src="'tags/network/openstacknetworklist.tag'"></div>
                             </div>
 
                         </div>

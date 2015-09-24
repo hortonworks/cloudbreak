@@ -1,4 +1,5 @@
-<form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+<form class="form-horizontal" role="document">
+    <!-- role: 'document' - non-editable "form" -->
     <div ng-include src="'tags/network/commonnetworkfieldslist.tag'"></div>
     <div class="form-group">
         <label class="col-sm-3 control-label" for="{{network.name}}-addressprefix">{{msg.network_azure_form_address_prefix_label}}</label>

@@ -1,4 +1,5 @@
-<form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+<form class="form-horizontal" role="document">
+    <!-- role: 'document' - non-editable "form" -->
     <div class="form-group">
         <label class="col-sm-3 control-label" for="awsclusterName">{{msg.name_label}}</label>
 
@@ -60,7 +61,7 @@
         <label class="col-sm-3 control-label" for="awsspotprice">{{msg.template_aws_form_spot_price_label}}</label>
 
         <div class="col-sm-9">
-            <p id="awsspotprice" class="form-control-static" >{{template.parameters.spotPrice}}</p>
+            <p id="awsspotprice" class="form-control-static">{{template.parameters.spotPrice}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
