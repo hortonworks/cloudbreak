@@ -47,10 +47,12 @@ public class EnvironmentVariableConfig {
     public static final String CB_DOCKER_CONTAINER_BAYWATCH_CLIENT = "sequenceiq/baywatch-client:v1.0.0";
     public static final String CB_DOCKER_CONTAINER_LOGROTATE = "sequenceiq/logrotate:v0.5.1";
 
+    public static final String CB_DOCKER_RELOCATE = "true";
+
     public static final String CB_BAYWATCH_ENABLED = "true";
     public static final String CB_BAYWATCH_EXTERN_LOCATION = "";
 
-    public static final String CB_AZURE_IMAGE_NAME = "cb-centos71-amb210-2015-09-16104_2015-September-16_4-22-os-2015-09-16.vhd";
+    public static final String CB_AZURE_IMAGE_NAME = "cb-centos71-amb210-2015-09-25110_2015-September-25_10-0-os-2015-09-25.vhd";
     public static final String CB_AZURE_IMAGE_URI = "https://102589fae040d8westeurope.blob.core.windows.net/images/" + CB_AZURE_IMAGE_NAME;
     public static final String CB_AZURE_RM_IMAGE = new StringBuilder()
             .append(String.format("EAST_ASIA:https://sequenceiqeastasia.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
@@ -66,9 +68,9 @@ public class EnvironmentVariableConfig {
             .append(String.format("WEST_US:https://sequenceiqwestus.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
             .append(String.format("WEST_EUROPE:https://sequenceiqwesteurope.blob.core.windows.net/images/%s", CB_AZURE_IMAGE_NAME))
             .toString();
-    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-8c6bfc8c,ap-southeast-1:ami-a2fbeef0,ap-southeast-2:ami-310a440b,eu-central-1:ami-68a5a575,eu-west-1:ami-13f2df64,sa-east-1:ami-111e8b0c,us-east-1:ami-d793e4b2,us-west-1:ami-4929ec0d,us-west-2:ami-c3dac5f3";
-    public static final String CB_OPENSTACK_IMAGE = "cb-centos71-amb210-2015-09-16";
-    public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos71-amb210-2015-09-16127.tar.gz";
+    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-b6e578b6,ap-southeast-1:ami-226f7870,ap-southeast-2:ami-093b7233,eu-central-1:ami-94999a89,eu-west-1:ami-7979510e,sa-east-1:ami-79019564,us-east-1:ami-279fe642,us-west-1:ami-9f9f58db,us-west-2:ami-e5ffe7d5";
+    public static final String CB_OPENSTACK_IMAGE = "cb-centos71-amb210-2015-09-25";
+    public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos71-amb210-2015-09-25130.tar.gz";
 
     public static final String CB_ARM_TEMPLATE_PATH = "templates/arm-v2.ftl";
     public static final String CB_ARM_PARAMETER_PATH = "templates/parameters.ftl";

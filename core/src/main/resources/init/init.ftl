@@ -1,6 +1,7 @@
 #!/bin/bash
 set -x
 
+CLOUD_PLATFORM="${cloudPlatform}"
 START_LABEL=${platformDiskStartLabel}
 PLATFORM_DISK_PREFIX=${platformDiskPrefix}
 
@@ -30,6 +31,13 @@ extend_rootfs() {
   root_fs_device=$(mount | grep ' / ' | cut -d' ' -f 1 | sed s/1//g)
   growpart $root_fs_device 1
   xfs_growfs /
+}
+
+relocate_docker() {
+  if [[ $CLOUD_PLATFORM == AZURE* ]] && [ -n "$(mount | grep ' /mnt ')" ]; then
+      mv /var/lib/docker /mnt/docker
+      ln -s /mnt/docker /var/lib/docker
+  fi
 }
 
 format_disks() {
@@ -93,6 +101,9 @@ main() {
   elif [ ! -f "/var/cb-init-executed" ]; then
     <#if gateway>
     setup_tmp_ssh
+    </#if>
+    <#if relocateDocker>
+    relocate_docker
     </#if>
     extend_rootfs
     format_disks

@@ -28,6 +28,7 @@ public class UserDataBuilderTest {
         factoryBean.afterPropertiesSet();
         Configuration configuration = factoryBean.getObject();
         userDataBuilder.setFreemarkerConfiguration(configuration);
+        userDataBuilder.setRelocateDocker(true);
     }
 
     @Test
