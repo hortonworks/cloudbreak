@@ -1,0 +1,15 @@
+{
+  "platformToVariants": {
+    "PLATFORM_1": [
+      "VARIANT_1"
+    ],
+    "PLATFORM_2": [
+      "VARIANT_1",
+      "VARIANT_2"
+    ]
+  },
+  "defaultVariants": {
+    "PLATFORM_1": "VARIANT_1",
+    "PLATFORM_2": "VARIANT_2"
+  }
+}
