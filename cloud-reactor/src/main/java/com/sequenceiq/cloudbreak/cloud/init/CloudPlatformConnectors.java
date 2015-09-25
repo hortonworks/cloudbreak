@@ -20,6 +20,7 @@ import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.EnvironmentVariableConfig;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 
 @Component
 public class CloudPlatformConnectors {
@@ -33,10 +34,11 @@ public class CloudPlatformConnectors {
     @Inject
     private List<CloudConnector> cloudConnectors;
     private Map<CloudPlatformVariant, CloudConnector> map = new HashMap<>();
+    private Multimap<String, String> platformToVariants;
 
     @PostConstruct
     public void cloudPlatformConnectors() {
-        Multimap<String, String> platformToVariants = HashMultimap.create();
+        platformToVariants = HashMultimap.create();
         for (CloudConnector connector : cloudConnectors) {
             map.put(new CloudPlatformVariant(connector.platform(), connector.variant()), connector);
             platformToVariants.put(connector.platform(), connector.variant());
@@ -103,6 +105,10 @@ public class CloudPlatformConnectors {
                     variant, map.keySet()));
         }
         return cc;
+    }
+
+    public PlatformVariants getPlatformVariants() {
+        return new PlatformVariants(platformToVariants.asMap(), defaultVariants);
     }
 
 }

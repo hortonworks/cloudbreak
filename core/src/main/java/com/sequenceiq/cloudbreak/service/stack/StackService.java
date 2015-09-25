@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 import java.util.List;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.domain.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.controller.json.InstanceGroupAdjustmentJson;
@@ -33,6 +34,8 @@ public interface StackService {
     Stack get(String ambariAddress);
 
     Stack create(CbUser user, Stack stack);
+
+    PlatformVariants getPlatformVariants();
 
     void delete(Long id, CbUser cbUser);
 

@@ -1,11 +1,25 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.controller.doc.ContentType;
 import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.controller.doc.Notes;
@@ -13,6 +27,7 @@ import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions.StackOpDes
 import com.sequenceiq.cloudbreak.controller.json.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.controller.json.CertificateResponse;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
+import com.sequenceiq.cloudbreak.controller.json.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.controller.json.StackRequest;
 import com.sequenceiq.cloudbreak.controller.json.StackResponse;
 import com.sequenceiq.cloudbreak.controller.json.StackValidationRequest;
@@ -28,18 +43,6 @@ import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @Api(value = "/stack", description = ControllerDescription.STACK_DESCRIPTION, position = 3)
@@ -215,6 +218,15 @@ public class StackController {
         MDCBuilder.buildMdcContext(user);
         stackService.removeInstance(user, stackId, instanceId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+
+    @ApiOperation(value = StackOpDescription.GET_PLATFORM_VARIANTS, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
+    @RequestMapping(value = "stacks/platformVariants", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<PlatformVariantsJson> getPlatformVariants(@ModelAttribute("user") CbUser user) {
+        PlatformVariants pv = stackService.getPlatformVariants();
+        return new ResponseEntity<>(conversionService.convert(pv, PlatformVariantsJson.class), HttpStatus.OK);
     }
 
     private ResponseEntity<IdJson> createStack(CbUser user, StackRequest stackRequest, boolean publicInAccount) {

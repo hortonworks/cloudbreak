@@ -20,10 +20,12 @@ public class LogContextAspects {
     private static final Logger LOGGER = LoggerFactory.getLogger(LogContextAspects.class);
 
     @Pointcut("execution(public * com.sequenceiq.cloudbreak.cloud.handler.CloudPlatformEventHandler+.accept(..))")
-    public void interceptReactorHandlersAcceptMethod() { }
+    public void interceptReactorHandlersAcceptMethod() {
+    }
 
     @Pointcut("execution(public * com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler.schedule(..))")
-    public void interceptFetchTasksCallMethod() { }
+    public void interceptFetchTasksCallMethod() {
+    }
 
 
     @Before("com.sequenceiq.cloudbreak.logger.LogContextAspects.interceptReactorHandlersAcceptMethod()")
@@ -31,7 +33,9 @@ public class LogContextAspects {
         Event<CloudPlatformRequest> event = (Event<CloudPlatformRequest>) joinPoint.getArgs()[0];
         CloudPlatformRequest cloudPlatformRequest = event.getData();
         CloudContext cloudContext = cloudPlatformRequest.getCloudContext();
-        MDCBuilder.buildMdcContext(String.valueOf(cloudContext.getStackId()), cloudContext.getStackName(), cloudContext.getOwner());
+        if (cloudContext != null) {
+            MDCBuilder.buildMdcContext(String.valueOf(cloudContext.getStackId()), cloudContext.getStackName(), cloudContext.getOwner());
+        }
         LOGGER.info("A Reactor event handler's 'accept' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
     }
 
