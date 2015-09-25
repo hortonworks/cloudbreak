@@ -16,7 +16,7 @@ create-migrate-log() {
 }
 
 migrate-startdb() {
-    compose-up --no-recreate cbdb pcdb
+    compose-up --no-recreate cbdb pcdb uaadb
 }
 
 migrateDebug() {
@@ -112,6 +112,8 @@ execute-migration() {
         migrate-one-db cbdb pending
         migrate-one-db pcdb up
         migrate-one-db pcdb pending
+        migrate-one-db uaadb up
+        migrate-one-db uaadb pending
     else
         migrate-one-db $params
     fi
@@ -140,6 +142,7 @@ migrate-cmd() {
 
     cloudbreak-config
     migrate-config
+    migrate-startdb
     compose-generate-yaml
     execute-migration "$@"
 }
