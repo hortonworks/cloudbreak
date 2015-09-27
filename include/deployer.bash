@@ -1,14 +1,14 @@
 
 shorten_function() {
   local max=25
-  local context=3
+  local context=5
   local word="$*"
   
   if [[ ${#word} -le ${max} ]]; then 
       echo "${word}"
   else
-      local keep=$(( ${#word} - (${max} - ${context} + 1) ))
-      echo "${word:0:${context}}.${word:$keep}"
+      local keep=$(( ${#word} - (${max} - ${context} - 2) ))
+      echo "${word:0:${context}}..${word:$keep}"
   fi
 }
 debug() {
