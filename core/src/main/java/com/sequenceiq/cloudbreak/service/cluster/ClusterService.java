@@ -9,8 +9,8 @@ import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.StatusRequest;
+import com.sequenceiq.cloudbreak.common.type.Status;
+import com.sequenceiq.cloudbreak.common.type.StatusRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 

@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.CloudRegion;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;

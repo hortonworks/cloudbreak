@@ -1,59 +1,43 @@
 package com.sequenceiq.cloudbreak.cloud.event.context;
 
 import com.sequenceiq.cloudbreak.cloud.CloudPlatformVariant;
-import com.sequenceiq.cloudbreak.domain.AdjustmentType;
-import com.sequenceiq.cloudbreak.domain.OnFailureAction;
-import com.sequenceiq.cloudbreak.domain.Stack;
 
 public class CloudContext {
 
-    private Long stackId;
-    private String stackName;
-    private String platform;
-    private String variant;
-    private String owner;
-    private String region;
-    private OnFailureAction onFailureAction = OnFailureAction.ROLLBACK;
-    private AdjustmentType adjustmentType;
-    private Long threshold;
-    private Long created;
+    private final Long id;
+    private final String name;
+    private final String platform;
+    private final String owner;
+    private final String variant;
+    private final Long created;
+    private final String region;
 
-    public CloudContext(Stack stack) {
-        this.stackId = stack.getId();
-        this.stackName = stack.getName();
-        this.platform = stack.cloudPlatform().name();
-        this.variant = stack.getPlatformVariant();
-        this.region = stack.getRegion();
-        this.owner = stack.getOwner();
-        this.onFailureAction = stack.getOnFailureActionAction();
-        this.created = stack.getCreated();
-        if (stack.getFailurePolicy() != null) {
-            this.adjustmentType = stack.getFailurePolicy().getAdjustmentType();
-            this.threshold = stack.getFailurePolicy().getThreshold();
-        }
-    }
-
-    public CloudContext(Long stackId, String stackName, String platform, String owner) {
-        this.stackId = stackId;
-        this.stackName = stackName;
+    public CloudContext(Long id, String name, String platform, String owner) {
+        this.id = id;
+        this.name = name;
         this.platform = platform;
         this.owner = owner;
+        this.variant = null;
+        this.created = null;
+        this.region = null;
     }
 
-    public CloudContext(Long stackId, String stackName, String platform, String variant, String owner) {
-        this.stackId = stackId;
-        this.stackName = stackName;
+    public CloudContext(Long id, String name, String platform, String owner, String variant, Long created, String region) {
+        this.id = id;
+        this.name = name;
         this.platform = platform;
+        this.owner = owner;
         this.variant = variant;
-        this.owner = owner;
+        this.created = created;
+        this.region = region;
     }
 
-    public Long getStackId() {
-        return stackId;
+    public Long getId() {
+        return id;
     }
 
-    public String getStackName() {
-        return stackName;
+    public String getName() {
+        return name;
     }
 
     public String getPlatform() {
@@ -64,45 +48,29 @@ public class CloudContext {
         return variant;
     }
 
-    public CloudPlatformVariant getPlatformVariant() {
-        return new CloudPlatformVariant(platform, variant);
-    }
-
     public String getOwner() {
         return owner;
     }
 
-    public String getRegion() {
-        return region;
-    }
-
-    public OnFailureAction getOnFailureAction() {
-        return onFailureAction;
-    }
-
-    public AdjustmentType getAdjustmentType() {
-        return adjustmentType;
-    }
-
-    public Long getThreshold() {
-        return threshold;
-    }
-
-    public void setAdjustmentType(AdjustmentType adjustmentType) {
-        this.adjustmentType = adjustmentType;
+    public CloudPlatformVariant getPlatformVariant() {
+        return new CloudPlatformVariant(platform, variant);
     }
 
     public Long getCreated() {
         return created;
     }
 
+    public String getRegion() {
+        return region;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("CloudContext{");
-        sb.append("stackId=").append(stackId);
-        sb.append(", stackName='").append(stackName).append('\'');
+        sb.append("id=").append(id);
+        sb.append(", name='").append(name).append('\'');
         sb.append(", platform='").append(platform).append('\'');
-        sb.append(", region='").append(region).append('\'');
+        sb.append(", owner='").append(owner).append('\'');
         sb.append('}');
         return sb.toString();
     }

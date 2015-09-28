@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.CloudRegion;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;

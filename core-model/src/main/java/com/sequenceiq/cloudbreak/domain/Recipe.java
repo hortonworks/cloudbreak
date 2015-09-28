@@ -16,6 +16,8 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.sequenceiq.cloudbreak.common.type.PluginExecutionType;
+
 @Entity
 @Table(name = "recipe", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "account", "name" })

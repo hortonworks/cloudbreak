@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.StackContext;
 

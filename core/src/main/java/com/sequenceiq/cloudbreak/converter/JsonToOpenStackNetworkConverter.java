@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.NetworkJson;
 import com.sequenceiq.cloudbreak.controller.validation.OpenStackNetworkParam;
-import com.sequenceiq.cloudbreak.domain.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.OpenStackNetwork;
 
 @Component

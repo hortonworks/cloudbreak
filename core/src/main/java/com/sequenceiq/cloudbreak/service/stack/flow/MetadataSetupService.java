@@ -11,12 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.domain.BillingStatus;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.BillingStatus;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;

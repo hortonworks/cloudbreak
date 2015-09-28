@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
-import com.sequenceiq.cloudbreak.domain.CloudRegion;
+import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 
 @Service
 public class GcpCredentialConnector implements CredentialConnector {

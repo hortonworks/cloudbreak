@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.controller.json.NetworkJson;
 import com.sequenceiq.cloudbreak.controller.validation.AwsNetworkParam;
 import com.sequenceiq.cloudbreak.domain.AwsNetwork;
-import com.sequenceiq.cloudbreak.domain.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 
 @Component
 public class JsonToAwsNetworkConverter extends AbstractConversionServiceAwareConverter<NetworkJson, AwsNetwork> {

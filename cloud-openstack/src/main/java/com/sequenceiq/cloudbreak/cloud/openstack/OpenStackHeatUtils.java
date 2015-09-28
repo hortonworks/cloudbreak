@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.openstack.status.HeatStackStatus;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Component
 public class OpenStackHeatUtils {

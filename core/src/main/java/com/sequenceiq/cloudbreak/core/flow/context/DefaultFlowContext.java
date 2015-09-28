@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow.context;
 
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
 public class DefaultFlowContext implements FlowContext {
     private Long stackId;

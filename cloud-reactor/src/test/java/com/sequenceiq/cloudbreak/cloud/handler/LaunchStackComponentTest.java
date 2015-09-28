@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 
 public class LaunchStackComponentTest extends AbstractComponentTest<LaunchStackResult> {
 
@@ -31,6 +32,6 @@ public class LaunchStackComponentTest extends AbstractComponentTest<LaunchStackR
 
     @Override
     protected CloudPlatformRequest getRequest() {
-        return new LaunchStackRequest(g().createCloudContext(), g().createCloudCredential(), g().createCloudStack());
+        return new LaunchStackRequest(g().createCloudContext(), g().createCloudCredential(), g().createCloudStack(), AdjustmentType.BEST_EFFORT, 0L);
     }
 }

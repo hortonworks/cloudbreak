@@ -10,6 +10,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
+import com.sequenceiq.cloudbreak.common.type.CommonStatus;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
+
 @Entity
 //@Table(uniqueConstraints = {
 //        @UniqueConstraint(columnNames = { "resourceType", "resourceName", "resource_stack" })
@@ -21,10 +24,6 @@ import javax.persistence.NamedQuery;
                         + "WHERE r.stack.id = :stackId AND r.resourceName = :name AND r.resourceType = :type")
 })
 public class Resource implements ProvisionEntity {
-    public enum Status {
-        REQUESTED,
-        CREATED
-    }
 
     @Id
     @GeneratedValue
@@ -34,7 +33,7 @@ public class Resource implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private ResourceType resourceType;
     @Enumerated(EnumType.STRING)
-    private Resource.Status resourceStatus;
+    private CommonStatus resourceStatus;
 
     private String resourceName;
     private String resourceReference;
@@ -48,14 +47,14 @@ public class Resource implements ProvisionEntity {
     }
 
     public Resource(ResourceType resourceType, String resourceName, Stack stack) {
-        this(resourceType, resourceName, null, Status.CREATED, stack, null);
+        this(resourceType, resourceName, null, CommonStatus.CREATED, stack, null);
     }
 
     public Resource(ResourceType resourceType, String resourceName, Stack stack, String instanceGroup) {
-        this(resourceType, resourceName, null, Status.CREATED, stack, instanceGroup);
+        this(resourceType, resourceName, null, CommonStatus.CREATED, stack, instanceGroup);
     }
 
-    public Resource(ResourceType resourceType, String resourceName, String resourceReference, Status status, Stack stack, String instanceGroup) {
+    public Resource(ResourceType resourceType, String resourceName, String resourceReference, CommonStatus status, Stack stack, String instanceGroup) {
         this.resourceType = resourceType;
         this.resourceName = resourceName;
         this.resourceReference = resourceReference;
@@ -96,11 +95,11 @@ public class Resource implements ProvisionEntity {
         this.resourceName = resourceName;
     }
 
-    public Status getResourceStatus() {
+    public CommonStatus getResourceStatus() {
         return resourceStatus;
     }
 
-    public void setResourceStatus(Status resourceStatus) {
+    public void setResourceStatus(CommonStatus resourceStatus) {
         this.resourceStatus = resourceStatus;
     }
 

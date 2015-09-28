@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class OpenStackNetworkResourceBuilder extends AbstractOpenStackNetworkResourceBuilder {
@@ -73,7 +73,7 @@ public class OpenStackNetworkResourceBuilder extends AbstractOpenStackNetworkRes
         if (osNetwork != null && context.isBuild()) {
             State networkStatus = osNetwork.getStatus();
             if (State.ERROR == networkStatus) {
-                throw new OpenStackResourceException("Network in failed state", resource.getType(), resource.getName(), cloudContext.getStackId(),
+                throw new OpenStackResourceException("Network in failed state", resource.getType(), resource.getName(), cloudContext.getId(),
                         networkStatus.name());
             }
             return networkStatus == State.ACTIVE;

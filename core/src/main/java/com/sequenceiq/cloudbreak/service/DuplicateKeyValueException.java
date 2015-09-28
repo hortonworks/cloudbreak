@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
 
-import com.sequenceiq.cloudbreak.domain.APIResourceType;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 
 public class DuplicateKeyValueException extends RuntimeException {
     private final APIResourceType resourceType;

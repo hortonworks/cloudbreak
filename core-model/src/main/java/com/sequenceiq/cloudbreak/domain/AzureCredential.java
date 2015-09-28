@@ -3,6 +3,9 @@ package com.sequenceiq.cloudbreak.domain;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudRegion;
+
 @Entity
 public class AzureCredential extends Credential implements ProvisionEntity {
 

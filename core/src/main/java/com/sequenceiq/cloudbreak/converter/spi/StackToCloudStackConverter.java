@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -137,7 +137,7 @@ public class StackToCloudStackConverter {
 
     private InstanceStatus getInstanceStatus(InstanceMetaData metaData, Set<String> deleteRequests) {
         return deleteRequests.contains(metaData.getInstanceId()) ? InstanceStatus.DELETE_REQUESTED
-                : metaData.getInstanceStatus() == com.sequenceiq.cloudbreak.domain.InstanceStatus.REQUESTED ? InstanceStatus.CREATE_REQUESTED
+                : metaData.getInstanceStatus() == com.sequenceiq.cloudbreak.common.type.InstanceStatus.REQUESTED ? InstanceStatus.CREATE_REQUESTED
                 : InstanceStatus.CREATED;
     }
 

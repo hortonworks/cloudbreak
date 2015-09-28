@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.validation.AzureTemplateParam;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
 @Component
 public class AzureTemplateToJsonConverter extends AbstractConversionServiceAwareConverter<AzureTemplate, TemplateResponse> {

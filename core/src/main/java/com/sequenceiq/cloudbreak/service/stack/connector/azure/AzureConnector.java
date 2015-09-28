@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
-import static com.sequenceiq.cloudbreak.domain.ResourceType.AZURE_VIRTUAL_MACHINE;
+import static com.sequenceiq.cloudbreak.common.type.ResourceType.AZURE_VIRTUAL_MACHINE;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
@@ -23,7 +23,7 @@ import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;

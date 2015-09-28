@@ -13,7 +13,6 @@ jar {
 
 dependencies {
 
-    compile project(':cloud-api')
     compile project(':cloud-common')
     compile project(':cloud-reactor')
 

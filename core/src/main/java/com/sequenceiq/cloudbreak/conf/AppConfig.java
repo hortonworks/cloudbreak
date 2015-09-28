@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceCom
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ExecutorBasedParallelContainerRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.StackDeletionBasedExitCriteria;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;

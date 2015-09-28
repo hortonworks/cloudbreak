@@ -17,7 +17,7 @@ import java.util.Set;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.domain.CbUserRole;
+import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Stack;

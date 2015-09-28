@@ -5,7 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.cloud.service.ResourceNameService;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 public class GcpResourceNameServiceTest {
 

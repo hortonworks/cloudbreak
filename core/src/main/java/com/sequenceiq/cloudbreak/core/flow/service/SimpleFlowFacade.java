@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
-import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_IN_PROGRESS;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
-import com.sequenceiq.cloudbreak.domain.BillingStatus;
+import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;

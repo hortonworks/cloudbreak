@@ -20,8 +20,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
-import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.CommonStatus;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 public abstract class AbstractOpenStackResourceBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractOpenStackResourceBuilder.class);
@@ -37,7 +37,7 @@ public abstract class AbstractOpenStackResourceBuilder {
         return new CloudResource.Builder()
                 .name(name)
                 .type(resourceType)
-                .status(Resource.Status.REQUESTED)
+                .status(CommonStatus.REQUESTED)
                 .build();
     }
 
@@ -49,7 +49,7 @@ public abstract class AbstractOpenStackResourceBuilder {
         return new CloudResource.Builder()
                 .cloudResource(namedResource)
                 .reference(reference)
-                .status(Resource.Status.CREATED)
+                .status(CommonStatus.CREATED)
                 .params(params)
                 .build();
     }
@@ -80,7 +80,7 @@ public abstract class AbstractOpenStackResourceBuilder {
             String faultMsg) {
         if (!response.isSuccess()) {
             if (response.getCode() != StatusCode.NOT_FOUND.getCode()) {
-                throw new OpenStackResourceException(faultMsg, resourceType, resource.getName(), auth.getCloudContext().getStackId(),
+                throw new OpenStackResourceException(faultMsg, resourceType, resource.getName(), auth.getCloudContext().getId(),
                         response.getFault());
             } else {
                 return null;

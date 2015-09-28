@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
-import com.sequenceiq.cloudbreak.domain.AdjustmentType;
+import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 
 public abstract class AbstractResourceConnector implements ResourceConnector {
 
@@ -34,7 +34,8 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
     private ContextBuilders contextBuilders;
 
     @Override
-    public List<CloudResourceStatus> launch(AuthenticatedContext auth, CloudStack stack, PersistenceNotifier notifier) throws Exception {
+    public List<CloudResourceStatus> launch(AuthenticatedContext auth, CloudStack stack, PersistenceNotifier notifier, AdjustmentType adjustmentType,
+            Long threshold) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
         String platform = cloudContext.getPlatform();
 
@@ -46,7 +47,8 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         context.addNetworkResources(getCloudResources(networkStatuses));
 
         //compute
-        List<CloudResourceStatus> computeStatuses = computeResourceService.buildResources(context, auth, stack.getGroups(), stack.getImage(), false);
+        List<CloudResourceStatus> computeStatuses = computeResourceService.buildResourcesForLaunch(context, auth, stack.getGroups(), stack.getImage(),
+                adjustmentType, threshold);
 
         networkStatuses.addAll(computeStatuses);
         return networkStatuses;
@@ -85,14 +87,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         String scalingGroup = getGroupName(stack);
         Group group = createScalingGroup(stack.getGroups(), scalingGroup);
 
-        AdjustmentType adjustmentType = auth.getCloudContext().getAdjustmentType();
-        auth.getCloudContext().setAdjustmentType(AdjustmentType.BEST_EFFORT);
-
-        List<CloudResourceStatus> computeResources = computeResourceService.buildResources(context, auth, Arrays.asList(group), stack.getImage(), true);
-
-        auth.getCloudContext().setAdjustmentType(adjustmentType);
-
-        return computeResources;
+        return computeResourceService.buildResourcesForUpscale(context, auth, Arrays.asList(group), stack.getImage());
     }
 
     @Override

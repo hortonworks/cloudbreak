@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.controller.json.CredentialResponse;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
 
 public class OpenStackCredentialToJsonConverterTest extends AbstractEntityConverterTest<OpenStackCredential> {

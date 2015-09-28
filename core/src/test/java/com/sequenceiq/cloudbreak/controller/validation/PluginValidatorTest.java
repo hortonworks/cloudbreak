@@ -30,7 +30,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
+import com.sequenceiq.cloudbreak.common.type.PluginExecutionType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PluginValidatorTest {

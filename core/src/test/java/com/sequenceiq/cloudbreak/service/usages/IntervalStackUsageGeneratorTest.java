@@ -20,7 +20,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.domain.AwsInstanceType;
+import com.sequenceiq.cloudbreak.common.type.AwsInstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;

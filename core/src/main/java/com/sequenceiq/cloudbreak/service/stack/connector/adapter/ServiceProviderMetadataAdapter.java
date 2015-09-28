@@ -25,16 +25,16 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.converter.spi.CloudVmInstanceStatusToCoreInstanceMetaDataConverter;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
@@ -64,7 +64,8 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
 
     @Override
     public Set<CoreInstanceMetaData> collectMetadata(Stack stack) {
-        CloudContext cloudContext = new CloudContext(stack);
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
+                stack.getCreated(), stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<InstanceTemplate> instanceTemplates = cloudStackConverter.buildInstanceTemplates(stack);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
@@ -87,7 +88,8 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
 
     @Override
     public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroupName, Integer scalingAdjustment) {
-        CloudContext cloudContext = new CloudContext(stack);
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
+                stack.getCreated(), stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<InstanceTemplate> instanceTemplates = getNewInstanceTemplates(stack);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
@@ -110,7 +112,8 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
 
     @Override
     public InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId) {
-        CloudContext cloudContext = new CloudContext(stack);
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
+                stack.getCreated(), stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         InstanceGroup ig = stack.getInstanceGroupByInstanceGroupName(instanceGroup.getGroupName());
         CloudInstance instance = null;

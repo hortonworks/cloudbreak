@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.status.NovaInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NovaInstanceView;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBuilder implements ComputeResourceBuilder<OpenStackContext> {
@@ -134,7 +134,7 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
         if (server != null && context.isBuild()) {
             Server.Status status = server.getStatus();
             if (Server.Status.ERROR == status) {
-                throw new OpenStackResourceException("Instance in failed state", resource.getType(), resource.getName(), cloudContext.getStackId(),
+                throw new OpenStackResourceException("Instance in failed state", resource.getType(), resource.getName(), cloudContext.getId(),
                         status.name());
             }
             return status == Server.Status.ACTIVE;

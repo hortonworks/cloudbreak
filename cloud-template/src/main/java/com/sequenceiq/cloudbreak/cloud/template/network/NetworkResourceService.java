@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.template.NetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class NetworkResourceService {
@@ -45,7 +45,7 @@ public class NetworkResourceService {
         CloudContext cloudContext = auth.getCloudContext();
         List<CloudResourceStatus> results = new ArrayList<>();
         for (NetworkResourceBuilder builder : resourceBuilders.network(cloudContext.getPlatform())) {
-            PollGroup pollGroup = InMemoryStateStore.get(auth.getCloudContext().getStackId());
+            PollGroup pollGroup = InMemoryStateStore.get(auth.getCloudContext().getId());
             if (pollGroup != null && CANCELLED.equals(pollGroup)) {
                 break;
             }

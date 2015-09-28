@@ -4,13 +4,13 @@ import java.util.List;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
-import com.sequenceiq.cloudbreak.domain.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.controller.json.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StatusRequest;
+import com.sequenceiq.cloudbreak.common.type.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
 public interface StackService {

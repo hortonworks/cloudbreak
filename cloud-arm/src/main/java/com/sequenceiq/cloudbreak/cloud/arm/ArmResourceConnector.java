@@ -31,7 +31,8 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -51,7 +52,8 @@ public class ArmResourceConnector implements ResourceConnector {
     private ArmPollTaskFactory armPollTaskFactory;
 
     @Override
-    public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier) {
+    public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier,
+            AdjustmentType adjustmentType, Long threshold) {
         String stackName = armUtils.getStackName(authenticatedContext.getCloudContext());
         String resourceGroupName = armUtils.getResourceGroupName(authenticatedContext.getCloudContext());
         String template = armTemplateBuilder.build(stackName, authenticatedContext.getCloudCredential(), authenticatedContext.getCloudContext(), stack);

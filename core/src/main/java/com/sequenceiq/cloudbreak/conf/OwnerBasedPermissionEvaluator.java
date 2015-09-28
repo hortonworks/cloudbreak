@@ -5,7 +5,7 @@ import java.lang.reflect.Field;
 
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.domain.CbUserRole;
+import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 import org.springframework.security.access.PermissionEvaluator;

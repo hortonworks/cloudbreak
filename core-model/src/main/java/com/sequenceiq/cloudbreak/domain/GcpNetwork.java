@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.persistence.Entity;
 
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+
 @Entity
 public class GcpNetwork extends Network {
 

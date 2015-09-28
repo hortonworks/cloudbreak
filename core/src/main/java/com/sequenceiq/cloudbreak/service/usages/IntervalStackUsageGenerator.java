@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.GcpTemplate;

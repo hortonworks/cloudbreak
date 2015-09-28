@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
-import com.sequenceiq.cloudbreak.domain.ImageStatusResult;
+import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
-import com.sequenceiq.cloudbreak.domain.ImageStatus;
+import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 
 import reactor.bus.Event;
 

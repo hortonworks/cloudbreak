@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.controller.json.AccountPreferencesJson;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.domain.CbUserRole;
+import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.account.ScheduledAccountPreferencesValidator;

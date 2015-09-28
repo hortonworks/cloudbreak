@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.NetworkJson;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GcpNetwork;
 
 @Component

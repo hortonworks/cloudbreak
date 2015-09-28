@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.APIResourceType;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.domain.CbUserRole;
+import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;

@@ -12,6 +12,8 @@ import javax.persistence.NamedQuery;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
+
 @Entity
 @NamedQueries({
         @NamedQuery(

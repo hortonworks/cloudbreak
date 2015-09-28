@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.service.price;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.domain.AwsInstanceType;
+import com.sequenceiq.cloudbreak.common.type.AwsInstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Template;
 
 @Component

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem;
 
-import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
+import com.sequenceiq.cloudbreak.common.type.PluginExecutionType;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterLifecycleEvent;
 
 public class FileSystemScriptConfig {

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 import com.sequenceiq.cloudbreak.controller.validation.OpenStackTemplateParam;
 import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
-import com.sequenceiq.cloudbreak.domain.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 
 @Component
 public class JsonToOpenStackTemplateConverter extends AbstractConversionServiceAwareConverter<TemplateRequest, OpenStackTemplate> {

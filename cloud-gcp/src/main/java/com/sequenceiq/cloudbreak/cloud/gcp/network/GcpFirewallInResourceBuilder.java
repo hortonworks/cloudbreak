@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.network;
 
-import static com.sequenceiq.cloudbreak.domain.ResourceType.GCP_FIREWALL_IN;
+import static com.sequenceiq.cloudbreak.common.type.ResourceType.GCP_FIREWALL_IN;
 import static java.util.Arrays.asList;
 
 import java.io.IOException;
@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class GcpFirewallInResourceBuilder extends AbstractGcpNetworkBuilder {

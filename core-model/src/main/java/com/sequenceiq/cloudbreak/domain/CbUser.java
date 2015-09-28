@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.domain;
 import java.util.Date;
 import java.util.List;
 
+import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+
 public class CbUser {
 
     private String userId;

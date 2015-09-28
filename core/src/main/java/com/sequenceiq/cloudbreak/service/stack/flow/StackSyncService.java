@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static com.sequenceiq.cloudbreak.domain.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.domain.Status.DELETE_FAILED;
-import static com.sequenceiq.cloudbreak.domain.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.common.type.Status.DELETE_FAILED;
+import static com.sequenceiq.cloudbreak.common.type.Status.STOPPED;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -19,12 +19,12 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.HostMetadataState;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;

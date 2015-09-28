@@ -9,8 +9,8 @@ import org.junit.Test;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 import freemarker.template.Configuration;

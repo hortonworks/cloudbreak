@@ -23,8 +23,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.domain.CloudRegion;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.CloudRegion;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class GcpMetadataCollector implements MetadataCollector {

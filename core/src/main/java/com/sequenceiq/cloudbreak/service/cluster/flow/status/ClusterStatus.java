@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.status;
 
-import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.common.type.Status;
 
 public enum ClusterStatus {
     UNKNOWN(null, null, "Error happened during the communication with Ambari"),

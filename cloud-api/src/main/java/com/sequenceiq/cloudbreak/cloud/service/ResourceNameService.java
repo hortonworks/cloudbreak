@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.service;
 
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 /**
  * Contract for resource name generation.

@@ -2,10 +2,10 @@ package com.sequenceiq.cloudbreak.service.stack.connector;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;

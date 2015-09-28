@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
-import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateway;
+import static com.sequenceiq.cloudbreak.common.type.InstanceGroupType.isGateway;
 
 import java.util.Set;
 

@@ -17,8 +17,8 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;

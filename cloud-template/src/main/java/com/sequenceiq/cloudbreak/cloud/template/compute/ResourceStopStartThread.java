@@ -56,7 +56,7 @@ public class ResourceStopStartThread implements Callable<ResourceRequestResult<L
     @Override
     public ResourceRequestResult<List<CloudVmInstanceStatus>> call() throws Exception {
         LOGGER.info("{} compute resource {}", context.isBuild() ? "Starting" : "Stopping", resource);
-        PollGroup pollGroup = InMemoryStateStore.get(auth.getCloudContext().getStackId());
+        PollGroup pollGroup = InMemoryStateStore.get(auth.getCloudContext().getId());
         if (pollGroup != null && CANCELLED.equals(pollGroup)) {
             List<CloudVmInstanceStatus> result = createResult(InstanceStatus.UNKNOWN);
             return new ResourceRequestResult<>(FutureResult.SUCCESS, result);

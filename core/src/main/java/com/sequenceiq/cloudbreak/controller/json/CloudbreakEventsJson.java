@@ -5,7 +5,7 @@ import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.InstanceGroupM
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.BlueprintModelDescription;
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.EventModelDescription;
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.StackModelDescription;
-import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.common.type.Status;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 

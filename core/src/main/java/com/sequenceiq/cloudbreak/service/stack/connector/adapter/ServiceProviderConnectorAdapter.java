@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsRequest;
@@ -48,17 +49,18 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
@@ -97,11 +99,13 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     @Override
     public Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties) {
         LOGGER.info("Assembling launch request for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack);
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
+                stack.getCreated(), stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
         instanceMetadataService.saveInstanceRequests(stack, cloudStack.getGroups());
-        LaunchStackRequest launchRequest = new LaunchStackRequest(cloudContext, cloudCredential, cloudStack);
+        FailurePolicy policy = Optional.fromNullable(stack.getFailurePolicy()).or(new FailurePolicy());
+        LaunchStackRequest launchRequest = new LaunchStackRequest(cloudContext, cloudCredential, cloudStack, policy.getAdjustmentType(), policy.getThreshold());
         LOGGER.info("Triggering event: {}", launchRequest);
         eventBus.notify(launchRequest.selector(), Event.wrap(launchRequest));
         try {
@@ -120,7 +124,8 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     @Override
     public void startAll(Stack stack) {
         LOGGER.info("Assembling start request for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack);
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
+                stack.getCreated(), stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<CloudInstance> instances = metadataConverter.convert(stack.getInstanceMetaDataAsList());
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
@@ -150,7 +155,8 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     @Override
     public void stopAll(Stack stack) {
         LOGGER.info("Assembling stop request for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack);
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
+                stack.getCreated(), stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<CloudInstance> instances = metadataConverter.convert(stack.getInstanceMetaDataAsList());
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
@@ -180,7 +186,8 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     @Override
     public Set<Resource> addInstances(Stack stack, String gateWayUserData, String coreUserData, Integer adjustment, String instanceGroup) {
         LOGGER.debug("Assembling upscale stack event for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack);
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
+                stack.getCreated(), stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         group.setNodeCount(group.getNodeCount() + adjustment);
@@ -210,7 +217,8 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     @Override
     public Set<String> removeInstances(Stack stack, String gateWayUserData, String coreUserData, Set<String> instanceIds, String instanceGroup) {
         LOGGER.debug("Assembling downscale stack event for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack);
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
+                stack.getCreated(), stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         List<CloudInstance> instances = new ArrayList<>();
@@ -243,7 +251,8 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     @Override
     public void deleteStack(Stack stack, Credential credential) {
         LOGGER.debug("Assembling terminate stack event for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack);
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
+                stack.getCreated(), stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         CloudStack cloudStack = cloudStackConverter.convert(stack, "", "");
@@ -275,7 +284,8 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     @Override
     public void updateAllowedSubnets(Stack stack, String gateWayUserData, String coreUserData) {
         LOGGER.debug("Assembling update subnet event for: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack);
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
+                stack.getCreated(), stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
@@ -306,7 +316,8 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     public Set<String> getSSHFingerprints(Stack stack, String gateway) {
         Set<String> result = new HashSet<>();
         LOGGER.debug("Get SSH fingerprints of gateway instance for stack: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack);
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
+                stack.getCreated(), stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         InstanceMetaData gatewayMetaData = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
         CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData);
@@ -331,7 +342,8 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     @Override
     public PlatformParameters getPlatformParameters(Stack stack) {
         LOGGER.debug("Get platform parameters for: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack);
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
+                stack.getCreated(), stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         PlatformParameterRequest parameterRequest = new PlatformParameterRequest(cloudContext, cloudCredential);
         eventBus.notify(parameterRequest.selector(), Event.wrap(parameterRequest));
@@ -352,7 +364,8 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     @Override
     public String checkAndGetPlatformVariant(Stack stack) {
         LOGGER.debug("Get platform variant for: {}", stack);
-        CloudContext cloudContext = new CloudContext(stack);
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
+                stack.getCreated(), stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CheckPlatformVariantRequest checkPlatformVariantRequest = new CheckPlatformVariantRequest(cloudContext, cloudCredential);
         eventBus.notify(checkPlatformVariantRequest.selector(), Event.wrap(checkPlatformVariantRequest));

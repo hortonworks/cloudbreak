@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.controller.json.NetworkJson;
 import com.sequenceiq.cloudbreak.controller.validation.AzureNetworkParam;
 import com.sequenceiq.cloudbreak.domain.AzureNetwork;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
 @Component
 public class AzureNetworkToJsonConverter extends AbstractConversionServiceAwareConverter<AzureNetwork, NetworkJson> {

@@ -2,10 +2,10 @@ package com.sequenceiq.cloudbreak.service.price;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GcpTemplate;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.domain.GcpInstanceType;
+import com.sequenceiq.cloudbreak.common.type.GcpInstanceType;
 
 @Component
 public class GCPPriceGenerator implements PriceGenerator {

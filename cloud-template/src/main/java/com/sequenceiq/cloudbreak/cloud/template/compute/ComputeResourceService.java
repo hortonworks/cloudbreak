@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.template.compute;
 
+import static com.sequenceiq.cloudbreak.cloud.template.compute.CloudFailureHandler.ScaleContext;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,7 +33,8 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class ComputeResourceService {
@@ -47,8 +50,18 @@ public class ComputeResourceService {
     @Inject
     private CloudFailureHandler cloudFailureHandler;
 
-    public List<CloudResourceStatus> buildResources(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image, Boolean upscale)
+    public List<CloudResourceStatus> buildResourcesForLaunch(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image,
+            AdjustmentType adjustmentType, Long threshold) throws Exception {
+        return buildResources(ctx, auth, groups, image, false, adjustmentType, threshold);
+    }
+
+    public List<CloudResourceStatus> buildResourcesForUpscale(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image)
             throws Exception {
+        return buildResources(ctx, auth, groups, image, true, AdjustmentType.BEST_EFFORT, null);
+    }
+
+    private List<CloudResourceStatus> buildResources(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image, Boolean upscale,
+            AdjustmentType adjustmentType, Long threshold) throws Exception {
         List<CloudResourceStatus> results = new ArrayList<>();
         int fullNodeCount = getFullNodeCount(groups);
 
@@ -67,14 +80,14 @@ public class ComputeResourceService {
                     results.addAll(flatList(futureResultListMap.get(FutureResult.SUCCESS)));
                     results.addAll(flatList(futureResultListMap.get(FutureResult.FAILED)));
                     cloudFailureHandler.rollback(auth, flatList(futureResultListMap.get(FutureResult.FAILED)), copyGroup,
-                            fullNodeCount, ctx, resourceBuilders, upscale);
+                            fullNodeCount, ctx, resourceBuilders, new ScaleContext(upscale, adjustmentType, threshold));
                 }
             }
             Map<FutureResult, List<List<CloudResourceStatus>>> futureResultListMap = waitForRequests(futures);
             results.addAll(flatList(futureResultListMap.get(FutureResult.SUCCESS)));
             results.addAll(flatList(futureResultListMap.get(FutureResult.FAILED)));
             cloudFailureHandler.rollback(auth, flatList(futureResultListMap.get(FutureResult.FAILED)), copyGroup, fullNodeCount, ctx,
-                    resourceBuilders, upscale);
+                    resourceBuilders, new ScaleContext(upscale, adjustmentType, threshold));
         }
         return results;
     }

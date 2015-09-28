@@ -25,9 +25,9 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.cloudbreak.domain.CloudRegion;
-import com.sequenceiq.cloudbreak.domain.GcpRawDiskType;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.CloudRegion;
+import com.sequenceiq.cloudbreak.common.type.GcpRawDiskType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Component
 public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
@@ -43,7 +43,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         GcpResourceNameService resourceNameService = getResourceNameService();
         String groupName = group.getName();
         final CloudContext cloudContext = auth.getCloudContext();
-        final String stackName = cloudContext.getStackName();
+        final String stackName = cloudContext.getName();
         for (int i = 0; i < template.getVolumes().size(); i++) {
             final String resourceName = resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, i);
             cloudResources.add(createNamedResource(resourceType(), resourceName));

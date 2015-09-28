@@ -31,7 +31,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VolumeCountValidatorTest {

@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;

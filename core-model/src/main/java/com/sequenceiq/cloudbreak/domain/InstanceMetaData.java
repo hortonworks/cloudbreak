@@ -9,6 +9,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
+import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
+
 @Entity
 @NamedQueries({
         @NamedQuery(

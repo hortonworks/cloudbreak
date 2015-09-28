@@ -26,7 +26,7 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.google.common.io.CharStreams;
 import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.domain.CbUserRole;
+import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 

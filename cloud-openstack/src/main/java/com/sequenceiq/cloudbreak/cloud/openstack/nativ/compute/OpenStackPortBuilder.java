@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class OpenStackPortBuilder extends AbstractOpenStackComputeResourceBuilder implements ComputeResourceBuilder<OpenStackContext> {

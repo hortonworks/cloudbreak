@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static com.sequenceiq.cloudbreak.domain.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.domain.Status.DELETE_FAILED;
-import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.common.type.Status.DELETE_FAILED;
+import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_IN_PROGRESS;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -22,14 +22,14 @@ import com.ecwid.consul.v1.ConsulClient;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
-import com.sequenceiq.cloudbreak.domain.BillingStatus;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.BillingStatus;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.HostMetadataState;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;

@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 public class GcpResourceExceptionTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpResourceExceptionTest.class);

@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NovaInstanceView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.OpenStackGroupView;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;

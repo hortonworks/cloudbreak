@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud;
 
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.domain.ImageStatusResult;
+import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 public interface Setup {

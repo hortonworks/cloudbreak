@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.domain.GcpInstanceType;
-import com.sequenceiq.cloudbreak.domain.GcpRawDiskType;
+import com.sequenceiq.cloudbreak.common.type.GcpInstanceType;
+import com.sequenceiq.cloudbreak.common.type.GcpRawDiskType;
 
 public enum GcpTemplateParam implements TemplateParam {
 

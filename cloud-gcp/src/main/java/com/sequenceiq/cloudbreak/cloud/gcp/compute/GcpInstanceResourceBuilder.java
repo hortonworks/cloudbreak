@@ -33,11 +33,11 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.domain.CloudRegion;
-import com.sequenceiq.cloudbreak.domain.GcpDiskMode;
-import com.sequenceiq.cloudbreak.domain.GcpDiskType;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.CloudRegion;
+import com.sequenceiq.cloudbreak.common.type.GcpDiskMode;
+import com.sequenceiq.cloudbreak.common.type.GcpDiskType;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Component
 public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
@@ -47,7 +47,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     @Override
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
-        String resourceName = getResourceNameService().resourceName(resourceType(), cloudContext.getStackName(), group.getName(), privateId);
+        String resourceName = getResourceNameService().resourceName(resourceType(), cloudContext.getName(), group.getName(), privateId);
         return Arrays.asList(createNamedResource(resourceType(), resourceName));
     }
 

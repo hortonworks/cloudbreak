@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.controller.json;
 
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.FailurePolicyModelDescription;
-import com.sequenceiq.cloudbreak.domain.AdjustmentType;
+import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 

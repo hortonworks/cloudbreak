@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceNameService;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service("GcpResourceNameServiceV2")
 public class GcpResourceNameService extends CloudbreakResourceNameService {

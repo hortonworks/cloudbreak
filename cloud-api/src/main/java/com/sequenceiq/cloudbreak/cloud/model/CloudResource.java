@@ -5,17 +5,17 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 
-import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.CommonStatus;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 public class CloudResource extends DynamicModel {
     private ResourceType type;
-    private Resource.Status status;
+    private CommonStatus status;
     private String name;
     private String reference;
     private boolean persistent;
 
-    private CloudResource(ResourceType type, Resource.Status status, String name, String reference, boolean persistent, Map<String, Object> params) {
+    private CloudResource(ResourceType type, CommonStatus status, String name, String reference, boolean persistent, Map<String, Object> params) {
         this.type = type;
         this.status = status;
         this.name = name;
@@ -28,7 +28,7 @@ public class CloudResource extends DynamicModel {
         return type;
     }
 
-    public Resource.Status getStatus() {
+    public CommonStatus getStatus() {
         return status;
     }
 
@@ -58,7 +58,7 @@ public class CloudResource extends DynamicModel {
 
     public static class Builder {
         private ResourceType type;
-        private Resource.Status status = Resource.Status.CREATED;
+        private CommonStatus status = CommonStatus.CREATED;
         private String name;
         private String reference;
         private boolean persistent = true;
@@ -78,7 +78,7 @@ public class CloudResource extends DynamicModel {
             return this;
         }
 
-        public Builder status(Resource.Status status) {
+        public Builder status(CommonStatus status) {
             this.status = status;
             return this;
         }

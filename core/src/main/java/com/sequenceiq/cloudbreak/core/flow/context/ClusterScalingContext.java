@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.ScalingType;
+import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 
 public class ClusterScalingContext extends DefaultFlowContext implements FlowContext {

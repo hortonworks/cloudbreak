@@ -30,8 +30,7 @@ import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.domain.CloudRegion;
-import com.sequenceiq.cloudbreak.domain.GcpCredential;
+import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 
 public final class GcpStackUtil {
 
@@ -152,11 +151,11 @@ public final class GcpStackUtil {
         return null;
     }
 
-    public static List<Disk> listDisks(Compute compute, GcpCredential gcpCredential) throws IOException {
+    public static List<Disk> listDisks(Compute compute, String projectId) throws IOException {
         List<Disk> disks = new ArrayList<>();
         for (CloudRegion gcpZone : CloudRegion.gcpRegions()) {
             try {
-                Compute.Disks.List list = compute.disks().list(gcpCredential.getProjectId(), gcpZone.value());
+                Compute.Disks.List list = compute.disks().list(projectId, gcpZone.value());
                 DiskList execute = list.execute();
                 disks.addAll(execute.getItems());
             } catch (NullPointerException ex) {

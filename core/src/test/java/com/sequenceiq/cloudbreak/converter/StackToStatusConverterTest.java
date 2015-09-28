@@ -10,7 +10,7 @@ import org.junit.Test;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.common.type.Status;
 
 public class StackToStatusConverterTest extends AbstractEntityConverterTest<Stack> {
 

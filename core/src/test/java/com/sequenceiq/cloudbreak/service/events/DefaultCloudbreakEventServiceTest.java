@@ -14,7 +14,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -121,7 +121,7 @@ public class DefaultCloudbreakEventServiceTest {
 
         //THEN
         BDDMockito.verify(eventRepository).save(captor.capture());
-        com.sequenceiq.cloudbreak.domain.CloudbreakEvent event = captor.getValue();
+        CloudbreakEvent event = captor.getValue();
 
         Assert.assertNotNull(event);
         Assert.assertEquals("The user name is not the expected", "John", event.getOwner());

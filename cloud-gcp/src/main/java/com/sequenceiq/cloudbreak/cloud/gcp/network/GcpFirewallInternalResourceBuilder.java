@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class GcpFirewallInternalResourceBuilder extends AbstractGcpNetworkBuilder {

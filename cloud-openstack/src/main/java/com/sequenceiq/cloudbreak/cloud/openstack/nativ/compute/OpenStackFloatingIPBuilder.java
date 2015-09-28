@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class OpenStackFloatingIPBuilder extends AbstractOpenStackComputeResourceBuilder implements ComputeResourceBuilder<OpenStackContext> {
@@ -36,7 +36,7 @@ public class OpenStackFloatingIPBuilder extends AbstractOpenStackComputeResource
                     unusedIp.getFloatingIpAddress());
             if (!response.isSuccess()) {
                 throw new OpenStackResourceException("Add floating-ip to server failed", resourceType(), resource.getName(),
-                        auth.getCloudContext().getStackId(), response.getFault());
+                        auth.getCloudContext().getId(), response.getFault());
             }
             return Collections.singletonList(createPersistedResource(resource, unusedIp.getId()));
         } catch (OS4JException ex) {

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
+import com.sequenceiq.cloudbreak.common.type.PluginExecutionType;
 
 public class RecipeScript {
     private String script;

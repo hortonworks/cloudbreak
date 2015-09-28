@@ -12,7 +12,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.common.type.Status;
 
 public class AmbariClusterStatusFactoryTest {
     private static final String TEST_BLUEPRINT = "blueprint";

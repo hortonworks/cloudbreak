@@ -32,7 +32,7 @@ public class PollInstanceConsoleOutputTask extends AbstractPollTask<InstanceCons
 
     @Override
     public InstanceConsoleOutputResult call() throws Exception {
-        LOGGER.info("Get console output of instance: {}, for stack: {}.", instance.getInstanceId(), getAuthenticatedContext().getCloudContext().getStackName());
+        LOGGER.info("Get console output of instance: {}, for stack: {}.", instance.getInstanceId(), getAuthenticatedContext().getCloudContext().getName());
         String consoleOutput = instanceConnector.getConsoleOutput(getAuthenticatedContext(), instance);
         return new InstanceConsoleOutputResult(getAuthenticatedContext().getCloudContext(), instance, consoleOutput);
     }

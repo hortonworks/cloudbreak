@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
