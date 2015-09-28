@@ -137,7 +137,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.selectedFileSystemChange = function() {
-            if ($scope.cluster.fileSystem.type == "DASH") {
+            if ($scope.cluster.fileSystem !== undefined && $scope.cluster.fileSystem.type == "DASH") {
                 $scope.cluster.ambariStackDetails = {};
                 $scope.cluster.ambariStackDetails.stack = "HDP";
                 $scope.cluster.ambariStackDetails.version = "2.3";
