@@ -135,6 +135,12 @@ uluwatuServices.factory('StackValidation', ['$resource',
     }
 ]);
 
+uluwatuServices.factory('PlatformVariant', ['$resource',
+    function($resource) {
+        return $resource('stacks/platformVariants');
+    }
+]);
+
 uluwatuServices.factory('UserUsages', ['$resource',
     function($resource) {
         return $resource('user/usages?:param');

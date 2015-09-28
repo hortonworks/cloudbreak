@@ -3,8 +3,8 @@
 var log = log4javascript.getLogger("clusterController-logger");
 var $jq = jQuery.noConflict();
 
-angular.module('uluwatuControllers').controller('clusterController', ['$scope', '$rootScope', '$filter', 'UluwatuCluster', 'GlobalStack', 'Cluster', 'GlobalStackInstance', '$interval', 'UserEvents', 'PeriscopeCluster',
-    function($scope, $rootScope, $filter, UluwatuCluster, GlobalStack, Cluster, GlobalStackInstance, $interval, UserEvents, PeriscopeCluster) {
+angular.module('uluwatuControllers').controller('clusterController', ['$scope', '$rootScope', '$filter', 'UluwatuCluster', 'GlobalStack', 'Cluster', 'GlobalStackInstance', '$interval', 'UserEvents', 'PeriscopeCluster', 'PlatformVariant',
+    function($scope, $rootScope, $filter, UluwatuCluster, GlobalStack, Cluster, GlobalStackInstance, $interval, UserEvents, PeriscopeCluster, PlatformVariant) {
 
         $rootScope.ledStyles = {
             "REQUESTED": "state2-run-blink",
@@ -53,6 +53,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $scope.newCredential = {};
         getUluwatuClusters();
         initCluster();
+        initPlatformVariants();
 
         $scope.showAdvancedOption = function() {
             if ($scope.showAdvancedOptionForm === false) {
@@ -653,6 +654,21 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
             };
             setFileSystem();
+        }
+
+        function initPlatformVariants() {
+            PlatformVariant.get().$promise.then(function(success) {
+                $scope.platformVariants = success.platformToVariants;
+            }, function(error) {
+                $scope.platformVariants = [];
+            });
+        }
+
+        $scope.getPlatformVariants = function() {
+            if ($rootScope.activeCredential !== undefined) {
+                return $scope.platformVariants[$rootScope.activeCredential.cloudPlatform];
+            }
+            return [];
         }
 
         $scope.showDetails = function() {
