@@ -574,17 +574,21 @@ public class AwsConnector implements CloudPlatformConnector {
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             try {
                 String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, instanceGroup.getGroupName());
-                AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(Regions.valueOf(stack.getRegion()), awsCredential);
-                List<AutoScalingGroup> asGroups = amazonASClient.describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest()
-                        .withAutoScalingGroupNames(asGroupName)).getAutoScalingGroups();
-                if (!asGroups.isEmpty()) {
-                    if (!asGroups.get(0).getSuspendedProcesses().isEmpty()) {
-                        amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
-                                .withAutoScalingGroupName(asGroupName)
-                                .withMinSize(0)
-                                .withDesiredCapacity(0));
-                        amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
+                if (asGroupName != null) {
+                    AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(Regions.valueOf(stack.getRegion()), awsCredential);
+                    List<AutoScalingGroup> asGroups = amazonASClient.describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest()
+                            .withAutoScalingGroupNames(asGroupName)).getAutoScalingGroups();
+                    if (!asGroups.isEmpty()) {
+                        if (!asGroups.get(0).getSuspendedProcesses().isEmpty()) {
+                            amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
+                                    .withAutoScalingGroupName(asGroupName)
+                                    .withMinSize(0)
+                                    .withDesiredCapacity(0));
+                            amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
+                        }
                     }
+                } else {
+                    LOGGER.info("Autoscaling Group's physical id is null (the resource doesn't exist), it is not needed to resume scaling policies.");
                 }
             } catch (AmazonServiceException e) {
                 if (e.getErrorMessage().matches("Resource.*does not exist for stack.*") || e.getErrorMessage().matches("Stack '.*' does not exist.*")) {
@@ -609,5 +613,4 @@ public class AwsConnector implements CloudPlatformConnector {
     protected CreateStackRequest createStackRequest() {
         return new CreateStackRequest();
     }
-
 }
