@@ -137,7 +137,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.selectedFileSystemChange = function() {
-            if ($scope.cluster.fileSystem !== undefined && $scope.cluster.fileSystem.type == "DASH") {
+            if ($scope.cluster.fileSystem !== undefined && ($scope.cluster.fileSystem.type == "DASH" || $scope.cluster.fileSystem.type == "WASB")) {
                 $scope.cluster.ambariStackDetails = {};
                 $scope.cluster.ambariStackDetails.stack = "HDP";
                 $scope.cluster.ambariStackDetails.version = "2.3";
@@ -293,8 +293,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 if (!$scope.isUndefined($scope.cluster.fileSystem.properties.accountName) && !$scope.isUndefined($scope.cluster.fileSystem.properties.accountKey)) {
                     return false;
                 }
+            } else if ($scope.cluster.fileSystem.type == 'WASB') {
+                if (!$scope.isUndefined($scope.cluster.fileSystem.properties.accountName) && !$scope.isUndefined($scope.cluster.fileSystem.properties.accountKey)) {
+                    return false;
+                }
             } else if ($scope.cluster.fileSystem.type == 'GCS') {
-
                 if (!$scope.isUndefined($scope.cluster.fileSystem.properties.projectId) && !$scope.isUndefined($scope.cluster.fileSystem.properties.serviceAccountEmail) && !$scope.isUndefined($scope.cluster.fileSystem.properties.privateKeyEncoded) && !$scope.isUndefined($scope.cluster.fileSystem.properties.defaultBucketName)) {
                     return false;
                 }
