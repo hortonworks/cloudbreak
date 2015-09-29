@@ -224,8 +224,8 @@ deployer-regenerate() {
     compose-generate-yaml
     
     if ! generate_uaa_check_diff; then
-        info renaming: uaa.yml to: uaa-${datetime}.uml
-        mv uaa.yml uaa-${datetime}.uml
+        info renaming: uaa.yml to: uaa-${datetime}.yml
+        mv uaa.yml uaa-${datetime}.yml
     fi
     generate_uaa_config
 }
