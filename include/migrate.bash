@@ -33,7 +33,7 @@ migrate-execute-mybatis-migrations() {
     local docker_image_name=$1 && shift
     local service_name=$1 && shift
     local container_name=$(compose-get-container $service_name)
-        migrateDebug "Migration command on $service_name with \"$@\" params will be executed on container: $container_name"
+        migrateDebug "Migration command on $service_name with params: '$*' will be executed on container: $container_name"
     if [ -z "$container_name" ]
     then
         migrateError "DB container with matching name is not running. Expected name: .*$service_name.*"
@@ -59,8 +59,12 @@ migrate-execute-mybatis-migrations() {
         docker run --rm --entrypoint bash -v $scripts_location:/migrate/scripts $docker_image_name -c "cp /schema/* /migrate/scripts/"
     fi
     migrateDebug "Scripts location:  $scripts_location"
-    docker run --rm --link $container_name:db -v $scripts_location:/migrate/scripts sequenceiq/mybatis-migrations:$DOCKER_TAG_MIGRATION $@ \
-      | tee -a "$DB_MIGRATION_LOG" | grep "Applying\|MyBatis Migrations SUCCESS\|MyBatis Migrations FAILURE" 2>/dev/null
+    docker run --rm \
+        --link $container_name:db \
+        -v $scripts_location:/migrate/scripts \
+        sequenceiq/mybatis-migrations:$DOCKER_TAG_MIGRATION "$@" \
+      | tee -a "$DB_MIGRATION_LOG" \
+      | grep "Applying\|MyBatis Migrations SUCCESS\|MyBatis Migrations FAILURE" 2>/dev/null
 }
 
 check_uaa_running() {
@@ -68,7 +72,7 @@ check_uaa_running() {
     uaa_info=$(docker exec -it cbreak_uaadb_1 bash -c "psql -U postgres -c 'select count(scope) from oauth_client_details;'"|head -3|tail -1)
     uaa_info=$(echo $uaa_info|sed 's, ,,g'|head -1)
     if [[ $uaa_info = *[[:digit:]]* ]]; then
-        if [[ "$uaa_info" > 1 ]]; then
+        if [[ "$uaa_info" -gt 1 ]]; then
           uaa_running=true;
         fi
     else
@@ -105,9 +109,7 @@ migrate-one-db() {
 }
 
 execute-migration() {
-    local params="$@"
-    if [ -z "$params" ]
-    then
+    if [ $# -eq 0 ]; then
         migrate-one-db cbdb up
         migrate-one-db cbdb pending
         migrate-one-db pcdb up
@@ -115,7 +117,7 @@ execute-migration() {
         migrate-one-db uaadb up
         migrate-one-db uaadb pending
     else
-        migrate-one-db $params
+        migrate-one-db "$@"
     fi
 }
 
