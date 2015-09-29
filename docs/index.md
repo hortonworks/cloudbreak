@@ -720,6 +720,9 @@ To bypass those limits Microsoft created a small service called [DASH](https://g
 DASH works by sharding the storage access across multiple storage accounts. It can be configured to distribute storage account load to at most 15 **scaleout** storage accounts. It needs one more **namespace** storage account where it keeps track of where the data is stored.
 When configuring a WASB filesystem with Hadoop, the only required config entries are the ones where the access details are described. To access a storage account Azure generates an access key that is displayed on the Azure portal or can be queried through the API while the account name is the name of the storage account itself. A DASH service has a similar account name and key, those can be configured in the configuration file while deploying the cloud service.
 
+
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/dash.png)
+
 #### Deploying a DASH service with Cloudbreak deployer
 
 We have automated the deployment of a DASH service in cloudbreak-deployer. After cbd is installed, simply run the following command to deploy a DASH cloud service with 5 scale out storage accounts:
@@ -732,9 +735,10 @@ The command first creates the namespace account and the scaleout storage account
 #### Configuring DASH from Cloudbreak
 
 When an Azure credential is selected in Cloudbreak the default filesystem is set to "WASB with DASH”. The *Account Name* and *Account Key* displayed by cbd must be copied to the corresponding fields.
-*Important:* For better performance DASH service and the Cloudbreak cluster must be in the same Azure region.
 
-<screenshot>
+**Important:** For better performance DASH service and the Cloudbreak cluster must be in the same Azure region.
+
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/dashui.png)
 
 The WASB filesystem configured with DASH can be used as a data lake - when multiple clusters are deployed with the same DASH filesystem configuration the same data can be accessed from all the clusters, but every cluster can have a different service configured as well. In that case deploy as many DASH services with cbd as clusters with Cloudbreak and configure them accordingly.
 
