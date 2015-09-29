@@ -79,9 +79,8 @@ compose-get-old-images() {
     contentsarray=()
     for versionedImage in $keep_imgs
       do
-        image=$(echo $versionedImage | tr ":" " ")
-        image_name=${image[0]}
-        image_version=${image[1]}
+        image_name="${versionedImage%:*}"
+        image_version="${versionedImage#*:}"
         remove_images=$(echo $all_imgs | tr ' ' "\n" | grep "$image_name:" | grep -v "$image_version")
         if [ -n "$remove_images" ]; then
           contentsarray+="${remove_images[@]} "
