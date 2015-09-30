@@ -9,6 +9,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.domain.CloudRegion;
 
 @Service
 public class GcpPlatformParameters implements PlatformParameters {
