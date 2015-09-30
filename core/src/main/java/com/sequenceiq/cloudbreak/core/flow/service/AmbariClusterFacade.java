@@ -14,15 +14,11 @@ import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
+import javax.inject.Inject;
+
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
@@ -59,6 +55,9 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListenerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 @Service
 public class AmbariClusterFacade implements ClusterFacade {
@@ -203,7 +202,7 @@ public class AmbariClusterFacade implements ClusterFacade {
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Cluster creation finished.");
             fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_BUILT, AVAILABLE.name(), stack.getAmbariIp());
             if (cluster.getEmailNeeded()) {
-                emailSenderService.sendProvisioningSuccessEmail(cluster.getOwner(), stack.getAmbariIp());
+                emailSenderService.sendProvisioningSuccessEmail(cluster.getOwner(), stack.getAmbariIp(), cluster.getName());
                 fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
             }
         }
@@ -230,7 +229,7 @@ public class AmbariClusterFacade implements ClusterFacade {
             fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_STARTED, AVAILABLE.name(), stack.getAmbariIp());
 
             if (cluster.getEmailNeeded()) {
-                emailSenderService.sendStartSuccessEmail(cluster.getOwner(), stack.getAmbariIp());
+                emailSenderService.sendStartSuccessEmail(cluster.getOwner(), stack.getAmbariIp(), cluster.getName());
                 fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
             }
         } else {
@@ -283,7 +282,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         fireEventAndLog(stack.getId(), actualContext, Msg.AMBARI_CLUSTER_SCALED_UP, AVAILABLE.name());
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
         if (cluster.getEmailNeeded()) {
-            emailSenderService.sendUpscaleSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
+            emailSenderService.sendUpscaleSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), cluster.getName());
             fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
         }
         return context;
@@ -419,7 +418,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         stackUpdater.updateStackStatus(actualContext.getStackId(), AVAILABLE, "Cluster could not be started: " + actualContext.getErrorReason());
         fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_START_FAILED, AVAILABLE.name(), actualContext.getErrorReason());
         if (cluster.getEmailNeeded()) {
-            emailSenderService.sendStartFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
+            emailSenderService.sendStartFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), cluster.getName());
             fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, START_FAILED.name());
         }
         return context;
@@ -435,7 +434,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "The Ambari cluster could not be stopped: " + actualContext.getErrorReason());
         fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_STOP_FAILED, AVAILABLE.name(), actualContext.getErrorReason());
         if (cluster.getEmailNeeded()) {
-            emailSenderService.sendStopFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
+            emailSenderService.sendStopFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), cluster.getName());
             fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, STOP_FAILED.name());
         }
         return context;
@@ -451,7 +450,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
         fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_CREATE_FAILED, CREATE_FAILED.name(), actualContext.getErrorReason());
         if (cluster.getEmailNeeded()) {
-            emailSenderService.sendProvisioningFailureEmail(cluster.getOwner());
+            emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), cluster.getName());
             fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
         }
         return actualContext;
@@ -467,7 +466,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
         fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_CONFIGURE_SECURITY_FAILED, ENABLE_SECURITY_FAILED.name());
         if (cluster.getEmailNeeded()) {
-            emailSenderService.sendProvisioningFailureEmail(cluster.getOwner());
+            emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), cluster.getName());
             fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
         }
 

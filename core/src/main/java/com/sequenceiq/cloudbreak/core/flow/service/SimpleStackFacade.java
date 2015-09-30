@@ -16,6 +16,8 @@ import static com.sequenceiq.cloudbreak.domain.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.domain.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.domain.Status.UPDATE_IN_PROGRESS;
 
+import javax.inject.Inject;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -25,13 +27,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.time.DateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
@@ -76,6 +71,10 @@ import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
+import org.apache.commons.lang3.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 @Service
 public class SimpleStackFacade implements StackFacade {
@@ -238,7 +237,7 @@ public class SimpleStackFacade implements StackFacade {
                 fireEventAndLog(stack.getId(), actualContext, Msg.STACK_BILLING_STOPPED, BILLING_STOPPED.name());
 
                 if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
-                    emailSenderService.sendStopSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
+                    emailSenderService.sendStopSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), stack.getCluster().getName());
                     fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_NOTIFICATION_EMAIL, STOPPED.name());
                 }
             }
@@ -269,7 +268,7 @@ public class SimpleStackFacade implements StackFacade {
             fireEventAndLog(stack.getId(), actualContext, Msg.STACK_DELETE_COMPLETED, DELETE_COMPLETED.name());
 
             if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
-                emailSenderService.sendTerminationSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
+                emailSenderService.sendTerminationSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), stack.getCluster().getName());
                 fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_NOTIFICATION_EMAIL, DELETE_COMPLETED.name());
             }
             terminationService.finalizeTermination(stack.getId());
@@ -394,7 +393,7 @@ public class SimpleStackFacade implements StackFacade {
             fireEventAndLog(stack.getId(), actualContext, Msg.STACK_DOWNSCALE_SUCCESS, AVAILABLE.name());
 
             if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
-                emailSenderService.sendDownScaleSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
+                emailSenderService.sendDownScaleSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), stack.getCluster().getName());
                 fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_NOTIFICATION_EMAIL, AVAILABLE.name());
             }
         } catch (Exception e) {
@@ -584,7 +583,7 @@ public class SimpleStackFacade implements StackFacade {
         stackUpdater.updateStackStatus(stack.getId(), DELETE_FAILED, "Termination failed: " + actualContext.getErrorReason());
         fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_DELETE_FAILED, DELETE_FAILED.name(), actualContext.getErrorReason());
         if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
-            emailSenderService.sendTerminationFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
+            emailSenderService.sendTerminationFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), stack.getCluster().getName());
             fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_NOTIFICATION_EMAIL, DELETE_FAILED.name());
         }
         return context;
@@ -601,7 +600,7 @@ public class SimpleStackFacade implements StackFacade {
             if (stack.getCluster() != null) {
                 clusterService.updateClusterStatusByStackId(context.getStackId(), STOPPED);
                 if (stack.getCluster().getEmailNeeded()) {
-                    emailSenderService.sendStartFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
+                    emailSenderService.sendStartFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), stack.getCluster().getName());
                     fireEventAndLog(context.getStackId(), context, Msg.STACK_NOTIFICATION_EMAIL, START_FAILED.name());
                 }
             }
@@ -611,7 +610,7 @@ public class SimpleStackFacade implements StackFacade {
             if (stack.getCluster() != null) {
                 clusterService.updateClusterStatusByStackId(context.getStackId(), STOPPED);
                 if (stack.getCluster().getEmailNeeded()) {
-                    emailSenderService.sendStopFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp());
+                    emailSenderService.sendStopFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), stack.getCluster().getName());
                     fireEventAndLog(context.getStackId(), context, Msg.STACK_NOTIFICATION_EMAIL, STOP_FAILED.name());
                 }
             }

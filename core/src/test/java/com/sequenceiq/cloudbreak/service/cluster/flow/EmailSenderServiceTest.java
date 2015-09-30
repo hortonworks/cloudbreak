@@ -35,6 +35,7 @@ import freemarker.template.TemplateException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EmailSenderServiceTest {
+    private static final String NAME_OF_THE_CLUSTER = "name-of-the-cluster";
 
     @Mock
     private UserDetailsService userDetailsService;
@@ -70,11 +71,12 @@ public class EmailSenderServiceTest {
     public void testSendTerminationSuccessEmail() throws IOException {
         // GIVEN
         String content = getFileContent("mail/termination-success-email");
-        when(emailMimeMessagePreparator.prepareMessage(cbUser, "Cloudbreak - cloudbreak cluster termination", content)).thenReturn(mimeMessagePreparator);
+        String subject = String.format("Cloudbreak - %s cluster termination", NAME_OF_THE_CLUSTER);
+        when(emailMimeMessagePreparator.prepareMessage(cbUser, subject, content)).thenReturn(mimeMessagePreparator);
         // WHEN
-        emailSenderService.sendTerminationSuccessEmail("xxx", "123.123.123.123");
+        emailSenderService.sendTerminationSuccessEmail("xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
         // THEN
-        verify(emailMimeMessagePreparator, times(1)).prepareMessage(cbUser, "Cloudbreak - cloudbreak cluster termination",
+        verify(emailMimeMessagePreparator, times(1)).prepareMessage(cbUser, subject,
                 getFileContent("mail/termination-success-email"));
         verify(mailSender, times(1)).send(mimeMessagePreparator);
     }
@@ -83,11 +85,12 @@ public class EmailSenderServiceTest {
     public void testSendTerminationFailureEmail() throws IOException {
         // GIVEN
         String content = getFileContent("mail/termination-failure-email");
-        when(emailMimeMessagePreparator.prepareMessage(cbUser, "Cloudbreak - cloudbreak cluster termination", content)).thenReturn(mimeMessagePreparator);
+        String subject = String.format("Cloudbreak - %s cluster termination", NAME_OF_THE_CLUSTER);
+        when(emailMimeMessagePreparator.prepareMessage(cbUser, subject, content)).thenReturn(mimeMessagePreparator);
         //WHEN
-        emailSenderService.sendTerminationFailureEmail("xxx", "123.123.123.123");
+        emailSenderService.sendTerminationFailureEmail("xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
         //THEN
-        verify(emailMimeMessagePreparator, times(1)).prepareMessage(cbUser, "Cloudbreak - cloudbreak cluster termination",
+        verify(emailMimeMessagePreparator, times(1)).prepareMessage(cbUser, subject,
                 getFileContent("mail/termination-failure-email"));
         verify(mailSender, times(1)).send(mimeMessagePreparator);
 
@@ -97,11 +100,12 @@ public class EmailSenderServiceTest {
     public void testSendProvisioningFailureEmail() throws IOException {
         //GIVEN
         String contenct = getFileContent("mail/provisioning-failure-email");
-        when(emailMimeMessagePreparator.prepareMessage(cbUser, "Cloudbreak - cloudbreak cluster installation", contenct)).thenReturn(mimeMessagePreparator);
+        String subject = String.format("Cloudbreak - %s cluster installation", NAME_OF_THE_CLUSTER);
+        when(emailMimeMessagePreparator.prepareMessage(cbUser, subject, contenct)).thenReturn(mimeMessagePreparator);
         //WHEN
-        emailSenderService.sendProvisioningFailureEmail("xxx");
+        emailSenderService.sendProvisioningFailureEmail("xxx", NAME_OF_THE_CLUSTER);
         //THEN
-        verify(emailMimeMessagePreparator, times(1)).prepareMessage(cbUser, "Cloudbreak - cloudbreak cluster installation",
+        verify(emailMimeMessagePreparator, times(1)).prepareMessage(cbUser, subject,
                 getFileContent("mail/provisioning-failure-email"));
         verify(mailSender, times(1)).send(mimeMessagePreparator);
 
@@ -111,11 +115,12 @@ public class EmailSenderServiceTest {
     public void testSendProvisioningSuccessEmail() throws IOException {
         //GIVEN
         String contenct = getFileContent("mail/provisioning-success-email");
-        when(emailMimeMessagePreparator.prepareMessage(cbUser, "Cloudbreak - cloudbreak cluster installation", contenct)).thenReturn(mimeMessagePreparator);
+        String subject = String.format("Cloudbreak - %s cluster installation", NAME_OF_THE_CLUSTER);
+        when(emailMimeMessagePreparator.prepareMessage(cbUser, subject, contenct)).thenReturn(mimeMessagePreparator);
         //WHEN
-        emailSenderService.sendProvisioningSuccessEmail("xxx", "123.123.123.123");
+        emailSenderService.sendProvisioningSuccessEmail("xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
         //THEN
-        verify(emailMimeMessagePreparator, times(1)).prepareMessage(cbUser, "Cloudbreak - cloudbreak cluster installation",
+        verify(emailMimeMessagePreparator, times(1)).prepareMessage(cbUser, subject,
                 getFileContent("mail/provisioning-success-email"));
         verify(mailSender, times(1)).send(mimeMessagePreparator);
 
