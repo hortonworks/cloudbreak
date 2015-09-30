@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemScrip
 public class DashFileSystemConfigurator extends AbstractFileSystemConfigurator<DashFileSystemConfiguration> {
 
     @Override
-    public List<BlueprintConfigurationEntry> getBlueprintProperties(DashFileSystemConfiguration fsConfig) {
+    public List<BlueprintConfigurationEntry> getFsProperties(DashFileSystemConfiguration fsConfig) {
         List<BlueprintConfigurationEntry> bpConfigs = new ArrayList<>();
         String dashAccountName = fsConfig.getAccountName();
         String dashAccountKey = fsConfig.getAccountKey();

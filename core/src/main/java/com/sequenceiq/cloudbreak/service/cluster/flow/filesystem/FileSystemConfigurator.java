@@ -7,9 +7,11 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.RecipeScript;
 
 public interface FileSystemConfigurator<T extends FileSystemConfiguration> {
 
-    List<BlueprintConfigurationEntry> getBlueprintProperties(T fsConfig);
+    List<BlueprintConfigurationEntry> getFsProperties(T fsConfig);
 
     String getDefaultFsValue(T fsConfig);
+
+    List<BlueprintConfigurationEntry> getDefaultFsProperties(T fsConfig);
 
     List<RecipeScript> getScripts();
 

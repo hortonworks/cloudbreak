@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType;
 public class WasbFileSystemConfigurator extends AbstractFileSystemConfigurator<WasbFileSystemConfiguration> {
 
     @Override
-    public List<BlueprintConfigurationEntry> getBlueprintProperties(WasbFileSystemConfiguration fsConfig) {
+    public List<BlueprintConfigurationEntry> getFsProperties(WasbFileSystemConfiguration fsConfig) {
         List<BlueprintConfigurationEntry> bpConfigs = new ArrayList<>();
         String accountName = fsConfig.getAccountName();
         String accountKey = fsConfig.getAccountKey();

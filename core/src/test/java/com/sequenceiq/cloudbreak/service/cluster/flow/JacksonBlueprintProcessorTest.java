@@ -160,15 +160,6 @@ public class JacksonBlueprintProcessorTest {
     }
 
     @Test
-    public void testAddDefaultFsAddsCorrectEntry() throws Exception {
-        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
-        String result = underTest.addDefaultFs(testBlueprint, "wasb://cloudbreak@dduihoab6jt1jl.cloudapp.net");
-
-        String defaultFsValue = new ObjectMapper().readTree(result).findPath("core-site").findPath("fs.defaultFS").textValue();
-        Assert.assertEquals("wasb://cloudbreak@dduihoab6jt1jl.cloudapp.net", defaultFsValue);
-    }
-
-    @Test
     public void testGetServicesInHostgroup() throws Exception {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
         Set<String> result = underTest.getServicesInHostgroup(testBlueprint, "slave_1");

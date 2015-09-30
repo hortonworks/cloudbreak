@@ -7,7 +7,5 @@ public interface BlueprintProcessor {
 
     String addConfigEntries(String originalBlueprint, List<BlueprintConfigurationEntry> properties, boolean override);
 
-    String addDefaultFs(String originalBlueprint, String defaultFs);
-
     Set<String> getServicesInHostgroup(String blueprintText, String hostgroup);
 }

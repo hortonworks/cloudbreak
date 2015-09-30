@@ -16,7 +16,6 @@
     },
     {
       "hbase-site" : {
-        "hbase.rootdir": "hdfs://hadoop-poc/apps/hbase/data",
         "zookeeper.recovery.retry" : "10"
       }
     },

@@ -33,7 +33,7 @@ public class WasbIntegratedFileSystemConfigurator extends AbstractFileSystemConf
     private PollingService<StorageAccountCheckerContext> storagePollingService;
 
     @Override
-    public List<BlueprintConfigurationEntry> getBlueprintProperties(WasbIntegratedFileSystemConfiguration fsConfig) {
+    public List<BlueprintConfigurationEntry> getFsProperties(WasbIntegratedFileSystemConfiguration fsConfig) {
         List<BlueprintConfigurationEntry> bpConfigs = new ArrayList<>();
 
         String tenantId = fsConfig.getTenantId();

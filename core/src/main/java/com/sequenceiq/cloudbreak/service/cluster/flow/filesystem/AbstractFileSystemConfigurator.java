@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sequenceiq.cloudbreak.service.cluster.flow.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.RecipeScript;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -21,6 +22,15 @@ public abstract class AbstractFileSystemConfigurator<T extends FileSystemConfigu
             throw new FileSystemConfigException("Filesystem configuration scripts cannot be read.", e);
         }
         return scripts;
+    }
+
+    @Override
+    public List<BlueprintConfigurationEntry> getDefaultFsProperties(T fsConfig) {
+        List<BlueprintConfigurationEntry> bpConfigs = new ArrayList<>();
+        String defaultFs = getDefaultFsValue(fsConfig);
+        bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.defaultFS", defaultFs));
+        bpConfigs.add(new BlueprintConfigurationEntry("hbase-site", "hbase.rootdir", defaultFs + "/apps/hbase/data"));
+        return bpConfigs;
     }
 
     protected abstract List<FileSystemScriptConfig> getScriptConfigs();

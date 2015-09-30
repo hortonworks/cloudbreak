@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -18,8 +17,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class JacksonBlueprintProcessor implements BlueprintProcessor {
 
     private static final String CONFIGURATIONS_NODE = "configurations";
-    private static final String CORE_SITE_NODE = "core-site";
-    private static final String DEFAULT_FS_KEY = "fs.defaultFS";
     private static final String HOST_GROUPS_NODE = "host_groups";
 
     @Override
@@ -51,13 +48,6 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
         } catch (IOException e) {
             throw new BlueprintProcessingException("Failed to add config entries to original blueprint.", e);
         }
-    }
-
-    @Override
-    public String addDefaultFs(String originalBlueprint, String defaultFs) {
-        List<BlueprintConfigurationEntry> configurationEntries = new ArrayList<>();
-        configurationEntries.add(new BlueprintConfigurationEntry(CORE_SITE_NODE, DEFAULT_FS_KEY, defaultFs));
-        return addConfigEntries(originalBlueprint, configurationEntries, true);
     }
 
     @Override
