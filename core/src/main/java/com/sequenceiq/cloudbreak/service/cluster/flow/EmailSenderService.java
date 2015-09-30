@@ -5,24 +5,22 @@ import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SMTP_SENDER
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SUCCESS_CLUSTER_INSTALLER_MAIL_TEMPLATE_PATH;
 import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processTemplateIntoString;
 
+import javax.inject.Inject;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
-
+import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.UserFilterField;
+import freemarker.template.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.service.user.UserFilterField;
-
-import freemarker.template.Configuration;
 
 @Service
 public class EmailSenderService {
@@ -51,28 +49,29 @@ public class EmailSenderService {
 
     private enum State {
         PROVISIONING_SUCCESS("SUCCESS", "Cloudbreak Cluster Install Success",
-                "Your cluster is ready to use. You can log into the Ambari UI %s:8080 using the configured username/password."),
+                "Your cluster '%s' is ready to use. You can log into the Ambari UI %s:8080 using the configured username/password."),
         PROVISIONING_FAILURE("FAILED", "Cloudbreak Cluster Install Failed",
                 "Something went terribly wrong - we are happy to help, please let us know your cluster details, "
                         + "time, etc - and we will check the logs and get a fix for you."),
         START_SUCCESS("SUCCESS", "Cloudbreak Cluster Start Success",
-                "Your cluster is ready to use after the start. You can log into the Ambari UI %s:8080 using the configured username/password."),
+                "Your cluster '%s' is ready to use after the start. You can log into the Ambari UI %s:8080 using the configured username/password."),
         START_FAILURE("FAILED", "Cloudbreak Cluster Start Failed",
-                "Your cluster start failed. - we are happy to help, please let us know your cluster details, time, etc - and we will check the"
+                "Failed to start your cluster: %s - we are happy to help, please let us know your cluster details, time, etc - and we will check the"
                         + " logs and get a fix for you."),
         STOP_SUCCESS("SUCCESS", "Cloudbreak Cluster Stop Success",
-                "Your cluster stop was success. If you want to use again just restart."),
+                "Your cluster '%s' was successfully stopped. If you want to use again just restart."),
         STOP_FAILURE("FAILED", "Cloudbreak Cluster Stop Failed",
-                "Your cluster stop failed. - we are happy to help, please let us know your cluster details, time, etc - and we will check the "
+                "Failed to stop your cluster: %s - we are happy to help, please let us know your cluster details, time, etc - and we will check the "
                         + "logs and get a fix for you."),
         UPSCALE_SUCCESS("SUCCESS", "Cloudbreak Cluster Upscale Success",
-                "Your cluster is ready to use after the upscale. You can log into the Ambari UI %s:8080 using the configured username/password."),
+                "Your cluster '%s' is ready to use after the upscale. You can log into the Ambari UI %s:8080 using the configured username/password."),
         DOWN_SCALE_SUCCESS("SUCCESS", "Cloudbreak Cluster Downscale Success",
-                "Your cluster is ready to use after the dwnscale. You can log into the Ambari UI %s:8080 using the configured username/password."),
+                "Your cluster '%s' is ready to use after the dwnscale. You can log into the Ambari UI %s:8080 using the configured username/password."),
         TERMINATION_SUCCESS("SUCCESS", "Cloudbreak Cluster Termination Success",
-                "Your cluster termination was success."),
+                "Your cluster '%s' was successfully terminated."),
         TERMINATION_FAILURE("FAILED", "Cloudbreak Cluster Termination Failed",
-                "Your cluster termination failed. Please try again...");
+                "Failed to terminate your cluster: '%s'. Please try again... - we are happy to help, please let us know your cluster details, time, "
+                        + "etc - and we will check the logs and get a fix for you.");
 
         private final String status;
         private final String title;
@@ -86,73 +85,73 @@ public class EmailSenderService {
     }
 
     @Async
-    public void sendProvisioningSuccessEmail(String email, String ambariServer) {
+    public void sendProvisioningSuccessEmail(String email, String ambariServer, String clusterName) {
         CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, successClusterMailTemplatePath, "cloudbreak cluster installation", getEmailModel(user.getGivenName(),
-                ambariServer, State.PROVISIONING_SUCCESS));
+        sendEmail(user, successClusterMailTemplatePath, clusterName + " cluster installation", getEmailModel(user.getGivenName(),
+                ambariServer, State.PROVISIONING_SUCCESS, clusterName));
     }
 
     @Async
-    public void sendProvisioningFailureEmail(String email) {
+    public void sendProvisioningFailureEmail(String email, String clusterName) {
         CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, failedClusterMailTemplatePath, "cloudbreak cluster installation", getEmailModel(user.getGivenName(),
-                null, State.PROVISIONING_FAILURE));
+        sendEmail(user, failedClusterMailTemplatePath, clusterName + " cluster installation", getEmailModel(user.getGivenName(),
+                null, State.PROVISIONING_FAILURE, clusterName));
     }
 
     @Async
-    public void sendStartSuccessEmail(String email, String ambariServer) {
+    public void sendStartSuccessEmail(String email, String ambariServer, String clusterName) {
         CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, successClusterMailTemplatePath, "cloudbreak cluster start", getEmailModel(user.getGivenName(),
-                ambariServer, State.START_SUCCESS));
+        sendEmail(user, successClusterMailTemplatePath, clusterName + " cluster start", getEmailModel(user.getGivenName(),
+                ambariServer, State.START_SUCCESS, clusterName));
     }
 
     @Async
-    public void sendStartFailureEmail(String email, String ambariServer) {
+    public void sendStartFailureEmail(String email, String ambariServer, String clusterName) {
         CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, failedClusterMailTemplatePath, "cloudbreak cluster start", getEmailModel(user.getGivenName(),
-                ambariServer, State.START_FAILURE));
+        sendEmail(user, failedClusterMailTemplatePath, clusterName + " cluster start", getEmailModel(user.getGivenName(),
+                ambariServer, State.START_FAILURE, clusterName));
     }
 
     @Async
-    public void sendStopSuccessEmail(String email, String ambariServer) {
+    public void sendStopSuccessEmail(String email, String ambariServer, String clusterName) {
         CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, successClusterMailTemplatePath, "cloudbreak cluster stop", getEmailModel(user.getGivenName(),
-                ambariServer, State.STOP_SUCCESS));
+        sendEmail(user, successClusterMailTemplatePath, clusterName + " cluster stop", getEmailModel(user.getGivenName(),
+                ambariServer, State.STOP_SUCCESS, clusterName));
     }
 
     @Async
-    public void sendStopFailureEmail(String email, String ambariServer) {
+    public void sendStopFailureEmail(String email, String ambariServer, String clusterName) {
         CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, failedClusterMailTemplatePath, "cloudbreak cluster stop", getEmailModel(user.getGivenName(),
-                ambariServer, State.STOP_FAILURE));
+        sendEmail(user, failedClusterMailTemplatePath, clusterName + " cluster stop", getEmailModel(user.getGivenName(),
+                ambariServer, State.STOP_FAILURE, clusterName));
     }
 
     @Async
-    public void sendUpscaleSuccessEmail(String email, String ambariServer) {
+    public void sendUpscaleSuccessEmail(String email, String ambariServer, String clusterName) {
         CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, successClusterMailTemplatePath, "cloudbreak cluster upscale", getEmailModel(user.getGivenName(),
-                ambariServer, State.UPSCALE_SUCCESS));
+        sendEmail(user, successClusterMailTemplatePath, clusterName + " cluster upscale", getEmailModel(user.getGivenName(),
+                ambariServer, State.UPSCALE_SUCCESS, clusterName));
     }
 
     @Async
-    public void sendDownScaleSuccessEmail(String email, String ambariServer) {
+    public void sendDownScaleSuccessEmail(String email, String ambariServer, String clusterName) {
         CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, successClusterMailTemplatePath, "cloudbreak cluster downscale", getEmailModel(user.getGivenName(),
-                ambariServer, State.DOWN_SCALE_SUCCESS));
+        sendEmail(user, successClusterMailTemplatePath, clusterName + " cluster downscale", getEmailModel(user.getGivenName(),
+                ambariServer, State.DOWN_SCALE_SUCCESS, clusterName));
     }
 
     @Async
-    public void sendTerminationSuccessEmail(String email, String ambariServer) {
+    public void sendTerminationSuccessEmail(String email, String ambariServer, String clusterName) {
         CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, successClusterMailTemplatePath, "cloudbreak cluster termination", getEmailModel(user.getGivenName(),
-                ambariServer, State.TERMINATION_SUCCESS));
+        sendEmail(user, successClusterMailTemplatePath, clusterName + " cluster termination", getEmailModel(user.getGivenName(),
+                ambariServer, State.TERMINATION_SUCCESS, clusterName));
     }
 
     @Async
-    public void sendTerminationFailureEmail(String email, String ambariServer) {
+    public void sendTerminationFailureEmail(String email, String ambariServer, String clusterName) {
         CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, failedClusterMailTemplatePath, "cloudbreak cluster termination", getEmailModel(user.getGivenName(),
-                ambariServer, State.TERMINATION_FAILURE));
+        sendEmail(user, failedClusterMailTemplatePath, clusterName + " cluster termination", getEmailModel(user.getGivenName(),
+                ambariServer, State.TERMINATION_FAILURE, clusterName));
     }
 
 
@@ -167,14 +166,15 @@ public class EmailSenderService {
         }
     }
 
-    private Map<String, Object> getEmailModel(String name, String server, State state) {
+    private Map<String, Object> getEmailModel(String name, String server, State state, String clusterName) {
         Map<String, Object> model = new HashMap<>();
         model.put("status", state.status);
         model.put("server", server);
         model.put("name", name);
-        model.put("text", String.format(state.text, server));
+        model.put("text", String.format(state.text, clusterName, server));
         model.put("title", state.title);
         model.put("state", state);
+        model.put("clusterName", clusterName);
         return model;
     }
 }

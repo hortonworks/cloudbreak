@@ -132,7 +132,7 @@
     <#if state == "TERMINATION_SUCCESS">
     <tr ><td style="font-size:16px; line-height:24px; color:#333333; font-family:Arial, Helvetica, sans-serif; text-align:center; " ><div class="mktEditable" id="text" ><p>${text}<br /> <br /></p>
 <#else>
-<tr ><td style="font-size:16px; line-height:24px; color:#333333; font-family:Arial, Helvetica, sans-serif; text-align:center; " ><div class="mktEditable" id="text" ><p>Your Cluster is ready for use<br /> <br /></p>
+<tr ><td style="font-size:16px; line-height:24px; color:#333333; font-family:Arial, Helvetica, sans-serif; text-align:center; " ><div class="mktEditable" id="text" ><p>Your cluster '${clusterName}' is ready for use<br /> <br /></p>
 <table style="margin: 0 auto; background: #e17000; border-radius: 4px;" border="0" cellspacing="0" cellpadding="0" align="center">
 <tbody>
 <tr>
