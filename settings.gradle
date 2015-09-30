@@ -12,3 +12,5 @@ include 'cloud-gcp'
 include 'cloud-template'
 
 rootProject.name = 'cloudbreak'
+include 'cloud-aws'
+
