@@ -453,13 +453,11 @@ public class AmbariClusterConnector {
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(fs.getProperties());
         FileSystemConfiguration fsConfiguration = (FileSystemConfiguration) mapper.readValue(json, FileSystemType.valueOf(fs.getType()).getClazz());
-        List<BlueprintConfigurationEntry> bpConfigEntries = fsConfigurator.getBlueprintProperties(fsConfiguration);
+        List<BlueprintConfigurationEntry> bpConfigEntries = fsConfigurator.getFsProperties(fsConfiguration);
         if (fs.isDefaultFs()) {
-            String defaultFsValue = fsConfigurator.getDefaultFsValue(fsConfiguration);
-            blueprintText = blueprintProcessor.addDefaultFs(blueprintText, defaultFsValue);
+            bpConfigEntries.addAll(fsConfigurator.getDefaultFsProperties(fsConfiguration));
         }
-        blueprintText = blueprintProcessor.addConfigEntries(blueprintText, bpConfigEntries, true);
-        return blueprintText;
+        return blueprintProcessor.addConfigEntries(blueprintText, bpConfigEntries, true);
 
 
     }

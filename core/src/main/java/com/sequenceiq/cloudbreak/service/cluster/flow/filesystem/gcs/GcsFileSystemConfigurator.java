@@ -26,7 +26,7 @@ public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<Gc
     }
 
     @Override
-    public List<BlueprintConfigurationEntry> getBlueprintProperties(GcsFileSystemConfiguration fsConfig) {
+    public List<BlueprintConfigurationEntry> getFsProperties(GcsFileSystemConfiguration fsConfig) {
         List<BlueprintConfigurationEntry> bpConfigs = new ArrayList<>();
         bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem"));
         bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.AbstractFileSystem.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS"));
