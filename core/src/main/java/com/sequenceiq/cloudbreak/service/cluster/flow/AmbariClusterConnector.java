@@ -184,7 +184,7 @@ public class AmbariClusterConnector {
             String blueprintText = cluster.getBlueprint().getBlueprintText();
             FileSystem fs = cluster.getFileSystem();
             if (fs != null) {
-                blueprintText = extendBlueprintWithFsConfig(blueprintText, fs);
+                blueprintText = extendBlueprintWithFsConfig(blueprintText, fs, stack);
             }
 
             blueprintText = blueprintProcessor.addConfigEntries(blueprintText, defaultConfigProvider.getDefaultConfigs(), false);
@@ -448,11 +448,12 @@ public class AmbariClusterConnector {
         return hostDeleted;
     }
 
-    private String extendBlueprintWithFsConfig(String blueprintText, FileSystem fs) throws IOException {
+    private String extendBlueprintWithFsConfig(String blueprintText, FileSystem fs, Stack stack) throws IOException {
         FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(FileSystemType.valueOf(fs.getType()));
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(fs.getProperties());
         FileSystemConfiguration fsConfiguration = (FileSystemConfiguration) mapper.readValue(json, FileSystemType.valueOf(fs.getType()).getClazz());
+        fsConfiguration.addProperty(FileSystemConfiguration.STORAGE_CONTAINER, "cloudbreak" + stack.getId());
         List<BlueprintConfigurationEntry> bpConfigEntries = fsConfigurator.getFsProperties(fsConfiguration);
         if (fs.isDefaultFs()) {
             bpConfigEntries.addAll(fsConfigurator.getDefaultFsProperties(fsConfiguration));

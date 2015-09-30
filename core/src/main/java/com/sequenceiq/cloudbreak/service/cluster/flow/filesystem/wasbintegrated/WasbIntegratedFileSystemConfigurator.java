@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.wasbintegrated;
 
+import static com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfiguration.STORAGE_CONTAINER;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType.WASB_INTEGRATED;
 
 import java.util.ArrayList;
@@ -11,12 +12,12 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
-import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigException;
 import com.sequenceiq.cloudbreak.service.cluster.flow.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.AbstractFileSystemConfigurator;
+import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigException;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemScriptConfig;
+import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -72,7 +73,7 @@ public class WasbIntegratedFileSystemConfigurator extends AbstractFileSystemConf
 
     @Override
     public String getDefaultFsValue(WasbIntegratedFileSystemConfiguration fsConfig) {
-        return "wasb://cloudbreak@" + fsConfig.getStorageName() + ".blob.core.windows.net";
+        return "wasb://" + fsConfig.getProperty(STORAGE_CONTAINER) + "@" + fsConfig.getStorageName() + ".blob.core.windows.net";
     }
 
     @Override
