@@ -4,13 +4,19 @@ import static java.util.Arrays.asList;
 
 import java.util.List;
 
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 
-public class PollComputeStatusTask extends PollTask<List<CloudVmInstanceStatus>> {
+@Component(PollComputeStatusTask.NAME)
+@Scope(value = "prototype")
+public class PollComputeStatusTask extends AbstractPollTask<List<CloudVmInstanceStatus>> {
+    public static final String NAME = "pollComputeStatusTask";
 
     private ComputeResourceBuilder builder;
     private ResourceBuilderContext context;

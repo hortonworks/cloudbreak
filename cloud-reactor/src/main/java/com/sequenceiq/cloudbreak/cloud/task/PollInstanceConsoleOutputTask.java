@@ -4,6 +4,8 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
@@ -11,7 +13,11 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.InstanceConsoleOutputResul
 import com.sequenceiq.cloudbreak.cloud.handler.GetSSHFingerprintsHandler;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 
-public class PollInstanceConsoleOutputTask extends PollTask<InstanceConsoleOutputResult> {
+@Component(PollInstanceConsoleOutputTask.NAME)
+@Scope(value = "prototype")
+public class PollInstanceConsoleOutputTask extends AbstractPollTask<InstanceConsoleOutputResult> {
+    public static final String NAME = "pollInstanceConsoleOutputTask";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PollInstanceConsoleOutputTask.class);
     private static final String CB_FINGERPRINT_END = "-----END SSH HOST KEY FINGERPRINTS-----";
 

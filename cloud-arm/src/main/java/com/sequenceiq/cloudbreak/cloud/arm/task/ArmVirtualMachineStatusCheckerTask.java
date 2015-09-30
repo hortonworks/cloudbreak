@@ -2,13 +2,19 @@ package com.sequenceiq.cloudbreak.cloud.arm.task;
 
 import java.util.Map;
 
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.cloud.arm.ArmClient;
 import com.sequenceiq.cloudbreak.cloud.arm.context.VirtualMachineCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 
+@Component(ArmVirtualMachineStatusCheckerTask.NAME)
+@Scope(value = "prototype")
 public class ArmVirtualMachineStatusCheckerTask extends PollBooleanStateTask {
+    public static final String NAME = "armVirtualMachineStatusCheckerTask";
 
     private VirtualMachineCheckerContext virtualMachineCheckerContext;
     private ArmClient armClient;

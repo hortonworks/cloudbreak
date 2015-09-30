@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.cloud.arm.task;
 
 import static com.sequenceiq.cloudbreak.cloud.arm.ArmUtils.NOT_FOUND;
 
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.cloud.arm.ArmClient;
 import com.sequenceiq.cloudbreak.cloud.arm.context.NetworkInterfaceCheckerContext;
@@ -11,7 +14,10 @@ import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 
 import groovyx.net.http.HttpResponseException;
 
+@Component(ArmNetworkInterfaceDeleteStatusCheckerTask.NAME)
+@Scope(value = "prototype")
 public class ArmNetworkInterfaceDeleteStatusCheckerTask extends PollBooleanStateTask {
+    public static final String NAME = "armNetworkInterfaceDeleteStatusCheckerTask";
 
     private NetworkInterfaceCheckerContext networkInterfaceCheckerContext;
     private ArmClient armClient;
@@ -27,8 +33,7 @@ public class ArmNetworkInterfaceDeleteStatusCheckerTask extends PollBooleanState
     public Boolean call() {
         AzureRMClient client = armClient.createAccess(networkInterfaceCheckerContext.getArmCredentialView());
         try {
-            Object networkInterface = client.getNetworkInterface(networkInterfaceCheckerContext.getGroupName(),
-                    networkInterfaceCheckerContext.getNetworkName());
+            client.getNetworkInterface(networkInterfaceCheckerContext.getGroupName(), networkInterfaceCheckerContext.getNetworkName());
         } catch (HttpResponseException e) {
             if (e.getStatusCode() != NOT_FOUND) {
                 throw new CloudConnectorException(e.getResponse().getData().toString());

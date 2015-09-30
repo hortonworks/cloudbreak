@@ -5,7 +5,7 @@ import javax.inject.Inject;
 
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 
-public abstract class PollBooleanStateTask extends PollTask<Boolean> {
+public abstract class PollBooleanStateTask extends AbstractPollTask<Boolean> {
 
     @Inject
     public PollBooleanStateTask(AuthenticatedContext authenticatedContext, boolean cancellable) {

@@ -30,7 +30,6 @@ public class OpenStackFloatingIPBuilder extends AbstractOpenStackComputeResource
             OSClient osClient = createOSClient(auth);
             List<CloudResource> computeResources = context.getComputeResources(privateId);
             CloudResource instance = getInstance(computeResources);
-            List<? extends FloatingIP> ips = osClient.compute().floatingIps().list();
             String pool = osClient.compute().floatingIps().getPoolNames().get(0);
             FloatingIP unusedIp = osClient.compute().floatingIps().allocateIP(pool);
             ActionResponse response = osClient.compute().floatingIps().addFloatingIP(instance.getParameter(OpenStackConstants.SERVER, Server.class),
@@ -46,6 +45,7 @@ public class OpenStackFloatingIPBuilder extends AbstractOpenStackComputeResource
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
         context.getParameter(OpenStackConstants.FLOATING_IP_IDS, List.class).add(resource.getReference());
         return null;

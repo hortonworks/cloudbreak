@@ -5,13 +5,19 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceStatusLists;
 
-public class PollResourcesStateTask extends PollTask<ResourcesStatePollerResult> {
+@Component(PollResourcesStateTask.NAME)
+@Scope(value = "prototype")
+public class PollResourcesStateTask extends AbstractPollTask<ResourcesStatePollerResult> {
+    public static final String NAME = "pollResourcesStateTask";
 
     private List<CloudResource> cloudResource;
     private ResourceConnector resourceConnector;
