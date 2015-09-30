@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
+import static com.sequenceiq.cloudbreak.service.stack.flow.ReflectionUtils.getDeclaredFields;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -85,8 +88,9 @@ public class StackToCloudStackConverter {
         return instanceTemplates;
     }
 
-    public InstanceTemplate buildInstanceTemplate(Template template, String name, long privateId, InstanceStatus status) {
-        InstanceTemplate instance = new InstanceTemplate(template.getInstanceTypeName(), name, privateId, status);
+    public InstanceTemplate buildInstanceTemplate(Template template, String name, Long privateId, InstanceStatus status) {
+        Map<String, Object> fields = getDeclaredFields(template);
+        InstanceTemplate instance = new InstanceTemplate(template.getInstanceTypeName(), name, privateId, status, fields);
         for (int i = 0; i < template.getVolumeCount(); i++) {
             Volume volume = new Volume(VolumeUtils.VOLUME_PREFIX + (i + 1), template.getVolumeTypeName(), template.getVolumeSize());
             instance.addVolume(volume);

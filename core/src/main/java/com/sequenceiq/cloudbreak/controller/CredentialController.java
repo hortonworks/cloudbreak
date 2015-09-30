@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.domain.GcpCredential;
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -58,6 +59,9 @@ public class CredentialController {
 
     @Inject
     private AzureStackUtil azureStackUtil;
+
+    @Inject
+    private Decorator<Credential> credentialDecorator;
 
     @ApiOperation(value = CredentialOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
     @RequestMapping(value = "user/credentials", method = RequestMethod.POST)
@@ -192,6 +196,7 @@ public class CredentialController {
 
     private ResponseEntity<IdJson> createCredential(CbUser user, CredentialRequest credentialRequest, boolean publicInAccount) {
         Credential credential = convert(credentialRequest, publicInAccount);
+        credential = credentialDecorator.decorate(credential);
         credential = credentialService.create(user, credential);
         return new ResponseEntity<>(new IdJson(credential.getId()), HttpStatus.CREATED);
     }

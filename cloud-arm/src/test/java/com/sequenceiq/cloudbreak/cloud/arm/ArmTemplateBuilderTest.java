@@ -65,14 +65,18 @@ public class ArmTemplateBuilderTest {
         Volume volume1 = new Volume("test1", "blob", volume1Size);
         Volume volume2 = new Volume("test2", "blob", volume2Size);
 
-        InstanceTemplate instanceTemplate1 = new InstanceTemplate("Standard_A3", "cbgateway", 0L, asList(volume1, volume2), InstanceStatus.CREATE_REQUESTED);
+        InstanceTemplate instanceTemplate1 = new InstanceTemplate("Standard_A3", "cbgateway", 0L, asList(volume1, volume2),
+                InstanceStatus.CREATE_REQUESTED, new HashMap<String, Object>());
         Group cbgateway = new Group("cbgateway", GATEWAY, asList(instanceTemplate1));
 
-        InstanceTemplate instanceTemplate2 = new InstanceTemplate("Standard_A3", "master", 1L, asList(volume1), InstanceStatus.CREATE_REQUESTED);
+        InstanceTemplate instanceTemplate2 = new InstanceTemplate("Standard_A3", "master", 1L, asList(volume1), InstanceStatus.CREATE_REQUESTED,
+                new HashMap<String, Object>());
         Group master = new Group("master", CORE, asList(instanceTemplate2));
 
-        InstanceTemplate instanceTemplate3 = new InstanceTemplate("Standard_A3", "slave_1", 2L, asList(volume1), InstanceStatus.CREATE_REQUESTED);
-        InstanceTemplate instanceTemplate4 = new InstanceTemplate("Standard_A3", "slave_1", three, asList(volume1), InstanceStatus.CREATE_REQUESTED);
+        InstanceTemplate instanceTemplate3 = new InstanceTemplate("Standard_A3", "slave_1", 2L, asList(volume1), InstanceStatus.CREATE_REQUESTED,
+                new HashMap<String, Object>());
+        InstanceTemplate instanceTemplate4 = new InstanceTemplate("Standard_A3", "slave_1", three, asList(volume1), InstanceStatus.CREATE_REQUESTED,
+                new HashMap<String, Object>());
         Group slave1 = new Group("slave_1", CORE, asList(instanceTemplate3, instanceTemplate4));
 
         Network network = new Network(new Subnet("10.0.0.0/16"));

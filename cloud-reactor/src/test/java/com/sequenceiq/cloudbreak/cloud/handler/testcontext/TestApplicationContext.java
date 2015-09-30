@@ -7,6 +7,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
@@ -57,10 +58,10 @@ public class TestApplicationContext {
 
     private CloudInstance cloudInstance = new CloudInstance("instanceId",
             new CloudInstanceMetaData("privateIp", "publicIp"),
-            new InstanceTemplate("flavor", "groupName", 1L, InstanceStatus.CREATE_REQUESTED));
+            new InstanceTemplate("flavor", "groupName", 1L, InstanceStatus.CREATE_REQUESTED, new HashMap<String, Object>()));
     private CloudInstance cloudInstanceBad = new CloudInstance("instanceIdBad",
             new CloudInstanceMetaData("privateIp", "publicIp"),
-            new InstanceTemplate("flavor", "groupName", 1L, InstanceStatus.CREATE_REQUESTED));
+            new InstanceTemplate("flavor", "groupName", 1L, InstanceStatus.CREATE_REQUESTED, new HashMap<String, Object>()));
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;

@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
                 name = "InstanceMetaData.findUnregisteredHostsInInstanceGroup",
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.id= :instanceGroupId "
-                        + "AND i.instanceStatus = 'UNREGISTERED'"),
+                        + "AND (i.instanceStatus = 'UNREGISTERED' OR i.instanceStatus = 'CREATED')"),
         @NamedQuery(
                 name = "InstanceMetaData.findUnusedHostsInInstanceGroup",
                 query = "SELECT i FROM InstanceMetaData i "
