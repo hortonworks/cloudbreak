@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.dash;
 
+import static com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfiguration.STORAGE_CONTAINER;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType.DASH;
 import static com.sequenceiq.cloudbreak.domain.PluginExecutionType.ALL_NODES;
 import static com.sequenceiq.cloudbreak.domain.PluginExecutionType.ONE_NODE;
@@ -32,7 +33,7 @@ public class DashFileSystemConfigurator extends AbstractFileSystemConfigurator<D
 
     @Override
     public String getDefaultFsValue(DashFileSystemConfiguration fsConfig) {
-        return "wasb://cloudbreak@" + fsConfig.getAccountName() + ".cloudapp.net";
+        return "wasb://" + fsConfig.getProperty(STORAGE_CONTAINER) + "@" + fsConfig.getAccountName() + ".cloudapp.net";
     }
 
     @Override

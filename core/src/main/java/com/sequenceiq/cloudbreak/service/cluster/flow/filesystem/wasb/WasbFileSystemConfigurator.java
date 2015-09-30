@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.wasb;
 
+import static com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfiguration.STORAGE_CONTAINER;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType.WASB;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class WasbFileSystemConfigurator extends AbstractFileSystemConfigurator<W
 
     @Override
     public String getDefaultFsValue(WasbFileSystemConfiguration fsConfig) {
-        return "wasb://cloudbreak@" + fsConfig.getAccountName() + ".blob.core.windows.net";
+        return "wasb://" + fsConfig.getProperty(STORAGE_CONTAINER) + "@" + fsConfig.getAccountName() + ".blob.core.windows.net";
     }
 
     @Override
