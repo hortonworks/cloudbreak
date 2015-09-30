@@ -228,9 +228,8 @@ identity:
     environment:
         - SERVICE_NAME=identity
         # - SERVICE_CHECK_HTTP=/login
-        - IDENTITY_DB_URL=mydb:5432
-    links:
-        - uaadb:mydb
+        - IDENTITY_DB_URL=uaadb.service.consul:5432
+    dns: $PRIVATE_IP
     volumes:
       - ./uaa.yml:/uaa/uaa.yml
     image: sequenceiq/uaa:$DOCKER_TAG_UAA
