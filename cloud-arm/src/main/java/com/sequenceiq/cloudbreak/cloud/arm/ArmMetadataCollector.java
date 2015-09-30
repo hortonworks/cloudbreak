@@ -30,7 +30,7 @@ public class ArmMetadataCollector implements MetadataCollector {
     private ArmClient armClient;
 
     @Inject
-    private ArmTemplateUtils armTemplateUtils;
+    private ArmUtils armTemplateUtils;
 
     @Override
     public List<CloudVmInstanceStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<InstanceTemplate> vms) {

@@ -11,8 +11,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 @Component
 public class ArmClient {
 
-    private static final int MAX_LENGTH_OF_RESOURCE_NAME = 24;
-
     public AuthenticatedContext createAuthenticatedContext(CloudContext cloudContext, CloudCredential cloudCredential) {
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
         AzureRMClient azureRMClient = createAccess(cloudCredential);
@@ -29,11 +27,5 @@ public class ArmClient {
         return new AzureRMClient(armCredential.getTenantId(), armCredential.getAccesKey(), armCredential.getSecretKey(), armCredential.getSubscriptionId());
     }
 
-    public String getStorageName(CloudContext cloudContext) {
-        String result = cloudContext.getStackName().toLowerCase().replaceAll("\\s+|-", "") + cloudContext.getStackId() + cloudContext.getCreated();
-        if (result.length() > MAX_LENGTH_OF_RESOURCE_NAME) {
-            return result.substring(result.length() - MAX_LENGTH_OF_RESOURCE_NAME, result.length());
-        }
-        return result;
-    }
+
 }

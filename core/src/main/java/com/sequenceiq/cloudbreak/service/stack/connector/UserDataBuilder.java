@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.connector;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_RELOCATE;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +10,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
@@ -25,6 +28,9 @@ public class UserDataBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserDataBuilder.class);
 
+    @Value("${cb.docker.relocate:" + CB_DOCKER_RELOCATE + "}")
+    private Boolean relocateDocker;
+
     @Inject
     private Configuration freemarkerConfiguration;
 
@@ -37,19 +43,23 @@ public class UserDataBuilder {
 
     public String buildGatewayUserdata(CloudPlatform cloudPlatform, String tmpSshKey, String sshUser, PlatformParameters params) {
         Map<String, Object> model = new HashMap<>();
+        model.put("cloudPlatform", cloudPlatform);
         model.put("platformDiskPrefix", params.diskPrefix());
         model.put("platformDiskStartLabel", params.startLabel());
         model.put("gateway", true);
         model.put("tmpSshKey", tmpSshKey);
         model.put("sshUser", sshUser);
+        model.put("relocateDocker", relocateDocker);
         return build(model);
     }
 
     public String buildCoreUserdata(CloudPlatform cloudPlatform, PlatformParameters params) {
         Map<String, Object> model = new HashMap<>();
+        model.put("cloudPlatform", cloudPlatform);
         model.put("platformDiskPrefix", params.diskPrefix());
         model.put("platformDiskStartLabel", params.startLabel());
         model.put("gateway", false);
+        model.put("relocateDocker", relocateDocker);
         return build(model);
     }
 
@@ -60,6 +70,11 @@ public class UserDataBuilder {
             LOGGER.error(e.getMessage(), e);
             throw new CloudConnectorException("Failed to process init script freemarker template", e);
         }
+    }
+
+    @VisibleForTesting
+    void setRelocateDocker(Boolean relocateDocker) {
+        this.relocateDocker = relocateDocker;
     }
 
     @VisibleForTesting

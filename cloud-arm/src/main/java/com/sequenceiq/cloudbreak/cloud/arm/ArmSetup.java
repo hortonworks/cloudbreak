@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.arm;
 
-import static com.sequenceiq.cloudbreak.cloud.arm.ArmTemplateUtils.NOT_FOUND;
+import static com.sequenceiq.cloudbreak.cloud.arm.ArmUtils.NOT_FOUND;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.cloud.arm.context.StorageCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.task.ArmStorageStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.domain.ImageStatusResult;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -31,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.domain.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.ImageStatus;
+import com.sequenceiq.cloudbreak.domain.ImageStatusResult;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 
 import groovyx.net.http.HttpResponseException;
@@ -38,7 +38,6 @@ import groovyx.net.http.HttpResponseException;
 @Component
 public class ArmSetup implements Setup {
 
-    public static final String VHDS = "vhds";
     public static final String IMAGES = "images";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArmSetup.class);
@@ -49,18 +48,23 @@ public class ArmSetup implements Setup {
     @Inject
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
     @Inject
-    private ArmTemplateUtils armTemplateUtils;
+    private ArmUtils armUtils;
     @Inject
     private ResourceNotifier resourceNotifier;
 
     @Override
     public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack) {
-        String osStorageName = armClient.getStorageName(authenticatedContext.getCloudContext());
-        String storageGroup = armTemplateUtils.getStackName(authenticatedContext.getCloudContext());
+        String storageName = armUtils.getStorageName(authenticatedContext.getCloudCredential(), authenticatedContext.getCloudContext(), stack.getRegion());
+        String imageResourceGroupName = armUtils.getImageResourceGroupName(authenticatedContext.getCloudContext());
         AzureRMClient client = armClient.createAccess(authenticatedContext.getCloudCredential());
+        String region = stack.getRegion();
         try {
-            if (!storageContainsImage(client, storageGroup, osStorageName, stack.getImage().getImageName())) {
-                client.copyImageBlobInStorageContainer(storageGroup, osStorageName, IMAGES, stack.getImage().getImageName());
+            if (!resourceGroupExist(client, imageResourceGroupName)) {
+                client.createResourceGroup(imageResourceGroupName, CloudRegion.valueOf(region).value());
+            }
+            createStorage(authenticatedContext, client, storageName, imageResourceGroupName, region);
+            if (!storageContainsImage(client, imageResourceGroupName, storageName, stack.getImage().getImageName())) {
+                client.copyImageBlobInStorageContainer(imageResourceGroupName, storageName, IMAGES, stack.getImage().getImageName());
             }
         } catch (HttpResponseException ex) {
             throw new CloudConnectorException(ex.getResponse().getData().toString(), ex);
@@ -72,13 +76,12 @@ public class ArmSetup implements Setup {
 
     @Override
     public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack) {
-        String osStorageName = armClient.getStorageName(authenticatedContext.getCloudContext());
-        String storageGroup = armTemplateUtils.getStackName(authenticatedContext.getCloudContext());
+        String storageName = armUtils.getStorageName(authenticatedContext.getCloudCredential(), authenticatedContext.getCloudContext(), stack.getRegion());
+        String imageResourceGroupName = armUtils.getImageResourceGroupName(authenticatedContext.getCloudContext());
         ArmCredentialView armCredentialView = new ArmCredentialView(authenticatedContext.getCloudCredential());
         AzureRMClient client = armClient.createAccess(armCredentialView);
         try {
-
-            CopyState copyState = client.getCopyStatus(storageGroup, osStorageName, IMAGES, stack.getImage().getImageName());
+            CopyState copyState = client.getCopyStatus(imageResourceGroupName, storageName, IMAGES, stack.getImage().getImageName());
             if (CopyStatus.SUCCESS.equals(copyState.getStatus())) {
                 return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
             } else if (CopyStatus.ABORTED.equals(copyState.getStatus()) || CopyStatus.INVALID.equals(copyState.getStatus())) {
@@ -101,23 +104,15 @@ public class ArmSetup implements Setup {
 
     @Override
     public void execute(AuthenticatedContext authenticatedContext, CloudStack stack) {
-        checkResourceGroups(authenticatedContext);
-        String osStorageName = armClient.getStorageName(authenticatedContext.getCloudContext());
-        String storageGroup = armTemplateUtils.getStackName(authenticatedContext.getCloudContext());
+        String storageGroup = armUtils.getResourceGroupName(authenticatedContext.getCloudContext());
         AzureRMClient client = armClient.createAccess(authenticatedContext.getCloudCredential());
         CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.ARM_TEMPLATE).name(storageGroup).build();
+        String region = stack.getRegion();
         try {
             resourceNotifier.notifyAllocation(cloudResource, authenticatedContext.getCloudContext());
             if (!resourceGroupExist(client, storageGroup)) {
-                client.createResourceGroup(storageGroup, CloudRegion.valueOf(stack.getRegion()).value());
+                client.createResourceGroup(storageGroup, CloudRegion.valueOf(region).value());
             }
-            if (!storageAccountExist(client, osStorageName)) {
-                client.createStorageAccount(storageGroup, osStorageName, CloudRegion.valueOf(stack.getRegion()).value(), LOCALLY_REDUNDANT_STORAGE);
-                PollTask<Boolean> task = new ArmStorageStatusCheckerTask(authenticatedContext, armClient,
-                        new StorageCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()), storageGroup, osStorageName));
-                syncPollingScheduler.schedule(task);
-            }
-            client.createContainerInStorage(storageGroup, osStorageName, IMAGES);
         } catch (HttpResponseException ex) {
             throw new CloudConnectorException(ex.getResponse().getData().toString(), ex);
         } catch (Exception ex) {
@@ -126,16 +121,15 @@ public class ArmSetup implements Setup {
         LOGGER.debug("setup has been executed");
     }
 
-    private void checkResourceGroups(AuthenticatedContext authenticatedContext) {
-        AzureRMClient client = armClient.createAccess(authenticatedContext.getCloudCredential());
-        try {
-            client.getResourceGroups();
-        } catch (HttpResponseException ex) {
-            throw new CloudConnectorException(ex.getResponse().getData().toString(), ex);
-        } catch (Exception e) {
-            throw new CloudConnectorException("Could not authenticate to azure", e);
+    private void createStorage(AuthenticatedContext authenticatedContext, AzureRMClient client, String osStorageName, String storageGroup, String region)
+            throws Exception {
+        if (!storageAccountExist(client, osStorageName)) {
+            client.createStorageAccount(storageGroup, osStorageName, CloudRegion.valueOf(region).value(), LOCALLY_REDUNDANT_STORAGE);
+            PollTask<Boolean> task = new ArmStorageStatusCheckerTask(authenticatedContext, armClient,
+                    new StorageCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()), storageGroup, osStorageName));
+            syncPollingScheduler.schedule(task);
         }
-        LOGGER.debug("preCheck has been executed");
+        client.createContainerInStorage(storageGroup, osStorageName, IMAGES);
     }
 
     private boolean resourceGroupExist(AzureRMClient client, String groupName) {

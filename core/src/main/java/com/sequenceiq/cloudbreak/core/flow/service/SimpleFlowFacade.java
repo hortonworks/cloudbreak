@@ -121,7 +121,7 @@ public class SimpleFlowFacade implements FlowFacade {
             LOGGER.debug("Check Image DONE.");
             Date endDate = new Date();
             long seconds = (endDate.getTime() - startDate.getTime()) / DateUtils.MILLIS_PER_SECOND;
-            fireEventAndLog(stack.getId(), context, Msg.FLOW_STACK_SETUP, UPDATE_IN_PROGRESS.name(), Arrays.asList(String.valueOf(seconds)));
+            fireEventAndLog(stack.getId(), context, Msg.FLOW_STACK_SETUP, UPDATE_IN_PROGRESS.name(), seconds);
             return new ProvisioningContext.Builder()
                     .setDefaultParams(setupComplete.getStackId(), setupComplete.getCloudPlatform())
                     .setProvisionSetupProperties(new HashMap<String, Object>())

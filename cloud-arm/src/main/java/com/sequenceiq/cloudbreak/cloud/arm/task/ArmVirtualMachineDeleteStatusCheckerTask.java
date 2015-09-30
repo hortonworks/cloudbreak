@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.arm.task;
 
-import static com.sequenceiq.cloudbreak.cloud.arm.ArmTemplateUtils.NOT_FOUND;
+import static com.sequenceiq.cloudbreak.cloud.arm.ArmUtils.NOT_FOUND;
 
 import java.util.Map;
 
