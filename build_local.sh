@@ -1,1 +1,0 @@
-ULU_CLOUDBREAK_ADDRESS=http://localhost:9090 ULU_IDENTITY_ADDRESS=https://qa-identity.sequenceiq.com ULU_OAUTH_CLIENT_ID=uluwatu-dev ULU_OAUTH_CLIENT_SECRET=f2b9f54c-e8e4-4da7-b5ce-276db040ed6c ULU_HOST_ADDRESS=http://localhost:3000      ULU_SULTANS_ADDRESS=https://qa-accounts.sequenceiq.com ULU_PERISCOPE_ADDRESS=http://alma.com NODE_TLS_REJECT_UNAUTHORIZED=0 node server.js
