@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.task.FetchTask;
+import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 
 import reactor.bus.Event;
 
@@ -24,9 +25,12 @@ public class LogContextAspects {
     }
 
     @Pointcut("execution(public * com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler.schedule(..))")
-    public void interceptFetchTasksCallMethod() {
+    public void interceptSchedulerScheduleMethod() {
     }
 
+    @Pointcut("execution(public * com.sequenceiq.cloudbreak.cloud.task.PollTask+.call(..))")
+    public void interceptPollTasksCallMethod() {
+    }
 
     @Before("com.sequenceiq.cloudbreak.logger.LogContextAspects.interceptReactorHandlersAcceptMethod()")
     public void buildLogContextForReactorHandler(JoinPoint joinPoint) {
@@ -39,11 +43,19 @@ public class LogContextAspects {
         LOGGER.info("A Reactor event handler's 'accept' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
     }
 
-    @Before("com.sequenceiq.cloudbreak.logger.LogContextAspects.interceptFetchTasksCallMethod()")
-    public void buildLogContextForFetchTask(JoinPoint joinPoint) {
+    @Before("com.sequenceiq.cloudbreak.logger.LogContextAspects.interceptSchedulerScheduleMethod()")
+    public void buildLogContextForScheduler(JoinPoint joinPoint) {
         FetchTask task = (FetchTask) joinPoint.getArgs()[0];
         CloudContext cloudContext = task.getAuthenticatedContext().getCloudContext();
         MDCBuilder.buildMdcContext(String.valueOf(cloudContext.getStackId()), cloudContext.getStackName(), cloudContext.getOwner());
-        LOGGER.info("A FetchTask's 'call' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
+        LOGGER.info("A SyncPollingScheduler's 'schedule' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
+    }
+
+    @Before("com.sequenceiq.cloudbreak.logger.LogContextAspects.interceptPollTasksCallMethod()")
+    public void buildLogContextForPollTask(JoinPoint joinPoint) {
+        PollTask pollTask = (PollTask) joinPoint.getTarget();
+        CloudContext cloudContext = pollTask.getAuthenticatedContext().getCloudContext();
+        MDCBuilder.buildMdcContext(String.valueOf(cloudContext.getStackId()), cloudContext.getStackName(), cloudContext.getOwner());
+        LOGGER.debug("A PollTask's 'call' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
     }
 }

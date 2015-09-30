@@ -18,10 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.arm.context.NetworkInterfaceCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.context.ResourceGroupCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.context.VirtualMachineCheckerContext;
-import com.sequenceiq.cloudbreak.cloud.arm.task.ArmNetworkInterfaceDeleteStatusCheckerTask;
-import com.sequenceiq.cloudbreak.cloud.arm.task.ArmResourceGroupDeleteStatusCheckerTask;
-import com.sequenceiq.cloudbreak.cloud.arm.task.ArmVirtualMachineDeleteStatusCheckerTask;
-import com.sequenceiq.cloudbreak.cloud.arm.task.ArmVirtualMachineStatusCheckerTask;
+import com.sequenceiq.cloudbreak.cloud.arm.task.ArmPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
@@ -50,6 +47,8 @@ public class ArmResourceConnector implements ResourceConnector {
     private ArmUtils armUtils;
     @Inject
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
+    @Inject
+    private ArmPollTaskFactory armPollTaskFactory;
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier) {
@@ -111,8 +110,8 @@ public class ArmResourceConnector implements ResourceConnector {
         for (CloudResource resource : resources) {
             try {
                 azureRMClient.deleteResourceGroup(resource.getName());
-                PollTask<Boolean> task = new ArmResourceGroupDeleteStatusCheckerTask(authenticatedContext, armClient, new ResourceGroupCheckerContext(
-                        new ArmCredentialView(authenticatedContext.getCloudCredential()), resource.getName()));
+                PollTask<Boolean> task = armPollTaskFactory.newResourceGroupDeleteStatusCheckerTask(authenticatedContext, armClient,
+                        new ResourceGroupCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()), resource.getName()));
                 Boolean statePollerResult = task.call();
                 if (!task.completed(statePollerResult)) {
                     syncPollingScheduler.schedule(task);
@@ -250,7 +249,7 @@ public class ArmResourceConnector implements ResourceConnector {
         for (String networkInterfacesName : networkInterfacesNames) {
             try {
                 client.deleteNetworkInterface(stackName, networkInterfacesName);
-                PollTask<Boolean> task = new ArmNetworkInterfaceDeleteStatusCheckerTask(authenticatedContext, armClient,
+                PollTask<Boolean> task = armPollTaskFactory.newNetworkInterfaceDeleteStatusCheckerTask(authenticatedContext, armClient,
                         new NetworkInterfaceCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()),
                                 stackName, networkInterfacesName));
 
@@ -270,11 +269,10 @@ public class ArmResourceConnector implements ResourceConnector {
             throws CloudConnectorException {
         try {
             client.deleteVirtualMachine(stackName, privateInstanceId);
-            PollTask<Boolean> task = new ArmVirtualMachineDeleteStatusCheckerTask(authenticatedContext, armClient,
+            PollTask<Boolean> task = armPollTaskFactory.newVirtualMachineDeleteStatusCheckerTask(authenticatedContext, armClient,
                     new VirtualMachineCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()),
                             stackName, privateInstanceId));
             syncPollingScheduler.schedule(task);
-
         } catch (HttpResponseException e) {
             if (e.getStatusCode() != NOT_FOUND) {
                 throw new CloudConnectorException(e.getResponse().getData().toString(), e);
@@ -288,11 +286,10 @@ public class ArmResourceConnector implements ResourceConnector {
             throws CloudConnectorException {
         try {
             client.deallocateVirtualMachine(stackName, privateInstanceId);
-            PollTask<Boolean> task = new ArmVirtualMachineStatusCheckerTask(authenticatedContext, armClient,
+            PollTask<Boolean> task = armPollTaskFactory.newVirtualMachineStatusCheckerTask(authenticatedContext, armClient,
                     new VirtualMachineCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()),
                             stackName, privateInstanceId, "Succeeded"));
             syncPollingScheduler.schedule(task);
-
         } catch (HttpResponseException e) {
             if (e.getStatusCode() != NOT_FOUND) {
                 throw new CloudConnectorException(e.getResponse().getData().toString(), e);

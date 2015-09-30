@@ -2,13 +2,19 @@ package com.sequenceiq.cloudbreak.cloud.task;
 
 import java.util.List;
 
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.template.ResourceChecker;
 
-public class PollResourceTask extends PollTask<List<CloudResourceStatus>> {
+@Component(PollResourceTask.NAME)
+@Scope(value = "prototype")
+public class PollResourceTask extends AbstractPollTask<List<CloudResourceStatus>> {
+    public static final String NAME = "pollResourceTask";
 
     private ResourceChecker checker;
     private List<CloudResource> cloudResources;

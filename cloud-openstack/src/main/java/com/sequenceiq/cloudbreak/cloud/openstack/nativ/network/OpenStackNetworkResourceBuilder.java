@@ -83,6 +83,7 @@ public class OpenStackNetworkResourceBuilder extends AbstractOpenStackNetworkRes
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     private void deAllocateFloatingIps(OpenStackContext context, OSClient osClient) {
         List<String> floatingIpIds = context.getParameter(OpenStackConstants.FLOATING_IP_IDS, List.class);
         for (String floatingIpId : floatingIpIds) {

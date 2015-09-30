@@ -4,6 +4,9 @@ import static com.sequenceiq.cloudbreak.cloud.arm.ArmUtils.NOT_FOUND;
 
 import java.util.Map;
 
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.cloud.arm.ArmClient;
 import com.sequenceiq.cloudbreak.cloud.arm.context.ResourceGroupCheckerContext;
@@ -13,7 +16,10 @@ import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 
 import groovyx.net.http.HttpResponseException;
 
+@Component(ArmResourceGroupDeleteStatusCheckerTask.NAME)
+@Scope(value = "prototype")
 public class ArmResourceGroupDeleteStatusCheckerTask extends PollBooleanStateTask {
+    public static final String NAME = "armResourceGroupDeleteStatusCheckerTask";
 
     private ResourceGroupCheckerContext resourceGroupDeleteCheckerContext;
     private ArmClient armClient;

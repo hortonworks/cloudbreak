@@ -19,7 +19,7 @@ import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.arm.context.StorageCheckerContext;
-import com.sequenceiq.cloudbreak.cloud.arm.task.ArmStorageStatusCheckerTask;
+import com.sequenceiq.cloudbreak.cloud.arm.task.ArmPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -51,6 +51,8 @@ public class ArmSetup implements Setup {
     private ArmUtils armUtils;
     @Inject
     private ResourceNotifier resourceNotifier;
+    @Inject
+    private ArmPollTaskFactory armPollTaskFactory;
 
     @Override
     public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack) {
@@ -125,7 +127,7 @@ public class ArmSetup implements Setup {
             throws Exception {
         if (!storageAccountExist(client, osStorageName)) {
             client.createStorageAccount(storageGroup, osStorageName, CloudRegion.valueOf(region).value(), LOCALLY_REDUNDANT_STORAGE);
-            PollTask<Boolean> task = new ArmStorageStatusCheckerTask(authenticatedContext, armClient,
+            PollTask<Boolean> task = armPollTaskFactory.newStorageStatusCheckerTask(authenticatedContext, armClient,
                     new StorageCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()), storageGroup, osStorageName));
             syncPollingScheduler.schedule(task);
         }
