@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -198,6 +199,41 @@ public class AzureConnector implements CloudPlatformConnector {
         @Override
         public Integer startLabel() {
             return START_LABEL;
+        }
+
+        @Override
+        public Map<String, String> diskTypes() {
+            return null;
+        }
+
+        @Override
+        public String defaultDiskType() {
+            return null;
+        }
+
+        @Override
+        public Map<String, String> regions() {
+            return null;
+        }
+
+        @Override
+        public String defaultRegion() {
+            return null;
+        }
+
+        @Override
+        public Map<String, List<String>> availabiltyZones() {
+            return null;
+        }
+
+        @Override
+        public Map<String, String> virtualMachines() {
+            return null;
+        }
+
+        @Override
+        public String defaultVirtualMachine() {
+            return null;
         }
     }
 }

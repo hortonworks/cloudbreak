@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.connector;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -50,6 +52,41 @@ public class UserDataBuilderTest {
             @Override
             public Integer startLabel() {
                 return 98;
+            }
+
+            @Override
+            public Map<String, String> diskTypes() {
+                return new HashMap<>();
+            }
+
+            @Override
+            public String defaultDiskType() {
+                return "";
+            }
+
+            @Override
+            public Map<String, String> regions() {
+                return new HashMap<>();
+            }
+
+            @Override
+            public String defaultRegion() {
+                return "";
+            }
+
+            @Override
+            public Map<String, List<String>> availabiltyZones() {
+                return new HashMap<>();
+            }
+
+            @Override
+            public Map<String, String> virtualMachines() {
+                return new HashMap<>();
+            }
+
+            @Override
+            public String defaultVirtualMachine() {
+                return "";
             }
         };
     }

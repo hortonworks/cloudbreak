@@ -66,6 +66,7 @@ public class SecurityConfig {
     @EnableResourceServer
     protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
         private static final Logger LOGGER = LoggerFactory.getLogger(ResourceServerConfiguration.class);
+        private static final String[] CONNECTORS_URL_PATTERNS = new String[]{"/connectors/**"};
         private static final String[] BLUEPRINT_URL_PATTERNS = new String[]{"/user/blueprints/**", "/account/blueprints/**", "/blueprints/**"};
         private static final String[] TEMPLATE_URL_PATTERNS = new String[]{"/user/templates/**", "/account/templates/**", "/templates/**"};
         private static final String[] CREDENTIAL_URL_PATTERNS = new String[]{"/user/credentials/**", "/account/credentials/**", "/credentials/**"};
