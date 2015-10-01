@@ -41,12 +41,6 @@ migrate-execute-mybatis-migrations() {
     fi
     local scripts_location=$1 && shift
     migrateDebug "Scripts location:  $scripts_location"
-    if [ "$service_name" = "uaadb" ]; then
-        while ! check_uaa_running; do
-            info "Uaa currently not updated the database. Waiting..."
-            sleep 3
-        done
-    fi
     if [ "$scripts_location" = "container" ]; then
         migrateDebug "Schema will be extracted from image:  $docker_image_name"
         local scripts_location=$(pwd)/.schema/$service_name
@@ -61,10 +55,6 @@ migrate-execute-mybatis-migrations() {
         sequenceiq/mybatis-migrations:$DOCKER_TAG_MIGRATION "$@" \
       | tee -a "$DB_MIGRATION_LOG" \
       | grep "Applying\|MyBatis Migrations SUCCESS\|MyBatis Migrations FAILURE" 2>/dev/null
-}
-
-check_uaa_running() {
-    docker exec cbreak_uaadb_1 bash -c 'psql -U postgres -c "select 1"' &>/dev/null
 }
 
 migrate-one-db() {
