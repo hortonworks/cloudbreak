@@ -32,6 +32,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_PERISCOPE 0.6.0-dev.4
     env-import DOCKER_TAG_PCDB 0.5.6
     env-import DOCKER_TAG_UAA 1.8.1-v2
+    env-import DOCKER_TAG_UAADB 1.0.1
     env-import DOCKER_TAG_ULUWATU 1.0.17
     env-import DOCKER_TAG_SULTANS 1.0.4
     env-import DOCKER_TAG_AMBASSADOR 0.5.0

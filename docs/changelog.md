@@ -26,6 +26,7 @@
 - `cbd generate` is less verbose, diff doesnt shown
 - `cbd doctor` shows diff if generate would change
 - `cbd regenerate` creates backup files if changes detected
+- sequenceiq/uaadb:1.0.1 is used instead of postgres:9.4.1
 
 ## [v1.0.3] - 2015-09-03
 

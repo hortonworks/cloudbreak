@@ -220,7 +220,7 @@ uaadb:
         #- SERVICE_CHECK_CMD=bash -c 'psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
     volumes:
         - "$CB_DB_ROOT_PATH/uaadb:/var/lib/postgresql/data"
-    image: postgres:$DOCKER_TAG_POSTGRES
+    image: sequenceiq/uaadb:$DOCKER_TAG_UAADB
 
 identity:
     ports:
