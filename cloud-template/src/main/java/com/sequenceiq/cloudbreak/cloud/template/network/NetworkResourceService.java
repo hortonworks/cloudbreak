@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.template.NetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
+import com.sequenceiq.cloudbreak.common.type.CommonStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
@@ -69,12 +70,14 @@ public class NetworkResourceService {
             NetworkResourceBuilder builder = builderChain.get(i);
             List<CloudResource> specificResources = getResources(resources, builder.resourceType());
             for (CloudResource resource : specificResources) {
-                CloudResource deletedResource = builder.delete(context, auth, resource);
-                if (deletedResource != null) {
-                    PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(
-                            builder, auth, asList(deletedResource), context, cancellable);
-                    List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
-                    results.addAll(pollerResult);
+                if (resource.getStatus() == CommonStatus.CREATED) {
+                    CloudResource deletedResource = builder.delete(context, auth, resource);
+                    if (deletedResource != null) {
+                        PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(
+                                builder, auth, asList(deletedResource), context, cancellable);
+                        List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
+                        results.addAll(pollerResult);
+                    }
                 }
                 resourceNotifier.notifyDeletion(resource, cloudContext).await();
             }
