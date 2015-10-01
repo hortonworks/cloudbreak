@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.validation.AwsTemplateParam;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
 @Component
 public class AwsTemplateToJsonConverter extends AbstractConversionServiceAwareConverter<AwsTemplate, TemplateResponse> {

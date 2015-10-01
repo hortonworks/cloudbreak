@@ -9,7 +9,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.codec.binary.Base64;
 
-import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
+import com.sequenceiq.cloudbreak.common.type.PluginExecutionType;
 
 public class PluginValidator implements ConstraintValidator<ValidPlugin, Map<String, PluginExecutionType>> {
 

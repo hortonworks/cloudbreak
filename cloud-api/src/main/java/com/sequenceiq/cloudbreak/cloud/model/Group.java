@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 
 public class Group {
 

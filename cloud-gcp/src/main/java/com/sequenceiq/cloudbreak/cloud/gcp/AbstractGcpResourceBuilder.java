@@ -24,8 +24,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.DynamicModel;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.domain.CloudRegion;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.CloudRegion;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 public abstract class AbstractGcpResourceBuilder {
 
@@ -58,7 +58,7 @@ public abstract class AbstractGcpResourceBuilder {
             } catch (Exception e) {
                 CloudContext cloudContext = auth.getCloudContext();
                 throw new GcpResourceException("Error during status check", type,
-                        cloudContext.getStackName(), cloudContext.getStackId(), resource.getName(), e);
+                        cloudContext.getName(), cloudContext.getId(), resource.getName(), e);
             }
         }
         return result;

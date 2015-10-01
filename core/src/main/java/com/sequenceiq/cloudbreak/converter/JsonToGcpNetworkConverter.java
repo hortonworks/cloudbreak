@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.NetworkJson;
 import com.sequenceiq.cloudbreak.domain.GcpNetwork;
-import com.sequenceiq.cloudbreak.domain.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 
 @Component
 public class JsonToGcpNetworkConverter extends AbstractConversionServiceAwareConverter<NetworkJson, GcpNetwork> {

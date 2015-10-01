@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow.handlers;
 
-import static com.sequenceiq.cloudbreak.domain.ScalingType.isStackDownScale;
+import static com.sequenceiq.cloudbreak.common.type.ScalingType.isStackDownScale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

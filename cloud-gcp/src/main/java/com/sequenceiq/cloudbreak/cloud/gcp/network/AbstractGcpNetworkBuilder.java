@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.template.NetworkResourceBuilder;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
 public abstract class AbstractGcpNetworkBuilder extends AbstractGcpResourceBuilder implements NetworkResourceBuilder<GcpContext> {
 

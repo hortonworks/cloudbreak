@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Entity;
 
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+
 @Entity
 public class OpenStackCredential extends Credential implements ProvisionEntity {
 

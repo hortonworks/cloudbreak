@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.controller.json.FailurePolicyJson;
-import com.sequenceiq.cloudbreak.domain.AdjustmentType;
+import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 
 public class FailurePolicyToJsonConverterTest extends AbstractEntityConverterTest<FailurePolicy> {

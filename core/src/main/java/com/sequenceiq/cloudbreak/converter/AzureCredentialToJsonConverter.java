@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.controller.json.CredentialResponse;
 import com.sequenceiq.cloudbreak.controller.validation.RequiredAzureCredentialParam;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
 @Component
 public class AzureCredentialToJsonConverter extends AbstractConversionServiceAwareConverter<AzureCredential, CredentialResponse> {

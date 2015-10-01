@@ -72,7 +72,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
                 buildableResources.addAll(list);
                 createResource(auth, list);
 
-                PollGroup pollGroup = InMemoryStateStore.get(auth.getCloudContext().getStackId());
+                PollGroup pollGroup = InMemoryStateStore.get(auth.getCloudContext().getId());
                 if (pollGroup != null && CANCELLED.equals(pollGroup)) {
                     throw new CancellationException(format("Building of %s has been cancelled", list));
                 }

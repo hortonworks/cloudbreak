@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -52,7 +52,7 @@ public class ArmUtils {
     }
 
     public String getStackName(CloudContext cloudContext) {
-        return String.format("%s%s", cloudContext.getStackName(), cloudContext.getStackId());
+        return String.format("%s%s", cloudContext.getName(), cloudContext.getId());
     }
 
     public String getLoadBalancerId(String stackName) {
@@ -116,7 +116,7 @@ public class ArmUtils {
             result = String.format("%s%s%s", persistentStorage, regionInitials, subscriptionIdPart).substring(0, MAX_LENGTH_OF_RESOURCE_NAME);
             LOGGER.info("Storage account name: {}", result);
         } else {
-            result = cloudContext.getStackName().toLowerCase().replaceAll("\\s+|-", "") + cloudContext.getStackId() + cloudContext.getCreated();
+            result = cloudContext.getName().toLowerCase().replaceAll("\\s+|-", "") + cloudContext.getId() + cloudContext.getCreated();
         }
         if (result.length() > MAX_LENGTH_OF_RESOURCE_NAME) {
             return result.substring(result.length() - MAX_LENGTH_OF_RESOURCE_NAME, result.length());

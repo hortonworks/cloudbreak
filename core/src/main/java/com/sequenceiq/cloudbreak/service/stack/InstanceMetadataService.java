@@ -29,7 +29,7 @@ public class InstanceMetadataService {
                 if (InstanceStatus.CREATE_REQUESTED == instanceTemplate.getStatus()) {
                     InstanceMetaData instanceMetaData = new InstanceMetaData();
                     instanceMetaData.setPrivateId(instanceTemplate.getPrivateId());
-                    instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.domain.InstanceStatus.REQUESTED);
+                    instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.common.type.InstanceStatus.REQUESTED);
                     instanceMetaData.setInstanceGroup(instanceGroup);
                     instanceMetaDataRepository.save(instanceMetaData);
                 }

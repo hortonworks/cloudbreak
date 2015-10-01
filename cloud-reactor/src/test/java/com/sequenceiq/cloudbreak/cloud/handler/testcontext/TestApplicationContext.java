@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.handler.testcontext;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -44,7 +45,8 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.Persister;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 import reactor.Environment;
 
@@ -128,7 +130,7 @@ public class TestApplicationContext {
         when(cloudConnector.variant()).thenReturn("TESTVARIANT");
         when(cloudConnector.resources()).thenReturn(resourceConnector);
         when(cloudConnector.instances()).thenReturn(instanceConnector);
-        when(resourceConnector.launch((AuthenticatedContext) any(), (CloudStack) any(), (PersistenceNotifier) any()))
+        when(resourceConnector.launch((AuthenticatedContext) any(), (CloudStack) any(), (PersistenceNotifier) any(), (AdjustmentType) any(), anyLong()))
                 .thenReturn(Arrays.asList(new CloudResourceStatus(resource, ResourceStatus.CREATED)));
         when(resourceConnector.terminate((AuthenticatedContext) any(), (CloudStack) any(), (List<CloudResource>) any()))
                 .thenReturn(Arrays.asList(new CloudResourceStatus(resource, ResourceStatus.DELETED)));

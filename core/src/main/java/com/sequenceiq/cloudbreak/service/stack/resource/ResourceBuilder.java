@@ -3,10 +3,10 @@ package com.sequenceiq.cloudbreak.service.stack.resource;
 import java.util.List;
 
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 public interface ResourceBuilder<P extends ProvisionContextObject,
         D extends DeleteContextObject, SSCO extends StartStopContextObject, U extends UpdateContextObject> {

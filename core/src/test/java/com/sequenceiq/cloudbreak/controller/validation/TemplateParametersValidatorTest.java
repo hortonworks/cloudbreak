@@ -32,11 +32,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
-import com.sequenceiq.cloudbreak.domain.AzureVmType;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.GcpDiskType;
-import com.sequenceiq.cloudbreak.domain.GcpInstanceType;
-import com.sequenceiq.cloudbreak.domain.GcpRawDiskType;
+import com.sequenceiq.cloudbreak.common.type.AzureVmType;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.GcpDiskType;
+import com.sequenceiq.cloudbreak.common.type.GcpInstanceType;
+import com.sequenceiq.cloudbreak.common.type.GcpRawDiskType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TemplateParametersValidatorTest {

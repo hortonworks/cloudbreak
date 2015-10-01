@@ -15,6 +15,8 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+
 
 @Entity
 @NamedQueries({

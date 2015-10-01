@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.nativ;
 
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 public class OpenStackResourceException extends CloudConnectorException {
     public OpenStackResourceException(Throwable cause) {

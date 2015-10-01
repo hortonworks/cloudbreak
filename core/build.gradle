@@ -79,6 +79,7 @@ dependencies {
 
     runtime     group: 'activation',                name: 'activation',                     version: '1.0.2'
 
+    testCompile project(path: ':core-model', configuration: 'tests')
     testCompile "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
     testCompile "org.springframework.boot:spring-boot-starter-freemarker:${springBootVersion}"
     testCompile group: 'com.jayway.restassured',    name: 'rest-assured',                   version: '2.3.4'

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateway;
+import static com.sequenceiq.cloudbreak.common.type.InstanceGroupType.isGateway;
 
 import javax.inject.Inject;
 

@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.domain.AzureNetwork;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.GcpNetwork;
 import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
 
 @Service

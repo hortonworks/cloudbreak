@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.controller.json.NetworkJson;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.OpenStackNetwork;
 
 public class OpenStackNetworkToJsonConverterTest extends AbstractEntityConverterTest<OpenStackNetwork> {

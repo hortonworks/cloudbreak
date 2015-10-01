@@ -22,16 +22,16 @@ import com.sequenceiq.cloudbreak.cloud.arm.context.StorageCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.task.ArmPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
-import com.sequenceiq.cloudbreak.domain.CloudRegion;
-import com.sequenceiq.cloudbreak.domain.ImageStatus;
-import com.sequenceiq.cloudbreak.domain.ImageStatusResult;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.CloudRegion;
+import com.sequenceiq.cloudbreak.common.type.ImageStatus;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 import groovyx.net.http.HttpResponseException;
 

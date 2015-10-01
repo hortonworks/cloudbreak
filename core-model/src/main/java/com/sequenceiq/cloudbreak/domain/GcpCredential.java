@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.domain;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+
 @Entity
 public class GcpCredential extends Credential implements ProvisionEntity {
     private String serviceAccountId;

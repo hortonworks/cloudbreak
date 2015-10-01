@@ -4,6 +4,9 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
+import com.sequenceiq.cloudbreak.common.type.AzureVmType;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+
 @Entity
 public class AzureTemplate extends Template implements ProvisionEntity {
 

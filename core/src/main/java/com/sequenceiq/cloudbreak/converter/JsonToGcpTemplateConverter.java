@@ -5,9 +5,9 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 import com.sequenceiq.cloudbreak.controller.validation.GcpTemplateParam;
 import com.sequenceiq.cloudbreak.domain.GcpTemplate;
-import com.sequenceiq.cloudbreak.domain.GcpInstanceType;
-import com.sequenceiq.cloudbreak.domain.GcpRawDiskType;
-import com.sequenceiq.cloudbreak.domain.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.type.GcpInstanceType;
+import com.sequenceiq.cloudbreak.common.type.GcpRawDiskType;
+import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 
 @Component
 public class JsonToGcpTemplateConverter extends AbstractConversionServiceAwareConverter<TemplateRequest, GcpTemplate> {

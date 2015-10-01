@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackHeatUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.metadata.CloudInstanceMetaDataExtractor;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class OpenStackNativeMetaDataCollector implements MetadataCollector {

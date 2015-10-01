@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.cloud.template.ResourceContextBuilder;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class OpenStackContextBuilder implements ResourceContextBuilder<OpenStackContext> {
@@ -46,7 +46,7 @@ public class OpenStackContextBuilder implements ResourceContextBuilder<OpenStack
     }
 
     private OpenStackContext initContext(CloudContext context, boolean build) {
-        return new OpenStackContext(context.getStackName(), context.getRegion(), PARALLEL_RESOURCE_REQUEST, build);
+        return new OpenStackContext(context.getName(), context.getRegion(), PARALLEL_RESOURCE_REQUEST, build);
     }
 
     @Override

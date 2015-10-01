@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.event.setup;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
-import com.sequenceiq.cloudbreak.domain.ImageStatus;
+import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 
 public class CheckImageResult extends CloudPlatformResult {
 

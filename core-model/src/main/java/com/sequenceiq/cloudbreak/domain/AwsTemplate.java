@@ -1,10 +1,15 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import static com.sequenceiq.cloudbreak.domain.AwsVolumeType.Ephemeral;
+import static com.sequenceiq.cloudbreak.common.type.AwsVolumeType.Ephemeral;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+
+import com.sequenceiq.cloudbreak.common.type.AwsEncryption;
+import com.sequenceiq.cloudbreak.common.type.AwsInstanceType;
+import com.sequenceiq.cloudbreak.common.type.AwsVolumeType;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
 @Entity
 public class AwsTemplate extends Template implements ProvisionEntity {

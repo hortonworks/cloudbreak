@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
+import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 
 @Service
 public class CloudFailureHandler {
@@ -39,51 +40,48 @@ public class CloudFailureHandler {
     private ApplicationContext applicationContext;
 
     public void rollback(AuthenticatedContext auth, List<CloudResourceStatus> failuresList, Group group, Integer fullNodeCount,
-            ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, Boolean upscale) {
+            ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, ScaleContext stx) {
         if (failuresList.isEmpty()) {
             return;
         }
-        doRollback(auth, failuresList, group, fullNodeCount, ctx, resourceBuilders, upscale);
+        doRollback(auth, failuresList, group, fullNodeCount, ctx, resourceBuilders, stx);
     }
 
     private void doRollback(AuthenticatedContext auth, List<CloudResourceStatus> failuresList, Group group, Integer fullNodeCount,
-            ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, Boolean upscale) {
+            ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, ScaleContext stx) {
         CloudContext localStack = auth.getCloudContext();
         Set<Long> failures = failureCount(failuresList);
-        if (localStack.getAdjustmentType() == null) {
-            if (failures.size() > 0) {
-                LOGGER.info("Failure policy is null so error will throw");
-                throwError(failuresList);
-            }
-        } else {
-            switch (localStack.getAdjustmentType()) {
-                case EXACT:
-                    if (localStack.getThreshold() > fullNodeCount - failures.size()) {
-                        LOGGER.info("Number of failures is more than the threshold so error will throw");
-                        throwError(failuresList);
-                    } else if (failures.size() != 0) {
-                        LOGGER.info("Decrease node counts because threshold was higher");
-                        handleExceptions(auth, failuresList, group, ctx, resourceBuilders, failures, upscale);
-                    }
-                    break;
-                case PERCENTAGE:
-                    if (Double.valueOf(localStack.getThreshold()) > calculatePercentage(failures.size(), fullNodeCount)) {
-                        LOGGER.info("Number of failures is more than the threshold so error will throw");
-                        throwError(failuresList);
-                    } else if (failures.size() != 0) {
-                        LOGGER.info("Decrease node counts because threshold was higher");
-                        handleExceptions(auth, failuresList, group, ctx, resourceBuilders, failures, upscale);
-                    }
-                    break;
-                case BEST_EFFORT:
-                    LOGGER.info("Decrease node counts because threshold was higher");
-                    handleExceptions(auth, failuresList, group, ctx, resourceBuilders, failures, upscale);
-                    break;
-                default:
-                    LOGGER.info("Unsupported adjustment type so error will throw");
+        if (stx.getAdjustmentType() == null && failures.size() > 0) {
+            LOGGER.info("Failure policy is null so error will throw");
+            throwError(failuresList);
+        }
+        switch (stx.getAdjustmentType()) {
+            case EXACT:
+                if (stx.getThreshold() > fullNodeCount - failures.size()) {
+                    LOGGER.info("Number of failures is more than the threshold so error will throw");
                     throwError(failuresList);
-                    break;
-            }
+                } else if (failures.size() != 0) {
+                    LOGGER.info("Decrease node counts because threshold was higher");
+                    handleExceptions(auth, failuresList, group, ctx, resourceBuilders, failures, stx.getUpscale());
+                }
+                break;
+            case PERCENTAGE:
+                if (Double.valueOf(stx.getThreshold()) > calculatePercentage(failures.size(), fullNodeCount)) {
+                    LOGGER.info("Number of failures is more than the threshold so error will throw");
+                    throwError(failuresList);
+                } else if (failures.size() != 0) {
+                    LOGGER.info("Decrease node counts because threshold was higher");
+                    handleExceptions(auth, failuresList, group, ctx, resourceBuilders, failures, stx.getUpscale());
+                }
+                break;
+            case BEST_EFFORT:
+                LOGGER.info("Decrease node counts because threshold was higher");
+                handleExceptions(auth, failuresList, group, ctx, resourceBuilders, failures, stx.getUpscale());
+                break;
+            default:
+                LOGGER.info("Unsupported adjustment type so error will throw");
+                throwError(failuresList);
+                break;
         }
     }
 
@@ -166,4 +164,27 @@ public class CloudFailureHandler {
         throw new CloudConnectorException(statuses.get(0).getStatusReason());
     }
 
+    public static class ScaleContext {
+        private final Boolean upscale;
+        private final AdjustmentType adjustmentType;
+        private final Long threshold;
+
+        public ScaleContext(Boolean upscale, AdjustmentType adjustmentType, Long threshold) {
+            this.upscale = upscale;
+            this.adjustmentType = adjustmentType;
+            this.threshold = threshold;
+        }
+
+        public Boolean getUpscale() {
+            return upscale;
+        }
+
+        public AdjustmentType getAdjustmentType() {
+            return adjustmentType;
+        }
+
+        public Long getThreshold() {
+            return threshold;
+        }
+    }
 }

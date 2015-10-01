@@ -31,7 +31,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.controller.json.CredentialRequest;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CredentialParametersValidatorTest {

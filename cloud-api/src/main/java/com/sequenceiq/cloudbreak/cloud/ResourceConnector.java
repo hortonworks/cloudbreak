@@ -8,12 +8,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 
 public interface ResourceConnector {
 
     // Resources
 
-    List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier) throws Exception;
+    List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier, AdjustmentType adjustmentType,
+            Long threshold) throws Exception;
 
     List<CloudResourceStatus> check(AuthenticatedContext authenticatedContext, List<CloudResource> resources);
 

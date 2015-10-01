@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.azure.builders.instance;
 
-import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateway;
+import static com.sequenceiq.cloudbreak.common.type.InstanceGroupType.isGateway;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.PORTS;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.RESERVEDIPNAME;
@@ -24,10 +24,10 @@ import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.domain.CloudRegion;
+import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;

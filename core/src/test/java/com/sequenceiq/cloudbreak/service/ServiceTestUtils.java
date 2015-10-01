@@ -6,14 +6,14 @@ import java.util.Set;
 
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AwsInstanceType;
+import com.sequenceiq.cloudbreak.common.type.AwsInstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.AwsVolumeType;
+import com.sequenceiq.cloudbreak.common.type.AwsVolumeType;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.domain.AzureVmType;
+import com.sequenceiq.cloudbreak.common.type.AzureVmType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -22,10 +22,10 @@ import com.sequenceiq.cloudbreak.domain.GcpTemplate;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.domain.GcpInstanceType;
-import com.sequenceiq.cloudbreak.domain.GcpRawDiskType;
+import com.sequenceiq.cloudbreak.common.type.GcpInstanceType;
+import com.sequenceiq.cloudbreak.common.type.GcpRawDiskType;
 
 public final class ServiceTestUtils {
 

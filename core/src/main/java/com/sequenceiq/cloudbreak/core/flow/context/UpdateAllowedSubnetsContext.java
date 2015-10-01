@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow.context;
 
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateAllowedSubnetsRequest;
 

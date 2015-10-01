@@ -31,6 +31,7 @@ dependencies {
       exclude group: 'slf4j-api'
     }
 
+    testCompile project(path: ':core-model', configuration: 'tests')
     testCompile group: 'org.mockito',               name: 'mockito-all',                    version: '1.10.19'
     testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: '1.1.8.RELEASE'
     testCompile group: 'junit',                     name: 'junit',                          version: '4.12'

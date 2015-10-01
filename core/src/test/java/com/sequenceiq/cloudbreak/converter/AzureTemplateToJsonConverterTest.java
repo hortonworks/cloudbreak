@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.controller.json.TemplateResponse;
 import com.sequenceiq.cloudbreak.controller.validation.AzureTemplateParam;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.domain.AzureVmType;
+import com.sequenceiq.cloudbreak.common.type.AzureVmType;
 
 public class AzureTemplateToJsonConverterTest extends AbstractEntityConverterTest<AzureTemplate> {
 

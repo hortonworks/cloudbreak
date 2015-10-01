@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.controller.validation.StackParam;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.common.type.Status;
 
 @Component
 public class JsonToStackConverter extends AbstractConversionServiceAwareConverter<StackRequest, Stack> {

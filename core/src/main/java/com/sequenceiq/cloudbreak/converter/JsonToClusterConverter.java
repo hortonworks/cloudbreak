@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static com.sequenceiq.cloudbreak.domain.Status.REQUESTED;
+import static com.sequenceiq.cloudbreak.common.type.Status.REQUESTED;
 
 import org.springframework.stereotype.Component;
 

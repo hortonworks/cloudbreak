@@ -38,7 +38,7 @@ public class LogContextAspects {
         CloudPlatformRequest cloudPlatformRequest = event.getData();
         CloudContext cloudContext = cloudPlatformRequest.getCloudContext();
         if (cloudContext != null) {
-            MDCBuilder.buildMdcContext(String.valueOf(cloudContext.getStackId()), cloudContext.getStackName(), cloudContext.getOwner());
+            MDCBuilder.buildMdcContext(String.valueOf(cloudContext.getId()), cloudContext.getName(), cloudContext.getOwner());
         }
         LOGGER.info("A Reactor event handler's 'accept' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
     }
@@ -47,7 +47,7 @@ public class LogContextAspects {
     public void buildLogContextForScheduler(JoinPoint joinPoint) {
         FetchTask task = (FetchTask) joinPoint.getArgs()[0];
         CloudContext cloudContext = task.getAuthenticatedContext().getCloudContext();
-        MDCBuilder.buildMdcContext(String.valueOf(cloudContext.getStackId()), cloudContext.getStackName(), cloudContext.getOwner());
+        MDCBuilder.buildMdcContext(String.valueOf(cloudContext.getId()), cloudContext.getName(), cloudContext.getOwner());
         LOGGER.info("A SyncPollingScheduler's 'schedule' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
     }
 
@@ -55,7 +55,7 @@ public class LogContextAspects {
     public void buildLogContextForPollTask(JoinPoint joinPoint) {
         PollTask pollTask = (PollTask) joinPoint.getTarget();
         CloudContext cloudContext = pollTask.getAuthenticatedContext().getCloudContext();
-        MDCBuilder.buildMdcContext(String.valueOf(cloudContext.getStackId()), cloudContext.getStackName(), cloudContext.getOwner());
+        MDCBuilder.buildMdcContext(String.valueOf(cloudContext.getId()), cloudContext.getName(), cloudContext.getOwner());
         LOGGER.debug("A PollTask's 'call' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
     }
 }

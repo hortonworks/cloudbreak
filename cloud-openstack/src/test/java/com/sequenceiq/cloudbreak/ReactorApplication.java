@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 
 import reactor.Environment;
 import reactor.bus.Event;
@@ -133,10 +133,10 @@ public class ReactorApplication implements CommandLineRunner {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
         String ts = sdf.format(new Date());
 
-        CloudContext cloudContext = new CloudContext(0L, "stack-name_" + ts, "OPENSTACK", "TEST_USER");
+        CloudContext cloudContext = new CloudContext(0L, "stack-name_" + ts, "OPENSTACK", "owner");
 
         CloudStack cs = new CloudStack(groups, network, security, image, "local", new HashMap<String, String>());
-        LaunchStackRequest lr = new LaunchStackRequest(cloudContext, c, cs);
+        LaunchStackRequest lr = new LaunchStackRequest(cloudContext, c, cs, null, null);
         LOGGER.debug("Launchrequest: {}", lr);
         return lr;
 

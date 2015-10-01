@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.arm;
 
-import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.CORE;
-import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.GATEWAY;
+import static com.sequenceiq.cloudbreak.common.type.InstanceGroupType.CORE;
+import static com.sequenceiq.cloudbreak.common.type.InstanceGroupType.GATEWAY;
 import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
@@ -18,6 +18,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.domain.Stack;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = ArmFreemarkerConfiguration.class)
@@ -85,7 +87,9 @@ public class ArmTemplateBuilderTest {
     }
 
     private CloudContext createCloudContext() {
-        return new CloudContext(TestUtil.stack());
+        Stack stack = TestUtil.stack();
+        return new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(), stack.getCreated(),
+                stack.getRegion());
     }
 
     @Ignore

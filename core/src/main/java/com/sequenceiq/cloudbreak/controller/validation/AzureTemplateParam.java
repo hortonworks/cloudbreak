@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.domain.AzureVmType;
+import com.sequenceiq.cloudbreak.common.type.AzureVmType;
 
 public enum AzureTemplateParam implements TemplateParam {
 

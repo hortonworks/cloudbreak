@@ -14,9 +14,9 @@ import com.sequenceiq.cloudbreak.cloud.event.credential.DeleteCredentialResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.credential.OpenSshPublicKeyValidator;
@@ -47,8 +47,7 @@ public class ServiceProviderCredentialAdapter implements CredentialHandler<Crede
     @Override
     public Credential init(Credential credential) {
         rsaPublicKeyValidator.validate(credential);
-        CloudPlatform cloudPlatform = credential.cloudPlatform();
-        CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(), cloudPlatform.name(), credential.getOwner());
+        CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(), credential.cloudPlatform().name(), credential.getOwner());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
 
         CreateCredentialRequest createCredentialRequest = new CreateCredentialRequest(cloudContext, cloudCredential);
@@ -75,8 +74,7 @@ public class ServiceProviderCredentialAdapter implements CredentialHandler<Crede
 
     @Override
     public boolean delete(Credential credential) {
-        CloudPlatform cloudPlatform = credential.cloudPlatform();
-        CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(), cloudPlatform.name(), credential.getOwner());
+        CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(), credential.cloudPlatform().name(), credential.getOwner());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
 
         DeleteCredentialRequest deleteCredentialRequest = new DeleteCredentialRequest(cloudContext, cloudCredential);

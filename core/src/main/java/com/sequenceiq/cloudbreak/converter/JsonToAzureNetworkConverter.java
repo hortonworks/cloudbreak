@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.NetworkJson;
 import com.sequenceiq.cloudbreak.controller.validation.AzureNetworkParam;
 import com.sequenceiq.cloudbreak.domain.AzureNetwork;
-import com.sequenceiq.cloudbreak.domain.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 
 @Component
 public class JsonToAzureNetworkConverter extends AbstractConversionServiceAwareConverter<NetworkJson, AzureNetwork> {

@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.nativ.service.OpenStackResource
 import com.sequenceiq.cloudbreak.cloud.openstack.view.CinderVolumeView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NovaInstanceView;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackComputeResourceBuilder implements ComputeResourceBuilder<OpenStackContext> {
@@ -48,7 +48,7 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
         NovaInstanceView instanceView = new NovaInstanceView(template, group.getType());
         String groupName = group.getName();
         final CloudContext cloudContext = auth.getCloudContext();
-        final String stackName = cloudContext.getStackName();
+        final String stackName = cloudContext.getName();
         for (int i = 0; i < instanceView.getVolumes().size(); i++) {
             final String resourceName = resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, i);
             CloudResource resource = createNamedResource(resourceType(), resourceName);
@@ -124,7 +124,7 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
             Volume.Status volumeStatus = osVolume.getStatus();
             if (Volume.Status.ERROR == volumeStatus || Volume.Status.ERROR_DELETING == volumeStatus
                     || Volume.Status.ERROR_RESTORING == osVolume.getStatus()) {
-                throw new OpenStackResourceException("Volume in failed state", resource.getType(), resource.getName(), cloudContext.getStackId(),
+                throw new OpenStackResourceException("Volume in failed state", resource.getType(), resource.getName(), cloudContext.getId(),
                         volumeStatus.name());
             }
             return volumeStatus == Volume.Status.AVAILABLE;

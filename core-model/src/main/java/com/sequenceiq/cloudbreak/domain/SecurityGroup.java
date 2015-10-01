@@ -18,6 +18,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
+
 @Entity
 @Table(uniqueConstraints = {
         @UniqueConstraint(columnNames = { "account", "name" }),

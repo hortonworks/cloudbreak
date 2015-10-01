@@ -4,9 +4,9 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
-import com.sequenceiq.cloudbreak.domain.AwsInstanceType;
-import com.sequenceiq.cloudbreak.domain.AwsVolumeType;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.AwsInstanceType;
+import com.sequenceiq.cloudbreak.common.type.AwsVolumeType;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
 public class VolumeCountValidator implements ConstraintValidator<ValidVolume, TemplateRequest> {
 

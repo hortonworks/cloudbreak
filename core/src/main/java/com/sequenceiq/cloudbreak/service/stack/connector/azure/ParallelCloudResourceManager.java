@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
-import static com.sequenceiq.cloudbreak.domain.InstanceGroupType.isGateway;
+import static com.sequenceiq.cloudbreak.common.type.InstanceGroupType.isGateway;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,10 +25,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.google.common.primitives.Ints;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;

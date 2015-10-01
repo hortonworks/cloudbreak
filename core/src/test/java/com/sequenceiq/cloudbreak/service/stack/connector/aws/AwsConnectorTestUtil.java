@@ -4,13 +4,13 @@ import java.util.Set;
 
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AwsInstanceType;
+import com.sequenceiq.cloudbreak.common.type.AwsInstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.AwsVolumeType;
+import com.sequenceiq.cloudbreak.common.type.AwsVolumeType;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.service.stack.connector.ConnectorTestUtil;
 
 public class AwsConnectorTestUtil extends ConnectorTestUtil {

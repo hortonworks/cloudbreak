@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.controller.json;
 
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.InstanceGroupModelDescription;
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.InstanceMetaDataModelDescription;
-import com.sequenceiq.cloudbreak.domain.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 

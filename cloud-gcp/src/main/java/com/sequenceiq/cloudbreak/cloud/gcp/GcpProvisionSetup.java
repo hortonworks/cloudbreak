@@ -26,12 +26,12 @@ import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.StorageObject;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.domain.ImageStatusResult;
+import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
-import com.sequenceiq.cloudbreak.domain.ImageStatus;
+import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 
 @Service
 public class GcpProvisionSetup implements Setup {
@@ -44,12 +44,12 @@ public class GcpProvisionSetup implements Setup {
 
     @Override
     public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack) {
-        long stackId = authenticatedContext.getCloudContext().getStackId();
+        long stackId = authenticatedContext.getCloudContext().getId();
         CloudCredential credential = authenticatedContext.getCloudCredential();
         try {
             String projectId = getProjectId(credential);
             String imageName = stack.getImage().getImageName();
-            Storage storage = buildStorage(credential, authenticatedContext.getCloudContext().getStackName());
+            Storage storage = buildStorage(credential, authenticatedContext.getCloudContext().getName());
             Compute compute = buildCompute(credential);
             ImageList list = compute.images().list(projectId).execute();
             Long time = new Date().getTime();

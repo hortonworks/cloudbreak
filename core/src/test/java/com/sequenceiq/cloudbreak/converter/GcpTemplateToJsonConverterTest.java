@@ -8,7 +8,7 @@ import org.junit.Test;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.controller.json.TemplateResponse;
 import com.sequenceiq.cloudbreak.controller.validation.GcpTemplateParam;
-import com.sequenceiq.cloudbreak.domain.GcpInstanceType;
+import com.sequenceiq.cloudbreak.common.type.GcpInstanceType;
 import com.sequenceiq.cloudbreak.domain.GcpTemplate;
 
 public class GcpTemplateToJsonConverterTest extends AbstractEntityConverterTest<GcpTemplate> {

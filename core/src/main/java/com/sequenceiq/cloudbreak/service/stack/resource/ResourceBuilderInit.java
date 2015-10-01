@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack.resource;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
 public interface ResourceBuilderInit

@@ -12,7 +12,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.controller.validation.ValidPlugin;
-import com.sequenceiq.cloudbreak.domain.PluginExecutionType;
+import com.sequenceiq.cloudbreak.common.type.PluginExecutionType;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 

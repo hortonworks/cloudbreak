@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceExceptio
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class OpenStackSubnetResourceBuilder extends AbstractOpenStackNetworkResourceBuilder {

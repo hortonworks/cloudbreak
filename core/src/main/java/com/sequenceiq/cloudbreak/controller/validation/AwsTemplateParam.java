@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.controller.validation;
 
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.domain.AwsVolumeType;
+import com.sequenceiq.cloudbreak.common.type.AwsVolumeType;
 
 public enum AwsTemplateParam implements TemplateParam {
 

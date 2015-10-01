@@ -9,7 +9,7 @@ import com.google.common.util.concurrent.Striped;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.domain.CbUserRole;
+import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.repository.AccountPreferencesRepository;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;

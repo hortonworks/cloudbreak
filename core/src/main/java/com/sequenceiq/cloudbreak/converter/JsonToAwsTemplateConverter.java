@@ -5,11 +5,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.AwsTemplateParam;
-import com.sequenceiq.cloudbreak.domain.AwsEncryption;
-import com.sequenceiq.cloudbreak.domain.AwsInstanceType;
+import com.sequenceiq.cloudbreak.common.type.AwsEncryption;
+import com.sequenceiq.cloudbreak.common.type.AwsInstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.AwsVolumeType;
-import com.sequenceiq.cloudbreak.domain.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.type.AwsVolumeType;
+import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 
 @Component
 public class JsonToAwsTemplateConverter extends AbstractConversionServiceAwareConverter<TemplateRequest, AwsTemplate> {

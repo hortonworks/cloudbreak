@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class OpenStackRouterResourceBuilder extends AbstractOpenStackNetworkResourceBuilder {
@@ -72,7 +72,7 @@ public class OpenStackRouterResourceBuilder extends AbstractOpenStackNetworkReso
         if (osRouter != null && context.isBuild()) {
             State routerStatus = osRouter.getStatus();
             if (State.ERROR == routerStatus) {
-                throw new OpenStackResourceException("Router in failed state", resource.getType(), cloudContext.getStackName(), cloudContext.getStackId(),
+                throw new OpenStackResourceException("Router in failed state", resource.getType(), cloudContext.getName(), cloudContext.getId(),
                         resource.getName());
             }
             return routerStatus == State.ACTIVE;

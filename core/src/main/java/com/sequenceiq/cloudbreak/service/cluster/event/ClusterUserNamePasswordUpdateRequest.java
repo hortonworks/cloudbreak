@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.event;
 
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
 public class ClusterUserNamePasswordUpdateRequest {
 

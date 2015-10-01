@@ -24,8 +24,9 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.cloudbreak.domain.InstanceGroupType;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Component
 public class ParameterGenerator {
@@ -33,7 +34,7 @@ public class ParameterGenerator {
     private static final long STACK_ID = 5L;
 
     public CloudContext createCloudContext() {
-        return new CloudContext(STACK_ID, "teststack", "TESTCONNECTOR", "TESTVARIANT", "owner");
+        return new CloudContext(STACK_ID, "teststack", "TESTCONNECTOR", "owner", "TESTVARIANT", 0L, "region");
     }
 
     public CloudCredential createCloudCredential() {
@@ -90,7 +91,7 @@ public class ParameterGenerator {
     }
 
     public LaunchStackRequest createLaunchStackRequest() {
-        return new LaunchStackRequest(createCloudContext(), createCloudCredential(), createCloudStack());
+        return new LaunchStackRequest(createCloudContext(), createCloudCredential(), createCloudStack(), AdjustmentType.BEST_EFFORT, 0L);
     }
 
     public AuthenticatedContext createAuthenticatedContext() {
