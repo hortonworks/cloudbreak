@@ -30,6 +30,7 @@ public abstract class AbstractFileSystemConfigurator<T extends FileSystemConfigu
         String defaultFs = getDefaultFsValue(fsConfig);
         bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.defaultFS", defaultFs));
         bpConfigs.add(new BlueprintConfigurationEntry("hbase-site", "hbase.rootdir", defaultFs + "/apps/hbase/data"));
+        bpConfigs.add(new BlueprintConfigurationEntry("accumulo-site", "instance.volumes", defaultFs + "/apps/accumulo/data"));
         return bpConfigs;
     }
 
