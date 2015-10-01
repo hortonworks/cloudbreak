@@ -1,51 +1,154 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
+import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.Instance;
+import com.amazonaws.services.ec2.model.Reservation;
+import com.amazonaws.services.ec2.model.StartInstancesRequest;
+import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
-import com.sequenceiq.cloudbreak.cloud.model.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
 @Service
 public class AwsInstanceConnector implements InstanceConnector {
 
     @Inject
-    private AwsClient armClient;
+    private AwsClient awsClient;
 
     @Inject
-    private AwsMetadataCollector armMetadataCollector;
+    private AwsMetadataCollector awsMetadataCollector;
 
     @Override
     public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm) {
-        throw new CloudOperationNotSupportedException("Aws doesn't provide access to the VM console output yet.");
+        //implement a poller for consol output
+        /*ConsoleOutputContext consoleOutputContext = new ConsoleOutputContext(stack, gatewayId);
+        PollingResult pollingResult = consoleOutputPollingService
+                .pollWithTimeout(consoleOutputCheckerTask, consoleOutputContext, POLLING_INTERVAL, CONSOLE_OUTPUT_POLLING_ATTEMPTS);
+        if (PollingResult.isExited(pollingResult)) {
+            throw new CancellationException("Operation cancelled.");
+        } else if (PollingResult.isTimeout(pollingResult)) {
+            throw new AwsResourceException("Operation timed out: Couldn't get console output of gateway instance.");
+        }
+        AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(consoleOutputContext.getStack());
+        GetConsoleOutputRequest getConsoleOutputRequest = new GetConsoleOutputRequest().withInstanceId(gatewayId);
+        GetConsoleOutputResult getConsoleOutputResult = amazonEC2Client.getConsoleOutput(getConsoleOutputRequest);
+        String consoleOutput = getConsoleOutputResult.getDecodedOutput();
+
+        Set<String> result = GetSSHFingerprintsHandler.FingerprintParserUtil.parseFingerprints(consoleOutput);
+        if (result.isEmpty()) {
+            throw new AwsResourceException("Couldn't parse SSH fingerprint from console output.");
+        }*/
+        return "";
     }
 
     @Override
     public MetadataCollector metadata() {
-        return armMetadataCollector;
+        return awsMetadataCollector;
     }
 
     @Override
     public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
-        return new ArrayList<>();
+        List<CloudVmInstanceStatus> statuses = new ArrayList<>();
+        AmazonEC2Client amazonEC2Client = awsClient.createAccess(ac.getCloudCredential());
+
+        for (String group : getGroups(vms)) {
+            Collection<String> instances = new ArrayList<>();
+            Collection<CloudInstance> cloudInstances = new ArrayList<>();
+
+            for (CloudInstance vm : vms) {
+                if (vm.getTemplate().getGroupName().equals(group)) {
+                    instances.add(vm.getInstanceId());
+                    cloudInstances.add(vm);
+                }
+            }
+            try {
+                instances = removeInstanceIdsWhichAreNotInCorrectState(instances, amazonEC2Client, "Running");
+                amazonEC2Client.startInstances(new StartInstancesRequest().withInstanceIds(instances));
+                for (CloudInstance cloudInstance : cloudInstances) {
+                    statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS));
+                }
+            } catch (Exception e) {
+                for (CloudInstance cloudInstance : cloudInstances) {
+                    statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.FAILED, e.getMessage()));
+                }
+            }
+        }
+        return statuses;
     }
+
 
     @Override
     public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
-        return new ArrayList<>();
+        List<CloudVmInstanceStatus> statuses = new ArrayList<>();
+        AmazonEC2Client amazonEC2Client = awsClient.createAccess(ac.getCloudCredential());
+
+        for (String group : getGroups(vms)) {
+            Collection<String> instances = new ArrayList<>();
+            Collection<CloudInstance> cloudInstances = new ArrayList<>();
+
+            for (CloudInstance vm : vms) {
+                if (vm.getTemplate().getGroupName().equals(group)) {
+                    instances.add(vm.getInstanceId());
+                    cloudInstances.add(vm);
+                }
+            }
+            try {
+                instances = removeInstanceIdsWhichAreNotInCorrectState(instances, amazonEC2Client, "Stopped");
+                amazonEC2Client.stopInstances(new StopInstancesRequest().withInstanceIds(instances));
+                for (CloudInstance cloudInstance : cloudInstances) {
+                    statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS));
+                }
+            } catch (Exception e) {
+                for (CloudInstance cloudInstance : cloudInstances) {
+                    statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.FAILED, e.getMessage()));
+                }
+            }
+        }
+        return statuses;
     }
 
     @Override
     public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
         return new ArrayList<>();
     }
+
+    private Collection<String> removeInstanceIdsWhichAreNotInCorrectState(Collection<String> instances, AmazonEC2Client amazonEC2Client, String state) {
+        DescribeInstancesResult describeInstances = amazonEC2Client.describeInstances(
+                new DescribeInstancesRequest().withInstanceIds(instances));
+        for (Reservation reservation : describeInstances.getReservations()) {
+            for (Instance instance : reservation.getInstances()) {
+                if (state.equalsIgnoreCase(instance.getState().getName())) {
+                    instances.remove(instance.getInstanceId());
+                }
+            }
+        }
+        return instances;
+    }
+
+    private Set<String> getGroups(List<CloudInstance> vms) {
+        Set<String> groups = new HashSet<>();
+        for (CloudInstance vm : vms) {
+            if (!groups.contains(vm.getTemplate().getGroupName())) {
+                groups.add(vm.getTemplate().getGroupName());
+            }
+        }
+        return groups;
+    }
+
 }
