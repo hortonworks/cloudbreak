@@ -7,8 +7,9 @@ import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 public interface ResourceContextBuilder<C extends ResourceBuilderContext> extends CloudPlatformAware {
-    C contextInit(CloudContext cloudContext, AuthenticatedContext auth, boolean build);
-    C terminationContextInit(CloudContext cloudContext, AuthenticatedContext auth, List<CloudResource> resources);
+    C contextInit(CloudContext cloudContext, AuthenticatedContext auth, CloudStack cloudStack, boolean build);
+    C terminationContextInit(CloudContext cloudContext, AuthenticatedContext auth, CloudStack cloudStack, List<CloudResource> resources);
 }

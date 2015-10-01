@@ -29,7 +29,7 @@ public class StopStackComponentTest extends AbstractComponentTest<StopInstancesR
     }
 
     protected CloudPlatformRequest getRequest() {
-        return new StopInstancesRequest(g().createCloudContext(), g().createCloudCredential(),
+        return new StopInstancesRequest(g().createCloudContext(), g().createCloudCredential(), g().createCloudStack(),
                 g().createCloudResourceList(), g().createCloudInstanceTemplates());
     }
 }

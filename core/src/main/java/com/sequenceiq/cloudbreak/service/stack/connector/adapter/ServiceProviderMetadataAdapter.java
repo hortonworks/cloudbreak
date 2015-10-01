@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
@@ -67,9 +68,11 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
                 stack.getCreated(), stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        CloudStack cloudStack = cloudStackConverter.convert(stack);
         List<InstanceTemplate> instanceTemplates = cloudStackConverter.buildInstanceTemplates(stack);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
-        CollectMetadataRequest<CollectMetadataResult> cmr = new CollectMetadataRequest<>(cloudContext, cloudCredential, cloudResources, instanceTemplates);
+        CollectMetadataRequest<CollectMetadataResult> cmr = new CollectMetadataRequest<>(cloudContext, cloudCredential, cloudStack, cloudResources,
+                instanceTemplates);
         LOGGER.info("Triggering event: {}", cmr);
         eventBus.notify(cmr.selector(CollectMetadataRequest.class), Event.wrap(cmr));
         try {
@@ -91,9 +94,11 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
                 stack.getCreated(), stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        CloudStack cloudStack = cloudStackConverter.convert(stack);
         List<InstanceTemplate> instanceTemplates = getNewInstanceTemplates(stack);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
-        CollectMetadataRequest<CollectMetadataResult> cmr = new CollectMetadataRequest<>(cloudContext, cloudCredential, cloudResources, instanceTemplates);
+        CollectMetadataRequest<CollectMetadataResult> cmr = new CollectMetadataRequest<>(cloudContext, cloudCredential, cloudStack, cloudResources,
+                instanceTemplates);
         LOGGER.info("Triggering event: {}", cmr);
         eventBus.notify(cmr.selector(CollectMetadataRequest.class), Event.wrap(cmr));
         try {
@@ -112,9 +117,6 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
 
     @Override
     public InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId) {
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
-                stack.getCreated(), stack.getRegion());
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         InstanceGroup ig = stack.getInstanceGroupByInstanceGroupName(instanceGroup.getGroupName());
         CloudInstance instance = null;
         for (InstanceMetaData metaData : ig.getAllInstanceMetaData()) {
@@ -124,8 +126,12 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
             }
         }
         if (instance != null) {
+            CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(),
+                    stack.getPlatformVariant(), stack.getCreated(), stack.getRegion());
+            CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+            CloudStack cloudStack = cloudStackConverter.convert(stack);
             GetInstancesStateRequest<GetInstancesStateResult> stateRequest =
-                    new GetInstancesStateRequest<>(cloudContext, cloudCredential, asList(instance));
+                    new GetInstancesStateRequest<>(cloudContext, cloudCredential, cloudStack, asList(instance));
             LOGGER.info("Triggering event: {}", stateRequest);
             eventBus.notify(stateRequest.selector(), Event.wrap(stateRequest));
             try {

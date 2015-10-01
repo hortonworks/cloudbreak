@@ -2,19 +2,21 @@ package com.sequenceiq.cloudbreak.cloud.event.instance;
 
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
+import com.sequenceiq.cloudbreak.cloud.event.StackPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
-public class StartInstancesRequest extends CloudPlatformRequest<StartInstancesResult> {
+public class StartInstancesRequest extends StackPlatformRequest<StartInstancesResult> {
 
-    private List<CloudInstance> cloudInstances;
-    private List<CloudResource> resources;
+    private final List<CloudInstance> cloudInstances;
+    private final List<CloudResource> resources;
 
-    public StartInstancesRequest(CloudContext cloudContext, CloudCredential credential, List<CloudResource> resources, List<CloudInstance> cloudInstances) {
-        super(cloudContext, credential);
+    public StartInstancesRequest(CloudContext cloudContext, CloudCredential credential, CloudStack cloudStack, List<CloudResource> resources,
+            List<CloudInstance> cloudInstances) {
+        super(cloudContext, credential, cloudStack);
         this.cloudInstances = cloudInstances;
         this.resources = resources;
     }
