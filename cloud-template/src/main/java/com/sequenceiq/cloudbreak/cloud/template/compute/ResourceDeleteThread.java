@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
+import com.sequenceiq.cloudbreak.common.type.CommonStatus;
 
 @Component(ResourceDeleteThread.NAME)
 @Scope(value = "prototype")
@@ -55,13 +56,15 @@ public class ResourceDeleteThread implements Callable<ResourceRequestResult<List
     @Override
     public ResourceRequestResult<List<CloudResourceStatus>> call() throws Exception {
         LOGGER.info("Deleting compute resource {}", resource);
-        CloudResource deletedResource = builder.delete(context, auth, resource);
-        if (deletedResource != null) {
-            PollTask<List<CloudResourceStatus>> task = statusCheckFactory
-                    .newPollResourceTask(builder, auth, asList(deletedResource), context, cancellable);
-            List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
-            deleteResource();
-            return new ResourceRequestResult<>(FutureResult.SUCCESS, pollerResult);
+        if (resource.getStatus() == CommonStatus.CREATED) {
+            CloudResource deletedResource = builder.delete(context, auth, resource);
+            if (deletedResource != null) {
+                PollTask<List<CloudResourceStatus>> task = statusCheckFactory
+                        .newPollResourceTask(builder, auth, asList(deletedResource), context, cancellable);
+                List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
+                deleteResource();
+                return new ResourceRequestResult<>(FutureResult.SUCCESS, pollerResult);
+            }
         }
         deleteResource();
         CloudResourceStatus status = new CloudResourceStatus(resource, ResourceStatus.DELETED);
