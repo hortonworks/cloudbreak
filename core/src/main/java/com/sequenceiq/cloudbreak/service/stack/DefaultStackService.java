@@ -21,7 +21,6 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.InstanceGroupAdjustmentJson;
@@ -90,8 +89,6 @@ public class DefaultStackService implements StackService {
     private CloudbreakMessagesService cloudbreakMessagesService;
     @Inject
     private CloudPlatformResolver platformResolver;
-    @Inject
-    private PlatformVariantService platformVariantService;
 
     private enum Msg {
         STACK_STOP_IGNORED("stack.stop.ignored"),
@@ -229,11 +226,6 @@ public class DefaultStackService implements StackService {
 
     private void setPlatformVariant(Stack stack) {
         stack.setPlatformVariant(platformResolver.connector(stack.cloudPlatform()).checkAndGetPlatformVariant(stack));
-    }
-
-    @Override
-    public PlatformVariants getPlatformVariants() {
-        return platformVariantService.getPlatformVariants();
     }
 
     @Override
