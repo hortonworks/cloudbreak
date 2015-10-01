@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
@@ -25,17 +26,17 @@ public class OpenStackContextBuilder implements ResourceContextBuilder<OpenStack
     private OpenStackClient openStackClient;
 
     @Override
-    public OpenStackContext contextInit(CloudContext cloudContext, AuthenticatedContext auth, boolean build) {
+    public OpenStackContext contextInit(CloudContext cloudContext, AuthenticatedContext auth, CloudStack cloudStack, boolean build) {
         OSClient osClient = openStackClient.createOSClient(auth);
         KeystoneCredentialView credentialView = new KeystoneCredentialView(auth.getCloudCredential());
-        OpenStackContext openStackContext = initContext(cloudContext, build);
+        OpenStackContext openStackContext = initContext(cloudContext, cloudStack, build);
         openStackContext.putParameter(OpenStackConstants.TENANT_ID, osClient.identity().tenants().getByName(credentialView.getTenantName()).getId());
         return openStackContext;
     }
 
     @Override
-    public OpenStackContext terminationContextInit(CloudContext cloudContext, AuthenticatedContext auth, List<CloudResource> resources) {
-        OpenStackContext osContext = initContext(cloudContext, false);
+    public OpenStackContext terminationContextInit(CloudContext cloudContext, AuthenticatedContext auth, CloudStack cloudStack, List<CloudResource> resources) {
+        OpenStackContext osContext = initContext(cloudContext, cloudStack, false);
         for (CloudResource resource : resources) {
             if (resource.getType().equals(ResourceType.OPENSTACK_SUBNET)) {
                 osContext.putParameter(OpenStackConstants.SUBNET_ID, resource.getReference());
@@ -45,8 +46,8 @@ public class OpenStackContextBuilder implements ResourceContextBuilder<OpenStack
         return osContext;
     }
 
-    private OpenStackContext initContext(CloudContext context, boolean build) {
-        return new OpenStackContext(context.getName(), context.getRegion(), PARALLEL_RESOURCE_REQUEST, build);
+    private OpenStackContext initContext(CloudContext context, CloudStack cloudStack, boolean build) {
+        return new OpenStackContext(context.getName(), cloudStack.getRegion(), PARALLEL_RESOURCE_REQUEST, build);
     }
 
     @Override

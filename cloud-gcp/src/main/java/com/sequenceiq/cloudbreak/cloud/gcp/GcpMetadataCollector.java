@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -32,10 +33,10 @@ public class GcpMetadataCollector implements MetadataCollector {
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpMetadataCollector.class);
 
     @Override
-    public List<CloudVmInstanceStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<InstanceTemplate> vms) {
+    public List<CloudVmInstanceStatus> collect(AuthenticatedContext auth, CloudStack cloudStack, List<CloudResource> resources, List<InstanceTemplate> vms) {
         List<CloudVmInstanceStatus> instanceMetaData = new ArrayList<>();
-        CloudCredential credential = authenticatedContext.getCloudCredential();
-        CloudContext cloudContext = authenticatedContext.getCloudContext();
+        CloudCredential credential = auth.getCloudCredential();
+        CloudContext cloudContext = auth.getCloudContext();
         Compute compute = GcpStackUtil.buildCompute(credential);
         Map<String, InstanceTemplate> templateMap = groupByInstanceName(resources, vms);
         for (CloudResource resource : resources) {
@@ -44,7 +45,7 @@ public class GcpMetadataCollector implements MetadataCollector {
                     String resourceName = resource.getName();
                     InstanceTemplate template = templateMap.get(resourceName);
                     if (template != null) {
-                        Instance executeInstance = getInstance(cloudContext, credential, compute, resourceName);
+                        Instance executeInstance = getInstance(cloudContext, credential, cloudStack, compute, resourceName);
                         CloudInstanceMetaData metaData = new CloudInstanceMetaData(
                                 executeInstance.getNetworkInterfaces().get(0).getNetworkIP(),
                                 executeInstance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP());
@@ -76,9 +77,10 @@ public class GcpMetadataCollector implements MetadataCollector {
         return templateMap;
     }
 
-    private Instance getInstance(CloudContext context, CloudCredential credential, Compute compute, String instanceName) throws IOException {
+    private Instance getInstance(CloudContext context, CloudCredential credential, CloudStack cloudStack, Compute compute, String instanceName)
+            throws IOException {
         return compute.instances().get(GcpStackUtil.getProjectId(credential),
-                CloudRegion.valueOf(context.getRegion()).value(), instanceName).execute();
+                CloudRegion.valueOf(cloudStack.getRegion()).value(), instanceName).execute();
     }
 
 }
