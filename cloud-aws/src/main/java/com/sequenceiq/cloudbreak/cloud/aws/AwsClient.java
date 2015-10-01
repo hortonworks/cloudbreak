@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
+import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
@@ -30,4 +32,33 @@ public class AwsClient {
         //amazonEC2Client.setRegion(Region.getRegion(regions));
         return null;
     }
+
+    public AmazonCloudFormationClient createCloudFormationClient(CloudCredential credential) {
+        AwsCredentialView awsCredential = new AwsCredentialView(credential);
+        return createCloudFormationClient(awsCredential);
+    }
+
+    public AmazonCloudFormationClient createCloudFormationClient(AwsCredentialView armCredential) {
+       /* BasicSessionCredentials basicSessionCredentials = credentialsProvider
+                .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
+                        credentialsProvider.getExternalId(), credential);
+        AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
+        amazonCloudFormationClient.setRegion(Region.getRegion(regions));*/
+        return null;
+    }
+
+    public AmazonAutoScalingClient createAutoScalingClient(CloudCredential credential) {
+        AwsCredentialView awsCredential = new AwsCredentialView(credential);
+        return createAutoScalingClient(awsCredential);
+    }
+
+    public AmazonAutoScalingClient createAutoScalingClient(AwsCredentialView armCredential) {
+        /*BasicSessionCredentials basicSessionCredentials = credentialsProvider
+                .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
+                        credentialsProvider.getExternalId(), credential);
+        AmazonAutoScalingClient amazonAutoScalingClient = new AmazonAutoScalingClient(basicSessionCredentials);
+        amazonAutoScalingClient.setRegion(Region.getRegion(regions));*/
+        return null;
+    }
+
 }
