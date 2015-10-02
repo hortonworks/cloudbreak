@@ -14,20 +14,20 @@ import org.springframework.stereotype.Service;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Instance;
-import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractInstanceConnector;
+import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 
 @Service
-public class GcpInstanceConnector extends AbstractInstanceConnector implements InstanceConnector {
+public class GcpInstanceConnector extends AbstractInstanceConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpInstanceConnector.class);
 
@@ -40,7 +40,7 @@ public class GcpInstanceConnector extends AbstractInstanceConnector implements I
     }
 
     @Override
-    public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
+    public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, CloudStack cloudStack, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
         CloudCredential credential = ac.getCloudCredential();
         CloudContext cloudContext = ac.getCloudContext();
@@ -48,7 +48,7 @@ public class GcpInstanceConnector extends AbstractInstanceConnector implements I
         for (CloudInstance instance : vms) {
             InstanceStatus status = InstanceStatus.UNKNOWN;
             try {
-                Instance executeInstance = getInstance(cloudContext, credential, compute, instance.getInstanceId());
+                Instance executeInstance = getInstance(cloudContext, credential, cloudStack, compute, instance.getInstanceId());
                 if ("RUNNING".equals(executeInstance.getStatus())) {
                     status = InstanceStatus.STARTED;
                 } else if ("TERMINATED".equals(executeInstance.getStatus())) {
@@ -69,20 +69,21 @@ public class GcpInstanceConnector extends AbstractInstanceConnector implements I
     }
 
     @Override
-    public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm) {
+    public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudStack cloudStack, CloudInstance vm) {
         CloudCredential credential = authenticatedContext.getCloudCredential();
         try {
             Compute.Instances.GetSerialPortOutput instanceGet = GcpStackUtil.buildCompute(credential).instances()
                     .getSerialPortOutput(GcpStackUtil.getProjectId(credential),
-                            CloudRegion.valueOf(authenticatedContext.getCloudContext().getRegion()).value(), vm.getInstanceId());
+                            CloudRegion.valueOf(cloudStack.getRegion()).value(), vm.getInstanceId());
             return instanceGet.execute().getContents();
         } catch (Exception e) {
             throw new GcpResourceException("Couldn't parse SSH fingerprint from console output.", e);
         }
     }
 
-    private Instance getInstance(CloudContext context, CloudCredential credential, Compute compute, String instanceName) throws IOException {
+    private Instance getInstance(CloudContext context, CloudCredential credential, CloudStack cloudStack, Compute compute, String instanceName)
+            throws IOException {
         return compute.instances().get(GcpStackUtil.getProjectId(credential),
-                CloudRegion.valueOf(context.getRegion()).value(), instanceName).execute();
+                CloudRegion.valueOf(cloudStack.getRegion()).value(), instanceName).execute();
     }
 }

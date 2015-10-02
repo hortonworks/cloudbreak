@@ -47,10 +47,10 @@ public class GetSSHFingerprintsComponentTest extends AbstractComponentTest<GetSS
 
     @Override
     protected CloudPlatformRequest getRequest() {
-        return new GetSSHFingerprintsRequest(g().createCloudContext(), g().createCloudCredential(), instance);
+        return new GetSSHFingerprintsRequest(g().createCloudContext(), g().createCloudCredential(), instance, g().createCloudStack());
     }
 
     protected CloudPlatformRequest getBadRequest() {
-        return new GetSSHFingerprintsRequest(g().createCloudContext(), g().createCloudCredential(), instanceBad);
+        return new GetSSHFingerprintsRequest(g().createCloudContext(), g().createCloudCredential(), instanceBad, g().createCloudStack());
     }
 }

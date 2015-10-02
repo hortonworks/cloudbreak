@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,14 +110,15 @@ public class ArmUtils {
 
     public String getStorageName(CloudCredential cloudCredential, CloudContext cloudContext, String region) {
         String result;
+        ArmCredentialView acv = new ArmCredentialView(cloudCredential);
+        String subscriptionIdPart = acv.getSubscriptionId().replaceAll("-", "").toLowerCase();
         if (isPersistentStorage()) {
-            ArmCredentialView acv = new ArmCredentialView(cloudCredential);
-            String subscriptionIdPart = acv.getSubscriptionId().replaceAll("-", "").toLowerCase();
             String regionInitials = WordUtils.initials(region, '_').toLowerCase();
             result = String.format("%s%s%s", persistentStorage, regionInitials, subscriptionIdPart).substring(0, MAX_LENGTH_OF_RESOURCE_NAME);
             LOGGER.info("Storage account name: {}", result);
         } else {
-            result = cloudContext.getName().toLowerCase().replaceAll("\\s+|-", "") + cloudContext.getId() + cloudContext.getCreated();
+            String en = Base64.encodeBase64String((subscriptionIdPart + cloudContext.getId() + cloudCredential.getId() + cloudCredential.getName()).getBytes());
+            result = cloudContext.getName().toLowerCase().replaceAll("\\s+|-", "") + en;
         }
         if (result.length() > MAX_LENGTH_OF_RESOURCE_NAME) {
             return result.substring(result.length() - MAX_LENGTH_OF_RESOURCE_NAME, result.length());
