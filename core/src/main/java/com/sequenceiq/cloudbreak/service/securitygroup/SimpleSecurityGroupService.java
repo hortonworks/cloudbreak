@@ -10,14 +10,15 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
+import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
@@ -26,7 +27,10 @@ public class SimpleSecurityGroupService implements SecurityGroupService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleSecurityGroupService.class);
 
     @Inject
-    private SecurityGroupRepository repository;
+    private SecurityGroupRepository groupRepository;
+
+    @Inject
+    private SecurityRuleRepository ruleRepository;
 
     @Inject
     private StackRepository stackRepository;
@@ -37,7 +41,9 @@ public class SimpleSecurityGroupService implements SecurityGroupService {
         securityGroup.setOwner(user.getUserId());
         securityGroup.setAccount(user.getAccount());
         try {
-            return repository.save(securityGroup);
+            SecurityGroup persistedSecurityGroup = groupRepository.save(securityGroup);
+            ruleRepository.save(securityGroup.getSecurityRules());
+            return persistedSecurityGroup;
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(APIResourceType.SECURITY_GROUP, securityGroup.getName(), ex);
         }
@@ -46,7 +52,7 @@ public class SimpleSecurityGroupService implements SecurityGroupService {
     @Override
     @PostAuthorize("hasPermission(returnObject,'read')")
     public SecurityGroup get(Long id) {
-        SecurityGroup securityGroup = repository.findById(id);
+        SecurityGroup securityGroup = groupRepository.findById(id);
         if (securityGroup == null) {
             throw new NotFoundException(String.format("SecurityGroup '%s' not found", id));
         }
@@ -55,7 +61,7 @@ public class SimpleSecurityGroupService implements SecurityGroupService {
 
     @Override
     public SecurityGroup getPrivateSecurityGroup(String name, CbUser user) {
-        SecurityGroup securityGroup = repository.findByNameForUser(name, user.getUserId());
+        SecurityGroup securityGroup = groupRepository.findByNameForUser(name, user.getUserId());
         if (securityGroup == null) {
             throw new NotFoundException(String.format("SecurityGroup '%s' not found for user", name));
         }
@@ -64,7 +70,7 @@ public class SimpleSecurityGroupService implements SecurityGroupService {
 
     @Override
     public SecurityGroup getPublicSecurityGroup(String name, CbUser user) {
-        SecurityGroup securityGroup = repository.findByNameInAccount(name, user.getAccount());
+        SecurityGroup securityGroup = groupRepository.findByNameInAccount(name, user.getAccount());
         if (securityGroup == null) {
             throw new NotFoundException(String.format("SecurityGroup '%s' not found in account", name));
         }
@@ -84,7 +90,7 @@ public class SimpleSecurityGroupService implements SecurityGroupService {
     @Override
     public void delete(String name, CbUser user) {
         LOGGER.info("Deleting SecurityGroup with name: {}", name);
-        SecurityGroup securityGroup = repository.findByNameInAccount(name, user.getAccount());
+        SecurityGroup securityGroup = groupRepository.findByNameInAccount(name, user.getAccount());
         if (securityGroup == null) {
             throw new NotFoundException(String.format("SecurityGroup '%s' not found.", name));
         }
@@ -93,15 +99,15 @@ public class SimpleSecurityGroupService implements SecurityGroupService {
 
     @Override
     public Set<SecurityGroup> retrievePrivateSecurityGroups(CbUser user) {
-        return repository.findForUser(user.getUserId());
+        return groupRepository.findForUser(user.getUserId());
     }
 
     @Override
     public Set<SecurityGroup> retrieveAccountSecurityGroups(CbUser user) {
         if (user.getRoles().contains(CbUserRole.ADMIN)) {
-            return repository.findAllInAccount(user.getAccount());
+            return groupRepository.findAllInAccount(user.getAccount());
         } else {
-            return repository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
+            return groupRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
         }
     }
 
@@ -111,10 +117,10 @@ public class SimpleSecurityGroupService implements SecurityGroupService {
                 throw new BadRequestException("Public SecurityGroups can only be deleted by owners or account admins.");
             } else {
                 if (ResourceStatus.USER_MANAGED.equals(securityGroup.getStatus())) {
-                    repository.delete(securityGroup);
+                    groupRepository.delete(securityGroup);
                 } else {
                     securityGroup.setStatus(ResourceStatus.DEFAULT_DELETED);
-                    repository.save(securityGroup);
+                    groupRepository.save(securityGroup);
                 }
             }
         } else {

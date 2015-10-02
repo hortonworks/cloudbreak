@@ -12,12 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
-import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 import com.sequenceiq.cloudbreak.service.network.Port;
 
@@ -27,11 +26,10 @@ public class DefaultSecurityGroupCreator {
     private static final String TCP_PROTOCOL = "tcp";
 
     @Inject
-    private SecurityGroupRepository groupRepository;
+    private SecurityGroupService securityGroupService;
 
     @Inject
-    private SecurityRuleRepository ruleRepository;
-
+    private SecurityGroupRepository groupRepository;
 
     public Set<SecurityGroup> createDefaultSecurityGroups(CbUser user) {
         Set<SecurityGroup> securityGroups = new HashSet<>();
@@ -50,9 +48,7 @@ public class DefaultSecurityGroupCreator {
         SecurityGroup onlySshAndSsl = createSecurityGroup(user, "only-ssh-and-ssl", "Open ports: 22 (SSH) 443 (HTTPS)");
         SecurityRule sshAndSslRule = createSecurityRule("22,443", onlySshAndSsl);
         onlySshAndSsl.setSecurityRules(new HashSet<>(Arrays.asList(sshAndSslRule)));
-        groupRepository.save(onlySshAndSsl);
-        ruleRepository.save(sshAndSslRule);
-        securityGroups.add(onlySshAndSsl);
+        securityGroups.add(securityGroupService.create(user, onlySshAndSsl));
 
         //create default security group which opens all of the known services' ports
         String allPortsOpenDesc = "Open ports: 8080 (Ambari) 8500 (Consul) 50070 (NN) 8088 (RM Web) 8030(RM Scheduler) 8050(RM IPC) "
@@ -62,9 +58,7 @@ public class DefaultSecurityGroupCreator {
         SecurityGroup allServicesPort = createSecurityGroup(user, "all-services-port", allPortsOpenDesc);
         SecurityRule allPortsRule = createSecurityRule(concatenateAllPortsKnownByCloudbreak(), allServicesPort);
         allServicesPort.setSecurityRules(new HashSet<>(Arrays.asList(allPortsRule)));
-        groupRepository.save(allServicesPort);
-        ruleRepository.save(allPortsRule);
-        securityGroups.add(allServicesPort);
+        securityGroups.add(securityGroupService.create(user, allServicesPort));
 
         return securityGroups;
     }
