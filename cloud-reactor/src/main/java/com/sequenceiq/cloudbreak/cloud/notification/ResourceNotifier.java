@@ -18,7 +18,7 @@ import reactor.rx.Promise;
 import reactor.rx.Promises;
 
 @Component
-public class ResourceNotifier implements PersistenceNotifier<ResourcePersisted> {
+public class ResourceNotifier implements PersistenceNotifier<CloudResource, ResourcePersisted> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceNotifier.class);
 
     @Inject
@@ -29,7 +29,7 @@ public class ResourceNotifier implements PersistenceNotifier<ResourcePersisted> 
         Promise<ResourcePersisted> promise = Promises.prepare();
         ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext.getId(), promise, ResourceNotificationType.CREATE);
         LOGGER.info("Sending resource allocation notification: {}, context: {}", notification, cloudContext);
-        eventBus.notify("resource-persisted", Event.wrap(notification));
+        eventBus.notify(topic(), Event.wrap(notification));
         return promise;
     }
 
@@ -47,7 +47,12 @@ public class ResourceNotifier implements PersistenceNotifier<ResourcePersisted> 
         Promise<ResourcePersisted> promise = Promises.prepare();
         ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext.getId(), promise, ResourceNotificationType.DELETE);
         LOGGER.info("Sending resource deletion notification: {}, context: {}", notification, cloudContext);
-        eventBus.notify("resource-persisted", Event.wrap(notification));
+        eventBus.notify(topic(), Event.wrap(notification));
         return promise;
+    }
+
+    @Override
+    public String topic() {
+        return "resource-persisted";
     }
 }

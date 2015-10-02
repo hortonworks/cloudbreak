@@ -31,25 +31,20 @@ import com.amazonaws.services.cloudformation.model.OnFailure;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.ec2.AmazonEC2Client;
-import com.amazonaws.services.ec2.model.Address;
 import com.amazonaws.services.ec2.model.AllocateAddressRequest;
 import com.amazonaws.services.ec2.model.AllocateAddressResult;
 import com.amazonaws.services.ec2.model.AssociateAddressRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeResult;
-import com.amazonaws.services.ec2.model.DescribeAddressesRequest;
-import com.amazonaws.services.ec2.model.DescribeAddressesResult;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
 import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
 import com.amazonaws.services.ec2.model.DescribeSnapshotsRequest;
 import com.amazonaws.services.ec2.model.DescribeSnapshotsResult;
-import com.amazonaws.services.ec2.model.DisassociateAddressRequest;
 import com.amazonaws.services.ec2.model.DomainType;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.Image;
-import com.amazonaws.services.ec2.model.ReleaseAddressRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -71,7 +66,7 @@ import com.sequenceiq.cloudbreak.common.type.AwsEncryption;
 import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
-import com.sequenceiq.cloudbreak.domain.Resource;
+//import com.sequenceiq.cloudbreak.domain.Resource;
 
 @Service
 public class AwsResourceConnector implements ResourceConnector {
@@ -79,20 +74,20 @@ public class AwsResourceConnector implements ResourceConnector {
     private static final String CLOUDBREAK_EBS_SNAPSHOT = "cloudbreak-ebs-snapshot";
     private static final int SNAPSHOT_VOLUME_SIZE = 10;
 
+    private static final List<String> SUSPENDED_PROCESSES = Arrays.asList("Launch", "HealthCheck", "ReplaceUnhealthy", "AZRebalance", "AlarmNotification",
+            "ScheduledActions", "AddToLoadBalancer", "RemoveFromLoadBalancerLowPriority");
     @Inject
     private AwsClient awsClient;
     @Inject
     private CloudFormationStackUtil cfStackUtil;
     @Inject
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
+
     @Inject
     private CloudFormationTemplateBuilder cloudFormationTemplateBuilder;
 
     @Value("${cb.aws.cf.template.path:" + CB_AWS_CF_TEMPLATE_PATH + "}")
     private String awsCloudformationTemplatePath;
-
-    private static final List<String> SUSPENDED_PROCESSES = Arrays.asList("Launch", "HealthCheck", "ReplaceUnhealthy", "AZRebalance", "AlarmNotification",
-            "ScheduledActions", "AddToLoadBalancer", "RemoveFromLoadBalancerLowPriority");
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier notifier,
@@ -219,7 +214,8 @@ public class AwsResourceConnector implements ResourceConnector {
                     .withSize(SNAPSHOT_VOLUME_SIZE)
                     .withAvailabilityZone(availabilityZonesResult.getAvailabilityZones().get(0).getZoneName())
                     .withEncrypted(true));
-           /* EbsVolumeContext ebsVolumeContext = new EbsVolumeContext(stack, volumeResult.getVolume().getVolumeId());
+            /*
+            EbsVolumeContext ebsVolumeContext = new EbsVolumeContext(stack, volumeResult.getVolume().getVolumeId());
             PollingResult pollingResult = ebsVolumeStatePollingService
                     .pollWithTimeout(ebsVolumeStateCheckerTask, ebsVolumeContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
             if (PollingResult.isSuccess(pollingResult)) {
@@ -256,8 +252,8 @@ public class AwsResourceConnector implements ResourceConnector {
 
     public boolean isExistingVPC(Network network) {
         return network.getStringParameter("subnetCIDR") != null
-             && network.getStringParameter("vpcId") != null
-             && network.getStringParameter("internetGatewayId") != null;
+                && network.getStringParameter("vpcId") != null
+                && network.getStringParameter("internetGatewayId") != null;
     }
 
 
@@ -303,9 +299,10 @@ public class AwsResourceConnector implements ResourceConnector {
             releaseReservedIp(stack, amazonEC2Client);
             LOGGER.info("No CloudFormation stack saved for stack.");
         }
+        /*
         for (CloudResource resource : resources) {
 
-        }
+        }*/
 
         return check(ac, resources);
     }
@@ -341,6 +338,7 @@ public class AwsResourceConnector implements ResourceConnector {
     }
 
     private void releaseReservedIp(CloudStack stack, AmazonEC2Client client) {
+        /*
         Resource elasticIpResource = new Resource(); //= stack.getResourceByType(ResourceType.AWS_RESERVED_IP);
         if (elasticIpResource != null && elasticIpResource.getResourceName() != null) {
             Address address;
@@ -360,7 +358,7 @@ public class AwsResourceConnector implements ResourceConnector {
                 client.disassociateAddress(new DisassociateAddressRequest().withAssociationId(elasticIpResource.getResourceName()));
             }
             client.releaseAddress(new ReleaseAddressRequest().withAllocationId(elasticIpResource.getResourceName()));
-        }
+        }*/
     }
 
     @Override
@@ -370,28 +368,28 @@ public class AwsResourceConnector implements ResourceConnector {
 
     @Override
     public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
-       // InstanceGroup instanceGroupByInstanceGroupName = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
-       // Integer requiredInstances = instanceGroupByInstanceGroupName.getNodeCount() + instanceCount;
+        // InstanceGroup instanceGroupByInstanceGroupName = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
+        // Integer requiredInstances = instanceGroupByInstanceGroupName.getNodeCount() + instanceCount;
 
         resumeAutoScaling(authenticatedContext, stack, resources.get(0));
 
         //AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(authenticatedContext.getCloudCredential());
         //String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, instanceGroup);
 
-       // amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
-       //         .withAutoScalingGroupName(asGroupName)
-       //         .withMaxSize(requiredInstances)
-       //         .withDesiredCapacity(requiredInstances));
-       // LOGGER.info("Updated Auto Scaling group's desiredCapacity: [stack: '{}', from: '{}', to: '{}']", stack.getId(),
-       //         instanceGroupByInstanceGroupName.getNodeCount(),
-       //         instanceGroupByInstanceGroupName.getNodeCount() + instanceCount);
-       // AutoScalingGroupReadyContext asGroupReady = new AutoScalingGroupReadyContext(stack, asGroupName, requiredInstances);
-       // LOGGER.info("Polling Auto Scaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
-       // PollingResult pollingResult = autoScalingGroupReadyPollingService
-       //         .pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-       // if (!isSuccess(pollingResult)) {
-       //     throw new AwsResourceException("Failed to create CloudFormation stack, because polling reached an invalid end state.");
-       // }
+        // amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
+        //         .withAutoScalingGroupName(asGroupName)
+        //         .withMaxSize(requiredInstances)
+        //         .withDesiredCapacity(requiredInstances));
+        // LOGGER.info("Updated Auto Scaling group's desiredCapacity: [stack: '{}', from: '{}', to: '{}']", stack.getId(),
+        //         instanceGroupByInstanceGroupName.getNodeCount(),
+        //         instanceGroupByInstanceGroupName.getNodeCount() + instanceCount);
+        // AutoScalingGroupReadyContext asGroupReady = new AutoScalingGroupReadyContext(stack, asGroupName, requiredInstances);
+        // LOGGER.info("Polling Auto Scaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
+        // PollingResult pollingResult = autoScalingGroupReadyPollingService
+        //         .pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+        // if (!isSuccess(pollingResult)) {
+        //     throw new AwsResourceException("Failed to create CloudFormation stack, because polling reached an invalid end state.");
+        // }
         suspendAutoScaling(authenticatedContext, stack, resources.get(0));
         return Collections.emptyList();
     }

@@ -23,6 +23,7 @@ public class AwsMetadataCollector implements MetadataCollector {
         /*List<CloudVmInstanceStatus> results = new ArrayList<>();
         List<CloudInstance> cloudInstances = new ArrayList<>();
 
+        /*
         try {
             Set<CoreInstanceMetaData> coreInstanceMetadata = new HashSet<>();
             AwsCredential awsCredential = (AwsCredential) stack.getCredential();

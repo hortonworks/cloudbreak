@@ -42,4 +42,8 @@ public class AwsCredentialView {
         return cloudCredential.getParameter("validUntil", String.class);
     }
 
+    public Long getId() {
+        return cloudCredential.getId();
+    }
+
 }

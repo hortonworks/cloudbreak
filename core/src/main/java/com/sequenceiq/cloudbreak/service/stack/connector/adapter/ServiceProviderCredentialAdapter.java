@@ -64,6 +64,7 @@ public class ServiceProviderCredentialAdapter implements CredentialHandler<Crede
                 throw new BadRequestException("Failed to setup provisioning: " + res.getCloudCredentialStatus().getStatusReason(),
                         res.getCloudCredentialStatus().getException());
             }
+
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing provisioning setup", e);
             throw new OperationException(e);

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class InstanceTemplate extends DynamicModel{
+public class InstanceTemplate extends DynamicModel {
 
     private String flavor;
     private String groupName;
