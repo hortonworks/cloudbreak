@@ -49,12 +49,19 @@ migrate-execute-mybatis-migrations() {
         docker run --rm --entrypoint bash -v $scripts_location:/migrate/scripts $docker_image_name -c "cp /schema/* /migrate/scripts/"
     fi
     migrateDebug "Scripts location:  $scripts_location"
-    docker run --rm \
+    local migrateResult=$(docker run --rm \
         --link $container_name:db \
         -v $scripts_location:/migrate/scripts \
         sequenceiq/mybatis-migrations:$DOCKER_TAG_MIGRATION "$@" \
-      | tee -a "$DB_MIGRATION_LOG" \
-      | grep "Applying\|MyBatis Migrations SUCCESS\|MyBatis Migrations FAILURE" 2>/dev/null
+      | tee -a "$DB_MIGRATION_LOG"
+    )
+
+    if grep -q "MyBatis Migrations SUCCESS" <<< "${migrateResult}"; then
+        info "Migration SUCCESS: $service_name $@"
+    else
+        error "Migration failed: $service_name $@"
+        error "See logs in: $DB_MIGRATION_LOG"
+    fi
 }
 
 migrate-one-db() {
