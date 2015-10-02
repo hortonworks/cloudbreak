@@ -1,0 +1,30 @@
+{
+  "sites": [
+    {
+      "name": "core-site",
+      "configurations": [
+        {
+          "key": "hadoop.proxyuser.root.groups",
+          "value": "*"
+        },
+        {
+          "key": "hadoop.proxyuser.root.hosts",
+          "value": "*"
+        }
+      ]
+    },{
+      "name": "webhcat-site",
+      "configurations": [
+        {
+          "key": "webhcat.proxyuser.root.groups",
+          "value": "*"
+        },
+        {
+          "key": "webhcat.proxyuser.root.hosts",
+          "value": "*"
+        }
+      ]
+    }
+
+  ]
+}
