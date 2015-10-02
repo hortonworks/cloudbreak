@@ -28,6 +28,7 @@ public class HadoopConfigurationService {
     @Inject
     private HostGroupRepository hostGroupRepository;
     private Map<String, ServiceConfig> serviceConfigs = new HashMap<>();
+    private Map<String, Map<String, String>> bpConfigs = new HashMap<>();
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @PostConstruct
@@ -52,6 +53,20 @@ public class HadoopConfigurationService {
             }
             serviceConfigs.put(serviceName, new ServiceConfig(serviceName, globalConfig, hostConfig));
         }
+
+        String bpConfigJson = FileReaderUtils.readFileFromClasspath("hdp/bp-config.json");
+        JsonNode bps = objectMapper.readTree(bpConfigJson).get("sites");
+        for (JsonNode bp : bps) {
+            String siteName = bp.get("name").asText();
+            JsonNode configurations = bp.get("configurations");
+            Map<String, String> keyVals = new HashMap<>();
+            for (JsonNode config : configurations) {
+                String key = config.get("key").asText();
+                String value = config.get("value").asText();
+                keyVals.put(key, value);
+            }
+            bpConfigs.put(siteName, keyVals);
+        }
     }
 
     public Map<String, Map<String, String>> getGlobalConfiguration(Cluster cluster) throws IOException {
@@ -64,6 +79,15 @@ public class HadoopConfigurationService {
             for (JsonNode component : components) {
                 String name = component.path("name").asText();
                 config.putAll(getProperties(name, true, null));
+            }
+        }
+        for (Map.Entry<String, Map<String, String>> entry : bpConfigs.entrySet()) {
+            if (config.containsKey(entry.getKey())) {
+                for (Map.Entry<String, String> inEntry : entry.getValue().entrySet()) {
+                    config.get(entry.getKey()).put(inEntry.getKey(), inEntry.getValue());
+                }
+            } else {
+                config.put(entry.getKey(), entry.getValue());
             }
         }
         return config;
