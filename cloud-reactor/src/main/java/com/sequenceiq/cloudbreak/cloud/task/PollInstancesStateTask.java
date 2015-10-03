@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.InstancesStatusResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
@@ -19,17 +20,21 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 public class PollInstancesStateTask extends AbstractPollTask<InstancesStatusResult> {
     public static final String NAME = "pollInstancesStateTask";
 
+    private CloudStack cloudStack;
     private List<CloudInstance> instances;
     private InstanceConnector instanceConnector;
     private Set<InstanceStatus> completedStatuses;
 
-    public PollInstancesStateTask(AuthenticatedContext authenticatedContext, InstanceConnector instanceConnector, List<CloudInstance> instances) {
-        this(authenticatedContext, instanceConnector, instances, Sets.<InstanceStatus>newHashSet());
+    public PollInstancesStateTask(AuthenticatedContext authenticatedContext, InstanceConnector instanceConnector, CloudStack cloudStack,
+            List<CloudInstance> instances) {
+        this(authenticatedContext, instanceConnector, cloudStack, instances, Sets.<InstanceStatus>newHashSet());
     }
 
-    public PollInstancesStateTask(AuthenticatedContext authenticatedContext, InstanceConnector instanceConnector, List<CloudInstance> instances,
+    public PollInstancesStateTask(AuthenticatedContext authenticatedContext, InstanceConnector instanceConnector, CloudStack cloudStack,
+            List<CloudInstance> instances,
             Set<InstanceStatus> completedStatuses) {
         super(authenticatedContext);
+        this.cloudStack = cloudStack;
         this.instances = instances;
         this.instanceConnector = instanceConnector;
         this.completedStatuses = completedStatuses;
@@ -37,7 +42,7 @@ public class PollInstancesStateTask extends AbstractPollTask<InstancesStatusResu
 
     @Override
     public InstancesStatusResult call() throws Exception {
-        List<CloudVmInstanceStatus> instanceStatuses = instanceConnector.check(getAuthenticatedContext(), instances);
+        List<CloudVmInstanceStatus> instanceStatuses = instanceConnector.check(getAuthenticatedContext(), cloudStack, instances);
         return new InstancesStatusResult(getAuthenticatedContext().getCloudContext(), instanceStatuses);
     }
 
