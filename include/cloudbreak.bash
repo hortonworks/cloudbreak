@@ -211,11 +211,9 @@ _cloudbreak-shell() {
 
     docker run "$@" \
         --rm \
-        --link cbreak_ambassador_1:backend \
-        -e BACKEND_9000=cloudbreak.service.consul \
-        -e BACKEND_9001=identity.service.consul \
-        -e CLOUDBREAK_ADDRESS=http://backend:9000 \
-        -e IDENTITY_ADDRESS=http://backend:9001 \
+        --dns=$PRIVATE_IP \
+        -e CLOUDBREAK_ADDRESS=http://cloudbreak.service.consul:8080 \
+        -e IDENTITY_ADDRESS=http://identity.service.consul:8089 \
         -e SEQUENCEIQ_USER=$UAA_DEFAULT_USER_EMAIL \
         -e SEQUENCEIQ_PASSWORD=$UAA_DEFAULT_USER_PW \
         -v $PWD:/data \
