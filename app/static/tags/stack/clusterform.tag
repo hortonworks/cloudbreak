@@ -175,24 +175,20 @@
                     </div>
 
                     <!--Azure WASB required properties-->
-                    <div class="form-group" ng-class="{ 'has-error': clusterCreationForm.wasbaccountname.$dirty && clusterCreationForm.wasbaccountname.$invalid }"
-                         ng-show="(activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'AZURE_RM') && cluster.fileSystem.type == 'WASB'">
+                    <div class="form-group" ng-class="{ 'has-error': clusterCreationForm.wasbaccountname.$dirty && clusterCreationForm.wasbaccountname.$invalid }" ng-show="(activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'AZURE_RM') && cluster.fileSystem.type == 'WASB'">
                         <label class="col-sm-3 control-label" for="wasbaccountname">{{msg.filesystem_wasb_account_name_label}}</label>
 
                         <div class="col-sm-9">
                             <input class="form-control" type="text" name="wasbaccountname" id="wasbaccountname" ng-model="cluster.fileSystem.properties.accountName" ng-pattern="/^[a-z0-9]{3,24}$/" ng-minlength="3" ng-maxlength="24" ng-required="cluster.fileSystem.type == 'WASB'">
-                            <div class="help-block"
-                                 ng-show="clusterCreationForm.wasbaccountname.$dirty && clusterCreationForm.wasbaccountname.$invalid"><i class="fa fa-warning"></i> {{msg.filesystem_azure_account_name_warning}}
+                            <div class="help-block" ng-show="clusterCreationForm.wasbaccountname.$dirty && clusterCreationForm.wasbaccountname.$invalid"><i class="fa fa-warning"></i> {{msg.filesystem_azure_account_name_warning}}
                             </div>
                         </div>
                     </div>
-                    <div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'AZURE_RM') && cluster.fileSystem.type == 'WASB'"
-                         ng-class="{ 'has-error': clusterCreationForm.wasbaccountkey.$dirty && clusterCreationForm.wasbaccountkey.$invalid }">
+                    <div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'AZURE_RM') && cluster.fileSystem.type == 'WASB'" ng-class="{ 'has-error': clusterCreationForm.wasbaccountkey.$dirty && clusterCreationForm.wasbaccountkey.$invalid }">
                         <label class="col-sm-3 control-label" for="wasbaccountkey">{{msg.filesystem_wasb_account_key_label}}</label>
                         <div class="col-sm-9">
                             <input class="form-control" type="text" name="wasbaccountkey" id="wasbaccountkey" ng-model="cluster.fileSystem.properties.accountKey" ng-pattern="/^([A-Za-z0-9+/]{4}){21}([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$/" ng-required="cluster.fileSystem.type == 'WASB'">
-                            <div class="help-block"
-                                 ng-show="clusterCreationForm.wasbaccountkey.$dirty && clusterCreationForm.wasbaccountkey.$invalid"><i class="fa fa-warning"></i> {{msg.filesystem_azure_account_key_warning}}
+                            <div class="help-block" ng-show="clusterCreationForm.wasbaccountkey.$dirty && clusterCreationForm.wasbaccountkey.$invalid"><i class="fa fa-warning"></i> {{msg.filesystem_azure_account_key_warning}}
                             </div>
                         </div>
                     </div>
