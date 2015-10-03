@@ -191,7 +191,7 @@ logsink:
         - SERVICE_NAME=logsink
     volumes:
         - .:/tmp
-    image: sequenceiq/socat:latest
+    image: sequenceiq/socat:1.0.0
     command: socat -u TCP-LISTEN:3333,reuseaddr,fork OPEN:/tmp/cbreak.log,creat,append
 
 logspout:
