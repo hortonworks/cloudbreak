@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.openstack.status.NovaInstanceStatus;
@@ -35,7 +34,7 @@ public class OpenStackInstanceConnector implements InstanceConnector {
     private OpenStackMetadataCollector metadataCollector;
 
     @Override
-    public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudStack cloudStack, CloudInstance vm) {
+    public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm) {
         OSClient osClient = openStackClient.createOSClient(authenticatedContext);
         return osClient.compute().servers().getConsoleOutput(vm.getInstanceId(), CONSOLE_OUTPUT_LINES);
     }
@@ -46,17 +45,17 @@ public class OpenStackInstanceConnector implements InstanceConnector {
     }
 
     @Override
-    public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, CloudStack cloudStack, List<CloudResource> resources, List<CloudInstance> vms) {
+    public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         return executeAction(ac, vms, Action.START);
     }
 
     @Override
-    public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, CloudStack cloudStack, List<CloudResource> resources, List<CloudInstance> vms) {
+    public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         return executeAction(ac, vms, Action.STOP);
     }
 
     @Override
-    public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, CloudStack cloudStack, List<CloudInstance> vms) {
+    public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
         OSClient osClient = openStackClient.createOSClient(ac);
         for (CloudInstance vm : vms) {

@@ -127,10 +127,9 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
                 stack.getCreated(), stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-        CloudStack cloudStack = cloudStackConverter.convert(stack);
         List<CloudInstance> instances = metadataConverter.convert(stack.getInstanceMetaDataAsList());
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
-        StartInstancesRequest startRequest = new StartInstancesRequest(cloudContext, cloudCredential, cloudStack, resources, instances);
+        StartInstancesRequest startRequest = new StartInstancesRequest(cloudContext, cloudCredential, resources, instances);
         LOGGER.info("Triggering event: {}", startRequest);
         eventBus.notify(startRequest.selector(), Event.wrap(startRequest));
         try {
@@ -159,10 +158,9 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
                 stack.getCreated(), stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-        CloudStack cloudStack = cloudStackConverter.convert(stack);
         List<CloudInstance> instances = metadataConverter.convert(stack.getInstanceMetaDataAsList());
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
-        StopInstancesRequest<StopInstancesResult> stopRequest = new StopInstancesRequest<>(cloudContext, cloudCredential, cloudStack, resources, instances);
+        StopInstancesRequest<StopInstancesResult> stopRequest = new StopInstancesRequest<>(cloudContext, cloudCredential, resources, instances);
         LOGGER.info("Triggering event: {}", stopRequest);
         eventBus.notify(stopRequest.selector(), Event.wrap(stopRequest));
         try {
@@ -321,11 +319,9 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
                 stack.getCreated(), stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-        CloudStack cloudStack = cloudStackConverter.convert(stack);
         InstanceMetaData gatewayMetaData = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
         CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData);
-        GetSSHFingerprintsRequest<GetSSHFingerprintsResult> sSHFingerprintReq = new GetSSHFingerprintsRequest<>(cloudContext, cloudCredential, gatewayInstance,
-                cloudStack);
+        GetSSHFingerprintsRequest<GetSSHFingerprintsResult> sSHFingerprintReq = new GetSSHFingerprintsRequest<>(cloudContext, cloudCredential, gatewayInstance);
         LOGGER.info("Triggering GetSSHFingerprintsRequest stack event: {}", sSHFingerprintReq);
         eventBus.notify(sSHFingerprintReq.selector(), Event.wrap(sSHFingerprintReq));
         try {

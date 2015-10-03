@@ -51,9 +51,8 @@ public class StopStackHandler implements CloudPlatformEventHandler<StopInstances
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             List<CloudInstance> instances = request.getCloudInstances();
             AuthenticatedContext authenticatedContext = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
-            List<CloudVmInstanceStatus> cloudVmInstanceStatuses = connector.instances().stop(authenticatedContext, request.getCloudStack(),
-                    request.getResources(), instances);
-            PollTask<InstancesStatusResult> task = statusCheckFactory.newPollInstanceStateTask(authenticatedContext, request.getCloudStack(), instances,
+            List<CloudVmInstanceStatus> cloudVmInstanceStatuses = connector.instances().stop(authenticatedContext, request.getResources(), instances);
+            PollTask<InstancesStatusResult> task = statusCheckFactory.newPollInstanceStateTask(authenticatedContext, instances,
                     Sets.newHashSet(InstanceStatus.STOPPED, InstanceStatus.FAILED));
             InstancesStatusResult statusResult = new InstancesStatusResult(cloudContext, cloudVmInstanceStatuses);
             if (!task.completed(statusResult)) {

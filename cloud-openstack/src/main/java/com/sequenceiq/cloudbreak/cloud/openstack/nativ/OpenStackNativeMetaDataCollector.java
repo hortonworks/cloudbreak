@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -43,9 +42,7 @@ public class OpenStackNativeMetaDataCollector implements MetadataCollector {
     @Named("cloudInstanceMetadataExtractor")
     private CloudInstanceMetaDataExtractor cloudInstanceMetaDataExtractor;
 
-    @Override
-    public List<CloudVmInstanceStatus> collect(AuthenticatedContext authenticatedContext, CloudStack cloudStack, List<CloudResource> resources,
-            List<InstanceTemplate> vms) {
+    public List<CloudVmInstanceStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<InstanceTemplate> vms) {
         Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(vms, new Function<InstanceTemplate, String>() {
             public String apply(InstanceTemplate from) {
                 return utils.getPrivateInstanceId(from.getGroupName(), Long.toString(from.getPrivateId()));

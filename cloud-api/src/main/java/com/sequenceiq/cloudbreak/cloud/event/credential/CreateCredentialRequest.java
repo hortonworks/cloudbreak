@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 public class CreateCredentialRequest extends CloudPlatformRequest<CreateCredentialResult> {
 
+
     public CreateCredentialRequest(CloudContext cloudContext, CloudCredential cloudCredential) {
         super(cloudContext, cloudCredential);
     }

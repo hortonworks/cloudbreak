@@ -48,15 +48,15 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
         GetSSHFingerprintsRequest fingerprintsRequest = getSSHFingerprintsRequestEvent.getData();
         try {
             CloudContext cloudContext = fingerprintsRequest.getCloudContext();
+            String platform = cloudContext.getPlatform();
             CloudInstance cloudInstance = fingerprintsRequest.getCloudInstance();
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, fingerprintsRequest.getCloudCredential());
             GetSSHFingerprintsResult fingerprintsResult;
             try {
-                String initialConsoleOutput = connector.instances().getConsoleOutput(ac, fingerprintsRequest.getCloudStack(), cloudInstance);
+                String initialConsoleOutput = connector.instances().getConsoleOutput(ac, cloudInstance);
                 InstanceConsoleOutputResult consoleOutputResult = new InstanceConsoleOutputResult(cloudContext, cloudInstance, initialConsoleOutput);
-                PollTask<InstanceConsoleOutputResult> outputPollerTask = statusCheckFactory.newPollConsoleOutputTask(connector.instances(), ac,
-                        fingerprintsRequest.getCloudStack(), cloudInstance);
+                PollTask<InstanceConsoleOutputResult> outputPollerTask = statusCheckFactory.newPollConsoleOutputTask(connector.instances(), ac, cloudInstance);
                 if (!outputPollerTask.completed(consoleOutputResult)) {
                     consoleOutputResult = syncPollingScheduler.schedule(outputPollerTask);
                 }

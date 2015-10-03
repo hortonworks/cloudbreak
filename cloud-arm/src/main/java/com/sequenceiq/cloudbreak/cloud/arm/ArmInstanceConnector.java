@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
@@ -35,7 +34,7 @@ public class ArmInstanceConnector implements InstanceConnector {
     private ArmUtils armTemplateUtils;
 
     @Override
-    public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudStack cloudStack, CloudInstance vm) {
+    public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm) {
         throw new CloudOperationNotSupportedException("Azure ARM doesn't provide access to the VM console output yet.");
     }
 
@@ -45,7 +44,7 @@ public class ArmInstanceConnector implements InstanceConnector {
     }
 
     @Override
-    public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, CloudStack cloudStack, List<CloudResource> resources, List<CloudInstance> vms) {
+    public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         AzureRMClient azureRMClient = armClient.createAccess(ac.getCloudCredential());
         String stackName = armTemplateUtils.getStackName(ac.getCloudContext());
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
@@ -64,7 +63,7 @@ public class ArmInstanceConnector implements InstanceConnector {
     }
 
     @Override
-    public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, CloudStack cloudStack, List<CloudResource> resources, List<CloudInstance> vms) {
+    public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         AzureRMClient azureRMClient = armClient.createAccess(ac.getCloudCredential());
         String stackName = armTemplateUtils.getStackName(ac.getCloudContext());
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
@@ -83,7 +82,7 @@ public class ArmInstanceConnector implements InstanceConnector {
     }
 
     @Override
-    public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, CloudStack cloudStack, List<CloudInstance> vms) {
+    public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
         AzureRMClient azureRMClient = armClient.createAccess(ac.getCloudCredential());
         String stackName = armTemplateUtils.getStackName(ac.getCloudContext());

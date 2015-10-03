@@ -11,10 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackClient;
@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.status.NovaInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractInstanceConnector;
 
 @Service
-public class OpenStackNativeInstanceConnector extends AbstractInstanceConnector  {
+public class OpenStackNativeInstanceConnector extends AbstractInstanceConnector implements InstanceConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackNativeInstanceConnector.class);
     private static final int CONSOLE_OUTPUT_LINES = Integer.MAX_VALUE;
 
@@ -38,7 +38,7 @@ public class OpenStackNativeInstanceConnector extends AbstractInstanceConnector 
     }
 
     @Override
-    public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, CloudStack cloudStack, List<CloudInstance> vms) {
+    public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
         OSClient osClient = openStackClient.createOSClient(ac);
         for (CloudInstance vm : vms) {
@@ -53,7 +53,7 @@ public class OpenStackNativeInstanceConnector extends AbstractInstanceConnector 
     }
 
     @Override
-    public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudStack cloudStack, CloudInstance vm) {
+    public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm) {
         OSClient osClient = openStackClient.createOSClient(authenticatedContext);
         return osClient.compute().servers().getConsoleOutput(vm.getInstanceId(), CONSOLE_OUTPUT_LINES);
     }
