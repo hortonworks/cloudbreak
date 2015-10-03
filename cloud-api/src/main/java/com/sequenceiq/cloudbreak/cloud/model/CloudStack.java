@@ -6,12 +6,12 @@ import java.util.Map;
 
 public class CloudStack {
 
-    private final List<Group> groups;
-    private final Network network;
-    private final Security security;
-    private final Image image;
-    private final String region;
-    private final Map<String, String> parameters;
+    private List<Group> groups;
+    private Network network;
+    private Security security;
+    private Image image;
+    private String region;
+    private Map<String, String> parameters;
 
     public CloudStack(List<Group> groups, Network network, Security security, Image image, String region, Map<String, String> parameters) {
         this.groups = groups;

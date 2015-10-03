@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -34,8 +33,7 @@ public class ArmMetadataCollector implements MetadataCollector {
     private ArmUtils armTemplateUtils;
 
     @Override
-    public List<CloudVmInstanceStatus> collect(AuthenticatedContext authenticatedContext, CloudStack cloudStack, List<CloudResource> resources,
-            List<InstanceTemplate> vms) {
+    public List<CloudVmInstanceStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<InstanceTemplate> vms) {
         AzureRMClient access = armClient.createAccess(authenticatedContext.getCloudCredential());
         final CloudResource resource = armTemplateUtils.getTemplateResource(resources);
         List<CloudVmInstanceStatus> results = new ArrayList<>();

@@ -140,17 +140,17 @@ public class TestApplicationContext {
                 .thenReturn(Arrays.asList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
         when(resourceConnector.downscale((AuthenticatedContext) any(), (CloudStack) any(), (List<CloudResource>) any(), anyList()))
                 .thenReturn(Arrays.asList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
-        when(instanceConnector.check((AuthenticatedContext) any(), (CloudStack) any(), (List<CloudInstance>) any()))
+        when(instanceConnector.check((AuthenticatedContext) any(), (List<CloudInstance>) any()))
                 .thenReturn(Arrays.asList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED)));
-        when(collector.collect((AuthenticatedContext) any(), (CloudStack) any(), (List<CloudResource>) any(), (List<InstanceTemplate>) any()))
+        when(collector.collect((AuthenticatedContext) any(), (List<CloudResource>) any(), (List<InstanceTemplate>) any()))
                 .thenReturn(Arrays.asList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS)));
-        when(instanceConnector.start((AuthenticatedContext) any(), (CloudStack) any(), (List<CloudResource>) any(), (List<CloudInstance>) any()))
+        when(instanceConnector.start((AuthenticatedContext) any(), (List<CloudResource>) any(), (List<CloudInstance>) any()))
                 .thenReturn(Arrays.asList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED)));
-        when(instanceConnector.stop((AuthenticatedContext) any(), (CloudStack) any(), (List<CloudResource>) any(), (List<CloudInstance>) any()))
+        when(instanceConnector.stop((AuthenticatedContext) any(), (List<CloudResource>) any(), (List<CloudInstance>) any()))
                 .thenReturn(Arrays.asList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STOPPED)));
-        when(instanceConnector.getConsoleOutput((AuthenticatedContext) any(), (CloudStack) any(), eq(cloudInstance)))
+        when(instanceConnector.getConsoleOutput((AuthenticatedContext) any(), eq(cloudInstance)))
                 .thenReturn(g.getSshFingerprint() + "    RSA/n-----END SSH HOST KEY FINGERPRINTS-----");
-        when(instanceConnector.getConsoleOutput((AuthenticatedContext) any(), (CloudStack) any(), eq(cloudInstanceBad)))
+        when(instanceConnector.getConsoleOutput((AuthenticatedContext) any(), eq(cloudInstanceBad)))
                 .thenReturn("XYZ    RSA/n-----END SSH HOST KEY FINGERPRINTS-----");
         return cloudConnector;
     }

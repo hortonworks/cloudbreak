@@ -5,8 +5,9 @@ import com.sequenceiq.cloudbreak.cloud.model.DynamicModel;
 
 public class AuthenticatedContext extends DynamicModel {
 
-    private final CloudContext cloudContext;
-    private final CloudCredential cloudCredential;
+    private CloudContext cloudContext;
+
+    private CloudCredential cloudCredential;
 
     public AuthenticatedContext(CloudContext cloudContext, CloudCredential cloudCredential) {
         this.cloudContext = cloudContext;
@@ -20,4 +21,6 @@ public class AuthenticatedContext extends DynamicModel {
     public CloudCredential getCloudCredential() {
         return cloudCredential;
     }
+
+
 }

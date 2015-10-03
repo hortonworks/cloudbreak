@@ -51,9 +51,8 @@ public class StartStackHandler implements CloudPlatformEventHandler<StartInstanc
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext authenticatedContext = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudInstance> instances = request.getCloudInstances();
-            List<CloudVmInstanceStatus> instanceStatuses = connector.instances().start(authenticatedContext, request.getCloudStack(), request.getResources(),
-                    instances);
-            PollTask<InstancesStatusResult> task = statusCheckFactory.newPollInstanceStateTask(authenticatedContext, request.getCloudStack(), instances,
+            List<CloudVmInstanceStatus> instanceStatuses = connector.instances().start(authenticatedContext, request.getResources(), instances);
+            PollTask<InstancesStatusResult> task = statusCheckFactory.newPollInstanceStateTask(authenticatedContext, instances,
                     Sets.newHashSet(InstanceStatus.STARTED, InstanceStatus.FAILED));
             InstancesStatusResult statusResult = new InstancesStatusResult(cloudContext, instanceStatuses);
             if (!task.completed(statusResult)) {

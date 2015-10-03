@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
@@ -37,15 +36,15 @@ public class PollTaskFactory {
         return createPollTask(PollResourcesStateTask.NAME, authenticatedContext, connector.resources(), cloudResource, cancellable);
     }
 
-    public PollTask<InstancesStatusResult> newPollInstanceStateTask(AuthenticatedContext authenticatedContext, CloudStack cloudStack,
-            List<CloudInstance> instances, Set<InstanceStatus> completedStatuses) {
+    public PollTask<InstancesStatusResult> newPollInstanceStateTask(AuthenticatedContext authenticatedContext, List<CloudInstance> instances,
+            Set<InstanceStatus> completedStatuses) {
         CloudConnector connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatformVariant());
-        return createPollTask(PollInstancesStateTask.NAME, authenticatedContext, connector.instances(), cloudStack, instances, completedStatuses);
+        return createPollTask(PollInstancesStateTask.NAME, authenticatedContext, connector.instances(), instances, completedStatuses);
     }
 
     public PollTask<InstanceConsoleOutputResult> newPollConsoleOutputTask(InstanceConnector instanceConnector,
-            AuthenticatedContext authenticatedContext, CloudStack cloudStack, CloudInstance instance) {
-        return createPollTask(PollInstanceConsoleOutputTask.NAME, instanceConnector, authenticatedContext, cloudStack, instance);
+            AuthenticatedContext authenticatedContext, CloudInstance instance) {
+        return createPollTask(PollInstanceConsoleOutputTask.NAME, instanceConnector, authenticatedContext, instance);
     }
 
     public PollTask<List<CloudResourceStatus>> newPollResourceTask(ResourceChecker checker, AuthenticatedContext authenticatedContext,
