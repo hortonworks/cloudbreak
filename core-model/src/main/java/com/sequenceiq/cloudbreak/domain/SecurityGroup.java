@@ -101,7 +101,7 @@ public class SecurityGroup {
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
 
-    @OneToMany(mappedBy = "securityGroup", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "securityGroup", cascade = { CascadeType.REMOVE, CascadeType.PERSIST }, orphanRemoval = true)
     private Set<SecurityRule> securityRules = new HashSet<>();
 
     public Long getId() {

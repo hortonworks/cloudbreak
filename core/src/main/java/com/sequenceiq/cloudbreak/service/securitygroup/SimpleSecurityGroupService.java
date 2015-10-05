@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
-import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
@@ -30,9 +29,6 @@ public class SimpleSecurityGroupService implements SecurityGroupService {
     private SecurityGroupRepository groupRepository;
 
     @Inject
-    private SecurityRuleRepository ruleRepository;
-
-    @Inject
     private StackRepository stackRepository;
 
     @Override
@@ -41,9 +37,7 @@ public class SimpleSecurityGroupService implements SecurityGroupService {
         securityGroup.setOwner(user.getUserId());
         securityGroup.setAccount(user.getAccount());
         try {
-            SecurityGroup persistedSecurityGroup = groupRepository.save(securityGroup);
-            ruleRepository.save(securityGroup.getSecurityRules());
-            return persistedSecurityGroup;
+            return groupRepository.save(securityGroup);
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(APIResourceType.SECURITY_GROUP, securityGroup.getName(), ex);
         }
