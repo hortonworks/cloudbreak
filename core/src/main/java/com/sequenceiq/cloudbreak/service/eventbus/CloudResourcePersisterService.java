@@ -18,7 +18,7 @@ public class CloudResourcePersisterService extends AbstractCloudPersisterService
     @Override
     public ResourceNotification persist(ResourceNotification notification) {
         LOGGER.debug("Resource allocation notification received: {}", notification);
-        Long stackId = notification.getStackId();
+        Long stackId = notification.getCloudContext().getId();
         CloudResource cloudResource = notification.getCloudResource();
         Resource resource = getConversionService().convert(cloudResource, Resource.class);
         resource.setStack(getStackRepository().findByIdLazy(stackId));
@@ -29,7 +29,7 @@ public class CloudResourcePersisterService extends AbstractCloudPersisterService
     @Override
     public ResourceNotification update(ResourceNotification notification) {
         LOGGER.debug("Resource update notification received: {}", notification);
-        Long stackId = notification.getStackId();
+        Long stackId = notification.getCloudContext().getId();
         CloudResource cloudResource = notification.getCloudResource();
         ResourceRepository repository = getResourceRepository();
         Resource persistedResource = repository.findByStackIdAndNameAndType(stackId, cloudResource.getName(), cloudResource.getType());
@@ -43,7 +43,7 @@ public class CloudResourcePersisterService extends AbstractCloudPersisterService
     @Override
     public ResourceNotification delete(ResourceNotification notification) {
         LOGGER.debug("Resource deletion notification received: {}", notification);
-        Long stackId = notification.getStackId();
+        Long stackId = notification.getCloudContext().getId();
         CloudResource cloudResource = notification.getCloudResource();
         ResourceRepository repository = getResourceRepository();
         Resource resource = repository.findByStackIdAndNameAndType(stackId, cloudResource.getName(), cloudResource.getType());
