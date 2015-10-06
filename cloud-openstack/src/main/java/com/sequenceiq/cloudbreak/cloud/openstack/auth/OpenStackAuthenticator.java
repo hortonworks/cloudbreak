@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.openstack;
+package com.sequenceiq.cloudbreak.cloud.openstack.auth;
 
 import javax.inject.Inject;
 
@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 
 @Service
 public class OpenStackAuthenticator implements Authenticator {

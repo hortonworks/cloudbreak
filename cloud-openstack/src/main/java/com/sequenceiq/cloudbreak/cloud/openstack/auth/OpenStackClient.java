@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.openstack;
+package com.sequenceiq.cloudbreak.cloud.openstack.auth;
 
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_OPENSTACK_API_DEBUG;
 

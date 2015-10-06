@@ -14,14 +14,13 @@ import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackConstants;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
-import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
-public class OpenStackPortBuilder extends AbstractOpenStackComputeResourceBuilder implements ComputeResourceBuilder<OpenStackContext> {
+public class OpenStackPortBuilder extends AbstractOpenStackComputeResourceBuilder {
     @Override
     public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
             List<CloudResource> buildableResource) throws Exception {
@@ -56,16 +55,6 @@ public class OpenStackPortBuilder extends AbstractOpenStackComputeResourceBuilde
     @Override
     public ResourceType resourceType() {
         return ResourceType.OPENSTACK_PORT;
-    }
-
-    @Override
-    public String platform() {
-        return OpenStackConstants.OPENSTACK;
-    }
-
-    @Override
-    public int order() {
-        return 0;
     }
 
     @Override

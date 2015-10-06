@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.openstack;
+package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
 import java.util.ArrayList;
 import java.util.HashMap;

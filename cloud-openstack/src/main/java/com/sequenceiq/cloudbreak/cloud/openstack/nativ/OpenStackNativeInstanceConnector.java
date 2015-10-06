@@ -11,18 +11,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackClient;
+import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.status.NovaInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractInstanceConnector;
 
 @Service
-public class OpenStackNativeInstanceConnector extends AbstractInstanceConnector implements InstanceConnector {
+public class OpenStackNativeInstanceConnector extends AbstractInstanceConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackNativeInstanceConnector.class);
     private static final int CONSOLE_OUTPUT_LINES = Integer.MAX_VALUE;
 

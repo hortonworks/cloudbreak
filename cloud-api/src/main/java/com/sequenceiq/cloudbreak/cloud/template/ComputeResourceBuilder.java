@@ -23,8 +23,6 @@ public interface ComputeResourceBuilder<C extends ResourceBuilderContext> extend
 
     CloudResource delete(C context, AuthenticatedContext auth, CloudResource resource) throws Exception;
 
-    CloudResource rollback(C context, CloudResource resource) throws Exception;
-
     CloudVmInstanceStatus start(C context, AuthenticatedContext auth, CloudInstance instance);
 
     CloudVmInstanceStatus stop(C context, AuthenticatedContext auth, CloudInstance instance);

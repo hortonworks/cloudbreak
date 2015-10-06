@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.openstack;
+package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
 import java.util.List;
 import java.util.Map;
@@ -15,12 +15,12 @@ import com.sequenceiq.cloudbreak.cloud.openstack.status.HeatStackStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Component
-public class OpenStackHeatUtils {
+public class OpenStackUtils {
 
     public static final String CB_INSTANCE_GROUP_NAME = "cb_instance_group_name";
     public static final String CB_INSTANCE_PRIVATE_ID = "cb_instance_private_id";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackHeatUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackUtils.class);
 
 
     public CloudResource getHeatResource(List<CloudResource> resourceList) {

@@ -26,17 +26,16 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackConstants;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
 import com.sequenceiq.cloudbreak.cloud.openstack.status.NovaInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NovaInstanceView;
-import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
-public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBuilder implements ComputeResourceBuilder<OpenStackContext> {
+public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBuilder {
     @Override
     public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
             List<CloudResource> buildableResource) throws Exception {
@@ -114,16 +113,6 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
     @Override
     public ResourceType resourceType() {
         return ResourceType.OPENSTACK_INSTANCE;
-    }
-
-    @Override
-    public String platform() {
-        return OpenStackConstants.OPENSTACK;
-    }
-
-    @Override
-    public int order() {
-        return 1;
     }
 
     @Override

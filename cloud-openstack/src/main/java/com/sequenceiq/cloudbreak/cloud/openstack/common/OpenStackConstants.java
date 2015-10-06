@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.openstack;
+package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
 public class OpenStackConstants {
     public static final String OPENSTACK = "OPENSTACK";

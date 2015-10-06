@@ -9,7 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackHeatUtils;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 
 public class NovaInstanceView {
@@ -64,8 +64,8 @@ public class NovaInstanceView {
 
     private Map<String, String> generateMetadata() {
         Map<String, String> metadata = new HashMap<>();
-        metadata.put(OpenStackHeatUtils.CB_INSTANCE_GROUP_NAME, instance.getGroupName());
-        metadata.put(OpenStackHeatUtils.CB_INSTANCE_PRIVATE_ID, Long.toString(getPrivateId()));
+        metadata.put(OpenStackUtils.CB_INSTANCE_GROUP_NAME, instance.getGroupName());
+        metadata.put(OpenStackUtils.CB_INSTANCE_PRIVATE_ID, Long.toString(getPrivateId()));
         return metadata;
     }
 

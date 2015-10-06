@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.openstack;
+package com.sequenceiq.cloudbreak.cloud.openstack.heat;
 
 import javax.inject.Inject;
 
@@ -13,11 +13,17 @@ import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackParameters;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackSetup;
+import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackAuthenticator;
+import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
+import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackCredentialConnector;
 
 @Service
-public class OpenStackConnector implements CloudConnector {
+public class OpenStackHeatConnector implements CloudConnector {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackConnector.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackHeatConnector.class);
 
     @Inject
     private OpenStackCredentialConnector credentialConnector;
