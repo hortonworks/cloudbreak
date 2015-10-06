@@ -65,7 +65,7 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
     @Override
     public Set<CoreInstanceMetaData> collectMetadata(Stack stack) {
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
-                stack.getCreated(), stack.getRegion());
+                stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<InstanceTemplate> instanceTemplates = cloudStackConverter.buildInstanceTemplates(stack);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
@@ -89,7 +89,7 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
     @Override
     public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroupName, Integer scalingAdjustment) {
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
-                stack.getCreated(), stack.getRegion());
+                stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<InstanceTemplate> instanceTemplates = getNewInstanceTemplates(stack);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
@@ -113,7 +113,7 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
     @Override
     public InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId) {
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
-                stack.getCreated(), stack.getRegion());
+                stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         InstanceGroup ig = stack.getInstanceGroupByInstanceGroupName(instanceGroup.getGroupName());
         CloudInstance instance = null;

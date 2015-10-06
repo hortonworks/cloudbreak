@@ -4,19 +4,25 @@ import java.util.Map;
 
 public class CloudCredential extends DynamicModel {
 
-    private String name;
-    private String publicKey;
-    private String loginUserName;
+    private final Long id;
+    private final String name;
+    private final String publicKey;
+    private final String loginUserName;
 
-    public CloudCredential(String name, String publicKey, String loginUserName) {
+    public CloudCredential(Long id, String name, String publicKey, String loginUserName) {
+        this.id = id;
         this.name = name;
         this.publicKey = publicKey;
         this.loginUserName = loginUserName;
     }
 
-    public CloudCredential(String name, String publicKey, String loginUserName, Map<String, Object> parameters) {
-        this(name, publicKey, loginUserName);
+    public CloudCredential(Long id, String name, String publicKey, String loginUserName, Map<String, Object> parameters) {
+        this(id, name, publicKey, loginUserName);
         super.putAll(parameters);
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getName() {
@@ -29,10 +35,6 @@ public class CloudCredential extends DynamicModel {
 
     public String getLoginUserName() {
         return loginUserName;
-    }
-
-    public Long getId() {
-        return getParameter("id", Long.class);
     }
 
 }

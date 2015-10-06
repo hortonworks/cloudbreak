@@ -102,7 +102,7 @@ public class ReactorApplication implements CommandLineRunner {
     }
 
     private LaunchStackRequest request() {
-        CloudCredential c = new CloudCredential("opencred", "somekey", "cloudbreak");
+        CloudCredential c = new CloudCredential(1L, "opencred", "somekey", "cloudbreak");
         c.putParameter("userName", userName);
         c.putParameter("password", password);
         c.putParameter("tenantName", tenantName);

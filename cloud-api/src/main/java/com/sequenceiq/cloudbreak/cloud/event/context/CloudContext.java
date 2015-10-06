@@ -9,7 +9,6 @@ public class CloudContext {
     private final String platform;
     private final String owner;
     private final String variant;
-    private final Long created;
     private final String region;
 
     public CloudContext(Long id, String name, String platform, String owner) {
@@ -18,17 +17,15 @@ public class CloudContext {
         this.platform = platform;
         this.owner = owner;
         this.variant = null;
-        this.created = null;
         this.region = null;
     }
 
-    public CloudContext(Long id, String name, String platform, String owner, String variant, Long created, String region) {
+    public CloudContext(Long id, String name, String platform, String owner, String variant, String region) {
         this.id = id;
         this.name = name;
         this.platform = platform;
         this.owner = owner;
         this.variant = variant;
-        this.created = created;
         this.region = region;
     }
 
@@ -54,10 +51,6 @@ public class CloudContext {
 
     public CloudPlatformVariant getPlatformVariant() {
         return new CloudPlatformVariant(platform, variant);
-    }
-
-    public Long getCreated() {
-        return created;
     }
 
     public String getRegion() {

@@ -17,7 +17,7 @@ public class CredentialToCloudCredentialConverter {
     public CloudCredential convert(Credential credential) {
         Map<String, Object> fields = getDeclaredFields(credential);
         fields.put(CREDENTIAL_ID, credential.getId());
-        return new CloudCredential(credential.getName(), credential.getPublicKey(), credential.getLoginUserName(), fields);
+        return new CloudCredential(credential.getId(), credential.getName(), credential.getPublicKey(), credential.getLoginUserName(), fields);
     }
 
 }
