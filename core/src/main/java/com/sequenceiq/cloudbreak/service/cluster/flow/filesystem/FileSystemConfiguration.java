@@ -6,6 +6,7 @@ import java.util.Map;
 public class FileSystemConfiguration {
 
     public static final String STORAGE_CONTAINER = "container";
+    public static final String RESOURCE_GROUP_NAME = "resourceGroupName";
     private Map<String, String> dynamicProperties = new HashMap<>();
 
     public String getProperty(String key) {

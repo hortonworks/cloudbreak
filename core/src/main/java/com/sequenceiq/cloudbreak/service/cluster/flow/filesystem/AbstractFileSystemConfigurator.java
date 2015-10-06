@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import com.sequenceiq.cloudbreak.service.cluster.flow.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.RecipeScript;
@@ -37,6 +39,16 @@ public abstract class AbstractFileSystemConfigurator<T extends FileSystemConfigu
         bpConfigs.add(new BlueprintConfigurationEntry(
                 "webhcat-site", "templeton.streaming.jar", defaultFs + "/hdp/apps/${hdp.version}/mapreduce/hadoop-streaming.jar"));
         return bpConfigs;
+    }
+
+    @Override
+    public Map<String, String> createResources(T fsConfig) {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public Map<String, String> deleteResources(T fsConfig) {
+        return Collections.emptyMap();
     }
 
     protected abstract List<FileSystemScriptConfig> getScriptConfigs();
