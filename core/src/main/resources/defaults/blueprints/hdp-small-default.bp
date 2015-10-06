@@ -211,11 +211,11 @@
           "fs.trash.interval": "360",
           "ha.failover-controller.active-standby-elector.zk.op.retries": "120",
           "hadoop.http.authentication.simple.anonymous.allowed": "true",
-          "hadoop.proxyuser.falcon.groups": "users",
+          "hadoop.proxyuser.falcon.groups": "*",
           "hadoop.proxyuser.falcon.hosts": "*",
-          "hadoop.proxyuser.hcat.groups": "users",
+          "hadoop.proxyuser.hcat.groups": "*",
           "hadoop.proxyuser.hcat.hosts": "%HOSTGROUP::host_group_master_2%",
-          "hadoop.proxyuser.hive.groups": "users",
+          "hadoop.proxyuser.hive.groups": "*",
           "hadoop.proxyuser.hive.hosts": "%HOSTGROUP::host_group_master_2%",
           "hadoop.proxyuser.oozie.groups": "*",
           "hadoop.proxyuser.oozie.hosts": "%HOSTGROUP::host_group_master_1%",
@@ -230,7 +230,7 @@
           "ipc.client.idlethreshold": "8000",
           "ipc.server.tcpnodelay": "true",
           "mapreduce.jobtracker.webinterface.trusted": "false",
-          "proxyuser_group": "users"
+          "proxyuser_group": "hadoop"
         }
       }
     },
@@ -349,7 +349,7 @@
           "namenode_opt_maxpermsize": "256m",
           "namenode_opt_newsize": "256m",
           "namenode_opt_permsize": "128m",
-          "proxyuser_group": "users"
+          "proxyuser_group": "hadoop"
         }
       }
     },
@@ -1130,7 +1130,7 @@
           "templeton.hive.path": "hive.tar.gz/hive/bin/hive",
           "templeton.hive.properties": "hive.metastore.local=false,hive.metastore.uris=thrift://%HOSTGROUP::host_group_master_2%:9083,hive.metastore.sasl.enabled=false,hive.metastore.execute.setugi=true",
           "templeton.jar": "/usr/hdp/current/hive-webhcat/share/webhcat/svr/lib/hive-webhcat-*.jar",
-          "templeton.libjars": "/usr/hdp/current/zookeeper-client/zookeeper.jar",
+          "templeton.libjars": "/usr/hdp/${hdp.version}/zookeeper/zookeeper.jar,/usr/hdp/${hdp.version}/hive/lib/hive-common.jar",
           "templeton.override.enabled": "false",
           "templeton.pig.archive": "hdfs:///hdp/apps/${hdp.version}/pig/pig.tar.gz",
           "templeton.pig.path": "pig.tar.gz/pig/bin/pig",
