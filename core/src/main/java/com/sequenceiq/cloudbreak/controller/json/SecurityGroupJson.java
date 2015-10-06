@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller.json;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -31,6 +32,7 @@ public class SecurityGroupJson {
     @ApiModelProperty(value = ModelDescriptions.DESCRIPTION, required = false)
     @Size(max = 1000)
     private String description;
+    @Valid
     @ApiModelProperty(value = ModelDescriptions.SecurityGroupModelDescription.SECURITY_RULES, required = true)
     private List<SecurityRuleJson> securityRules = new LinkedList<>();
 
