@@ -14,7 +14,7 @@ angular.module('uluwatuControllers').controller('securityGroupController', ['$sc
             if ($scope.tmpsecport.cidr !== null && $scope.tmpsecport.cidr !== undefined
                 && $scope.tmpsecport.port !== null && $scope.tmpsecport.port !== undefined
                 && $scope.tmpsecport.protocol !== null && $scope.tmpsecport.protocol !== undefined) {
-                if ($scope.tmpsecport.port.match(/[0-9]+(,[0-9]+)*/g) === null) {
+                if ($scope.tmpsecport.port.match(/^[0-9]+(,[0-9]+)*$/g) === null) {
                     $scope.showErrorMessage($rootScope.msg.incorrect_port_definition_sec_group);
                     return;
                 }
