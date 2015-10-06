@@ -24,6 +24,14 @@ public class FixedDefaultConfigProvider implements DefaultConfigProvider {
         defaultConfigEntries
                 .add(new BlueprintConfigurationEntry("mapred-site", "yarn.app.mapreduce.am.command-opts", "-Xmx2457m -Dhdp.version=${hdp.version}"));
 
+        defaultConfigEntries.add(new BlueprintConfigurationEntry("core-site", "hadoop.proxyuser.falcon.groups", "*"));
+        defaultConfigEntries.add(new BlueprintConfigurationEntry("core-site", "hadoop.proxyuser.hbase.groups", "*"));
+        defaultConfigEntries.add(new BlueprintConfigurationEntry("core-site", "hadoop.proxyuser.hcat.groups", "*"));
+        defaultConfigEntries.add(new BlueprintConfigurationEntry("core-site", "hadoop.proxyuser.hive.groups", "*"));
+        defaultConfigEntries.add(new BlueprintConfigurationEntry("core-site", "hadoop.proxyuser.oozie.groups", "*"));
+        defaultConfigEntries.add(new BlueprintConfigurationEntry("core-site", "hadoop.proxyuser.root.groups", "*"));
+        defaultConfigEntries.add(new BlueprintConfigurationEntry("core-site", "proxyuser_group", "hadoop"));
+
         return defaultConfigEntries;
     }
 }
