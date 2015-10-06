@@ -1,68 +1,25 @@
-#AWS based installation
+# Launch/configure your instance
 
-We have pre-built a custom AWS AMI image with all the required tooling and Cloudbreak deployer installed. In order to launch this image on AWS please use the following [AMI]().
+We have pre-built a custom AWS AMI image with all the required tooling and Cloudbreak deployer installed. In order to launch this image on AWS please use the following [Cloudformation] link().
 
 Cloudbreak will already be installed, thus you can follow these steps to launch the application.
 
-## Usage
+# Configure Cloudbreak deployer
 
-Once the Cloudbreak deployer is installed it will generate some config files and will download supporting binaries. It is
-advised that you create a dedicated directory for it:
-
-```
-mkdir cloudbreak-deployment
-cd cloudbreak-deployment
-```
-
-### Initialize Profile
-
-First initialize your directory by creating a `Profile` file:
+Enter into the `cloudbreak-deployment folder`.
 
 ```
-cbd init
+cd ~/cloudbreak-deployment
 ```
 
-It will create a `Profile` file in the current directory. Please edit the file - the only required
-configuration is the `PUBLIC_IP`. This IP will be used to access the Cloudbreak UI
+In this folder you will find a `Profile` file.
+
+#### Configure Cloudbreak UI access
+
+Please edit the Profile file - the only mandatory configuration is the `PUBLIC_IP`. This IP will be used to access the Cloudbreak UI
 (called Uluwatu). In some cases the `cbd` tool tries to guess it, if can't than will give a hint.
 
-### Start Cloudbreak
-
-To start all the containers run:
-
-```
-cbd start
-```
-
-Launching the first time will take more time as it does some additional steps:
-
-- download all the docker images, needed by Cloudbreak.
-- create **docker-compose.yml**: Full configuration of containers needed for the Cloudbreak deployment.
-- create **uaa.yml**: Identity Server configuration.
-
-### Watch the logs
-
-```
-cbd logs
-```
-
-## Default Credentials
-
-The default credentials can be revealed by `cbd login`
-
-These values are used in the `uaa.yml` end section. To change these values, add 2 lines into your Profile:
-
-```
-export UAA_DEFAULT_USER_EMAIL=myself@example.com
-export UAA_DEFAULT_USER_PW=demo123
-```
-and than you need to recreate configs:
-```
-rm *.yml
-cbd generate
-```
-
-## Provider specific configurations
+#### AWS access setup
 
 In order for Cloudbreak to be able to launch clusters on AWS on your behalf you need to set up your AWS keys in the Profile file:
 
@@ -71,9 +28,19 @@ export AWS_ACCESS_KEY_ID=AKIA**************W7SA
 export AWS_SECRET_ACCESS_KEY=RWCT4Cs8******************/*skiOkWD
 ```
 
-and regenerate your Profile with `cbd generate`.
+#### SMTP configurations
 
-## Generate an AWS role
+During registration or cluster provisioning Cloudbreak sends emails to the user. In order for email sending to work put these lines into your `Profile` file.
+
+```
+export CLOUDBREAK_SMTP_SENDER_USERNAME=
+export CLOUDBREAK_SMTP_SENDER_PASSWORD=
+export CLOUDBREAK_SMTP_SENDER_HOST=
+export CLOUDBREAK_SMTP_SENDER_PORT=
+export CLOUDBREAK_SMTP_SENDER_FROM=
+```
+
+#### Generate an AWS role
 
 One key point is that Cloudbreak **does not** store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by the end user. Cloudbreak is purely acting on behalf of the end user - without having access to the user's account. In order to launch clusters on your behalf we need an AWS IAM role - that can be used in the Cloudbreak application as a credential.
 
@@ -85,109 +52,44 @@ cbd aws delete-role    - Deletes an AWS IAM role, removes all inline policies
 
 You can check the generated role on your AWS console, under IAM roles.
 
-## Manage cloud credentials
+#### Change default username/Password
 
-You can now log into the Cloudbreak application at http://PUBLIC_IP:3000. Once logged in go to **Manage credentials**. Using manage credentials will  link your cloud account with the Cloudbreak account.
+The default credentials can be revealed by `cbd login` These values are used in the `uaa.yml` file's end section. To change these values, add 2 lines into your Profile:
 
-`Name:` name of your credential
+```
+export UAA_DEFAULT_USER_EMAIL=myself@example.com
+export UAA_DEFAULT_USER_PW=demo123
+```
 
-`Description:` short description of your linked credential
+#### Regenerate your Profile
 
-`Role ARN:` the role string - you can find it at the summary tab of the IAM role, default is *cbreak -deployer*
+You are done with the configuration of Cloudbreak deployer. The last thing you have to do is to regenerate the configurations in order to take effect.
 
-`SSH public key:` an SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later
+```
+rm *.yml
+cbd generate
+```
 
-`Public in account:` share it with others in the account
+#### Verify configs
 
-The ssh username is **ec2-user**
+In order to verify that all configs are OK use the `doctor` command.
 
-##Manage resources
+```
+cbd doctor
+```
 
-Using manage resources you can create infrastructure templates. Templates describes the infrastructure where the HDP cluster will be provisioned. We support heterogenous clusters - this means that one cluster can be built by combining different templates.
+# Use Cloudbreak 
 
-`Name:` name of your template
+To start the Cloudbreak application use the following command.
 
-`Description:` short description of your template
+```
+cbd start
+```
 
-`Instance type:` the Amazon instance type to be used - we suggest to use at least small or medium instances
+This will start all the Docker containers and initialize the application. Please give a few minutes until all services starts. While the services are starting you can check the logs.
 
-`Volume type:` option to choose are SSD, regular HDD (both EBS) or Ephemeral
+```
+cbd logs
+```
 
-`Attached volumes per instance:` the number of disks to be attached
-
-`Volume size (GB):` the size of the attached disks (in GB)
-
-`Spot price:` option to set a spot price - not mandatory, if specified we will request spot price instances (which might take a while or never be fulfilled by Amazon)
-
-`EBS encryption:` this feature is supported with all EBS volume types (General Purpose (SSD), Provisioned IOPS (SSD), and Magnetic
-
-`Public in account:` share it with others in the account
-
-## Manage blueprints
-Blueprints are your declarative definition of a Hadoop cluster.
-
-`Name:` name of your blueprint
-
-`Description:` short description of your blueprint
-
-`Source URL:` you can add a blueprint by pointing to a URL. As an example you can use this [blueprint](https://github.com/sequenceiq/ambari-rest-client/raw/1.6.0/src/main/resources/blueprints/multi-node-hdfs-yarn).
-
-`Manual copy:` you can copy paste your blueprint in this text area
-
-`Public in account:` share it with others in the account
-
-## Manage networks
-Manage networks allows you to create or reuse existing networks and configure them.
-
-`Name:` name of the network
-
-`Description:` short description of your network
-
-`Subnet (CIDR):` a subnet in the VPC with CIDR block
-
-`Public in account:` share it with others in the account
-
-## Manage security groups
-Security groups allows configuration of traffic/access to the cluster. Currently there are two default groups, and later versions will allow setup of new groups.
-
-`only-ssh-and-ssl:` all ports are locked down (you can't access Hadoop services outside of the VPN) but SSH (22) and HTTPS (443)
-
-`all-services-port:` all Hadoop services + SSH/HTTP are accessible by default: SSH (22) HTTPS (443) 8080 (Ambari) 8500 (Consul) 50070 (NN) 8088 (RM Web) 8030 (RM Scheduler) 8050 (RM IPC) 19888 (Job history server) 60010 (HBase master) 15000 (Falcon) 8744 (Storm) 11000 (Oozie) 18080 (Spark HS) 8042 (NM Web) 9996 (Zeppelin WebSocket) 9995 (Zeppelin UI) 3080 (Kibana) 9200 (Elasticsearch)
-
-## Create a cluster
-
-Using the create cluster functionality Cloudbreak will create a cloud Stack and a Hadoop Cluster. In order to create a cluster you will have to select a credential first.
-
-`Cluster name:` your cluster name
-
-`Region:` the region where the cluster is started
-
-`Network:` the network template
-
-`Security Group:" the security group
-
-`Blueprint:` your Hadoop cluster blueprint. Once the blueprint is selected we parse it and give you the option to select the followings for each **hostgroup**.
-
-`Hostgroup configuration`
-
-  `Group size:` the number of instances to be started
-
-  `Template:` the stack template associated to the hostgroup
-
-`Enable security:` Install KDC and Kerberize the cluster
-
-`Public in account:` share it with others in the account
-
-**Advanced features**:
-
-`Consul server count:` the number of Consul servers (odd number), by default is 3. It varies with the cluster size.
-
-`Minimum cluster size:` the provisioning strategy in case of the cloud provider can't allocate all the requested nodes
-
-`Validate blueprint:` feature to validate or not the Ambari blueprint. By default is switched on.
-
- `Dedicated instances:` AWS allows to use dedicated instances
-
-`Ambari Repository config:` you can take the stack RPM's from a custom stack repository
-
-Once you have launched the cluster creation you can track the progress either on Cloudbreak UI or your cloud provider management UI.
+Once Cloudbreak is up and running you can launch clusters in two different ways. You can use the [Cloudbreak UI](aws_cb_ui.md) or use the [Cloudbreak shell](aws_cb_shell.md).

@@ -1,4 +1,4 @@
-#Azure based installation
+# Launch/configure your instance
 
 We have pre-built a custom Azure image available on VM Depot with all the required tooling and Cloudbreak deployer installed. In order to launch this image on Azure please use the following [image]().
 
@@ -6,65 +6,22 @@ Note that we use the new [Azure ARM](https://azure.microsoft.com/en-us/documenta
 
 Cloudbreak will already be installed, thus you can follow these steps to launch the application.
 
-## Usage
+# Configure Cloudbreak deployer
 
-Once the Cloudbreak deployer is installed it will generate some config files and will download supporting binaries. It is
-advised that you create a dedicated directory for it:
-
-```
-mkdir cloudbreak-deployment
-cd cloudbreak-deployment
-```
-
-### Initialize Profile
-
-First initialize your directory by creating a `Profile` file:
+Enter into the `cloudbreak-deployment folder`.
 
 ```
-cbd init
+cd ~/cloudbreak-deployment
 ```
 
-It will create a `Profile` file in the current directory. Please edit the file - the only required
-configuration is the `PUBLIC_IP`. This IP will be used to access the Cloudbreak UI
+In this folder you will find a `Profile` file.
+
+#### Configure Cloudbreak UI access
+
+Please edit the Profile file - the only mandatory configuration is the `PUBLIC_IP`. This IP will be used to access the Cloudbreak UI
 (called Uluwatu). In some cases the `cbd` tool tries to guess it, if can't than will give a hint.
 
-### Start Cloudbreak
-
-To start all the containers run:
-
-```
-cbd start
-```
-
-Launching the first time will take more time as it does some additional steps:
-
-- download all the docker images, needed by Cloudbreak.
-- create **docker-compose.yml**: Full configuration of containers needed for the Cloudbreak deployment.
-- create **uaa.yml**: Identity Server configuration.
-
-### Watch the logs
-
-```
-cbd logs
-```
-
-## Default Credentials
-
-The default credentials can be revealed by `cbd login`
-
-These values are used in the `uaa.yml` end section. To change these values, add 2 lines into your Profile:
-
-```
-export UAA_DEFAULT_USER_EMAIL=myself@example.com
-export UAA_DEFAULT_USER_PW=demo123
-```
-and than you need to recreate configs:
-```
-rm *.yml
-cbd generate
-```
-
-## Provider specific configurations
+#### Azure access setup
 
 In order for Cloudbreak to be able to launch clusters on Azure on your behalf you need to set up your Azure ARM application.
 
@@ -74,11 +31,11 @@ cbd azure configure-arm --app_name myapp --app_password password123 --subscripti
 
 Where `--app_password` is your application password (default is password), `--subscription_id` is your Azure subscription ID, `--username` is your Azure username and  `--password` is your Azure password.
 
-##Filesystem configuration
+#### Filesystem configuration
 
-When starting a cluster with Cloudbreak on Azure, the default filesystem is “Windows Azure blob storage with DASH”. Hadoop has built-in support for the [wasb filesystem](https://hadoop.apache.org/docs/current/hadoop-azure/index.html) so it can be used easily as HDFS instead of disks.
+When starting a cluster with Cloudbreak on Azure, the default filesystem is “Windows Azure blob storage with DASH”. Hadoop has built-in support for the [WASB filesystem](https://hadoop.apache.org/docs/current/hadoop-azure/index.html) so it can be used easily as HDFS instead of disks.
 
-### Disks and blob storage
+##### Disks and blob storage
 
 In Azure every data disk attached to a virtual machine [is stored](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-disks-vhds/) as a virtual hard disk (VHD) in a page blob inside an Azure storage account. Because these are not local disks and the operations must be done on the VHD files it causes degraded performance when used as HDFS.
 When WASB is used as a Hadoop filesystem the files are full-value blobs in a storage account. It means better performance compared to the data disks and the WASB filesystem can be configured very easily but Azure storage accounts have their own [limitations](https://azure.microsoft.com/en-us/documentation/articles/azure-subscription-service-limits/#storage-limits) as well. There is a space limitation for TB per storage account (500 TB) as well but the real bottleneck is the total request rate that is only 20000 IOPS where Azure will start to throw errors when trying to do an I/O operation.
@@ -88,7 +45,7 @@ When configuring a WASB filesystem with Hadoop, the only required config entries
 
 ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/dash.png)
 
-### Deploying a DASH service with Cloudbreak deployer
+##### Deploying a DASH service with Cloudbreak deployer
 
 We have automated the deployment of a DASH service in cloudbreak-deployer. After cbd is installed, simply run the following command to deploy a DASH cloud service with 5 scale out storage accounts:
 ```
@@ -97,126 +54,58 @@ cbd azure deploy-dash --accounts 5 --prefix dash --location "West Europe" --inst
 
 The command first creates the namespace account and the scaleout storage accounts, builds the *.cscfg* configuration file based on the created storage account names and keys, generates an Account Name and an Account Key for the DASH service and finally deploys the cloud service package file to a new cloud service.
 
-### Configuring DASH from Cloudbreak
-
-When an Azure credential is selected in Cloudbreak the default filesystem is set to "WASB with DASH”. The *Account Name* and *Account Key* displayed by `cbd` must be copied to the corresponding fields.
-
-**Important:** For better performance DASH service and the Cloudbreak cluster must be in the same Azure region.
-
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/dashui.png)
-
 The WASB filesystem configured with DASH can be used as a data lake - when multiple clusters are deployed with the same DASH filesystem configuration the same data can be accessed from all the clusters, but every cluster can have a different service configured as well. In that case deploy as many DASH services with cbd as clusters with Cloudbreak and configure them accordingly.
 
+#### SMTP configurations
 
-## Manage cloud credentials
+During registration or cluster provisioning Cloudbreak sends emails to the user. In order for email sending to work put these lines into your `Profile` file.
 
-You can now log into the Cloudbreak application at http://PUBLIC_IP:3000. Once logged in go to **Manage credentials**. Using manage credentials will  link your cloud account with the Cloudbreak account.
+```
+export CLOUDBREAK_SMTP_SENDER_USERNAME=
+export CLOUDBREAK_SMTP_SENDER_PASSWORD=
+export CLOUDBREAK_SMTP_SENDER_HOST=
+export CLOUDBREAK_SMTP_SENDER_PORT=
+export CLOUDBREAK_SMTP_SENDER_FROM=
+```
 
-`Name:` name of your credential
+#### Change default username/Password
 
-`Description:` short description of your linked credential
+The default credentials can be revealed by `cbd login` These values are used in the `uaa.yml` file's end section. To change these values, add 2 lines into your Profile:
 
-`Subscription Id:` your Azure subscription id - see Accounts (Browse all> Subscription)
+```
+export UAA_DEFAULT_USER_EMAIL=myself@example.com
+export UAA_DEFAULT_USER_PW=demo123
+```
 
-`Password:` your password which was setted up when you create the AD app
+#### Regenerate your Profile
 
-`App ID:` You app Id (Browse all> Subscription> Subscription detail> Users> You application> Properties)
+You are done with the configuration of Cloudbreak deployer. The last thing you have to do is to regenerate the configurations in order to take effect.
 
-`App Owner Tenant ID:` You Tenant Id (Browse all> Subscription> Subscription detail> Users> You application> Properties)
+```
+rm *.yml
+cbd generate
+```
 
-`SSH certificate:` the SSH public certificate in OpenSSH format that's private keypair can be used to log into the launched instances later (The key generation process is described in the Configuring the Microsoft Azure account section)
+#### Verify configs
 
-The ssh username is **cloudbreak**
+In order to verify that all configs are OK use the `doctor` command.
 
-##Manage resources
+```
+cbd doctor
+```
 
-Using manage resources you can create infrastructure templates. Templates describes the infrastructure where the HDP cluster will be provisioned. We support heterogenous clusters - this means that one cluster can be built by combining different templates.
+# Use Cloudbreak
 
-`Name:` name of your template
+To start the Cloudbreak application use the following command.
 
-`Description:` short description of your template
+```
+cbd start
+```
 
-`Instance type:` the Amazon instance type to be used - we suggest to use at least small or medium instances
+This will start all the Docker containers and initialize the application. Please give a few minutes until all services starts. While the services are starting you can check the logs.
 
-`Volume type:` option to choose are SSD, regular HDD (both EBS) or Ephemeral
+```
+cbd logs
+```
 
-`Attached volumes per instance:` the number of disks to be attached
-
-`Volume size (GB):` the size of the attached disks (in GB)
-
-`Spot price:` option to set a spot price - not mandatory, if specified we will request spot price instances (which might take a while or never be fulfilled by Amazon)
-
-`EBS encryption:` this feature is supported with all EBS volume types (General Purpose (SSD), Provisioned IOPS (SSD), and Magnetic
-
-`Public in account:` share it with others in the account
-
-## Manage blueprints
-Blueprints are your declarative definition of a Hadoop cluster.
-
-`Name:` name of your blueprint
-
-`Description:` short description of your blueprint
-
-`Source URL:` you can add a blueprint by pointing to a URL. As an example you can use this [blueprint](https://github.com/sequenceiq/ambari-rest-client/raw/1.6.0/src/main/resources/blueprints/multi-node-hdfs-yarn).
-
-`Manual copy:` you can copy paste your blueprint in this text area
-
-`Public in account:` share it with others in the account
-
-## Manage networks
-
-Manage networks allows you to create or reuse existing networks and configure them.
-
-`Name:` name of the network
-
-`Description:` short description of your network
-
-`Subnet (CIDR):` a subnet in the VPC with CIDR block
-
-`Address prefix (CIDR):` the address space that is used for subnets
-
-`Public in account:` share it with others in the account
-
-## Manage security groups
-
-Security groups allows configuration of traffic/access to the cluster. Currently there are two default groups, and later versions will allow setup of new groups.
-
-`only-ssh-and-ssl:` all ports are locked down (you can't access Hadoop services outside of the VPN) but SSH (22) and HTTPS (443)
-
-`all-services-port:` all Hadoop services + SSH/HTTP are accessible by default: SSH (22) HTTPS (443) 8080 (Ambari) 8500 (Consul) 50070 (NN) 8088 (RM Web) 8030 (RM Scheduler) 8050 (RM IPC) 19888 (Job history server) 60010 (HBase master) 15000 (Falcon) 8744 (Storm) 11000 (Oozie) 18080 (Spark HS) 8042 (NM Web) 9996 (Zeppelin WebSocket) 9995 (Zeppelin UI) 3080 (Kibana) 9200 (Elasticsearch)
-
-## Create a cluster
-
-Using the create cluster functionality Cloudbreak will create a cloud Stack and a Hadoop Cluster. In order to create a cluster you will have to select a credential first.
-
-`Cluster name:` your cluster name
-
-`Region:` the region where the cluster is started
-
-`Network:` the network template
-
-`Security Group:" the security group
-
-`Blueprint:` your Hadoop cluster blueprint. Once the blueprint is selected we parse it and give you the option to select the followings for each **hostgroup**.
-
-`Hostgroup configuration`
-
-  `Group size:` the number of instances to be started
-
-  `Template:` the stack template associated to the hostgroup
-
-`Enable security:` Install KDC and Kerberize the cluster
-
-`Public in account:` share it with others in the account
-
-**Advanced features**:
-
-`Consul server count:` the number of Consul servers (odd number), by default is 3. It varies with the cluster size.
-
-`Minimum cluster size:` the provisioning strategy in case of the cloud provider can't allocate all the requested nodes
-
-`Validate blueprint:` feature to validate or not the Ambari blueprint. By default is switched on.
-
-`Ambari Repository config:` you can take the stack RPM's from a custom stack repository
-
-Once you have launched the cluster creation you can track the progress either on Cloudbreak UI or your cloud provider management UI.
+Once Cloudbreak is up and running you can launch clusters in two different ways. You can use the [Cloudbreak UI](azure_cb_ui.md) or use the [Cloudbreak shell](azure_cb_shell.md).
