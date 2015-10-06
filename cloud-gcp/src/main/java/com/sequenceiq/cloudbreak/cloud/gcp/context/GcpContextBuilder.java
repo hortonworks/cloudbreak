@@ -19,16 +19,7 @@ public class GcpContextBuilder implements ResourceContextBuilder<GcpContext> {
     public static final int PARALLEL_RESOURCE_REQUEST = 30;
 
     @Override
-    public GcpContext contextInit(CloudContext context, AuthenticatedContext auth, boolean build) {
-        return initContext(context, auth, build);
-    }
-
-    @Override
-    public GcpContext terminationContextInit(CloudContext context, AuthenticatedContext auth, List<CloudResource> resources) {
-        return initContext(context, auth, false);
-    }
-
-    private GcpContext initContext(CloudContext context, AuthenticatedContext auth, boolean build) {
+    public GcpContext contextInit(CloudContext context, AuthenticatedContext auth, List<CloudResource> resources, boolean build) {
         CloudCredential credential = auth.getCloudCredential();
         String projectId = GcpStackUtil.getProjectId(credential);
         Compute compute = GcpStackUtil.buildCompute(credential);

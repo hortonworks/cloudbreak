@@ -7,6 +7,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.openstack4j.api.Builders;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.exceptions.OS4JException;
+import org.openstack4j.model.compute.Action;
 import org.openstack4j.model.compute.ActionResponse;
 import org.openstack4j.model.compute.BlockDeviceMappingCreate;
 import org.openstack4j.model.compute.Flavor;
@@ -14,6 +15,8 @@ import org.openstack4j.model.compute.Server;
 import org.openstack4j.model.compute.ServerCreate;
 import org.openstack4j.model.compute.builder.BlockDeviceMappingBuilder;
 import org.openstack4j.model.compute.builder.ServerCreateBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -36,6 +39,9 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBuilder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackInstanceBuilder.class);
+
     @Override
     public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
             List<CloudResource> buildableResource) throws Exception {
@@ -111,26 +117,54 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
     }
 
     @Override
+    public CloudVmInstanceStatus stop(OpenStackContext context, AuthenticatedContext auth, CloudInstance instance) {
+        return executeAction(auth, instance, Action.STOP);
+    }
+
+    @Override
+    public CloudVmInstanceStatus start(OpenStackContext context, AuthenticatedContext auth, CloudInstance instance) {
+        return executeAction(auth, instance, Action.START);
+    }
+
+    private CloudVmInstanceStatus executeAction(AuthenticatedContext auth, CloudInstance instance, Action action) {
+        OSClient osClient = createOSClient(auth);
+        ActionResponse actionResponse = osClient.compute().servers().action(instance.getInstanceId(), action);
+        if (actionResponse.isSuccess()) {
+            return new CloudVmInstanceStatus(instance, InstanceStatus.IN_PROGRESS);
+        }
+        return new CloudVmInstanceStatus(instance, InstanceStatus.FAILED, actionResponse.getFault());
+    }
+
+
+    @Override
     public ResourceType resourceType() {
         return ResourceType.OPENSTACK_INSTANCE;
     }
 
     @Override
     protected boolean checkStatus(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) {
-        OSClient osClient = createOSClient(auth);
-        CloudContext cloudContext = auth.getCloudContext();
-        Server server = osClient.compute().servers().get(resource.getReference());
-        if (server != null && context.isBuild()) {
-            Server.Status status = server.getStatus();
+        Server.Status status = getStatus(auth, resource.getReference());
+        if (status != null && context.isBuild()) {
             if (Server.Status.ERROR == status) {
+                CloudContext cloudContext = auth.getCloudContext();
                 throw new OpenStackResourceException("Instance in failed state", resource.getType(), resource.getName(), cloudContext.getId(),
                         status.name());
             }
             return status == Server.Status.ACTIVE;
-        } else if (server == null && !context.isBuild()) {
+        } else if (status == null && !context.isBuild()) {
             return true;
         }
         return false;
+    }
+
+    private Server.Status getStatus(AuthenticatedContext auth, String serverId) {
+        OSClient osClient = createOSClient(auth);
+        Server server = osClient.compute().servers().get(serverId);
+        Server.Status status = null;
+        if (server != null) {
+            status = server.getStatus();
+        }
+        return status;
     }
 
     private CloudResource getPort(List<CloudResource> computeResources) {
