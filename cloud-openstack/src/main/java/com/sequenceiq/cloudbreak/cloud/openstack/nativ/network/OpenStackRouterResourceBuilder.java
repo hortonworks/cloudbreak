@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
-import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackConstants;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
@@ -57,11 +57,6 @@ public class OpenStackRouterResourceBuilder extends AbstractOpenStackNetworkReso
     @Override
     public ResourceType resourceType() {
         return ResourceType.OPENSTACK_ROUTER;
-    }
-
-    @Override
-    public int order() {
-        return 2;
     }
 
     @Override

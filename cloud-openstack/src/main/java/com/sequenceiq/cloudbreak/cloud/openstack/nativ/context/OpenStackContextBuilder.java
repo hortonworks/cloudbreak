@@ -7,46 +7,56 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.openstack4j.api.OSClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackClient;
-import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackConstants;
+import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.cloud.template.ResourceContextBuilder;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class OpenStackContextBuilder implements ResourceContextBuilder<OpenStackContext> {
-    public static final int PARALLEL_RESOURCE_REQUEST = 30;
+    private static final int PARALLEL_RESOURCE_REQUEST = 30;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackContextBuilder.class);
+
     @Inject
     private OpenStackClient openStackClient;
 
     @Override
-    public OpenStackContext contextInit(CloudContext cloudContext, AuthenticatedContext auth, boolean build) {
+    public OpenStackContext contextInit(CloudContext cloudContext, AuthenticatedContext auth, List<CloudResource> resources, boolean build) {
         OSClient osClient = openStackClient.createOSClient(auth);
         KeystoneCredentialView credentialView = new KeystoneCredentialView(auth.getCloudCredential());
-        OpenStackContext openStackContext = initContext(cloudContext, build);
-        openStackContext.putParameter(OpenStackConstants.TENANT_ID, osClient.identity().tenants().getByName(credentialView.getTenantName()).getId());
-        return openStackContext;
-    }
 
-    @Override
-    public OpenStackContext terminationContextInit(CloudContext cloudContext, AuthenticatedContext auth, List<CloudResource> resources) {
-        OpenStackContext osContext = initContext(cloudContext, false);
-        for (CloudResource resource : resources) {
-            if (resource.getType().equals(ResourceType.OPENSTACK_SUBNET)) {
-                osContext.putParameter(OpenStackConstants.SUBNET_ID, resource.getReference());
+        OpenStackContext openStackContext = new OpenStackContext(cloudContext.getName(), cloudContext.getRegion(), PARALLEL_RESOURCE_REQUEST, build);
+
+        openStackContext.putParameter(OpenStackConstants.TENANT_ID, osClient.identity().tenants().getByName(credentialView.getTenantName()).getId());
+
+        if (resources != null) {
+            for (CloudResource resource : resources) {
+                switch (resource.getType()) {
+                    case OPENSTACK_SUBNET:
+                        openStackContext.putParameter(OpenStackConstants.SUBNET_ID, resource.getReference());
+                        break;
+                    case OPENSTACK_NETWORK:
+                        openStackContext.putParameter(OpenStackConstants.NETWORK_ID, resource.getReference());
+                        break;
+                    case OPENSTACK_SECURITY_GROUP:
+                        openStackContext.putParameter(OpenStackConstants.SECURITYGROUP_ID, resource.getReference());
+                        break;
+                    default:
+                        LOGGER.debug("Resource is not used during context build: {}", resource);
+                }
             }
         }
-        osContext.putParameter(OpenStackConstants.FLOATING_IP_IDS, Collections.synchronizedList(new ArrayList<String>()));
-        return osContext;
-    }
+        openStackContext.putParameter(OpenStackConstants.FLOATING_IP_IDS, Collections.synchronizedList(new ArrayList<String>()));
 
-    private OpenStackContext initContext(CloudContext context, boolean build) {
-        return new OpenStackContext(context.getName(), context.getRegion(), PARALLEL_RESOURCE_REQUEST, build);
+        return openStackContext;
     }
 
     @Override

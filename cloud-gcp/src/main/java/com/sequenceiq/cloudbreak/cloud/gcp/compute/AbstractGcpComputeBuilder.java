@@ -30,11 +30,6 @@ public abstract class AbstractGcpComputeBuilder extends AbstractGcpResourceBuild
     }
 
     @Override
-    public CloudResource rollback(GcpContext context, CloudResource resource) throws Exception {
-        return null;
-    }
-
-    @Override
     public CloudVmInstanceStatus stop(GcpContext context, AuthenticatedContext auth, CloudInstance instance) {
         return null;
     }

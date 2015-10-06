@@ -23,8 +23,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackClient;
-import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackHeatUtils;
+import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.metadata.CloudInstanceMetaDataExtractor;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
@@ -36,7 +36,7 @@ public class OpenStackNativeMetaDataCollector implements MetadataCollector {
     private OpenStackClient openStackClient;
 
     @Inject
-    private OpenStackHeatUtils utils;
+    private OpenStackUtils utils;
 
     @Inject
     @Named("cloudInstanceMetadataExtractor")

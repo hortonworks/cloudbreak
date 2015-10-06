@@ -13,11 +13,12 @@ import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
-import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackAuthenticator;
-import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackClient;
-import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackConstants;
-import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackCredentialConnector;
-import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackSetup;
+import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackAuthenticator;
+import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
+import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackCredentialConnector;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackParameters;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackSetup;
 
 @Service
 public class OpenStackNativeConnector implements CloudConnector {
@@ -37,7 +38,7 @@ public class OpenStackNativeConnector implements CloudConnector {
     @Inject
     private OpenStackSetup openStackSetup;
     @Inject
-    private OpenStackNativeParameters openStackNativeParameters;
+    private OpenStackParameters openStackParameters;
 
 
     @Override
@@ -77,7 +78,7 @@ public class OpenStackNativeConnector implements CloudConnector {
 
     @Override
     public PlatformParameters parameters() {
-        return openStackNativeParameters;
+        return openStackParameters;
     }
 
 }

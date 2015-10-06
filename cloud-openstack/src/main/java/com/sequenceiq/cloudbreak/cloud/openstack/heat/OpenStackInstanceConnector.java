@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.openstack;
+package com.sequenceiq.cloudbreak.cloud.openstack.heat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.status.NovaInstanceStatus;
 
 @Service

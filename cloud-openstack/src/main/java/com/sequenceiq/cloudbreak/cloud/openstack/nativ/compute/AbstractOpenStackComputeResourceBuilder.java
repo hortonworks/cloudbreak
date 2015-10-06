@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.nativ.compute;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -14,13 +17,26 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackConstants;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.AbstractOpenStackResourceBuilder;
+import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.service.OpenStackResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 
 public abstract class AbstractOpenStackComputeResourceBuilder extends AbstractOpenStackResourceBuilder implements ComputeResourceBuilder<OpenStackContext> {
+
+    private static final Map<Class<? extends AbstractOpenStackComputeResourceBuilder>, Integer> ORDER;
+
+    static {
+        Map<Class<? extends AbstractOpenStackComputeResourceBuilder>, Integer> map = Maps.newHashMap();
+        map.put(OpenStackPortBuilder.class, 0);
+        map.put(OpenStackAttachedDiskResourceBuilder.class, 0);
+        map.put(OpenStackInstanceBuilder.class, 1);
+        map.put(OpenStackFloatingIPBuilder.class, 2);
+        ORDER = Collections.unmodifiableMap(map);
+    }
+
     @Inject
     private OpenStackResourceNameService resourceNameService;
 
@@ -33,11 +49,6 @@ public abstract class AbstractOpenStackComputeResourceBuilder extends AbstractOp
 
     @Override
     public List<CloudVmInstanceStatus> checkInstances(OpenStackContext context, AuthenticatedContext auth, List<CloudInstance> instances) {
-        return null;
-    }
-
-    @Override
-    public CloudResource rollback(OpenStackContext context, CloudResource resource) throws Exception {
         return null;
     }
 
@@ -55,6 +66,16 @@ public abstract class AbstractOpenStackComputeResourceBuilder extends AbstractOp
     public List<CloudResourceStatus> checkResources(OpenStackContext context, AuthenticatedContext auth, List<CloudResource> resources) {
         return checkResources(resourceType(), context, auth, resources);
     }
+
+    @Override
+    public int order() {
+        Integer order = ORDER.get(getClass());
+        if (order == null) {
+            throw new OpenStackResourceException(String.format("No resource order found for class: %s", getClass()));
+        }
+        return order;
+    }
+
 
     @Override
     public String platform() {

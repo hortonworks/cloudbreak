@@ -223,7 +223,7 @@ public class ComputeResourceService {
 
     private CloudInstance getCloudInstance(CloudResource cloudResource, List<CloudInstance> instances) {
         for (CloudInstance instance : instances) {
-            if (instance.getInstanceId().equalsIgnoreCase(cloudResource.getName())) {
+            if (instance.getInstanceId().equalsIgnoreCase(cloudResource.getName()) || instance.getInstanceId().equalsIgnoreCase(cloudResource.getReference())) {
                 return instance;
             }
         }

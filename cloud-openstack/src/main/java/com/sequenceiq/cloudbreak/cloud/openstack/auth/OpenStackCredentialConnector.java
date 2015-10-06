@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.openstack;
+package com.sequenceiq.cloudbreak.cloud.openstack.auth;
 
 import javax.inject.Inject;
 
