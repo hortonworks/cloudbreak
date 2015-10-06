@@ -34,11 +34,11 @@ public class ParameterGenerator {
     private static final long STACK_ID = 5L;
 
     public CloudContext createCloudContext() {
-        return new CloudContext(STACK_ID, "teststack", "TESTCONNECTOR", "owner", "TESTVARIANT", 0L, "region");
+        return new CloudContext(STACK_ID, "teststack", "TESTCONNECTOR", "owner", "TESTVARIANT", "region");
     }
 
     public CloudCredential createCloudCredential() {
-        CloudCredential c = new CloudCredential("opencred", "public_key", "cloudbreak");
+        CloudCredential c = new CloudCredential(1L, "opencred", "public_key", "cloudbreak");
         c.putParameter("userName", "userName");
         c.putParameter("password", "password");
         c.putParameter("tenantName", "tenantName");

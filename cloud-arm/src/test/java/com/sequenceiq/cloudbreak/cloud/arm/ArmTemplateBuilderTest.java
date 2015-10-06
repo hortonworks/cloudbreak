@@ -58,7 +58,7 @@ public class ArmTemplateBuilderTest {
     private CloudCredential createCloudCredential() {
         Map<String, Object> credentialMap = new HashMap<>();
         credentialMap.put("sshKey", "sshkey....");
-        return new CloudCredential("testcredential", "pubkey", "cloudbreak", credentialMap);
+        return new CloudCredential(1L, "testcredential", "pubkey", "cloudbreak", credentialMap);
     }
 
     private CloudStack createCloudStack() {
@@ -88,8 +88,7 @@ public class ArmTemplateBuilderTest {
 
     private CloudContext createCloudContext() {
         Stack stack = TestUtil.stack();
-        return new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(), stack.getCreated(),
-                stack.getRegion());
+        return new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(), stack.getRegion());
     }
 
     @Ignore

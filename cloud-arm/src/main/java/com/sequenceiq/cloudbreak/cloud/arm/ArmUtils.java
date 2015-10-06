@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.cloud.arm;
 
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_ARM_CENTRAL_STORAGE;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +35,8 @@ public class ArmUtils {
     public static final int NOT_FOUND = 404;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArmUtils.class);
-
+    private static final int RADIX = 16;
+    private static final int MAX_LENGTH_OF_NAME_SLICE = 8;
     private static final int MAX_LENGTH_OF_RESOURCE_NAME = 24;
 
     @Value("${cb.arm.persistent.storage:" + CB_ARM_CENTRAL_STORAGE + "}")
@@ -113,14 +117,23 @@ public class ArmUtils {
             ArmCredentialView acv = new ArmCredentialView(cloudCredential);
             String subscriptionIdPart = acv.getSubscriptionId().replaceAll("-", "").toLowerCase();
             String regionInitials = WordUtils.initials(region, '_').toLowerCase();
-            result = String.format("%s%s%s", persistentStorage, regionInitials, subscriptionIdPart).substring(0, MAX_LENGTH_OF_RESOURCE_NAME);
-            LOGGER.info("Storage account name: {}", result);
+            result = String.format("%s%s%s", persistentStorage, regionInitials, subscriptionIdPart);
         } else {
-            result = cloudContext.getName().toLowerCase().replaceAll("\\s+|-", "") + cloudContext.getId() + cloudContext.getCreated();
+            String name = cloudContext.getName().toLowerCase().replaceAll("\\s+|-", "");
+            name = name.length() > MAX_LENGTH_OF_NAME_SLICE ? name.substring(0, MAX_LENGTH_OF_NAME_SLICE) : name;
+            MessageDigest messageDigest;
+            try {
+                messageDigest = MessageDigest.getInstance("MD5");
+                messageDigest.update((cloudCredential.getId().toString() + cloudContext.getId() + cloudContext.getOwner()).getBytes());
+                result = name + new BigInteger(1, messageDigest.digest()).toString(RADIX);
+            } catch (NoSuchAlgorithmException e) {
+                result = name + cloudCredential.getId() + cloudContext.getId() + cloudContext.getOwner();
+            }
         }
         if (result.length() > MAX_LENGTH_OF_RESOURCE_NAME) {
-            return result.substring(result.length() - MAX_LENGTH_OF_RESOURCE_NAME, result.length());
+            result = result.substring(0, MAX_LENGTH_OF_RESOURCE_NAME);
         }
+        LOGGER.info("Storage account name: {}", result);
         return result;
     }
 

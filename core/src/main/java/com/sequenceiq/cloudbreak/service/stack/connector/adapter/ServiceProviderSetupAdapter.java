@@ -56,7 +56,7 @@ public class ServiceProviderSetupAdapter implements ProvisionSetup {
     public ProvisionEvent prepareImage(Stack stack) throws Exception {
         CloudPlatform cloudPlatform = stack.cloudPlatform();
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
-                stack.getCreated(), stack.getRegion());
+                stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         PrepareImageRequest<PrepareImageResult> prepareImageRequest = new PrepareImageRequest<>(cloudContext, cloudCredential, cloudStack);
@@ -79,7 +79,7 @@ public class ServiceProviderSetupAdapter implements ProvisionSetup {
     @Override
     public ImageStatusResult checkImage(Stack stack) throws Exception {
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
-                stack.getCreated(), stack.getRegion());
+                stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         CheckImageRequest<CheckImageResult> checkImageRequest = new CheckImageRequest<>(cloudContext, cloudCredential, cloudStack);
@@ -103,7 +103,7 @@ public class ServiceProviderSetupAdapter implements ProvisionSetup {
     public ProvisionEvent setupProvisioning(Stack stack) throws Exception {
         CloudPlatform cloudPlatform = stack.cloudPlatform();
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
-                stack.getCreated(), stack.getRegion());
+                stack.getRegion());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         SetupRequest<SetupResult> setupRequest = new SetupRequest<>(cloudContext, cloudCredential, cloudStack);

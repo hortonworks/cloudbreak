@@ -1,16 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.util;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -21,6 +19,7 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.SecurityUtils;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.ComputeScopes;
 import com.google.api.services.compute.model.Disk;
@@ -62,21 +61,14 @@ public final class GcpStackUtil {
     }
 
     public static GoogleCredential buildCredential(CloudCredential gcpCredential, HttpTransport httpTransport) throws IOException, GeneralSecurityException {
-        String p12path = gcpCredential.getId() == null ? "/tmp/" + new Date().getTime() + ".p12" : "/tmp/" + gcpCredential.getId() + ".p12";
-        File p12file = new File(p12path);
-        if (!p12file.exists()) {
-            FileOutputStream output = new FileOutputStream(p12file);
-            IOUtils.write(Base64.decodeBase64(getServiceAccountPrivateKey(gcpCredential)), output);
-        }
+        PrivateKey pk = SecurityUtils.loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(),
+                new ByteArrayInputStream(Base64.decodeBase64(getServiceAccountPrivateKey(gcpCredential))), "notasecret", "privatekey", "notasecret");
         GoogleCredential credential = new GoogleCredential.Builder().setTransport(httpTransport)
                 .setJsonFactory(JSON_FACTORY)
                 .setServiceAccountId(getServiceAccountId(gcpCredential))
                 .setServiceAccountScopes(SCOPES)
-                .setServiceAccountPrivateKeyFromP12File(p12file)
+                .setServiceAccountPrivateKey(pk)
                 .build();
-        if (gcpCredential.getId() == null) {
-            p12file.delete();
-        }
         return credential;
     }
 
