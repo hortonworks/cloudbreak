@@ -1,102 +1,39 @@
-Cloudbreak Deployer helps to deploy a Cloudbreak environment into Docker containers.
-For recent changes please check the [changelog](http://sequenceiq.com/cloudbreak-deployer/latest/changelog/).
+Cloudbreak is a cloud agnostic Hadoop as a Service API. Abstracts the provisioning and ease management and monitoring of on-demand HDP clusters in different virtual environments. For recent changes please check the [changelog](http://sequenceiq.com/cloudbreak-deployer/latest/changelog/).
 
-Full documentation is generated [here](http://sequenceiq.com/cloudbreak-deployer/latest/)
+Cloudbreak has two main components - the [Cloudbreak deployer](http://sequenceiq.com/cloudbreak-deployer) and the [Cloudbreak application](http://sequenceiq.com/cloudbreak). Cloudbreak deployer helps you to deploy the Cloudbreak application automatically in environments with Docker support. Once the Cloudbreak application is deployed you can use it to provision HDP clusters in different cloud environments.
 
 ## Requirements
 
-Currently only **Linux** and **OSX** 64 bit binaries are released for Cloudbreak Deployer. For anything else we will create a special Docker container.
-The deployment itself needs only **Docker 1.7.0** or later.
-Your firewall must be configured to let docker containers talk to each other, this is especially important on CentOS 7 where firewalld blocks some connections by default.
+Currently only **Linux** and **OSX** 64 bit binaries are released for Cloudbreak Deployer. For anything else we can create a special Docker container. The deployment itself needs only **Docker 1.7.0** or later.
+Your firewall must be configured to let Docker containers talk to each other and have SELinux disabled. *This is especially important on CentOS 7 where default firewall configuration blocks connections by default.* Should you intend to deploy the Cloudbreak application alongside your cluster in your favorite cloud environment you can use our CentOS 7 based default cloud images - that comes with CBD (Cloudbreak deployer) and the required Docker containers pre-installed.
 
-## Installation
+##On-prem installation
 
-To install Cloudbreak Deployer, you just have to unzip the platform specific
-single binary to your PATH. The one-liner way is:
+For on premise installations of the Cloudbreak application please open the [Onprem submenu](onprem.md)
 
-```
-curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install | sh && cbd --version
-```
+##AWS based installation
 
-## Usage
+We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
 
-**cbd** will generate some config files, and will download supporting binaries. It is
-advised that you create a dedicated directory for it:
+You can follow the AWS provider specific documentation using this [link](aws.md)
 
-```
-mkdir cloudbreak-deployment
-cd cloudbreak-deployment
-```
+##Azure based installation
 
-### Initialize Profile
-First initialize your directory by creating a `Profile` file:
+We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
 
-```
-cbd init
-```
-It will create a `Profile` file in the current directory. The only required
-configuration is the `PUBLIC_IP`. This IP will be used for the Cloudbreak UI
-(called Uluwatu). In some case the `cbd` tool tries to guess it, if can't than will give a hint.
+You can follow the AWS provider specific documentation using this [link](azure.md)
 
+##GCP based installation
 
-### Deploy Cloudbreak
+We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
 
-To start all the containers run:
+You can follow the AWS provider specific documentation using this [link](gcp.md)
 
-```
-cbd start
-```
+##OpenStack based installation
 
-At the first time it will take more time, as it does additional steps:
-- download all the docker images, neded by Cloudbreak.
-- create **docker-compose.yml**: Full confirguration of containers needed for Cloudbreak deployment.
-- create **uaa.yml**: Identity Server configuration. (For example default user/password in the last line)
+We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
 
-### Watch the logs
-
-```
-cbd logs
-```
-
-### Pull Docker images
-
-All Cloudbreak components and the backend database is running inside containers.
-The **pull command is optional** but you can run it prior to `cbd start`
-
-```
-cbd pull
-```
-
-It will take some time, depending on your network connection, so you can grab a cup of coffee.
-
-
-## Default Credentials
-
-The default credentials can be revealed by `cbd login`
-
-These values are used in the `uaa.yml` end section. To change these values, add 2 lines into your Profile:
-
-```
-export UAA_DEFAULT_USER_EMAIL=myself@example.com
-export UAA_DEFAULT_USER_PW=demo123
-```
-and than you need to recreate configs:
-```
-rm *.yml
-cbd generate
-```
-
-## Cloud Provider configuration
-
-In order to be able to assume roles on AWS you need to set up your AWS keys in the Profile file:
-```
-export AWS_ACCESS_KEY_ID=AKIA**************W7SA
-export AWS_SECRET_ACCESS_KEY=RWCT4Cs8******************/*skiOkWD
-```
-If you do not have plans to launch clusters in AWS, then you can safely skip these settings.
-
-For more details regarding accounts please check [Cloudbreak documentation](http://sequenceiq.com/cloudbreak/#accounts).
-
+You can follow the AWS provider specific documentation using this [link](openstack.md)
 
 ## Debug
 
@@ -105,6 +42,8 @@ If you want to have more detailed output set the `DEBUG` env variable to non-zer
 ```
 DEBUG=1 cbd some_command
 ```
+
+## Troubleshooting
 
 You can also use the `doctor` command to diagnose your environment:
 

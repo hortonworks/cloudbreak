@@ -53,7 +53,7 @@ export CLOUDBREAK_SMTP_SENDER_FROM=
 
 ## Consul
 
-[Consul](http://consul.io) is used for dns resolution. All cloudbreak related services are registered as
+[Consul](http://consul.io) is used for dns resolution. All Cloudbreak related services are registered as
 **someservice.service.consul**. Consul’s built in dns server is able to “fall-back” on an other dns server.
 This option is called `-recursor`. Clodbreak Deployer first tries to discover the dns settings of the host,
 by looking for **nameserver** entry in `/etc/resolv.conf`. If it finds one consul will use it as a recursor,
