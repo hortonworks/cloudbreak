@@ -669,6 +669,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         $scope.getPlatformVariants = function() {
             if ($rootScope.activeCredential !== undefined) {
+                $scope.cluster.platformVariant = $rootScope.config.DEFAULT_VARIANTS[$rootScope.activeCredential.cloudPlatform];
                 return $scope.platformVariants[$rootScope.activeCredential.cloudPlatform];
             }
             return [];
