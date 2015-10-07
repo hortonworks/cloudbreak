@@ -37,8 +37,9 @@ public class EnvironmentVariableConfig {
 
     public static final String CB_CONTAINER_ORCHESTRATOR = "SWARM";
     public static final String CB_SUPPORTED_CONTAINER_ORCHESTRATORS = "com.sequenceiq.cloudbreak.orchestrator.swarm.SwarmContainerOrchestrator";
-    public static final String CB_DOCKER_CONTAINER_AMBARI_WARMUP = "sequenceiq/ambari-warmup:2.1.0-consul";
-    public static final String CB_DOCKER_CONTAINER_AMBARI = "sequenceiq/ambari-warmup:2.1.0-consul";
+    public static final String CB_DOCKER_AMBARI_IMAGE_NAME = "sequenceiq/ambari:2.1.2-v1";
+    public static final String CB_DOCKER_CONTAINER_AMBARI_WARMUP = CB_DOCKER_AMBARI_IMAGE_NAME;
+    public static final String CB_DOCKER_CONTAINER_AMBARI = CB_DOCKER_AMBARI_IMAGE_NAME;
     public static final String CB_DOCKER_CONTAINER_REGISTRATOR = "sequenceiq/registrator:v5.2";
     public static final String CB_DOCKER_CONTAINER_DOCKER_CONSUL_WATCH_PLUGN = "sequenceiq/docker-consul-watch-plugn:2.0.2-consul";
     public static final String CB_DOCKER_CONTAINER_AMBARI_DB = "postgres:9.4.1";
@@ -52,7 +53,7 @@ public class EnvironmentVariableConfig {
     public static final String CB_BAYWATCH_ENABLED = "true";
     public static final String CB_BAYWATCH_EXTERN_LOCATION = "";
 
-    public static final String CB_AZURE_IMAGE_NAME = "cb-centos71-amb210-2015-09-25110_2015-September-25_10-0-os-2015-09-25.vhd";
+    public static final String CB_AZURE_IMAGE_NAME = "cb-centos71-amb212-2015-10-07113_2015-October-7_7-11-os-2015-10-07.vhd";
     public static final String CB_AZURE_IMAGE_URI = "https://102589fae040d8westeurope.blob.core.windows.net/images/" + CB_AZURE_IMAGE_NAME;
     public static final String CB_AZURE_RM_IMAGE = new StringBuilder()
             .append(String.format("EAST_ASIA:https://sequenceiqeastasia.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
@@ -68,9 +69,9 @@ public class EnvironmentVariableConfig {
             .append(String.format("WEST_US:https://sequenceiqwestus.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
             .append(String.format("WEST_EUROPE:https://sequenceiqwesteurope.blob.core.windows.net/images/%s", CB_AZURE_IMAGE_NAME))
             .toString();
-    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-b6e578b6,ap-southeast-1:ami-226f7870,ap-southeast-2:ami-093b7233,eu-central-1:ami-94999a89,eu-west-1:ami-7979510e,sa-east-1:ami-79019564,us-east-1:ami-279fe642,us-west-1:ami-9f9f58db,us-west-2:ami-e5ffe7d5";
-    public static final String CB_OPENSTACK_IMAGE = "cb-centos71-amb210-2015-09-25";
-    public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos71-amb210-2015-09-25130.tar.gz";
+    public static final String CB_AWS_AMI_MAP = "ap-northeast-1:ami-7c8f157c,ap-southeast-1:ami-2e4a5b7c,ap-southeast-2:ami-1fa4ec25,eu-central-1:ami-886c6195,eu-west-1:ami-999cabee,sa-east-1:ami-f3f365ee,us-east-1:ami-0b0e426e,us-west-1:ami-b971b7fd,us-west-2:ami-a804e09b";
+    public static final String CB_OPENSTACK_IMAGE = "cb-centos71-amb212-2015-10-07";
+    public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos71-amb212-2015-10-07132.tar.gz";
 
     public static final String CB_ARM_CENTRAL_STORAGE = "cbstore";
     public static final String CB_ARM_TEMPLATE_PATH = "templates/arm-v2.ftl";
