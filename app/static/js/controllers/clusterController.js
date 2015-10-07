@@ -136,22 +136,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             return angular.isUndefined(variable) || variable === null;
         }
 
-        $scope.selectedFileSystemChange = function() {
-            if ($scope.cluster.fileSystem !== undefined && ($scope.cluster.fileSystem.type == "DASH" || $scope.cluster.fileSystem.type == "WASB")) {
-                $scope.cluster.ambariStackDetails = {};
-                $scope.cluster.ambariStackDetails.stack = "HDP";
-                $scope.cluster.ambariStackDetails.version = "2.3";
-                $scope.cluster.ambariStackDetails.os = "redhat6";
-                $scope.cluster.ambariStackDetails.stackRepoId = "HDP-2.3";
-                $scope.cluster.ambariStackDetails.verify = true;
-                $scope.cluster.ambariStackDetails.stackBaseURL = "http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.3.0.1";
-                $scope.cluster.ambariStackDetails.utilsRepoId = "HDP-UTILS-1.1.0.20";
-                $scope.cluster.ambariStackDetails.utilsBaseURL = "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/centos6";
-            } else {
-                $scope.cluster.ambariStackDetails = {};
-            }
-        }
-
         $scope.changeRecipeRun = function(recipeId, hostGroupName, model) {
             var recipe = $filter('filter')($rootScope.recipes, {
                 id: recipeId
@@ -433,7 +417,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.cluster.failurePolicy.threshold = null;
                 $scope.cluster.parameters = {};
                 setFileSystem();
-                $scope.selectedFileSystemChange();
             }
         });
 
