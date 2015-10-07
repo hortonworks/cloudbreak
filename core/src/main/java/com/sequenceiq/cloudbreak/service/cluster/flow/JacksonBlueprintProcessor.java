@@ -51,7 +51,7 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
     }
 
     @Override
-    public Set<String> getServicesInHostgroup(String blueprintText, String hostGroup) {
+    public Set<String> getComponentsInHostGroup(String blueprintText, String hostGroup) {
         ObjectMapper mapper = new ObjectMapper();
         try {
             Set<String> services = new HashSet<>();
