@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_MAX_AWS_RESOURCE_NAME_LENGTH;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
@@ -14,12 +17,17 @@ import com.amazonaws.services.autoscaling.model.Instance;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourceRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourceResult;
+import com.google.common.base.Splitter;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 @Service
 public class CloudFormationStackUtil {
+
+
+    @Value("${cb.max.aws.resource.name.length:" + CB_MAX_AWS_RESOURCE_NAME_LENGTH + "}")
+    private int maxResourceNameLength;
 
     @Inject
     private AwsClient awsClient;
@@ -38,7 +46,8 @@ public class CloudFormationStackUtil {
     }
 
     public String getCfStackName(AuthenticatedContext ac) {
-        return String.format("%s-%s", ac.getCloudContext().getName(), ac.getCloudContext().getId());
+        return String.format("%s-%s", new String(Splitter.fixedLength(maxResourceNameLength - (ac.getCloudContext().getId().toString().length() + 1)).limit(1)
+                .splitToList(ac.getCloudContext().getName()).get(0)), ac.getCloudContext().getId());
     }
 
     public List<String> getInstanceIds(AuthenticatedContext ac, CloudStack stack, String instanceGroup) {
