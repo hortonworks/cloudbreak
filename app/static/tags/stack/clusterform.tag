@@ -79,7 +79,7 @@
                             <input class="form-control" type="number" id="consulServerCount" ng-model="cluster.consulServerCount">
                         </div>
                     </div>
-                    <div class="form-group" ng-show="showAdvancedOptionForm">
+                    <div class="form-group" ng-show="showAdvancedOptionForm && cluster.platformVariant">
                         <label class="col-sm-3 control-label" for="platformVariant">{{msg.cluster_form_platform_variant_label}}</label>
                         <div class="col-sm-3">
                             <select class="form-control" id="platformVariant" ng-model="cluster.platformVariant">

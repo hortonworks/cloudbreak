@@ -743,9 +743,14 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
             }, {
                 key: 'Etc/GMT-12',
                 value: 'GMT+12'
-            }]
+            }],
+            'DEFAULT_VARIANTS': {
+              'GCP': 'GCP',
+              'AZURE': null,
+              'AZURE_RM': 'AZURE_RM',
+              'AWS': null,
+              'OPENSTACK': 'HEAT'
+            }
         }
-
-
     }
 ]);
