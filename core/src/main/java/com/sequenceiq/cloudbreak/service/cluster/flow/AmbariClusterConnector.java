@@ -14,10 +14,6 @@ import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationServ
 import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
 import static java.util.Collections.singletonMap;
 
-import javax.annotation.Nullable;
-import javax.annotation.Resource;
-import javax.inject.Inject;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +26,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import javax.annotation.Nullable;
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Function;
@@ -78,10 +82,8 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
+
 import groovyx.net.http.HttpResponseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 @Service
 public class AmbariClusterConnector {
@@ -228,6 +230,7 @@ public class AmbariClusterConnector {
                 eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
                         cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_MR_SMOKE_FAILED.code()));
             }
+            createDefaultViews(ambariClient, blueprintText, hostGroups);
             cluster = handleClusterCreationSuccess(stack, cluster);
             return cluster;
         } catch (CancellationException cancellationException) {
@@ -487,8 +490,7 @@ public class AmbariClusterConnector {
             }
             if (oneNode) {
                 for (HostGroup hostGroup : hostGroups) {
-                    Set<String> components = blueprintProcessor.getServicesInHostgroup(blueprintText, hostGroup.getName());
-                    if (components.contains("HDFS_CLIENT")) {
+                    if (isComponentPresent(blueprintText, "HDFS_CLIENT", hostGroup)) {
                         hostGroup.addRecipe(recipe);
                         break;
                     }
@@ -499,6 +501,20 @@ public class AmbariClusterConnector {
                 }
             }
         }
+    }
+
+    private boolean isComponentPresent(String blueprint, String component, HostGroup hostGroup) {
+        return isComponentPresent(blueprint, component, Sets.newHashSet(hostGroup));
+    }
+
+    private boolean isComponentPresent(String blueprint, String component, Set<HostGroup> hostGroups) {
+        for (HostGroup hostGroup : hostGroups) {
+            Set<String> components = blueprintProcessor.getComponentsInHostGroup(blueprint, hostGroup.getName());
+            if (components.contains(component)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void rollback(Stack stack, Cluster cluster, AmbariClient ambariClient, HostGroupAdjustmentJson hostGroupAdjustment,
@@ -973,6 +989,20 @@ public class AmbariClusterConnector {
                 new AmbariHostsWithNames(stack, ambariClient, hosts),
                 AMBARI_POLLING_INTERVAL,
                 MAX_ATTEMPTS_FOR_REGION_DECOM);
+    }
+
+    private void createDefaultViews(AmbariClient ambariClient, String blueprintText, Set<HostGroup> hostGroups) {
+        try {
+            ambariClient.createFilesView();
+            if (isComponentPresent(blueprintText, "PIG", hostGroups)) {
+                ambariClient.createPigView();
+            }
+            if (isComponentPresent(blueprintText, "HIVE_SERVER", hostGroups)) {
+                ambariClient.createHiveView();
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Could not create default views", e);
+        }
     }
 
 }

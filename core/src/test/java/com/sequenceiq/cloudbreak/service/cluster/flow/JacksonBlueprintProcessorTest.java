@@ -162,7 +162,7 @@ public class JacksonBlueprintProcessorTest {
     @Test
     public void testGetServicesInHostgroup() throws Exception {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
-        Set<String> result = underTest.getServicesInHostgroup(testBlueprint, "slave_1");
+        Set<String> result = underTest.getComponentsInHostGroup(testBlueprint, "slave_1");
 
         Set<String> expected = new HashSet<>();
         expected.add("DATANODE");
@@ -178,7 +178,7 @@ public class JacksonBlueprintProcessorTest {
     @Test(expected = BlueprintProcessingException.class)
     public void testGetServicesInHostgroupThrowsExceptionIfBlueprintCannotBeParsed() throws Exception {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-invalid.bp");
-        underTest.getServicesInHostgroup(testBlueprint, "slave_1");
+        underTest.getComponentsInHostGroup(testBlueprint, "slave_1");
     }
 
 }

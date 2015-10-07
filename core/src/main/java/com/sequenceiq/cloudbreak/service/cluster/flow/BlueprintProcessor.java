@@ -7,5 +7,5 @@ public interface BlueprintProcessor {
 
     String addConfigEntries(String originalBlueprint, List<BlueprintConfigurationEntry> properties, boolean override);
 
-    Set<String> getServicesInHostgroup(String blueprintText, String hostgroup);
+    Set<String> getComponentsInHostGroup(String blueprintText, String hostGroup);
 }
