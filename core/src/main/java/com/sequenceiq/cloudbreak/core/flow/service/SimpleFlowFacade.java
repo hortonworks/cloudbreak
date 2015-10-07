@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
+import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -164,6 +165,22 @@ public class SimpleFlowFacade implements FlowFacade {
                     .build();
         } catch (Exception e) {
             LOGGER.error("Exception during metadata setup: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext collectMetadata(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Metadata collect. Context: {}", context);
+        try {
+            StackStatusUpdateContext stackStatusUpdateContext = (StackStatusUpdateContext) context;
+            Stack stack = stackService.getById(stackStatusUpdateContext.getStackId());
+            MDCBuilder.buildMdcContext(stack);
+            metadataSetupService.setupMetadata(stackStatusUpdateContext.getCloudPlatform(), stack);
+            LOGGER.debug("Metadata collect DONE.");
+            return stackStatusUpdateContext;
+        } catch (Exception e) {
+            LOGGER.error("Exception during metadata collect: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }

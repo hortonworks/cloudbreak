@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterUpscaleHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ConsulMetadataSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ExtendConsulMetadataHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ExtendMetadataHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.MetadataCollectHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.MetadataSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.PrepareProvisionImageHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ProvisioningHandler;
@@ -86,6 +87,7 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.CHECK_IMAGE.name()), getHandlerForClass(CheckImageStatusHandler.class));
         reactor.on($(FlowPhases.PROVISIONING.name()), getHandlerForClass(ProvisioningHandler.class));
         reactor.on($(FlowPhases.METADATA_SETUP.name()), getHandlerForClass(MetadataSetupHandler.class));
+        reactor.on($(FlowPhases.METADATA_COLLECT.name()), getHandlerForClass(MetadataCollectHandler.class));
         reactor.on($(FlowPhases.TLS_SETUP.name()), getHandlerForClass(TlsSetupHandler.class));
         reactor.on($(FlowPhases.BOOTSTRAP_CLUSTER.name()), getHandlerForClass(BootstrapClusterHandler.class));
         reactor.on($(FlowPhases.CONSUL_METADATA_SETUP.name()), getHandlerForClass(ConsulMetadataSetupHandler.class));
@@ -183,7 +185,10 @@ public class FlowInitializer implements InitializingBean {
 
     private void registerStartFlows() {
         transitionKeyService.registerTransition(StackStartHandler.class, TransitionFactory
-                .createTransition(FlowPhases.STACK_START.name(), FlowPhases.CLUSTER_START.name(), FlowPhases.STACK_STATUS_UPDATE_FAILED.name()));
+                .createTransition(FlowPhases.STACK_START.name(), FlowPhases.METADATA_COLLECT.name(), FlowPhases.STACK_STATUS_UPDATE_FAILED.name()));
+
+        transitionKeyService.registerTransition(MetadataCollectHandler.class, TransitionFactory
+                .createTransition(FlowPhases.METADATA_COLLECT.name(), FlowPhases.CLUSTER_START.name(), FlowPhases.STACK_STATUS_UPDATE_FAILED.name()));
 
         transitionKeyService.registerTransition(ClusterStartHandler.class, TransitionFactory
                 .createTransition(FlowPhases.CLUSTER_START.name(), FlowPhases.NONE.name(), FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name()));
