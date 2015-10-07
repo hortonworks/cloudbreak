@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.service;
 
+import java.lang.reflect.Field;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.cloud.service.ResourceNameService;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -14,6 +17,9 @@ public class GcpResourceNameServiceTest {
     @Before
     public void setUp() throws Exception {
         subject = new GcpResourceNameService();
+        Field field = ReflectionUtils.findField(GcpResourceNameService.class, "maxResourceNameLength");
+        ReflectionUtils.makeAccessible(field);
+        ReflectionUtils.setField(field, subject, 63);
     }
 
     @Test
@@ -83,7 +89,7 @@ public class GcpResourceNameServiceTest {
         // THEN
         Assert.assertNotNull("The generated name must not be null!", resourceName);
         Assert.assertTrue("The timestamp must be appended", resourceName.split("-").length == 5);
-        Assert.assertTrue("The resource name is not the expected one!", resourceName.startsWith("group-3-stack-2"));
+        Assert.assertTrue("The resource name is not the expected one!", resourceName.startsWith("stack-group-3-2"));
 
 
     }

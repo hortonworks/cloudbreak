@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.nativ.service;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_MAX_OPENSTACK_RESOURCE_NAME_LENGTH;
+
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -17,13 +19,8 @@ public class OpenStackResourceNameService extends CloudbreakResourceNameService 
     private static final int ATTACHED_DISKS_PART_COUNT = 4;
     private static final int INSTANCE_NAME_PART_COUNT = 3;
 
-    @Value("${cb.max.openstack.resource.name.length:50}")
+    @Value("${cb.max.openstack.resource.name.length:" + CB_MAX_OPENSTACK_RESOURCE_NAME_LENGTH + "}")
     private int maxResourceNameLength;
-
-    @Override
-    protected int getMaxResourceLength() {
-        return maxResourceNameLength;
-    }
 
     @Override
     public String resourceName(ResourceType resourceType, Object... parts) {
@@ -63,6 +60,7 @@ public class OpenStackResourceNameService extends CloudbreakResourceNameService 
         name = trimHash(name);
         name = appendPart(name, cnt);
         name = appendHash(name, new Date());
+        name = adjustBaseLength(name, maxResourceNameLength);
         return name;
     }
 
@@ -78,6 +76,7 @@ public class OpenStackResourceNameService extends CloudbreakResourceNameService 
         name = appendPart(name, normalize(instanceGroupName));
         name = appendPart(name, privateId);
         name = appendHash(name, new Date());
+        name = adjustBaseLength(name, maxResourceNameLength);
 
         return name;
     }
@@ -89,6 +88,7 @@ public class OpenStackResourceNameService extends CloudbreakResourceNameService 
         networkName = normalize(stackName);
         networkName = adjustPartLength(networkName);
         networkName = appendHash(networkName, new Date());
+        networkName = adjustBaseLength(networkName, maxResourceNameLength);
         return networkName;
     }
 }
