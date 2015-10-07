@@ -1,21 +1,22 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
@@ -23,6 +24,12 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
+import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfiguration;
+import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
+import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 @Service
 public class TerminationService {
@@ -46,6 +53,9 @@ public class TerminationService {
 
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
+
+    @Resource
+    private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
 
     public void terminateStack(Long stackId, CloudPlatform cloudPlatform) {
         final Stack stack = stackRepository.findOneWithLists(stackId);
@@ -71,6 +81,7 @@ public class TerminationService {
                     hostGroup.getRecipes().clear();
                     hostGroupRepository.save(hostGroup);
                 }
+                deleteFileSystemResources(stackId, cluster.getFileSystem());
             }
             stack.setCredential(null);
             stack.setNetwork(null);
@@ -81,6 +92,19 @@ public class TerminationService {
         } catch (Exception ex) {
             LOGGER.error("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
             throw new TerminationFailedException(ex);
+        }
+    }
+
+    private Map<String, String> deleteFileSystemResources(Long stackId, FileSystem fileSystem) {
+        try {
+            FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(FileSystemType.valueOf(fileSystem.getType()));
+            ObjectMapper mapper = new ObjectMapper();
+            String json = mapper.writeValueAsString(fileSystem.getProperties());
+            FileSystemConfiguration fsConfiguration = (FileSystemConfiguration) mapper.readValue(json, FileSystemType.valueOf(fileSystem.getType()).getClazz());
+            fsConfiguration.addProperty(FileSystemConfiguration.STORAGE_CONTAINER, "cloudbreak" + stackId);
+            return fsConfigurator.deleteResources(fsConfiguration);
+        } catch (IOException e) {
+            throw new TerminationFailedException("File system resources could not be deleted: ", e);
         }
     }
 

@@ -5,19 +5,19 @@ import static com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSyst
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.stereotype.Component;
+import java.util.Map;
 
 import com.sequenceiq.cloudbreak.service.cluster.flow.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.AbstractFileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemScriptConfig;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType;
+import org.springframework.stereotype.Component;
 
 @Component
 public class WasbFileSystemConfigurator extends AbstractFileSystemConfigurator<WasbFileSystemConfiguration> {
 
     @Override
-    public List<BlueprintConfigurationEntry> getFsProperties(WasbFileSystemConfiguration fsConfig) {
+    public List<BlueprintConfigurationEntry> getFsProperties(WasbFileSystemConfiguration fsConfig, Map<String, String> resourceProperties) {
         List<BlueprintConfigurationEntry> bpConfigs = new ArrayList<>();
         String accountName = fsConfig.getAccountName();
         String accountKey = fsConfig.getAccountKey();

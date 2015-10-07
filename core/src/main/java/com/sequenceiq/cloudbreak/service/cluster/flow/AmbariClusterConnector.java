@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudPlatform.AZURE_RM;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_DB;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_SERVER;
@@ -12,6 +13,10 @@ import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationServ
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
 import static java.util.Collections.singletonMap;
+
+import javax.annotation.Nullable;
+import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,14 +31,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.annotation.Nullable;
-import javax.annotation.Resource;
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
@@ -42,6 +39,11 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
 import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.type.PluginExecutionType;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
@@ -55,11 +57,8 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
-import com.sequenceiq.cloudbreak.common.type.PluginExecutionType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
@@ -79,8 +78,10 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
-
 import groovyx.net.http.HttpResponseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 @Service
 public class AmbariClusterConnector {
@@ -453,14 +454,24 @@ public class AmbariClusterConnector {
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(fs.getProperties());
         FileSystemConfiguration fsConfiguration = (FileSystemConfiguration) mapper.readValue(json, FileSystemType.valueOf(fs.getType()).getClazz());
-        fsConfiguration.addProperty(FileSystemConfiguration.STORAGE_CONTAINER, "cloudbreak" + stack.getId());
-        List<BlueprintConfigurationEntry> bpConfigEntries = fsConfigurator.getFsProperties(fsConfiguration);
+        decorateFsConfigurationProperties(fsConfiguration, stack);
+        Map<String, String> resourceProperties = fsConfigurator.createResources(fsConfiguration);
+        List<BlueprintConfigurationEntry> bpConfigEntries = fsConfigurator.getFsProperties(fsConfiguration, resourceProperties);
         if (fs.isDefaultFs()) {
             bpConfigEntries.addAll(fsConfigurator.getDefaultFsProperties(fsConfiguration));
         }
         return blueprintProcessor.addConfigEntries(blueprintText, bpConfigEntries, true);
 
 
+    }
+
+    private void decorateFsConfigurationProperties(FileSystemConfiguration fsConfiguration, Stack stack) {
+        fsConfiguration.addProperty(FileSystemConfiguration.STORAGE_CONTAINER, "cloudbreak" + stack.getId());
+        CloudPlatform stackPlatform = CloudPlatform.valueOf(stack.getPlatformVariant());
+        if (AZURE_RM.equals(stackPlatform)) {
+            String resourceGroupName = stack.getResourceByType(ResourceType.ARM_TEMPLATE).getResourceName();
+            fsConfiguration.addProperty(FileSystemConfiguration.RESOURCE_GROUP_NAME, resourceGroupName);
+        }
     }
 
     private void addFsRecipes(String blueprintText, FileSystem fs, Set<HostGroup> hostGroups) {

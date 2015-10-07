@@ -6,13 +6,13 @@ import static com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSyst
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.stereotype.Component;
+import java.util.Map;
 
 import com.sequenceiq.cloudbreak.service.cluster.flow.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.AbstractFileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemScriptConfig;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType;
+import org.springframework.stereotype.Component;
 
 @Component
 public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<GcsFileSystemConfiguration> {
@@ -26,7 +26,7 @@ public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<Gc
     }
 
     @Override
-    public List<BlueprintConfigurationEntry> getFsProperties(GcsFileSystemConfiguration fsConfig) {
+    public List<BlueprintConfigurationEntry> getFsProperties(GcsFileSystemConfiguration fsConfig, Map<String, String> resourceProperties) {
         List<BlueprintConfigurationEntry> bpConfigs = new ArrayList<>();
         bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem"));
         bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.AbstractFileSystem.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS"));
