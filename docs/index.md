@@ -774,7 +774,7 @@ To configure recipe or recipe groups in Cloudbreak you have to create a descript
   "properties": {
     "[key]": "[value]"
   },
-  "plugins": { 
+  "plugins": {
       "git://github.com/account/recipe.git": "ONE_NODE"
       "http://user:password@mydomain.com/my-recipe.tar": "ALL_NODES"
       "https://mydomain.com/my-recipe.zip": "ALL_NODES"
@@ -792,11 +792,11 @@ The next one is plugins. As you read before we support a few kind of protocols, 
     * git repository must be public (or available from the cluster)
     * the recipe files must be on the root
     * only repository default branch supported, there is no opportunity to check out different branch
-    
+
   * HTTP(S)
     * on this kind of protocols you have to bundle your recipe into a tar or zip file
     * basic authentication is the only way to protect recipe from public
-  
+
 Last one is the execution type of the recipe. We supports two options:
 
   * ONE_NODE means the recipe will execute only one node in the hostgroup
@@ -832,7 +832,7 @@ Recipes are ready to attach to a hostgroup, for more information about hostgroup
 ##Kerberos security
 
 Ambari supports Kerberos security for internal communication. To activate Kerberos with Cloudbreak you have enable security option and fill the `kerberos master key`, `kerberos admin` and `kerberos password` too.
-To run a job on the cluster, you can use one of the default Hadoop users, like `ambari-qa`, as usual. 
+To run a job on the cluster, you can use one of the default Hadoop users, like `ambari-qa`, as usual.
 
 **Optional**
 
@@ -847,14 +847,14 @@ addprinc custom-user (type user password twice)
 ```
 
   * Log in via SSH to all other nodes
-  
+
 ```
 sudo docker exec -i $(docker ps | grep ambari-warmup | cut -d" " -f 1) bash
 useradd custom-user
 ```
 
   * Log in via SSH to one of the nodes
-  
+
 ```
 sudo docker exec -i $(docker ps | grep ambari-warmup | cut -d" " -f 1) bash
 su custom-user
@@ -1008,6 +1008,10 @@ Before submitting issues please check for duplicate or similar issues. If you ar
 
 We recommend discussing your plans on the [mailing list](https://groups.google.com/forum/#!forum/cloudbreak) before starting to code - especially for more ambitious contributions. This gives other contributors a chance to point you in the right direction, give feedback on your design, and maybe point out if someone else is working on the same thing.
 
+###Development environment
+
+If you would like to contribute then probably you need a comfortable development environment. We have created a detailed description about [how to set up Cloudbreak on your local machine with IDEA](https://github.com/sequenceiq/cloudbreak/blob/master/dev/development.md).
+
 ####Conventions
 
 Please write clean code. Universally formatted code promotes ease of writing, reading, and maintenance.
@@ -1017,7 +1021,7 @@ Please write clean code. Universally formatted code promotes ease of writing, re
 
 * Code must be formatted according to our [formatter](https://github.com/sequenceiq/cloudbreak/blob/master/config/eclipse_formatter.xml).
 
-* Code must be checked with our [checkstyle](https://github.com/sequenceiq/cloudbreak/blob/master/core/config/checkstyle/checkstyle-suppressions.xml).
+* Code must be checked with our [checkstyle](https://github.com/sequenceiq/cloudbreak/blob/master/config/checkstyle/checkstyle.xml).
 
 * Contributions must pass existing unit tests.
 
