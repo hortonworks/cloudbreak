@@ -141,7 +141,7 @@
                     <div class="form-group" ng-show="activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'AZURE_RM' || activeCredential.cloudPlatform == 'GCP'">
                         <label class="col-sm-3 control-label" for="selectFileSystem">{{msg.filesystem_label}}</label>
                         <div class="col-sm-9">
-                            <select class="form-control" id="selectFileSystem" ng-model="cluster.fileSystem.type" ng-change="selectedFileSystemChange()">
+                            <select class="form-control" id="selectFileSystem" ng-model="cluster.fileSystem.type">
                                 <option value="LOCAL">{{msg.filesystem_local_label}}</option>
                                 <option value="DASH" ng-if="activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'AZURE_RM'">{{msg.filesystem_dash_label}}</option>
                                 <option value="WASB" ng-if="activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'AZURE_RM'">{{msg.filesystem_wasb_label}}</option>
