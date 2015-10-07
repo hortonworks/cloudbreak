@@ -25,4 +25,7 @@ dependencies {
     compile group: 'commons-codec',                 name: 'commons-codec',                  version: '1.10'
 
     testCompile project(':cloud-reactor')
+    testCompile group: 'org.mockito',               name: 'mockito-all',                    version: '1.10.19'
+    testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: '1.1.8.RELEASE'
+    testCompile group: 'junit',                     name: 'junit',                          version: '4.12'
 }

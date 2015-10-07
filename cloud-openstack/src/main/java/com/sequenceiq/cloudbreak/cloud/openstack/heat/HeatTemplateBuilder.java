@@ -39,6 +39,7 @@ public class HeatTemplateBuilder {
     @Value("${cb.openstack.heat.template.path:" + CB_OPENSTACK_HEAT_TEMPLATE_PATH + "}")
     private String openStackHeatTemplatePath;
 
+
     @Inject
     private OpenStackUtils openStackUtil;
     @Inject
@@ -48,7 +49,7 @@ public class HeatTemplateBuilder {
         try {
             List<NovaInstanceView> novaInstances = new OpenStackGroupView(groups).getFlatNovaView();
             Map<String, Object> model = new HashMap<>();
-            model.put("cb_stack_name", stackName);
+            model.put("cb_stack_name", openStackUtil.adjustStackNameLength(stackName));
             model.put("agents", novaInstances);
             model.put("core_user_data", formatUserData(instanceUserData.getUserData(InstanceGroupType.CORE)));
             model.put("gateway_user_data", formatUserData(instanceUserData.getUserData(InstanceGroupType.GATEWAY)));
