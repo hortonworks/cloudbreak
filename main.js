@@ -10,6 +10,7 @@ var needle = require('needle');
 var md5 = require('MD5');
 var request = require('request');
 var dns = require('dns');
+var morgan = require('morgan');
 
 var domain = require('domain'),
 d = domain.create();
@@ -71,6 +72,8 @@ function continueInit() {
   }))
   app.use(bodyParser.urlencoded({ extended: false }))
   app.use(bodyParser.json())
+  app.use( morgan(':status :method :url - proxied-for: :req[proxied-for]'))
+
 
   var pjson = require('./package.json');
 
