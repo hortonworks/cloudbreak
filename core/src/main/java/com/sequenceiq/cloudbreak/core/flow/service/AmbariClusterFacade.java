@@ -14,13 +14,22 @@ import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
-import javax.inject.Inject;
-
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterContainerRunner;
@@ -34,9 +43,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
@@ -51,13 +58,11 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.status.AmbariClusterStatus
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListenerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 @Service
 public class AmbariClusterFacade implements ClusterFacade {
@@ -113,6 +118,8 @@ public class AmbariClusterFacade implements ClusterFacade {
     @Inject
     private CloudbreakMessagesService messagesService;
 
+    @Inject
+    private InstanceMetadataService instanceMetadataService;
 
     private enum Msg {
 
@@ -265,6 +272,9 @@ public class AmbariClusterFacade implements ClusterFacade {
         stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Adding new containers to the cluster.");
         fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_ADD_CONTAINERS, UPDATE_IN_PROGRESS.name());
         containerRunner.addClusterContainers(actualContext);
+        Map<InstanceGroupType, InstanceStatus> statusByGroupType = new HashMap<>();
+        statusByGroupType.put(InstanceGroupType.CORE, InstanceStatus.UNREGISTERED);
+        instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.CREATED, statusByGroupType);
         return context;
     }
 
@@ -299,6 +309,10 @@ public class AmbariClusterFacade implements ClusterFacade {
             stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Running cluster containers.");
             fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_RUN_CONTAINERS, UPDATE_IN_PROGRESS.name());
             containerRunner.runClusterContainers(actualContext);
+            Map<InstanceGroupType, InstanceStatus> statusByGroupType = new HashMap<>();
+            statusByGroupType.put(InstanceGroupType.GATEWAY, InstanceStatus.REGISTERED);
+            statusByGroupType.put(InstanceGroupType.CORE, InstanceStatus.UNREGISTERED);
+            instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.CREATED, statusByGroupType);
             InstanceGroup gateway = stack.getGatewayInstanceGroup();
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
             context = new ProvisioningContext.Builder()

@@ -63,7 +63,7 @@ public class MetadataSetupService {
     }
 
     public String setupMetadata(final CloudPlatform cloudPlatform, Stack stack) throws Exception {
-        Set<InstanceMetaData> allInstanceMetadata = saveInstanceMetaData(stack, collectCoreMetadata(cloudPlatform, stack), true);
+        Set<InstanceMetaData> allInstanceMetadata = saveInstanceMetaData(stack, collectCoreMetadata(cloudPlatform, stack), InstanceStatus.CREATED);
         for (InstanceMetaData instanceMetaData : allInstanceMetadata) {
             if (instanceMetaData.getAmbariServer()) {
                 return instanceMetaData.getPublicIp();
@@ -73,13 +73,13 @@ public class MetadataSetupService {
     }
 
     public void collectMetadata(final CloudPlatform cloudPlatform, Stack stack) {
-        saveInstanceMetaData(stack, collectCoreMetadata(cloudPlatform, stack), false);
+        saveInstanceMetaData(stack, collectCoreMetadata(cloudPlatform, stack), null);
     }
 
     public Set<String> setupNewMetadata(Long stackId, Set<Resource> resources, String instanceGroupName, Integer scalingAdjustment) {
         Stack stack = stackService.getById(stackId);
         Set<CoreInstanceMetaData> coreInstanceMetaData = collectNewMetadata(stack, resources, instanceGroupName, scalingAdjustment);
-        saveInstanceMetaData(stack, coreInstanceMetaData, true);
+        saveInstanceMetaData(stack, coreInstanceMetaData, InstanceStatus.CREATED);
         Set<String> upscaleCandidateAddresses = new HashSet<>();
         for (CoreInstanceMetaData coreInstanceMetadataEntry : coreInstanceMetaData) {
             upscaleCandidateAddresses.add(coreInstanceMetadataEntry.getPrivateIp());
@@ -103,14 +103,13 @@ public class MetadataSetupService {
         return coreInstanceMetaData;
     }
 
-    private Set<InstanceMetaData> saveInstanceMetaData(Stack stack, Set<CoreInstanceMetaData> coreInstanceMetaData, Boolean updateStatus) {
+    private Set<InstanceMetaData> saveInstanceMetaData(Stack stack, Set<CoreInstanceMetaData> coreInstanceMetaData, InstanceStatus status) {
         Boolean ambariServerFound = false;
         Set<InstanceMetaData> updatedInstanceMetadata = new HashSet<>();
         Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
         for (CoreInstanceMetaData coreInstanceMetadataEntry : coreInstanceMetaData) {
             long timeInMillis = Calendar.getInstance().getTimeInMillis();
             InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), coreInstanceMetadataEntry.getInstanceGroupName());
-            boolean gateway = InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType());
             Long privateId = coreInstanceMetadataEntry.getPrivateId();
             InstanceMetaData instanceMetaDataEntry = createInstanceMetadataIfAbsent(allInstanceMetadata, privateId);
             instanceMetaDataEntry.setPrivateIp(coreInstanceMetadataEntry.getPrivateIp());
@@ -122,14 +121,14 @@ public class MetadataSetupService {
             instanceMetaDataEntry.setDockerSubnet(null);
             instanceMetaDataEntry.setContainerCount(coreInstanceMetadataEntry.getContainerCount());
             instanceMetaDataEntry.setStartDate(timeInMillis);
-            if (!ambariServerFound && gateway) {
+            if (!ambariServerFound && InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
                 instanceMetaDataEntry.setAmbariServer(Boolean.TRUE);
                 ambariServerFound = true;
             } else {
                 instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
             }
-            if (updateStatus) {
-                instanceMetaDataEntry.setInstanceStatus(gateway ? InstanceStatus.REGISTERED : InstanceStatus.UNREGISTERED);
+            if (status != null) {
+                instanceMetaDataEntry.setInstanceStatus(status);
             }
             instanceMetaDataRepository.save(instanceMetaDataEntry);
             updatedInstanceMetadata.add(instanceMetaDataEntry);
