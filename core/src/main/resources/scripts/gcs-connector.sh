@@ -3,7 +3,7 @@
 : ${LOGFILE:=/var/log/consul-watch/consul_handler.log}
 
 : ${SOURCE_DIR:=/data/jars}
-: ${STORAGE_JAR:=gcs-connector-latest-hadoop2.jar.jar}
+: ${STORAGE_JAR:=gcs-connector-latest-hadoop2.jar}
 : ${TARGET_DIR:=/usr/lib/hadoop/lib/}
 
 main(){
