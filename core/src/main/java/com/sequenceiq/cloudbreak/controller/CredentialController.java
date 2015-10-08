@@ -163,6 +163,7 @@ public class CredentialController {
     @ApiOperation(value = CredentialOpDescription.PUT_CERTIFICATE_BY_ID, produces = ContentType.FILE_STREAM, notes = Notes.CREDENTIAL_NOTES)
     @RequestMapping(value = "credentials/certificate/{credentialId}", method = RequestMethod.PUT)
     @ResponseBody
+    // TODO Have to be removed when the termination of the old version of azure clusters won't be supported anymore
     public ModelAndView refreshCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
         MDCBuilder.buildUserMdcContext(user);
         Credential credential = credentialService.update(credentialId);
@@ -178,6 +179,7 @@ public class CredentialController {
     @ApiOperation(value = CredentialOpDescription.GET_SSH_FILE, produces = ContentType.FILE_STREAM, notes = Notes.CREDENTIAL_NOTES)
     @RequestMapping(value = "credentials/{credentialId}/sshkey", method = RequestMethod.GET)
     @ResponseBody
+    // TODO Have to be removed when the termination of the old version of azure clusters won't be supported anymore
     public ModelAndView getSshFile(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
         MDCBuilder.buildUserMdcContext(user);
         AzureCredential credential = (AzureCredential) credentialService.get(credentialId);
@@ -199,9 +201,6 @@ public class CredentialController {
         switch (json.getCloudPlatform()) {
         case AWS:
             converted = conversionService.convert(json, AwsCredential.class);
-            break;
-        case AZURE:
-            converted = conversionService.convert(json, AzureCredential.class);
             break;
         case GCP:
             converted = conversionService.convert(json, GcpCredential.class);

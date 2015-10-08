@@ -1,179 +1,34 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
-import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
-import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
-import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
-import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.DELETED;
-import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.RUNNING;
-import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.STOPPED;
-import static com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState.UNKNOWN;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.PollingResult;
-import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 
 @Component
+// TODO Have to be removed when the termination of the old version of azure clusters won't be supported anymore
 public class AzureMetadataSetup implements MetadataSetup {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AzureMetadataSetup.class);
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final int POLLING_INTERVAL = 5000;
-    private static final int MAX_POLLING_ATTEMPTS = 100;
-    private static final int MAX_FAILURE_COUNT = 3;
-
-    @Inject
-    private AzureMetadataSetupCheckerTask azureMetadataSetupCheckerTask;
-    @Inject
-    private PollingService<AzureMetadataSetupCheckerTaskContext> azureMetadataSetupCheckerTaskPollingService;
-    @Inject
-    private AzureStackUtil azureStackUtil;
-
     @Override
     public Set<CoreInstanceMetaData> collectMetadata(Stack stack) {
-        AzureCredential azureCredential = (AzureCredential) stack.getCredential();
-        AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential);
-        return collectMetaData(stack, azureClient);
+        throw new UnsupportedOperationException(String.format(AzureStackUtil.UNSUPPORTED_OPERATION, "collectMetadata"));
     }
 
     @Override
     public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroup, Integer scalingAdjustment) {
-        AzureCredential azureCredential = (AzureCredential) stack.getCredential();
-        AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential);
-        List<Resource> resources = new ArrayList<>();
-        for (Resource resource : resourceList) {
-            if (ResourceType.AZURE_VIRTUAL_MACHINE.equals(resource.getResourceType())) {
-                resources.add(resource);
-            }
-        }
-        return collectMetaData(stack, azureClient, resources);
-    }
-
-    private Set<CoreInstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient, List<Resource> resources) {
-        Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
-        for (Resource resource : resources) {
-            instanceMetaDatas.add(getMetadata(stack, azureClient, resource));
-        }
-        return instanceMetaDatas;
-    }
-
-    private Set<CoreInstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient) {
-        return collectMetaData(stack, azureClient, stack.getResourcesByType(ResourceType.AZURE_VIRTUAL_MACHINE));
-    }
-
-    private CoreInstanceMetaData getMetadata(Stack stack, AzureClient azureClient, Resource resource) {
-        Map<String, Object> props = new HashMap<>();
-        props.put(NAME, resource.getResourceName());
-        props.put(SERVICENAME, resource.getResourceName());
-        AzureMetadataSetupCheckerTaskContext azureMetadataSetupCheckerTaskContext = new AzureMetadataSetupCheckerTaskContext(azureClient, stack, props);
-        PollingResult pollingResult = azureMetadataSetupCheckerTaskPollingService
-                .pollWithTimeout(azureMetadataSetupCheckerTask,
-                        azureMetadataSetupCheckerTaskContext,
-                        POLLING_INTERVAL,
-                        MAX_POLLING_ATTEMPTS,
-                        MAX_FAILURE_COUNT);
-        if (isSuccess(pollingResult)) {
-            Object virtualMachine = azureClient.getVirtualMachine(props);
-            try {
-                String privateId = getPrivateIP((String) virtualMachine);
-                CoreInstanceMetaData instanceMetaData = new CoreInstanceMetaData(
-                        resource.getResourceName(),
-                        Long.valueOf(privateId.replaceAll("\\.", "")),
-                        privateId,
-                        getVirtualIP((String) virtualMachine),
-                        stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup()).getTemplate().getVolumeCount(),
-                        resource.getInstanceGroup()
-                );
-                return instanceMetaData;
-            } catch (IOException e) {
-                LOGGER.error(String.format("Instance %s is not reachable: %s", resource.getResourceName(), e.getMessage()), e);
-            }
-        }
-        return null;
-    }
-
-    @VisibleForTesting
-    protected String getVirtualIP(String response) throws IOException {
-        JsonNode actualObj = MAPPER.readValue(response, JsonNode.class);
-        return actualObj.get("Deployment").get("VirtualIPs").get("VirtualIP").get("Address").asText();
-    }
-
-    @VisibleForTesting
-    protected String getPrivateIP(String response) throws IOException {
-        JsonNode actualObj = MAPPER.readValue(response, JsonNode.class);
-        return actualObj.get("Deployment").get("RoleInstanceList").get("RoleInstance").get("IpAddress").asText();
+        throw new UnsupportedOperationException(String.format(AzureStackUtil.UNSUPPORTED_OPERATION, "collectNewMetadata"));
     }
 
     @Override
     public InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId) {
-        Map<String, String> vmContext = createVMContext(instanceId);
-        AzureCredential credential = (AzureCredential) stack.getCredential();
-        AzureClient azureClient = azureStackUtil.createAzureClient(credential);
-        InstanceSyncState instanceSyncState;
-        try {
-            String virtualMachineState = azureClient.getVirtualMachineState(vmContext);
-            if ("Running".equals(virtualMachineState)) {
-                instanceSyncState = RUNNING;
-            } else if ("Suspended".equals(virtualMachineState)) {
-                instanceSyncState = STOPPED;
-            } else if (isActualStatusDesired(virtualMachineState, "RunningTransitioning", "SuspendedTransitioning",
-                    "Starting", "Suspending", "Deploying", "Deleting")) {
-                instanceSyncState = IN_PROGRESS;
-            } else {
-                instanceSyncState = UNKNOWN;
-            }
-        } catch (Exception ex) {
-            if (ex.getMessage().contains("Not Found")) {
-                LOGGER.info("The instance({}) could not be found by Azure.", instanceId);
-                instanceSyncState = DELETED;
-            } else {
-                throw new AzureResourceException(String.format("Failed to retrieve status of instance(%s) from Azure.", instanceId), ex);
-            }
-        }
-        return instanceSyncState;
-    }
-
-    private Map<String, String> createVMContext(String vmName) {
-        Map<String, String> context = new HashMap<>();
-        context.put(SERVICENAME, vmName);
-        context.put(NAME, vmName);
-        return context;
-    }
-
-    private boolean isActualStatusDesired(String actualStatus, String... desiredStatuses) {
-        boolean result = false;
-        for (String desiredStatus : desiredStatuses) {
-            if (actualStatus.equals(desiredStatus)) {
-                result = true;
-            }
-        }
-        return result;
+        throw new UnsupportedOperationException(String.format(AzureStackUtil.UNSUPPORTED_OPERATION, "getState"));
     }
 
     @Override

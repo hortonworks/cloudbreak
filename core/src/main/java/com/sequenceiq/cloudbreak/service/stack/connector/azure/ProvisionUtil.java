@@ -10,27 +10,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.flow.FutureResult;
 import com.sequenceiq.cloudbreak.service.stack.flow.ResourceRequestResult;
-import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 
 @Component
+// TODO Have to be removed when the termination of the old version of azure clusters won't be supported anymore
 public class ProvisionUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisionUtil.class);
     private static final int PARALLEL_NUMBER = 6;
 
-    @javax.annotation.Resource
-    private Map<CloudPlatform, List<ResourceBuilder>> instanceBuilders;
-
     public boolean isRequestFull(Stack stack, int fullIndex) {
         return fullIndex % PARALLEL_NUMBER == 0;
-    }
-
-    public boolean isRequestFullWithCloudPlatform(Stack stack, int fullIndex) {
-        return (fullIndex * instanceBuilders.get(stack.cloudPlatform()).size()) % PARALLEL_NUMBER == 0;
     }
 
     public Map<FutureResult, List<ResourceRequestResult>> waitForRequestToFinish(List<Future<ResourceRequestResult>> futures) throws Exception {

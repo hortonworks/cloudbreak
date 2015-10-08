@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.service.StackContext;
 
 import groovyx.net.http.HttpResponseDecorator;
 
+// TODO Have to be removed when the termination of the old version of azure clusters won't be supported anymore
 public class AzureResourcePollerObject extends StackContext {
 
     private AzureClient azureClient;

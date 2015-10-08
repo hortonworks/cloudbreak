@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureResourceExce
 
 import groovyx.net.http.HttpResponseDecorator;
 
+// TODO Have to be removed when the termination of the old version of azure clusters won't be supported anymore
 public abstract class AzureResourceStatusCheckerTask extends SimpleStatusCheckerTask<AzureResourcePollerObject> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureResourceStatusCheckerTask.class);
 

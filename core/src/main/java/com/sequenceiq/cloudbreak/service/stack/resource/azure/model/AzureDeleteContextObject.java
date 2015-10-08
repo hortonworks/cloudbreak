@@ -6,6 +6,7 @@ import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
 
+// TODO Have to be removed when the termination of the old version of azure clusters won't be supported anymore
 public class AzureDeleteContextObject extends DeleteContextObject {
 
     private AzureClient azureClient;
