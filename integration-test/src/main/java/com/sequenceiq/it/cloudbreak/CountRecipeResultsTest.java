@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_AMBARI_WARMUP;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -99,7 +101,7 @@ public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
             session.connect(1000);
 
             executor = (ChannelExec) session.openChannel("exec");
-            executor.setCommand("sudo docker exec -it $(sudo docker ps |grep ambari-warmup |cut -d\" \" -f1) file " + file);
+            executor.setCommand("sudo docker exec -it $(sudo docker ps |grep '" + CB_DOCKER_CONTAINER_AMBARI_WARMUP + "' |cut -d\" \" -f1) file " + file);
             executor.setPty(true);
             executor.connect(1000);
 
