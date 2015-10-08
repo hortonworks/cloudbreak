@@ -17,6 +17,7 @@ apply plugin: 'spring-boot'
 mainClassName = 'com.sequenceiq.it.IntegrationTestApp'
 
 dependencies {
+    compile project(':cloud-common')
     compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
         exclude group: 'org.slf4j';
     }
