@@ -81,7 +81,10 @@ public class TerminationService {
                     hostGroup.getRecipes().clear();
                     hostGroupRepository.save(hostGroup);
                 }
-                deleteFileSystemResources(stackId, cluster.getFileSystem());
+                FileSystem fs = cluster.getFileSystem();
+                if (fs != null) {
+                    deleteFileSystemResources(stackId, fs);
+                }
             }
             stack.setCredential(null);
             stack.setNetwork(null);
