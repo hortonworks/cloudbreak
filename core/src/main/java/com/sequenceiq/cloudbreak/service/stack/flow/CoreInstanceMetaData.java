@@ -10,13 +10,6 @@ public class CoreInstanceMetaData {
     private Long privateId;
     private String instanceGroupName;
 
-    public CoreInstanceMetaData() {
-    }
-
-    public CoreInstanceMetaData(String instanceId, String privateIp, String publicIp, Integer volumeCount, String instanceGroupName) {
-        this(instanceId, null, privateIp, publicIp, volumeCount, instanceGroupName);
-    }
-
     public CoreInstanceMetaData(String instanceId, Long privateId, String privateIp, String publicIp, Integer volumeCount, String instanceGroupName) {
         this.instanceId = instanceId;
         this.privateId = privateId;
