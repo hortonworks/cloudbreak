@@ -12,11 +12,11 @@ import static com.sequenceiq.cloudbreak.service.PollingResult.isTimeout;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.AMBARI_POLLING_INTERVAL;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -82,6 +82,7 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -209,6 +210,7 @@ public class AmbariClusterConnector {
             if (fs != null) {
                 addFsRecipes(blueprintText, fs, hostGroups);
             }
+            addHDFSRecipe(cluster, blueprintText, hostGroups);
 
             final boolean recipesFound = recipesFound(hostGroups);
 
@@ -353,8 +355,7 @@ public class AmbariClusterConnector {
 
 
         eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
-                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP.code(),
-                        Arrays.asList(adjustment, hostGroupName)), hostGroupName);
+                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP.code(), asList(adjustment, hostGroupName)), hostGroupName);
         TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
         String blueprintName = stack.getCluster().getBlueprint().getBlueprintName();
@@ -436,7 +437,7 @@ public class AmbariClusterConnector {
         if (ambariClient.getClusterHosts().contains(data.getHostName())) {
             String hostState = ambariClient.getHostState(data.getHostName());
             if ("UNKNOWN".equals(hostState)) {
-                deleteHosts(stack, Arrays.asList(data.getHostName()), components);
+                deleteHosts(stack, asList(data.getHostName()), components);
                 PollingResult result = restartHadoopServices(stack, ambariClient, true);
                 if (isTimeout(result)) {
                     throw new AmbariOperationFailedException("Timeout while restarting Hadoop services.");
@@ -500,6 +501,22 @@ public class AmbariClusterConnector {
                     hostGroup.addRecipe(recipe);
                 }
             }
+        }
+    }
+
+    private void addHDFSRecipe(Cluster cluster, String blueprintText, Set<HostGroup> hostGroups) {
+        try {
+            for (HostGroup hostGroup : hostGroups) {
+                if (isComponentPresent(blueprintText, "HDFS_CLIENT", hostGroup)) {
+                    String script = FileReaderUtils.readFileFromClasspath("scripts/hdfs-home.sh").replaceAll("\\$USER", cluster.getUserName());
+                    RecipeScript recipeScript = new RecipeScript(script, ClusterLifecycleEvent.POST_INSTALL, PluginExecutionType.ONE_NODE);
+                    Recipe recipe = recipeBuilder.buildRecipes(asList(recipeScript), Collections.<String, String>emptyMap()).get(0);
+                    hostGroup.addRecipe(recipe);
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.warn("Cannot create HDFS home dir recipe", e);
         }
     }
 
@@ -710,7 +727,7 @@ public class AmbariClusterConnector {
     }
 
     private int restartComponentWithClient(AmbariClient ambariClient, String service, String... compontents) {
-        return ambariClient.restartServiceComponents(service, Arrays.asList(compontents));
+        return ambariClient.restartServiceComponents(service, asList(compontents));
     }
 
     private PollingResult startServiceIfNeeded(Stack stack, AmbariClient ambariClient, String blueprint) throws CloudbreakException {
@@ -933,7 +950,7 @@ public class AmbariClusterConnector {
         Set<InstanceMetaData> instances = FluentIterable.from(unregisteredHosts).limit(scalingAdjustment).toSet();
         eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
                 cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_ADDING_NODE_TO_HOSTGROUP.code(),
-                        Arrays.asList(instances.size(), hostGroup.getName())), hostGroup.getName());
+                        asList(instances.size(), hostGroup.getName())), hostGroup.getName());
         return getHostNames(instances);
     }
 
@@ -947,7 +964,7 @@ public class AmbariClusterConnector {
             ambariClient.addComponentsToHosts(hosts, blueprintName, hGroupName);
             ambariClient.addHostsToConfigGroups(hosts, hGroupName);
             if (cluster.isSecure()) {
-                ambariClient.addComponentsToHosts(hosts, Arrays.asList(securityService.KERBEROS_CLIENT));
+                ambariClient.addComponentsToHosts(hosts, asList(securityService.KERBEROS_CLIENT));
             }
             requests.put("Install components to the new hosts", ambariClient.installAllComponentsOnHosts(hosts));
             if (cluster.isSecure()) {
