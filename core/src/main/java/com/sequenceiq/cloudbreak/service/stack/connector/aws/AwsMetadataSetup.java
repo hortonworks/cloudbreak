@@ -95,6 +95,7 @@ public class AwsMetadataSetup implements MetadataSetup {
                 for (com.amazonaws.services.ec2.model.Instance instance : reservation.getInstances()) {
                     coreInstanceMetadata.add(new CoreInstanceMetaData(
                             instance.getInstanceId(),
+                            generatePrivateId(instance.getPrivateIpAddress()),
                             instance.getPrivateIpAddress(),
                             instance.getPublicIpAddress(),
                             instance.getBlockDeviceMappings().size() - 1,
@@ -129,6 +130,7 @@ public class AwsMetadataSetup implements MetadataSetup {
                     if (!metadataExists) {
                         coreInstanceMetadata.add(new CoreInstanceMetaData(
                                 instance.getInstanceId(),
+                                generatePrivateId(instance.getPrivateIpAddress()),
                                 instance.getPrivateIpAddress(),
                                 instance.getPublicIpAddress(),
                                 instance.getBlockDeviceMappings().size() - 1,
@@ -197,5 +199,8 @@ public class AwsMetadataSetup implements MetadataSetup {
         }
     }
 
+    private Long generatePrivateId(String ipAddress) {
+        return Long.valueOf(ipAddress.replaceAll("\\.", ""));
+    }
 
 }

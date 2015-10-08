@@ -101,9 +101,11 @@ public class AzureMetadataSetup implements MetadataSetup {
         if (isSuccess(pollingResult)) {
             Object virtualMachine = azureClient.getVirtualMachine(props);
             try {
+                String privateId = getPrivateIP((String) virtualMachine);
                 CoreInstanceMetaData instanceMetaData = new CoreInstanceMetaData(
                         resource.getResourceName(),
-                        getPrivateIP((String) virtualMachine),
+                        Long.valueOf(privateId.replaceAll("\\.", "")),
+                        privateId,
                         getVirtualIP((String) virtualMachine),
                         stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup()).getTemplate().getVolumeCount(),
                         resource.getInstanceGroup()
