@@ -176,7 +176,7 @@ public class SimpleFlowFacade implements FlowFacade {
             StackStatusUpdateContext stackStatusUpdateContext = (StackStatusUpdateContext) context;
             Stack stack = stackService.getById(stackStatusUpdateContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
-            metadataSetupService.setupMetadata(stackStatusUpdateContext.getCloudPlatform(), stack);
+            metadataSetupService.collectMetadata(stackStatusUpdateContext.getCloudPlatform(), stack);
             LOGGER.debug("Metadata collect DONE.");
             return stackStatusUpdateContext;
         } catch (Exception e) {
