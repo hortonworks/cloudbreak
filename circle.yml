@@ -22,7 +22,16 @@ deployment:
     commands:
       - eval $(docker run gliderlabs/pagebuilder circleci-cmd)
 
+  docsupdate:
+    branch: docsupdate
+    commands:
+      - eval $(docker run gliderlabs/pagebuilder circleci-cmd)
+  
   release:
     branch: release
     commands:
       - make release
+general:
+  branches:
+    ignore:
+      - gh-pages
