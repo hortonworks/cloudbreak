@@ -6,7 +6,6 @@ dev_addr: 0.0.0.0:8000
 pages:
     - 'Home': index.md
     - 'Docs':
-        - Architecture : architecture.md
         - Configuration : configuration.md
         - Database : database.md
         - Development : development.md
