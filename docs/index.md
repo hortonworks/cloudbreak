@@ -1,41 +1,51 @@
-Cloudbreak is a cloud agnostic Hadoop as a Service API. Abstracts the provisioning and ease management and monitoring of on-demand HDP clusters in different virtual environments. For recent changes please check the [changelog](http://sequenceiq.com/cloudbreak-deployer/latest/changelog/).
+Cloudbreak is a cloud agnostic Hadoop as a Service API. Abstracts the provisioning and ease management and monitoring of on-demand HDP clusters in different virtual environments. Once it is deployed in your favorite servlet container exposes a REST API allowing to span up Hadoop clusters of arbitrary sizes on your selected cloud provider. Provisioning Hadoop has never been easier.
+Cloudbreak is built on the foundation of cloud providers API (Microsoft Azure, Amazon AWS, Google Cloud Platform, OpenStack), Apache Ambari, Docker containers, Swarm and Consul.
+
+For a detailed overview please follow this [link](http://sequenceiq.com/cloudbreak-deployer/docsupdate/overview/)
+
+For recent changes please check the [changelog](http://sequenceiq.com/cloudbreak-deployer/latest/changelog/).
 
 Cloudbreak has two main components - the [Cloudbreak deployer](http://sequenceiq.com/cloudbreak-deployer) and the [Cloudbreak application](http://sequenceiq.com/cloudbreak). Cloudbreak deployer helps you to deploy the Cloudbreak application automatically in environments with Docker support. Once the Cloudbreak application is deployed you can use it to provision HDP clusters in different cloud environments.
 
-## Requirements
+##Technology
+
+For an architectural overview of the CLoudbreak deployer and application please follow this [link](http://sequenceiq.com/cloudbreak-deployer/docsupdate/technology/)
+
+##Installation
 
 Currently only **Linux** and **OSX** 64 bit binaries are released for Cloudbreak Deployer. For anything else we can create a special Docker container. The deployment itself needs only **Docker 1.7.0** or later.
-Your firewall must be configured to let Docker containers talk to each other and have SELinux disabled. *This is especially important on CentOS 7 where default firewall configuration blocks connections by default.* Should you intend to deploy the Cloudbreak application alongside your cluster in your favorite cloud environment you can use our CentOS 7 based default cloud images - that comes with CBD (Cloudbreak deployer) and the required Docker containers pre-installed.
 
-##On-prem installation
+####DIY installation
 
-For on premise installations of the Cloudbreak application please open the [Onprem submenu](onprem.md)
+For on premise installations of the Cloudbreak application please follow the [link](http://sequenceiq.com/cloudbreak-deployer/docsupdate/onprem)
 
-##AWS based installation
-
-We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
-
-You can follow the AWS provider specific documentation using this [link](aws.md)
-
-##Azure based installation
+####AWS based installation
 
 We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
 
-You can follow the AWS provider specific documentation using this [link](azure.md)
+You can follow the AWS provider specific documentation using this [link](http://sequenceiq.com/cloudbreak-deployer/docsupdate/onpremaws)
 
-##GCP based installation
+####Azure based installation
 
 We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
 
-You can follow the AWS provider specific documentation using this [link](gcp.md)
+You can follow the AWS provider specific documentation using this [link](http://sequenceiq.com/cloudbreak-deployer/docsupdate/azure)
 
-##OpenStack based installation
+####GCP based installation
+
+We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
+
+You can follow the AWS provider specific documentation using this [link](http://sequenceiq.com/cloudbreak-deployer/docsupdate/gcp)
+
+####OpenStack based installation
 
 We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
 
 You can follow the AWS provider specific documentation using this [link](openstack.md)
 
-## Debug
+##Misc
+
+####Debug
 
 If you want to have more detailed output set the `DEBUG` env variable to non-zero:
 
@@ -43,7 +53,7 @@ If you want to have more detailed output set the `DEBUG` env variable to non-zer
 DEBUG=1 cbd some_command
 ```
 
-## Troubleshooting
+####Troubleshoot
 
 You can also use the `doctor` command to diagnose your environment:
 
@@ -51,7 +61,15 @@ You can also use the `doctor` command to diagnose your environment:
 cbd doctor
 ```
 
-## Update
+####Logs
+
+For logs use the :
+
+```
+cbd logs
+```
+
+#### Update
 
 The tool is capable to upgrade itself to a newer version.
 

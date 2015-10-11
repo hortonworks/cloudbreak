@@ -1,5 +1,5 @@
 
-##  Cloudbreak deployer architecture
+##Cloudbreak deployer architecture
 
 - **uaa**: OAuth Identity Server
 - **cloudbreak** - the Cloudbreak app
@@ -7,12 +7,12 @@
 - **uluwatu** - Cloudbreak UI
 - **sultans** - user management
 
-## System Level Containers
+#### System Level Containers
 
 - consul: Service Registry
 - registrator: automatically registers/unregisters containers with Consul
 
-##  Cloudbreak application architecture
+##Cloudbreak application architecture
 
 Cloudbreak is built on the foundation of cloud providers APIs, Apache Ambari, Docker containers, Swarm and Consul.
 
@@ -33,8 +33,7 @@ Ambari enables System Administrators to:
 
 3. Monitor a Hadoop Cluster
   * Ambari provides a dashboard for monitoring health and status of the Hadoop cluster.
-  * Ambari leverages Ganglia for metrics collection.
-  * Ambari leverages Nagios for system alerting and will send emails when your attention is needed (e.g. a node goes down, remaining disk space is low, etc).
+  * Ambari allows to choose between predefined alerts or add yur custom ones
 
 Ambari enables to integrate Hadoop provisioning, management and monitoring capabilities into applications with the Ambari REST APIs.
 Ambari Blueprints are a declarative definition of a cluster. With a Blueprint, you can specify a Stack, the Component layout and the Configurations to materialise a Hadoop cluster instance (via a REST API) without having to use the Ambari Cluster Install Wizard.
