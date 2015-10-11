@@ -1,4 +1,5 @@
 site_name: Cloudbreak Deployer
+site_url: http://sequenceiq.com/cloudbreak-deployer
 theme: mkdocs
 theme_dir: mkdocs_theme
 dev_addr: 0.0.0.0:8000

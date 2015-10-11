@@ -93,6 +93,16 @@
             </div>
         </div>
 
+         <script>
+           $( document ).ready(function() {
+               $.getJSON("{{ config.site_url }}/versions.json", function(data) {
+               $("#versions-dropdown").append('<li><a href="{{ config.site_url }}/latest">latest ('+data.latest+')</a></li>');
+                $.each(data.versions, function( index, value ) {
+                  $("#versions-dropdown").append('<li><a href="{{ config.site_url }}/'+value+'">'+value+'</a></li>');
+                });
+               });
+           });
+         </script>
     </body>
 </html>
 {% if current_page and current_page.is_homepage %}
