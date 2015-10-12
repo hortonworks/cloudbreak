@@ -48,21 +48,21 @@ public class AwsClient {
     }
 
     public AmazonEC2Client createAccess(AwsCredentialView awsCredential, String regionName) {
-        BasicSessionCredentials basicSessionCredentials = retrieveSessionCredentials(awsCredential);
+        BasicSessionCredentials basicSessionCredentials = retrieveCachedSessionCredentials(awsCredential);
         AmazonEC2Client amazonEC2Client = new AmazonEC2Client(basicSessionCredentials);
         amazonEC2Client.setRegion(RegionUtils.getRegion(awsPlatformParameters.regions().get(regionName)));
         return amazonEC2Client;
     }
 
     public AmazonCloudFormationClient createCloudFormationClient(AwsCredentialView awsCredential, String regionName) {
-        BasicSessionCredentials basicSessionCredentials = retrieveSessionCredentials(awsCredential);
+        BasicSessionCredentials basicSessionCredentials = retrieveCachedSessionCredentials(awsCredential);
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
         amazonCloudFormationClient.setRegion(RegionUtils.getRegion(awsPlatformParameters.regions().get(regionName)));
         return amazonCloudFormationClient;
     }
 
     public AmazonAutoScalingClient createAutoScalingClient(AwsCredentialView awsCredential, String regionName) {
-        BasicSessionCredentials basicSessionCredentials = retrieveSessionCredentials(awsCredential);
+        BasicSessionCredentials basicSessionCredentials = retrieveCachedSessionCredentials(awsCredential);
         AmazonAutoScalingClient amazonAutoScalingClient = new AmazonAutoScalingClient(basicSessionCredentials);
         amazonAutoScalingClient.setRegion(RegionUtils.getRegion(awsPlatformParameters.regions().get(regionName)));
         return amazonAutoScalingClient;
