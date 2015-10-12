@@ -7,7 +7,7 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_FAI
 import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_COMPLETE;
 import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_FAILED;
 import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AWS_CF_TEMPLATE_NEW_PATH;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AWS_CF_TEMPLATE_PATH;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -109,7 +109,7 @@ public class AwsResourceConnector implements ResourceConnector {
     @Inject
     private ResourceNotifier resourceNotifier;
 
-    @Value("${cb.aws.cf.template.new.path:" + CB_AWS_CF_TEMPLATE_NEW_PATH + "}")
+    @Value("${cb.aws.cf.template.new.path:" + CB_AWS_CF_TEMPLATE_PATH + "}")
     private String awsCloudformationTemplatePath;
 
     @Override

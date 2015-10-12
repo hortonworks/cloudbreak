@@ -12,10 +12,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsGroupView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.common.type.AwsEncryption;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -27,7 +29,25 @@ public class CloudFormationTemplateBuilder {
 
     public String build(CloudStack stack, String snapshotId, boolean existingVPC, String templatePath) {
         Map<String, Object> model = new HashMap<>();
-        model.put("instanceGroups", stack.getGroups());
+        List<AwsGroupView> awsGroupViews = new ArrayList<>();
+        for (Group group : stack.getGroups()) {
+            InstanceTemplate instanceTemplate = group.getInstances().get(0);
+            awsGroupViews.add(
+                    new AwsGroupView(
+                            group.getInstances().size(),
+                            group.getType().name(),
+                            instanceTemplate.getFlavor(),
+                            group.getName(),
+                            instanceTemplate.getVolumes().size(),
+                            instanceTemplate.getParameter("encrypted", AwsEncryption.class).equals(AwsEncryption.TRUE) ? true : false,
+                            instanceTemplate.getVolumes().get(0).getSize(),
+                            instanceTemplate.getVolumes().get(0).getType(),
+                            instanceTemplate.getParameter("spotPrice", Double.class)
+                    )
+            );
+        }
+
+        model.put("instanceGroups", awsGroupViews);
         model.put("existingVPC", existingVPC);
         model.put("securityRules", stack.getSecurity());
         model.put("cbSubnet", stack.getNetwork().getSubnet().getCidr());

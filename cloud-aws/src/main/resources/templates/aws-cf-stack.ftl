@@ -194,24 +194,24 @@
         "RouteTableId" : { "Ref" : "PublicRouteTable" }
       }
     },
-    <#list instanceGroups as instanceGroup>
-	"AmbariNodes${instanceGroup.name?replace('_', '')}" : {
+    <#list instanceGroups as group>
+	"AmbariNodes${group.groupName?replace('_', '')}" : {
       "Type" : "AWS::AutoScaling::AutoScalingGroup",
       "DependsOn" : "PublicSubnet",
       "Properties" : {
         "AvailabilityZones" : [{ "Fn::GetAtt" : [ "PublicSubnet", "AvailabilityZone" ] }],
         "VPCZoneIdentifier" : [{ "Ref" : "PublicSubnet" }],
-        "LaunchConfigurationName" : { "Ref" : "AmbariNodeLaunchConfig${instanceGroup.name?replace('_', '')}" },
+        "LaunchConfigurationName" : { "Ref" : "AmbariNodeLaunchConfig${group.groupName?replace('_', '')}" },
         "MinSize" : 1,
-        "MaxSize" : ${instanceGroup.instances?size},
-        "DesiredCapacity" : ${instanceGroup.instances?size},
+        "MaxSize" : ${group.instanceCount},
+        "DesiredCapacity" : ${group.instanceCount},
         "Tags" : [ { "Key" : "Name", "Value" : { "Ref" : "StackName" }, "PropagateAtLaunch" : "true" },
         		   { "Key" : "owner", "Value" : { "Ref" : "StackOwner" }, "PropagateAtLaunch" : "true" },
-        		   { "Key" : "instanceGroup", "Value" : "${instanceGroup.name}", "PropagateAtLaunch" : "true" }]
+        		   { "Key" : "instanceGroup", "Value" : "${group.groupName}", "PropagateAtLaunch" : "true" }]
       }
     },
 
-    "AmbariNodeLaunchConfig${instanceGroup.name?replace('_', '')}"  : {
+    "AmbariNodeLaunchConfig${group.groupName?replace('_', '')}"  : {
       "Type" : "AWS::AutoScaling::LaunchConfiguration",
       "Properties" : {
       	"BlockDeviceMappings" : [
@@ -224,18 +224,18 @@
           }
 		  <#assign seq = ["b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]>
 			<#list seq as x>
-			<#if x_index = instanceGroup.instances[0].volumes?size><#break></#if>
+			<#if x_index = group.volumeCount><#break></#if>
   		  ,{
           	"DeviceName" : "/dev/xvd${x}",
-          	<#if instanceGroup.instances[0].volumes[0].type == "ephemeral">
+          	<#if group.volumeType == "ephemeral">
             "VirtualName" : "ephemeral${x_index}"
             <#else>
             "Ebs" : {
-            <#if instanceGroup.instances[0].parameters.encrypted == "TRUE">
+            <#if group.ebsEncrypted == true>
               "SnapshotId" : "${snapshotId}",
             </#if>
-              "VolumeSize" : ${instanceGroup.instances[0].volumes[0].size},
-              "VolumeType" : "${instanceGroup.instances[0].volumes[0].type}"
+              "VolumeSize" : ${group.volumeSize},
+              "VolumeType" : "${group.volumeType}"
             }
             </#if>
       	  }
@@ -243,16 +243,16 @@
       	],
         "ImageId"        : { "Ref" : "AMI" },
         "SecurityGroups" : [ { "Ref" : "ClusterNodeSecurityGroup" } ],
-        "InstanceType"   : "${instanceGroup.instances[0].flavor}",
+        "InstanceType"   : "${group.flavor}",
         "KeyName"        : { "Ref" : "KeyName" },
         "AssociatePublicIpAddress" : "true",
-        <#if instanceGroup.instances[0].parameters.spotPrice??>
-        "SpotPrice"      : ${instanceGroup.instances[0].parameters.spotPrice},
+        <#if group.spotPrice??>
+        "SpotPrice"      : ${group.spotPrice},
         </#if>
-        <#if instanceGroup.type == "CORE">
+        <#if group.type == "CORE">
         "UserData"       : { "Fn::Base64" : { "Ref" : "CBUserData"}}
         </#if>
-        <#if instanceGroup.type == "GATEWAY">
+        <#if group.type == "GATEWAY">
         "UserData"       : { "Fn::Base64" : { "Ref" : "CBGateWayUserData"}}
         </#if>
       }

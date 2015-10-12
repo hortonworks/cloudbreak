@@ -40,7 +40,6 @@ dependencies {
     compile group: 'org.springframework',           name: 'spring-context-support',         version: '4.0.3.RELEASE'
     compile group: 'io.projectreactor',             name: 'reactor-core',                   version: eventBusVersion
     compile group: 'io.projectreactor',             name: 'reactor-bus',                    version: eventBusVersion
-    compile group: 'net.sf.ehcache',                name: 'ehcache',                        version: '2.8.3'
     compile group: 'org.postgresql',                name: 'postgresql',                     version: '9.3-1101-jdbc41'
     compile group: 'org.hibernate',                 name: 'hibernate-validator',            version: '5.1.1.Final'
     compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: '3.3.2'
@@ -76,7 +75,7 @@ dependencies {
     runtime project(':cloud-openstack')
     runtime project(':cloud-arm')
     runtime project(':cloud-gcp')
-    compile project(':cloud-aws')
+    runtime project(':cloud-aws')
 
     runtime     group: 'activation',                name: 'activation',                     version: '1.0.2'
 
