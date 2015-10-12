@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -20,6 +22,22 @@ public class InstanceMetadataService {
 
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
+
+    public void updateInstanceStatus(Set<InstanceGroup> instanceGroup, com.sequenceiq.cloudbreak.common.type.InstanceStatus currentStatus,
+            Map<InstanceGroupType, com.sequenceiq.cloudbreak.common.type.InstanceStatus> statusByGroupType) {
+        for (InstanceGroup group : instanceGroup) {
+            com.sequenceiq.cloudbreak.common.type.InstanceStatus newStatus = statusByGroupType.get(group.getInstanceGroupType());
+            if (newStatus != null) {
+                for (InstanceMetaData instanceMetaData : group.getInstanceMetaData()) {
+                    if (currentStatus == instanceMetaData.getInstanceStatus()) {
+                        instanceMetaData.setInstanceStatus(newStatus);
+                        instanceMetaDataRepository.save(instanceMetaData);
+                    }
+                }
+            }
+        }
+
+    }
 
     public void saveInstanceRequests(Stack stack, List<Group> groups) {
         Set<InstanceGroup> instanceGroups = stack.getInstanceGroups();

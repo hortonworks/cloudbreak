@@ -32,15 +32,18 @@ public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversion
 
     private InstanceStatus getInstanceStatus(InstanceMetaData metaData) {
         switch (metaData.getInstanceStatus()) {
-            case DECOMMISSIONED:
-                return InstanceStatus.DELETE_REQUESTED;
+
             case REQUESTED:
                 return InstanceStatus.CREATE_REQUESTED;
-            case TERMINATED:
-                return InstanceStatus.TERMINATED;
+            case CREATED:
+                return InstanceStatus.CREATED;
             case UNREGISTERED:
             case REGISTERED:
                 return InstanceStatus.STARTED;
+            case DECOMMISSIONED:
+                return InstanceStatus.DELETE_REQUESTED;
+            case TERMINATED:
+                return InstanceStatus.TERMINATED;
             default:
                 return InstanceStatus.UNKNOWN;
         }
