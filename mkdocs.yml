@@ -4,12 +4,23 @@ theme: mkdocs
 theme_dir: mkdocs_theme
 dev_addr: 0.0.0.0:8000
 pages:
-    - 'Home': index.md
-    - 'Docs':
-        - AWS : aws.md
-        - Azure : azure.md
-        - GCP : gco.md
-        - OpenStack : openstack.md
+    - Home: index.md
+    - Docs:
+        - Configuration : configuration.md
         - Shell : shell.md
         - Recipes: recipes.md
         - Kerberos: kerberos.md
+        - Database : database.md
+        - Development : development.md
+        - Changelog : changelog.md
+    - Providers:
+        - AWS :
+            - Deployment: aws.md
+            - 'Provisioning - webui': aws_cb_ui.md
+            - 'Provisioning - cli': aws_cb_shell.md
+        - Azure :
+            - Deployment: azure.md
+            - 'Provisioning - webui': azure_cb_ui.md
+            - 'Provisioning - cli': azure_cb_shell.md
+        - GCP : gcp.md
+        - OpenStack : openstack.md
