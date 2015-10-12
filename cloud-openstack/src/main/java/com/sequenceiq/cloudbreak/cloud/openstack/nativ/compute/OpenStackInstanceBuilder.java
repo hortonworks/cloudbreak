@@ -74,7 +74,6 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
                     BlockDeviceMappingCreate blockDeviceMappingCreate = Builders.blockDeviceMapping()
                             .uuid(computeResource.getReference())
                             .deviceName(computeResource.getStringParameter(OpenStackConstants.VOLUME_MOUNT_POINT))
-//                            .deleteOnTermination(true)
                             .sourceType("volume")
                             .destinationType("volume")
                             .build();

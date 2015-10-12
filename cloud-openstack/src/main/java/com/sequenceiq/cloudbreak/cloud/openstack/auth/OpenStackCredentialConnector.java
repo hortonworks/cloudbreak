@@ -20,11 +20,8 @@ public class OpenStackCredentialConnector implements CredentialConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackCredentialConnector.class);
 
-    private static final String CB_KEYPAIR_NAME = "cb-keypair-";
-
     @Inject
     private OpenStackClient openStackClient;
-
 
     @Override
     public CloudCredentialStatus create(AuthenticatedContext authenticatedContext) {
@@ -51,8 +48,6 @@ public class OpenStackCredentialConnector implements CredentialConnector {
     @Override
     public CloudCredentialStatus delete(AuthenticatedContext authenticatedContext) {
         LOGGER.info("Deleted credential: {}", authenticatedContext.getCloudCredential());
-
-        KeystoneCredentialView keystoneCredentialView = openStackClient.createKeystoneCredential(authenticatedContext.getCloudCredential());
 
         OSClient client = openStackClient.createOSClient(authenticatedContext);
         KeystoneCredentialView keystoneCredential = openStackClient.createKeystoneCredential(authenticatedContext.getCloudCredential());

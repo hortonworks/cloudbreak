@@ -12,11 +12,8 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 @Component
 public class CredentialToCloudCredentialConverter {
 
-    private static final String CREDENTIAL_ID = "id";
-
     public CloudCredential convert(Credential credential) {
         Map<String, Object> fields = getDeclaredFields(credential);
-        fields.put(CREDENTIAL_ID, credential.getId());
         return new CloudCredential(credential.getId(), credential.getName(), credential.getPublicKey(), credential.getLoginUserName(), fields);
     }
 

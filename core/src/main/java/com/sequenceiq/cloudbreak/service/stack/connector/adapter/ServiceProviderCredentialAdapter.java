@@ -57,15 +57,15 @@ public class ServiceProviderCredentialAdapter implements CredentialHandler<Crede
             CreateCredentialResult res = createCredentialRequest.await();
             LOGGER.info("Result: {}", res);
             if (res.getStatus() != EventStatus.OK) {
-                LOGGER.error("Failed to setup provisioning", res.getErrorDetails());
+                LOGGER.error("Failed to create the credential", res.getErrorDetails());
                 throw new OperationException(res.getErrorDetails());
             }
             if (CredentialStatus.FAILED.equals(res.getCloudCredentialStatus().getStatus())) {
-                throw new BadRequestException("Failed to setup provisioning: " + res.getCloudCredentialStatus().getStatusReason(),
+                throw new BadRequestException("Failed to create the credential: " + res.getCloudCredentialStatus().getStatusReason(),
                         res.getCloudCredentialStatus().getException());
             }
         } catch (InterruptedException e) {
-            LOGGER.error("Error while executing provisioning setup", e);
+            LOGGER.error("Error while executing credential create", e);
             throw new OperationException(e);
         }
 
@@ -84,11 +84,11 @@ public class ServiceProviderCredentialAdapter implements CredentialHandler<Crede
             DeleteCredentialResult res = deleteCredentialRequest.await();
             LOGGER.info("Result: {}", res);
             if (res.getStatus() != EventStatus.OK) {
-                LOGGER.error("Failed to setup provisioning", res.getErrorDetails());
+                LOGGER.error("Failed to delete the credential", res.getErrorDetails());
                 throw new OperationException(res.getErrorDetails());
             }
         } catch (InterruptedException e) {
-            LOGGER.error("Error while executing provisioning setup", e);
+            LOGGER.error("Error while executing credential delete", e);
             throw new OperationException(e);
         }
 
