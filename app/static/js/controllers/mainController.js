@@ -204,6 +204,14 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                     value: 'A9',
                     cloud: 'AZURE'
                 }, {
+                    key: 'A10',
+                    value: 'A10',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'A11',
+                    value: 'A11',
+                    cloud: 'AZURE'
+                }, {
                     key: 'STANDARD_D1',
                     value: 'D1',
                     cloud: 'AZURE'
@@ -218,6 +226,58 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                 }, {
                     key: 'STANDARD_D4',
                     value: 'D4',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D11',
+                    value: 'D11',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D12',
+                    value: 'D12',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D13',
+                    value: 'D13',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D14',
+                    value: 'D14',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D1_V2',
+                    value: 'D1_V2',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D2_V2',
+                    value: 'D2_V2',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D3_V2',
+                    value: 'D3_V2',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D4_V2',
+                    value: 'D4_V2',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D5_V2',
+                    value: 'D5_V2',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D11_V2',
+                    value: 'D11_V2',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D12_V2',
+                    value: 'D12_V2',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D13_V2',
+                    value: 'D13_V2',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D14_V2',
+                    value: 'D14_V2',
                     cloud: 'AZURE'
                 }, {
                     key: 'STANDARD_G1',
@@ -238,22 +298,6 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                 }, {
                     key: 'STANDARD_G5',
                     value: 'G5',
-                    cloud: 'AZURE'
-                }, {
-                    key: 'STANDARD_D11',
-                    value: 'D11',
-                    cloud: 'AZURE'
-                }, {
-                    key: 'STANDARD_D12',
-                    value: 'D12',
-                    cloud: 'AZURE'
-                }, {
-                    key: 'STANDARD_D13',
-                    value: 'D13',
-                    cloud: 'AZURE'
-                }, {
-                    key: 'STANDARD_D14',
-                    value: 'D14',
                     cloud: 'AZURE'
                 }]
             },
