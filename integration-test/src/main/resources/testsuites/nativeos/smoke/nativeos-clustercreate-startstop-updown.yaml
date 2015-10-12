@@ -1,0 +1,84 @@
+# OpenStack credential name must be specified
+name: Native OpenStack full smoketest
+parameters:
+  cloudProvider: OPENSTACK
+
+tests:
+  - name: init
+    classes:
+      - com.sequenceiq.it.TestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+
+  - name: create openstack network
+    parameters:
+      networkName: it-nativeos-network-ssud
+      subnetCIDR: 10.0.36.0/24
+      publicNetId: 8a1ca549-30cb-4fd5-9d32-84a42433558b
+    classes:
+      - com.sequenceiq.it.cloudbreak.OpenStackNetworkCreationTest
+
+  - name: create gateway template
+    parameters:
+      templateName: it-nativeos-smoke-gateway-ssud
+      instanceType: m1.large
+      volumeCount: 1
+      volumeSize: 10
+      templateAdditions: "cbgateway,1,GATEWAY"
+    classes:
+      - com.sequenceiq.it.cloudbreak.OpenStackTemplateCreationTest
+
+  - name: create master template
+    parameters:
+      templateName: it-nativeos-smoke-master-ssud
+      instanceType: m1.large
+      volumeCount: 2
+      volumeSize: 10
+      templateAdditions: "master,1"
+    classes:
+      - com.sequenceiq.it.cloudbreak.OpenStackTemplateCreationTest
+
+  - name: create slave template
+    parameters:
+      templateName: it-nativeos-smoke-slave-ssud
+      instanceType: m1.large
+      volumeCount: 3
+      volumeSize: 10
+      templateAdditions: "slave_1,3"
+    classes:
+      - com.sequenceiq.it.cloudbreak.OpenStackTemplateCreationTest
+
+  - name: create cluster
+    parameters:
+      stackName: it-nativeos-stack-ssud
+      region: local
+      variant: NATIVE
+      clusterName: it-nativeos-cluster-ssud
+    classes:
+      - com.sequenceiq.it.cloudbreak.StackCreationTest
+      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
+  - name: stop cluster
+    parameters:
+      newStatus: STOPPED
+    classes:
+      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+
+  - name: start cluster
+    parameters:
+      newStatus: STARTED
+    classes:
+      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+
+  - name: upscale
+    parameters:
+      instanceGroup: slave_1
+      scalingAdjustment: 3
+    classes:
+      - com.sequenceiq.it.cloudbreak.ScalingTest
+
+  - name: downscale
+    parameters:
+      instanceGroup: slave_1
+      scalingAdjustment: -2
+    classes:
+      - com.sequenceiq.it.cloudbreak.ScalingTest
