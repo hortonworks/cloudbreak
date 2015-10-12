@@ -33,6 +33,7 @@ public class AwsSetup implements Setup {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsSetup.class);
     private static final String IGW_DOES_NOT_EXIST_MSG = "The given internet gateway '%s' does not exist or belongs to a different region.";
     private static final String VPC_DOES_NOT_EXIST_MSG = "The given internet gateway '%s' does not belong to the given VPC '%s'.";
+    private static final int FINISHED_PROGRESS_VALUE = 100;
 
     @Value("${cb.aws.spotinstances.enabled:" + CB_AWS_SPOTINSTANCE_ENABLED + "}")
     private boolean awsSpotinstanceEnabled;
@@ -51,7 +52,7 @@ public class AwsSetup implements Setup {
 
     @Override
     public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack) {
-        return new ImageStatusResult(ImageStatus.CREATE_FINISHED, 100);
+        return new ImageStatusResult(ImageStatus.CREATE_FINISHED, FINISHED_PROGRESS_VALUE);
     }
 
     @Override

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import javax.inject.Inject;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.cache.AwsCachingConfig;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 
 
+@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TestContext.class)
 public class AwsClientTest {
