@@ -39,7 +39,8 @@ public class ExceptionControllerAdvice {
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler({ TypeMismatchException.class, HttpMessageNotReadableException.class, BadRequestException.class, ConversionFailedException.class  })
+    @ExceptionHandler({ TypeMismatchException.class, HttpMessageNotReadableException.class, BadRequestException.class, ConversionFailedException.class,
+            UnsupportedOperationException.class  })
     public ResponseEntity<ExceptionResult> badRequest(Exception e) {
         MDCBuilder.buildMdcContext();
         LOGGER.error(e.getMessage(), e);

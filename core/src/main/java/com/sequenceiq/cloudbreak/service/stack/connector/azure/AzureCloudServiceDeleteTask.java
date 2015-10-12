@@ -16,6 +16,7 @@ import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
 
 @Component
+// TODO Have to be removed when the termination of the old version of azure clusters won't be supported anymore
 public class AzureCloudServiceDeleteTask extends SimpleStatusCheckerTask<AzureCloudServiceDeleteTaskContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureCloudServiceDeleteTask.class);

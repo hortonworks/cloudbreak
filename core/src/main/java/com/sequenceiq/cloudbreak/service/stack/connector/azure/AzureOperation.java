@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.builders.AzureResourceBuilderInit;
 
+// TODO Have to be removed when the termination of the old version of azure clusters won't be supported anymore
 public abstract class AzureOperation<T> {
     private CloudbreakEventService cloudbreakEventService;
     private Map<String, Lock> lockMap;

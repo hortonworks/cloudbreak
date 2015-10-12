@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.sequenceiq.cloudbreak.domain.Resource;
 
+// TODO Have to be removed when the termination of the old version of azure clusters won't be supported anymore
 public abstract class DeleteContextObject {
 
     private Long stackId;

@@ -13,32 +13,31 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
 
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.type.ScalingType;
+import com.sequenceiq.cloudbreak.common.type.StatusRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.controller.validation.NetworkConfigurationValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.core.flow.FlowManager;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
-import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
-import com.sequenceiq.cloudbreak.common.type.StatusRequest;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
@@ -203,6 +202,7 @@ public class DefaultStackService implements StackService {
 
     @Override
     public Stack create(CbUser user, Stack stack) {
+        checkCloudPlatform(stack, "create");
         Stack savedStack = null;
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
@@ -240,6 +240,7 @@ public class DefaultStackService implements StackService {
     @Override
     public void removeInstance(CbUser user, Long stackId, String instanceId) {
         Stack stack = get(stackId);
+        checkCloudPlatform(stack, "removeInstance");
         InstanceMetaData instanceMetaData = instanceMetaDataRepository.findByInstanceId(stackId, instanceId);
         if (instanceMetaData == null) {
             throw new NotFoundException(String.format("Metadata for instance %s not found.", instanceId));
@@ -253,6 +254,7 @@ public class DefaultStackService implements StackService {
     @Override
     public void updateStatus(Long stackId, StatusRequest status) {
         Stack stack = get(stackId);
+        checkCloudPlatform(stack, "updateStatus: " + status.name());
         Cluster cluster = null;
         if (stack.getCluster() != null) {
             cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
@@ -317,6 +319,7 @@ public class DefaultStackService implements StackService {
     @Override
     public void updateNodeCount(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustmentJson) {
         Stack stack = get(stackId);
+        checkCloudPlatform(stack, "updateNodeCount");
         validateStackStatus(stack);
         validateInstanceGroup(stack, instanceGroupAdjustmentJson.getInstanceGroup());
         validateScalingAdjustment(instanceGroupAdjustmentJson, stack);
@@ -337,6 +340,7 @@ public class DefaultStackService implements StackService {
     @Override
     public void updateAllowedSubnets(Long stackId, List<SecurityRule> securityRuleList) {
         Stack stack = get(stackId);
+        checkCloudPlatform(stack, "updateAllowedSubnets");
         if (!stack.isAvailable()) {
             throw new BadRequestException(String.format("Stack is currently in '%s' state. Security constraints cannot be updated.", stack.getStatus()));
         }
@@ -418,9 +422,11 @@ public class DefaultStackService implements StackService {
         }
     }
 
-    private String generateHash(Stack stack) {
-        int hashCode = HashCodeBuilder.reflectionHashCode(stack);
-        return DigestUtils.md5DigestAsHex(String.valueOf(hashCode).getBytes());
+    // TODO Have to be removed when the termination of the old version of azure clusters won't be supported anymore
+    private void checkCloudPlatform(Stack stack, String operation) {
+        if (stack.getCredential().cloudPlatform() == CloudPlatform.AZURE) {
+            throw new BadRequestException(String.format("Unsupported operation: %s, on old azure clusters the only supported operation is the termination.",
+                    operation));
+        }
     }
-
 }
