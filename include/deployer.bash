@@ -214,6 +214,7 @@ deployer-generate() {
 deployer-regenerate() {
     declare desc="Backups and generates new docker-compose.yml and uaa.yml"
 
+    regeneteInProgress=1
     : ${datetime:=$(date +%Y%m%d-%H%M%S)}
     cloudbreak-generate-cert
 

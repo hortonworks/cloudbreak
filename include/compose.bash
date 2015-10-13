@@ -120,9 +120,11 @@ compose-generate-check-diff() {
              debug "docker-compose.yml already exist, and generate wouldn't change it."
              return 0
         else
-            warn "docker-compose.yml already exists, BUT generate would create a DIFFERENT one!"
-            warn "please regenerate it:"
-            echo "  cbd regenerate" | blue
+            if ! [[ "$regeneteInProgress" ]]; then
+                warn "docker-compose.yml already exists, BUT generate would create a DIFFERENT one!"
+                warn "please regenerate it:"
+                echo "  cbd regenerate" | blue
+            fi
             if [[ "$verbose" ]]; then
                 warn "expected change:"
                 diff /tmp/docker-compose-delme.yml docker-compose.yml || true
@@ -141,16 +143,14 @@ compose-generate-yaml() {
 
     cloudbreak-config
 
-    if [ -f docker-compose.yml ]; then
-        if ! compose-generate-check-diff; then
-            if [[ "$CBD_FORCE_START" ]]; then
-                warn "You have forced to start ..."
-            else
-                warn "Please check the expected config changes with:"
-                echo "  cbd doctor" | blue
-                debug "If you want to ignore the changes, set the CBD_FORCE_START to true in Profile"
-                exit 1
-            fi
+    if ! compose-generate-check-diff; then
+        if [[ "$CBD_FORCE_START" ]]; then
+            warn "You have forced to start ..."
+        else
+            warn "Please check the expected config changes with:"
+            echo "  cbd doctor" | blue
+            debug "If you want to ignore the changes, set the CBD_FORCE_START to true in Profile"
+            exit 1
         fi
     else
         info "generating docker-compose.yml"
