@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.CloudbreakRecipeSetupException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.ClusterException;
 import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
@@ -214,24 +215,13 @@ public class AmbariClusterConnector {
 
             final boolean recipesFound = recipesFound(hostGroups);
 
-            if (recipesFound) {
-                recipeEngine.setupRecipes(stack, hostGroups);
-                recipeEngine.executePreInstall(stack);
-            }
+            preInstallRecipesRun(stack, hostGroups, recipesFound);
             ambariClient.createCluster(cluster.getName(), cluster.getBlueprint().getBlueprintName(), hostGroupMappings);
             PollingResult pollingResult = waitForClusterInstall(stack, ambariClient);
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
 
-            if (recipesFound) {
-                recipeEngine.executePostInstall(stack);
-            }
-            pollingResult = runSmokeTest(stack, ambariClient);
-            if (isExited(pollingResult)) {
-                throw new CancellationException("Stack or cluster in delete in progress phase.");
-            } else if (isFailure(pollingResult) || isTimeout(pollingResult)) {
-                eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
-                        cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_MR_SMOKE_FAILED.code()));
-            }
+            postInstallRecipesRun(stack, recipesFound);
+            executeSmokeTest(stack, ambariClient);
             createDefaultViews(ambariClient, blueprintText, hostGroups);
             cluster = handleClusterCreationSuccess(stack, cluster);
             return cluster;
@@ -243,6 +233,31 @@ public class AmbariClusterConnector {
         } catch (Exception e) {
             LOGGER.error("Error while building the Ambari cluster. Message {}, throwable: {}", e.getMessage(), e);
             throw new AmbariOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    private void executeSmokeTest(Stack stack, AmbariClient ambariClient) {
+        PollingResult pollingResult;
+        pollingResult = runSmokeTest(stack, ambariClient);
+        if (isExited(pollingResult)) {
+            throw new CancellationException("Stack or cluster in delete in progress phase.");
+        } else if (isFailure(pollingResult) || isTimeout(pollingResult)) {
+            eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
+                    cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_MR_SMOKE_FAILED.code()));
+        }
+    }
+
+    private void postInstallRecipesRun(Stack stack, boolean recipesFound) throws CloudbreakSecuritySetupException, CloudbreakRecipeSetupException {
+        if (recipesFound) {
+            recipeEngine.executePostInstall(stack);
+        }
+    }
+
+    private void preInstallRecipesRun(Stack stack, Set<HostGroup> hostGroups, boolean recipesFound)
+            throws CloudbreakSecuritySetupException, CloudbreakRecipeSetupException {
+        if (recipesFound) {
+            recipeEngine.setupRecipes(stack, hostGroups);
+            recipeEngine.executePreInstall(stack);
         }
     }
 
@@ -735,9 +750,29 @@ public class AmbariClusterConnector {
         Map<String, String> componentsCategory = ambariClient.getComponentsCategory(blueprint);
         Map<String, Map<String, String>> hostComponentsStates = ambariClient.getHostComponentsStates();
         Set<String> services = new HashSet<>();
-        for (Map.Entry<String, Map<String, String>> hostComponentsEntry : hostComponentsStates.entrySet()) {
+        collectServicesToStart(componentsCategory, hostComponentsStates, services);
+        if (!services.isEmpty()) {
+            if (services.contains("HDFS")) {
+                int requestId = ambariClient.startService("HDFS");
+                stringIntegerMap.put("HDFS_START", requestId);
+            }
+            if (services.contains("HBASE")) {
+                int requestId = ambariClient.startService("HBASE");
+                stringIntegerMap.put("HBASE_START", requestId);
+            }
+        }
+
+        if (!stringIntegerMap.isEmpty()) {
+            return waitForAmbariOperations(stack, ambariClient, stringIntegerMap);
+        } else {
+            return SUCCESS;
+        }
+    }
+
+    private void collectServicesToStart(Map<String, String> componentsCategory, Map<String, Map<String, String>> hostComponentsStates, Set<String> services) {
+        for (Entry<String, Map<String, String>> hostComponentsEntry : hostComponentsStates.entrySet()) {
             Map<String, String> componentStateMap = hostComponentsEntry.getValue();
-            for (Map.Entry<String, String> componentStateEntry : componentStateMap.entrySet()) {
+            for (Entry<String, String> componentStateEntry : componentStateMap.entrySet()) {
                 String componentKey = componentStateEntry.getKey();
                 String category = componentsCategory.get(componentKey);
                 if (!"CLIENT".equals(category)) {
@@ -754,22 +789,6 @@ public class AmbariClusterConnector {
                     }
                 }
             }
-        }
-        if (!services.isEmpty()) {
-            if (services.contains("HDFS")) {
-                int requestId = ambariClient.startService("HDFS");
-                stringIntegerMap.put("HDFS_START", requestId);
-            }
-            if (services.contains("HBASE")) {
-                int requestId = ambariClient.startService("HBASE");
-                stringIntegerMap.put("HBASE_START", requestId);
-            }
-        }
-
-        if (!stringIntegerMap.isEmpty()) {
-            return waitForAmbariOperations(stack, ambariClient, stringIntegerMap);
-        } else {
-            return SUCCESS;
         }
     }
 

@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,8 +21,6 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.SecurityUtils;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.ComputeScopes;
-import com.google.api.services.compute.model.Disk;
-import com.google.api.services.compute.model.DiskList;
 import com.google.api.services.compute.model.Operation;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
@@ -141,20 +138,6 @@ public final class GcpStackUtil {
             LOGGER.error("Error occurred while building Google Storage access.", e);
         }
         return null;
-    }
-
-    public static List<Disk> listDisks(Compute compute, String projectId) throws IOException {
-        List<Disk> disks = new ArrayList<>();
-        for (CloudRegion gcpZone : CloudRegion.gcpRegions()) {
-            try {
-                Compute.Disks.List list = compute.disks().list(projectId, gcpZone.value());
-                DiskList execute = list.execute();
-                disks.addAll(execute.getItems());
-            } catch (NullPointerException ex) {
-                disks.addAll(new ArrayList<Disk>());
-            }
-        }
-        return disks;
     }
 
     public static String getBucket(String image) {

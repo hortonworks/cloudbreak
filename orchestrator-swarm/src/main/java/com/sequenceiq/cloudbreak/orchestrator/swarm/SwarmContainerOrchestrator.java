@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
 import com.sequenceiq.cloudbreak.orchestrator.SimpleContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
@@ -61,7 +62,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
      */
     @Override
     public void bootstrap(GatewayConfig gatewayConfig, Set<Node> nodes, int consulServerCount, String consulLogLocation, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+            throws CloudbreakOrchestratorException {
         try {
             String privateGatewayIp = getPrivateGatewayIp(gatewayConfig.getPublicAddress(), nodes);
             Set<String> privateAddresses = getPrivateAddresses(nodes);
@@ -84,7 +85,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Override
     public void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> nodes, String consulLogLocation, ExitCriteriaModel exitCriteriaModel)
-        throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+        throws CloudbreakOrchestratorException {
         try {
             Set<String> privateAddresses = getPrivateAddresses(nodes);
             Set<String> result = prepareDockerAddressInventory(privateAddresses);
@@ -103,7 +104,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Override
     public void startRegistrator(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+            throws CloudbreakOrchestratorException {
         try {
             Node gateway = getGatewayNode(cluster.getGatewayConfig().getPublicAddress(), cluster.getNodes());
             runner(registratorBootstrap(cluster.getGatewayConfig(), imageName, gateway), getExitCriteria(), exitCriteriaModel,
@@ -118,7 +119,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     @Override
     public void startAmbariServer(ContainerOrchestratorCluster cluster, String dbImageName, String serverImageName, String platform,
             LogVolumePath logVolumePath, Boolean localAgentRequired, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+            throws CloudbreakOrchestratorException {
         try {
             Node gateway = getGatewayNode(cluster.getGatewayConfig().getPublicAddress(), cluster.getNodes());
             runner(ambariServerDatabaseBootstrap(cluster.getGatewayConfig(), dbImageName, gateway, logVolumePath),
@@ -139,7 +140,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     @Override
     public void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, String platform, LogVolumePath logVolumePath,
             ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+            throws CloudbreakOrchestratorException {
         try {
             List<Future<Boolean>> futures = new ArrayList<>();
             Set<Node> nodes = getNodesWithoutGateway(cluster.getGatewayConfig().getPublicAddress(), cluster.getNodes());
@@ -161,7 +162,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Override
     public void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+            throws CloudbreakOrchestratorException {
         try {
             List<Future<Boolean>> futures = new ArrayList<>();
             int i = 0;
@@ -183,7 +184,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     @Override
     public void startKerberosServer(ContainerOrchestratorCluster cluster, String serverImageName, LogVolumePath logVolumePath,
             KerberosConfiguration kerberosConfiguration, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+            throws CloudbreakOrchestratorException {
         try {
             Node gateway = getGatewayNode(cluster.getGatewayConfig().getPublicAddress(), cluster.getNodes());
             runner(kerberosServerBootstrap(kerberosConfiguration, cluster.getGatewayConfig(), serverImageName, gateway, logVolumePath),
@@ -197,7 +198,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Override
     public void startBaywatchServer(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
+            throws CloudbreakOrchestratorException {
         try {
             Node gateway = getGatewayNode(cluster.getGatewayConfig().getPublicAddress(), cluster.getNodes());
             runner(baywatchServerBootstrap(cluster.getGatewayConfig(), imageName, gateway),
@@ -214,7 +215,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     @Override
     public void startBaywatchClients(ContainerOrchestratorCluster cluster, String imageName, String consulDomain, LogVolumePath logVolumePath,
             String externServerLocation, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
+            throws CloudbreakOrchestratorException {
         try {
             List<Future<Boolean>> futures = new ArrayList<>();
             int i = 0;
@@ -236,7 +237,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Override
     public void startLogrotate(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+            throws CloudbreakOrchestratorException {
         try {
             List<Future<Boolean>> futures = new ArrayList<>();
             int i = 0;

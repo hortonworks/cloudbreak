@@ -50,6 +50,7 @@ public class AzureStackUtil {
     public static final Logger LOGGER = LoggerFactory.getLogger(AzureStackUtil.class);
     public static final int ROOTFS_COUNT = 1;
     public static final int GLOBAL_STORAGE = -1;
+    public static final int MAX_LENGTH_OF_ARRAY = 4096;
 
     @Inject
     private KeyGeneratorService keyGeneratorService;
@@ -76,7 +77,7 @@ public class AzureStackUtil {
         }
         int vhdPerStorageAccount = getNumOfVHDPerStorageAccount(stack);
         List<InstanceGroup> instanceGroups = getOrderedInstanceGroups(stack);
-        int[] accounts = new int[4096];
+        int[] accounts = new int[MAX_LENGTH_OF_ARRAY];
         Arrays.fill(accounts, vhdPerStorageAccount);
         for (InstanceGroup ig : instanceGroups) {
             int nodeCount = ig.getNodeCount();
