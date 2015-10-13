@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 
+@Component(AwsCloudformationStatusCheckerTask.NAME)
 @Scope(value = "prototype")
 public class AwsCloudformationStatusCheckerTask extends PollBooleanStateTask {
     public static final String NAME = "awsCloudformationStatusCheckerTask";
