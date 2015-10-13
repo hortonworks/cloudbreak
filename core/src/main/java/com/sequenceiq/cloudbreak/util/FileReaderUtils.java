@@ -11,7 +11,8 @@ import java.nio.file.Paths;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ClassPathResource;
 
-import com.amazonaws.util.Base64;
+import com.google.common.io.BaseEncoding;
+
 
 public class FileReaderUtils {
 
@@ -30,12 +31,12 @@ public class FileReaderUtils {
 
     public static final String readFileFromPath(String fileName) throws IOException {
         String br = IOUtils.toString(new FileInputStream(fileName));
-        return Base64.encodeAsString(br.getBytes());
+        return BaseEncoding.base64().encode(br.getBytes());
     }
 
     public static final String readBinaryFileFromPath(String fileName) throws IOException {
         Path path = Paths.get(fileName);
-        return Base64.encodeAsString(Files.readAllBytes(path));
+        return BaseEncoding.base64().encode(Files.readAllBytes(path));
     }
 
     public static final String readFileFromPathToString(String fileName) throws IOException {
