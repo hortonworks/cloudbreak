@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.heat;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -51,6 +51,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
     @Inject
     private OpenStackUtils utils;
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier,
             AdjustmentType adjustmentType, Long threshold) {
@@ -73,9 +74,9 @@ public class OpenStackResourceConnector implements ResourceConnector {
             promise.awaitSuccess();
         } catch (Exception e) {
             //Rollback
-            terminate(authenticatedContext, stack, Arrays.asList(cloudResource));
+            terminate(authenticatedContext, stack, Lists.newArrayList(cloudResource));
         }
-        List<CloudResourceStatus> resources = check(authenticatedContext, Arrays.asList(cloudResource));
+        List<CloudResourceStatus> resources = check(authenticatedContext, Lists.newArrayList(cloudResource));
         LOGGER.debug("Launched resources: {}", resources);
         return resources;
     }
