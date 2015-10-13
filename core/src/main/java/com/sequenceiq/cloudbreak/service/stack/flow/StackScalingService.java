@@ -163,20 +163,21 @@ public class StackScalingService {
         Stack stack = stackService.getById(stackId);
         CloudPlatform platform = stack.cloudPlatform();
         CloudPlatformConnector connector = platformResolver.connector(platform);
-        Map<String, String> unregisteredHostNamesByInstanceId = getUnregisteredInstanceIds(instanceGroupName, scalingAdjustment, stack);
-        Set<String> instanceIds = new HashSet<>(unregisteredHostNamesByInstanceId.keySet());
+        Map<String, String> unusedInstanceIds = getUnusedInstanceIds(instanceGroupName, scalingAdjustment, stack);
+        Set<String> instanceIds = new HashSet<>(unusedInstanceIds.keySet());
         Map<InstanceGroupType, String> userdata = buildUserData(stack, platform, connector);
         instanceIds = connector.removeInstances(stack, userdata.get(InstanceGroupType.GATEWAY),
                 userdata.get(InstanceGroupType.CORE), instanceIds, instanceGroupName);
         updateRemovedResourcesState(stack, instanceIds, stack.getInstanceGroupByInstanceGroupName(instanceGroupName));
     }
 
-    private Map<String, String> getUnregisteredInstanceIds(String instanceGroupName, Integer scalingAdjustment, Stack stack) {
+    private Map<String, String> getUnusedInstanceIds(String instanceGroupName, Integer scalingAdjustment, Stack stack) {
         Map<String, String> instanceIds = new HashMap<>();
 
         int i = 0;
         for (InstanceMetaData metaData : stack.getInstanceGroupByInstanceGroupName(instanceGroupName).getInstanceMetaData()) {
-            if (!metaData.getAmbariServer() && !metaData.getConsulServer() && (metaData.isDecommissioned() || metaData.isUnRegistered())) {
+            if (!metaData.getAmbariServer() && !metaData.getConsulServer()
+                    && (metaData.isDecommissioned() || metaData.isUnRegistered() || metaData.isCreated())) {
                 instanceIds.put(metaData.getInstanceId(), metaData.getDiscoveryFQDN());
                 if (++i >= scalingAdjustment * -1) {
                     break;
@@ -204,10 +205,10 @@ public class StackScalingService {
 
         for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
             if (instanceIds.contains(instanceMetaData.getInstanceId())) {
+                removeAgentFromConsul(stack, client, instanceMetaData);
                 long timeInMillis = Calendar.getInstance().getTimeInMillis();
                 instanceMetaData.setTerminationDate(timeInMillis);
                 instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
-                removeAgentFromConsul(stack, client, instanceMetaData);
                 instanceMetaDataRepository.save(instanceMetaData);
             }
         }
