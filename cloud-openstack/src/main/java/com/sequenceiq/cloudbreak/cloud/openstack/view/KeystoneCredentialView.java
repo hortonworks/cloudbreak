@@ -14,13 +14,12 @@ public class KeystoneCredentialView {
     }
 
     public String getKeyPairName() {
-        return CB_KEYPAIR_NAME + deleteWhitespace(getName().toLowerCase());
+        return CB_KEYPAIR_NAME + cloudCredential.getId() + "-" + deleteWhitespace(getName().toLowerCase());
     }
 
     public String getName() {
         return cloudCredential.getName();
     }
-
 
     public String getPublicKey() {
         return cloudCredential.getPublicKey();
