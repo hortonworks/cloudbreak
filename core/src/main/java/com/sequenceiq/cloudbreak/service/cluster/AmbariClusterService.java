@@ -416,7 +416,7 @@ public class AmbariClusterService implements ClusterService {
             throw new BadRequestException("No scaling adjustments specified. Nothing to do.");
         }
         if (!downScale) {
-            validateUnregisteredHosts(hostGroup, scalingAdjustment);
+            validateUnusedHosts(hostGroup, scalingAdjustment);
         } else {
             validateRegisteredHosts(stack, hostGroupAdjustment);
             validateComponentsCategory(stack, hostGroupAdjustment);
@@ -429,10 +429,9 @@ public class AmbariClusterService implements ClusterService {
 
     private Set<String> collectUpscaleCandidates(HostGroupAdjustmentJson adjustmentJson, Cluster cluster) {
         HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), adjustmentJson.getHostGroup());
-        Set<InstanceMetaData> unregisteredHostsInInstanceGroup =
-                instanceMetadataRepository.findUnregisteredHostsInInstanceGroup(hostGroup.getInstanceGroup().getId());
+        Set<InstanceMetaData> unusedHostsInInstanceGroup = instanceMetadataRepository.findUnusedHostsInInstanceGroup(hostGroup.getInstanceGroup().getId());
         Set<String> instanceIds = new HashSet<>();
-        for (InstanceMetaData instanceMetaData : unregisteredHostsInInstanceGroup) {
+        for (InstanceMetaData instanceMetaData : unusedHostsInInstanceGroup) {
             instanceIds.add(instanceMetaData.getPrivateIp());
             if (instanceIds.size() >= adjustmentJson.getScalingAdjustment()) {
                 break;
@@ -495,12 +494,12 @@ public class AmbariClusterService implements ClusterService {
         }
     }
 
-    private void validateUnregisteredHosts(HostGroup hostGroup, int scalingAdjustment) {
-        Set<InstanceMetaData> unregisteredHosts = instanceMetadataRepository.findUnregisteredHostsInInstanceGroup(hostGroup.getInstanceGroup().getId());
-        if (unregisteredHosts.size() < scalingAdjustment) {
+    private void validateUnusedHosts(HostGroup hostGroup, int scalingAdjustment) {
+        Set<InstanceMetaData> unusedHostsInInstanceGroup = instanceMetadataRepository.findUnusedHostsInInstanceGroup(hostGroup.getInstanceGroup().getId());
+        if (unusedHostsInInstanceGroup.size() < scalingAdjustment) {
             throw new BadRequestException(String.format(
                     "There are %s unregistered instances in instance group '%s'. %s more instances needed to complete this request.",
-                    unregisteredHosts.size(), hostGroup.getInstanceGroup().getGroupName(), scalingAdjustment - unregisteredHosts.size()));
+                    unusedHostsInInstanceGroup.size(), hostGroup.getInstanceGroup().getGroupName(), scalingAdjustment - unusedHostsInInstanceGroup.size()));
         }
     }
 

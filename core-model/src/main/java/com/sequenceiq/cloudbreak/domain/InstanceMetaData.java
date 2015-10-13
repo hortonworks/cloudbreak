@@ -25,6 +25,12 @@ import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
                         + "WHERE i.instanceGroup.id= :instanceGroupId "
                         + "AND i.instanceStatus = 'UNREGISTERED'"),
         @NamedQuery(
+                name = "InstanceMetaData.findUnusedHostsInInstanceGroup",
+                query = "SELECT i FROM InstanceMetaData i "
+                        + "WHERE i.instanceGroup.id= :instanceGroupId "
+                        + "AND i.instanceStatus in ('CREATED', 'UNREGISTERED')"),
+
+        @NamedQuery(
                 name = "InstanceMetaData.findNotTerminatedForStack",
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.stack.id= :stackId "
@@ -47,7 +53,7 @@ import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.stack.id= :stackId "
                         + "AND i.instanceGroup.groupName= :groupName "
-                        + "AND (i.instanceStatus= 'DECOMMISSIONED' OR i.instanceStatus= 'UNREGISTERED')"),
+                        + "AND i.instanceStatus in ('CREATED', 'UNREGISTERED', 'DECOMMISSIONED')"),
         @NamedQuery(
                 name = "InstanceMetaData.findNotTerminatedByPrivateAddress",
                 query = "SELECT i FROM InstanceMetaData i "
