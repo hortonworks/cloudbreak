@@ -234,7 +234,7 @@
             <#if instanceGroup.instances[0].parameters.encrypted == "TRUE">
               "SnapshotId" : "${snapshotId}",
             </#if>
-              "VolumeSize" : ${instanceGroup.instances[0].volumes[0].size},
+              "VolumeSize" : ${instanceGroup.instances[0].volumes?size},
               "VolumeType" : "${instanceGroup.instances[0].volumes[0].type}"
             }
             </#if>

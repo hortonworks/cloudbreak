@@ -27,7 +27,6 @@ public class EnvironmentVariableConfig {
     public static final String CB_AWS_EXTERNAL_ID = "provision-ambari";
 
     public static final String CB_AWS_CF_TEMPLATE_PATH = "templates/aws-cf-stack.ftl";
-    public static final String CB_AWS_CF_TEMPLATE_NEW_PATH = "templates/aws-cf-stack.ftl";
 
     public static final String CB_BLUEPRINT_DEFAULTS = "hdp-small-default,hdp-spark-cluster,hdp-streaming-cluster";
     public static final String CB_TEMPLATE_DEFAULTS = "minviable-gcp,minviable-azure,minviable-aws";

@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.aws.task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.CreateSnapshotResult;
@@ -12,7 +11,6 @@ import com.amazonaws.services.ec2.model.DescribeSnapshotsResult;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 
-@Component(CreateSnapshotReadyStatusCheckerTask.NAME)
 @Scope(value = "prototype")
 public class CreateSnapshotReadyStatusCheckerTask extends PollBooleanStateTask {
     public static final String NAME = "createSnapshotReadyStatusCheckerTask";

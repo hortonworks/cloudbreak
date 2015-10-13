@@ -5,7 +5,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.Activity;
@@ -21,7 +20,6 @@ import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 
-@Component(ASGroupStatusCheckerTask.NAME)
 @Scope(value = "prototype")
 public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
     public static final String NAME = "aSGroupStatusCheckerTask";

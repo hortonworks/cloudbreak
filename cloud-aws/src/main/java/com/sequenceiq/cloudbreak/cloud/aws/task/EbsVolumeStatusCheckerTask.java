@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.aws.task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeVolumesRequest;
@@ -12,7 +11,6 @@ import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 
-@Component(EbsVolumeStatusCheckerTask.NAME)
 @Scope(value = "prototype")
 public class EbsVolumeStatusCheckerTask extends PollBooleanStateTask {
     public static final String NAME = "ebsVolumeStatusCheckerTask";
