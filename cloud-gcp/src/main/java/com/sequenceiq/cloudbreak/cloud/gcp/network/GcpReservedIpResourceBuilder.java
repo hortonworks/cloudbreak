@@ -32,7 +32,6 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpNetworkBuilder {
         String region = CloudRegion.valueOf(context.getRegion()).region();
 
         Address address = new Address();
-        address.setRegion(region);
         address.setName(resource.getName());
 
         Compute.Addresses.Insert networkInsert = context.getCompute().addresses().insert(projectId, region, address);
