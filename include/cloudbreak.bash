@@ -264,7 +264,6 @@ generate_uaa_check_diff() {
 
         fi
     else
-        info "generating uaa.yml"
         generate_uaa_config_force uaa.yml
     fi
     return 0
