@@ -250,9 +250,12 @@ generate_uaa_check_diff() {
             debug "uaa.yml exists and generate wouldn't change it"
             return 0
         else
-            warn "uaa.yml already exists, BUT generate would create a DIFFERENT one!"
-            warn "please regenerate it:"
-            echo "  cbd regenerate" | blue
+            if ! [[ "$regeneteInProgress" ]]; then
+                warn "uaa.yml already exists, BUT generate would create a DIFFERENT one!"
+                warn "please regenerate it:"
+                echo "  cbd regenerate" | blue
+            fi
+
             if [[ "$verbose" ]]; then
                 warn "expected change:"
                 diff /tmp/uaa-delme.yml uaa.yml || true
@@ -274,16 +277,14 @@ generate_uaa_check_diff() {
 generate_uaa_config() {
     cloudbreak-config
 
-    if [ -f uaa.yml ]; then
-        if ! generate_uaa_check_diff; then
-            if [[ "$CBD_FORCE_START" ]]; then
-                warn "You have forced to start ..."
-            else
-                warn "Please check the expected config changes with:"
-                echo "  cbd doctor" | blue
-                debug "If you want to ignore the changes, set the CBD_FORCE_START to true in Profile"
-                exit 1
-            fi
+    if ! generate_uaa_check_diff; then
+        if [[ "$CBD_FORCE_START" ]]; then
+            warn "You have forced to start ..."
+        else
+            warn "Please check the expected config changes with:"
+            echo "  cbd doctor" | blue
+            debug "If you want to ignore the changes, set the CBD_FORCE_START to true in Profile"
+            exit 1
         fi
     else
         info "generating uaa.yml"

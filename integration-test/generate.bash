@@ -98,4 +98,19 @@ T_regenerateShouldBackup() {
     teardown
 }
 
+T_regenerateShouldntWarn() {
+    setup
+    $CBD_BINARY generate
+    echo "export PUBLIC_IP=$(($RANDOM % 255)).$(($RANDOM % 255)).$(($RANDOM % 255)).$(($RANDOM % 255))" > Profile
+    echo "export UAA_DEFAULT_USER_PW=$(base64 <<<$RANDOM)" >> Profile
+
+    local regenOutput=$($CBD_BINARY regenerate 2>&1)
+
+    if grep -q 'already exists, BUT generate would create a DIFFERENT' <<<"$regenOutput"; then
+        $T_fail "regenerate shouldnt complain like: ...  BUT generate would create a DIFFERENT ..."
+        return
+    fi
+
+    teardown
+}
 
