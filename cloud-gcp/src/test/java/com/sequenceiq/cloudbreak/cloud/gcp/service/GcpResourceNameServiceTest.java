@@ -22,7 +22,7 @@ public class GcpResourceNameServiceTest {
         String[] parts = new String[]{"gcp Network"};
 
         // WHEN
-        String networkResourceName = subject.resourceName(ResourceType.GCP_NETWORK, parts);
+        String networkResourceName = subject.resourceName(ResourceType.GCP_NETWORK, (Object[]) parts);
 
         // THEN
         Assert.assertNotNull("The generated name must not be null!", networkResourceName);

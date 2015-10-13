@@ -97,6 +97,7 @@ public class SwarmContainerOrchestratorTest {
     @Mock
     private Future<Boolean> future;
 
+    @SuppressWarnings("unchecked")
     @Before
     public void before() {
         underTest.init(parallelContainerRunner(), exitCriteria());

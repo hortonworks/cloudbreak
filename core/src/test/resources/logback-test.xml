@@ -26,6 +26,9 @@
     <logger name="org.hibernate.type.descriptor.sql.BasicBinder">
         <level value="INFO"/>
     </logger>
+    <logger name="org.springframework.context.support.GenericApplicationContext">
+        <level value="ERROR"/>
+    </logger>
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>

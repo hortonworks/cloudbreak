@@ -11,10 +11,12 @@ public class DynamicModel {
         parameters = new HashMap<>();
     }
 
+    @SuppressWarnings("unchecked")
     public <T> T getParameter(String key, Class<T> clazz) {
         return (T) parameters.get(key);
     }
 
+    @SuppressWarnings("unchecked")
     public <T> T getParameter(Class<T> clazz) {
         return (T) parameters.get(clazz.getName());
     }
