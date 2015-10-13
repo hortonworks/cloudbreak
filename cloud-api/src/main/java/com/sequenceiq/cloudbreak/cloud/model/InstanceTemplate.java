@@ -2,8 +2,9 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public class InstanceTemplate {
+public class InstanceTemplate extends DynamicModel {
 
     private String flavor;
     private String groupName;
@@ -11,20 +12,17 @@ public class InstanceTemplate {
     private List<Volume> volumes;
     private InstanceStatus status;
 
-    public InstanceTemplate(String flavor, String groupName, Long privateId, InstanceStatus status) {
-        this.flavor = flavor;
-        this.groupName = groupName;
-        this.privateId = privateId;
-        this.status = status;
-        volumes = new ArrayList<>();
+    public InstanceTemplate(String flavor, String groupName, Long privateId, InstanceStatus status, Map<String, Object> parameters) {
+        this(flavor, groupName, privateId, new ArrayList<Volume>(), status, parameters);
     }
 
-    public InstanceTemplate(String flavor, String groupName, Long privateId, List<Volume> volumes, InstanceStatus status) {
+    public InstanceTemplate(String flavor, String groupName, Long privateId, List<Volume> volumes, InstanceStatus status, Map<String, Object> parameters) {
         this.flavor = flavor;
         this.groupName = groupName;
         this.privateId = privateId;
         this.volumes = volumes;
         this.status = status;
+        super.putAll(parameters);
     }
 
     public String getFlavor() {

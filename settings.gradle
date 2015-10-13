@@ -9,6 +9,7 @@ include 'cloud-openstack'
 include 'cloud-arm'
 include 'cloud-common'
 include 'cloud-gcp'
+include 'cloud-aws'
 include 'cloud-template'
 
 rootProject.name = 'cloudbreak'

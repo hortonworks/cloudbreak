@@ -1,0 +1,34 @@
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+
+repositories {
+  maven { url 'http://repo.spring.io/libs-release' }
+  mavenCentral()
+}
+
+jar {
+  baseName = 'cloud-aws'
+}
+
+dependencies {
+
+  compile project(':cloud-api')
+  compile project(':cloud-common')
+  compile project(':cloud-reactor')
+
+  compile group: 'javax',                         name: 'javaee-api',                     version: '7.0'
+  compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
+  compile group: 'org.springframework',           name: 'spring-context-support',         version: '4.0.3.RELEASE'
+  compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: '3.3.2'
+  compile group: 'commons-io',                    name: 'commons-io',                     version: '2.4'
+  compile group: 'commons-codec',                 name: 'commons-codec',                  version: '1.10'
+  compile group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
+  compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: '1.10.11')      { exclude group: 'commons-logging' }
+  compile group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
+
+  testCompile group: 'org.mockito',               name: 'mockito-all',                    version: '1.10.19'
+  testCompile group: 'junit',                     name: 'junit',                          version: '4.12'
+  testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: '1.1.8.RELEASE'
+
+}

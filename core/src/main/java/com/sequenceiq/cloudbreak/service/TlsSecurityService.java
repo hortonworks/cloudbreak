@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.io.BaseEncoding;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
@@ -62,10 +63,10 @@ public class TlsSecurityService {
         try {
             generateTempSshKeypair(stack.getId());
             SecurityConfig securityConfig = new SecurityConfig();
-            securityConfig.setClientKey(com.amazonaws.util.Base64.encodeAsString(readClientKey(stack.getId()).getBytes()));
-            securityConfig.setClientCert(com.amazonaws.util.Base64.encodeAsString(readClientCert(stack.getId()).getBytes()));
-            securityConfig.setTemporarySshPrivateKey(com.amazonaws.util.Base64.encodeAsString(readPrivateSshKey(stack.getId()).getBytes()));
-            securityConfig.setTemporarySshPublicKey(com.amazonaws.util.Base64.encodeAsString(readPublicSshKey(stack.getId()).getBytes()));
+            securityConfig.setClientKey(BaseEncoding.base64().encode(readClientKey(stack.getId()).getBytes()));
+            securityConfig.setClientCert(BaseEncoding.base64().encode(readClientCert(stack.getId()).getBytes()));
+            securityConfig.setTemporarySshPrivateKey(BaseEncoding.base64().encode(readPrivateSshKey(stack.getId()).getBytes()));
+            securityConfig.setTemporarySshPublicKey(BaseEncoding.base64().encode(readPublicSshKey(stack.getId()).getBytes()));
             securityConfig.setStack(stack);
             securityConfigRepository.save(securityConfig);
         } catch (IOException | JSchException e) {

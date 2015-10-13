@@ -20,10 +20,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.util.Base64;
+import com.google.common.io.BaseEncoding;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -190,7 +190,7 @@ public class TlsSetupService {
         ssh.newSCPFileTransfer().download("/tmp/server.pem", tlsSecurityService.getCertDir(stack.getId()) + "/ca.pem");
         Stack stackWithSecurity = stackRepository.findByIdWithSecurityConfig(stack.getId());
         SecurityConfig securityConfig = stackWithSecurity.getSecurityConfig();
-        securityConfig.setServerCert(Base64.encodeAsString(tlsSecurityService.readServerCert(stack.getId()).getBytes()));
+        securityConfig.setServerCert(BaseEncoding.base64().encode(tlsSecurityService.readServerCert(stack.getId()).getBytes()));
         securityConfigRepository.save(securityConfig);
     }
 
