@@ -356,7 +356,7 @@ util-token() {
     local TOKEN=$(curl -siX POST \
         -H "accept: application/x-www-form-urlencoded" \
         -d credentials='{"username":"'${UAA_DEFAULT_USER_EMAIL}'","password":"'${UAA_DEFAULT_USER_PW}'"}' \
-        "${PRIVATE_IP}:8089/oauth/authorize?response_type=token&client_id=cloudbreak_shell&scope.0=openid&source=login&redirect_uri=http://cloudbreak.shell" \
+        "${PUBLIC_IP}:8089/oauth/authorize?response_type=token&client_id=cloudbreak_shell&scope.0=openid&source=login&redirect_uri=http://cloudbreak.shell" \
            | grep Location | cut -d'=' -f 2 | cut -d'&' -f 1)
     info TOKEN=$TOKEN
 }
