@@ -3,8 +3,11 @@
 setup() {
     : ${CBD_TMPDIR:=$(mktemp -d delme-XXXXXX)}
     
-    echo export PUBLIC_IP=1.2.3.4 > "$CBD_TMPDIR/Profile"
-
+    cat > "$CBD_TMPDIR/Profile" <<EOF
+export PUBLIC_IP=1.2.3.4
+export BRIDGE_IP=172.17.42.1
+export DOCKER_CONSUL_OPTIONS="-recursor 192.168.1.1"
+EOF
     if ! [ -e "$CBD_TMPDIR/.deps" ]; then
         if [ -e /cbd/.deps ]; then
             cp -r /cbd/.deps "$CBD_TMPDIR/.deps"
@@ -16,7 +19,7 @@ setup() {
         $CBD_BINARY init
     else
         cd $CBD_TMPDIR
-        ls -1 | grep -v Profile | xargs rm -rf
+        ls -1 | grep -v "Profile\|certs" | xargs rm -rf
     fi
 }
 
