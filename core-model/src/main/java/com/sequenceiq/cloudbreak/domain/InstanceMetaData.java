@@ -211,6 +211,10 @@ public class InstanceMetaData implements ProvisionEntity {
         this.consulServer = consulServer;
     }
 
+    public boolean isCreated() {
+        return InstanceStatus.CREATED.equals(instanceStatus);
+    }
+
     public boolean isDecommissioned() {
         return InstanceStatus.DECOMMISSIONED.equals(instanceStatus);
     }
