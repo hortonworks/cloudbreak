@@ -47,15 +47,18 @@ integration-tests:
 integration-tests-centos:
 	docker build -f Dockerfile.integrationtest -t cbd:integration .
 	docker run -it --rm \
-		-v $PWD:$PWD \
-		-w $PWD \
+		-v $(PWD):$(PWD) \
+		-w $(PWD) \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v /usr/local/bin/docker:/usr/local/bin/docker \
+		-e CBD_TMPDIR=$(PWD)/delme-centos \
+		cbd:integration make integration-tests
+
 		cbd:integration make integration-tests
 
 install-test:
 	docker rmi cbd:delme 2>/dev/null || true
-	docker build -f Dockerfile.installtest -t cbd:delme . 
+	docker build -f Dockerfile.installtest -t cbd:delme .
 	docker run --rm cbd:delme cbd --version
 
 prepare-release: build

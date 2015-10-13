@@ -3,6 +3,16 @@ FROM centos
 RUN yum install -y\
     sudo \
     make \
+    unzip \
+    git \
     && curl -L https://github.com/progrium/basht/releases/download/v0.1.0/basht_0.1.0_Linux_x86_64.tgz | tar -xz -C /usr/bin/
 
+RUN curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install | sh
+WORKDIR /cbd
+RUN echo export PUBLIC_IP=1.2.3.4 > Profile \
+    && cbd init || true \
+    && rm -f Profile
+
+ADD ./Makefile /cbd/
+ADD ./integration-test/ /cbd/integration-test/
 

@@ -3,6 +3,14 @@
 setup() {
     : ${CBD_TMPDIR:=$(mktemp -d delme-XXXXXX)}
     
+    echo export PUBLIC_IP=1.2.3.4 > "$CBD_TMPDIR/Profile"
+
+    if ! [ -e "$CBD_TMPDIR/.deps" ]; then
+        if [ -e /cbd/.deps ]; then
+            cp -r /cbd/.deps "$CBD_TMPDIR/.deps"
+        fi
+    fi
+
     if ! [ -f "$CBD_TMPDIR/Profile" ]; then
         cd $CBD_TMPDIR
         $CBD_BINARY init
