@@ -416,6 +416,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.cluster.failurePolicy.adjustmentType = "BEST_EFFORT";
                 $scope.cluster.failurePolicy.threshold = null;
                 $scope.cluster.parameters = {};
+                $scope.cluster.availabilityZone = null;
+                $scope.cluster.region = null;
                 setFileSystem();
             }
         });
@@ -609,6 +611,23 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.showError(error, $rootScope.msg.cluster_sync_failed);
             });
         }
+
+        $scope.$watch('cluster.region', function() {
+            if ($rootScope.activeCredential != undefined && $rootScope.activeCredential.cloudPlatform == 'AWS') {
+                angular.forEach($rootScope.config.AWS.awsRegions, function(region) {
+                    if (region == null) {
+                        $scope.cluster.availabilityZone = null;
+                    }
+                    if (region.key == $scope.cluster.region) {
+                        $scope.avZones = region.availabilityZones;
+                        return;
+                    }
+                });
+            } else {
+                $scope.cluster.availabilityZone = null;
+            }
+        });
+
 
         $scope.requestStatusChange = function(cluster) {
             if (cluster.status == "STOPPED") {

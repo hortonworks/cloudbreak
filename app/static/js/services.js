@@ -304,6 +304,7 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         consulServerCount: cluster.consulServerCount,
                         networkId: cluster.networkId,
                         securityGroupId: cluster.securityGroupId,
+                        availabilityZone: cluster.availabilityZone || null,
                         platformVariant: cluster.platformVariant
                     }
                     if (cluster.public) {
