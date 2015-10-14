@@ -651,11 +651,17 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.getPlatformVariants = function() {
+            var variants = [];
             if ($rootScope.activeCredential !== undefined) {
-                $scope.cluster.platformVariant = $rootScope.config.DEFAULT_VARIANTS[$rootScope.activeCredential.cloudPlatform];
-                return $scope.platformVariants[$rootScope.activeCredential.cloudPlatform];
+                variants = $scope.platformVariants[$rootScope.activeCredential.cloudPlatform];
+                var defaultVariant = $rootScope.config.DEFAULT_VARIANTS[$rootScope.activeCredential.cloudPlatform];
+                if (defaultVariant == null) {
+                    $scope.cluster.platformVariant = null;
+                } else if (variants.indexOf($scope.cluster.platformVariant) < 0) {
+                    $scope.cluster.platformVariant = defaultVariant;
+                }
             }
-            return [];
+            return variants;
         }
 
         $scope.showDetails = function() {

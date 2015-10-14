@@ -790,7 +790,7 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
             }],
             'DEFAULT_VARIANTS': {
                 'GCP': 'GCP',
-                'AZURE': null,
+                'AZURE': 'AZURE',
                 'AZURE_RM': 'AZURE_RM',
                 'AWS': null,
                 'OPENSTACK': 'HEAT'
