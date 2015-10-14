@@ -1,6 +1,7 @@
 
 cloudbreak-config() {
-  env-import PRIVATE_IP $(bridge-ip)
+  : ${BRIDGE_IP:=$(docker run --rm alpine sh -c 'ip ro | grep default | cut -d" " -f 3')}
+  env-import PRIVATE_IP $BRIDGE_IP
   cloudbreak-conf-tags
   cloudbreak-conf-images
   cloudbreak-conf-cert
@@ -14,10 +15,6 @@ cloudbreak-config() {
   cloudbreak-conf-baywatch
   cloudbreak-conf-consul
   migrate-config
-}
-
-bridge-ip() {
-    echo ${BRIDGE_IP:=$(docker run --rm alpine sh -c 'ip ro | grep default | cut -d" " -f 3')}
 }
 
 cloudbreak-conf-tags() {
@@ -69,7 +66,7 @@ cloudbreak-conf-consul() {
     
     env-import DOCKER_CONSUL_OPTIONS ""
     if ! [[ $DOCKER_CONSUL_OPTIONS =~ .*recursor.* ]]; then
-        DOCKER_CONSUL_OPTIONS="$DOCKER_CONSUL_OPTIONS $(consul-recursors <(docker run -it --rm --net=host alpine cat /etc/resolv.conf) $(bridge-ip) $(docker-ip))"
+        DOCKER_CONSUL_OPTIONS="$DOCKER_CONSUL_OPTIONS $(consul-recursors <(docker run -it --rm --net=host alpine cat /etc/resolv.conf) ${BRIDGE_IP} $(docker-ip))"
     fi
     debug "DOCKER_CONSUL_OPTIONS=$DOCKER_CONSUL_OPTIONS"
     cloudbreakConfConsulExecuted=1
@@ -267,7 +264,6 @@ generate_uaa_check_diff() {
 
         fi
     else
-        info "generating uaa.yml"
         generate_uaa_config_force uaa.yml
     fi
     return 0
@@ -360,7 +356,7 @@ util-token() {
     local TOKEN=$(curl -siX POST \
         -H "accept: application/x-www-form-urlencoded" \
         -d credentials='{"username":"'${UAA_DEFAULT_USER_EMAIL}'","password":"'${UAA_DEFAULT_USER_PW}'"}' \
-        "${PRIVATE_IP}:8089/oauth/authorize?response_type=token&client_id=cloudbreak_shell&scope.0=openid&source=login&redirect_uri=http://cloudbreak.shell" \
+        "${PUBLIC_IP}:8089/oauth/authorize?response_type=token&client_id=cloudbreak_shell&scope.0=openid&source=login&redirect_uri=http://cloudbreak.shell" \
            | grep Location | cut -d'=' -f 2 | cut -d'&' -f 1)
     info TOKEN=$TOKEN
 }
