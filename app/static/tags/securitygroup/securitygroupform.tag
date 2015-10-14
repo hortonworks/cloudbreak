@@ -24,10 +24,10 @@
         <!-- .col-sm-9 -->
     </div>
     <div class="form-group" ng-class="{ 'has-error': securitygroupForm.securitygroup_publicInAccount.$dirty && securitygroupForm.securitygroup_publicInAccount.$invalid }">
-            <label class="col-sm-3 control-label" for="securitygroup_publicInAccount">{{msg.public_in_account_label}}</label>
-            <div class="col-sm-9">
-                <input type="checkbox" name="securitygroup_publicInAccount" id="securitygroup_publicInAccount" ng-model="securitygroup.public">
-            </div>
+        <label class="col-sm-3 control-label" for="securitygroup_publicInAccount">{{msg.public_in_account_label}}</label>
+        <div class="col-sm-9">
+            <input type="checkbox" name="securitygroup_publicInAccount" id="securitygroup_publicInAccount" ng-model="securitygroup.public">
+        </div>
     </div>
 
     <div class="form-group">
@@ -37,7 +37,7 @@
                 <div class="form-group" style="padding-top: 10px;" ng-class="{ 'has-error': tmpsecportForm.cidr.$dirty && tmpsecportForm.cidr.$invalid }">
                     <label class="col-sm-3 control-label">CIDR: </label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" name="cidr" ng-model="tmpsecport.cidr" placeholder = "0.0.0.0/0" id="cidr" ng-pattern="/^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$/">
+                        <input type="text" class="form-control" name="cidr" ng-model="tmpsecport.cidr" placeholder="0.0.0.0/0" id="cidr" ng-pattern="/^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$/">
                         <div class="help-block" ng-show="tmpsecportForm.seccidr.$dirty && tmpsecportForm.seccidr.$invalid">
                             <i class="fa fa-warning"></i> {{msg.invalid_cidr}}
                         </div>
@@ -46,7 +46,7 @@
                 <div class="form-group" ng-class="{ 'has-error': tmpsecportForm.port.$dirty && tmpsecportForm.port.$invalid }">
                     <label class="col-sm-3 control-label">Port: </label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" name="port" placeholder = "4444,5555,6666" ng-model="tmpsecport.port" id="port">
+                        <input type="text" class="form-control" name="port" placeholder="4444,5555,6666" ng-model="tmpsecport.port" id="port">
                         <div class="help-block" ng-show="tmpsecportForm.port.$dirty && tmpsecportForm.port.$invalid">
                             <i class="fa fa-warning"></i> {{msg.invalid_port_string}}
                         </div>
@@ -55,7 +55,7 @@
                 <div class="form-group" ng-class="{ 'has-error': tmpsecportForm.protocol.$dirty && tmpsecportForm.protocol.$invalid }">
                     <label class="col-sm-3 control-label">Protocol: </label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" name="protocol" placeholder = "tcp" ng-model="tmpsecport.protocol" id="protocol">
+                        <input type="text" class="form-control" name="protocol" placeholder="tcp" ng-model="tmpsecport.protocol" id="protocol">
                         <div class="help-block" ng-show="tmpsecportForm.protocol.$dirty && tmpsecportForm.protocol.$invalid">
                             <i class="fa fa-warning"></i> {{msg.invalid_protocol_string}}
                         </div>
