@@ -117,6 +117,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);
+        stack.setAvailabilityZone("avZone");
         Network network = new AwsNetwork();
         network.setId(1L);
         stack.setNetwork(network);

@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.adapter;
 
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
+import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -15,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.event.setup.SetupRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
@@ -55,8 +60,9 @@ public class ServiceProviderSetupAdapter implements ProvisionSetup {
     @Override
     public ProvisionEvent prepareImage(Stack stack) throws Exception {
         CloudPlatform cloudPlatform = stack.cloudPlatform();
+        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
-                stack.getRegion());
+                location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         PrepareImageRequest<PrepareImageResult> prepareImageRequest = new PrepareImageRequest<>(cloudContext, cloudCredential, cloudStack);
@@ -78,8 +84,9 @@ public class ServiceProviderSetupAdapter implements ProvisionSetup {
 
     @Override
     public ImageStatusResult checkImage(Stack stack) throws Exception {
+        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
-                stack.getRegion());
+                location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         CheckImageRequest<CheckImageResult> checkImageRequest = new CheckImageRequest<>(cloudContext, cloudCredential, cloudStack);
@@ -102,8 +109,9 @@ public class ServiceProviderSetupAdapter implements ProvisionSetup {
     @Override
     public ProvisionEvent setupProvisioning(Stack stack) throws Exception {
         CloudPlatform cloudPlatform = stack.cloudPlatform();
+        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
-                stack.getRegion());
+                location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         SetupRequest<SetupResult> setupRequest = new SetupRequest<>(cloudContext, cloudCredential, cloudStack);

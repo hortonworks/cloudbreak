@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.adapter;
 
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
+import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
@@ -25,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.converter.spi.CloudVmInstanceStatusToCoreInstanceMetaDataConverter;
@@ -64,8 +68,9 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
 
     @Override
     public Set<CoreInstanceMetaData> collectMetadata(Stack stack) {
+        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
-                stack.getRegion());
+                location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<InstanceTemplate> instanceTemplates = cloudStackConverter.buildInstanceTemplates(stack);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
@@ -88,8 +93,9 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
 
     @Override
     public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroupName, Integer scalingAdjustment) {
+        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
-                stack.getRegion());
+                location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<InstanceTemplate> instanceTemplates = getNewInstanceTemplates(stack);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
@@ -112,8 +118,9 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
 
     @Override
     public InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId) {
+        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
-                stack.getRegion());
+                location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         InstanceGroup ig = stack.getInstanceGroupByInstanceGroupName(instanceGroup.getGroupName());
         CloudInstance instance = null;

@@ -5,6 +5,7 @@
   "credentialId": 51,
   "image": "aws-image",
   "onFailureAction": "ROLLBACK",
+  "availabilityZone": "avZone",
   "failurePolicy": {
     "id": 1,
     "threshold": 10,

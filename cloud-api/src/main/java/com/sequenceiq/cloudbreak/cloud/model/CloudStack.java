@@ -10,15 +10,13 @@ public class CloudStack {
     private Network network;
     private Security security;
     private Image image;
-    private String region;
     private Map<String, String> parameters;
 
-    public CloudStack(List<Group> groups, Network network, Security security, Image image, String region, Map<String, String> parameters) {
+    public CloudStack(List<Group> groups, Network network, Security security, Image image, Map<String, String> parameters) {
         this.groups = groups;
         this.network = network;
         this.security = security;
         this.image = image;
-        this.region = region;
         this.parameters = parameters;
     }
 
@@ -38,10 +36,6 @@ public class CloudStack {
         return image;
     }
 
-    public String getRegion() {
-        return region;
-    }
-
     public Map<String, String> getParameters() {
         return parameters;
     }
@@ -53,7 +47,6 @@ public class CloudStack {
         sb.append(", network=").append(network);
         sb.append(", security=").append(security);
         sb.append(", image=").append(image);
-        sb.append(", region='").append(region).append('\'');
         sb.append('}');
         return sb.toString();
     }

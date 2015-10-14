@@ -55,16 +55,16 @@ public class ArmSetup implements Setup {
     private ArmPollTaskFactory armPollTaskFactory;
 
     @Override
-    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack) {
-        String storageName = armUtils.getStorageName(authenticatedContext.getCloudCredential(), authenticatedContext.getCloudContext(), stack.getRegion());
-        String imageResourceGroupName = armUtils.getImageResourceGroupName(authenticatedContext.getCloudContext());
-        AzureRMClient client = armClient.createAccess(authenticatedContext.getCloudCredential());
-        String region = stack.getRegion();
+    public void prepareImage(AuthenticatedContext ac, CloudStack stack) {
+        String storageName = armUtils.getStorageName(ac.getCloudCredential(), ac.getCloudContext(), ac.getCloudContext().getLocation().getRegion().value());
+        String imageResourceGroupName = armUtils.getImageResourceGroupName(ac.getCloudContext());
+        AzureRMClient client = armClient.createAccess(ac.getCloudCredential());
+        String region = ac.getCloudContext().getLocation().getRegion().value();
         try {
             if (!resourceGroupExist(client, imageResourceGroupName)) {
                 client.createResourceGroup(imageResourceGroupName, CloudRegion.valueOf(region).value());
             }
-            createStorage(authenticatedContext, client, storageName, imageResourceGroupName, region);
+            createStorage(ac, client, storageName, imageResourceGroupName, region);
             if (!storageContainsImage(client, imageResourceGroupName, storageName, stack.getImage().getImageName())) {
                 client.copyImageBlobInStorageContainer(imageResourceGroupName, storageName, IMAGES, stack.getImage().getImageName());
             }
@@ -77,10 +77,10 @@ public class ArmSetup implements Setup {
     }
 
     @Override
-    public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack) {
-        String storageName = armUtils.getStorageName(authenticatedContext.getCloudCredential(), authenticatedContext.getCloudContext(), stack.getRegion());
-        String imageResourceGroupName = armUtils.getImageResourceGroupName(authenticatedContext.getCloudContext());
-        ArmCredentialView armCredentialView = new ArmCredentialView(authenticatedContext.getCloudCredential());
+    public ImageStatusResult checkImageStatus(AuthenticatedContext ac, CloudStack stack) {
+        String storageName = armUtils.getStorageName(ac.getCloudCredential(), ac.getCloudContext(), ac.getCloudContext().getLocation().getRegion().value());
+        String imageResourceGroupName = armUtils.getImageResourceGroupName(ac.getCloudContext());
+        ArmCredentialView armCredentialView = new ArmCredentialView(ac.getCloudCredential());
         AzureRMClient client = armClient.createAccess(armCredentialView);
         try {
             CopyState copyState = client.getCopyStatus(imageResourceGroupName, storageName, IMAGES, stack.getImage().getImageName());
@@ -105,13 +105,13 @@ public class ArmSetup implements Setup {
     }
 
     @Override
-    public void execute(AuthenticatedContext authenticatedContext, CloudStack stack) {
-        String storageGroup = armUtils.getResourceGroupName(authenticatedContext.getCloudContext());
-        AzureRMClient client = armClient.createAccess(authenticatedContext.getCloudCredential());
+    public void execute(AuthenticatedContext ac, CloudStack stack) {
+        String storageGroup = armUtils.getResourceGroupName(ac.getCloudContext());
+        AzureRMClient client = armClient.createAccess(ac.getCloudCredential());
         CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.ARM_TEMPLATE).name(storageGroup).build();
-        String region = stack.getRegion();
+        String region = ac.getCloudContext().getLocation().getRegion().value();
         try {
-            resourceNotifier.notifyAllocation(cloudResource, authenticatedContext.getCloudContext());
+            resourceNotifier.notifyAllocation(cloudResource, ac.getCloudContext());
             if (!resourceGroupExist(client, storageGroup)) {
                 client.createResourceGroup(storageGroup, CloudRegion.valueOf(region).value());
             }

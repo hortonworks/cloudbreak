@@ -42,9 +42,12 @@ public class CloudFormationStackUtil {
     }
 
     public List<String> getInstanceIds(AuthenticatedContext ac, CloudStack stack, String instanceGroup) {
-        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()), stack.getRegion());
-        AmazonCloudFormationClient amazonCFClient = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()), stack.getRegion());
-        return getInstanceIds(ac, amazonASClient, amazonCFClient, getAutoscalingGroupName(ac, instanceGroup, stack.getRegion()));
+        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
+        AmazonCloudFormationClient amazonCFClient = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
+        return getInstanceIds(ac, amazonASClient, amazonCFClient, getAutoscalingGroupName(ac, instanceGroup,
+                ac.getCloudContext().getLocation().getRegion().value()));
     }
 
     public List<String> getInstanceIds(AuthenticatedContext ac, AmazonAutoScalingClient aSClient, AmazonCloudFormationClient amazonCFClient,

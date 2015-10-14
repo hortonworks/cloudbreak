@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
+import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -19,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
@@ -34,7 +39,8 @@ public class ParameterGenerator {
     private static final long STACK_ID = 5L;
 
     public CloudContext createCloudContext() {
-        return new CloudContext(STACK_ID, "teststack", "TESTCONNECTOR", "owner", "TESTVARIANT", "region");
+        Location location = location(region("region"), availabilityZone("availabilityZone"));
+        return new CloudContext(STACK_ID, "teststack", "TESTCONNECTOR", "owner", "TESTVARIANT", location);
     }
 
     public CloudCredential createCloudCredential() {
@@ -70,7 +76,7 @@ public class ParameterGenerator {
         List<SecurityRule> rules = Arrays.asList(new SecurityRule("0.0.0.0/0", new String[]{"22", "443"}, "tcp"));
         Security security = new Security(rules);
 
-        return new CloudStack(groups, network, security, image, "region", new HashMap<String, String>());
+        return new CloudStack(groups, network, security, image, new HashMap<String, String>());
     }
 
     public String getSshFingerprint() {

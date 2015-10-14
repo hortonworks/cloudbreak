@@ -49,9 +49,9 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
     public Boolean call() {
         LOGGER.info("Checking status of Auto Scaling group '{}'", autoScalingGroupName);
         AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(getAuthenticatedContext().getCloudCredential()),
-                getAuthenticatedContext().getCloudContext().getRegion());
+                getAuthenticatedContext().getCloudContext().getLocation().getRegion().value());
         AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(getAuthenticatedContext().getCloudCredential()),
-                getAuthenticatedContext().getCloudContext().getRegion());
+                getAuthenticatedContext().getCloudContext().getLocation().getRegion().value());
         List<String> instanceIds = cloudFormationStackUtil.getInstanceIds(autoScalingGroupName, amazonASClient);
         if (instanceIds.size() < requiredInstances) {
             LOGGER.debug("Instances in AS group: {}, needed: {}", instanceIds.size(), requiredInstances);

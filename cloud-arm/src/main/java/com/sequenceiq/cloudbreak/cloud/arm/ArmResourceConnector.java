@@ -120,7 +120,8 @@ public class ArmResourceConnector implements ResourceConnector {
                 }
                 if (armUtils.isPersistentStorage()) {
                     CloudContext cloudCtx = authenticatedContext.getCloudContext();
-                    String storageName = armUtils.getStorageName(authenticatedContext.getCloudCredential(), cloudCtx, stack.getRegion());
+                    String storageName = armUtils.getStorageName(authenticatedContext.getCloudCredential(), cloudCtx,
+                            cloudCtx.getLocation().getRegion().value());
                     String imageStorageGroup = armUtils.getImageResourceGroupName(cloudCtx);
                     String diskContainer = armUtils.getDiskContainerName(cloudCtx);
                     deleteContainer(azureRMClient, imageStorageGroup, storageName, diskContainer);
@@ -194,7 +195,8 @@ public class ArmResourceConnector implements ResourceConnector {
     public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms) {
         AzureRMClient client = armClient.createAccess(auth.getCloudCredential());
         String stackName = armUtils.getStackName(auth.getCloudContext());
-        String storageName = armUtils.getStorageName(auth.getCloudCredential(), auth.getCloudContext(), stack.getRegion());
+        String storageName = armUtils.getStorageName(auth.getCloudCredential(), auth.getCloudContext(),
+                auth.getCloudContext().getLocation().getRegion().value());
         String imageStorageGroup = armUtils.getImageResourceGroupName(auth.getCloudContext());
         String diskContainer = armUtils.getDiskContainerName(auth.getCloudContext());
 

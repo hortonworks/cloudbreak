@@ -52,12 +52,13 @@ public class AwsMetadataCollector implements MetadataCollector {
     public List<CloudVmInstanceStatus> collect(AuthenticatedContext ac, List<CloudResource> resources, List<InstanceTemplate> vms) {
         List<CloudInstance> cloudInstances = new ArrayList<>();
         try {
+            String region = ac.getCloudContext().getLocation().getRegion().value();
             AmazonCloudFormationClient amazonCFClient =
-                    awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()), ac.getCloudContext().getRegion());
+                    awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()), region);
             AmazonAutoScalingClient amazonASClient =
-                    awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()), ac.getCloudContext().getRegion());
+                    awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()), region);
             AmazonEC2Client amazonEC2Client =
-                    awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), ac.getCloudContext().getRegion());
+                    awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), region);
             Map<String, List<InstanceTemplate>> instanceIds1 = getInstanceIds(vms);
 
 

@@ -13,6 +13,7 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsGroupView;
+import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -27,7 +28,7 @@ public class CloudFormationTemplateBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    public String build(CloudStack stack, String snapshotId, boolean existingVPC, String templatePath) {
+    public String build(AuthenticatedContext ac, CloudStack stack, String snapshotId, boolean existingVPC, String templatePath) {
         Map<String, Object> model = new HashMap<>();
         List<AwsGroupView> awsGroupViews = new ArrayList<>();
         for (Group group : stack.getGroups()) {
@@ -52,6 +53,7 @@ public class CloudFormationTemplateBuilder {
         model.put("securityRules", stack.getSecurity());
         model.put("cbSubnet", stack.getNetwork().getSubnet().getCidr());
         model.put("dedicatedInstances", areDedicatedInstancesRequested(stack));
+        model.put("availabilitySetNeeded", ac.getCloudContext().getLocation().getAvailabilityZone().value() == null ? false : true);
         if (snapshotId != null) {
             model.put("snapshotId", snapshotId);
         }

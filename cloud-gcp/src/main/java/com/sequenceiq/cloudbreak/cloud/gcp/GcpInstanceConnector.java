@@ -73,7 +73,7 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
         try {
             Compute.Instances.GetSerialPortOutput instanceGet = GcpStackUtil.buildCompute(credential).instances()
                     .getSerialPortOutput(GcpStackUtil.getProjectId(credential),
-                            CloudRegion.valueOf(authenticatedContext.getCloudContext().getRegion()).value(), vm.getInstanceId());
+                            CloudRegion.valueOf(authenticatedContext.getCloudContext().getLocation().getRegion().value()).value(), vm.getInstanceId());
             return instanceGet.execute().getContents();
         } catch (Exception e) {
             throw new GcpResourceException("Couldn't parse SSH fingerprint from console output.", e);
@@ -82,6 +82,6 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
 
     private Instance getInstance(CloudContext context, CloudCredential credential, Compute compute, String instanceName) throws IOException {
         return compute.instances().get(GcpStackUtil.getProjectId(credential),
-                CloudRegion.valueOf(context.getRegion()).value(), instanceName).execute();
+                CloudRegion.valueOf(context.getLocation().getRegion().value()).value(), instanceName).execute();
     }
 }

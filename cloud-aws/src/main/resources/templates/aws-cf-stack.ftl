@@ -39,6 +39,15 @@
     },
     </#if>
 
+    <#if availabilitySetNeeded>
+    "AvailabilitySet" : {
+      "Description" : "Availability set name",
+      "Type" : "String",
+      "MinLength": "1",
+      "MaxLength": "50"
+    },
+    </#if>
+
     "StackOwner" : {
       "Description" : "The instances will have this parameter as an Owner tag.",
       "Type" : "String",
@@ -123,6 +132,9 @@
         "VpcId" : { "Ref" : "VPCId" },
         "CidrBlock" : { "Ref" : "SubnetCIDR" },
         <#else>
+        <#if availabilitySetNeeded>
+        "AvailabilityZone" : {"Fn::Join" : ["",[ { "Ref" : "AvailabilitySet" } ] ]} ,
+        </#if>
         "VpcId" : { "Ref" : "VPC" },
         "CidrBlock" : { "Fn::FindInMap" : [ "SubnetConfig", "Public", "CIDR" ]},
         </#if>

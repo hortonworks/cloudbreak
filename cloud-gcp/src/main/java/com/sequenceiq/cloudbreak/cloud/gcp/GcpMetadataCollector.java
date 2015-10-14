@@ -78,7 +78,7 @@ public class GcpMetadataCollector implements MetadataCollector {
 
     private Instance getInstance(CloudContext context, CloudCredential credential, Compute compute, String instanceName) throws IOException {
         return compute.instances().get(GcpStackUtil.getProjectId(credential),
-                CloudRegion.valueOf(context.getRegion()).value(), instanceName).execute();
+                CloudRegion.valueOf(context.getLocation().getRegion().value()).value(), instanceName).execute();
     }
 
 }
