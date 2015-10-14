@@ -32,6 +32,8 @@ public class FixedDefaultConfigProvider implements DefaultConfigProvider {
         defaultConfigEntries.add(new BlueprintConfigurationEntry("core-site", "hadoop.proxyuser.root.groups", "*"));
         defaultConfigEntries.add(new BlueprintConfigurationEntry("core-site", "proxyuser_group", "hadoop"));
 
+        defaultConfigEntries.add(new BlueprintConfigurationEntry("hbase-site", "zookeeper.recovery.retry", "10"));
+
         return defaultConfigEntries;
     }
 }
