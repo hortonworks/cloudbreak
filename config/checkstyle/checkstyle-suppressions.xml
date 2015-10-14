@@ -6,33 +6,16 @@
 
 <suppressions>
     <!-- suppressing checks in real classes -->
-    <suppress checks="Javadoc.*" files="test|Dummy|Mock"/>
-    <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="test|Dummy|Mock"/>
-    <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="AzureCloudServiceResourceBuilder.java"/>
-    <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="AmbariClusterConnector.java"/>
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="PublicKeyReaderUtil.java"/>
-    <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="ClusterController.java"/>
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="StatusToPollGroupConverter.java"/>
-    <suppress checks="RedundantThrows" files="SwarmContainerOrchestrator.java"/>
-    <suppress checks="ParameterNumber" files="CloudbreakUsageController.java"/>
-    <suppress checks="IllegalCatch" files="CredentialController.java"/>
-    <suppress checks="IllegalCatch" files="GcpStackUtil.java"/>
     <suppress checks="IllegalCatch" files="GcpProvisionSetup.java"/>
-    <suppress checks="MagicNumber" files="AzureStackUtil.java"/>
 
-    <!-- suppressing checks in tests -->
+    <!-- suppressing checks in application runner classes -->
     <suppress id="sysout" files="VersionedApplication.java"/>
-    <suppress checks="MagicNumberCheck" files="test|Dummy|Mock|simulator"/>
-    <suppress id="IllegalTypeImpl" files="test"/>
-    <suppress checks="IllegalCatch" files="test"/>
-    <suppress checks="AbstractClassName" files="test"/>
-    <suppress checks="EmptyBlock" files="test"/>
     <suppress checks="HideUtilityClassConstructor" files=".*Application.java"/>
-    <suppress checks="LineLength" files=".*VariableConfig.java"/>
-    <suppress checks="RedundantThrows" files=".*Test.java"/>
-    <suppress checks="RedundantThrows" files="Mock.*.java"/>
 
-    <!-- -->
+    <!-- suppress test classes in generated code -->
+    <suppress checks="IllegalTypeImpl|IllegalCatch|AbstractClassName|EmptyBlock|RedundantThrows|MagicNumberCheck|ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="test|Dummy|Mock"/>
 
     <!-- suppress everything in generated code -->
     <suppress checks=".*" files="generated"/>

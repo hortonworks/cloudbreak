@@ -161,19 +161,7 @@ public class ClusterController {
         MDCBuilder.buildMdcContext(stack);
         UserNamePasswordJson userNamePasswordJson = updateJson.getUserNamePasswordJson();
         if (userNamePasswordJson != null) {
-            if (!stack.isAvailable()) {
-                throw new BadRequestException(String.format(
-                        "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
-                        stack.getStatus()));
-            }
-            if (!userNamePasswordJson.getOldPassword().equals(stack.getCluster().getPassword())) {
-                throw new BadRequestException(String.format(
-                        "Cluster actual password does not match in the request, please pass the real password.", stackId,
-                        stack.getStatus()));
-            }
-            LOGGER.info("Cluster username password update request received. Stack id:  {}, username: {}, password: {}",
-                    stackId, userNamePasswordJson.getUserName(), userNamePasswordJson.getPassword());
-            clusterService.updateUserNamePassword(stackId, userNamePasswordJson);
+            ambariUserNamePasswordChange(stackId, stack, userNamePasswordJson);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -185,33 +173,58 @@ public class ClusterController {
 
         if (updateJson.getBlueprintId() != null && updateJson.getHostgroups() != null && stack.getCluster().isCreateFailed()) {
             LOGGER.info("Cluster rebuild request received. Stack id:  {}", stackId);
-            Set<HostGroup> hostGroups = new HashSet<>();
-            for (HostGroupJson json : updateJson.getHostgroups()) {
-                HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
-                hostGroup = hostGroupDecorator.decorate(hostGroup, stackId, json.getInstanceGroupName(), json.getRecipeIds(), false);
-                hostGroups.add(hostGroupService.save(hostGroup));
-            }
-            AmbariStackDetailsJson stackDetails = updateJson.getAmbariStackDetails();
-            AmbariStackDetails ambariStackDetails = null;
-            if (stackDetails != null) {
-                ambariStackDetails = conversionService.convert(stackDetails, AmbariStackDetails.class);
-            }
-            clusterService.recreate(stackId, updateJson.getBlueprintId(), hostGroups, updateJson.getValidateBlueprint(), ambariStackDetails);
+            recreateCluster(stackId, updateJson);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
         if (updateJson.getHostGroupAdjustment() != null) {
-            if (!stack.isAvailable()) {
-                throw new BadRequestException(String.format(
-                        "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
-                        stack.getStatus()));
-            }
-            LOGGER.info("Cluster host adjustment request received. Stack id: {} ", stackId);
-            clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
+            clusterHostgroupAdjusmentChange(stackId, updateJson, stack);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         LOGGER.error("Invalid cluster update request received. Stack id: {}", stackId);
         throw new BadRequestException("Invalid update cluster request!");
+    }
+
+    private void clusterHostgroupAdjusmentChange(Long stackId, UpdateClusterJson updateJson, Stack stack)
+            throws CloudbreakSecuritySetupException {
+        if (!stack.isAvailable()) {
+            throw new BadRequestException(String.format(
+                    "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
+                    stack.getStatus()));
+        }
+        LOGGER.info("Cluster host adjustment request received. Stack id: {} ", stackId);
+        clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
+    }
+
+    private void recreateCluster(Long stackId, UpdateClusterJson updateJson) {
+        Set<HostGroup> hostGroups = new HashSet<>();
+        for (HostGroupJson json : updateJson.getHostgroups()) {
+            HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
+            hostGroup = hostGroupDecorator.decorate(hostGroup, stackId, json.getInstanceGroupName(), json.getRecipeIds(), false);
+            hostGroups.add(hostGroupService.save(hostGroup));
+        }
+        AmbariStackDetailsJson stackDetails = updateJson.getAmbariStackDetails();
+        AmbariStackDetails ambariStackDetails = null;
+        if (stackDetails != null) {
+            ambariStackDetails = conversionService.convert(stackDetails, AmbariStackDetails.class);
+        }
+        clusterService.recreate(stackId, updateJson.getBlueprintId(), hostGroups, updateJson.getValidateBlueprint(), ambariStackDetails);
+    }
+
+    private void ambariUserNamePasswordChange(Long stackId, Stack stack, UserNamePasswordJson userNamePasswordJson) {
+        if (!stack.isAvailable()) {
+            throw new BadRequestException(String.format(
+                    "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
+                    stack.getStatus()));
+        }
+        if (!userNamePasswordJson.getOldPassword().equals(stack.getCluster().getPassword())) {
+            throw new BadRequestException(String.format(
+                    "Cluster actual password does not match in the request, please pass the real password.", stackId,
+                    stack.getStatus()));
+        }
+        LOGGER.info("Cluster username password update request received. Stack id:  {}, username: {}, password: {}",
+                stackId, userNamePasswordJson.getUserName(), userNamePasswordJson.getPassword());
+        clusterService.updateUserNamePassword(stackId, userNamePasswordJson);
     }
 
     private ClusterResponse getClusterResponse(Cluster cluster, String clusterJson) {
