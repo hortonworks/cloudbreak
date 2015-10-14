@@ -140,7 +140,7 @@ public class StackSyncService {
     private void syncRunningInstance(Stack stack, Long stackId, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance,
             InstanceGroup instanceGroup) {
         instanceStateCounts.put(InstanceSyncState.RUNNING, instanceStateCounts.get(InstanceSyncState.RUNNING) + 1);
-        if (!instance.isRunning() && !instance.isDecommissioned()) {
+        if (!instance.isRunning() && !instance.isDecommissioned() && !instance.isCreated()) {
             LOGGER.info("Instance '{}' is reported as running on the cloud provider, updating metadata.", instance.getInstanceId());
             createResourceIfNeeded(stack, instance, instanceGroup);
             updateMetaDataToRunning(stackId, stack.getCluster(), instance, instanceGroup);
