@@ -1,7 +1,7 @@
 Cloudbreak is a cloud agnostic Hadoop as a Service API. Abstracts the provisioning and ease management and monitoring of on-demand HDP clusters in different virtual environments. Once it is deployed in your favorite servlet container exposes a REST API allowing to span up Hadoop clusters of arbitrary sizes on your selected cloud provider. Provisioning Hadoop has never been easier.
 Cloudbreak is built on the foundation of cloud providers API (Microsoft Azure, Amazon AWS, Google Cloud Platform, OpenStack), Apache Ambari, Docker containers, Swarm and Consul.
 
-For a detailed overview please follow this [link](http://sequenceiq.com/cloudbreak-deployer/docsupdate/overview/)
+For a detailed overview please follow this [link](overview.md)
 
 For recent changes please check the [changelog](http://sequenceiq.com/cloudbreak-deployer/latest/changelog/).
 
@@ -9,35 +9,35 @@ Cloudbreak has two main components - the [Cloudbreak deployer](http://sequenceiq
 
 ##Technology
 
-For an architectural overview of the CLoudbreak deployer and application please follow this [link](http://sequenceiq.com/cloudbreak-deployer/docsupdate/technology/)
+For an architectural overview of the CLoudbreak deployer and application please follow this [link](technology.md)
 
 ##Installation
 
-Currently only **Linux** and **OSX** 64 bit binaries are released for Cloudbreak Deployer. For anything else we can create a special Docker container. The deployment itself needs only **Docker 1.7.0** or later.
+Currently only **Linux** and **OSX** 64 bit binaries are released for Cloudbreak Deployer. For anything else we can create a special Docker container - please contact us. The deployment itself needs only **Docker 1.7.0** or later. You can install the Cloudbreak installation anywhere (on-prem or cloud VMs), however we suggest to installed it as close to the desired HDP clusters as possible. For further information check the **Provider** section of the documentation.
 
-####DIY installation
+**On-prem installation**
 
-For on premise installations of the Cloudbreak application please follow the [link](http://sequenceiq.com/cloudbreak-deployer/docsupdate/onprem)
+For on premise installations of the Cloudbreak application please follow the [link](onprem.md)
 
-####AWS based installation
-
-We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
-
-You can follow the AWS provider specific documentation using this [link](http://sequenceiq.com/cloudbreak-deployer/docsupdate/onpremaws)
-
-####Azure based installation
+**AWS based installation**
 
 We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
 
-You can follow the AWS provider specific documentation using this [link](http://sequenceiq.com/cloudbreak-deployer/docsupdate/azure)
+You can follow the AWS provider specific documentation using this [link](aws.md)
 
-####GCP based installation
+**Azure based installation**
 
 We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
 
-You can follow the AWS provider specific documentation using this [link](http://sequenceiq.com/cloudbreak-deployer/docsupdate/gcp)
+You can follow the AWS provider specific documentation using this [link](azure.md)
 
-####OpenStack based installation
+**GCP based installation**
+
+We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
+
+You can follow the AWS provider specific documentation using this [link](gcp.md)
+
+**OpenStack based installation**
 
 We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
 
@@ -45,7 +45,7 @@ You can follow the AWS provider specific documentation using this [link](opensta
 
 ##Misc
 
-####Debug
+**Debug**
 
 If you want to have more detailed output set the `DEBUG` env variable to non-zero:
 
@@ -53,7 +53,7 @@ If you want to have more detailed output set the `DEBUG` env variable to non-zer
 DEBUG=1 cbd some_command
 ```
 
-####Troubleshoot
+**Troubleshoot**
 
 You can also use the `doctor` command to diagnose your environment:
 
@@ -61,7 +61,7 @@ You can also use the `doctor` command to diagnose your environment:
 cbd doctor
 ```
 
-####Logs
+**Logs**
 
 For logs use the :
 
@@ -69,7 +69,7 @@ For logs use the :
 cbd logs
 ```
 
-#### Update
+**Update**
 
 The tool is capable to upgrade itself to a newer version.
 
@@ -77,7 +77,7 @@ The tool is capable to upgrade itself to a newer version.
 cbd update
 ```
 
-## Credits
+**Credits**
 
 This tool, and the PR driven release, is inspired from [glidergun](https://github.com/gliderlabs/glidergun). Actually it
 could be a fork of it. The reason it’s not a fork, because we wanted to have our own binary with all modules

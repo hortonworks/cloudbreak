@@ -9,8 +9,9 @@ pages:
         - Configuration : configuration.md
         - Shell : shell.md
         - Recipes: recipes.md
+        - SPI: spi.md
         - Kerberos: kerberos.md
-        - Database : database.md
+        - Migration : database.md
         - Development : development.md
         - Changelog : changelog.md
     - Providers:
@@ -22,5 +23,11 @@ pages:
             - Deployment: azure.md
             - 'Provisioning - webui': azure_cb_ui.md
             - 'Provisioning - cli': azure_cb_shell.md
-        - GCP : gcp.md
-        - OpenStack : openstack.md
+        - GCP :
+            - Deployment: gcp.md
+            - 'Provisioning - webui': gcp_cb_ui.md
+            - 'Provisioning - cli': gcp_cb_shell.md
+        - OpenStack :
+            - Deployment: openstack.md
+            - 'Provisioning - webui': openstack_cb_ui.md
+            - 'Provisioning - cli': openstack_cb_shell.md
