@@ -11,18 +11,23 @@ angular.module('uluwatuControllers').controller('securityGroupController', ['$sc
         }
 
         $scope.addGroupProtocol = function() {
-            if ($scope.tmpsecport.cidr !== null && $scope.tmpsecport.cidr !== undefined
-                && $scope.tmpsecport.port !== null && $scope.tmpsecport.port !== undefined
-                && $scope.tmpsecport.protocol !== null && $scope.tmpsecport.protocol !== undefined) {
+            if ($scope.tmpsecport.cidr !== null && $scope.tmpsecport.cidr !== undefined && $scope.tmpsecport.port !== null && $scope.tmpsecport.port !== undefined && $scope.tmpsecport.protocol !== null && $scope.tmpsecport.protocol !== undefined) {
                 if ($scope.tmpsecport.port.match(/^[0-9]+(,[0-9]+)*$/g) === null) {
                     $scope.showErrorMessage($rootScope.msg.incorrect_port_definition_sec_group);
                     return;
                 }
                 angular.forEach($scope.tmpsecport.port.split(","), function(port_test) {
-                    var tmp = {"cidr": $scope.tmpsecport.cidr, "protocol": $scope.tmpsecport.protocol, "port": port_test};
+                    var tmp = {
+                        "cidr": $scope.tmpsecport.cidr,
+                        "protocol": $scope.tmpsecport.protocol,
+                        "port": port_test
+                    };
                     $scope.securitygroup.tmpsecurityRules.push(tmp);
                 });
-                $scope.tmpsecport = {"cidr": "0.0.0.0/0", "protocol": "tcp"};
+                $scope.tmpsecport = {
+                    "cidr": "0.0.0.0/0",
+                    "protocol": "tcp"
+                };
             } else if ($scope.tmpsecport.cidr === null || $scope.tmpsecport.cidr === undefined) {
                 $scope.tmpsecport.cidr = null;
                 $scope.showErrorMessage($rootScope.msg.cidr_definition_incorrect);

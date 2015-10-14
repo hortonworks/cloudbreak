@@ -185,119 +185,119 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                 }],
                 azureVmTypes: [{
                     key: 'A5',
-                    value: 'A5',
+                    value: 'Standard A5',
                     cloud: 'AZURE'
                 }, {
                     key: 'A6',
-                    value: 'A6',
+                    value: 'Standard A6',
                     cloud: 'AZURE'
                 }, {
                     key: 'A7',
-                    value: 'A7',
+                    value: 'Standard A7',
                     cloud: 'AZURE'
                 }, {
                     key: 'A8',
-                    value: 'A8',
+                    value: 'Standard A8',
                     cloud: 'AZURE'
                 }, {
                     key: 'A9',
-                    value: 'A9',
+                    value: 'Standard A9',
                     cloud: 'AZURE'
                 }, {
                     key: 'A10',
-                    value: 'A10',
+                    value: 'Standard A10',
                     cloud: 'AZURE'
                 }, {
                     key: 'A11',
-                    value: 'A11',
+                    value: 'Standard A11',
                     cloud: 'AZURE'
                 }, {
                     key: 'STANDARD_D1',
-                    value: 'D1',
+                    value: 'Standard D1',
                     cloud: 'AZURE'
                 }, {
                     key: 'STANDARD_D2',
-                    value: 'D2',
+                    value: 'Standard D2',
                     cloud: 'AZURE'
                 }, {
                     key: 'STANDARD_D3',
-                    value: 'D3',
+                    value: 'Standard D3',
                     cloud: 'AZURE'
                 }, {
                     key: 'STANDARD_D4',
-                    value: 'D4',
+                    value: 'Standard D4',
                     cloud: 'AZURE'
                 }, {
                     key: 'STANDARD_D11',
-                    value: 'D11',
+                    value: 'Standard D11',
                     cloud: 'AZURE'
                 }, {
                     key: 'STANDARD_D12',
-                    value: 'D12',
+                    value: 'Standard D12',
                     cloud: 'AZURE'
                 }, {
                     key: 'STANDARD_D13',
-                    value: 'D13',
+                    value: 'Standard D13',
                     cloud: 'AZURE'
                 }, {
                     key: 'STANDARD_D14',
-                    value: 'D14',
-                    cloud: 'AZURE'
-                }, {
-                    key: 'STANDARD_D1_V2',
-                    value: 'D1_V2',
-                    cloud: 'AZURE'
-                }, {
-                    key: 'STANDARD_D2_V2',
-                    value: 'D2_V2',
-                    cloud: 'AZURE'
-                }, {
-                    key: 'STANDARD_D3_V2',
-                    value: 'D3_V2',
-                    cloud: 'AZURE'
-                }, {
-                    key: 'STANDARD_D4_V2',
-                    value: 'D4_V2',
-                    cloud: 'AZURE'
-                }, {
-                    key: 'STANDARD_D5_V2',
-                    value: 'D5_V2',
-                    cloud: 'AZURE'
-                }, {
-                    key: 'STANDARD_D11_V2',
-                    value: 'D11_V2',
-                    cloud: 'AZURE'
-                }, {
-                    key: 'STANDARD_D12_V2',
-                    value: 'D12_V2',
-                    cloud: 'AZURE'
-                }, {
-                    key: 'STANDARD_D13_V2',
-                    value: 'D13_V2',
-                    cloud: 'AZURE'
-                }, {
-                    key: 'STANDARD_D14_V2',
-                    value: 'D14_V2',
+                    value: 'Standard D14',
                     cloud: 'AZURE'
                 }, {
                     key: 'STANDARD_G1',
-                    value: 'G1',
+                    value: 'Standard G1',
                     cloud: 'AZURE'
                 }, {
                     key: 'STANDARD_G2',
-                    value: 'G2',
+                    value: 'Standard G2',
                     cloud: 'AZURE'
                 }, {
                     key: 'STANDARD_G3',
-                    value: 'G3',
+                    value: 'Standard G3',
                     cloud: 'AZURE'
                 }, {
                     key: 'STANDARD_G4',
-                    value: 'G4',
+                    value: 'Standard G4',
                     cloud: 'AZURE'
                 }, {
                     key: 'STANDARD_G5',
-                    value: 'G5',
+                    value: 'Standard G5',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D1_V2',
+                    value: 'Standard D1 v2',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D2_V2',
+                    value: 'Standard D2 v2',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D3_V2',
+                    value: 'Standard D3 v2',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D4_V2',
+                    value: 'Standard D4 v2',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D5_V2',
+                    value: 'Standard D5 v2',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D11_V2',
+                    value: 'Standard D11 v2',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D12_V2',
+                    value: 'Standard D12 v2',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D13_V2',
+                    value: 'Standard D13 v2',
+                    cloud: 'AZURE'
+                }, {
+                    key: 'STANDARD_D14_V2',
+                    value: 'Standard D14 v2',
                     cloud: 'AZURE'
                 }]
             },
@@ -787,14 +787,9 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
             }, {
                 key: 'Etc/GMT-12',
                 value: 'GMT+12'
-            }],
-            'DEFAULT_VARIANTS': {
-              'GCP': 'GCP',
-              'AZURE': null,
-              'AZURE_RM': 'AZURE_RM',
-              'AWS': null,
-              'OPENSTACK': 'HEAT'
-            }
+            }]
         }
+
+
     }
 ]);

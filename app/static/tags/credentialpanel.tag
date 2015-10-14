@@ -44,10 +44,6 @@
                             <form class="form-horizontal" role="form" name="awsCredentialForm" ng-show="awsCredential  && !credentialInCreation" name="awsCredentialForm">
                                 <div ng-include src="'tags/credential/awsform.tag'"></div>
                             </form>
-
-                            <form class="form-horizontal" role="form" name="azureCredentialForm" ng-show="azureCredential && !credentialInCreation">
-                                <div ng-include src="'tags/credential/azureform.tag'"></div>
-                            </form>
                             <form class="form-horizontal" role="form" name="azureRmCredentialForm" ng-show="azureRmCredential && !credentialInCreation">
                                 <div ng-include src="'tags/credential/azurermform.tag'"></div>
                             </form>
