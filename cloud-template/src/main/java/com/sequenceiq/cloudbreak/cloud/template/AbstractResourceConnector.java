@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.template;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -84,10 +84,9 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         context.addNetworkResources(networkResourceService.getNetworkResources(platform, resources));
 
         //compute
-        String scalingGroup = getGroupName(stack);
-        Group group = createScalingGroup(stack.getGroups(), scalingGroup);
+        Group scalingGroup = getScalingGroup(getGroup(stack.getGroups(), getGroupName(stack)));
 
-        return computeResourceService.buildResourcesForUpscale(context, auth, Arrays.asList(group), stack.getImage());
+        return computeResourceService.buildResourcesForUpscale(context, auth, Collections.singletonList(scalingGroup), stack.getImage());
     }
 
     @Override
@@ -131,17 +130,15 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         return resources;
     }
 
-    private Group createScalingGroup(List<Group> originalGroups, String groupName) {
-        Group scalingGroup = getGroup(originalGroups, groupName);
-        List<InstanceTemplate> instances = scalingGroup.getInstances();
+    private Group getScalingGroup(Group scalingGroup) {
+        List<InstanceTemplate> instances = new ArrayList<>(scalingGroup.getInstances());
         Iterator<InstanceTemplate> iterator = instances.iterator();
         while (iterator.hasNext()) {
             if (InstanceStatus.CREATE_REQUESTED != iterator.next().getStatus()) {
                 iterator.remove();
             }
         }
-        scalingGroup.setInstances(instances);
-        return scalingGroup;
+        return new Group(scalingGroup.getName(), scalingGroup.getType(), instances);
     }
 
     private Group getGroup(List<Group> groups, String groupName) {

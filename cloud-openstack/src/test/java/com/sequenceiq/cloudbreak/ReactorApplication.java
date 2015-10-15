@@ -109,15 +109,12 @@ public class ReactorApplication implements CommandLineRunner {
         c.putParameter("endpoint", endpoint);
 
         List<Group> groups = new ArrayList<>();
-        Group g = new Group("master", InstanceGroupType.CORE);
-        groups.add(g);
-        InstanceTemplate instance = new InstanceTemplate("m1.medium", g.getName(), 0L, InstanceStatus.CREATE_REQUESTED, new HashMap<String, Object>());
-        Volume v = new Volume("/hadoop/fs1", "HDD", 1);
-        instance.addVolume(v);
-        v = new Volume("/hadoop/fs2", "HDD", 1);
-        instance.addVolume(v);
 
-        g.addInstance(instance);
+        String name = "master";
+        List<Volume> volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
+        InstanceTemplate instance = new InstanceTemplate("m1.medium", name, 0L, volumes, InstanceStatus.CREATE_REQUESTED, new HashMap<String, Object>());
+
+        groups.add(new Group(name, InstanceGroupType.CORE, Arrays.asList(instance)));
 
         Image image = new Image("cb-centos66-amb200-2015-05-25");
         image.putUserData(InstanceGroupType.CORE, "CORE");

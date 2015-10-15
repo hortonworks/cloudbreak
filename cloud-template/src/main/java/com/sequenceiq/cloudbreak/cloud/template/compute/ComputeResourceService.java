@@ -69,7 +69,6 @@ public class ComputeResourceService {
         List<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
         List<ComputeResourceBuilder> builders = resourceBuilders.compute(cloudContext.getPlatform());
         for (Group group : getOrderedCopy(groups)) {
-            Group copyGroup = new Group(group.getName(), group.getType(), group.getInstances());
             List<InstanceTemplate> instances = group.getInstances();
             for (int i = 0; i < instances.size(); i++) {
                 ResourceCreateThread thread = createThread(ResourceCreateThread.NAME, instances.get(i).getPrivateId(), group, ctx, auth, image);
@@ -79,14 +78,14 @@ public class ComputeResourceService {
                     Map<FutureResult, List<List<CloudResourceStatus>>> futureResultListMap = waitForRequests(futures);
                     results.addAll(flatList(futureResultListMap.get(FutureResult.SUCCESS)));
                     results.addAll(flatList(futureResultListMap.get(FutureResult.FAILED)));
-                    cloudFailureHandler.rollback(auth, flatList(futureResultListMap.get(FutureResult.FAILED)), copyGroup,
+                    cloudFailureHandler.rollback(auth, flatList(futureResultListMap.get(FutureResult.FAILED)), group,
                             fullNodeCount, ctx, resourceBuilders, new ScaleContext(upscale, adjustmentType, threshold));
                 }
             }
             Map<FutureResult, List<List<CloudResourceStatus>>> futureResultListMap = waitForRequests(futures);
             results.addAll(flatList(futureResultListMap.get(FutureResult.SUCCESS)));
             results.addAll(flatList(futureResultListMap.get(FutureResult.FAILED)));
-            cloudFailureHandler.rollback(auth, flatList(futureResultListMap.get(FutureResult.FAILED)), copyGroup, fullNodeCount, ctx,
+            cloudFailureHandler.rollback(auth, flatList(futureResultListMap.get(FutureResult.FAILED)), group, fullNodeCount, ctx,
                     resourceBuilders, new ScaleContext(upscale, adjustmentType, threshold));
         }
         return results;

@@ -1,28 +1,20 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 
 public class Group {
 
-    private String name;
-
-    private InstanceGroupType type;
-
-    private List<InstanceTemplate> instances;
-
-    public Group(String name, InstanceGroupType type) {
-        this.name = name;
-        this.type = type;
-        instances = new ArrayList<>();
-    }
+    private final String name;
+    private final InstanceGroupType type;
+    private final List<InstanceTemplate> instances;
 
     public Group(String name, InstanceGroupType type, List<InstanceTemplate> instances) {
         this.name = name;
         this.type = type;
-        this.instances = instances;
+        this.instances = ImmutableList.copyOf(instances);
     }
 
     public String getName() {
@@ -34,15 +26,7 @@ public class Group {
     }
 
     public List<InstanceTemplate> getInstances() {
-        return new ArrayList<>(instances);
-    }
-
-    public void setInstances(List<InstanceTemplate> instances) {
-        this.instances = instances;
-    }
-
-    public void addInstance(InstanceTemplate instance) {
-        instances.add(instance);
+        return instances;
     }
 
 }

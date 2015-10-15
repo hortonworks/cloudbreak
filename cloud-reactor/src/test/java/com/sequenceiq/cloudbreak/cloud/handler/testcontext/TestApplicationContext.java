@@ -7,6 +7,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -47,6 +48,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.Persister;
 import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
@@ -61,10 +63,10 @@ public class TestApplicationContext {
 
     private CloudInstance cloudInstance = new CloudInstance("instanceId",
             new CloudInstanceMetaData("privateIp", "publicIp"),
-            new InstanceTemplate("flavor", "groupName", 1L, InstanceStatus.CREATE_REQUESTED, new HashMap<String, Object>()));
+            new InstanceTemplate("flavor", "groupName", 1L, Collections.<Volume>emptyList(), InstanceStatus.CREATE_REQUESTED, new HashMap<String, Object>()));
     private CloudInstance cloudInstanceBad = new CloudInstance("instanceIdBad",
             new CloudInstanceMetaData("privateIp", "publicIp"),
-            new InstanceTemplate("flavor", "groupName", 1L, InstanceStatus.CREATE_REQUESTED, new HashMap<String, Object>()));
+            new InstanceTemplate("flavor", "groupName", 1L, Collections.<Volume>emptyList(), InstanceStatus.CREATE_REQUESTED, new HashMap<String, Object>()));
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
