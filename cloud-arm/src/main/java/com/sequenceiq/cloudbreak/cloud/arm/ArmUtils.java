@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.arm;
 
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_ARM_CENTRAL_STORAGE;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_MAX_AZURE_RESOURCE_NAME_LENGTH;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.cloud.arm.status.ArmStackStatus;
@@ -39,6 +41,9 @@ public class ArmUtils {
     private static final int MAX_LENGTH_OF_NAME_SLICE = 8;
     private static final int MAX_LENGTH_OF_RESOURCE_NAME = 24;
 
+    @Value("${cb.max.openstack.resource.name.length:" + CB_MAX_AZURE_RESOURCE_NAME_LENGTH + "}")
+    private int maxResourceNameLength;
+
     @Value("${cb.arm.persistent.storage:" + CB_ARM_CENTRAL_STORAGE + "}")
     private String persistentStorage;
 
@@ -56,7 +61,8 @@ public class ArmUtils {
     }
 
     public String getStackName(CloudContext cloudContext) {
-        return String.format("%s%s", cloudContext.getName(), cloudContext.getId());
+        return new String(Splitter.fixedLength(maxResourceNameLength - cloudContext.getId().toString().length()).limit(1)
+                .splitToList(cloudContext.getName()).get(0) + cloudContext.getId());
     }
 
     public String getLoadBalancerId(String stackName) {

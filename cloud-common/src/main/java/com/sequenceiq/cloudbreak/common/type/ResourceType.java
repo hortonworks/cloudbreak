@@ -1,5 +1,5 @@
 package com.sequenceiq.cloudbreak.common.type;
-
+//TODO Clean this enum class
 public enum ResourceType {
     // AZURE
     AZURE_VIRTUAL_MACHINE,
