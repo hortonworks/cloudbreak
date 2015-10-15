@@ -449,39 +449,66 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                 awsRegions: [{
                     key: 'US_EAST_1',
                     value: 'US East(N. Virginia)',
-                    cloud: 'AWS'
+                    cloud: 'AWS',
+                    availabilityZones: [
+                        'us-east-1a', 'us-east-1b', 'us-east-1d', 'us-east-1e'
+                    ]
                 }, {
                     key: 'US_WEST_1',
                     value: 'US West (N. California)',
-                    cloud: 'AWS'
+                    cloud: 'AWS',
+                    availabilityZones: [
+                        'us-west-1a', 'us-west-1b'
+                    ]
                 }, {
                     key: 'US_WEST_2',
                     value: 'US West (Oregon)',
-                    cloud: 'AWS'
+                    cloud: 'AWS',
+                    availabilityZones: [
+                        'us-west-2a', 'us-west-2b', 'us-west-2c'
+                    ]
                 }, {
                     key: 'EU_WEST_1',
                     value: 'EU (Ireland)',
-                    cloud: 'AWS'
+                    cloud: 'AWS',
+                    availabilityZones: [
+                        'eu-west-1a', 'eu-west-1b', 'eu-west-1c'
+                    ]
                 }, {
                     key: 'EU_CENTRAL_1',
                     value: 'EU (Frankfurt)',
-                    cloud: 'AWS'
+                    cloud: 'AWS',
+                    availabilityZones: [
+                        'eu-central-1a', 'eu-central-1b'
+                    ]
                 }, {
                     key: 'AP_SOUTHEAST_1',
                     value: 'Asia Pacific (Singapore)',
-                    cloud: 'AWS'
+                    cloud: 'AWS',
+                    availabilityZones: [
+                        'ap-southeast-1a', 'ap-southeast-1b'
+                    ]
                 }, {
                     key: 'AP_SOUTHEAST_2',
                     value: 'Asia Pacific (Sydney)',
-                    cloud: 'AWS'
+                    cloud: 'AWS',
+                    availabilityZones: [
+                        'ap-southeast-2a', 'ap-southeast-2b'
+                    ]
                 }, {
                     key: 'AP_NORTHEAST_1',
                     value: 'Asia Pacific (Tokyo)',
-                    cloud: 'AWS'
+                    cloud: 'AWS',
+                    availabilityZones: [
+                        'ap-northeast-1a', 'ap-northeast-1c'
+                    ]
                 }, {
                     key: 'SA_EAST_1',
                     value: 'South America (São Paulo)',
-                    cloud: 'AWS'
+                    cloud: 'AWS',
+                    availabilityZones: [
+                        'sa-east-1a', 'sa-east-1b', 'sa-east-1c'
+                    ]
                 }],
                 instanceType: [{
                     key: 'C3Large',
