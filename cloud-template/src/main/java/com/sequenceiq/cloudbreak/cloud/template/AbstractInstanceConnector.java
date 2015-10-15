@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
@@ -28,7 +29,7 @@ public abstract class AbstractInstanceConnector implements InstanceConnector {
     @Override
     public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) throws Exception {
         CloudContext cloudContext = ac.getCloudContext();
-        String platform = cloudContext.getPlatform();
+        Platform platform = cloudContext.getPlatform();
 
         //context
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, ac, resources, false);
@@ -40,7 +41,7 @@ public abstract class AbstractInstanceConnector implements InstanceConnector {
     @Override
     public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) throws Exception {
         CloudContext cloudContext = ac.getCloudContext();
-        String platform = cloudContext.getPlatform();
+        Platform platform = cloudContext.getPlatform();
 
         //context
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, ac, resources, true);

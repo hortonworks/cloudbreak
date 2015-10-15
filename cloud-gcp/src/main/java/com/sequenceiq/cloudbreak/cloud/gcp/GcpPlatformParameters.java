@@ -2,85 +2,101 @@ package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
+import com.sequenceiq.cloudbreak.cloud.model.DiskType;
+import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.Regions;
+import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
+import com.sequenceiq.cloudbreak.cloud.model.VmType;
+import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 
 @Service
 public class GcpPlatformParameters implements PlatformParameters {
     private static final Integer START_LABEL = Integer.valueOf(97);
+    private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("sd", START_LABEL);
 
     @Override
-    public String diskPrefix() {
-        return "sd";
+    public ScriptParams scriptParams() {
+        return SCRIPT_PARAMS;
     }
 
     @Override
-    public Integer startLabel() {
-        return START_LABEL;
+    public DiskTypes diskTypes() {
+        return new DiskTypes(getDiskTypes(), defaultDiskType());
     }
 
-    @Override
-    public Map<String, String> diskTypes() {
-        Map<String, String> disks = new HashMap<>();
-        for (DiskType diskType : DiskType.values()) {
-            disks.put(diskType.name(), diskType.value);
+    private Collection<DiskType> getDiskTypes() {
+        Collection<DiskType> disks = Lists.newArrayList();
+        for (GcpDiskType diskType : GcpDiskType.values()) {
+            disks.add(DiskType.diskType(diskType.value()));
         }
         return disks;
     }
 
-    @Override
-    public String defaultDiskType() {
-        return diskTypes().get(DiskType.HDD.name());
+    private DiskType defaultDiskType() {
+        return DiskType.diskType(GcpDiskType.HDD.value());
     }
 
     @Override
-    public Map<String, String> regions() {
-        Map<String, String> regions = new HashMap<>();
-        for (Region region : Region.values()) {
-            regions.put(region.name(), region.value());
+    public Regions regions() {
+        return new Regions(getRegions(), defaultRegion());
+    }
+
+    private Collection<Region> getRegions() {
+        Collection<Region> regions = Lists.newArrayList();
+        for (GcpRegion region : GcpRegion.values()) {
+            regions.add(Region.region(region.value()));
         }
         return regions;
     }
 
-    @Override
-    public String defaultRegion() {
-        return Region.US_CENTRAL1_A.name();
+    private Region defaultRegion() {
+        return Region.region(GcpRegion.US_CENTRAL1_A.value());
     }
 
     @Override
-    public Map<String, List<String>> availabiltyZones() {
-        Map<String, List<String>> regions = new HashMap<>();
-        for (Region region : Region.values()) {
-            regions.put(region.name(), new ArrayList<String>());
+    public AvailabilityZones availabilityZones() {
+        Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
+        for (GcpRegion region : GcpRegion.values()) {
+            regions.put(Region.region(region.value()), new ArrayList<AvailabilityZone>());
         }
-        return regions;
+        return new AvailabilityZones(regions);
     }
 
     @Override
-    public Map<String, String> virtualMachines() {
-        Map<String, String> vmTypes = new HashMap<>();
-        for (VmType vmType : VmType.values()) {
-            vmTypes.put(vmType.name(), vmType.vmType());
+    public VmTypes vmTypes() {
+        return new VmTypes(virtualMachines(), defaultVirtualMachine());
+    }
+
+    private Collection<VmType> virtualMachines() {
+        Collection<VmType> vmTypes = Lists.newArrayList();
+        for (GcpVmType vmType : GcpVmType.values()) {
+            vmTypes.add(VmType.vmType(vmType.value));
         }
         return vmTypes;
     }
 
-    @Override
-    public String defaultVirtualMachine() {
-        return VmType.N1_STANDARD_2.name();
+    private VmType defaultVirtualMachine() {
+        return VmType.vmType(GcpVmType.N1_STANDARD_2.value);
     }
 
-    private enum DiskType {
+    private enum GcpDiskType {
         SSD("pd-ssd"), HDD("pd-standard");
 
         private final String value;
 
-        private DiskType(String value) {
+        private GcpDiskType(String value) {
             this.value = value;
         }
 
@@ -88,12 +104,12 @@ public class GcpPlatformParameters implements PlatformParameters {
             return value;
         }
 
-        public String getUrl(String projectId, Region zone) {
+        public String getUrl(String projectId, GcpRegion zone) {
             return String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/diskTypes/%s", projectId, zone.value(), value);
         }
     }
 
-    private enum VmType {
+    private enum GcpVmType {
 
         N1_STANDARD_1("n1-standard-1"),
         N1_STANDARD_2("n1-standard-2"),
@@ -113,7 +129,7 @@ public class GcpPlatformParameters implements PlatformParameters {
 
         private final String value;
 
-        private VmType(String value) {
+        private GcpVmType(String value) {
             this.value = value;
         }
 
@@ -122,7 +138,7 @@ public class GcpPlatformParameters implements PlatformParameters {
         }
     }
 
-    private enum Region {
+    private enum GcpRegion {
         US_CENTRAL1_A("us-central1-a", Arrays.asList("us-central1")),
         US_CENTRAL1_B("us-central1-b", Arrays.asList("us-central1")),
         US_CENTRAL1_F("us-central1-f", Arrays.asList("us-central1")),
@@ -137,7 +153,7 @@ public class GcpPlatformParameters implements PlatformParameters {
         private final String value;
         private final List<String> availabilityZones;
 
-        private Region(String value, List<String> availabilityZones) {
+        private GcpRegion(String value, List<String> availabilityZones) {
             this.value = value;
             this.availabilityZones = availabilityZones;
         }
