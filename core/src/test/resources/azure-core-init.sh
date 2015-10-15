@@ -94,7 +94,6 @@ main() {
     format_disks
     fix_hostname
     release_udev_cookie
-    touch /var/cb-init-executed
     echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/cb-init-executed
   fi
 }
