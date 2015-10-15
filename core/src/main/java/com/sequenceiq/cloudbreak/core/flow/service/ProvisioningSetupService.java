@@ -9,7 +9,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ImageCheckerContext;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ImageStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.event.CheckImageComplete;
@@ -26,9 +25,6 @@ public class ProvisioningSetupService {
     private StackRepository stackRepository;
 
     @Inject
-    private TlsSecurityService tlsSecurityService;
-
-    @Inject
     private CloudPlatformResolver cloudPlatformResolver;
 
     @Inject
@@ -41,11 +37,8 @@ public class ProvisioningSetupService {
     private ImageStatusCheckerTask imageStatusCheckerTask;
 
     public ProvisionSetupComplete setup(Stack stack) throws Exception {
-        ProvisionSetupComplete setupComplete = (ProvisionSetupComplete)
+        return (ProvisionSetupComplete)
                 cloudPlatformResolver.provisioning(stack.cloudPlatform()).setupProvisioning(stack);
-        tlsSecurityService.copyClientKeys(stack.getId());
-        tlsSecurityService.setupSSHKeys(stack);
-        return setupComplete;
     }
 
     public PrepareImageComplete prepareImage(Stack stack) throws Exception {

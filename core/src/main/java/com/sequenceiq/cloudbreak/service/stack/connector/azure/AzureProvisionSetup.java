@@ -27,11 +27,6 @@ public class AzureProvisionSetup implements ProvisionSetup {
     }
 
     @Override
-    public String preProvisionCheck(Stack stack) {
-        throw new UnsupportedOperationException(String.format(AzureStackUtil.UNSUPPORTED_OPERATION, "preProvisionCheck"));
-    }
-
-    @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AZURE;
     }

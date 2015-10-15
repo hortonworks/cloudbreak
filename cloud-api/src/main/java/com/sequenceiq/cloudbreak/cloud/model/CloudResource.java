@@ -3,10 +3,10 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.util.Assert;
-
 import com.sequenceiq.cloudbreak.common.type.CommonStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
+
+import reactor.core.support.Assert;
 
 public class CloudResource extends DynamicModel {
     private ResourceType type;

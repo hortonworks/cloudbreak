@@ -23,11 +23,11 @@ import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
+import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils;
 import com.sequenceiq.cloudbreak.service.stack.flow.ReflectionUtils;
 
@@ -37,17 +37,16 @@ public class StackToCloudStackConverter {
     @Inject
     private SecurityRuleRepository securityRuleRepository;
 
+    @Inject
+    private ImageService imageService;
+
     public CloudStack convert(Stack stack) {
-        return convert(stack, null, null);
+        return convert(stack, Collections.<String>emptySet());
     }
 
-    public CloudStack convert(Stack stack, String coreUserData, String gateWayUserData) {
-        return convert(stack, coreUserData, gateWayUserData, Collections.<String>emptySet());
-    }
-
-    public CloudStack convert(Stack stack, String coreUserData, String gateWayUserData, Set<String> deleteRequestedInstances) {
+    public CloudStack convert(Stack stack, Set<String> deleteRequestedInstances) {
         List<Group> instanceGroups = buildInstanceGroups(stack.getInstanceGroupsAsList(), deleteRequestedInstances);
-        Image image = buildImage(stack, coreUserData, gateWayUserData);
+        Image image = imageService.getImage(stack.getId());
         Network network = buildNetwork(stack);
         Security security = buildSecurity(stack);
         return new CloudStack(instanceGroups, network, security, image, stack.getParameters());
@@ -96,13 +95,6 @@ public class StackToCloudStackConverter {
             volumes.add(volume);
         }
         return new InstanceTemplate(template.getInstanceTypeName(), name, privateId, volumes, status, fields);
-    }
-
-    private Image buildImage(Stack stack, String coreUserData, String gateWayUserData) {
-        Image image = new Image(stack.getImage());
-        image.putUserData(InstanceGroupType.CORE, coreUserData);
-        image.putUserData(InstanceGroupType.GATEWAY, gateWayUserData);
-        return image;
     }
 
     private Network buildNetwork(Stack stack) {

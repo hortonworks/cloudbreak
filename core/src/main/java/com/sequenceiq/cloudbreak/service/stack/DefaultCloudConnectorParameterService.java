@@ -26,7 +26,7 @@ import reactor.bus.EventBus;
 
 @Service
 public class DefaultCloudConnectorParameterService implements CloudConnectorParameterService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultStackService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCloudConnectorParameterService.class);
 
     @Inject
     private EventBus eventBus;

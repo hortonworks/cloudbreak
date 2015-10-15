@@ -11,11 +11,11 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 
 public interface CloudPlatformConnector {
 
-    Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties);
+    Set<Resource> buildStack(Stack stack, Map<String, Object> setupProperties);
 
-    Set<Resource> addInstances(Stack stack, String gateWayUserData, String coreUserData, Integer instanceCount, String instanceGroup);
+    Set<Resource> addInstances(Stack stack, Integer instanceCount, String instanceGroup);
 
-    Set<String> removeInstances(Stack stack, String gateWayUserData, String coreUserData, Set<String> instanceIds, String instanceGroup);
+    Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup);
 
     void deleteStack(Stack stack, Credential credential);
 
@@ -27,7 +27,7 @@ public interface CloudPlatformConnector {
 
     CloudPlatform getCloudPlatform();
 
-    void updateAllowedSubnets(Stack stack, String gateWayUserData, String coreUserData);
+    void updateAllowedSubnets(Stack stack);
 
     Set<String> getSSHFingerprints(Stack stack, String gateway);
 

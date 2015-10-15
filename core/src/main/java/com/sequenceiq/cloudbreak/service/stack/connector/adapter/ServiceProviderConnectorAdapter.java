@@ -101,13 +101,13 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     private InstanceMetadataService instanceMetadataService;
 
     @Override
-    public Set<Resource> buildStack(Stack stack, String gateWayUserData, String coreUserData, Map<String, Object> setupProperties) {
+    public Set<Resource> buildStack(Stack stack, Map<String, Object> setupProperties) {
         LOGGER.info("Assembling launch request for stack: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
                 location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-        CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
+        CloudStack cloudStack = cloudStackConverter.convert(stack);
         instanceMetadataService.saveInstanceRequests(stack, cloudStack.getGroups());
         FailurePolicy policy = Optional.fromNullable(stack.getFailurePolicy()).or(new FailurePolicy());
         LaunchStackRequest launchRequest = new LaunchStackRequest(cloudContext, cloudCredential, cloudStack, policy.getAdjustmentType(), policy.getThreshold());
@@ -191,7 +191,7 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     }
 
     @Override
-    public Set<Resource> addInstances(Stack stack, String gateWayUserData, String coreUserData, Integer adjustment, String instanceGroup) {
+    public Set<Resource> addInstances(Stack stack, Integer adjustment, String instanceGroup) {
         LOGGER.debug("Assembling upscale stack event for stack: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
@@ -199,7 +199,7 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         group.setNodeCount(group.getNodeCount() + adjustment);
-        CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
+        CloudStack cloudStack = cloudStackConverter.convert(stack);
         instanceMetadataService.saveInstanceRequests(stack, cloudStack.getGroups());
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         UpscaleStackRequest<UpscaleStackResult> upscaleRequest = new UpscaleStackRequest<>(cloudContext, cloudCredential, cloudStack, resources);
@@ -223,7 +223,7 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     }
 
     @Override
-    public Set<String> removeInstances(Stack stack, String gateWayUserData, String coreUserData, Set<String> instanceIds, String instanceGroup) {
+    public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
         LOGGER.debug("Assembling downscale stack event for stack: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
@@ -238,7 +238,7 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
                 instances.add(cloudInstance);
             }
         }
-        CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData, instanceIds);
+        CloudStack cloudStack = cloudStackConverter.convert(stack, instanceIds);
         DownscaleStackRequest<DownscaleStackResult> downscaleRequest = new DownscaleStackRequest<>(cloudContext,
                 cloudCredential, cloudStack, resources, instances);
         LOGGER.info("Triggering downscale stack event: {}", downscaleRequest);
@@ -265,7 +265,7 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
                 location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
-        CloudStack cloudStack = cloudStackConverter.convert(stack, "", "");
+        CloudStack cloudStack = cloudStackConverter.convert(stack);
         TerminateStackRequest<TerminateStackResult> terminateRequest = new TerminateStackRequest<>(cloudContext, cloudStack, cloudCredential, resources);
         LOGGER.info("Triggering terminate stack event: {}", terminateRequest);
         eventBus.notify(terminateRequest.selector(), Event.wrap(terminateRequest));
@@ -292,13 +292,13 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     }
 
     @Override
-    public void updateAllowedSubnets(Stack stack, String gateWayUserData, String coreUserData) {
+    public void updateAllowedSubnets(Stack stack) {
         LOGGER.debug("Assembling update subnet event for: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
                 location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-        CloudStack cloudStack = cloudStackConverter.convert(stack, coreUserData, gateWayUserData);
+        CloudStack cloudStack = cloudStackConverter.convert(stack);
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         UpdateStackRequest<UpdateStackResult> updateRequest = new UpdateStackRequest<>(cloudContext, cloudCredential, cloudStack, resources);
         eventBus.notify(updateRequest.selector(), Event.wrap(updateRequest));

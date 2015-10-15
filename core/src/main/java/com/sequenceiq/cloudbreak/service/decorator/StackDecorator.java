@@ -1,26 +1,13 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AWS_AMI_MAP;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AZURE_IMAGE_URI;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AZURE_RM_IMAGE;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_GCP_SOURCE_IMAGE_PATH;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_OPENSTACK_IMAGE;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.regions.Regions;
-import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -45,21 +32,6 @@ public class StackDecorator implements Decorator<Stack> {
     @Inject
     private SecurityGroupService securityGroupService;
 
-    @Value("${cb.azure.image.uri:}")
-    private String azureImage;
-
-    @Value("${cb.azure.rm.image.uri:}")
-    private String azureRmImage;
-
-    @Value("${cb.aws.ami.map:}")
-    private String awsImage;
-
-    @Value("${cb.openstack.image:}")
-    private String openStackImage;
-
-    @Value("${cb.gcp.source.image.path:}")
-    private String gcpImage;
-
     private enum DecorationData {
         CREDENTIAL_ID,
         USR_CONSUL_SERVER_COUNT,
@@ -82,65 +54,10 @@ public class StackDecorator implements Decorator<Stack> {
         if (subject.getFailurePolicy() != null) {
             validatFailurePolicy(subject, consulServers, subject.getFailurePolicy());
         }
-
-        if (subject.getImage() == null) {
-            subject.setImage(prepareImage(subject));
-        }
         validate(subject);
         return subject;
     }
 
-    private String prepareImage(Stack stack) {
-        CloudPlatform cloudPlatform = stack.cloudPlatform();
-        String selectedImage;
-        switch (cloudPlatform) {
-            case AWS:
-                selectedImage = prepareAmis().get(Regions.valueOf(stack.getRegion()).getName());
-                break;
-            case AZURE:
-                selectedImage = determineImageName(azureImage, CB_AZURE_IMAGE_URI);
-                break;
-            case GCP:
-                selectedImage = determineImageName(gcpImage, CB_GCP_SOURCE_IMAGE_PATH);
-                break;
-            case OPENSTACK:
-                selectedImage = determineImageName(openStackImage, CB_OPENSTACK_IMAGE);
-                break;
-            case AZURE_RM:
-                selectedImage = prepareAzureRmImages().get(stack.getRegion());
-                break;
-            default:
-                throw new BadRequestException(String.format("Not supported cloud platform: %s", stack.cloudPlatform()));
-        }
-
-        LOGGER.info("Selected VM image for CloudPlatform '{}' is: {}", cloudPlatform, selectedImage);
-        return selectedImage;
-    }
-
-    private Map<String, String> prepareAmis() {
-        Map<String, String> amisMap = new HashMap<>();
-        String awsImageNames = determineImageName(awsImage, CB_AWS_AMI_MAP);
-        for (String s : awsImageNames.split(",")) {
-            amisMap.put(s.split(":")[0], s.split(":")[1]);
-        }
-        return amisMap;
-    }
-
-    private Map<String, String> prepareAzureRmImages() {
-        Map<String, String> azureMap = new HashMap<>();
-        String azureImageNames = determineImageName(azureRmImage, CB_AZURE_RM_IMAGE);
-        for (String s : azureImageNames.split(",")) {
-            azureMap.put(s.split(":")[0], s.split(":")[1] + ":" + s.split(":")[2]);
-        }
-        return azureMap;
-    }
-
-    private String determineImageName(String imageName, String defaultImageName) {
-        if (Strings.isNullOrEmpty(imageName)) {
-            return defaultImageName;
-        }
-        return imageName;
-    }
 
     private void validate(Stack stack) {
         if (stack.getGatewayInstanceGroup() == null) {

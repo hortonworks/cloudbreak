@@ -36,18 +36,17 @@ public class AzureConnector implements CloudPlatformConnector {
     private Map<String, Lock> lockMap = Collections.synchronizedMap(new HashMap<String, Lock>());
 
     @Override
-    public Set<Resource> buildStack(final Stack stack, final String gateWayUserData, final String coreUserData,
-            final Map<String, Object> setupProperties) {
+    public Set<Resource> buildStack(final Stack stack, final Map<String, Object> setupProperties) {
         throw new UnsupportedOperationException(String.format(AzureStackUtil.UNSUPPORTED_OPERATION, "buildStack"));
     }
 
     @Override
-    public Set<Resource> addInstances(Stack stack, String gateWayUserData, String coreUserData, Integer instanceCount, String instanceGroup) {
+    public Set<Resource> addInstances(Stack stack, Integer instanceCount, String instanceGroup) {
         throw new UnsupportedOperationException(String.format(AzureStackUtil.UNSUPPORTED_OPERATION, "addInstances"));
     }
 
     @Override
-    public Set<String> removeInstances(Stack stack, String gateWayUserData, String coreUserData, Set<String> origInstanceIds, String instanceGroup) {
+    public Set<String> removeInstances(Stack stack, Set<String> origInstanceIds, String instanceGroup) {
         throw new UnsupportedOperationException(String.format(AzureStackUtil.UNSUPPORTED_OPERATION, "removeInstances"));
     }
 
@@ -73,7 +72,7 @@ public class AzureConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public void updateAllowedSubnets(Stack stack, String gateWayUserData, String coreUserData) {
+    public void updateAllowedSubnets(Stack stack) {
         throw new UnsupportedOperationException(String.format(AzureStackUtil.UNSUPPORTED_OPERATION, "updateAllowedSubnets"));
     }
 

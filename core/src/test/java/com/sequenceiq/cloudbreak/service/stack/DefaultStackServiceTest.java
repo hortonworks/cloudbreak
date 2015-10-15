@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 public class DefaultStackServiceTest {
 
     @InjectMocks
-    private DefaultStackService underTest;
+    private StackService underTest;
 
     @Mock
     private StackRepository stackRepository;

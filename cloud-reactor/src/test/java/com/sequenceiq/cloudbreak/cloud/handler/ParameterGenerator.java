@@ -8,9 +8,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
@@ -62,9 +64,11 @@ public class ParameterGenerator {
 
         groups.add(new Group(name, InstanceGroupType.CORE, Arrays.asList(instance)));
 
-        Image image = new Image("cb-centos66-amb200-2015-05-25");
-        image.putUserData(InstanceGroupType.CORE, "CORE");
-        image.putUserData(InstanceGroupType.GATEWAY, "GATEWAY");
+        Map<InstanceGroupType, String> userData = ImmutableMap.of(
+                InstanceGroupType.CORE, "CORE",
+                InstanceGroupType.GATEWAY, "GATEWAY"
+        );
+        Image image = new Image("cb-centos66-amb200-2015-05-25", userData);
 
         Subnet subnet = new Subnet("10.0.0.0/24");
         Network network = new Network(subnet);

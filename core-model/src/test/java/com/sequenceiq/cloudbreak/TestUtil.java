@@ -201,7 +201,6 @@ public class TestUtil {
         stack.setSecurityGroup(securityGroup(1L));
         stack.setStatusReason("statusReason");
         stack.setRegion("region");
-        stack.setImage("image");
         stack.setCreated(123L);
         switch (credential.cloudPlatform()) {
             case AWS:

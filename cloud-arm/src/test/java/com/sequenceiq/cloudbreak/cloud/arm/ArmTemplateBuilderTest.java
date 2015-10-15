@@ -21,6 +21,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -89,7 +91,11 @@ public class ArmTemplateBuilderTest {
         securityRuleList.add(new SecurityRule("10.0.0.0/16", new String[]{"80", "8080"}, "tcp"));
         Security security = new Security(securityRuleList);
 
-        Image image = new Image("https://krisztian.blob.core.windows.net/images/cb-centos71-amb210-2015-07-22-b1470.vhd");
+        Map<InstanceGroupType, String> userData = ImmutableMap.of(
+                InstanceGroupType.CORE, "CORE",
+                InstanceGroupType.GATEWAY, "GATEWAY"
+        );
+        Image image = new Image("https://krisztian.blob.core.windows.net/images/cb-centos71-amb210-2015-07-22-b1470.vhd", userData);
 
         return new CloudStack(asList(cbgateway, master, slave1), network, security, image, new HashMap<String, String>());
     }

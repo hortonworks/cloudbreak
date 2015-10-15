@@ -39,8 +39,6 @@ public abstract class StackBase implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = StackModelDescription.CREDENTIAL_ID, required = true)
     private Long credentialId;
-    @ApiModelProperty(value = StackModelDescription.IMAGE, required = true)
-    private String image;
     @ApiModelProperty(StackModelDescription.FAILURE_ACTION)
     private OnFailureAction onFailureAction = OnFailureAction.ROLLBACK;
     @ApiModelProperty(StackModelDescription.FAILURE_POLICY)
@@ -113,14 +111,6 @@ public abstract class StackBase implements JsonEntity {
 
     public void setRegion(String region) {
         this.region = region;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
     }
 
     public Long getNetworkId() {

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.connector;
+package com.sequenceiq.cloudbreak.service.image;
 
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_RELOCATE;
 
@@ -34,31 +34,25 @@ public class UserDataBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    public Map<InstanceGroupType, String> buildUserData(CloudPlatform cloudPlatform, String tmpSshKey, String sshUser, PlatformParameters parameters) {
+    Map<InstanceGroupType, String> buildUserData(CloudPlatform cloudPlatform, String tmpSshKey, String sshUser, PlatformParameters parameters) {
         Map<InstanceGroupType, String> result = new HashMap<>();
-        result.put(InstanceGroupType.GATEWAY, buildGatewayUserdata(cloudPlatform, tmpSshKey, sshUser, parameters));
-        result.put(InstanceGroupType.CORE, buildCoreUserdata(cloudPlatform, parameters));
+        result.put(InstanceGroupType.GATEWAY, build(InstanceGroupType.GATEWAY, cloudPlatform, tmpSshKey, sshUser, parameters));
+        result.put(InstanceGroupType.CORE, build(InstanceGroupType.CORE, cloudPlatform, null, null, parameters));
         return result;
     }
 
-    public String buildGatewayUserdata(CloudPlatform cloudPlatform, String tmpSshKey, String sshUser, PlatformParameters params) {
+    private String build(InstanceGroupType type, CloudPlatform cloudPlatform, String tmpSshKey, String sshUser, PlatformParameters params) {
         Map<String, Object> model = new HashMap<>();
         model.put("cloudPlatform", cloudPlatform);
         model.put("platformDiskPrefix", params.diskPrefix());
         model.put("platformDiskStartLabel", params.startLabel());
-        model.put("gateway", true);
-        model.put("tmpSshKey", tmpSshKey);
-        model.put("sshUser", sshUser);
-        model.put("relocateDocker", relocateDocker);
-        return build(model);
-    }
-
-    public String buildCoreUserdata(CloudPlatform cloudPlatform, PlatformParameters params) {
-        Map<String, Object> model = new HashMap<>();
-        model.put("cloudPlatform", cloudPlatform);
-        model.put("platformDiskPrefix", params.diskPrefix());
-        model.put("platformDiskStartLabel", params.startLabel());
-        model.put("gateway", false);
+        if (type == InstanceGroupType.GATEWAY) {
+            model.put("gateway", true);
+            model.put("tmpSshKey", tmpSshKey);
+            model.put("sshUser", sshUser);
+        } else {
+            model.put("gateway", false);
+        }
         model.put("relocateDocker", relocateDocker);
         return build(model);
     }

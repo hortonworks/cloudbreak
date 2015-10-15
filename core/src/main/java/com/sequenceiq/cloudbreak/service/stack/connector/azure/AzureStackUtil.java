@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -58,8 +59,12 @@ public class AzureStackUtil {
     @Inject
     private UserDetailsService userDetailsService;
 
+    @Inject
+    private ImageService imageService;
+
     public String getOsImageName(Stack stack, String storageName) {
-        String[] split = stack.getImage().split("/");
+        String imageName = imageService.getImage(stack.getId()).getImageName();
+        String[] split = imageName.split("/");
         return format("%s-%s-%s", storageName, IMAGE_NAME, split[split.length - 1].replaceAll(".vhd", ""));
     }
 

@@ -1,18 +1,24 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-import java.util.HashMap;
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
+
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 
+@JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)
 public class Image {
 
     private final String imageName;
     private final Map<InstanceGroupType, String> userdata;
 
-    public Image(String imageName) {
+    public Image(@JsonProperty("imageName") String imageName, @JsonProperty("userdata") Map<InstanceGroupType, String> userdata) {
         this.imageName = imageName;
-        userdata = new HashMap<>();
+        this.userdata = ImmutableMap.copyOf(userdata);
     }
 
     public String getImageName() {
@@ -21,10 +27,6 @@ public class Image {
 
     public String getUserData(InstanceGroupType key) {
         return userdata.get(key);
-    }
-
-    public void putUserData(InstanceGroupType key, String value) {
-        userdata.put(key, value);
     }
 
 }

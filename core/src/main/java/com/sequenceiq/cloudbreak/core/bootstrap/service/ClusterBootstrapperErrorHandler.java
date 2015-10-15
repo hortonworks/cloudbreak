@@ -13,16 +13,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
-import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.common.type.Status;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -32,13 +30,11 @@ import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
-import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 
 @Component
@@ -68,9 +64,6 @@ public class ClusterBootstrapperErrorHandler {
 
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
-
-    @Inject
-    private UserDataBuilder userDataBuilder;
 
     @Inject
     private TlsSecurityService tlsSecurityService;
@@ -148,19 +141,8 @@ public class ClusterBootstrapperErrorHandler {
         CloudPlatformConnector cloudPlatformConnector = platformResolver.connector(stack.cloudPlatform());
         Set<String> instanceIds = new HashSet<>();
         instanceIds.add(instanceMetaData.getInstanceId());
-        Map<InstanceGroupType, String> userdata = buildUserData(stack, stack.cloudPlatform(), cloudPlatformConnector);
-        cloudPlatformConnector.removeInstances(stack, userdata.get(InstanceGroupType.GATEWAY),
-                userdata.get(InstanceGroupType.CORE), instanceIds, instanceMetaData.getInstanceGroup().getGroupName());
+        cloudPlatformConnector.removeInstances(stack, instanceIds, instanceMetaData.getInstanceGroup().getGroupName());
         LOGGER.info("Deleted instance [name: {}, id: {}]", instanceMetaData.getId(), instanceMetaData.getInstanceId());
-    }
-
-    private Map<InstanceGroupType, String> buildUserData(Stack stack, CloudPlatform platform, CloudPlatformConnector connector) {
-        try {
-            return userDataBuilder.buildUserData(platform, tlsSecurityService.readPublicSshKey(stack.getId()), stack.getCredential().getLoginUserName(),
-                    connector.getPlatformParameters(stack));
-        } catch (CloudbreakSecuritySetupException e) {
-            throw new CloudbreakServiceException(e.getMessage(), e);
-        }
     }
 
     private void deleteInstanceResourceFromDatabase(Stack stack, InstanceMetaData instanceMetaData) {
