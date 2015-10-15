@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.heat;
 
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_MAX_OPENSTACK_RESOURCE_NAME_LENGTH;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_OPENSTACK_HEAT_TEMPLATE_PATH;
 import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processTemplateIntoString;
 
@@ -16,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Splitter;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -40,9 +38,6 @@ public class HeatTemplateBuilder {
 
     @Value("${cb.openstack.heat.template.path:" + CB_OPENSTACK_HEAT_TEMPLATE_PATH + "}")
     private String openStackHeatTemplatePath;
-    @Value("${cb.max.openstack.resource.name.length:" + CB_MAX_OPENSTACK_RESOURCE_NAME_LENGTH + "}")
-    private int maxResourceNameLength;
-
 
     @Inject
     private OpenStackUtils openStackUtil;
@@ -53,7 +48,7 @@ public class HeatTemplateBuilder {
         try {
             List<NovaInstanceView> novaInstances = new OpenStackGroupView(groups).getFlatNovaView();
             Map<String, Object> model = new HashMap<>();
-            model.put("cb_stack_name", new String(Splitter.fixedLength(maxResourceNameLength).limit(1).splitToList(stackName).get(0)));
+            model.put("cb_stack_name", stackName);
             model.put("agents", novaInstances);
             model.put("core_user_data", formatUserData(instanceUserData.getUserData(InstanceGroupType.CORE)));
             model.put("gateway_user_data", formatUserData(instanceUserData.getUserData(InstanceGroupType.GATEWAY)));

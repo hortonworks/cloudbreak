@@ -168,7 +168,7 @@ public final class GcpStackUtil {
     }
 
     public static long getPrivateId(String resourceName) {
-        return Long.valueOf(resourceName.split("-")[2]);
+        return Long.valueOf(resourceName.split("-")[1]);
     }
 
     private static String[] createParts(String splittable) {
