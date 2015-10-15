@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.arm;
 
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
+import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.common.type.InstanceGroupType.CORE;
 import static com.sequenceiq.cloudbreak.common.type.InstanceGroupType.GATEWAY;
 import static java.util.Arrays.asList;
@@ -26,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
@@ -87,12 +91,13 @@ public class ArmTemplateBuilderTest {
 
         Image image = new Image("https://krisztian.blob.core.windows.net/images/cb-centos71-amb210-2015-07-22-b1470.vhd");
 
-        return new CloudStack(asList(cbgateway, master, slave1), network, security, image, "West US", new HashMap<String, String>());
+        return new CloudStack(asList(cbgateway, master, slave1), network, security, image, new HashMap<String, String>());
     }
 
     private CloudContext createCloudContext() {
         Stack stack = TestUtil.stack();
-        return new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(), stack.getRegion());
+        Location location = location(region("region"), availabilityZone("availabilityZone"));
+        return new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(), location);
     }
 
     @Ignore

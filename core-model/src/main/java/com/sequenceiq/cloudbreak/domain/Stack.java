@@ -218,6 +218,7 @@ public class Stack implements ProvisionEntity {
     private String account;
     private boolean publicInAccount;
     private String region;
+    private String availabilityZone;
     private String image;
     private int consulServers;
     @Column(length = 1000000, columnDefinition = "TEXT")
@@ -404,6 +405,14 @@ public class Stack implements ProvisionEntity {
 
     public void setSecurityConfig(SecurityConfig securityConfig) {
         this.securityConfig = securityConfig;
+    }
+
+    public String getAvailabilityZone() {
+        return availabilityZone;
+    }
+
+    public void setAvailabilityZone(String availabilityZone) {
+        this.availabilityZone = availabilityZone;
     }
 
     public String getPlatformVariant() {

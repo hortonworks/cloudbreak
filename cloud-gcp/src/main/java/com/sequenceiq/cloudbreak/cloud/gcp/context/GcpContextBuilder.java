@@ -23,7 +23,7 @@ public class GcpContextBuilder implements ResourceContextBuilder<GcpContext> {
         CloudCredential credential = auth.getCloudCredential();
         String projectId = GcpStackUtil.getProjectId(credential);
         Compute compute = GcpStackUtil.buildCompute(credential);
-        return new GcpContext(context.getName(), context.getRegion(), projectId, compute, PARALLEL_RESOURCE_REQUEST, build);
+        return new GcpContext(context.getName(), context.getLocation().getRegion().value(), projectId, compute, PARALLEL_RESOURCE_REQUEST, build);
     }
 
     @Override

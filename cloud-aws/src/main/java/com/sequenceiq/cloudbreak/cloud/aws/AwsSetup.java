@@ -56,7 +56,7 @@ public class AwsSetup implements Setup {
     }
 
     @Override
-    public void execute(AuthenticatedContext authenticatedContext, CloudStack stack) {
+    public void execute(AuthenticatedContext ac, CloudStack stack) {
         Network network = stack.getNetwork();
         if (!awsSpotinstanceEnabled) {
             for (Group group : stack.getGroups()) {
@@ -67,7 +67,8 @@ public class AwsSetup implements Setup {
         }
         if (isExistingVPC(network)) {
             try {
-                AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(authenticatedContext.getCloudCredential()), stack.getRegion());
+                AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
+                        ac.getCloudContext().getLocation().getRegion().value());
                 DescribeInternetGatewaysRequest describeInternetGatewaysRequest = new DescribeInternetGatewaysRequest();
                 describeInternetGatewaysRequest.withInternetGatewayIds(network.getStringParameter("internetGatewayId"));
                 DescribeInternetGatewaysResult describeInternetGatewaysResult = amazonEC2Client.describeInternetGateways(describeInternetGatewaysRequest);
@@ -85,9 +86,9 @@ public class AwsSetup implements Setup {
                 throw new CloudConnectorException(String.format(IGW_DOES_NOT_EXIST_MSG, network.getStringParameter("internetGatewayId")));
             }
         }
-        String cFStackName = cfStackUtil.getCfStackName(authenticatedContext);
+        String cFStackName = cfStackUtil.getCfStackName(ac);
         CloudResource cloudFormationStack = new CloudResource.Builder().type(ResourceType.CLOUDFORMATION_STACK).name(cFStackName).build();
-        resourceNotifier.notifyAllocation(cloudFormationStack, authenticatedContext.getCloudContext());
+        resourceNotifier.notifyAllocation(cloudFormationStack, ac.getCloudContext());
         LOGGER.debug("setup has been executed");
     }
 

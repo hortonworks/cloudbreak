@@ -36,6 +36,7 @@ public class ModelDescriptions {
         public static final String STACK_ID = "id of the stack";
         public static final String STACK_NAME = "name of the stack";
         public static final String REGION = "region of the stack";
+        public static final String AVAILABILITY_ZONE = "availability zone of the stack";
         public static final String CREDENTIAL_ID = "credential resource id for the stack";
         public static final String USERNAME = "ambari username";
         public static final String PASSWORD = "ambari password";

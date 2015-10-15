@@ -118,12 +118,13 @@ public class AwsResourceConnector implements ResourceConnector {
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier notifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
         Long stackId = ac.getCloudContext().getId();
-        AmazonCloudFormationClient client = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()), stack.getRegion());
+        AmazonCloudFormationClient client = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
         String cFStackName = cfStackUtil.getCfStackName(ac);
         String snapshotId = getEbsSnapshotIdIfNeeded(ac, stack);
-        String cfTemplate = cloudFormationTemplateBuilder.build(stack, snapshotId, isExistingVPC(stack.getNetwork()), awsCloudformationTemplatePath);
+        String cfTemplate = cloudFormationTemplateBuilder.build(ac, stack, snapshotId, isExistingVPC(stack.getNetwork()), awsCloudformationTemplatePath);
         LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
-        importKeyPairs(ac, stack.getRegion());
+        importKeyPairs(ac, ac.getCloudContext().getLocation().getRegion().value());
         CreateStackRequest createStackRequest = new CreateStackRequest()
                 .withStackName(cFStackName)
                 .withOnFailure(OnFailure.DO_NOTHING)
@@ -150,8 +151,10 @@ public class AwsResourceConnector implements ResourceConnector {
         } catch (Exception e) {
             throw new CloudConnectorException(e.getMessage(), e);
         }
-        AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), stack.getRegion());
-        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()), stack.getRegion());
+        AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
+        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
         AllocateAddressRequest allocateAddressRequest = new AllocateAddressRequest().withDomain(DomainType.Vpc);
         AllocateAddressResult allocateAddressResult = amazonEC2Client.allocateAddress(allocateAddressRequest);
 
@@ -170,17 +173,19 @@ public class AwsResourceConnector implements ResourceConnector {
     }
 
     private void suspendAutoScaling(AuthenticatedContext ac, CloudStack stack) {
-        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()), stack.getRegion());
+        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
         for (Group group : stack.getGroups()) {
-            String asGroupName = cfStackUtil.getAutoscalingGroupName(ac, group.getName(), stack.getRegion());
+            String asGroupName = cfStackUtil.getAutoscalingGroupName(ac, group.getName(), ac.getCloudContext().getLocation().getRegion().value());
             amazonASClient.suspendProcesses(new SuspendProcessesRequest().withAutoScalingGroupName(asGroupName).withScalingProcesses(SUSPENDED_PROCESSES));
         }
     }
 
     private void resumeAutoScaling(AuthenticatedContext ac, CloudStack stack) {
-        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()), stack.getRegion());
+        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
         for (Group group : stack.getGroups()) {
-            String asGroupName = cfStackUtil.getAutoscalingGroupName(ac, group.getName(), stack.getRegion());
+            String asGroupName = cfStackUtil.getAutoscalingGroupName(ac, group.getName(), ac.getCloudContext().getLocation().getRegion().value());
             amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName).withScalingProcesses(SUSPENDED_PROCESSES));
         }
     }
@@ -198,16 +203,22 @@ public class AwsResourceConnector implements ResourceConnector {
                 new Parameter().withParameterKey("AMI").withParameterValue(stack.getImage().getImageName()),
                 new Parameter().withParameterKey("RootDeviceName").withParameterValue(getRootDeviceName(ac, stack))
         ));
+        if (ac.getCloudContext().getLocation().getAvailabilityZone().value() != null) {
+            parameters.add(new Parameter().withParameterKey("AvailabilitySet")
+                    .withParameterValue(ac.getCloudContext().getLocation().getAvailabilityZone().value()));
+        }
         if (existingVPC) {
             parameters.add(new Parameter().withParameterKey("VPCId").withParameterValue(stack.getNetwork().getStringParameter("vpcId")));
             parameters.add(new Parameter().withParameterKey("SubnetCIDR").withParameterValue(stack.getNetwork().getSubnet().getCidr()));
-            parameters.add(new Parameter().withParameterKey("InternetGatewayId").withParameterValue(stack.getNetwork().getStringParameter("internetGatewayId")));
+            parameters.add(new Parameter().withParameterKey("InternetGatewayId")
+                    .withParameterValue(stack.getNetwork().getStringParameter("internetGatewayId")));
         }
         return parameters;
     }
 
     private String getRootDeviceName(AuthenticatedContext ac, CloudStack cloudStack) {
-        AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), cloudStack.getRegion());
+        AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
         DescribeImagesResult images = ec2Client.describeImages(new DescribeImagesRequest().withImageIds(cloudStack.getImage().getImageName()));
         if (images.getImages().isEmpty()) {
             throw new CloudConnectorException(String.format("AMI is not available: '%s'.", cloudStack.getImage().getImageName()));
@@ -233,13 +244,14 @@ public class AwsResourceConnector implements ResourceConnector {
     }
 
     private Optional<String> createSnapshotIfNeeded(AuthenticatedContext ac, CloudStack cloudStack) {
-        AmazonEC2Client client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), ac.getCloudContext().getRegion());
+        AmazonEC2Client client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), ac.getCloudContext().getLocation().getRegion().value());
         DescribeSnapshotsRequest describeSnapshotsRequest = new DescribeSnapshotsRequest()
                 .withFilters(new Filter().withName("tag-key").withValues(CLOUDBREAK_EBS_SNAPSHOT));
         DescribeSnapshotsResult describeSnapshotsResult = client.describeSnapshots(describeSnapshotsRequest);
         if (describeSnapshotsResult.getSnapshots().isEmpty()) {
             DescribeAvailabilityZonesResult availabilityZonesResult = client.describeAvailabilityZones(new DescribeAvailabilityZonesRequest()
-                    .withFilters(new Filter().withName("region-name").withValues(CloudRegion.valueOf(cloudStack.getRegion()).value())));
+                    .withFilters(new Filter().withName("region-name")
+                            .withValues(CloudRegion.valueOf(ac.getCloudContext().getLocation().getRegion().value()).value())));
             CreateVolumeResult volumeResult = client.createVolume(new CreateVolumeRequest()
                     .withSize(SNAPSHOT_VOLUME_SIZE)
                     .withAvailabilityZone(availabilityZonesResult.getAvailabilityZones().get(0).getZoneName())
@@ -302,7 +314,8 @@ public class AwsResourceConnector implements ResourceConnector {
     public List<CloudResourceStatus> terminate(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
         LOGGER.info("Deleting stack: {}", ac.getCloudContext().getId());
         if (resources != null && !resources.isEmpty()) {
-            AmazonCloudFormationClient client = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()), stack.getRegion());
+            AmazonCloudFormationClient client = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()),
+                    ac.getCloudContext().getLocation().getRegion().value());
             String cFStackName = getCloudFormationStackResource(resources).getName();
             LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", ac.getCloudContext().getId(), cFStackName);
             DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
@@ -310,14 +323,15 @@ public class AwsResourceConnector implements ResourceConnector {
                 client.describeStacks(describeStacksRequest);
             } catch (AmazonServiceException e) {
                 if (e.getErrorMessage().contains(cFStackName + " does not exist")) {
-                    AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), ac.getCloudContext().getRegion());
+                    AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
+                            ac.getCloudContext().getLocation().getRegion().value());
                     releaseReservedIp(amazonEC2Client, resources);
                     return Arrays.asList();
                 } else {
                     throw e;
                 }
             }
-            resumeAutoScalingPolicies(ac, stack, getReservedIp(resources));
+            resumeAutoScalingPolicies(ac, stack);
             DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(cFStackName);
             client.deleteStack(deleteStackRequest);
             PollTask<Boolean> task = awsPollTaskFactory.newAwsCloudformationStatusCheckerTask(ac, client,
@@ -330,24 +344,26 @@ public class AwsResourceConnector implements ResourceConnector {
             } catch (Exception e) {
                 throw new CloudConnectorException(e.getMessage(), e);
             }
-            AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), ac.getCloudContext().getRegion());
+            AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
+                    ac.getCloudContext().getLocation().getRegion().value());
             releaseReservedIp(amazonEC2Client, resources);
-            deleteKeyPair(ac, stack.getRegion());
+            deleteKeyPair(ac, ac.getCloudContext().getLocation().getRegion().value());
         } else {
-            AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), ac.getCloudContext().getRegion());
+            AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
+                    ac.getCloudContext().getLocation().getRegion().value());
             releaseReservedIp(amazonEC2Client, resources);
             LOGGER.info("No CloudFormation stack saved for stack.");
         }
         return check(ac, resources);
     }
 
-    private void resumeAutoScalingPolicies(AuthenticatedContext ac, CloudStack stack, CloudResource cloudResource) {
+    private void resumeAutoScalingPolicies(AuthenticatedContext ac, CloudStack stack) {
         for (Group instanceGroup : stack.getGroups()) {
             try {
-                String asGroupName = cfStackUtil.getAutoscalingGroupName(ac, instanceGroup.getName(), stack.getRegion());
+                String asGroupName = cfStackUtil.getAutoscalingGroupName(ac, instanceGroup.getName(), ac.getCloudContext().getLocation().getRegion().value());
                 if (asGroupName != null) {
                     AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()),
-                            stack.getRegion());
+                            ac.getCloudContext().getLocation().getRegion().value());
                     List<AutoScalingGroup> asGroups = amazonASClient.describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest()
                             .withAutoScalingGroupNames(asGroupName)).getAutoScalingGroups();
                     if (!asGroups.isEmpty()) {
@@ -405,9 +421,9 @@ public class AwsResourceConnector implements ResourceConnector {
         resumeAutoScaling(ac, stack);
 
         AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()),
-                stack.getRegion());
+                ac.getCloudContext().getLocation().getRegion().value());
         AmazonCloudFormationClient cloudFormationClient = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()),
-                stack.getRegion());
+                ac.getCloudContext().getLocation().getRegion().value());
 
         for (Group group : stack.getGroups()) {
             String asGroupName = cfStackUtil.getAutoscalingGroupName(ac, cloudFormationClient, group.getName());
@@ -436,10 +452,13 @@ public class AwsResourceConnector implements ResourceConnector {
 
     @Override
     public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms) {
-        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(auth.getCloudCredential()), stack.getRegion());
-        AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(auth.getCloudCredential()), auth.getCloudContext().getRegion());
+        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(auth.getCloudCredential()),
+                auth.getCloudContext().getLocation().getRegion().value());
+        AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(auth.getCloudCredential()),
+                auth.getCloudContext().getLocation().getRegion().value());
 
-        String asGroupName = cfStackUtil.getAutoscalingGroupName(auth, vms.get(0).getTemplate().getGroupName(), stack.getRegion());
+        String asGroupName = cfStackUtil.getAutoscalingGroupName(auth, vms.get(0).getTemplate().getGroupName(),
+                auth.getCloudContext().getLocation().getRegion().value());
         List<String> instanceIds = new ArrayList<>();
         for (CloudInstance vm : vms) {
             instanceIds.add(vm.getInstanceId());

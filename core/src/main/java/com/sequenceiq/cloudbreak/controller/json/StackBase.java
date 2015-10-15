@@ -27,6 +27,8 @@ public abstract class StackBase implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
     private String name;
+    @ApiModelProperty(value = StackModelDescription.AVAILABILITY_ZONE, required = false)
+    private String availabilityZone;
     @NotNull
     @ApiModelProperty(value = StackModelDescription.REGION, required = true)
     private String region;
@@ -127,6 +129,14 @@ public abstract class StackBase implements JsonEntity {
 
     public void setNetworkId(Long networkId) {
         this.networkId = networkId;
+    }
+
+    public String getAvailabilityZone() {
+        return availabilityZone;
+    }
+
+    public void setAvailabilityZone(String availabilityZone) {
+        this.availabilityZone = availabilityZone;
     }
 
     public Map<String, String> getParameters() {

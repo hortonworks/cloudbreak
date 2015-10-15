@@ -55,14 +55,14 @@ public class ArmTemplateBuilder {
             String[] split = imageName.split("/");
             ArmCredentialView armCredentialView = new ArmCredentialView(cloudCredential);
             Map<String, Object> model = new HashMap<>();
-            model.put("storage_account_name", armUtils.getStorageName(cloudCredential, cloudContext, cloudStack.getRegion()));
+            model.put("storage_account_name", armUtils.getStorageName(cloudCredential, cloudContext, cloudContext.getLocation().getRegion().value()));
             model.put("image_storage_container_name", ArmSetup.IMAGES);
             model.put("storage_container_name", armUtils.getDiskContainerName(cloudContext));
             model.put("storage_vhd_name", split[2]);
             model.put("admin_user_name", cloudCredential.getLoginUserName());
             model.put("stackname", stackName);
             model.put("ssh_key", armCredentialView.getPublicKey());
-            model.put("region", CloudRegion.valueOf(cloudStack.getRegion()).value());
+            model.put("region", CloudRegion.valueOf(cloudContext.getLocation().getRegion().value()).value());
             model.put("subnet1Prefix", cloudStack.getNetwork().getSubnet().getCidr());
             model.put("addressPrefix", cloudStack.getNetwork().getParameter("subnetCIDR", String.class));
             model.put("groups", cloudStack.getGroups());

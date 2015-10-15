@@ -36,6 +36,7 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         stackJson.setStatusReason(source.getStatusReason());
         stackJson.setConsulServerCount(source.getConsulServers());
         stackJson.setRegion(source.getRegion());
+        stackJson.setAvailabilityZone(source.getAvailabilityZone());
         stackJson.setOnFailureAction(source.getOnFailureActionAction());
         stackJson.setSecurityGroupId(source.getSecurityGroup().getId());
         List<InstanceGroupJson> templateGroups = new ArrayList<>();

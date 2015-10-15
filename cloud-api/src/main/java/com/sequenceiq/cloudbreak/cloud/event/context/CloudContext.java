@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.event.context;
 
 import com.sequenceiq.cloudbreak.cloud.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
 
 public class CloudContext {
 
@@ -9,7 +10,7 @@ public class CloudContext {
     private final String platform;
     private final String owner;
     private final String variant;
-    private final String region;
+    private final Location location;
 
     public CloudContext(Long id, String name, String platform, String owner) {
         this.id = id;
@@ -17,16 +18,16 @@ public class CloudContext {
         this.platform = platform;
         this.owner = owner;
         this.variant = null;
-        this.region = null;
+        this.location = null;
     }
 
-    public CloudContext(Long id, String name, String platform, String owner, String variant, String region) {
+    public CloudContext(Long id, String name, String platform, String owner, String variant, Location location) {
         this.id = id;
         this.name = name;
         this.platform = platform;
         this.owner = owner;
         this.variant = variant;
-        this.region = region;
+        this.location = location;
     }
 
     public Long getId() {
@@ -53,8 +54,8 @@ public class CloudContext {
         return new CloudPlatformVariant(platform, variant);
     }
 
-    public String getRegion() {
-        return region;
+    public Location getLocation() {
+        return location;
     }
 
     @Override

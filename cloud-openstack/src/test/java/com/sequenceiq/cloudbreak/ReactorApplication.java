@@ -135,7 +135,7 @@ public class ReactorApplication implements CommandLineRunner {
 
         CloudContext cloudContext = new CloudContext(0L, "stack-name_" + ts, "OPENSTACK", "owner");
 
-        CloudStack cs = new CloudStack(groups, network, security, image, "local", new HashMap<String, String>());
+        CloudStack cs = new CloudStack(groups, network, security, image, new HashMap<String, String>());
         LaunchStackRequest lr = new LaunchStackRequest(cloudContext, c, cs, null, null);
         LOGGER.debug("Launchrequest: {}", lr);
         return lr;

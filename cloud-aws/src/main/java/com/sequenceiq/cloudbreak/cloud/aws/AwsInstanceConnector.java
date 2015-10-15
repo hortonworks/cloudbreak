@@ -44,7 +44,7 @@ public class AwsInstanceConnector implements InstanceConnector {
     @Override
     public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm) {
         AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(authenticatedContext.getCloudCredential()),
-                authenticatedContext.getCloudContext().getRegion());
+                authenticatedContext.getCloudContext().getLocation().getRegion().value());
         GetConsoleOutputRequest getConsoleOutputRequest = new GetConsoleOutputRequest().withInstanceId(vm.getInstanceId());
         GetConsoleOutputResult getConsoleOutputResult = amazonEC2Client.getConsoleOutput(getConsoleOutputRequest);
         try {
@@ -67,7 +67,8 @@ public class AwsInstanceConnector implements InstanceConnector {
     @Override
     public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
-        AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), ac.getCloudContext().getRegion());
+        AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
 
         for (String group : getGroups(vms)) {
             Collection<String> instances = new ArrayList<>();
@@ -100,7 +101,8 @@ public class AwsInstanceConnector implements InstanceConnector {
     @Override
     public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
-        AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), ac.getCloudContext().getRegion());
+        AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
 
         for (String group : getGroups(vms)) {
             Collection<String> instances = new ArrayList<>();
@@ -133,7 +135,8 @@ public class AwsInstanceConnector implements InstanceConnector {
     public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> cloudVmInstanceStatuses = new ArrayList<>();
         for (CloudInstance vm : vms) {
-            DescribeInstancesResult result = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), ac.getCloudContext().getRegion())
+            DescribeInstancesResult result = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
+                    ac.getCloudContext().getLocation().getRegion().value())
                     .describeInstances(new DescribeInstancesRequest().withInstanceIds(vm.getInstanceId()));
             for (Reservation reservation : result.getReservations()) {
                 for (Instance instance : reservation.getInstances()) {
