@@ -14,9 +14,8 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackAuthenticator;
-import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
-import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackCredentialConnector;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackParameters;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackSetup;
 
@@ -30,8 +29,6 @@ public class OpenStackNativeConnector implements CloudConnector {
     @Inject
     private OpenStackAuthenticator authenticator;
     @Inject
-    private OpenStackClient openStackClient;
-    @Inject
     private OpenStackNativeResourceConnector resourceConnector;
     @Inject
     private OpenStackNativeInstanceConnector instanceConnector;
@@ -39,7 +36,6 @@ public class OpenStackNativeConnector implements CloudConnector {
     private OpenStackSetup openStackSetup;
     @Inject
     private OpenStackParameters openStackParameters;
-
 
     @Override
     public String platform() {

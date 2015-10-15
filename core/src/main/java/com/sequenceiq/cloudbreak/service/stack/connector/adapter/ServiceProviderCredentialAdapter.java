@@ -7,10 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.event.credential.CreateCredentialRequest;
-import com.sequenceiq.cloudbreak.cloud.event.credential.CreateCredentialResult;
-import com.sequenceiq.cloudbreak.cloud.event.credential.DeleteCredentialRequest;
-import com.sequenceiq.cloudbreak.cloud.event.credential.DeleteCredentialResult;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRequest;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
@@ -50,50 +48,26 @@ public class ServiceProviderCredentialAdapter implements CredentialHandler<Crede
         CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(), credential.cloudPlatform().name(), credential.getOwner());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
 
-        CreateCredentialRequest createCredentialRequest = new CreateCredentialRequest(cloudContext, cloudCredential);
-        LOGGER.info("Triggering event: {}", createCredentialRequest);
-        eventBus.notify(createCredentialRequest.selector(), Event.wrap(createCredentialRequest));
+        CredentialVerificationRequest request = new CredentialVerificationRequest(cloudContext, cloudCredential);
+        LOGGER.info("Triggering event: {}", request);
+        eventBus.notify(request.selector(), Event.wrap(request));
         try {
-            CreateCredentialResult res = createCredentialRequest.await();
+            CredentialVerificationResult res = request.await();
             LOGGER.info("Result: {}", res);
             if (res.getStatus() != EventStatus.OK) {
-                LOGGER.error("Failed to setup provisioning", res.getErrorDetails());
+                LOGGER.error("Failed to verify the credential", res.getErrorDetails());
                 throw new OperationException(res.getErrorDetails());
             }
             if (CredentialStatus.FAILED.equals(res.getCloudCredentialStatus().getStatus())) {
-                throw new BadRequestException("Failed to setup provisioning: " + res.getCloudCredentialStatus().getStatusReason(),
+                throw new BadRequestException("Failed to verify the credential: " + res.getCloudCredentialStatus().getStatusReason(),
                         res.getCloudCredentialStatus().getException());
             }
-
         } catch (InterruptedException e) {
-            LOGGER.error("Error while executing provisioning setup", e);
+            LOGGER.error("Error while executing credential verification", e);
             throw new OperationException(e);
         }
 
         return credential;
-    }
-
-    @Override
-    public boolean delete(Credential credential) {
-        CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(), credential.cloudPlatform().name(), credential.getOwner());
-        CloudCredential cloudCredential = credentialConverter.convert(credential);
-
-        DeleteCredentialRequest deleteCredentialRequest = new DeleteCredentialRequest(cloudContext, cloudCredential);
-        LOGGER.info("Triggering event: {}", deleteCredentialRequest);
-        eventBus.notify(deleteCredentialRequest.selector(), Event.wrap(deleteCredentialRequest));
-        try {
-            DeleteCredentialResult res = deleteCredentialRequest.await();
-            LOGGER.info("Result: {}", res);
-            if (res.getStatus() != EventStatus.OK) {
-                LOGGER.error("Failed to setup provisioning", res.getErrorDetails());
-                throw new OperationException(res.getErrorDetails());
-            }
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while executing provisioning setup", e);
-            throw new OperationException(e);
-        }
-
-        return true;
     }
 
     @Override

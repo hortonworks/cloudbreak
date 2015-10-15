@@ -67,6 +67,7 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
             } else {
                 result = new TerminateStackResult(request);
             }
+            connector.credentials().delete(ac);
             request.getResult().onNext(result);
             LOGGER.info("TerminateStackHandler finished");
         } catch (Exception e) {

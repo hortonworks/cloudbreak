@@ -10,6 +10,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 @Service
 public class ArmCredentialConnector implements CredentialConnector {
 
+    @Override
+    public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
+        return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.VERIFIED);
+    }
 
     @Override
     public CloudCredentialStatus create(AuthenticatedContext authenticatedContext) {

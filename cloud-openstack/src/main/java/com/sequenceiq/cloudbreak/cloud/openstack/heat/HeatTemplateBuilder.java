@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -61,8 +61,8 @@ public class HeatTemplateBuilder {
         }
     }
 
-    public Map<String, String> buildParameters(CloudCredential credential, Network network, Image image) {
-        KeystoneCredentialView osCredential = new KeystoneCredentialView(credential);
+    public Map<String, String> buildParameters(AuthenticatedContext auth, Network network, Image image) {
+        KeystoneCredentialView osCredential = new KeystoneCredentialView(auth);
         NeutronNetworkView neutronView = new NeutronNetworkView(network);
         Map<String, String> parameters = new HashMap<>();
         parameters.put("public_net_id", neutronView.getPublicNetId());

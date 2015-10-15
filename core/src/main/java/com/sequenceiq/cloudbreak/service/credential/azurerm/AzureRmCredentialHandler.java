@@ -1,17 +1,14 @@
 package com.sequenceiq.cloudbreak.service.credential.azurerm;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AzureRmCredential;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
-import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -19,9 +16,6 @@ import groovyx.net.http.HttpResponseException;
 public class AzureRmCredentialHandler implements CredentialHandler<AzureRmCredential> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureRmCredentialHandler.class);
-
-    @Inject
-    private AzureStackUtil azureStackUtil;
 
     @Override
     public CloudPlatform getCloudPlatform() {
@@ -45,11 +39,6 @@ public class AzureRmCredentialHandler implements CredentialHandler<AzureRmCreden
             throw new BadRequestException(ex.getMessage(), ex);
         }
         return azureCredential;
-    }
-
-    @Override
-    public boolean delete(AzureRmCredential credential) {
-        return true;
     }
 
     @Override

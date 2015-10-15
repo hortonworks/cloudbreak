@@ -20,19 +20,21 @@ public class OpenStackCredentialConnector implements CredentialConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackCredentialConnector.class);
 
-    private static final String CB_KEYPAIR_NAME = "cb-keypair-";
-
     @Inject
     private OpenStackClient openStackClient;
 
+    @Override
+    public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
+        return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.VERIFIED);
+    }
 
     @Override
-    public CloudCredentialStatus create(AuthenticatedContext authenticatedContext) {
-        LOGGER.info("Create credential: {}", authenticatedContext.getCloudCredential());
+    public CloudCredentialStatus create(AuthenticatedContext auth) {
+        LOGGER.info("Create credential: {}", auth.getCloudCredential());
 
-        OSClient client = openStackClient.createOSClient(authenticatedContext);
+        OSClient client = openStackClient.createOSClient(auth);
 
-        KeystoneCredentialView keystoneCredential = openStackClient.createKeystoneCredential(authenticatedContext.getCloudCredential());
+        KeystoneCredentialView keystoneCredential = openStackClient.createKeystoneCredential(auth);
 
         String keyPairName = keystoneCredential.getKeyPairName();
         Keypair keyPair = client.compute().keypairs().get(keyPairName);
@@ -41,29 +43,23 @@ public class OpenStackCredentialConnector implements CredentialConnector {
         }
 
         keyPair = client.compute().keypairs().create(keyPairName, keystoneCredential.getPublicKey());
-
-        LOGGER.info("Credential has been created: {}, kp: {}", authenticatedContext.getCloudCredential(), keyPair);
-
-
-        return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.CREATED);
+        LOGGER.info("Credential has been created: {}, kp: {}", auth.getCloudCredential(), keyPair);
+        return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.CREATED);
     }
 
     @Override
-    public CloudCredentialStatus delete(AuthenticatedContext authenticatedContext) {
-        LOGGER.info("Deleted credential: {}", authenticatedContext.getCloudCredential());
+    public CloudCredentialStatus delete(AuthenticatedContext auth) {
+        LOGGER.info("Delete credential: {}", auth.getCloudCredential());
 
-        KeystoneCredentialView keystoneCredentialView = openStackClient.createKeystoneCredential(authenticatedContext.getCloudCredential());
-
-        OSClient client = openStackClient.createOSClient(authenticatedContext);
-        KeystoneCredentialView keystoneCredential = openStackClient.createKeystoneCredential(authenticatedContext.getCloudCredential());
+        OSClient client = openStackClient.createOSClient(auth);
+        KeystoneCredentialView keystoneCredential = openStackClient.createKeystoneCredential(auth);
         String keyPairName = keystoneCredential.getKeyPairName();
 
         client.compute().keypairs().delete(keyPairName);
 
-        LOGGER.info("Credential has been deleted: {}", authenticatedContext.getCloudCredential());
+        LOGGER.info("Credential has been deleted: {}", auth.getCloudCredential());
 
-        return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.DELETED);
-
+        return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.DELETED);
     }
 
 }

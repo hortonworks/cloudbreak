@@ -27,6 +27,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -71,6 +72,9 @@ public class TestApplicationContext {
 
     @Mock
     private Authenticator authenticator;
+
+    @Mock
+    private CredentialConnector credentialConnector;
 
     @Mock
     private MetadataCollector collector;
@@ -125,6 +129,7 @@ public class TestApplicationContext {
     public CloudConnector cloudConnectors() throws Exception {
         CloudResource resource = new CloudResource.Builder().type(ResourceType.HEAT_STACK).name("ref").build();
         when(cloudConnector.authentication()).thenReturn(authenticator);
+        when(cloudConnector.credentials()).thenReturn(credentialConnector);
         when(instanceConnector.metadata()).thenReturn(collector);
         when(authenticator.authenticate((CloudContext) any(), (CloudCredential) any())).thenReturn(g.createAuthenticatedContext());
         when(cloudConnector.platform()).thenReturn("TESTCONNECTOR");

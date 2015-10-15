@@ -39,15 +39,12 @@ import reactor.rx.Promise;
 public class OpenStackResourceConnector implements ResourceConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackResourceConnector.class);
-
     private static final long OPERATION_TIMEOUT = 60L;
 
     @Inject
     private OpenStackClient openStackClient;
-
     @Inject
     private HeatTemplateBuilder heatTemplateBuilder;
-
     @Inject
     private OpenStackUtils utils;
 
@@ -57,7 +54,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
             AdjustmentType adjustmentType, Long threshold) {
         String stackName = authenticatedContext.getCloudContext().getName();
         String heatTemplate = heatTemplateBuilder.build(stackName, stack.getGroups(), stack.getSecurity(), stack.getImage());
-        Map<String, String> parameters = heatTemplateBuilder.buildParameters(authenticatedContext.getCloudCredential(), stack.getNetwork(), stack.getImage());
+        Map<String, String> parameters = heatTemplateBuilder.buildParameters(authenticatedContext, stack.getNetwork(), stack.getImage());
 
         OSClient client = openStackClient.createOSClient(authenticatedContext);
 
@@ -129,7 +126,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
     public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         String stackName = authenticatedContext.getCloudContext().getName();
         String heatTemplate = heatTemplateBuilder.build(stackName, stack.getGroups(), stack.getSecurity(), stack.getImage());
-        Map<String, String> parameters = heatTemplateBuilder.buildParameters(authenticatedContext.getCloudCredential(), stack.getNetwork(), stack.getImage());
+        Map<String, String> parameters = heatTemplateBuilder.buildParameters(authenticatedContext, stack.getNetwork(), stack.getImage());
         return updateHeatStack(authenticatedContext, resources, heatTemplate, parameters);
     }
 
@@ -138,7 +135,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
         CloudStack stack = removeDeleteRequestedInstances(cloudStack);
         String stackName = auth.getCloudContext().getName();
         String heatTemplate = heatTemplateBuilder.build(stackName, stack.getGroups(), stack.getSecurity(), stack.getImage());
-        Map<String, String> parameters = heatTemplateBuilder.buildParameters(auth.getCloudCredential(), stack.getNetwork(), stack.getImage());
+        Map<String, String> parameters = heatTemplateBuilder.buildParameters(auth, stack.getNetwork(), stack.getImage());
         return updateHeatStack(auth, resources, heatTemplate, parameters);
     }
 
@@ -146,7 +143,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         String stackName = authenticatedContext.getCloudContext().getName();
         String heatTemplate = heatTemplateBuilder.build(stackName, stack.getGroups(), stack.getSecurity(), stack.getImage());
-        Map<String, String> parameters = heatTemplateBuilder.buildParameters(authenticatedContext.getCloudCredential(), stack.getNetwork(), stack.getImage());
+        Map<String, String> parameters = heatTemplateBuilder.buildParameters(authenticatedContext, stack.getNetwork(), stack.getImage());
         return updateHeatStack(authenticatedContext, resources, heatTemplate, parameters);
     }
 

@@ -45,7 +45,6 @@ import com.amazonaws.services.ec2.model.CreateSnapshotResult;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeResult;
-import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesResult;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
@@ -58,7 +57,6 @@ import com.amazonaws.services.ec2.model.DisassociateAddressRequest;
 import com.amazonaws.services.ec2.model.DomainType;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.Image;
-import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.amazonaws.services.ec2.model.ReleaseAddressRequest;
 import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
@@ -86,7 +84,6 @@ import com.sequenceiq.cloudbreak.common.type.AwsEncryption;
 import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
-//import com.sequenceiq.cloudbreak.domain.Resource;
 
 @Service
 public class AwsResourceConnector implements ResourceConnector {
@@ -124,7 +121,6 @@ public class AwsResourceConnector implements ResourceConnector {
         String snapshotId = getEbsSnapshotIdIfNeeded(ac, stack);
         String cfTemplate = cloudFormationTemplateBuilder.build(ac, stack, snapshotId, isExistingVPC(stack.getNetwork()), awsCloudformationTemplatePath);
         LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
-        importKeyPairs(ac, ac.getCloudContext().getLocation().getRegion().value());
         CreateStackRequest createStackRequest = new CreateStackRequest()
                 .withStackName(cFStackName)
                 .withOnFailure(OnFailure.DO_NOTHING)
@@ -192,14 +188,12 @@ public class AwsResourceConnector implements ResourceConnector {
 
     private List<Parameter> getStackParameters(AuthenticatedContext ac, String coreGroupUserData, String gateWayUserData, CloudStack stack, String stackName,
             boolean existingVPC) {
-        AwsCredentialView awsCredentialView = new AwsCredentialView(ac.getCloudCredential());
-
         List<Parameter> parameters = new ArrayList<>(Arrays.asList(
                 new Parameter().withParameterKey("CBUserData").withParameterValue(coreGroupUserData),
                 new Parameter().withParameterKey("CBGateWayUserData").withParameterValue(gateWayUserData),
                 new Parameter().withParameterKey("StackName").withParameterValue(stackName),
                 new Parameter().withParameterKey("StackOwner").withParameterValue(ac.getCloudContext().getOwner()),
-                new Parameter().withParameterKey("KeyName").withParameterValue(getKeyPairName(ac)),
+                new Parameter().withParameterKey("KeyName").withParameterValue(awsClient.getKeyPairName(ac)),
                 new Parameter().withParameterKey("AMI").withParameterValue(stack.getImage().getImageName()),
                 new Parameter().withParameterKey("RootDeviceName").withParameterValue(getRootDeviceName(ac, stack))
         ));
@@ -347,7 +341,6 @@ public class AwsResourceConnector implements ResourceConnector {
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
                     ac.getCloudContext().getLocation().getRegion().value());
             releaseReservedIp(amazonEC2Client, resources);
-            deleteKeyPair(ac, ac.getCloudContext().getLocation().getRegion().value());
         } else {
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
                     ac.getCloudContext().getLocation().getRegion().value());
@@ -487,38 +480,6 @@ public class AwsResourceConnector implements ResourceConnector {
             }
         }
         return null;
-    }
-
-    private void importKeyPairs(AuthenticatedContext ac, String region) {
-        AwsCredentialView awsCredential = new AwsCredentialView(ac.getCloudCredential());
-        try {
-            LOGGER.info(String.format("Importing publickey to %s region on AWS", region));
-            AmazonEC2Client client = awsClient.createAccess(awsCredential, region);
-            ImportKeyPairRequest importKeyPairRequest = new ImportKeyPairRequest(getKeyPairName(ac), awsCredential.getPublicKey());
-            client.importKeyPair(importKeyPairRequest);
-        } catch (Exception e) {
-            String errorMessage = String.format("Failed to import public key [roleArn:'%s'], detailed message: %s", awsCredential.getRoleArn(), e.getMessage());
-            LOGGER.error(errorMessage, e);
-            throw new CloudConnectorException(errorMessage, e);
-        }
-    }
-
-    private void deleteKeyPair(AuthenticatedContext ac, String region) {
-        AwsCredentialView awsCredential = new AwsCredentialView(ac.getCloudCredential());
-        try {
-            AmazonEC2Client client = awsClient.createAccess(awsCredential, region);
-            DeleteKeyPairRequest deleteKeyPairRequest = new DeleteKeyPairRequest(getKeyPairName(ac));
-            client.deleteKeyPair(deleteKeyPairRequest);
-        } catch (Exception e) {
-            String errorMessage = String.format("Failed to delete public key [roleArn:'%s', region: '%s'], detailed message: %s",
-                    awsCredential.getRoleArn(), region, e.getMessage());
-            LOGGER.error(errorMessage, e);
-        }
-    }
-
-    private String getKeyPairName(AuthenticatedContext ac) {
-        return String.format("%s%s%s%s", ac.getCloudCredential().getName(), ac.getCloudCredential().getId(),
-                ac.getCloudContext().getName(), ac.getCloudContext().getId());
     }
 
 }

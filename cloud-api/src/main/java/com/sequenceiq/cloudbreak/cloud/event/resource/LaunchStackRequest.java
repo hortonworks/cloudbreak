@@ -10,9 +10,8 @@ public class LaunchStackRequest extends CloudStackRequest<LaunchStackResult> {
     private final AdjustmentType adjustmentType;
     private final Long threshold;
 
-    public LaunchStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack, AdjustmentType adjustmentType, Long threshold) {
-        super(cloudContext, cloudCredential, cloudStack);
-
+    public LaunchStackRequest(CloudContext cloudCtx, CloudCredential cloudCredential, CloudStack cloudStack, AdjustmentType adjustmentType, Long threshold) {
+        super(cloudCtx, cloudCredential, cloudStack);
         this.adjustmentType = adjustmentType;
         this.threshold = threshold;
     }

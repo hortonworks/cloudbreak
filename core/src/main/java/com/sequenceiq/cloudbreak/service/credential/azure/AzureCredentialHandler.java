@@ -25,11 +25,6 @@ public class AzureCredentialHandler implements CredentialHandler<AzureCredential
     }
 
     @Override
-    public boolean delete(AzureCredential credential) {
-        return true;
-    }
-
-    @Override
     public AzureCredential update(AzureCredential credential) throws Exception {
         return azureStackUtil.refreshCerfile(credential);
     }

@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
-import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
@@ -26,7 +25,6 @@ public class OpenStackSubnetResourceBuilder extends AbstractOpenStackNetworkReso
             throws Exception {
         try {
             OSClient osClient = createOSClient(auth);
-            KeystoneCredentialView credentialView = new KeystoneCredentialView(auth.getCloudCredential());
             NeutronNetworkView networkView = new NeutronNetworkView(network);
             Subnet subnet = Builders.subnet().name(resource.getName())
                     .networkId(context.getParameter(OpenStackConstants.NETWORK_ID, String.class))
