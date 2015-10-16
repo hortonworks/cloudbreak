@@ -25,7 +25,7 @@
                             <a href="" class="btn btn-warning" role="button" ng-show="((activeCluster.status == 'AVAILABLE' && activeCluster.cluster.status != 'START_REQUESTED') || ((activeCluster.status == 'STOP_REQUESTED' || activeCluster.status == 'STOP_FAILED') && activeCluster.cluster.status == 'STOPPED')) && !isEphemeralCluster(activeCluster)" data-toggle="modal" data-target="#modal-stop-cluster">
                                 <i class="fa fa-pause fa-fw"></i><span> {{msg.active_cluster_command_stop_label}}</span>
                             </a>
-                            <a href="" id="terminate-btn" class="btn btn-danger" role="button" data-toggle="modal" data-target="#modal-terminate">
+                            <a href="" id="terminate-btn" class="btn btn-danger" role="button" data-toggle="modal" data-target="#modal-terminate" ng-click='inherited.forcedTermination = false'>
                                 <i class="fa fa-trash-o fa-fw"></i><span> {{msg.active_cluster_command_terminate_label}}</span>
                             </a>
                         </p>
@@ -326,6 +326,8 @@
                 <!-- .modal-header -->
                 <div class="modal-body">
                     <p>{{msg.cluster_list_terminate_dialog_prefix}} <strong>{{activeCluster.name}}</strong> {{msg.cluster_list_dialog_suffix}}</p>
+                    <input id='modal-terminate-forced' type='checkbox' ng-model="inherited.forcedTermination" />
+                    <label for='modal-terminate-forced'>{{msg.cluster_list_terminate_dialog_forced}}</label>
                 </div>
                 <div class="modal-footer">
                     <div class="row">
