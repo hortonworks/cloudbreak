@@ -24,8 +24,12 @@ public class AwsSessionCredentialClient {
     @Value("${cb.aws.external.id:" + CB_AWS_EXTERNAL_ID + "}")
     private String externalId;
 
-    @Cacheable(AwsCachingConfig.TEMPORARY_AWS_CREDENTIAL_CACHE)
+    @Cacheable(value = AwsCachingConfig.TEMPORARY_AWS_CREDENTIAL_CACHE, unless = "#awsCredential.getId() == null")
     public BasicSessionCredentials retrieveCachedSessionCredentials(AwsCredentialView awsCredential) {
+        return retrieveSessionCredentials(awsCredential);
+    }
+
+    public BasicSessionCredentials retrieveSessionCredentials(AwsCredentialView awsCredential) {
         LOGGER.debug("retrieving session credential");
         AWSSecurityTokenServiceClient client = new AWSSecurityTokenServiceClient();
         AssumeRoleRequest assumeRoleRequest = new AssumeRoleRequest()

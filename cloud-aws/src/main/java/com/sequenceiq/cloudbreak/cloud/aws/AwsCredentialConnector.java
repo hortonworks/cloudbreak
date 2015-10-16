@@ -47,7 +47,7 @@ public class AwsCredentialConnector implements CredentialConnector {
     private CloudCredentialStatus validateIamRoleIsAssumable(CloudCredential cloudCredential) {
         AwsCredentialView awsCredential = new AwsCredentialView(cloudCredential);
         try {
-            credentialClient.retrieveCachedSessionCredentials(awsCredential);
+            credentialClient.retrieveSessionCredentials(awsCredential);
         } catch (AmazonClientException ae) {
             if (ae.getMessage().contains("Unable to load AWS credentials")) {
                 String errorMessage =
