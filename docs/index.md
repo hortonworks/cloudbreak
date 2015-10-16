@@ -7,7 +7,7 @@ For a detailed overview please follow this [link](overview.md)
 
 Cloudbreak has two main components - the [Cloudbreak deployer](http://sequenceiq.com/cloudbreak-deployer) and the [Cloudbreak application](http://sequenceiq.com/cloudbreak). Cloudbreak deployer helps you to deploy the Cloudbreak application automatically in environments with Docker support. Once the Cloudbreak application is deployed you can use it to provision HDP clusters in different cloud environments.
 
-##Technology 
+##Technology
 
 For an architectural overview of the [Cloudbreak deployer](http://sequenceiq.com/cloudbreak-deployer) and the [Cloudbreak application](http://sequenceiq.com/cloudbreak) please follow this [link](technology.md).
 
@@ -43,39 +43,19 @@ We have pre-built custom cloud images with Cloudbreak deployer pre-configured. F
 
 You can follow the AWS provider specific documentation using this [link](openstack.md)
 
-##Misc
+##Release notes - 1.1.0
 
-**Debug**
-
-If you want to have more detailed output set the `DEBUG` env variable to non-zero:
-
-```
-DEBUG=1 cbd some_command
-```
-
-**Troubleshoot**
-
-You can also use the `doctor` command to diagnose your environment:
-
-```
-cbd doctor
-```
-
-**Logs**
-
-For logs use the :
-
-```
-cbd logs
-```
-
-**Update**
-
-The tool is capable to upgrade itself to a newer version.
-
-```
-cbd update
-```
+| Components    | GA            | Tech preview  |
+| ------------- |:-------------:| -----:|
+| AWS   | yes |
+| Azure ARM   | yes      |    |
+| Azure ARM   | yes      |    |
+| GCP  | yes      |    |
+| OpenStack Juno   |       | yes   |
+| SPI interface   |       | yes   |
+| CLI/shell  |   yes    |    |
+| Recipes  |       | yes   |
+| Kerberos   |       | yes   |
 
 **Credits**
 

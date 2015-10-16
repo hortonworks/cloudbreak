@@ -4,7 +4,14 @@ theme: mkdocs
 theme_dir: mkdocs_theme
 dev_addr: 0.0.0.0:8000
 pages:
-    - Overview: index.md
+    - Home:
+        - Overview : index.md
+        - Technology : technology.md
+        - Installation :
+            - AWS: aws.md
+            - Azure: azure.md
+            - GCP: gcp.md
+            - OpenStack: openstack.md
     - Providers:
         - AWS :
             - Deployment: aws.md
@@ -28,6 +35,7 @@ pages:
         - Recipes: recipes.md
         - SPI: spi.md
         - Kerberos: kerberos.md
+        - Insights: insights.md
         - Migration : database.md
         - Configuration : configuration.md
         - Development : development.md
