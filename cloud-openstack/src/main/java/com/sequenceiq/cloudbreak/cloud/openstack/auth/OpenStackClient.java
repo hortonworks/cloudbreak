@@ -28,7 +28,7 @@ public class OpenStackClient {
 
     public AuthenticatedContext createAuthenticatedContext(CloudContext cloudContext, CloudCredential cloudCredential) {
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
-        Access access = createAccess(cloudCredential);
+        Access access = createAccess(authenticatedContext);
         authenticatedContext.putParameter(Access.class, access);
         return authenticatedContext;
     }
@@ -38,22 +38,20 @@ public class OpenStackClient {
         return createOSClient(access);
     }
 
-    public KeystoneCredentialView createKeystoneCredential(CloudCredential credential) {
-        return new KeystoneCredentialView(credential);
+    public KeystoneCredentialView createKeystoneCredential(AuthenticatedContext authenticatedContext) {
+        return new KeystoneCredentialView(authenticatedContext);
     }
 
-    public Access createAccess(CloudCredential credential) {
-        KeystoneCredentialView osCredential = createKeystoneCredential(credential);
+    public Access createAccess(AuthenticatedContext authenticatedContext) {
+        KeystoneCredentialView osCredential = createKeystoneCredential(authenticatedContext);
         return OSFactory.builder().endpoint(osCredential.getEndpoint())
                 .credentials(osCredential.getUserName(), osCredential.getPassword())
                 .tenantName(osCredential.getTenantName())
                 .authenticate().getAccess();
     }
 
-
     public OSClient createOSClient(Access access) {
         return OSFactory.clientFromAccess(access);
     }
-
 
 }

@@ -12,9 +12,12 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
@@ -66,6 +69,13 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
                 }
             } else {
                 result = new TerminateStackResult(request);
+            }
+            CloudCredentialStatus credentialStatus = connector.credentials().delete(ac);
+            if (CredentialStatus.FAILED == credentialStatus.getStatus()) {
+                if (credentialStatus.getException() != null) {
+                    throw new CloudConnectorException(credentialStatus.getException());
+                }
+                throw new CloudConnectorException(credentialStatus.getStatusReason());
             }
             request.getResult().onNext(result);
             LOGGER.info("TerminateStackHandler finished");

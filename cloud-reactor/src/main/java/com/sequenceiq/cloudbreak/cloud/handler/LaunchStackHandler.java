@@ -13,9 +13,12 @@ import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
@@ -53,6 +56,13 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
         try {
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
+            CloudCredentialStatus credentialStatus = connector.credentials().create(ac);
+            if (CredentialStatus.FAILED == credentialStatus.getStatus()) {
+                if (credentialStatus.getException() != null) {
+                    throw new CloudConnectorException(credentialStatus.getException());
+                }
+                throw new CloudConnectorException(credentialStatus.getStatusReason());
+            }
             List<CloudResourceStatus> resourceStatus = connector.resources().launch(ac, request.getCloudStack(), persistenceNotifier,
                     request.getAdjustmentType(), request.getThreshold());
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);

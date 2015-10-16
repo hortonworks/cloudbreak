@@ -15,8 +15,6 @@ import org.openstack4j.model.compute.Server;
 import org.openstack4j.model.compute.ServerCreate;
 import org.openstack4j.model.compute.builder.BlockDeviceMappingBuilder;
 import org.openstack4j.model.compute.builder.ServerCreateBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -40,8 +38,6 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 @Service
 public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBuilder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackInstanceBuilder.class);
-
     @Override
     public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
             List<CloudResource> buildableResource) throws Exception {
@@ -50,7 +46,7 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
             OSClient osClient = createOSClient(auth);
             InstanceTemplate template = getInstanceTemplate(group, privateId);
             CloudResource port = getPort(context.getComputeResources(privateId));
-            KeystoneCredentialView osCredential = new KeystoneCredentialView(auth.getCloudCredential());
+            KeystoneCredentialView osCredential = new KeystoneCredentialView(auth);
             NovaInstanceView novaInstanceView = new NovaInstanceView(template, group.getType());
             String imageId = osClient.images().list(Collections.singletonMap("name", image.getImageName())).get(0).getId();
             ServerCreateBuilder serverCreateBuilder = Builders.server()
@@ -74,7 +70,6 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
                     BlockDeviceMappingCreate blockDeviceMappingCreate = Builders.blockDeviceMapping()
                             .uuid(computeResource.getReference())
                             .deviceName(computeResource.getStringParameter(OpenStackConstants.VOLUME_MOUNT_POINT))
-//                            .deleteOnTermination(true)
                             .sourceType("volume")
                             .destinationType("volume")
                             .build();

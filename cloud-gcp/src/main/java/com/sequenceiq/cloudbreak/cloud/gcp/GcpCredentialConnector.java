@@ -32,8 +32,8 @@ public class GcpCredentialConnector implements CredentialConnector {
     private GcpContextBuilder gcpContextBuilder;
 
     @Override
-    public CloudCredentialStatus create(AuthenticatedContext authenticatedContext) {
-        LOGGER.info("Create credential: {}", authenticatedContext.getCloudCredential());
+    public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
+        LOGGER.info("Verify credential: {}", authenticatedContext.getCloudCredential());
         GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, false);
         try {
             Compute compute = gcpContext.getCompute();
@@ -46,10 +46,15 @@ public class GcpCredentialConnector implements CredentialConnector {
             LOGGER.error(errorMessage, e);
             return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.FAILED, e, errorMessage);
         } catch (Exception e) {
-            String errorMessage = String.format("Could not validate credential [credential: '%s'], detailed message: %s", gcpContext.getName(), e.getMessage());
+            String errorMessage = String.format("Could not verify credential [credential: '%s'], detailed message: %s", gcpContext.getName(), e.getMessage());
             LOGGER.error(errorMessage, e);
             return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.FAILED, e, errorMessage);
         }
+        return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.VERIFIED);
+    }
+
+    @Override
+    public CloudCredentialStatus create(AuthenticatedContext authenticatedContext) {
         return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.CREATED);
     }
 
@@ -68,8 +73,6 @@ public class GcpCredentialConnector implements CredentialConnector {
 
     @Override
     public CloudCredentialStatus delete(AuthenticatedContext authenticatedContext) {
-        LOGGER.info("Deleted credential: {}", authenticatedContext.getCloudCredential());
-
         return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.DELETED);
     }
 }

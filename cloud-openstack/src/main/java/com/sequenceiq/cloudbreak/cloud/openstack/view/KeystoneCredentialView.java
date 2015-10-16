@@ -2,25 +2,31 @@ package com.sequenceiq.cloudbreak.cloud.openstack.view;
 
 import static org.apache.commons.lang3.StringUtils.deleteWhitespace;
 
+import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 public class KeystoneCredentialView {
-    private static final String CB_KEYPAIR_NAME = "cb-keypair-";
+    private static final String CB_KEYPAIR_NAME = "cb";
 
     private CloudCredential cloudCredential;
+    private String stackName;
 
-    public KeystoneCredentialView(CloudCredential cloudCredential) {
-        this.cloudCredential = cloudCredential;
+    public KeystoneCredentialView(AuthenticatedContext authenticatedContext) {
+        this.stackName = authenticatedContext.getCloudContext().getName();
+        this.cloudCredential = authenticatedContext.getCloudCredential();
     }
 
     public String getKeyPairName() {
-        return CB_KEYPAIR_NAME + deleteWhitespace(getName().toLowerCase());
+        return String.format("%s-%s-%s-%s", CB_KEYPAIR_NAME, getStackName(), deleteWhitespace(getName().toLowerCase()), cloudCredential.getId());
     }
 
     public String getName() {
         return cloudCredential.getName();
     }
 
+    public String getStackName() {
+        return stackName;
+    }
 
     public String getPublicKey() {
         return cloudCredential.getPublicKey();
@@ -41,6 +47,5 @@ public class KeystoneCredentialView {
     public String getEndpoint() {
         return cloudCredential.getParameter("endpoint", String.class);
     }
-
 
 }

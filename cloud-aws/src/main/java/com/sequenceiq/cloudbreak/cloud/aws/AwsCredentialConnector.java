@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -8,6 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonClientException;
+import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
+import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
@@ -21,30 +23,54 @@ public class AwsCredentialConnector implements CredentialConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsCredentialConnector.class);
 
     @Inject
+    private AwsSessionCredentialClient credentialClient;
+    @Inject
     private AwsClient awsClient;
 
-    @Inject
-    private AwsSessionCredentialClient credentialClient;
-
-    @Inject
-    private AwsPlatformParameters platformParameters;
-
     @Override
-    public CloudCredentialStatus create(AuthenticatedContext authenticatedContext) {
+    public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
         LOGGER.info("Create credential: {}", authenticatedContext.getCloudCredential());
-        CloudCredentialStatus cloudCredentialStatus = validateIamRoleIsAssumable(authenticatedContext.getCloudCredential());
+        CloudCredentialStatus cloudCredentialStatus = verifyIamRoleIsAssumable(authenticatedContext.getCloudCredential());
         if (cloudCredentialStatus.getStatus().equals(CredentialStatus.FAILED)) {
             return cloudCredentialStatus;
         }
-        return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.CREATED);
+        return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.VERIFIED);
     }
 
     @Override
-    public CloudCredentialStatus delete(AuthenticatedContext authenticatedContext) {
-        return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.DELETED);
+    public CloudCredentialStatus create(AuthenticatedContext auth) {
+        AwsCredentialView awsCredential = new AwsCredentialView(auth.getCloudCredential());
+        String region = auth.getCloudContext().getLocation().getRegion().value();
+        try {
+            LOGGER.info(String.format("Importing public key to %s region on AWS", region));
+            AmazonEC2Client client = awsClient.createAccess(awsCredential, region);
+            ImportKeyPairRequest importKeyPairRequest = new ImportKeyPairRequest(awsClient.getKeyPairName(auth), awsCredential.getPublicKey());
+            client.importKeyPair(importKeyPairRequest);
+        } catch (Exception e) {
+            String errorMessage = String.format("Failed to import public key [roleArn:'%s'], detailed message: %s", awsCredential.getRoleArn(), e.getMessage());
+            LOGGER.error(errorMessage, e);
+            return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.FAILED, e, errorMessage);
+        }
+        return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.CREATED);
     }
 
-    private CloudCredentialStatus validateIamRoleIsAssumable(CloudCredential cloudCredential) {
+    @Override
+    public CloudCredentialStatus delete(AuthenticatedContext auth) {
+        AwsCredentialView awsCredential = new AwsCredentialView(auth.getCloudCredential());
+        String region = auth.getCloudContext().getLocation().getRegion().value();
+        try {
+            AmazonEC2Client client = awsClient.createAccess(awsCredential, region);
+            DeleteKeyPairRequest deleteKeyPairRequest = new DeleteKeyPairRequest(awsClient.getKeyPairName(auth));
+            client.deleteKeyPair(deleteKeyPairRequest);
+        } catch (Exception e) {
+            String errorMessage = String.format("Failed to delete public key [roleArn:'%s', region: '%s'], detailed message: %s",
+                    awsCredential.getRoleArn(), region, e.getMessage());
+            LOGGER.error(errorMessage, e);
+        }
+        return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.DELETED);
+    }
+
+    private CloudCredentialStatus verifyIamRoleIsAssumable(CloudCredential cloudCredential) {
         AwsCredentialView awsCredential = new AwsCredentialView(cloudCredential);
         try {
             credentialClient.retrieveSessionCredentials(awsCredential);

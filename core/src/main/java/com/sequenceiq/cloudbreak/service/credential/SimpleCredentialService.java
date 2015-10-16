@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
-import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -13,21 +12,18 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
-import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
-import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 
 @Service
 public class SimpleCredentialService implements CredentialService {
@@ -140,29 +136,10 @@ public class SimpleCredentialService implements CredentialService {
         }
         List<Stack> stacks = stackRepository.findByCredential(credential.getId());
         if (stacks.isEmpty()) {
-            try {
-                platformResolver.credential(credential.cloudPlatform()).delete(credential);
-            } catch (OperationException e) {
-                LOGGER.error("Error during deleting cloud provider credential. Archiving local credential.", e);
-                notificationSender.send(getCredentialNotification(credential, Status.DELETE_FAILED.name(),
-                        "Error during deleting cloud provider credential. Please delete the cloud provider credential manually."));
-            } finally {
-                archiveCredential(credential);
-            }
+            archiveCredential(credential);
         } else {
             throw new BadRequestException(String.format("Credential '%d' is in use, cannot be deleted.", credential.getId()));
         }
-    }
-
-    private Notification getCredentialNotification(Credential credential, String eventType, String message) {
-        Notification notification = new Notification();
-        notification.setEventType(eventType);
-        notification.setEventTimestamp(Calendar.getInstance().getTime());
-        notification.setEventMessage(message);
-        notification.setOwner(credential.getOwner());
-        notification.setAccount(credential.getAccount());
-        return notification;
-
     }
 
     private String generateArchiveName(String name) {

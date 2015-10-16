@@ -31,7 +31,7 @@ public class OpenStackContextBuilder implements ResourceContextBuilder<OpenStack
     @Override
     public OpenStackContext contextInit(CloudContext cloudContext, AuthenticatedContext auth, List<CloudResource> resources, boolean build) {
         OSClient osClient = openStackClient.createOSClient(auth);
-        KeystoneCredentialView credentialView = new KeystoneCredentialView(auth.getCloudCredential());
+        KeystoneCredentialView credentialView = new KeystoneCredentialView(auth);
 
         OpenStackContext openStackContext = new OpenStackContext(cloudContext.getName(), cloudContext.getLocation().getRegion().value(),
                 PARALLEL_RESOURCE_REQUEST, build);

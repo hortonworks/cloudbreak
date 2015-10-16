@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.auth.BasicSessionCredentials;
@@ -18,8 +16,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 @Component
 public class AwsClient {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsClient.class);
-
     private static final String DEFAULT_REGION_NAME = "US_WEST_1";
 
     @Inject
@@ -63,6 +59,10 @@ public class AwsClient {
         return String.format("%s%s", groupName, number);
     }
 
+    public String getKeyPairName(AuthenticatedContext ac) {
+        return String.format("%s%s%s%s", ac.getCloudCredential().getName(), ac.getCloudCredential().getId(),
+                ac.getCloudContext().getName(), ac.getCloudContext().getId());
+    }
 
 
 }

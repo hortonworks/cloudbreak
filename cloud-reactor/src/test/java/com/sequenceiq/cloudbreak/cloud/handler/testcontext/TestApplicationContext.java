@@ -27,6 +27,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -35,12 +36,14 @@ import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.handler.ParameterGenerator;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
@@ -71,6 +74,9 @@ public class TestApplicationContext {
 
     @Mock
     private Authenticator authenticator;
+
+    @Mock
+    private CredentialConnector credentialConnector;
 
     @Mock
     private MetadataCollector collector;
@@ -125,6 +131,9 @@ public class TestApplicationContext {
     public CloudConnector cloudConnectors() throws Exception {
         CloudResource resource = new CloudResource.Builder().type(ResourceType.HEAT_STACK).name("ref").build();
         when(cloudConnector.authentication()).thenReturn(authenticator);
+        when(cloudConnector.credentials()).thenReturn(credentialConnector);
+        when(credentialConnector.create(any(AuthenticatedContext.class))).thenReturn(new CloudCredentialStatus(null, CredentialStatus.CREATED));
+        when(credentialConnector.delete(any(AuthenticatedContext.class))).thenReturn(new CloudCredentialStatus(null, CredentialStatus.DELETED));
         when(instanceConnector.metadata()).thenReturn(collector);
         when(authenticator.authenticate((CloudContext) any(), (CloudCredential) any())).thenReturn(g.createAuthenticatedContext());
         when(cloudConnector.platform()).thenReturn("TESTCONNECTOR");

@@ -5,10 +5,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 
 public interface CredentialConnector {
 
+    CloudCredentialStatus verify(AuthenticatedContext authenticatedContext);
 
     CloudCredentialStatus create(AuthenticatedContext authenticatedContext);
 
     CloudCredentialStatus delete(AuthenticatedContext authenticatedContext);
-
 
 }

@@ -13,12 +13,11 @@ import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
+import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackAuthenticator;
+import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackCredentialConnector;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackParameters;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackSetup;
-import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackAuthenticator;
-import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
-import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
-import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackCredentialConnector;
 
 @Service
 public class OpenStackHeatConnector implements CloudConnector {
@@ -29,8 +28,6 @@ public class OpenStackHeatConnector implements CloudConnector {
     private OpenStackCredentialConnector credentialConnector;
     @Inject
     private OpenStackAuthenticator authenticator;
-    @Inject
-    private OpenStackClient openStackClient;
     @Inject
     private OpenStackResourceConnector resourceConnector;
     @Inject

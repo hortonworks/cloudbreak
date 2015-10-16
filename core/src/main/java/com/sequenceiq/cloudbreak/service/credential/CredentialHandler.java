@@ -9,7 +9,5 @@ public interface CredentialHandler<T extends Credential> {
 
     T init(T credential);
 
-    boolean delete(T credential);
-
     T update(T credential) throws Exception;
 }
