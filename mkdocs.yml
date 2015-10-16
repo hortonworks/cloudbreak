@@ -4,8 +4,8 @@ theme: mkdocs
 theme_dir: mkdocs_theme
 dev_addr: 0.0.0.0:8000
 pages:
-    - Home: index.md
-        - Overview : overview.md
+    - Home:
+        - Overview : index.md
         - Technology : technology.md
         - Installation :
             - AWS: aws.md
