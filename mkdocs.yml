@@ -4,30 +4,31 @@ theme: mkdocs
 theme_dir: mkdocs_theme
 dev_addr: 0.0.0.0:8000
 pages:
-    - Home: index.md
+    - Overview: index.md
+    - Providers:
+        - AWS :
+            - Deployment: aws.md
+            - 'Provisioning - UI': aws_cb_ui.md
+            - 'Provisioning - CLI': aws_cb_shell.md
+        - Azure :
+            - Deployment: azure.md
+            - 'Provisioning - UI': azure_cb_ui.md
+            - 'Provisioning - CLI': azure_cb_shell.md
+        - GCP :
+            - Deployment: gcp.md
+            - 'Provisioning - UI': gcp_cb_ui.md
+            - 'Provisioning - CLI': gcp_cb_shell.md
+        - OpenStack :
+            - Deployment: openstack.md
+            - 'Provisioning - UI': openstack_cb_ui.md
+            - 'Provisioning - CLI': openstack_cb_shell.md
     - Docs:
-        - Configuration : configuration.md
+        - API : api.md
         - Shell : shell.md
         - Recipes: recipes.md
         - SPI: spi.md
         - Kerberos: kerberos.md
         - Migration : database.md
+        - Configuration : configuration.md
         - Development : development.md
         - Changelog : changelog.md
-    - Providers:
-        - AWS :
-            - Deployment: aws.md
-            - 'Provisioning - webui': aws_cb_ui.md
-            - 'Provisioning - cli': aws_cb_shell.md
-        - Azure :
-            - Deployment: azure.md
-            - 'Provisioning - webui': azure_cb_ui.md
-            - 'Provisioning - cli': azure_cb_shell.md
-        - GCP :
-            - Deployment: gcp.md
-            - 'Provisioning - webui': gcp_cb_ui.md
-            - 'Provisioning - cli': gcp_cb_shell.md
-        - OpenStack :
-            - Deployment: openstack.md
-            - 'Provisioning - webui': openstack_cb_ui.md
-            - 'Provisioning - cli': openstack_cb_shell.md
