@@ -50,7 +50,7 @@ public class AwsCredentialConnector implements CredentialConnector {
         } catch (Exception e) {
             String errorMessage = String.format("Failed to import public key [roleArn:'%s'], detailed message: %s", awsCredential.getRoleArn(), e.getMessage());
             LOGGER.error(errorMessage, e);
-            throw new CloudConnectorException(errorMessage, e);
+            return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.FAILED, e, errorMessage);
         }
         return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.CREATED);
     }

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.auth;
 
+import static java.lang.String.format;
+
 import javax.inject.Inject;
 
 import org.openstack4j.api.OSClient;
@@ -10,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
@@ -31,7 +32,6 @@ public class OpenStackCredentialConnector implements CredentialConnector {
     @Override
     public CloudCredentialStatus create(AuthenticatedContext auth) {
         LOGGER.info("Create credential: {}", auth.getCloudCredential());
-
         OSClient client = openStackClient.createOSClient(auth);
 
         KeystoneCredentialView keystoneCredential = openStackClient.createKeystoneCredential(auth);
@@ -39,12 +39,17 @@ public class OpenStackCredentialConnector implements CredentialConnector {
         String keyPairName = keystoneCredential.getKeyPairName();
         Keypair keyPair = client.compute().keypairs().get(keyPairName);
         if (keyPair != null) {
-            throw new CloudConnectorException(String.format("Key with name: %s already exist", keyPairName));
+            return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.FAILED, null, format("Key with name: %s already exist", keyPairName));
         }
 
-        keyPair = client.compute().keypairs().create(keyPairName, keystoneCredential.getPublicKey());
-        LOGGER.info("Credential has been created: {}, kp: {}", auth.getCloudCredential(), keyPair);
-        return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.CREATED);
+        try {
+            keyPair = client.compute().keypairs().create(keyPairName, keystoneCredential.getPublicKey());
+            LOGGER.info("Credential has been created: {}, kp: {}", auth.getCloudCredential(), keyPair);
+            return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.CREATED);
+        } catch (Exception e) {
+            LOGGER.error("Failed to create credential", e);
+            return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.FAILED, e, e.getMessage());
+        }
     }
 
     @Override
