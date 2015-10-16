@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.ProvisioningSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.RemoveInstanceHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackCreationFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackDownscaleHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.StackForcedTerminationHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStatusUpdateFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStopHandler;
@@ -97,6 +98,7 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.CLUSTER_RESET.name()), getHandlerForClass(ClusterResetHandler.class));
         reactor.on($(FlowPhases.ENABLE_KERBEROS.name()), getHandlerForClass(ClusterSecurityHandler.class));
         reactor.on($(FlowPhases.TERMINATION.name()), getHandlerForClass(StackTerminationHandler.class));
+        reactor.on($(FlowPhases.FORCED_TERMINATION.name()), getHandlerForClass(StackForcedTerminationHandler.class));
         reactor.on($(FlowPhases.STACK_START.name()), getHandlerForClass(StackStartHandler.class));
         reactor.on($(FlowPhases.STACK_STOP.name()), getHandlerForClass(StackStopHandler.class));
         reactor.on($(FlowPhases.UPSCALE_STACK_SYNC.name()), getHandlerForClass(UpscaleStackSyncHandler.class));
@@ -181,6 +183,9 @@ public class FlowInitializer implements InitializingBean {
     private void registerTerminationFlow() {
         transitionKeyService.registerTransition(StackTerminationHandler.class, TransitionFactory
                 .createTransition(FlowPhases.TERMINATION.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
+
+        transitionKeyService.registerTransition(StackForcedTerminationHandler.class, TransitionFactory
+                .createTransition(FlowPhases.FORCED_TERMINATION.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerStartFlows() {

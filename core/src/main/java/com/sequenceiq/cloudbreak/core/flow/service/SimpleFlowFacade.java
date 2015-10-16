@@ -550,7 +550,22 @@ public class SimpleFlowFacade implements FlowFacade {
         } catch (CloudbreakException e) {
             throw e;
         } catch (Exception e) {
-            LOGGER.error("Exception during the downscaling of cluster: {}", e.getMessage());
+            LOGGER.error("Exception during the termination of stack: {}", e.getMessage());
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public FlowContext forceTerminateStack(FlowContext context) throws CloudbreakException {
+        LOGGER.debug("Forced termination of stack. Context: {}", context);
+        try {
+            context = stackFacade.forceTerminateStack(context);
+            LOGGER.debug("Forced termination of stack is DONE");
+            return context;
+        } catch (CloudbreakException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Exception during the forced termination of stack: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }

@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.RemoveInstanceRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
+import com.sequenceiq.cloudbreak.service.stack.event.StackForcedDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateAllowedSubnetsRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
@@ -87,6 +88,7 @@ public class ReactorFlowManagerTest {
         StackStatusUpdateRequest stackStatusUpdateRequest = new StackStatusUpdateRequest(CloudPlatform.AZURE, 1L, StatusRequest.STARTED);
         ClusterStatusUpdateRequest clusterStatusUpdateRequest = new ClusterStatusUpdateRequest(1L, StatusRequest.STARTED, CloudPlatform.AZURE);
         StackDeleteRequest stackDeleteRequest = new StackDeleteRequest(CloudPlatform.AZURE, 1L);
+        StackForcedDeleteRequest stackForcedDeleteRequest = new StackForcedDeleteRequest(CloudPlatform.AZURE, 1L);
         UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(CloudPlatform.AZURE, 1L, 1, "master", ScalingType.DOWNSCALE_ONLY_CLUSTER);
         RemoveInstanceRequest removeInstanceRequest = new RemoveInstanceRequest(CloudPlatform.AZURE, 1L, "instanceId");
         UpdateAmbariHostsRequest updateAmbariHostsRequest = new UpdateAmbariHostsRequest(1L, new HostGroupAdjustmentJson(), new HashSet<String>(),
@@ -105,6 +107,7 @@ public class ReactorFlowManagerTest {
         flowManager.triggerClusterStop(clusterStatusUpdateRequest);
         flowManager.triggerClusterStart(clusterStatusUpdateRequest);
         flowManager.triggerTermination(stackDeleteRequest);
+        flowManager.triggerForcedTermination(stackForcedDeleteRequest);
         flowManager.triggerStackUpscale(updateInstancesRequest);
         flowManager.triggerStackDownscale(updateInstancesRequest);
         flowManager.triggerStackRemoveInstance(removeInstanceRequest);

@@ -74,6 +74,8 @@ public interface FlowFacade {
 
     FlowContext terminateStack(FlowContext flowContext) throws CloudbreakException;
 
+    FlowContext forceTerminateStack(FlowContext context) throws CloudbreakException;
+
     FlowContext handleStackTerminationFailure(FlowContext context) throws CloudbreakException;
 
     FlowContext handleClusterScalingFailure(FlowContext context) throws CloudbreakException;

@@ -24,12 +24,14 @@ import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.RemoveInstanceRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
+import com.sequenceiq.cloudbreak.service.stack.event.StackForcedDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateAllowedSubnetsRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
+
 /**
  * Flow manager implementation backed by Reactor.
  * This class is the flow state machine and mediates between the states and reactor events
@@ -133,6 +135,13 @@ public class ReactorFlowManager implements FlowManager {
         StackDeleteRequest deleteRequest = (StackDeleteRequest) object;
         DefaultFlowContext context = new DefaultFlowContext(deleteRequest.getStackId(), deleteRequest.getCloudPlatform());
         reactor.notify(FlowPhases.TERMINATION.name(), eventFactory.createEvent(context, FlowPhases.TERMINATION.name()));
+    }
+
+    @Override
+    public void triggerForcedTermination(Object object) {
+        StackDeleteRequest deleteRequest = (StackForcedDeleteRequest) object;
+        DefaultFlowContext context = new DefaultFlowContext(deleteRequest.getStackId(), deleteRequest.getCloudPlatform());
+        reactor.notify(FlowPhases.FORCED_TERMINATION.name(), eventFactory.createEvent(context, FlowPhases.FORCED_TERMINATION.name()));
     }
 
     @Override

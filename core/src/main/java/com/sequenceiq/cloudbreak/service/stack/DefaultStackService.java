@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.RemoveInstanceRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
+import com.sequenceiq.cloudbreak.service.stack.event.StackForcedDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateAllowedSubnetsRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
@@ -201,6 +202,15 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
+    public void forceDelete(String name, CbUser user) {
+        Stack stack = stackRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
+        if (stack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", name));
+        }
+        forceDelete(stack, user);
+    }
+
+    @Override
     public Stack create(CbUser user, Stack stack) {
         checkCloudPlatform(stack, "create");
         Stack savedStack = null;
@@ -235,6 +245,15 @@ public class DefaultStackService implements StackService {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
         delete(stack, user);
+    }
+
+    @Override
+    public void forceDelete(Long id, CbUser user) {
+        Stack stack = stackRepository.findByIdInAccount(id, user.getAccount());
+        if (stack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", id));
+        }
+        forceDelete(stack, user);
     }
 
     @Override
@@ -417,6 +436,18 @@ public class DefaultStackService implements StackService {
         }
         if (!stack.isDeleteCompleted()) {
             flowManager.triggerTermination(new StackDeleteRequest(stack.cloudPlatform(), stack.getId()));
+        } else {
+            LOGGER.info("Stack is already deleted.");
+        }
+    }
+
+    private void forceDelete(Stack stack, CbUser user) {
+        LOGGER.info("Stack forced delete requested.");
+        if (!user.getUserId().equals(stack.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+            throw new BadRequestException("Stacks can be force deleted only by account admins or owners.");
+        }
+        if (!stack.isDeleteCompleted()) {
+            flowManager.triggerForcedTermination(new StackForcedDeleteRequest(stack.cloudPlatform(), stack.getId()));
         } else {
             LOGGER.info("Stack is already deleted.");
         }

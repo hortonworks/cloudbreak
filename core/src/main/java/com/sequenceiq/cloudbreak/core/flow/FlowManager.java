@@ -28,6 +28,8 @@ public interface FlowManager {
 
     void triggerClusterStart(Object object);
 
+    void triggerForcedTermination(Object object);
+
     void triggerStackUpscale(Object object);
 
     void triggerStackDownscale(Object object);
