@@ -1,15 +1,15 @@
+##Overview
+
 Cloudbreak is a cloud agnostic Hadoop as a Service API. Abstracts the provisioning and ease management and monitoring of on-demand HDP clusters in different virtual environments. Once it is deployed in your favorite servlet container exposes a REST API allowing to span up Hadoop clusters of arbitrary sizes on your selected cloud provider. Provisioning Hadoop has never been easier.
 Cloudbreak is built on the foundation of cloud providers API (Microsoft Azure, Amazon AWS, Google Cloud Platform, OpenStack), Apache Ambari, Docker containers, Swarm and Consul.
 
 For a detailed overview please follow this [link](overview.md)
 
-For recent changes please check the [changelog](http://sequenceiq.com/cloudbreak-deployer/latest/changelog/).
-
 Cloudbreak has two main components - the [Cloudbreak deployer](http://sequenceiq.com/cloudbreak-deployer) and the [Cloudbreak application](http://sequenceiq.com/cloudbreak). Cloudbreak deployer helps you to deploy the Cloudbreak application automatically in environments with Docker support. Once the Cloudbreak application is deployed you can use it to provision HDP clusters in different cloud environments.
 
-##Technology
+##Technology 
 
-For an architectural overview of the CLoudbreak deployer and application please follow this [link](technology.md)
+For an architectural overview of the [Cloudbreak deployer](http://sequenceiq.com/cloudbreak-deployer) and the [Cloudbreak application](http://sequenceiq.com/cloudbreak) please follow this [link](technology.md).
 
 ##Installation
 
