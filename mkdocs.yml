@@ -4,7 +4,7 @@ theme: mkdocs
 theme_dir: mkdocs_theme
 dev_addr: 0.0.0.0:8000
 pages:
-    - Home:
+    - Home: index.md
         - Overview : overview.md
         - Technology : technology.md
         - Installation :
