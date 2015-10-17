@@ -6,7 +6,11 @@ setup_cbclient_cert() {
 }
 
 waiting_for_docker() {
-  MAX_RETRIES=60
+  if [ -f /var/docker-relocate ]; then
+    MAX_RETRIES=120
+  else
+    MAX_RETRIES=60
+  fi
   retries=0
   while ((retries++ < MAX_RETRIES)) && ! sudo docker info &> /dev/null; do
     echo "Docker is not running yet."
