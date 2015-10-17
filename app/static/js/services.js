@@ -224,6 +224,12 @@ uluwatuServices.factory('GlobalStack', ['$resource',
         return $resource('stacks/:id', null, {
             'update': {
                 method: 'PUT'
+            },
+            'forcedDelete': {
+                method: 'DELETE',
+                params: {
+                    'forced': 'true'
+                }
             }
         });
     }
@@ -355,6 +361,16 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
 
             this.delete = function(cluster, successHandler, failureHandler) {
                 GlobalStack.delete({
+                    id: cluster.id
+                }, function(result) {
+                    successHandler(result);
+                }, function(failure) {
+                    failureHandler(failure);
+                });
+            }
+
+            this.forcedDelete = function(cluster, successHandler, failureHandler) {
+                GlobalStack.forcedDelete({
                     id: cluster.id
                 }, function(result) {
                     successHandler(result);

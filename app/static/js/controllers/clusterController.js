@@ -51,6 +51,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $scope.metricsShow = false;
         $scope.showAdvancedOptionForm = false;
         $scope.newCredential = {};
+        $scope.inherited = {
+            forcedTermination: false
+        };
         getUluwatuClusters();
         initCluster();
         initPlatformVariants();
@@ -349,8 +352,18 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.deleteCluster = function(cluster) {
+            if ($scope.inherited.forcedTermination) {
+                del(UluwatuCluster.forcedDelete, cluster);
+                $scope.inherited.forcedTermination = false;
+            } else {
+                del(UluwatuCluster.delete, cluster);
+            }
+
+        }
+
+        function del(deleteFunction, cluster) {
             $rootScope.activeCluster = {};
-            UluwatuCluster.delete(cluster, function(result) {
+            deleteFunction(cluster, function(result) {
                 var actCluster = $filter('filter')($rootScope.clusters, {
                     id: cluster.id
                 }, true)[0];
