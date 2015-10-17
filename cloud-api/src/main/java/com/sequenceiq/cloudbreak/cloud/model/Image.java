@@ -7,9 +7,8 @@ import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 
 public class Image {
 
-    private String imageName;
-
-    private Map<InstanceGroupType, String> userdata;
+    private final String imageName;
+    private final Map<InstanceGroupType, String> userdata;
 
     public Image(String imageName) {
         this.imageName = imageName;

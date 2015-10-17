@@ -1,27 +1,29 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+
 public class CloudStack {
 
-    private List<Group> groups;
-    private Network network;
-    private Security security;
-    private Image image;
+    private final List<Group> groups;
+    private final Network network;
+    private final Security security;
+    private final Image image;
     private Map<String, String> parameters;
 
     public CloudStack(List<Group> groups, Network network, Security security, Image image, Map<String, String> parameters) {
-        this.groups = groups;
+        this.groups = ImmutableList.copyOf(groups);
         this.network = network;
         this.security = security;
         this.image = image;
-        this.parameters = parameters;
+        this.parameters = ImmutableMap.copyOf(parameters);
     }
 
     public List<Group> getGroups() {
-        return new ArrayList<>(groups);
+        return groups;
     }
 
     public Network getNetwork() {

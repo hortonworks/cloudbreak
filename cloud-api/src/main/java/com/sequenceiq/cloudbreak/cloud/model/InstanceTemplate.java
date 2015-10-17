@@ -1,26 +1,23 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableList;
+
 public class InstanceTemplate extends DynamicModel {
 
-    private String flavor;
-    private String groupName;
-    private Long privateId;
-    private List<Volume> volumes;
-    private InstanceStatus status;
-
-    public InstanceTemplate(String flavor, String groupName, Long privateId, InstanceStatus status, Map<String, Object> parameters) {
-        this(flavor, groupName, privateId, new ArrayList<Volume>(), status, parameters);
-    }
+    private final String flavor;
+    private final String groupName;
+    private final Long privateId;
+    private final List<Volume> volumes;
+    private final InstanceStatus status;
 
     public InstanceTemplate(String flavor, String groupName, Long privateId, List<Volume> volumes, InstanceStatus status, Map<String, Object> parameters) {
         this.flavor = flavor;
         this.groupName = groupName;
         this.privateId = privateId;
-        this.volumes = volumes;
+        this.volumes = ImmutableList.copyOf(volumes);
         this.status = status;
         super.putAll(parameters);
     }
@@ -39,10 +36,6 @@ public class InstanceTemplate extends DynamicModel {
 
     public Long getPrivateId() {
         return privateId;
-    }
-
-    public void addVolume(Volume volume) {
-        volumes.add(volume);
     }
 
     public InstanceStatus getStatus() {

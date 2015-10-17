@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class DynamicModel {
 
-    private Map<String, Object> parameters;
+    private final Map<String, Object> parameters;
 
     public DynamicModel() {
         parameters = new HashMap<>();

@@ -2,12 +2,14 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
+
 public class Security {
 
-    private List<SecurityRule> rules;
+    private final List<SecurityRule> rules;
 
     public Security(List<SecurityRule> rules) {
-        this.rules = rules;
+        this.rules = ImmutableList.copyOf(rules);
     }
 
     public List<SecurityRule> getRules() {

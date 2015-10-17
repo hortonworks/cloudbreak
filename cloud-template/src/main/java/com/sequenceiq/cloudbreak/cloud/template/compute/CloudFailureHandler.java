@@ -119,8 +119,7 @@ public class CloudFailureHandler {
         List<ComputeResourceBuilder> compute = resourceBuilders.compute(auth.getCloudContext().getPlatform());
         List<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
         LOGGER.info(String.format("InstanceGroup %s node count decreased with one so the new node size is: %s", group.getName(), group.getInstances().size()));
-        group = removeFromList(group, ids);
-        if (group.getInstances().size() <= 0 && !upscale) {
+        if (getRemovableInstanceTemplates(group, ids).size() <= 0 && !upscale) {
             LOGGER.info("InstanceGroup node count lower than 1 which is incorrect so error will throw");
             throwError(statuses);
         } else {
@@ -145,15 +144,14 @@ public class CloudFailureHandler {
         }
     }
 
-    public Group removeFromList(Group group, Set<Long> ids) {
+    private List<InstanceTemplate> getRemovableInstanceTemplates(Group group, Set<Long> ids) {
         List<InstanceTemplate> instanceTemplates = new ArrayList<>();
         for (InstanceTemplate instanceTemplate : group.getInstances()) {
             if (!ids.contains(instanceTemplate.getPrivateId())) {
                 instanceTemplates.add(instanceTemplate);
             }
         }
-        group.setInstances(instanceTemplates);
-        return group;
+        return instanceTemplates;
     }
 
     private <T> T createThread(String name, Object... args) {

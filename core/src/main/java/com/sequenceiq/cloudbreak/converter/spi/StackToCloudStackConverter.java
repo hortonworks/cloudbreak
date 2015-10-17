@@ -59,22 +59,22 @@ public class StackToCloudStackConverter {
         List<Group> groups = new ArrayList<>();
         long privateId = getFirstValidPrivateId(instanceGroups);
         for (InstanceGroup instanceGroup : instanceGroups) {
-            Group group = new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType());
+            List<InstanceTemplate> instances = new ArrayList<>();
             Template template = instanceGroup.getTemplate();
             int desiredNodeCount = instanceGroup.getNodeCount();
             // existing instances
             for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
                 InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
-                group.addInstance(buildInstanceTemplate(template, instanceGroup.getGroupName(), metaData.getPrivateId(), status));
+                instances.add(buildInstanceTemplate(template, instanceGroup.getGroupName(), metaData.getPrivateId(), status));
             }
             // new instances
-            int existingNodesSize = group.getInstances().size();
+            int existingNodesSize = instances.size();
             if (existingNodesSize < desiredNodeCount) {
                 for (long i = 0; i < desiredNodeCount - existingNodesSize; i++) {
-                    group.addInstance(buildInstanceTemplate(template, instanceGroup.getGroupName(), privateId++, InstanceStatus.CREATE_REQUESTED));
+                    instances.add(buildInstanceTemplate(template, instanceGroup.getGroupName(), privateId++, InstanceStatus.CREATE_REQUESTED));
                 }
             }
-            groups.add(group);
+            groups.add(new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType(), instances));
         }
         return groups;
     }
@@ -90,12 +90,12 @@ public class StackToCloudStackConverter {
 
     public InstanceTemplate buildInstanceTemplate(Template template, String name, Long privateId, InstanceStatus status) {
         Map<String, Object> fields = getDeclaredFields(template);
-        InstanceTemplate instance = new InstanceTemplate(template.getInstanceTypeName(), name, privateId, status, fields);
+        List<Volume> volumes = new ArrayList<>();
         for (int i = 0; i < template.getVolumeCount(); i++) {
             Volume volume = new Volume(VolumeUtils.VOLUME_PREFIX + (i + 1), template.getVolumeTypeName(), template.getVolumeSize());
-            instance.addVolume(volume);
+            volumes.add(volume);
         }
-        return instance;
+        return new InstanceTemplate(template.getInstanceTypeName(), name, privateId, volumes, status, fields);
     }
 
     private Image buildImage(Stack stack, String coreUserData, String gateWayUserData) {

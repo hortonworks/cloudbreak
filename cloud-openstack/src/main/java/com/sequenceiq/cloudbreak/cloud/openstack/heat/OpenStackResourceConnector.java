@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.heat;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -162,15 +161,17 @@ public class OpenStackResourceConnector implements ResourceConnector {
     }
 
     private CloudStack removeDeleteRequestedInstances(CloudStack stack) {
+        List<Group> groups = new ArrayList<>();
         for (Group group : stack.getGroups()) {
-            Iterator<InstanceTemplate> iterator = group.getInstances().iterator();
-            while (iterator.hasNext()) {
-                if (InstanceStatus.DELETE_REQUESTED == iterator.next().getStatus()) {
-                    iterator.remove();
+            List<InstanceTemplate> instances = new ArrayList<>(group.getInstances());
+            for (InstanceTemplate instance : group.getInstances()) {
+                if (InstanceStatus.DELETE_REQUESTED == instance.getStatus()) {
+                    instances.remove(instance);
                 }
             }
+            groups.add(new Group(group.getName(), group.getType(), instances));
         }
-        return stack;
+        return new CloudStack(groups, stack.getNetwork(), stack.getSecurity(), stack.getImage(), stack.getParameters());
     }
 
 }
