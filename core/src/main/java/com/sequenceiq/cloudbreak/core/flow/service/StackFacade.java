@@ -25,6 +25,8 @@ public interface StackFacade {
 
     FlowContext handleTerminationFailure(FlowContext context) throws CloudbreakException;
 
+    FlowContext forceTerminateStack(FlowContext context) throws CloudbreakException;
+
     FlowContext addInstances(FlowContext context) throws CloudbreakException;
 
     FlowContext removeInstance(FlowContext context) throws CloudbreakException;

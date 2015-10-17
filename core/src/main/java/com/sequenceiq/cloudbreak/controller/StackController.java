@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
@@ -148,27 +149,42 @@ public class StackController {
     @ApiOperation(value = StackOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
     @RequestMapping(value = "stacks/{id}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<TemplateResponse> deleteStack(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+    public ResponseEntity<TemplateResponse> deleteStack(@ModelAttribute("user") CbUser user, @PathVariable Long id,
+            @RequestParam(value = "forced", required = false, defaultValue = "false") Boolean forced) {
         MDCBuilder.buildUserMdcContext(user);
-        stackService.delete(id, user);
+        if (forced) {
+            stackService.forceDelete(id, user);
+        } else {
+            stackService.delete(id, user);
+        }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @ApiOperation(value = StackOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
     @RequestMapping(value = "user/stacks/{name}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<TemplateResponse> deletePrivateStack(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+    public ResponseEntity<TemplateResponse> deletePrivateStack(@ModelAttribute("user") CbUser user, @PathVariable String name,
+            @RequestParam(value = "forced", required = false, defaultValue = "false") Boolean forced) {
         MDCBuilder.buildUserMdcContext(user);
-        stackService.delete(name, user);
+        if (forced) {
+            stackService.forceDelete(name, user);
+        } else {
+            stackService.delete(name, user);
+        }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @ApiOperation(value = StackOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
     @RequestMapping(value = "account/stacks/{name}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<TemplateResponse> deletePublicStack(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+    public ResponseEntity<TemplateResponse> deletePublicStack(@ModelAttribute("user") CbUser user, @PathVariable String name,
+            @RequestParam(value = "forced", required = false, defaultValue = "false") Boolean forced) {
         MDCBuilder.buildUserMdcContext(user);
-        stackService.delete(name, user);
+        if (forced) {
+            stackService.forceDelete(name, user);
+        } else {
+            stackService.delete(name, user);
+        }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

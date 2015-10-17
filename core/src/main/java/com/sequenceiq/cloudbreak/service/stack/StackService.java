@@ -32,9 +32,13 @@ public interface StackService {
 
     Stack get(String ambariAddress);
 
+    void forceDelete(String name, CbUser user);
+
     Stack create(CbUser user, Stack stack);
 
     void delete(Long id, CbUser cbUser);
+
+    void forceDelete(Long id, CbUser user);
 
     void removeInstance(CbUser user, Long stackId, String instanceId);
 

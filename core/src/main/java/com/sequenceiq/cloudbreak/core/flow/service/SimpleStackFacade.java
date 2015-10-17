@@ -16,8 +16,6 @@ import static com.sequenceiq.cloudbreak.common.type.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.common.type.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_IN_PROGRESS;
 
-import javax.inject.Inject;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -28,6 +26,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+import com.sequenceiq.cloudbreak.common.type.OnFailureAction;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
@@ -39,12 +47,9 @@ import com.sequenceiq.cloudbreak.core.flow.context.StackInstanceUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
-import com.sequenceiq.cloudbreak.common.type.OnFailureAction;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
@@ -71,10 +76,6 @@ import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
-import org.apache.commons.lang3.time.DateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 @Service
 public class SimpleStackFacade implements StackFacade {
@@ -139,6 +140,7 @@ public class SimpleStackFacade implements StackFacade {
         STACK_NOTIFICATION_EMAIL("stack.notification.email"),
         STACK_DELETE_IN_PROGRESS("stack.delete.in.progress"),
         STACK_DELETE_COMPLETED("stack.delete.completed"),
+        STACK_FORCED_DELETE_COMPLETED("stack.forced.delete.completed"),
         STACK_ADDING_INSTANCES("stack.adding.instances"),
         STACK_METADATA_EXTEND("stack.metadata.extend"),
         STACK_BOOTSTRAP_NEW_NODES("stack.bootstrap.new.nodes"),
@@ -276,6 +278,28 @@ public class SimpleStackFacade implements StackFacade {
         } catch (Exception e) {
             LOGGER.error("Exception during the stack termination process: {}", e.getMessage());
             throw new CloudbreakException(e);
+        }
+        return context;
+    }
+
+    @Override
+    public FlowContext forceTerminateStack(FlowContext context) throws CloudbreakException {
+        try {
+            return terminateStack(context);
+        } catch (CloudbreakException e) {
+            DefaultFlowContext actualContext = (DefaultFlowContext) context;
+            Stack stack = stackService.getById(actualContext.getStackId());
+
+            stackUpdater.updateStackStatus(stack.getId(), DELETE_COMPLETED,
+                    "The cluster and its infrastructure have been force terminated.");
+            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_FORCED_DELETE_COMPLETED, DELETE_COMPLETED.name());
+
+            if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
+                emailSenderService.sendTerminationSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), stack.getCluster().getName());
+                fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_NOTIFICATION_EMAIL, DELETE_COMPLETED.name());
+            }
+            terminationService.finalizeTermination(stack.getId());
+            clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
         }
         return context;
     }
