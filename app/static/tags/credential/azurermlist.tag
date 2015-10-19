@@ -36,13 +36,6 @@
         <!-- .col-sm-9 -->
     </div>
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="secretKey">{{msg.credential_azure_rm_form_secret_key_id_label}}</label>
-
-        <div class="col-sm-9">
-            <p id="secretKey" class="form-control-static">{{credential.parameters.secretKey}}</p>
-        </div>
-    </div>
-    <div class="form-group">
         <label class="col-sm-3 control-label" for="tenantId">{{msg.credential_azure_rm_form_tenant_id_label}}</label>
 
         <div class="col-sm-9">
