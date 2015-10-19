@@ -18,7 +18,7 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     Cluster findOneWithLists(@Param("id") Long id);
 
-    List<Cluster> findByStatus(@Param("status") Status status);
+    List<Cluster> findByStatuses(@Param("statuses") List<Status> statuses);
 
     Cluster findByNameInAccount(@Param("name") String name, @Param("account") String account);
 
