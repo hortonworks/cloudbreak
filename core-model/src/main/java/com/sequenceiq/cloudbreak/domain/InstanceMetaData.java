@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
                 name = "InstanceMetaData.findUnregisteredHostsInInstanceGroup",
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.id= :instanceGroupId "
-                        + "AND (i.instanceStatus = 'UNREGISTERED' OR i.instanceStatus = 'CREATED')"),
+                        + "AND i.instanceStatus = 'UNREGISTERED'"),
         @NamedQuery(
                 name = "InstanceMetaData.findUnusedHostsInInstanceGroup",
                 query = "SELECT i FROM InstanceMetaData i "
@@ -53,7 +53,7 @@ import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.stack.id= :stackId "
                         + "AND i.instanceGroup.groupName= :groupName "
-                        + "AND i.instanceStatus in ('CREATED', 'UNREGISTERED', 'DECOMMISSIONED')"),
+                        + "AND i.instanceStatus in ('CREATED', 'UNREGISTERED', 'DECOMMISSIONED', 'FAILED')"),
         @NamedQuery(
                 name = "InstanceMetaData.findNotTerminatedByPrivateAddress",
                 query = "SELECT i FROM InstanceMetaData i "
@@ -213,6 +213,10 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public boolean isCreated() {
         return InstanceStatus.CREATED.equals(instanceStatus);
+    }
+
+    public boolean isFailed() {
+        return InstanceStatus.FAILED.equals(instanceStatus);
     }
 
     public boolean isDecommissioned() {

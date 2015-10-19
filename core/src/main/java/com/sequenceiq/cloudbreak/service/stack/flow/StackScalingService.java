@@ -167,7 +167,7 @@ public class StackScalingService {
         int i = 0;
         for (InstanceMetaData metaData : stack.getInstanceGroupByInstanceGroupName(instanceGroupName).getInstanceMetaData()) {
             if (!metaData.getAmbariServer() && !metaData.getConsulServer()
-                    && (metaData.isDecommissioned() || metaData.isUnRegistered() || metaData.isCreated())) {
+                    && (metaData.isDecommissioned() || metaData.isUnRegistered() || metaData.isCreated() || metaData.isFailed())) {
                 instanceIds.put(metaData.getInstanceId(), metaData.getDiscoveryFQDN());
                 if (++i >= scalingAdjustment * -1) {
                     break;
