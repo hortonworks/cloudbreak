@@ -1,13 +1,17 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_MAX_OPENSTACK_RESOURCE_NAME_LENGTH;
+
 import java.util.List;
 import java.util.Map;
 
 import org.openstack4j.model.heat.Stack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Splitter;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -19,8 +23,10 @@ public class OpenStackUtils {
 
     public static final String CB_INSTANCE_GROUP_NAME = "cb_instance_group_name";
     public static final String CB_INSTANCE_PRIVATE_ID = "cb_instance_private_id";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackUtils.class);
+
+    @Value("${cb.max.openstack.resource.name.length:" + CB_MAX_OPENSTACK_RESOURCE_NAME_LENGTH + "}")
+    private int maxResourceNameLength;
 
 
     public CloudResource getHeatResource(List<CloudResource> resourceList) {
@@ -52,6 +58,10 @@ public class OpenStackUtils {
         CloudResourceStatus heatResourceStatus = new CloudResourceStatus(resource, HeatStackStatus.mapResourceStatus(status), heatStack.getStackStatusReason());
         LOGGER.debug("Cloudresource status: {}", heatResourceStatus);
         return heatResourceStatus;
+    }
+
+    public String adjustStackNameLength(String stackName) {
+        return new String(Splitter.fixedLength(maxResourceNameLength).splitToList(stackName).get(0));
     }
 
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.service;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_MAX_GCP_RESOURCE_NAME_LENGTH;
+
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -20,13 +22,8 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
     private static final int ATTACHED_DISKS_PART_COUNT = 4;
     private static final int INSTANCE_NAME_PART_COUNT = 3;
 
-    @Value("${cb.max.gcp.resource.name.length:50}")
+    @Value("${cb.max.gcp.resource.name.length:" + CB_MAX_GCP_RESOURCE_NAME_LENGTH + "}")
     private int maxResourceNameLength;
-
-    @Override
-    protected int getMaxResourceLength() {
-        return maxResourceNameLength;
-    }
 
     @Override
     public String resourceName(ResourceType resourceType, Object... parts) {
@@ -67,6 +64,7 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
         name = trimHash(name);
         name = appendPart(name, cnt);
         name = appendHash(name, new Date());
+        name = adjustBaseLength(name, maxResourceNameLength);
         return name;
     }
 
@@ -77,11 +75,12 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
         String instanceGroupName = String.valueOf(parts[1]);
         String privateId = String.valueOf(parts[2]);
 
-        name = normalize(instanceGroupName);
+        name = normalize(stackName);
         name = adjustPartLength(name);
+        name = appendPart(name, normalize(instanceGroupName));
         name = appendPart(name, privateId);
-        name = appendPart(name, stackName);
         name = appendHash(name, new Date());
+        name = adjustBaseLength(name, maxResourceNameLength);
 
         return name;
     }
@@ -94,6 +93,7 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
         name = adjustPartLength(name);
         name = appendPart(name, suffix);
         name = appendHash(name, new Date());
+        name = adjustBaseLength(name, maxResourceNameLength);
         return name;
     }
 
@@ -104,6 +104,7 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
         networkName = normalize(stackName);
         networkName = adjustPartLength(networkName);
         networkName = appendHash(networkName, new Date());
+        networkName = adjustBaseLength(networkName, maxResourceNameLength);
         return networkName;
     }
 }

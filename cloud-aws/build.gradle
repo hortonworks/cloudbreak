@@ -23,7 +23,6 @@ dependencies {
   compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: '3.3.2'
   compile group: 'commons-io',                    name: 'commons-io',                     version: '2.4'
   compile group: 'commons-codec',                 name: 'commons-codec',                  version: '1.10'
-  compile group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
   compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: '1.10.11')      { exclude group: 'commons-logging' }
   compile group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
 
