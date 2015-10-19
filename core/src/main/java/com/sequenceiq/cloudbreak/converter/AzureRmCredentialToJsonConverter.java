@@ -24,7 +24,6 @@ public class AzureRmCredentialToJsonConverter extends AbstractConversionServiceA
         Map<String, Object> params = new HashMap<>();
         params.put(RequiredAzureRmCredentialParam.SUBSCRIPTION_ID.getName(), source.getSubscriptionId());
         params.put(RequiredAzureRmCredentialParam.ACCES_KEY.getName(), source.getAccesKey());
-        params.put(RequiredAzureRmCredentialParam.SECRET_KEY.getName(), source.getSecretKey());
         params.put(RequiredAzureRmCredentialParam.TENANT_ID.getName(), source.getTenantId());
         credentialJson.setParameters(params);
         credentialJson.setLoginUserName(source.getLoginUserName());
