@@ -179,7 +179,7 @@
                         </div>
                         <div class="panel panel-default" ng-show="filteredActiveClusterData.length !== 0">
                             <div class="panel-heading">
-                                <h5><a href="" data-toggle="collapse" data-target="#panel-collapse0002"><i class="fa fa-align-justify fa-fw"></i>{{msg.active_cluster_stack_description_title_prefix_label}} {{activeCluster.name}}</a></h5>
+                                <h5><a href="" data-toggle="collapse" data-target="#panel-collapse0002"><i class="fa fa-align-justify fa-fw"></i>{{msg.active_cluster_stack_description_title_prefix_label}}</a></h5>
                             </div>
                             <div id="panel-collapse0002" class="panel-collapse collapse">
                                 <div class="panel-body pagination">
