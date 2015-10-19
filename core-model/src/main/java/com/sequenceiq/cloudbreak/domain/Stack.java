@@ -201,9 +201,9 @@ import com.sequenceiq.cloudbreak.common.type.Status;
                 query = "SELECT s FROM Stack s "
                         + "WHERE s.status <> 'DELETE_COMPLETED' "),
         @NamedQuery(
-                name = "Stack.findByStatus",
+                name = "Stack.findByStatuses",
                 query = "SELECT s FROM Stack s "
-                        + "WHERE s.status= :status"
+                        + "WHERE s.status IN :statuses"
         )
 })
 public class Stack implements ProvisionEntity {

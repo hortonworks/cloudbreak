@@ -6,8 +6,8 @@ import java.util.Set;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.common.type.Status;
+import com.sequenceiq.cloudbreak.domain.Stack;
 
 @EntityType(entityClass = Stack.class)
 public interface StackRepository extends CrudRepository<Stack, Long> {
@@ -52,5 +52,5 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
 
     List<Stack> findAllAlive();
 
-    List<Stack> findByStatus(@Param("status") Status status);
+    List<Stack> findByStatuses(@Param("statuses") List<Status> statuses);
 }

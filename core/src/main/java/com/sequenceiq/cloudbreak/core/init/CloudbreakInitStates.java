@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.init;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -39,7 +40,7 @@ public class CloudbreakInitStates {
     }
 
     private void resetCloudStatus() {
-        List<Cluster> clustersInProgress = clusterRepository.findByStatus(Status.UPDATE_IN_PROGRESS);
+        List<Cluster> clustersInProgress = clusterRepository.findByStatuses(Arrays.asList(Status.UPDATE_REQUESTED, Status.UPDATE_IN_PROGRESS));
         for (Cluster cluster : clustersInProgress) {
             LOGGER.info("Cluster {} status is updated from {} to {} at CB start.", cluster.getId(), cluster.getStatus(), Status.WAIT_FOR_SYNC);
             cluster.setStatus(Status.WAIT_FOR_SYNC);
@@ -48,7 +49,7 @@ public class CloudbreakInitStates {
     }
 
     private void resetStackStatus() {
-        List<Stack> stacksInProgress = stackRepository.findByStatus(Status.UPDATE_IN_PROGRESS);
+        List<Stack> stacksInProgress = stackRepository.findByStatuses(Arrays.asList(Status.UPDATE_REQUESTED, Status.UPDATE_IN_PROGRESS));
         for (Stack stack : stacksInProgress) {
             LOGGER.info("Stack {} status is updated from {} to {} at CB start.", stack.getId(), stack.getStatus(), Status.WAIT_FOR_SYNC);
             stack.setStatus(Status.WAIT_FOR_SYNC);

@@ -49,9 +49,9 @@ import com.sequenceiq.cloudbreak.common.type.Status;
                         + "LEFT JOIN FETCH c.hostGroups "
                         + "WHERE c.id= :id"),
         @NamedQuery(
-                name = "Cluster.findByStatus",
+                name = "Cluster.findByStatuses",
                 query = "SELECT c FROM Cluster c "
-                        + "WHERE c.status= :status"
+                        + "WHERE c.status IN :statuses"
         ),
         @NamedQuery(
                 name = "Cluster.findByNameInAccount",
