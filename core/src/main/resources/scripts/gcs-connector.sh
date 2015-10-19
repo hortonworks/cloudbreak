@@ -18,5 +18,5 @@ main(){
   mv "$SOURCE_JAR" "$TARGET_DIR"
 }
 
-exec &> "$LOGFILE"
+exec &>> "$LOGFILE"
 [[ "$0" == "$BASH_SOURCE" ]] && main "$@"
