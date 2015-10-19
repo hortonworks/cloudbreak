@@ -196,17 +196,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     $scope.showErrorMessage($rootScope.msg.filesystem_config_error);
                     return;
                 }
-                if (!$scope.isUndefined($scope.cluster.fileSystem) && $scope.cluster.fileSystem.type == "DASH" && $scope.isUndefined($scope.cluster.ambariStackDetails)) {
-                    $scope.cluster.ambariStackDetails = {};
-                    $scope.cluster.ambariStackDetails.stack = "HDP";
-                    $scope.cluster.ambariStackDetails.version = "2.3";
-                    $scope.cluster.ambariStackDetails.os = "redhat6";
-                    $scope.cluster.ambariStackDetails.stackRepoId = "HDP-2.3";
-                    $scope.cluster.ambariStackDetails.verify = true;
-                    $scope.cluster.ambariStackDetails.stackBaseURL = "http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.3.0.1";
-                    $scope.cluster.ambariStackDetails.utilsRepoId = "HDP-UTILS-1.1.0.20";
-                    $scope.cluster.ambariStackDetails.utilsBaseURL = "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/centos6";
-                }
             }
             if ($rootScope.activeCredential.cloudPlatform == 'AWS' || $rootScope.activeCredential.cloudPlatform == 'OPENSTACK') {
                 delete $scope.cluster.fileSystem;
@@ -439,7 +428,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             if ($rootScope.activeCredential != undefined && $rootScope.activeCredential.cloudPlatform != undefined) {
                 if ($rootScope.activeCredential.cloudPlatform == 'AZURE' || $rootScope.activeCredential.cloudPlatform == 'AZURE_RM') {
                     $scope.cluster.fileSystem = {};
-                    $scope.cluster.fileSystem.type = "DASH";
+                    $scope.cluster.fileSystem.type = "WASB";
                     $scope.cluster.fileSystem.defaultFs = true;
                 } else if ($rootScope.activeCredential.cloudPlatform == 'GCP') {
                     $scope.cluster.fileSystem = {};
