@@ -57,7 +57,7 @@
     <label class="col-sm-3 control-label" for="csecretKey">{{msg.credential_azure_rm_form_secret_key_id_label}}</label>
 
     <div class="col-sm-9">
-        <input type="text" class="form-control" id="credentialAzureRm.parameters.secretKey" name="csecretKey" ng-model="credentialAzureRm.parameters.secretKey" required placeholder="{{msg.credential_azure_rm_form_secret_key_id_placeholder}}">
+        <input type="password" class="form-control" id="credentialAzureRm.parameters.secretKey" name="csecretKey" ng-model="credentialAzureRm.parameters.secretKey" required placeholder="{{msg.credential_azure_rm_form_secret_key_id_placeholder}}">
         <div class="help-block" ng-show="azureRmCredentialForm.csecretKey.$dirty && azureRmCredentialForm.csecretKey.$invalid">
             <i class="fa fa-warning"></i> {{msg.credential_secretkey_invalid}}
         </div>
