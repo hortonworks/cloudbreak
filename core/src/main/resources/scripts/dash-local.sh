@@ -41,5 +41,5 @@ main(){
 
 }
 
-exec &> "$LOGFILE"
+exec &>> "$LOGFILE"
 [[ "$0" == "$BASH_SOURCE" ]] && main "$@"

@@ -8,5 +8,5 @@ main(){
   echo "p12 file successfully downloaded from key-value store."
 }
 
-exec &> "$LOGFILE"
+exec &>> "$LOGFILE"
 [[ "$0" == "$BASH_SOURCE" ]] && main "$@"
