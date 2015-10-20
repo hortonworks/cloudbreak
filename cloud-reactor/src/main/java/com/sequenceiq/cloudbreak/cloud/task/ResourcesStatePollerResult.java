@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.task;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 

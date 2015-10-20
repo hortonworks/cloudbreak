@@ -27,13 +27,13 @@ import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
-import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.handler.ParameterGenerator;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -136,12 +136,12 @@ public class TestApplicationContext {
         when(cloudConnector.credentials()).thenReturn(credentialConnector);
         when(credentialConnector.create(any(AuthenticatedContext.class))).thenReturn(new CloudCredentialStatus(null, CredentialStatus.CREATED));
         when(credentialConnector.delete(any(AuthenticatedContext.class))).thenReturn(new CloudCredentialStatus(null, CredentialStatus.DELETED));
-        when(instanceConnector.metadata()).thenReturn(collector);
         when(authenticator.authenticate((CloudContext) any(), (CloudCredential) any())).thenReturn(g.createAuthenticatedContext());
         when(cloudConnector.platform()).thenReturn("TESTCONNECTOR");
         when(cloudConnector.variant()).thenReturn("TESTVARIANT");
         when(cloudConnector.resources()).thenReturn(resourceConnector);
         when(cloudConnector.instances()).thenReturn(instanceConnector);
+        when(cloudConnector.metadata()).thenReturn(collector);
         when(resourceConnector.launch((AuthenticatedContext) any(), (CloudStack) any(), (PersistenceNotifier) any(), (AdjustmentType) any(), anyLong()))
                 .thenReturn(Arrays.asList(new CloudResourceStatus(resource, ResourceStatus.CREATED)));
         when(resourceConnector.terminate((AuthenticatedContext) any(), (CloudStack) any(), (List<CloudResource>) any()))

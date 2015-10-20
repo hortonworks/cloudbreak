@@ -14,8 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
-import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
-import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
@@ -31,18 +30,11 @@ public class OpenStackInstanceConnector implements InstanceConnector {
 
     @Inject
     private OpenStackClient openStackClient;
-    @Inject
-    private OpenStackMetadataCollector metadataCollector;
 
     @Override
     public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm) {
         OSClient osClient = openStackClient.createOSClient(authenticatedContext);
         return osClient.compute().servers().getConsoleOutput(vm.getInstanceId(), CONSOLE_OUTPUT_LINES);
-    }
-
-    @Override
-    public MetadataCollector metadata() {
-        return metadataCollector;
     }
 
     @Override

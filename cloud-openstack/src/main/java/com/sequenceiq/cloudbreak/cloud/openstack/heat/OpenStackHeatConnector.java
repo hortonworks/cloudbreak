@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
+import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
@@ -32,6 +33,8 @@ public class OpenStackHeatConnector implements CloudConnector {
     private OpenStackResourceConnector resourceConnector;
     @Inject
     private OpenStackInstanceConnector instanceConnector;
+    @Inject
+    private OpenStackMetadataCollector metadataCollector;
     @Inject
     private OpenStackSetup openStackSetup;
     @Inject
@@ -60,6 +63,11 @@ public class OpenStackHeatConnector implements CloudConnector {
     @Override
     public InstanceConnector instances() {
         return instanceConnector;
+    }
+
+    @Override
+    public MetadataCollector metadata() {
+        return metadataCollector;
     }
 
     @Override

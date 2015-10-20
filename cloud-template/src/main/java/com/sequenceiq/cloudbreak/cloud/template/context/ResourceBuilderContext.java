@@ -8,7 +8,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.DynamicModel;
+import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
 public class ResourceBuilderContext extends DynamicModel {
 

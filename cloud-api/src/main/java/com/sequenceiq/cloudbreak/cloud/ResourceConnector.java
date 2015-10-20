@@ -2,19 +2,22 @@ package com.sequenceiq.cloudbreak.cloud;
 
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 
 public interface ResourceConnector {
 
     // Resources
 
-    List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier, AdjustmentType adjustmentType,
+    List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier<ResourcePersisted> persistenceNotifier,
+            AdjustmentType
+            adjustmentType,
             Long threshold) throws Exception;
 
     List<CloudResourceStatus> check(AuthenticatedContext authenticatedContext, List<CloudResource> resources);

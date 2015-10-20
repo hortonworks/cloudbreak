@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
+
 public class Network extends DynamicModel {
 
     private final Subnet subnet;

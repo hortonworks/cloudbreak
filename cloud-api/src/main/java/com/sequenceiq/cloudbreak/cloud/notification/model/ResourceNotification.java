@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.notification.model;
 
-import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 
 import reactor.rx.Promise;

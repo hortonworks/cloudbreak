@@ -21,16 +21,17 @@ import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.arm.context.StorageCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.task.ArmPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
-import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
+import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 import groovyx.net.http.HttpResponseException;
@@ -49,8 +50,6 @@ public class ArmSetup implements Setup {
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
     @Inject
     private ArmUtils armUtils;
-    @Inject
-    private ResourceNotifier resourceNotifier;
     @Inject
     private ArmPollTaskFactory armPollTaskFactory;
 
@@ -105,13 +104,13 @@ public class ArmSetup implements Setup {
     }
 
     @Override
-    public void execute(AuthenticatedContext ac, CloudStack stack) {
+    public void execute(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier<ResourcePersisted> persistenceNotifier) {
         String storageGroup = armUtils.getResourceGroupName(ac.getCloudContext());
         AzureRMClient client = armClient.createAccess(ac.getCloudCredential());
         CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.ARM_TEMPLATE).name(storageGroup).build();
         String region = ac.getCloudContext().getLocation().getRegion().value();
         try {
-            resourceNotifier.notifyAllocation(cloudResource, ac.getCloudContext());
+            persistenceNotifier.notifyAllocation(cloudResource, ac.getCloudContext());
             if (!resourceGroupExist(client, storageGroup)) {
                 client.createResourceGroup(storageGroup, CloudRegion.valueOf(region).value());
             }

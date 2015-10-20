@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableList;
+import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
 public class InstanceTemplate extends DynamicModel {
 

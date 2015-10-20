@@ -1,0 +1,25 @@
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+
+repositories {
+    maven { url 'http://repo.spring.io/libs-release' }
+    mavenCentral()
+}
+
+jar {
+    baseName = 'cloud-reactor-api'
+}
+
+dependencies {
+
+    compile project(':cloud-api')
+    compile project(':cloud-common')
+
+    compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
+    compile group: 'io.projectreactor',             name: 'reactor-core',                   version: eventBusVersion
+    compile group: 'io.projectreactor',             name: 'reactor-bus',                    version: eventBusVersion
+    compile group: 'io.projectreactor',             name: 'reactor-stream',                 version: eventBusVersion
+    compile group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
+
+}

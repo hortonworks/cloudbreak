@@ -69,8 +69,7 @@ dependencies {
 
     compile project(':core-model')
     compile project(':orchestrator-api')
-    compile project(':cloud-api')
-    compile project(':cloud-common')
+    compile project(':cloud-reactor-api')
 
     runtime project(':orchestrator-swarm')
     runtime project(':cloud-reactor')

@@ -22,9 +22,8 @@ import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
-import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
-import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
@@ -37,9 +36,6 @@ public class AwsInstanceConnector implements InstanceConnector {
 
     @Inject
     private AwsClient awsClient;
-
-    @Inject
-    private AwsMetadataCollector awsMetadataCollector;
 
     @Override
     public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm) {
@@ -57,11 +53,6 @@ public class AwsInstanceConnector implements InstanceConnector {
             LOGGER.debug(ex.getMessage(), ex);
             return "";
         }
-    }
-
-    @Override
-    public MetadataCollector metadata() {
-        return awsMetadataCollector;
     }
 
     @Override

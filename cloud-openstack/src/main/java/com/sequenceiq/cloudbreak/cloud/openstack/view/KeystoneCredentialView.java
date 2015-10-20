@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.openstack.view;
 
 import static org.apache.commons.lang3.StringUtils.deleteWhitespace;
 
-import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 public class KeystoneCredentialView {

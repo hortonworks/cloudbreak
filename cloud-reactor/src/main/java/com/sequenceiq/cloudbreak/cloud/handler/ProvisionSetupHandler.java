@@ -7,12 +7,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 
 import reactor.bus.Event;
 
@@ -23,6 +24,9 @@ public class ProvisionSetupHandler implements CloudPlatformEventHandler<SetupReq
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Inject
+    private ResourceNotifier resourceNotifier;
 
     @Override
     public Class<SetupRequest> type() {
@@ -38,7 +42,7 @@ public class ProvisionSetupHandler implements CloudPlatformEventHandler<SetupReq
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             CloudStack cloudStack = request.getCloudStack();
-            connector.setup().execute(auth, cloudStack);
+            connector.setup().execute(auth, cloudStack, resourceNotifier);
 
             request.getResult().onNext(new SetupResult(request));
             LOGGER.info("Provision setup finished for {}", cloudContext);

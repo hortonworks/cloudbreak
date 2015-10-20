@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -37,7 +37,7 @@ public class CollectMetadataHandler implements CloudPlatformEventHandler<Collect
         try {
             CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
-            List<CloudVmInstanceStatus> instanceStatuses = connector.instances().metadata().collect(ac, request.getCloudResource(), request.getVms());
+            List<CloudVmInstanceStatus> instanceStatuses = connector.metadata().collect(ac, request.getCloudResource(), request.getVms());
             CollectMetadataResult collectMetadataResult = new CollectMetadataResult(request.getCloudContext(), instanceStatuses);
             request.getResult().onNext(collectMetadataResult);
             LOGGER.info("Metadata collection successfully finished");

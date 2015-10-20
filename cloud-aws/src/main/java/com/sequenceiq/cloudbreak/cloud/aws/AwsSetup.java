@@ -17,16 +17,15 @@ import com.amazonaws.services.ec2.model.InternetGateway;
 import com.amazonaws.services.ec2.model.InternetGatewayAttachment;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
-import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
-import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Component
 public class AwsSetup implements Setup {
@@ -40,8 +39,7 @@ public class AwsSetup implements Setup {
 
     @Inject
     private CloudFormationStackUtil cfStackUtil;
-    @Inject
-    private ResourceNotifier resourceNotifier;
+
     @Inject
     private AwsClient awsClient;
 
@@ -56,7 +54,7 @@ public class AwsSetup implements Setup {
     }
 
     @Override
-    public void execute(AuthenticatedContext ac, CloudStack stack) {
+    public void execute(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier<ResourcePersisted> persistenceNotifier) {
         Network network = stack.getNetwork();
         if (!awsSpotinstanceEnabled) {
             for (Group group : stack.getGroups()) {
@@ -86,9 +84,7 @@ public class AwsSetup implements Setup {
                 throw new CloudConnectorException(String.format(IGW_DOES_NOT_EXIST_MSG, network.getStringParameter("internetGatewayId")));
             }
         }
-        String cFStackName = cfStackUtil.getCfStackName(ac);
-        CloudResource cloudFormationStack = new CloudResource.Builder().type(ResourceType.CLOUDFORMATION_STACK).name(cFStackName).build();
-        resourceNotifier.notifyAllocation(cloudFormationStack, ac.getCloudContext());
+
         LOGGER.debug("setup has been executed");
     }
 

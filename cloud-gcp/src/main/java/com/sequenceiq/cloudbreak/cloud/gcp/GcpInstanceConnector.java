@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +12,8 @@ import org.springframework.stereotype.Service;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Instance;
-import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
-import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -29,14 +26,6 @@ import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 public class GcpInstanceConnector extends AbstractInstanceConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpInstanceConnector.class);
-
-    @Inject
-    private GcpMetadataCollector metadataCollector;
-
-    @Override
-    public MetadataCollector metadata() {
-        return metadataCollector;
-    }
 
     @Override
     public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {

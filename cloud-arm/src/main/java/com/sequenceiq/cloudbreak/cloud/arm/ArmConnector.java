@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
+import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
@@ -26,10 +27,11 @@ public class ArmConnector implements CloudConnector {
     @Inject
     private ArmInstanceConnector armInstanceConnector;
     @Inject
+    private ArmMetadataCollector armMetadataCollector;
+    @Inject
     private ArmCredentialConnector armCredentialConnector;
     @Inject
     private ArmPlatformParameters armPlatformParameters;
-
     @Inject
     private ArmSetup armSetup;
     @Inject
@@ -58,6 +60,11 @@ public class ArmConnector implements CloudConnector {
     @Override
     public InstanceConnector instances() {
         return armInstanceConnector;
+    }
+
+    @Override
+    public MetadataCollector metadata() {
+        return armMetadataCollector;
     }
 
     @Override

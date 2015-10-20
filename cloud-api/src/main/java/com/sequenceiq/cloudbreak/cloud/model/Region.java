@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
+
 public class Region extends StringType {
 
     private Region(String value) {
