@@ -31,7 +31,7 @@ INSERT INTO component (componenttype,
                        name,
                        stack_id,
                        attributes)
-   SELECT 'CONTAINER' AS componentType,
+   SELECT 'IMAGE' AS componentType,
           'image' AS NAME,
           s.id AS stack_id,
              '{"imageName":"'
@@ -46,7 +46,7 @@ INSERT INTO component (componenttype,
                        name,
                        stack_id,
                        attributes)
-   SELECT 'CONTAINER' AS componentType,
+   SELECT 'IMAGE' AS componentType,
           'image' AS NAME,
           s.id AS stack_id,
              '{"imageName":"'
