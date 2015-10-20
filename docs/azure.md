@@ -23,6 +23,8 @@ Please edit the Profile file - the only mandatory configuration is the `PUBLIC_I
 
 #### Azure access setup
 
+If you want to use your Azure subscription then you need an Azure Active directory user.
+You can configure your AD users on `manage.windowsazure.com` > `Active Directory` > `Your active directory` > `Users` > `Add User` after you add the user to the AD you need to add to the `manage.windowsazure.com` > `Settings` > `Administrators` > `Add` now you can create ARM application with cbd
 In order for Cloudbreak to be able to launch clusters on Azure on your behalf you need to set up your Azure ARM application.
 
 ```

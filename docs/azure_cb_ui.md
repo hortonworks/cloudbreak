@@ -17,7 +17,9 @@ You can now log into the Cloudbreak application at http://PUBLIC_IP:3000. Once l
 
 `App Owner Tenant ID:` You Tenant Id (Browse all> Subscription> Subscription detail> Users> You application> Properties)
 
-`SSH certificate:` the SSH public certificate in OpenSSH format that's private keypair can be used to log into the launched instances later (The key generation process is described in the Configuring the Microsoft Azure account section)
+`SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later
+
+> Cloudbreak supporting simple rsa public key instead of X509 certificate file
 
 The ssh username is **cloudbreak**
 
@@ -36,10 +38,6 @@ Using manage resources you can create infrastructure templates. Templates descri
 `Attached volumes per instance:` the number of disks to be attached
 
 `Volume size (GB):` the size of the attached disks (in GB)
-
-`Spot price:` option to set a spot price - not mandatory, if specified we will request spot price instances (which might take a while or never be fulfilled by Amazon)
-
-`EBS encryption:` this feature is supported with all EBS volume types (General Purpose (SSD), Provisioned IOPS (SSD), and Magnetic
 
 `Public in account:` share it with others in the account
 
