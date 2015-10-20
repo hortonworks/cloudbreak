@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.event.context.ResourceBuilderContext;
+import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -27,9 +27,9 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
-import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
+import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
 
 @Component(ResourceCreateThread.NAME)
 @Scope(value = "prototype")
@@ -43,7 +43,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
     @Inject
     private SyncPollingScheduler<List<CloudResourceStatus>> syncPollingScheduler;
     @Inject
-    private PollTaskFactory statusCheckFactory;
+    private ResourcePollTaskFactory resourcePollTaskFactory;
     @Inject
     private PersistenceNotifier resourceNotifier;
 
@@ -80,7 +80,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
                 List<CloudResource> resources = builder.build(context, privateId, auth, group, image, list);
                 updateResource(auth, resources);
                 context.addComputeResources(privateId, resources);
-                PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(builder, auth, resources, context, true);
+                PollTask<List<CloudResourceStatus>> task = resourcePollTaskFactory.newPollResourceTask(builder, auth, resources, context, true);
                 List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
                 for (CloudResourceStatus resourceStatus : pollerResult) {
                     resourceStatus.setPrivateId(privateId);

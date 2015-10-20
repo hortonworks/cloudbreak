@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.task;
+package com.sequenceiq.cloudbreak.cloud.template.task;
 
 import static java.util.Arrays.asList;
 
@@ -8,9 +8,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.event.context.ResourceBuilderContext;
+import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.task.AbstractPollTask;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 
 @Component(PollComputeStatusTask.NAME)
