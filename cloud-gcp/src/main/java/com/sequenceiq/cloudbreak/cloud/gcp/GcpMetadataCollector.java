@@ -64,9 +64,9 @@ public class GcpMetadataCollector implements MetadataCollector {
         for (CloudResource resource : resources) {
             if (ResourceType.GCP_INSTANCE == resource.getType()) {
                 String resourceName = resource.getName();
-                long privateId = GcpStackUtil.getPrivateId(resourceName);
+                Long privateId = GcpStackUtil.getPrivateId(resourceName);
                 for (InstanceTemplate vm : vms) {
-                    if (vm.getPrivateId() == privateId) {
+                    if (privateId == null || vm.getPrivateId().equals(privateId)) {
                         templateMap.put(resourceName, vm);
                         break;
                     }

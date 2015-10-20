@@ -36,6 +36,7 @@ public final class GcpStackUtil {
     private static final String GCP_IMAGE_TYPE_PREFIX = "https://www.googleapis.com/compute/v1/projects/%s/global/images/";
     private static final String EMPTY_BUCKET = "";
     private static final int FINISHED = 100;
+    private static final int PRIVATE_ID_PART = 2;
     private static final String SERVICE_ACCOUNT = "serviceAccountId";
     private static final String PRIVATE_KEY = "serviceAccountPrivateKey";
     private static final String PROJECT_ID = "projectId";
@@ -167,8 +168,16 @@ public final class GcpStackUtil {
         return String.format(GCP_IMAGE_TYPE_PREFIX + getImageName(image), projectId);
     }
 
-    public static long getPrivateId(String resourceName) {
-        return Long.valueOf(resourceName.split("-")[2]);
+    public static Long getPrivateId(String resourceName) {
+        try {
+            return Long.valueOf(resourceName.split("-")[PRIVATE_ID_PART]);
+        } catch (NumberFormatException nfe) {
+            LOGGER.warn("Cannot determine the private id of GCP instance, name: " + resourceName);
+            return null;
+        } catch (Exception e) {
+            LOGGER.warn("Cannot determine the private id of GCP instance, name: " + resourceName, e);
+            return null;
+        }
     }
 
     private static String[] createParts(String splittable) {

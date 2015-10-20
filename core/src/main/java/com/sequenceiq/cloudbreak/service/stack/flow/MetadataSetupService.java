@@ -13,10 +13,10 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
@@ -109,13 +109,17 @@ public class MetadataSetupService {
         Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
         for (CoreInstanceMetaData coreInstanceMetadataEntry : coreInstanceMetaData) {
             long timeInMillis = Calendar.getInstance().getTimeInMillis();
-            InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), coreInstanceMetadataEntry.getInstanceGroupName());
             Long privateId = coreInstanceMetadataEntry.getPrivateId();
-            InstanceMetaData instanceMetaDataEntry = createInstanceMetadataIfAbsent(allInstanceMetadata, privateId);
+            String instanceId = coreInstanceMetadataEntry.getInstanceId();
+            InstanceMetaData instanceMetaDataEntry = createInstanceMetadataIfAbsent(allInstanceMetadata, privateId, instanceId);
+            // CB 1.0.x clusters do not have private id thus we cannot correlate them with instance groups thus keep the original one
+            String group = instanceMetaDataEntry.getInstanceGroup() == null ? coreInstanceMetadataEntry.getInstanceGroupName()
+                    : instanceMetaDataEntry.getInstanceGroup().getGroupName();
+            InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), group);
             instanceMetaDataEntry.setPrivateIp(coreInstanceMetadataEntry.getPrivateIp());
             instanceMetaDataEntry.setInstanceGroup(instanceGroup);
             instanceMetaDataEntry.setPublicIp(coreInstanceMetadataEntry.getPublicIp());
-            instanceMetaDataEntry.setInstanceId(coreInstanceMetadataEntry.getInstanceId());
+            instanceMetaDataEntry.setInstanceId(instanceId);
             instanceMetaDataEntry.setPrivateId(privateId);
             instanceMetaDataEntry.setVolumeCount(coreInstanceMetadataEntry.getVolumeCount());
             instanceMetaDataEntry.setDockerSubnet(null);
@@ -136,10 +140,16 @@ public class MetadataSetupService {
         return updatedInstanceMetadata;
     }
 
-    private InstanceMetaData createInstanceMetadataIfAbsent(Set<InstanceMetaData> allInstanceMetadata, Long privateId) {
+    private InstanceMetaData createInstanceMetadataIfAbsent(Set<InstanceMetaData> allInstanceMetadata, Long privateId, String instanceId) {
         if (privateId != null) {
             for (InstanceMetaData instanceMetaData : allInstanceMetadata) {
                 if (Objects.equals(instanceMetaData.getPrivateId(), privateId)) {
+                    return instanceMetaData;
+                }
+            }
+        } else {
+            for (InstanceMetaData instanceMetaData : allInstanceMetadata) {
+                if (Objects.equals(instanceMetaData.getInstanceId(), instanceId)) {
                     return instanceMetaData;
                 }
             }
