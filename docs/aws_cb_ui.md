@@ -101,7 +101,7 @@ Using the create cluster functionality Cloudbreak will create a cloud Stack and 
 
 `Validate blueprint:` feature to validate or not the Ambari blueprint. By default is switched on.
 
- `Dedicated instances:` AWS allows to use dedicated instances
+`Dedicated instances:` AWS allows to use dedicated instances
 
 `Ambari Repository config:` you can take the stack RPM's from a custom stack repository
 

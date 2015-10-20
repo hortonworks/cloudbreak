@@ -2,60 +2,108 @@
 
 Start the shell with `cbd util cloudbreak-shell`. This will launch the Cloudbr shell inside a Docker container and you are ready to start using it.
 
-### Create a cloud credential
 
-In order to start using Cloudbreak you will need to have an AWS cloud use configured. Note that Cloudbreak **does not** store you cloud user details - we work around the concept of [IAM](http://aws.amazon.com/iam/) - on Amazon (or other cloud providers) you will have to create an IAM role, a policy and associate that with your Cloudbreak account.
+## Manage cloud credentials
 
-```
-credential createEC2 --description “description" --name “myCredentialName" --roleArn "arn:aws:iam::NUMBER:role/cloudbreak-ABC" --sshKeyUrl “URL towards your AWS public key"
-```
+You can now log into the Cloudbreak application at http://PUBLIC_IP:3000. Once logged in go to **Manage credentials**. Using manage credentials will  link your cloud account with the Cloudbreak account.
 
-Alternatively you can upload your public key from a file as well, by using the `—sshKeyPath` switch. You can check whether the credential was creates successfully by using the `credential list` command. You can switch between your cloud credential - when you’d like to use one and act with that you will have to use:
+`Name:` name of your credential
 
-```
-credential select --id #ID of the credential
-```
+`Description:` short description of your linked credential
 
-### Create a template
+`Project Id:` your GCP Project id - see Accounts
 
-A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. A template can be used repeatedly to create identical copies of the same stack (or to use as a foundation to start a new stack).
+`Service Account Email Address:` your GCP service account mail address - see Accounts
 
-```
-template createEC2 --name awstemplate --description aws-template  --region EU_WEST_1 --instanceType M3Xlarge --volumeSize 100 --volumeCount 2
-```
-You can check whether the template was created successfully by using the `template list` command. Check the template and select it if you are happy with it:
+`Service Account private (p12) key:` your GCP service account generated private key - see Accounts
 
-```
-template show --id #ID of the template
+`SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later
 
-template select --id #ID of the template
-```
-### Create a stack
+`Public in account:` share it with others in the account
 
-Stacks are template `instances` - a running cloud infrastructure created based on a template. Use the following command to create a stack to be used with your Hadoop cluster:
+The ssh username is cloudbreak.
 
-```
-stack create --name “myStackName" --nodeCount 10
-```
-### Select a blueprint
+##Manage resources
 
-We ship default Hadoop cluster blueprints with Cloudbreak. You can use these blueprints or add yours. To see the available blueprints and use one of them please use:
+Using manage resources you can create infrastructure templates. Templates describes the infrastructure where the HDP cluster will be provisioned. We support heterogenous clusters - this means that one cluster can be built by combining different templates.
 
-```
-blueprint list
+`Name:` name of your template
 
-blueprint select --id #ID of the blueprint
-```
-### Create a Hadoop cluster
-You are almost done - one more command and this will create your Hadoop cluster on your favorite cloud provider. Same as the API, or UI this will use your `template`, and by using CloudFormation will launch a cloud `stack` - once the `stack` is up and running (cloud provisioning is done) it will use your selected `blueprint` and install your custom Hadoop cluster with the selected components and services.
+`Description:` short description of your template
 
-```
-cluster create --description “my cluster desc"
-```
-You are done - you can check the progress through the Ambari UI. If you log back to Cloudbreak UI you can check the progress over there as well, and learn the IP address of Ambari.
+`Instance type:` the Amazon instance type to be used - we suggest to use at least small or medium instances
 
-# Silent mode
+`Volume type:` option to choose are SSD, regular HDD (both EBS) or Ephemeral
 
-With Cloudbreak shell you can recreate clusters based on earlier deployments. Each time you start the shell the executed commands are logged in a file line by line and later either with the `script` command or specifying an `—cmdfile` option the same commands can be executed again.
+`Attached volumes per instance:` the number of disks to be attached
 
-With c`bd util cloudbreak-shell-quiet` you can specify a shell file and let the shell apply the configs step by step in a silent mode.
+`Volume size (GB):` the size of the attached disks (in GB)
+
+`Public in account:` share it with others in the account
+
+## Manage blueprints
+Blueprints are your declarative definition of a Hadoop cluster.
+
+`Name:` name of your blueprint
+
+`Description:` short description of your blueprint
+
+`Source URL:` you can add a blueprint by pointing to a URL. As an example you can use this [blueprint](https://github.com/sequenceiq/ambari-rest-client/raw/1.6.0/src/main/resources/blueprints/multi-node-hdfs-yarn).
+
+`Manual copy:` you can copy paste your blueprint in this text area
+
+`Public in account:` share it with others in the account
+
+## Manage networks
+Manage networks allows you to create or reuse existing networks and configure them.
+
+`Name:` name of the network
+
+`Description:` short description of your network
+
+`Subnet (CIDR):` a subnet in the VPC with CIDR block
+
+`Public in account:` share it with others in the account
+
+## Manage security groups
+Security groups allows configuration of traffic/access to the cluster. Currently there are two default groups, and later versions will allow setup of new groups.
+
+`only-ssh-and-ssl:` all ports are locked down (you can't access Hadoop services outside of the VPN) but SSH (22) and HTTPS (443)
+
+`all-services-port:` all Hadoop services + SSH/HTTP are accessible by default: SSH (22) HTTPS (443) 8080 (Ambari) 8500 (Consul) 50070 (NN) 8088 (RM Web) 8030 (RM Scheduler) 8050 (RM IPC) 19888 (Job history server) 60010 (HBase master) 15000 (Falcon) 8744 (Storm) 11000 (Oozie) 18080 (Spark HS) 8042 (NM Web) 9996 (Zeppelin WebSocket) 9995 (Zeppelin UI) 3080 (Kibana) 9200 (Elasticsearch)
+
+## Create a cluster
+
+Using the create cluster functionality Cloudbreak will create a cloud Stack and a Hadoop Cluster. In order to create a cluster you will have to select a credential first.
+
+`Cluster name:` your cluster name
+
+`Region:` the region where the cluster is started
+
+`Network:` the network template
+
+`Security Group:" the security group
+
+`Blueprint:` your Hadoop cluster blueprint. Once the blueprint is selected we parse it and give you the option to select the followings for each **hostgroup**.
+
+`Hostgroup configuration`
+
+  `Group size:` the number of instances to be started
+
+  `Template:` the stack template associated to the hostgroup
+
+`Enable security:` Install KDC and Kerberize the cluster
+
+`Public in account:` share it with others in the account
+
+**Advanced features**:
+
+`Consul server count:` the number of Consul servers (odd number), by default is 3. It varies with the cluster size.
+
+`Minimum cluster size:` the provisioning strategy in case of the cloud provider can't allocate all the requested nodes
+
+`Validate blueprint:` feature to validate or not the Ambari blueprint. By default is switched on.
+
+`Ambari Repository config:` you can take the stack RPM's from a custom stack repository
+
+Once you have launched the cluster creation you can track the progress either on Cloudbreak UI or your cloud provider management UI.
