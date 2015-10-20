@@ -1,13 +1,27 @@
 package com.sequenceiq.cloudbreak.service.hostgroup;
 
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 
-public interface HostGroupService {
+@Service
+public class HostGroupService {
 
-    HostGroup getByClusterIdAndInstanceGroupName(Long clusterId, String instanceGroupName);
+    @Inject
+    private HostGroupRepository hostGroupRepository;
 
-    HostGroup getByClusterIdAndName(Long clusterId, String hostGroupName);
+    public HostGroup getByClusterIdAndName(Long clusterId, String hostGroupName) {
+        return hostGroupRepository.findHostGroupInClusterByName(clusterId, hostGroupName);
+    }
 
-    HostGroup save(HostGroup hostGroup);
+    public HostGroup save(HostGroup hostGroup) {
+        return hostGroupRepository.save(hostGroup);
+    }
 
+    public HostGroup getByClusterIdAndInstanceGroupName(Long clusterId, String instanceGroupName) {
+        return hostGroupRepository.findHostGroupsByInstanceGroupName(clusterId, instanceGroupName);
+    }
 }

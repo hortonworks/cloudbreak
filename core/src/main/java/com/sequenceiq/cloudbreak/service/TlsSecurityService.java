@@ -25,6 +25,7 @@ import com.google.common.io.BaseEncoding;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
+import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -59,7 +60,7 @@ public class TlsSecurityService {
     @Inject
     private SecurityConfigRepository securityConfigRepository;
 
-    public void setupSSHKeys(Stack stack) throws CloudbreakSecuritySetupException {
+    public void storeSSHKeys(Stack stack) throws CloudbreakSecuritySetupException {
         try {
             generateTempSshKeypair(stack.getId());
             SecurityConfig securityConfig = new SecurityConfig();
@@ -240,4 +241,13 @@ public class TlsSecurityService {
         }
         return readSecurityFile(stackId, getPublicSshKeyFileName(stackId));
     }
+
+    public byte[] getCertificate(Long id) {
+        String cert = securityConfigRepository.getServerCertByStackId(id);
+        if (cert == null) {
+            throw new NotFoundException("Stack doesn't exist, or certificate was not found for stack.");
+        }
+        return Base64.decodeBase64(cert);
+    }
+
 }

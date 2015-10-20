@@ -219,7 +219,6 @@ public class Stack implements ProvisionEntity {
     private boolean publicInAccount;
     private String region;
     private String availabilityZone;
-    private String image;
     private int consulServers;
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
@@ -247,6 +246,8 @@ public class Stack implements ProvisionEntity {
     private SecurityConfig securityConfig;
     @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<InstanceGroup> instanceGroups = new HashSet<>();
+    @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<Component> components = new HashSet<>();
     @Version
     private Long version;
     @ManyToOne
@@ -365,14 +366,6 @@ public class Stack implements ProvisionEntity {
 
     public void setResources(Set<Resource> resources) {
         this.resources = resources;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
     }
 
     public int getConsulServers() {
@@ -619,5 +612,13 @@ public class Stack implements ProvisionEntity {
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public Set<Component> getComponents() {
+        return components;
+    }
+
+    public void setComponents(Set<Component> components) {
+        this.components = components;
     }
 }

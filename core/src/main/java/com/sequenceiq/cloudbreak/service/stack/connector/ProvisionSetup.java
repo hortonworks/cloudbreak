@@ -13,14 +13,6 @@ public interface ProvisionSetup {
 
     ImageStatusResult checkImage(Stack stack) throws Exception;
 
-    /**
-     * @deprecated There is no pre-provision check in SPI, therefore this method will be deleted soon
-     *
-     *
-     */
-    @Deprecated
-    String preProvisionCheck(Stack stack);
-
     CloudPlatform getCloudPlatform();
 
 }

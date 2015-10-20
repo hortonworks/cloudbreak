@@ -27,11 +27,12 @@ dependencies {
         exclude group: 'org.slf4j';
     }
 
-    compile "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
-    compile "org.springframework.boot:spring-boot-starter-actuator:${springBootVersion}"
-    compile "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
-    compile "org.springframework.boot:spring-boot-starter-websocket:${springBootVersion}"
-    compile "org.springframework.boot:spring-boot-starter-aop:${springBootVersion}"
+    compile group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
+    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-web',        version: springBootVersion
+    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-actuator',   version: springBootVersion
+    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-data-jpa',   version: springBootVersion
+    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-websocket',  version: springBootVersion
+    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-aop',        version: springBootVersion
     compile group: 'javax',                         name: 'javaee-api',                     version: '7.0'
     compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',    version: '2.0.3.RELEASE'
     compile group: 'org.springframework.security',  name: 'spring-security-config',         version: '3.2.3.RELEASE'
@@ -59,6 +60,7 @@ dependencies {
     compile group: 'com.mangofactory',              name: 'swagger-springmvc',              version: '1.0.2'
     compile group: 'com.google.http-client',        name: 'google-http-client-jackson2',    version: '1.17.0-rc'
     compile (group: 'com.google.oauth-client',      name: 'google-oauth-client-jetty',      version: '1.17.0-rc')   { exclude module: 'servlet-api' }
+    //needs to be removed
     compile ("com.sequenceiq:azure-rest-client:${azureRestClientVersion}")                                          { exclude group: 'log4j' }
     compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: '1.10.11')      { exclude group: 'commons-logging' }
     compile group: 'com.jcraft',                    name: 'jsch',                           version: '0.1.52'

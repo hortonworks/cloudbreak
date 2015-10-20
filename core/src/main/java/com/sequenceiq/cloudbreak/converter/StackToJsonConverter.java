@@ -50,7 +50,6 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         if (source.getFailurePolicy() != null) {
             stackJson.setFailurePolicy(getConversionService().convert(source.getFailurePolicy(), FailurePolicyJson.class));
         }
-        stackJson.setImage(source.getImage());
         if (source.getNetwork() == null) {
             stackJson.setNetworkId(null);
         } else {

@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.type.OnFailureAction;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
@@ -58,7 +57,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -67,7 +65,6 @@ import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
-import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulMetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
@@ -98,8 +95,6 @@ public class SimpleStackFacade implements StackFacade {
     @Inject
     private MetadataSetupService metadataSetupService;
     @Inject
-    private UserDataBuilder userDataBuilder;
-    @Inject
     private HostGroupService hostGroupService;
     @Inject
     private ClusterBootstrapper clusterBootstrapper;
@@ -118,8 +113,6 @@ public class SimpleStackFacade implements StackFacade {
     @Inject
     private TlsSetupService tlsSetupService;
     @Inject
-    private TlsSecurityService tlsSecurityService;
-    @Inject
     private StackSyncService stackSyncService;
     @Inject
     private SecurityGroupService securityGroupService;
@@ -127,48 +120,6 @@ public class SimpleStackFacade implements StackFacade {
     private CloudbreakMessagesService messagesService;
     @Inject
     private CloudPlatformResolver platformResolver;
-
-    private enum Msg {
-        STACK_INFRASTRUCTURE_BOOTSTRAP("stack.infrastructure.bootstrap"),
-        STACK_INFRASTRUCTURE_METADATA_SETUP("stack.infrastructure.metadata.setup"),
-        STACK_INFRASTRUCTURE_STARTING("stack.infrastructure.starting"),
-        STACK_INFRASTRUCTURE_STARTED("stack.infrastructure.started"),
-        STACK_BILLING_STARTED("stack.billing.started"),
-        STACK_BILLING_STOPPED("stack.billing.stopped"),
-        STACK_INFRASTRUCTURE_STOPPING("stack.infrastructure.stopping"),
-        STACK_INFRASTRUCTURE_STOPPED("stack.infrastructure.stopped"),
-        STACK_NOTIFICATION_EMAIL("stack.notification.email"),
-        STACK_DELETE_IN_PROGRESS("stack.delete.in.progress"),
-        STACK_DELETE_COMPLETED("stack.delete.completed"),
-        STACK_FORCED_DELETE_COMPLETED("stack.forced.delete.completed"),
-        STACK_ADDING_INSTANCES("stack.adding.instances"),
-        STACK_METADATA_EXTEND("stack.metadata.extend"),
-        STACK_BOOTSTRAP_NEW_NODES("stack.bootstrap.new.nodes"),
-        STACK_UPSCALE_FINISHED("stack.upscale.finished"),
-        STACK_DOWNSCALE_INSTANCES("stack.downscale.instances"),
-        STACK_DOWNSCALE_SUCCESS("stack.downscale.success"),
-        STACK_STOP_REQUESTED("stack.stop.requested"),
-        STACK_PROVISIONING("stack.provisioning"),
-        STACK_INFRASTRUCTURE_TIME("stack.infrastructure.time"),
-        STACK_INFRASTRUCTURE_SUBNETS_UPDATING("stack.infrastructure.subnets.updating"),
-        STACK_INFRASTRUCTURE_SUBNETS_UPDATED("stack.infrastructure.subnets.updated"),
-        STACK_INFRASTRUCTURE_UPDATE_FAILED("stack.infrastructure.update.failed"),
-        STACK_INFRASTRUCTURE_CREATE_FAILED("stack.infrastructure.create.failed"),
-        STACK_INFRASTRUCTURE_ROLLBACK_FAILED("stack.infrastructure.rollback.failed"),
-        STACK_INFRASTRUCTURE_DELETE_FAILED("stack.infrastructure.delete.failed"),
-        STACK_INFRASTRUCTURE_START_FAILED("stack.infrastructure.start.failed"),
-        STACK_INFRASTRUCTURE_STOP_FAILED("stack.infrastructure.stop.failed");
-
-        private String code;
-
-        Msg(String msgCode) {
-            code = msgCode;
-        }
-
-        public String code() {
-            return code;
-        }
-    }
 
     @Override
     public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
@@ -500,13 +451,10 @@ public class SimpleStackFacade implements StackFacade {
 
             CloudPlatform cloudPlatform = stack.cloudPlatform();
             CloudPlatformConnector connector = platformResolver.connector(cloudPlatform);
-            Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(cloudPlatform,
-                    tlsSecurityService.readPublicSshKey(stack.getId()), stack.getCredential().getLoginUserName(), connector.getPlatformParameters(stack));
             Map<String, Set<SecurityRule>> modifiedSubnets = getModifiedSubnetList(stack, actualContext.getAllowedSecurityRules());
             Set<SecurityRule> newSecurityRules = modifiedSubnets.get(UPDATED_SUBNETS);
             stack.getSecurityGroup().setSecurityRules(newSecurityRules);
-            connector.updateAllowedSubnets(stack,
-                    userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE));
+            connector.updateAllowedSubnets(stack);
             securityRuleRepository.delete(modifiedSubnets.get(REMOVED_SUBNETS));
             securityRuleRepository.save(newSecurityRules);
 
@@ -679,5 +627,47 @@ public class SimpleStackFacade implements StackFacade {
         LOGGER.debug("{} [STACK_FLOW_STEP]. Context: {}", msgCode, context);
         String message = messagesService.getMessage(msgCode.code(), Arrays.asList(args));
         cloudbreakEventService.fireCloudbreakEvent(stackId, eventType, message);
+    }
+
+    private enum Msg {
+        STACK_INFRASTRUCTURE_BOOTSTRAP("stack.infrastructure.bootstrap"),
+        STACK_INFRASTRUCTURE_METADATA_SETUP("stack.infrastructure.metadata.setup"),
+        STACK_INFRASTRUCTURE_STARTING("stack.infrastructure.starting"),
+        STACK_INFRASTRUCTURE_STARTED("stack.infrastructure.started"),
+        STACK_BILLING_STARTED("stack.billing.started"),
+        STACK_BILLING_STOPPED("stack.billing.stopped"),
+        STACK_INFRASTRUCTURE_STOPPING("stack.infrastructure.stopping"),
+        STACK_INFRASTRUCTURE_STOPPED("stack.infrastructure.stopped"),
+        STACK_NOTIFICATION_EMAIL("stack.notification.email"),
+        STACK_DELETE_IN_PROGRESS("stack.delete.in.progress"),
+        STACK_DELETE_COMPLETED("stack.delete.completed"),
+        STACK_FORCED_DELETE_COMPLETED("stack.forced.delete.completed"),
+        STACK_ADDING_INSTANCES("stack.adding.instances"),
+        STACK_METADATA_EXTEND("stack.metadata.extend"),
+        STACK_BOOTSTRAP_NEW_NODES("stack.bootstrap.new.nodes"),
+        STACK_UPSCALE_FINISHED("stack.upscale.finished"),
+        STACK_DOWNSCALE_INSTANCES("stack.downscale.instances"),
+        STACK_DOWNSCALE_SUCCESS("stack.downscale.success"),
+        STACK_STOP_REQUESTED("stack.stop.requested"),
+        STACK_PROVISIONING("stack.provisioning"),
+        STACK_INFRASTRUCTURE_TIME("stack.infrastructure.time"),
+        STACK_INFRASTRUCTURE_SUBNETS_UPDATING("stack.infrastructure.subnets.updating"),
+        STACK_INFRASTRUCTURE_SUBNETS_UPDATED("stack.infrastructure.subnets.updated"),
+        STACK_INFRASTRUCTURE_UPDATE_FAILED("stack.infrastructure.update.failed"),
+        STACK_INFRASTRUCTURE_CREATE_FAILED("stack.infrastructure.create.failed"),
+        STACK_INFRASTRUCTURE_ROLLBACK_FAILED("stack.infrastructure.rollback.failed"),
+        STACK_INFRASTRUCTURE_DELETE_FAILED("stack.infrastructure.delete.failed"),
+        STACK_INFRASTRUCTURE_START_FAILED("stack.infrastructure.start.failed"),
+        STACK_INFRASTRUCTURE_STOP_FAILED("stack.infrastructure.stop.failed");
+
+        private String code;
+
+        Msg(String msgCode) {
+            code = msgCode;
+        }
+
+        public String code() {
+            return code;
+        }
     }
 }

@@ -15,7 +15,7 @@ public class StackServiceTest {
 
     @Before
     public void before() {
-        stackService = new DefaultStackService();
+        stackService = new StackService();
         MockitoAnnotations.initMocks(this);
     }
 

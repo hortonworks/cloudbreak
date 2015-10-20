@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -19,6 +20,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
+import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
@@ -116,9 +118,11 @@ public class ReactorApplication implements CommandLineRunner {
 
         groups.add(new Group(name, InstanceGroupType.CORE, Arrays.asList(instance)));
 
-        Image image = new Image("cb-centos66-amb200-2015-05-25");
-        image.putUserData(InstanceGroupType.CORE, "CORE");
-        image.putUserData(InstanceGroupType.GATEWAY, "GATEWAY");
+        Map<InstanceGroupType, String> userData = ImmutableMap.of(
+                InstanceGroupType.CORE, "CORE",
+                InstanceGroupType.GATEWAY, "GATEWAY"
+        );
+        Image image = new Image("cb-centos66-amb200-2015-05-25", userData);
 
         Subnet subnet = new Subnet("10.0.0.0/24");
         Network network = new Network(subnet);

@@ -20,16 +20,15 @@ import org.springframework.stereotype.Service;
 
 import com.ecwid.consul.v1.ConsulClient;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
+import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
@@ -43,7 +42,6 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
-import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 
 @Service
 public class StackScalingService {
@@ -53,8 +51,6 @@ public class StackScalingService {
 
     @Inject
     private StackService stackService;
-    @Inject
-    private UserDataBuilder userDataBuilder;
     @Inject
     private PollingService<ConsulContext> consulPollingService;
     @Inject
@@ -100,9 +96,7 @@ public class StackScalingService {
         Stack stack = stackService.getById(stackId);
         CloudPlatform cloudPlatform = stack.cloudPlatform();
         CloudPlatformConnector connector = platformResolver.connector(cloudPlatform);
-        Map<InstanceGroupType, String> userdata = buildUserData(stack, cloudPlatform, connector);
-        return connector.addInstances(stack, userdata.get(InstanceGroupType.GATEWAY),
-                userdata.get(InstanceGroupType.CORE), scalingAdjustment, instanceGroupName);
+        return connector.addInstances(stack, scalingAdjustment, instanceGroupName);
     }
 
     public void removeInstance(Long stackId, String instanceId) throws Exception {
@@ -153,9 +147,7 @@ public class StackScalingService {
         Set<String> instanceIds = Sets.newHashSet(instanceId);
         CloudPlatform platform = stack.cloudPlatform();
         CloudPlatformConnector connector = platformResolver.connector(platform);
-        Map<InstanceGroupType, String> userdata = buildUserData(stack, platform, connector);
-        instanceIds = connector.removeInstances(stack, userdata.get(InstanceGroupType.GATEWAY), userdata.get(InstanceGroupType.CORE),
-                instanceIds, instanceGroupName);
+        instanceIds = connector.removeInstances(stack, instanceIds, instanceGroupName);
         updateRemovedResourcesState(stack, instanceIds, stack.getInstanceGroupByInstanceGroupName(instanceGroupName));
     }
 
@@ -165,9 +157,7 @@ public class StackScalingService {
         CloudPlatformConnector connector = platformResolver.connector(platform);
         Map<String, String> unusedInstanceIds = getUnusedInstanceIds(instanceGroupName, scalingAdjustment, stack);
         Set<String> instanceIds = new HashSet<>(unusedInstanceIds.keySet());
-        Map<InstanceGroupType, String> userdata = buildUserData(stack, platform, connector);
-        instanceIds = connector.removeInstances(stack, userdata.get(InstanceGroupType.GATEWAY),
-                userdata.get(InstanceGroupType.CORE), instanceIds, instanceGroupName);
+        instanceIds = connector.removeInstances(stack, instanceIds, instanceGroupName);
         updateRemovedResourcesState(stack, instanceIds, stack.getInstanceGroupByInstanceGroupName(instanceGroupName));
     }
 
@@ -185,12 +175,6 @@ public class StackScalingService {
             }
         }
         return instanceIds;
-    }
-
-    private Map<InstanceGroupType, String> buildUserData(Stack stack, CloudPlatform platform, CloudPlatformConnector connector)
-            throws CloudbreakSecuritySetupException {
-        return userDataBuilder.buildUserData(platform, tlsSecurityService.readPublicSshKey(stack.getId()), stack.getCredential().getLoginUserName(),
-                connector.getPlatformParameters(stack));
     }
 
     private void updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) throws CloudbreakSecuritySetupException {

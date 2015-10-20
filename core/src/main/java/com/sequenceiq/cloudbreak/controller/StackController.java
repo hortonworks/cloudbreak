@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationFailed;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
@@ -52,6 +53,9 @@ public class StackController {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private TlsSecurityService tlsSecurityService;
 
     @Inject
     @Qualifier("conversionService")
@@ -217,7 +221,7 @@ public class StackController {
     @RequestMapping(value = "stacks/{id}/certificate", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<CertificateResponse> getCertificate(@PathVariable Long id) {
-        return new ResponseEntity<>(new CertificateResponse(stackService.getCertificate(id)), HttpStatus.OK);
+        return new ResponseEntity<>(new CertificateResponse(tlsSecurityService.getCertificate(id)), HttpStatus.OK);
     }
 
     @ApiOperation(value = StackOpDescription.VALIDATE, produces = ContentType.JSON, notes = Notes.STACK_NOTES)

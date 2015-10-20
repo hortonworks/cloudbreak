@@ -9,11 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.common.type.Status;
-import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 
 @Component
 public class StackUpdater {
@@ -22,8 +21,6 @@ public class StackUpdater {
 
     @Inject
     private StackRepository stackRepository;
-    @Inject
-    private CloudbreakEventService cloudbreakEventService;
     @Inject
     private ResourceRepository resourceRepository;
     @Inject

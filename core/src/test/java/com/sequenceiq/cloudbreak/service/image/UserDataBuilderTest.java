@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.connector;
+package com.sequenceiq.cloudbreak.service.image;
 
 import java.io.IOException;
 import java.util.HashMap;

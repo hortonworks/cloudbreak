@@ -52,12 +52,6 @@ public class ServiceProviderSetupAdapter implements ProvisionSetup {
     }
 
     @Override
-    public String preProvisionCheck(Stack stack) {
-        //There is no pre-provision check in SPI
-        return null;
-    }
-
-    @Override
     public ProvisionEvent prepareImage(Stack stack) throws Exception {
         CloudPlatform cloudPlatform = stack.cloudPlatform();
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
