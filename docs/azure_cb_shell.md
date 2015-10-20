@@ -11,22 +11,16 @@ credential create --AZURE --description "description" --name "myCredentialName" 
 Alternatively you can upload your public key from a file as well, by using the `—sshKeyPath` switch. You can check whether the credential was creates successfully by using the `credential list` command.
 You can switch between your cloud credential - when you’d like to use one and act with that you will have to use:
 ```
-credential select --id #ID of the credential
-or
 credential select --name #NAME of the credential
 ```
 
 You can delete your cloud credential - when you’d like to delete one you will have to use:
 ```
-credential delete --id #ID of the credential
-or
 credential delete --name #NAME of the credential
 ```
 
 You can show your cloud credential - when you’d like to show one you will have to use:
 ```
-credential show --id #ID of the credential
-or
 credential show --name #NAME of the credential
 ```
 
@@ -40,22 +34,16 @@ template create --AZURE --name azuretemplate --description azure-template --inst
 You can check whether the template was created successfully by using the `template list` command.
 Check the template and select it if you are happy with it:
 ```
-template select --id #ID of the template
-or
 template select --name #NAME of the template
 ```
 
 You can delete your cloud template - when you’d like to delete one you will have to use:
 ```
-template delete --id #ID of the template
-or
 template delete --name #NAME of the template
 ```
 
 You can show your cloud template - when you’d like to show one you will have to use:
 ```
-template show --id #ID of the template
-or
 template show --name #NAME of the template
 ```
 
