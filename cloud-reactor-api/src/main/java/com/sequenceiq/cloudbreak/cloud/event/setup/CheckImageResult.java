@@ -6,8 +6,8 @@ import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 
 public class CheckImageResult extends CloudPlatformResult {
 
-    private ImageStatus imageStatus;
-    private Integer statusProgressValue;
+    private final ImageStatus imageStatus;
+    private final Integer statusProgressValue;
 
     public CheckImageResult(CloudPlatformRequest<?> request, ImageStatus imageStatus, Integer statusProgressValue) {
         super(request);
@@ -22,6 +22,7 @@ public class CheckImageResult extends CloudPlatformResult {
     public CheckImageResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request, ImageStatus imageStatus) {
         super(statusReason, errorDetails, request);
         this.imageStatus = imageStatus;
+        this.statusProgressValue = null;
     }
 
     public ImageStatus getImageStatus() {

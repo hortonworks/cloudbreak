@@ -15,14 +15,14 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
-import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
-import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
+import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
+import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 
 @Component
 public class OpenStackSetup implements Setup {
@@ -33,14 +33,14 @@ public class OpenStackSetup implements Setup {
     private OpenStackClient openStackClient;
 
     @Override
-    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack) {
-        String imageName = stack.getImage().getImageName();
+    public void prepareImage(AuthenticatedContext authenticatedContext, com.sequenceiq.cloudbreak.cloud.model.Image image) {
+        String imageName = image.getImageName();
         OSClient osClient = openStackClient.createOSClient(authenticatedContext);
         verifyImage(osClient, imageName);
     }
 
     @Override
-    public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack) {
+    public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, com.sequenceiq.cloudbreak.cloud.model.Image image) {
         return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
     }
 

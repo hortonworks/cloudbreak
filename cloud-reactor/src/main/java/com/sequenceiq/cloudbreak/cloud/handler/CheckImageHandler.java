@@ -9,15 +9,15 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
+import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 
 import reactor.bus.Event;
 
@@ -45,8 +45,8 @@ public class CheckImageHandler implements CloudPlatformEventHandler<CheckImageRe
         try {
             CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
-            CloudStack cloudStack = request.getCloudStack();
-            ImageStatusResult progress = connector.setup().checkImageStatus(auth, cloudStack);
+            Image image = request.getImage();
+            ImageStatusResult progress = connector.setup().checkImageStatus(auth, image);
             CheckImageResult imageResult = new CheckImageResult(request, progress.getImageStatus(), progress.getStatusProgressValue());
             request.getResult().onNext(imageResult);
             LOGGER.info("Provision setup finished for {}", cloudContext);

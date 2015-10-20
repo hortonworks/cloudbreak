@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
@@ -54,7 +55,7 @@ public class ArmSetup implements Setup {
     private ArmPollTaskFactory armPollTaskFactory;
 
     @Override
-    public void prepareImage(AuthenticatedContext ac, CloudStack stack) {
+    public void prepareImage(AuthenticatedContext ac, Image image) {
         String storageName = armUtils.getStorageName(ac.getCloudCredential(), ac.getCloudContext(), ac.getCloudContext().getLocation().getRegion().value());
         String imageResourceGroupName = armUtils.getImageResourceGroupName(ac.getCloudContext());
         AzureRMClient client = armClient.createAccess(ac.getCloudCredential());
@@ -64,8 +65,8 @@ public class ArmSetup implements Setup {
                 client.createResourceGroup(imageResourceGroupName, CloudRegion.valueOf(region).value());
             }
             createStorage(ac, client, storageName, imageResourceGroupName, region);
-            if (!storageContainsImage(client, imageResourceGroupName, storageName, stack.getImage().getImageName())) {
-                client.copyImageBlobInStorageContainer(imageResourceGroupName, storageName, IMAGES, stack.getImage().getImageName());
+            if (!storageContainsImage(client, imageResourceGroupName, storageName, image.getImageName())) {
+                client.copyImageBlobInStorageContainer(imageResourceGroupName, storageName, IMAGES, image.getImageName());
             }
         } catch (HttpResponseException ex) {
             throw new CloudConnectorException(ex.getResponse().getData().toString(), ex);
@@ -76,13 +77,13 @@ public class ArmSetup implements Setup {
     }
 
     @Override
-    public ImageStatusResult checkImageStatus(AuthenticatedContext ac, CloudStack stack) {
+    public ImageStatusResult checkImageStatus(AuthenticatedContext ac, Image image) {
         String storageName = armUtils.getStorageName(ac.getCloudCredential(), ac.getCloudContext(), ac.getCloudContext().getLocation().getRegion().value());
         String imageResourceGroupName = armUtils.getImageResourceGroupName(ac.getCloudContext());
         ArmCredentialView armCredentialView = new ArmCredentialView(ac.getCloudCredential());
         AzureRMClient client = armClient.createAccess(armCredentialView);
         try {
-            CopyState copyState = client.getCopyStatus(imageResourceGroupName, storageName, IMAGES, stack.getImage().getImageName());
+            CopyState copyState = client.getCopyStatus(imageResourceGroupName, storageName, IMAGES, image.getImageName());
             if (CopyStatus.SUCCESS.equals(copyState.getStatus())) {
                 return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
             } else if (CopyStatus.ABORTED.equals(copyState.getStatus()) || CopyStatus.INVALID.equals(copyState.getStatus())) {

@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
@@ -44,12 +45,12 @@ public class AwsSetup implements Setup {
     private AwsClient awsClient;
 
     @Override
-    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack) {
+    public void prepareImage(AuthenticatedContext authenticatedContext, Image image) {
         LOGGER.debug("prepare image has been executed");
     }
 
     @Override
-    public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack) {
+    public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, Image image) {
         return new ImageStatusResult(ImageStatus.CREATE_FINISHED, FINISHED_PROGRESS_VALUE);
     }
 
