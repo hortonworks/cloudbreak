@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.context;
 
 import com.google.api.services.compute.Compute;
-import com.sequenceiq.cloudbreak.cloud.event.context.ResourceBuilderContext;
+import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 
 public class GcpContext extends ResourceBuilderContext {
 

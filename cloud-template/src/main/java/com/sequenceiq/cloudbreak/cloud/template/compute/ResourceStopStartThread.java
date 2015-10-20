@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.event.context.ResourceBuilderContext;
+import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
@@ -23,8 +23,8 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
-import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
+import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
 
 @Component(ResourceStopStartThread.NAME)
 @Scope(value = "prototype")
@@ -36,7 +36,7 @@ public class ResourceStopStartThread implements Callable<ResourceRequestResult<L
     @Inject
     private SyncPollingScheduler<List<CloudVmInstanceStatus>> syncPollingScheduler;
     @Inject
-    private PollTaskFactory statusCheckFactory;
+    private ResourcePollTaskFactory resourcePollTaskFactory;
 
     private final ResourceBuilderContext context;
     private final AuthenticatedContext auth;
@@ -63,7 +63,7 @@ public class ResourceStopStartThread implements Callable<ResourceRequestResult<L
         }
         CloudVmInstanceStatus status = context.isBuild() ? builder.start(context, auth, instance) : builder.stop(context, auth, instance);
         if (status != null) {
-            PollTask<List<CloudVmInstanceStatus>> task = statusCheckFactory.newPollComputeStatusTask(builder, auth, context, status.getCloudInstance());
+            PollTask<List<CloudVmInstanceStatus>> task = resourcePollTaskFactory.newPollComputeStatusTask(builder, auth, context, status.getCloudInstance());
             List<CloudVmInstanceStatus> pollResult = syncPollingScheduler.schedule(task);
             return new ResourceRequestResult<>(FutureResult.SUCCESS, pollResult);
         }

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.event.context;
+package com.sequenceiq.cloudbreak.cloud.template.context;
 
 import java.util.ArrayList;
 import java.util.HashMap;
