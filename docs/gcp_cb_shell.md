@@ -7,13 +7,29 @@ Start the shell with `cbd util cloudbreak-shell`. This will launch the Cloudbrea
 In order to start using Cloudbreak to provision a cluster in Google Cloud you will need to have an GCP credential. If you do not want to Cloubreak to reach you google cloud resources then you have to delete the service account.
 
 ```
-credential create --GCP --description "description" --name "myCredentialName" --projectId "proctid" --serviceAccountId "12345test@developer.gserviceaccount.com" --serviceAccountPrivateKeyPath "/tmp/gcp.p12" --sshKeyUrl "URL towards your GCP public key"
+credential create --GCP --description "description" --name "myCredentialName" --projectId "projectid" --serviceAccountId "12345test@developer.gserviceaccount.com" --serviceAccountPrivateKeyPath "/tmp/gcp.p12" --sshKeyUrl "URL towards your GCP public key"
 ```
 
-Alternatively you can upload your public key from a file as well, by using the `—sshKeyPath` switch. You can check whether the credential was creates successfully by using the `credential list` command. You can switch between your cloud credential - when you’d like to use one and act with that you will have to use:
-
+Alternatively you can upload your public key from a file as well, by using the `—sshKeyPath` switch. You can check whether the credential was creates successfully by using the `credential list` command.
+You can switch between your cloud credential - when you’d like to use one and act with that you will have to use:
 ```
 credential select --id #ID of the credential
+or
+credential select --name #NAME of the credential
+```
+
+You can delete your cloud credential - when you’d like to delete one you will have to use:
+```
+credential delete --id #ID of the credential
+or
+credential delete --name #NAME of the credential
+```
+
+You can show your cloud credential - when you’d like to show one you will have to use:
+```
+credential show --id #ID of the credential
+or
+credential show --name #NAME of the credential
 ```
 
 ### Create a template
@@ -29,13 +45,28 @@ Other available options:
 
 --publicInAccount "flag": flags if the template is public in the account
 
-You can check whether the template was created successfully by using the `template list` command. Check the template and select it if you are happy with it:
+You can check whether the template was created successfully by using the `template list` command.
+Check the template and select it if you are happy with it:
+```
+template select --id #ID of the template
+or
+template select --name #NAME of the template
+```
 
+You can delete your cloud template - when you’d like to delete one you will have to use:
+```
+template delete --id #ID of the template
+or
+template delete --name #NAME of the template
+```
+
+You can show your cloud template - when you’d like to show one you will have to use:
 ```
 template show --id #ID of the template
-
-template select --id #ID of the template
+or
+template show --name #NAME of the template
 ```
+
 ### Create a stack
 
 Stacks are template `instances` - a running cloud infrastructure created based on a template. Use the following command to create a stack to be used with your Hadoop cluster:
