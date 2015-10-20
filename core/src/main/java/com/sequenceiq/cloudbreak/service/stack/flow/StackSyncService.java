@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.common.type.Status.CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.common.type.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.common.type.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.common.type.Status.WAIT_FOR_SYNC;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,15 +18,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
+import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
@@ -76,7 +78,8 @@ public class StackSyncService {
         STACK_SYNC_HOST_UPDATED("stack.sync.host.updated"),
         STACK_SYNC_INSTANCE_TERMINATED("stack.sync.instance.terminated"),
         STACK_SYNC_INSTANCE_DELETED_CBMETADATA("stack.sync.instance.deleted.cbmetadata"),
-        STACK_SYNC_INSTANCE_RUNNING("stack.sync.instance.running");
+        STACK_SYNC_INSTANCE_RUNNING("stack.sync.instance.running"),
+        STACK_SYNC_INSTANCE_FAILED("stack.sync.instance.failed");
 
         private String code;
 
@@ -100,7 +103,7 @@ public class StackSyncService {
 
     private void sync(Stack stack) {
         Long stackId = stack.getId();
-        Set<InstanceMetaData> instances = instanceMetaDataRepository.findAllInStack(stackId);
+        Set<InstanceMetaData> instances = instanceMetaDataRepository.findNotTerminatedForStack(stackId);
         Map<InstanceSyncState, Integer> instanceStateCounts = initInstanceStateCounts();
         for (InstanceMetaData instance : instances) {
             InstanceGroup instanceGroup = instance.getInstanceGroup();
@@ -140,7 +143,14 @@ public class StackSyncService {
     private void syncRunningInstance(Stack stack, Long stackId, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance,
             InstanceGroup instanceGroup) {
         instanceStateCounts.put(InstanceSyncState.RUNNING, instanceStateCounts.get(InstanceSyncState.RUNNING) + 1);
-        if (!instance.isRunning() && !instance.isDecommissioned() && !instance.isCreated()) {
+        if (stack.getStatus() == WAIT_FOR_SYNC && instance.isCreated()) {
+            LOGGER.info("Instance '{}' is reported as created on the cloud provider but not member of the cluster, setting its state to FAILED.",
+                    instance.getInstanceId());
+            instance.setInstanceStatus(InstanceStatus.FAILED);
+            instanceMetaDataRepository.save(instance);
+            eventService.fireCloudbreakEvent(stackId, CREATE_FAILED.name(),
+                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_FAILED.code(), Arrays.asList(instance.getDiscoveryFQDN())));
+        } else if (!instance.isRunning() && !instance.isDecommissioned() && !instance.isCreated() && !instance.isFailed()) {
             LOGGER.info("Instance '{}' is reported as running on the cloud provider, updating metadata.", instance.getInstanceId());
             createResourceIfNeeded(stack, instance, instanceGroup);
             updateMetaDataToRunning(stackId, stack.getCluster(), instance, instanceGroup);
