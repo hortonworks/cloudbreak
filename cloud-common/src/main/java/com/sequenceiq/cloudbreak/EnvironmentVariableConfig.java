@@ -94,7 +94,9 @@ public class EnvironmentVariableConfig {
     public static final String CB_CLOUD_API_EXECUTORSERVICE_POOL_SIZE = "40";
 
     public static final String CB_MAX_AZURE_RESOURCE_NAME_LENGTH = "50";
-    public static final String CB_MAX_GCP_RESOURCE_NAME_LENGTH = "50";
+    public static final String CB_MAX_GCP_RESOURCE_NAME_LENGTH = "63";
+    public static final String CB_MAX_AWS_RESOURCE_NAME_LENGTH = "50";
+    public static final String CB_MAX_OPENSTACK_RESOURCE_NAME_LENGTH = "120";
 
     public static final String CB_ADDRESS_RESOLVING_TIMEOUT = "60000";
 
