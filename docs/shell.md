@@ -50,4 +50,4 @@ Note:
 ```
 Once you are connected you can start to create a cluster. If you are lost and need guidance through the process you can use `hint`. You can always use `TAB` for completion. Note that all commands are `context aware` - they are available only when it makes sense - this way you are never confused and guided by the system on the right path.
 
-You can find the provider specific documentations under the **Provider** drop down menu: **Provider / \<Cloud provider\> / Provisioning - CLI** or you can find more detailed documentation about Cloudbreak-shell in its [Github repositiry](https://github.com/sequenceiq/cloudbreak-shell).
+You can find the provider specific documentations under the **Provider** drop down menu: **Provider / <Cloud provider\> / Provisioning - CLI** or you can find more detailed documentation about Cloudbreak-shell in its [Github repositiry](https://github.com/sequenceiq/cloudbreak-shell).
