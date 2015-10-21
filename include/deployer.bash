@@ -184,8 +184,14 @@ doctor() {
     info "===> $desc"
     cbd-version
     if [[ "$(uname)" == "Darwin" ]]; then
-        debug "checking boot2docker on OSX only ..."
+        debug "checking OSX specific dependencies..."
         docker-check-boot2docker
+        if [[ $(is-sub-path $(dirname ~/.) $(pwd)) == 0 ]]; then
+          info "deployer location: OK"
+        else
+          error "Please relocate deployer under your home folder. On OSX other locations are not supported."
+          exit 1
+        fi
     fi
 
     docker-check-version
@@ -195,6 +201,16 @@ doctor() {
 
 cbd-find-root() {
     CBD_ROOT=$PWD
+}
+
+is-sub-path() {
+  declare desc="Checks first path contains secound one"
+
+  declare reference_path=$1
+  declare path=$2
+  local reference_size=${#reference_path}
+  [[ $reference_path == ${path:0:$reference_size} ]]
+  echo $?
 }
 
 deployer-delete() {
