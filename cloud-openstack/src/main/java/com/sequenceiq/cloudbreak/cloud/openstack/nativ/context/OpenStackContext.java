@@ -4,7 +4,7 @@ import org.openstack4j.api.OSClient;
 
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 
-public class OpenStackContext  extends ResourceBuilderContext {
+public class OpenStackContext extends ResourceBuilderContext {
     private OSClient osClient;
 
     public OpenStackContext(String name, String region, int parallelResourceRequest, boolean build) {

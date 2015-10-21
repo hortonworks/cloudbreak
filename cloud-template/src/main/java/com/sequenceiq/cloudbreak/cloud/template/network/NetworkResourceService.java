@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -24,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.template.NetworkResourceBuilder;
+import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
 import com.sequenceiq.cloudbreak.common.type.CommonStatus;
@@ -50,7 +50,7 @@ public class NetworkResourceService {
             if (pollGroup != null && CANCELLED.equals(pollGroup)) {
                 break;
             }
-            CloudResource buildableResource = builder.create(context, auth, network, security);
+            CloudResource buildableResource = builder.create(context, auth);
             createResource(auth, buildableResource);
             CloudResource resource = builder.build(context, auth, network, security, buildableResource);
             updateResource(auth, resource);

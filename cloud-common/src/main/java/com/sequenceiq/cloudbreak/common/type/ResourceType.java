@@ -33,7 +33,6 @@ public enum ResourceType {
     GCP_NETWORK,
     GCP_FIREWALL_IN,
     GCP_FIREWALL_INTERNAL,
-    GCP_ROUTE,
     GCP_INSTANCE,
 
     // ARM
