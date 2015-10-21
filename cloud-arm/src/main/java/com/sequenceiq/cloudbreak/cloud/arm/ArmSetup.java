@@ -21,16 +21,18 @@ import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.arm.context.StorageCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.task.ArmPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
-import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
+import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 import groovyx.net.http.HttpResponseException;
@@ -50,12 +52,10 @@ public class ArmSetup implements Setup {
     @Inject
     private ArmUtils armUtils;
     @Inject
-    private ResourceNotifier resourceNotifier;
-    @Inject
     private ArmPollTaskFactory armPollTaskFactory;
 
     @Override
-    public void prepareImage(AuthenticatedContext ac, CloudStack stack) {
+    public void prepareImage(AuthenticatedContext ac, Image image) {
         String storageName = armUtils.getStorageName(ac.getCloudCredential(), ac.getCloudContext(), ac.getCloudContext().getLocation().getRegion().value());
         String imageResourceGroupName = armUtils.getImageResourceGroupName(ac.getCloudContext());
         AzureRMClient client = armClient.createAccess(ac.getCloudCredential());
@@ -65,8 +65,8 @@ public class ArmSetup implements Setup {
                 client.createResourceGroup(imageResourceGroupName, CloudRegion.valueOf(region).value());
             }
             createStorage(ac, client, storageName, imageResourceGroupName, region);
-            if (!storageContainsImage(client, imageResourceGroupName, storageName, stack.getImage().getImageName())) {
-                client.copyImageBlobInStorageContainer(imageResourceGroupName, storageName, IMAGES, stack.getImage().getImageName());
+            if (!storageContainsImage(client, imageResourceGroupName, storageName, image.getImageName())) {
+                client.copyImageBlobInStorageContainer(imageResourceGroupName, storageName, IMAGES, image.getImageName());
             }
         } catch (HttpResponseException ex) {
             throw new CloudConnectorException(ex.getResponse().getData().toString(), ex);
@@ -77,13 +77,13 @@ public class ArmSetup implements Setup {
     }
 
     @Override
-    public ImageStatusResult checkImageStatus(AuthenticatedContext ac, CloudStack stack) {
+    public ImageStatusResult checkImageStatus(AuthenticatedContext ac, Image image) {
         String storageName = armUtils.getStorageName(ac.getCloudCredential(), ac.getCloudContext(), ac.getCloudContext().getLocation().getRegion().value());
         String imageResourceGroupName = armUtils.getImageResourceGroupName(ac.getCloudContext());
         ArmCredentialView armCredentialView = new ArmCredentialView(ac.getCloudCredential());
         AzureRMClient client = armClient.createAccess(armCredentialView);
         try {
-            CopyState copyState = client.getCopyStatus(imageResourceGroupName, storageName, IMAGES, stack.getImage().getImageName());
+            CopyState copyState = client.getCopyStatus(imageResourceGroupName, storageName, IMAGES, image.getImageName());
             if (CopyStatus.SUCCESS.equals(copyState.getStatus())) {
                 return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
             } else if (CopyStatus.ABORTED.equals(copyState.getStatus()) || CopyStatus.INVALID.equals(copyState.getStatus())) {
@@ -105,13 +105,13 @@ public class ArmSetup implements Setup {
     }
 
     @Override
-    public void execute(AuthenticatedContext ac, CloudStack stack) {
+    public void execute(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier<ResourcePersisted> persistenceNotifier) {
         String storageGroup = armUtils.getResourceGroupName(ac.getCloudContext());
         AzureRMClient client = armClient.createAccess(ac.getCloudCredential());
         CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.ARM_TEMPLATE).name(storageGroup).build();
         String region = ac.getCloudContext().getLocation().getRegion().value();
         try {
-            resourceNotifier.notifyAllocation(cloudResource, ac.getCloudContext());
+            persistenceNotifier.notifyAllocation(cloudResource, ac.getCloudContext());
             if (!resourceGroupExist(client, storageGroup)) {
                 client.createResourceGroup(storageGroup, CloudRegion.valueOf(region).value());
             }

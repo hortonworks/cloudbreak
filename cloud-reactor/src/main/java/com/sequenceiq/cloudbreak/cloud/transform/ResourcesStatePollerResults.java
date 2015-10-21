@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.transform;
 
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;

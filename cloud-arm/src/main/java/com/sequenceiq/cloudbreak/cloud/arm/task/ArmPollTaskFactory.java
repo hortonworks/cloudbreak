@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.arm.context.NetworkInterfaceCheckerContex
 import com.sequenceiq.cloudbreak.cloud.arm.context.ResourceGroupCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.context.StorageCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.context.VirtualMachineCheckerContext;
-import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 
 @Component

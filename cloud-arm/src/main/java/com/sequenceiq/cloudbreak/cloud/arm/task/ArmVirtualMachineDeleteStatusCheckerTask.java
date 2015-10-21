@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.cloud.arm.ArmClient;
 import com.sequenceiq.cloudbreak.cloud.arm.context.VirtualMachineCheckerContext;
-import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 

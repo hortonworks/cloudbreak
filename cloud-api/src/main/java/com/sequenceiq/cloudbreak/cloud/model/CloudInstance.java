@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.Map;
 
+import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
+
 public class CloudInstance extends DynamicModel {
 
     private String instanceId;

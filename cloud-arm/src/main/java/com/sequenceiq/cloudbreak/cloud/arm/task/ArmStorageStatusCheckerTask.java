@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.cloud.arm.ArmClient;
 import com.sequenceiq.cloudbreak.cloud.arm.context.StorageCheckerContext;
-import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 
 @Component(ArmStorageStatusCheckerTask.NAME)

@@ -22,7 +22,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
-import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;

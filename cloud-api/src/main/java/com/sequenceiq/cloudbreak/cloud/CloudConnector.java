@@ -12,6 +12,8 @@ public interface CloudConnector extends CloudPlatformVariantAware {
 
     InstanceConnector instances();
 
+    MetadataCollector metadata();
+
     PlatformParameters parameters();
 
 }

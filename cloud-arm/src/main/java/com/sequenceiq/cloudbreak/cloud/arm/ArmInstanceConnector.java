@@ -10,11 +10,10 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
-import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.arm.status.ArmInstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
-import com.sequenceiq.cloudbreak.cloud.model.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -28,19 +27,11 @@ public class ArmInstanceConnector implements InstanceConnector {
     private ArmClient armClient;
 
     @Inject
-    private ArmMetadataCollector armMetadataCollector;
-
-    @Inject
     private ArmUtils armTemplateUtils;
 
     @Override
     public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm) {
         throw new CloudOperationNotSupportedException("Azure ARM doesn't provide access to the VM console output yet.");
-    }
-
-    @Override
-    public MetadataCollector metadata() {
-        return armMetadataCollector;
     }
 
     @Override

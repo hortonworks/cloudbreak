@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
+import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
@@ -25,6 +26,8 @@ public class AwsConnector implements CloudConnector {
     private AwsResourceConnector awsResourceConnector;
     @Inject
     private AwsInstanceConnector awsInstanceConnector;
+    @Inject
+    private AwsMetadataCollector awsMetadataCollector;
     @Inject
     private AwsCredentialConnector awsCredentialConnector;
     @Inject
@@ -57,6 +60,11 @@ public class AwsConnector implements CloudConnector {
     @Override
     public InstanceConnector instances() {
         return awsInstanceConnector;
+    }
+
+    @Override
+    public MetadataCollector metadata() {
+        return awsMetadataCollector;
     }
 
     @Override

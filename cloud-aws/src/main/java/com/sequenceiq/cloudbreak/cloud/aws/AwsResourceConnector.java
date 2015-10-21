@@ -65,7 +65,7 @@ import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
-import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -76,7 +76,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
+import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
@@ -105,19 +105,21 @@ public class AwsResourceConnector implements ResourceConnector {
     private CloudFormationTemplateBuilder cloudFormationTemplateBuilder;
     @Inject
     private AwsPollTaskFactory awsPollTaskFactory;
-    @Inject
-    private ResourceNotifier resourceNotifier;
 
     @Value("${cb.aws.cf.template.new.path:" + CB_AWS_CF_TEMPLATE_PATH + "}")
     private String awsCloudformationTemplatePath;
 
     @Override
-    public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier notifier,
+    public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier<ResourcePersisted> resourceNotifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
+
+        String cFStackName = cfStackUtil.getCfStackName(ac);
+        CloudResource cloudFormationStack = new CloudResource.Builder().type(ResourceType.CLOUDFORMATION_STACK).name(cFStackName).build();
+        resourceNotifier.notifyAllocation(cloudFormationStack, ac.getCloudContext());
+
         Long stackId = ac.getCloudContext().getId();
         AmazonCloudFormationClient client = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()),
                 ac.getCloudContext().getLocation().getRegion().value());
-        String cFStackName = cfStackUtil.getCfStackName(ac);
         String snapshotId = getEbsSnapshotIdIfNeeded(ac, stack);
         String cfTemplate = cloudFormationTemplateBuilder.build(ac, stack, snapshotId, isExistingVPC(stack.getNetwork()), awsCloudformationTemplatePath);
         LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);

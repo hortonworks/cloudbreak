@@ -8,7 +8,7 @@ import org.openstack4j.model.network.IPVersionType;
 import org.openstack4j.model.network.Subnet;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;

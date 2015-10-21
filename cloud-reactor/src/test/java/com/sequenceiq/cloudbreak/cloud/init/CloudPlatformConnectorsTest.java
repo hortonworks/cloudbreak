@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
+import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
@@ -97,6 +98,11 @@ public class CloudPlatformConnectorsTest {
 
             @Override
             public InstanceConnector instances() {
+                return null;
+            }
+
+            @Override
+            public MetadataCollector metadata() {
                 return null;
             }
 

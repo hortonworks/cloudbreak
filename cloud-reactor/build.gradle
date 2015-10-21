@@ -13,8 +13,7 @@ jar {
 
 dependencies {
 
-    compile project(':cloud-api')
-    compile project(':cloud-common')
+    compile project(':cloud-reactor-api')
 
     compile group: 'javax',                         name: 'javaee-api',                     version: '7.0'
     compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
