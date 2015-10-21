@@ -19,7 +19,7 @@ You can now log into the Cloudbreak application at http://PUBLIC_IP:3000. Once l
 
 `SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later
 
-> Cloudbreak supporting simple rsa public key instead of X509 certificate file
+>> Cloudbreak supporting simple rsa public key instead of X509 certificate file after 1.0.4 version
 
 The ssh username is **cloudbreak**
 
@@ -72,9 +72,32 @@ Manage networks allows you to create or reuse existing networks and configure th
 
 Security groups allows configuration of traffic/access to the cluster. Currently there are two default groups, and later versions will allow setup of new groups.
 
-`only-ssh-and-ssl:` all ports are locked down (you can't access Hadoop services outside of the VPN) but SSH (22) and HTTPS (443)
+`only-ssh-and-ssl:` all ports are locked down (you can't access Hadoop services outside of the VPN)
 
-`all-services-port:` all Hadoop services + SSH/HTTP are accessible by default: SSH (22) HTTPS (443) 8080 (Ambari) 8500 (Consul) 50070 (NN) 8088 (RM Web) 8030 (RM Scheduler) 8050 (RM IPC) 19888 (Job history server) 60010 (HBase master) 15000 (Falcon) 8744 (Storm) 11000 (Oozie) 18080 (Spark HS) 8042 (NM Web) 9996 (Zeppelin WebSocket) 9995 (Zeppelin UI) 3080 (Kibana) 9200 (Elasticsearch)
+* SSH (22)
+* HTTPS (443)
+
+`all-services-port:` all Hadoop services + SSH/HTTP are accessible by default:
+
+* SSH (22)
+* HTTPS (443)
+* Ambari (8080)
+* Consul (8500)
+* NN (50070)
+* RM Web (8088)
+* RM Scheduler (8030)
+* RM IPC (8050)
+* Job history server (19888)
+* HBase master (60010)
+* Falcon (15000)
+* Storm (8744)
+* Oozie (11000)
+* Spark HS (18080)
+* NM Web (8042)
+* Zeppelin WebSocket (9996)
+* Zeppelin UI (9995)
+* Kibana (3080)
+* Elasticsearch (9200)
 
 ## Create a cluster
 
