@@ -1,10 +1,10 @@
-#GCP based installation
+#GCP deployment
 
-We have pre-built a custom GCP image available on VM Depot with all the required tooling and Cloudbreak deployer installed. In order to launch this image on Azure please use the following [image]().
+GCP image is available in our storage with all the required tools and installed Cloudbreak Deployer. In order to launch this image on GCP please use the following [image](http://storage.googleapis.com/sequenceiqimage/cb-centos71-amb210-2015-08-24-docker18.tar.gz).
 
 Cloudbreak will already be installed, thus you can follow these steps to launch the application.
 
-## Usage
+## Installation
 
 Once the Cloudbreak deployer is installed it will generate some config files and will download supporting binaries. It is
 advised that you create a dedicated directory for it:
@@ -12,9 +12,10 @@ advised that you create a dedicated directory for it:
 ```
 mkdir cloudbreak-deployment
 cd cloudbreak-deployment
+curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install | sh && cbd --version
 ```
 
-### Initialize Profile
+## Initialize Profile
 
 First initialize your directory by creating a `Profile` file:
 
@@ -26,7 +27,7 @@ It will create a `Profile` file in the current directory. Please edit the file -
 configuration is the `PUBLIC_IP`. This IP will be used to access the Cloudbreak UI
 (called Uluwatu). In some cases the `cbd` tool tries to guess it, if can't than will give a hint.
 
-#### Change default username/Password
+### Change default username/Password
 
 The default credentials can be revealed by `cbd login` These values are used in the `uaa.yml` file's end section. To change these values, add 2 lines into your Profile:
 
@@ -35,21 +36,28 @@ export UAA_DEFAULT_USER_EMAIL=myself@example.com
 export UAA_DEFAULT_USER_PW=demo123
 ```
 
-#### Regenerate your Profile
+### Regenerate your Profile
 
-You are done with the configuration of Cloudbreak deployer. The last thing you have to do is to regenerate the configurations in order to take effect.
+There is available a "cbd regenerate" command for this.
 
 ```
-rm *.yml
-cbd generate
+cbd regenerate
 ```
 
-#### Verify configs
+### Verify configurations
 
 In order to verify that all configs are OK use the `doctor` command.
 
 ```
 cbd doctor
+```
+
+### Pull Docker images
+
+All Cloudbreak components and the backend database is running inside containers. The pull command is optional but you can run it prior to cbd start
+
+```
+cbd pull
 ```
 
 ## Use Cloudbreak

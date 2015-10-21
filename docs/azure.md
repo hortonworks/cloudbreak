@@ -1,10 +1,8 @@
-#AZURE based installation
+#AZURE deployment
 
-We have pre-built a custom Azure image available on VM Depot with all the required tooling and Cloudbreak deployer installed. In order to launch this image on Azure please use the following [image]().
+AZURE image is available on the VM Depot with all the required tools and installed Cloudbreak Deployer.. In order to launch this image on Azure please use the following [image](https://102589fae040d8westeurope.blob.core.windows.net/images/cb-centos71-amb210-2015-08-25-ofs_2015-August-25_10-1-os-2015-08-25.vhd).
 
-Note that we use the new [Azure ARM](https://azure.microsoft.com/en-us/documentation/articles/resource-group-overview/) in order to launch clusters. In order to work we need to create an Active Directory application with the configured name and password and adds the permissions that are needed to call the Azure Resource Manager API. Cloudbreak deployer automates all this for you.
-
-## Usage
+## Installation
 
 Once the Cloudbreak deployer is installed it will generate some config files and will download supporting binaries. It is
 advised that you create a dedicated directory for it:
@@ -12,9 +10,10 @@ advised that you create a dedicated directory for it:
 ```
 mkdir cloudbreak-deployment
 cd cloudbreak-deployment
+curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install | sh && cbd --version
 ```
 
-### Initialize Profile
+## Initialize Profile
 
 First initialize your directory by creating a `Profile` file:
 
@@ -26,7 +25,7 @@ It will create a `Profile` file in the current directory. Please edit the file -
 configuration is the `PUBLIC_IP`. This IP will be used to access the Cloudbreak UI
 (called Uluwatu). In some cases the `cbd` tool tries to guess it, if can't than will give a hint.
 
-#### Change default username/Password
+### Change default username/Password
 
 The default credentials can be revealed by `cbd login` These values are used in the `uaa.yml` file's end section. To change these values, add 2 lines into your Profile:
 
@@ -35,7 +34,7 @@ export UAA_DEFAULT_USER_EMAIL=myself@example.com
 export UAA_DEFAULT_USER_PW=demo123
 ```
 
-#### Regenerate your Profile
+### Regenerate your Profile
 
 You are done with the configuration of Cloudbreak deployer. The last thing you have to do is to regenerate the configurations in order to take effect.
 
@@ -44,12 +43,20 @@ rm *.yml
 cbd generate
 ```
 
-#### Verify configs
+### Verify configurations
 
 In order to verify that all configs are OK use the `doctor` command.
 
 ```
 cbd doctor
+```
+
+### Pull Docker images
+
+All Cloudbreak components and the backend database is running inside containers. The pull command is optional but you can run it prior to cbd start
+
+```
+cbd pull
 ```
 
 ## Use Cloudbreak
@@ -72,7 +79,11 @@ This will start all the Docker containers and initialize the application. Please
 cbd logs
 ```
 
-## Azure access setup
+## Provider specific configurations
+
+Note that we use the new [Azure ARM](https://azure.microsoft.com/en-us/documentation/articles/resource-group-overview/) in order to launch clusters. In order to work we need to create an Active Directory application with the configured name and password and adds the permissions that are needed to call the Azure Resource Manager API. Cloudbreak deployer automates all this for you.
+
+### Azure access setup
 
 If you want to use your Azure subscription then you need an Azure Active directory user.
 
@@ -114,7 +125,7 @@ The command first creates an Active Directory application with the configured na
 
 **--password**: Your Azure password.
 
-## Filesystem configuration
+### Filesystem configuration
 
 When starting a cluster with Cloudbreak on Azure, the default filesystem is “Windows Azure blob storage with DASH”. Hadoop has built-in support for the [WASB filesystem](https://hadoop.apache.org/docs/current/hadoop-azure/index.html) so it can be used easily as HDFS instead of disks.
 
