@@ -48,7 +48,7 @@ Blueprints are your declarative definition of a Hadoop cluster.
 
 `Description:` short description of your blueprint
 
-`Source URL:` you can add a blueprint by pointing to a URL. As an example you can use this [blueprint](https://github.com/sequenceiq/ambari-rest-client/raw/1.6.0/src/main/resources/blueprints/multi-node-hdfs-yarn).
+`Source URL:` you can add a blueprint by pointing to a URL. As an example you can use this [blueprint](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/core/src/main/resources/defaults/blueprints/multi-node-hdfs-yarn.bp).
 
 `Manual copy:` you can copy paste your blueprint in this text area
 
@@ -109,7 +109,7 @@ Using the create cluster functionality Cloudbreak will create a cloud Stack and 
 
 `Network:` the network template
 
-`Security Group:" the security group
+`Security Group:` the security group
 
 `Blueprint:` your Hadoop cluster blueprint. Once the blueprint is selected we parse it and give you the option to select the followings for each **hostgroup**.
 
