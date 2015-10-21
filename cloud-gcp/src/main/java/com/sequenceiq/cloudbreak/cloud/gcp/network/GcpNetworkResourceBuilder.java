@@ -19,7 +19,7 @@ public class GcpNetworkResourceBuilder extends AbstractGcpNetworkBuilder {
     public static final String NETWORK_NAME = "netName";
 
     @Override
-    public CloudResource create(GcpContext context, AuthenticatedContext auth, Network network, Security security) {
+    public CloudResource create(GcpContext context, AuthenticatedContext auth) {
         String resourceName = getResourceNameService().resourceName(resourceType(), context.getName());
         return createNamedResource(resourceType(), resourceName);
     }

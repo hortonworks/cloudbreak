@@ -39,7 +39,7 @@ public abstract class AbstractOpenStackNetworkResourceBuilder extends AbstractOp
     private OpenStackClient openStackClient;
 
     @Override
-    public CloudResource create(OpenStackContext context, AuthenticatedContext auth, Network network, Security security) {
+    public CloudResource create(OpenStackContext context, AuthenticatedContext auth) {
         String resourceName = resourceNameService.resourceName(resourceType(), context.getName());
         return createNamedResource(resourceType(), resourceName);
     }

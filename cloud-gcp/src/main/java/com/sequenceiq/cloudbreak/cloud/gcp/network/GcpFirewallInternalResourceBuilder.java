@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 public class GcpFirewallInternalResourceBuilder extends AbstractGcpNetworkBuilder {
 
     @Override
-    public CloudResource create(GcpContext context, AuthenticatedContext auth, Network network, Security security) {
+    public CloudResource create(GcpContext context, AuthenticatedContext auth) {
         String resourceName = getResourceNameService().resourceName(resourceType(), context.getName());
         return createNamedResource(resourceType(), resourceName);
     }
