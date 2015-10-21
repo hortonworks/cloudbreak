@@ -22,7 +22,7 @@
                             <a href="" class="btn btn-success" role="button" ng-show="activeCluster.status == 'STOPPED' || (activeCluster.cluster.status == 'START_REQUESTED' && activeCluster.status == 'AVAILABLE')" data-toggle="modal" data-target="#modal-start-cluster">
                                 <i class="fa fa-play fa-fw"></i><span> {{msg.active_cluster_command_start_label}}</span>
                             </a>
-                            <a href="" class="btn btn-warning" role="button" ng-show="((activeCluster.status == 'AVAILABLE' && activeCluster.cluster.status != 'START_REQUESTED') || ((activeCluster.status == 'STOP_REQUESTED' || activeCluster.status == 'STOP_FAILED') && activeCluster.cluster.status == 'STOPPED')) && !isEphemeralCluster(activeCluster)" data-toggle="modal" data-target="#modal-stop-cluster">
+                            <a href="" class="btn btn-warning" role="button" ng-show="((activeCluster.status == 'AVAILABLE' && activeCluster.cluster.status != 'START_REQUESTED') || ((activeCluster.status == 'STOP_REQUESTED' || activeCluster.status == 'STOP_FAILED') && activeCluster.cluster.status == 'STOPPED')) &&  activeCluster.cluster.status != 'WAIT_FOR_SYNC' && !isEphemeralCluster(activeCluster)" data-toggle="modal" data-target="#modal-stop-cluster">
                                 <i class="fa fa-pause fa-fw"></i><span> {{msg.active_cluster_command_stop_label}}</span>
                             </a>
                             <a href="" id="terminate-btn" class="btn btn-danger" role="button" data-toggle="modal" data-target="#modal-terminate" ng-click='inherited.forcedTermination = false'>
@@ -210,17 +210,30 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr ng-repeat="instance in filteredActiveClusterData | orderBy: 'instanceId'" ng-class="instance.state == 'UNHEALTHY' ? 'danger' : ''">
+                                            <tr ng-repeat="instance in filteredActiveClusterData | orderBy: ['instanceGroup', 'privateIp']" ng-class="instance.state == 'UNHEALTHY' ? 'danger' : ''">
                                                 <td class="col-md-4" data-title="'name'" class="col-md-4">{{instance.instanceId}}</td>
                                                 <td class="col-md-2" data-title="'public IP'" class="col-md-3">{{instance.publicIp}}</td>
                                                 <td class="col-md-2" data-title="'private IP'" class="col-md-3">{{instance.privateIp}}</td>
                                                 <td class="col-md-2 text-center" data-title="'host group'" class="col-md-2"><span class="label label-default">{{instance.instanceGroup}}</span></td>
                                                 <td class="col-md-2 text-center" data-title="'state'" class="col-md-2">
-                                                    <div ng-if="instance.state === 'UNHEALTHY' || instance.instanceStatus === 'DECOMMISSIONED'">
-                                                        <a ng-init="instance.unhealthyMessage=msg.active_cluster_stack_description_hostgroup_unhealthy_label" title="{{msg.active_cluster_stack_description_hostgroup_terminate_tooltip}}" href="" class="btn label label-block label-danger fa fa-trash-o fa-fw" ng-mouseover="activeCluster.instanceId=instance.instanceId; instance.unhealthyMessage=msg.active_cluster_stack_description_hostgroup_terminate_label" ng-mouseleave="instance.unhealthyMessage=msg.active_cluster_stack_description_hostgroup_unhealthy_label" role="button" style="font-size: 12px; width: 100px; display: inline-block; !important" data-toggle="modal" data-target="#modal-terminate-instance">
-                                                        {{instance.unhealthyMessage}}</a>
+                                                    <div ng-if="activeCluster.status != 'WAIT_FOR_SYNC' && activeCluster.cluster.status != 'WAIT_FOR_SYNC'">
+                                                      <div ng-if="instance.instanceStatus === 'FAILED' || instance.state === 'UNHEALTHY' || instance.instanceStatus === 'DECOMMISSIONED'">
+                                                          <a ng-init="instance.unhealthyMessage=msg.active_cluster_stack_description_hostgroup_unhealthy_label" title="{{msg.active_cluster_stack_description_hostgroup_terminate_tooltip}}" href="" class="btn label label-block label-danger fa fa-trash-o fa-fw" ng-mouseover="activeCluster.instanceId=instance.instanceId; instance.unhealthyMessage=msg.active_cluster_stack_description_hostgroup_terminate_label" ng-mouseleave="instance.unhealthyMessage=msg.active_cluster_stack_description_hostgroup_unhealthy_label" role="button" style="font-size: 12px; width: 100px; display: inline-block; !important" data-toggle="modal" data-target="#modal-terminate-instance">
+                                                          {{instance.unhealthyMessage}}</a>
+                                                      </div>
+                                                      <span ng-if="activeCluster.status != 'AVAILABLE' && (instance.instanceStatus == 'REQUESTED' || instance.instanceStatus == 'CREATED' || instance.instanceStatus == 'UNREGISTERED')" title="{{msg.active_cluster_stack_description_hostgroup_state_tooltip}}" class="label label-warning" style="font-size: 12px;">
+                                                        {{msg.active_cluster_stack_description_hostgroup_in_progress_label}}
+                                                      </span>
+                                                      <span ng-if="activeCluster.status == 'AVAILABLE' && (instance.instanceStatus == 'CREATED' || instance.instanceStatus == 'UNREGISTERED')" title="{{msg.active_cluster_stack_description_hostgroup_state_tooltip}}" class="label label-warning" style="font-size: 12px;">
+                                                        {{msg.active_cluster_stack_description_hostgroup_unused_label}}
+                                                      </span>
+                                                      <span ng-if="instance.state !== 'UNHEALTHY' && instance.instanceStatus == 'REGISTERED'" title="{{msg.active_cluster_stack_description_hostgroup_state_tooltip}}" class="label label-info" style="font-size: 12px;">
+                                                        {{msg.active_cluster_stack_description_hostgroup_healthy_label}}
+                                                      </span>
                                                     </div>
-                                                    <span ng-if="instance.state !== 'UNHEALTHY' && instance.instanceStatus !== 'DECOMMISSIONED'" title="{{msg.active_cluster_stack_description_hostgroup_state_tooltip}}" class="label label-info" style="font-size: 12px;">{{msg.active_cluster_stack_description_hostgroup_healthy_label}}</span>
+                                                    <span ng-if="activeCluster.status == 'WAIT_FOR_SYNC' || activeCluster.cluster.status == 'WAIT_FOR_SYNC'" title="{{msg.active_cluster_stack_description_hostgroup_state_tooltip}}" class="label label-danger" style="font-size: 12px;">
+                                                      {{msg.active_cluster_stack_description_hostgroup_unknown_label}}
+                                                    </span>
                                                 </td>
                                             </tr>
                                         </tbody>
