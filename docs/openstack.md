@@ -75,19 +75,3 @@ This will start all the Docker containers and initialize the application. Please
 cbd logs
 ```
 
-## Default Credentials
-
-The default credentials can be revealed by `cbd login`
-
-These values are used in the `uaa.yml` end section. To change these values, add 2 lines into your Profile:
-
-```
-export UAA_DEFAULT_USER_EMAIL=myself@example.com
-export UAA_DEFAULT_USER_PW=demo123
-```
-and than you need to recreate configs:
-```
-rm *.yml
-cbd generate
-```
-
