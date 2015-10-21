@@ -46,10 +46,21 @@ If you want to use your Azure subscription then you need an Azure Active directo
 In order for Cloudbreak to be able to launch clusters on Azure on your behalf you need to set up your Azure ARM application.
 
 ```
-cbd azure configure-arm --app_name myapp --app_password password123 --subscription_id 1234-abcd-efgh-1234 --username example@company.onmicrosoft.com --password password123
+cbd azure configure-arm --app_name myapp --app_password password123 --subscription_id 1234-abcd-efgh-1234 --username testuser@company.onmicrosoft.com --password password123
 ```
+The command first creates an Active Directory application with the configured name and password and adds the permissions that are needed to call the Azure Resource Manager API.
 
-Where `--app_password` is your application password (default is password), `--subscription_id` is your Azure subscription ID, `--username` is your Azure username and  `--password` is your Azure password.
+*Options:*
+
+**--app_name**: Your application name. Default is *app*.
+
+**--app_password**: Your application password. Default is *password*.
+
+**--subscription_id**: Your Azure subscription ID.
+
+**--username**: Your Azure username.
+
+**--password**: Your Azure password.
 
 #### Filesystem configuration
 
@@ -63,7 +74,7 @@ To bypass those limits Microsoft created a small service called [DASH](https://g
 DASH works by sharding the storage access across multiple storage accounts. It can be configured to distribute storage account load to at most 15 **scaleout** storage accounts. It needs one more **namespace** storage account where it keeps track of where the data is stored.
 When configuring a WASB filesystem with Hadoop, the only required config entries are the ones where the access details are described. To access a storage account Azure generates an access key that is displayed on the Azure portal or can be queried through the API while the account name is the name of the storage account itself. A DASH service has a similar account name and key, those can be configured in the configuration file while deploying the cloud service.
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/dash.png)
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/dash.png)
 
 ##### Deploying a DASH service with Cloudbreak deployer
 
