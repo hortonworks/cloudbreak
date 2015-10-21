@@ -6,22 +6,7 @@ Note that we use the new [Azure ARM](https://azure.microsoft.com/en-us/documenta
 
 Cloudbreak will already be installed, thus you can follow these steps to launch the application.
 
-# Configure Cloudbreak deployer
-
-Enter into the `cloudbreak-deployment folder`.
-
-```
-cd ~/cloudbreak-deployment
-```
-
-In this folder you will find a `Profile` file.
-
-#### Configure Cloudbreak UI access
-
-Please edit the Profile file - the only mandatory configuration is the `PUBLIC_IP`. This IP will be used to access the Cloudbreak UI
-(called Uluwatu). In some cases the `cbd` tool tries to guess it, if can't than will give a hint.
-
-#### Azure access setup
+# Azure access setup
 
 If you want to use your Azure subscription then you need an Azure Active directory user.
 
@@ -50,6 +35,7 @@ cbd azure configure-arm --app_name myapp --app_password password123 --subscripti
 ```
 The command first creates an Active Directory application with the configured name and password and adds the permissions that are needed to call the Azure Resource Manager API.
 
+
 *Options:*
 
 **--app_name**: Your application name. Default is *app*.
@@ -62,7 +48,7 @@ The command first creates an Active Directory application with the configured na
 
 **--password**: Your Azure password.
 
-#### Filesystem configuration
+# Filesystem configuration
 
 When starting a cluster with Cloudbreak on Azure, the default filesystem is “Windows Azure blob storage with DASH”. Hadoop has built-in support for the [WASB filesystem](https://hadoop.apache.org/docs/current/hadoop-azure/index.html) so it can be used easily as HDFS instead of disks.
 
@@ -86,6 +72,21 @@ cbd azure deploy-dash --accounts 5 --prefix dash --location "West Europe" --inst
 The command first creates the namespace account and the scaleout storage accounts, builds the *.cscfg* configuration file based on the created storage account names and keys, generates an Account Name and an Account Key for the DASH service and finally deploys the cloud service package file to a new cloud service.
 
 The WASB filesystem configured with DASH can be used as a data lake - when multiple clusters are deployed with the same DASH filesystem configuration the same data can be accessed from all the clusters, but every cluster can have a different service configured as well. In that case deploy as many DASH services with cbd as clusters with Cloudbreak and configure them accordingly.
+
+# Configure Cloudbreak deployer
+
+Enter into the `cloudbreak-deployment folder`.
+
+```
+cd ~/cloudbreak-deployment
+```
+
+In this folder you will find a `Profile` file.
+
+#### Configure Cloudbreak UI access
+
+Please edit the Profile file - the only mandatory configuration is the `PUBLIC_IP`. This IP will be used to access the Cloudbreak UI
+(called Uluwatu). In some cases the `cbd` tool tries to guess it, if can't than will give a hint.
 
 #### SMTP configurations
 
