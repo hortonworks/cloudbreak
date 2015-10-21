@@ -3,7 +3,7 @@
 With the help of Cloudbreak it is very easy to provision Hadoop clusters in the cloud from an Apache Ambari blueprint. Cloudbreak built in provisioning doesn't contain every use case, so we are introducing the concept of recipes.
 Recipes are basically script extensions to a cluster that run on a set of nodes before or after the Ambari cluster installation. With recipes it's quite easy for example to put a JAR file on the Hadoop classpath or run some custom scripts.
 In Cloudbreak we supports two ways to configure recipe, we have downloadable and stored recipes. A downloadable recipe should be available on HTTP, HTTPS protocols optionally with basic authentication, or any kind of public Git repository.
-As the name mentions stored recipes are uploaded and stored in Cloudbreak with (Clodbreak shell)[https://github.com/sequenceiq/cloudbreak-shell]. [Uluwatu](https://github.com/sequenceiq/uluwatu) support coming soon.
+As the name mentions stored recipes are uploaded and stored in Cloudbreak via web interface or shell.
 
 ###Downloadable recipes
 This kind of recipe must contain a plugin.toml file, with some basic information about the recipe, and at least a recipe-pre-install or recipe-post-install script.
@@ -21,7 +21,7 @@ website_url = "[website-url]"
 
 Pre and post scripts are regular shell scripts, and must be executable.
 
-To configure recipe or recipe groups in Cloudbreak you have to create a descriptive JSON file and send it to Cloudbreak via our shell.
+To configure recipe or recipe groups in Cloudbreak you have to create a descriptive JSON file and send it to Cloudbreak via our shell. On web interface you could skip this step, just fill the required fields.
 ```
 {
   "name": "[recipe-name]",
@@ -70,7 +70,7 @@ recipe add --url http(s)://mydomain.com/my-recipe.json
 Add command has an optional parameter --publicInAccount, flags if the template is public in the account.
 
 ###Stored recipes
-The easiest way to create a custom recipe in Cloudbreak is stored recipes. Create your own pre and/or post scripts, and upload them via shell. In the background Cloudbreak pushes recipe to Consul key/value store during cluster creation.
+The easiest way to create a custom recipe in Cloudbreak is stored recipes. Create your own pre and/or post scripts, and upload them via shell or web interface. In the background Cloudbreak pushes recipe to Consul key/value store during cluster creation.
 Stored recipes has the same size limitation like properties in downloadable recipe, because of the key/value store, the base64 encoded contents of the scripts must be less then 512kB.
 
 ```
@@ -82,4 +82,4 @@ This command has two optional parameters:
 - --timeout "integer": timeout of the script execution
 - --publicInAccount "flag": flags if the template is public in the account
 
-Recipes are ready to attach to a hostgroup, for more information about hostgroups please jump to [Create cluster](https://github.com/sequenceiq/cloudbreak#create-cluster) section or visit the shell [documentation](https://github.com/sequenceiq/cloudbreak-shell#configure-a-host-groups).
+Recipes are ready to use at hostgroup configuration.
