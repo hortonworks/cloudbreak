@@ -2,6 +2,12 @@ compose-init() {
     deps-require docker-compose
     env-import CB_COMPOSE_PROJECT cbreak
     env-import CBD_LOG_NAME cbreak
+    env-import ULUWATU_VOLUME_HOST /dev/null
+    if [[ "$ULUWATU_VOLUME_HOST" != "/dev/null" ]]; then
+      ULUWATU_VOLUME_CONTAINER=/uluwatu
+    else
+      ULUWATU_VOLUME_CONTAINER=/tmp/null
+    fi
 }
 
 dockerCompose() {
@@ -333,6 +339,8 @@ uluwatu:
         - ULU_PERISCOPE_SERVICEID=periscope.service.consul
     ports:
         - 3000:3000
+    volumes:
+        - $ULUWATU_VOLUME_HOST:$ULUWATU_VOLUME_CONTAINER
     dns: $PRIVATE_IP
     image: sequenceiq/uluwatu-bin:$DOCKER_TAG_ULUWATU
 
