@@ -19,7 +19,7 @@ You can now log into the Cloudbreak application at http://PUBLIC_IP:3000. Once l
 
 `SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later
 
->> Cloudbreak supporting simple rsa public key instead of X509 certificate file after 1.0.4 version
+> Cloudbreak supporting simple rsa public key instead of X509 certificate file after 1.0.4 version
 
 The ssh username is **cloudbreak**
 
