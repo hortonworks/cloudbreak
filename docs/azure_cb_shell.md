@@ -7,6 +7,7 @@ Start the shell with `cbd util cloudbreak-shell`. This will launch the Cloudbr s
 ```
 credential create --AZURE --description "description" --name "myCredentialName" --subscriptionId "mySubscriptionId" --tenantId "sdfsd-sdfdsf-dsfdsf-sdfsdf" --secretKey "sdfdsfs-sdfsddsf-sdfsdf-sdfsdf" --accesKey "acceskey" --sshKeyUrl "URL towards your public SSH key file"
 ```
+>> Cloudbreak supporting simple rsa public key instead of X509 certificate file after 1.0.4 version
 
 Alternatively you can upload your public key from a file as well, by using the `—sshKeyPath` switch. You can check whether the credential was creates successfully by using the `credential list` command.
 You can switch between your cloud credential - when you’d like to use one and act with that you will have to use:

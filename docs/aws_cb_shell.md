@@ -13,7 +13,7 @@ credential createEC2 --description “description" --name “myCredentialName" -
 Alternatively you can upload your public key from a file as well, by using the `—sshKeyPath` switch. You can check whether the credential was creates successfully by using the `credential list` command. You can switch between your cloud credential - when you’d like to use one and act with that you will have to use:
 
 ```
-credential select --id #ID of the credential
+credential select --name #NAME of the credential
 ```
 
 ### Create a template
@@ -26,16 +26,16 @@ template createEC2 --name awstemplate --description aws-template  --region EU_WE
 You can check whether the template was created successfully by using the `template list` command. Check the template and select it if you are happy with it:
 
 ```
-template show --id #ID of the template
+template show --name #NAME of the template
 
-template select --id #ID of the template
+template select --name #NAME of the template
 ```
 ### Create a stack
 
 Stacks are template `instances` - a running cloud infrastructure created based on a template. Use the following command to create a stack to be used with your Hadoop cluster:
 
 ```
-stack create --name “myStackName" --nodeCount 10
+stack create --name "myStackName" --nodeCount 10
 ```
 ### Select a blueprint
 
@@ -44,13 +44,13 @@ We ship default Hadoop cluster blueprints with Cloudbreak. You can use these blu
 ```
 blueprint list
 
-blueprint select --id #ID of the blueprint
+blueprint select --name #NAME of the blueprint
 ```
 ### Create a Hadoop cluster
 You are almost done - one more command and this will create your Hadoop cluster on your favorite cloud provider. Same as the API, or UI this will use your `template`, and by using CloudFormation will launch a cloud `stack` - once the `stack` is up and running (cloud provisioning is done) it will use your selected `blueprint` and install your custom Hadoop cluster with the selected components and services.
 
 ```
-cluster create --description “my cluster desc"
+cluster create --description "my cluster desc"
 ```
 You are done - you can check the progress through the Ambari UI. If you log back to Cloudbreak UI you can check the progress over there as well, and learn the IP address of Ambari.
 
