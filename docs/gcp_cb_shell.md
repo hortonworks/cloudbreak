@@ -69,7 +69,7 @@ We ship default Hadoop cluster blueprints with Cloudbreak. You can use these blu
 ```
 blueprint list
 
-blueprint select --id #ID of the blueprint
+blueprint select --name #NAME of the blueprint
 ```
 ### Create a Hadoop cluster
 You are almost done - one more command and this will create your Hadoop cluster on your favorite cloud provider. Same as the API, or UI this will use your `template`, and by using CloudFormation will launch a cloud `stack` - once the `stack` is up and running (cloud provisioning is done) it will use your selected `blueprint` and install your custom Hadoop cluster with the selected components and services.

@@ -24,7 +24,25 @@ Please edit the Profile file - the only mandatory configuration is the `PUBLIC_I
 #### Azure access setup
 
 If you want to use your Azure subscription then you need an Azure Active directory user.
-You can configure your AD users on `manage.windowsazure.com` > `Active Directory` > `Your active directory` > `Users` > `Add User` after you add the user to the AD you need to add to the `manage.windowsazure.com` > `Settings` > `Administrators` > `Add` now you can create ARM application with cbd
+
+1. You can configure your AD users on `manage.windowsazure.com` > `Active Directory` > `Your active directory` > `Users` menu
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/docsupdate/docs/images/azure2.png)
+
+2. Now you add the new user to AD. Simply click on `Add User` on the bottom of the page
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/docsupdate/docs/images/azure3.png)
+
+3. Type the new user name in to the box
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/docsupdate/docs/images/azure4.png)
+
+4. You will see the added user in the list
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/docsupdate/docs/images/azure5.png)
+
+5. After you add the user to the AD you need to add to the `manage.windowsazure.com` > `Settings` > `Administrators`
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/docsupdate/docs/images/azure6.png)
+
+6. Now you add the new user to Administrators. Simply click on `Add` on the bottom of the page
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/docsupdate/docs/images/azure7.png)
+
 In order for Cloudbreak to be able to launch clusters on Azure on your behalf you need to set up your Azure ARM application.
 
 ```
