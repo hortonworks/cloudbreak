@@ -52,7 +52,7 @@ In order to verify that all configs are OK use the `doctor` command.
 cbd doctor
 ```
 
-# Use Cloudbreak
+## Use Cloudbreak
 
 To start the Cloudbreak application use the following command.
 
