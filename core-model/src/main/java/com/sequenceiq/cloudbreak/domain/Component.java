@@ -96,4 +96,13 @@ public class Component {
     public void setStack(Stack stack) {
         this.stack = stack;
     }
+
+    @Override
+    public String toString() {
+        return "Component{"
+                + "id=" + id
+                + ", componentType=" + componentType
+                + ", name='" + name + '\''
+                + '}';
+    }
 }

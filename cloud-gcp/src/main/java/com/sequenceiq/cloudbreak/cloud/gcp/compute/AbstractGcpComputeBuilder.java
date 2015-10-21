@@ -10,14 +10,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
 public abstract class AbstractGcpComputeBuilder extends AbstractGcpResourceBuilder implements ComputeResourceBuilder<GcpContext> {
-
-    @Override
-    public String platform() {
-        return CloudPlatform.GCP.name();
-    }
 
     @Override
     public List<CloudResourceStatus> checkResources(GcpContext context, AuthenticatedContext auth, List<CloudResource> resources) {

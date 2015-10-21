@@ -32,4 +32,9 @@ public class GcpContextBuilder implements ResourceContextBuilder<GcpContext> {
     public String platform() {
         return CloudPlatform.GCP.name();
     }
+
+    @Override
+    public String variant() {
+        return CloudPlatform.GCP.name();
+    }
 }

@@ -25,6 +25,11 @@ public class ArmAuthenticator implements Authenticator {
     }
 
     @Override
+    public String variant() {
+        return ArmConstants.AZURE_RM;
+    }
+
+    @Override
     public AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential) {
         LOGGER.info("Authenticating to azure ...");
         return armClient.createAuthenticatedContext(cloudContext, cloudCredential);

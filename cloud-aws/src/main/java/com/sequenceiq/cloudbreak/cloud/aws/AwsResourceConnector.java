@@ -76,7 +76,6 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
@@ -110,7 +109,7 @@ public class AwsResourceConnector implements ResourceConnector {
     private String awsCloudformationTemplatePath;
 
     @Override
-    public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier<ResourcePersisted> resourceNotifier,
+    public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
 
         String cFStackName = cfStackUtil.getCfStackName(ac);

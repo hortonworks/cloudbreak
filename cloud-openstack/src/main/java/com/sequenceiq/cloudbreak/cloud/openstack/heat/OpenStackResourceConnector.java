@@ -49,7 +49,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier<ResourcePersisted> notifier,
+    public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier,
             AdjustmentType adjustmentType, Long threshold) {
         String stackName = authenticatedContext.getCloudContext().getName();
         String heatTemplate = heatTemplateBuilder.build(stackName, stack.getGroups(), stack.getSecurity(), stack.getImage());

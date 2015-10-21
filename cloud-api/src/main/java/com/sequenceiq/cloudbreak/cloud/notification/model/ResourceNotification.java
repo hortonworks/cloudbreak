@@ -5,11 +5,15 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 
 import reactor.rx.Promise;
 
+/**
+ * Notification sent to Cloudbreak.
+ */
 public class ResourceNotification {
-    private CloudResource cloudResource;
-    private CloudContext cloudContext;
-    private Promise<ResourcePersisted> promise;
-    private ResourceNotificationType type;
+
+    private final CloudResource cloudResource;
+    private final CloudContext cloudContext;
+    private final Promise<ResourcePersisted> promise;
+    private final ResourceNotificationType type;
 
     public ResourceNotification(CloudResource cloudResource, CloudContext cloudContext, Promise<ResourcePersisted> promise, ResourceNotificationType type) {
         this.cloudResource = cloudResource;

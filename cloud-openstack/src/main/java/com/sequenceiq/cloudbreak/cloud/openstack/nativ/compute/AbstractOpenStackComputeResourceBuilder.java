@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.AbstractOpenStackResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
@@ -74,12 +73,6 @@ public abstract class AbstractOpenStackComputeResourceBuilder extends AbstractOp
             throw new OpenStackResourceException(String.format("No resource order found for class: %s", getClass()));
         }
         return order;
-    }
-
-
-    @Override
-    public String platform() {
-        return OpenStackConstants.OPENSTACK;
     }
 
     protected InstanceTemplate getInstanceTemplate(Group group, long privateId) {

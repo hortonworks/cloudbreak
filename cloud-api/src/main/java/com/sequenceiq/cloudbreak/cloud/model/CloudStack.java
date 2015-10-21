@@ -6,13 +6,16 @@ import java.util.Map;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+/**
+ * Class that describes complete structure of infrastructure that needs to be started on the Cloud Provider
+ */
 public class CloudStack {
 
     private final List<Group> groups;
     private final Network network;
     private final Security security;
     private final Image image;
-    private Map<String, String> parameters;
+    private final Map<String, String> parameters;
 
     public CloudStack(List<Group> groups, Network network, Security security, Image image, Map<String, String> parameters) {
         this.groups = ImmutableList.copyOf(groups);

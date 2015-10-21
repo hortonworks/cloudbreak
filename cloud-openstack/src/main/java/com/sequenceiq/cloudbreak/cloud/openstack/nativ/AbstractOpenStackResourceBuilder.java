@@ -14,16 +14,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.cloud.CloudPlatformAware;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
 import com.sequenceiq.cloudbreak.common.type.CommonStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
-public abstract class AbstractOpenStackResourceBuilder {
+public abstract class AbstractOpenStackResourceBuilder implements CloudPlatformAware {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractOpenStackResourceBuilder.class);
 
     @Inject
@@ -88,6 +90,17 @@ public abstract class AbstractOpenStackResourceBuilder {
         }
         return resource;
     }
+
+    @Override
+    public String platform() {
+        return OpenStackConstants.OPENSTACK;
+    }
+
+    @Override
+    public String variant() {
+        return OpenStackConstants.Variant.NATIVE.name();
+    }
+
 
     protected abstract boolean checkStatus(OpenStackContext context, AuthenticatedContext auth, CloudResource resource);
 }

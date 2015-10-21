@@ -10,7 +10,7 @@ public enum ResourceStatus {
 
     private StatusGroup statusGroup;
 
-    private ResourceStatus(StatusGroup statusGroup) {
+    ResourceStatus(StatusGroup statusGroup) {
         this.statusGroup = statusGroup;
     }
 
