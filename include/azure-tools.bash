@@ -1,7 +1,7 @@
 azure-configure-arm() {
     declare desc="Configure new ARM application"
 
-    docker run -it sequenceiq/azure-cli-tools:1.1 arm_configure "$@"
+    docker run -it sequenceiq/azure-cli-tools:1.2 configure-arm "$@"
 }
 
 azure-deploy-dash() {
