@@ -1,8 +1,3 @@
-# Interactive mode
-
-Start the shell with `cbd util cloudbreak-shell`. This will launch the Cloudbr shell inside a Docker container and you are ready to start using it.
-
-
 ## Manage cloud credentials
 
 You can now log into the Cloudbreak application at http://PUBLIC_IP:3000. Once logged in go to **Manage credentials**. Using manage credentials will  link your cloud account with the Cloudbreak account.

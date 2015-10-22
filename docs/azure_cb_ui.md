@@ -1,9 +1,7 @@
-
-Once Cloudbreak is up and running you can launch clusters in two different ways. You can use the [Cloudbreak UI](azure_cb_ui.md) or use the [Cloudbreak shell](azure_cb_shell.md).
-
 ## Manage cloud credentials
 
 You can now log into the Cloudbreak application at http://PUBLIC_IP:3000. Once logged in go to **Manage credentials**. Using manage credentials will  link your cloud account with the Cloudbreak account.
+If you do not have an Azure Resource manager application you can simply create it with Cloudbreak deployer. Please read the [Provisioning prerequisites](azure_pre_provision.md) for more information.
 
 `Name:` name of your credential
 
@@ -13,9 +11,9 @@ You can now log into the Cloudbreak application at http://PUBLIC_IP:3000. Once l
 
 `Password:` your password which was setted up when you create the AD app
 
-`App ID:` You app Id (Browse all> Subscription> Subscription detail> Users> You application> Properties)
+`App ID:` You app Id (`Browse all`> `Subscription`> `Subscription detail`> `Users`> `You application`> `Properties`)
 
-`App Owner Tenant ID:` You Tenant Id (Browse all> Subscription> Subscription detail> Users> You application> Properties)
+`App Owner Tenant ID:` You Tenant Id (`Browse all`> `Subscription`> `Subscription detail`> `Users`> `You application`> `Properties`)
 
 `SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later
 
@@ -31,9 +29,7 @@ Using manage resources you can create infrastructure templates. Templates descri
 
 `Description:` short description of your template
 
-`Instance type:` the Amazon instance type to be used - we suggest to use at least small or medium instances
-
-`Volume type:` option to choose are SSD, regular HDD (both EBS) or Ephemeral
+`Instance type:` the Azure instance type to be used
 
 `Attached volumes per instance:` the number of disks to be attached
 

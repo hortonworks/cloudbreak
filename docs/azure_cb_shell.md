@@ -2,7 +2,7 @@
 
 Start the shell with `cbd util cloudbreak-shell`. This will launch the Cloudbr shell inside a Docker container and you are ready to start using it.
 
-### Create a cloud credential
+## Create a cloud credential
 
 ```
 credential create --AZURE --description "description" --name "myCredentialName" --subscriptionId "mySubscriptionId" --tenantId "sdfsd-sdfdsf-dsfdsf-sdfsdf" --secretKey "sdfdsfs-sdfsddsf-sdfsdf-sdfsdf" --accesKey "acceskey" --sshKeyUrl "URL towards your public SSH key file"
@@ -25,7 +25,7 @@ You can show your cloud credential - when you’d like to show one you will have
 credential show --name #NAME of the credential
 ```
 
-### Create a template
+## Create a template
 
 A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. A template can be used repeatedly to create identical copies of the same stack (or to use as a foundation to start a new stack).
 
@@ -48,14 +48,14 @@ You can show your cloud template - when you’d like to show one you will have t
 template show --name #NAME of the template
 ```
 
-### Create a stack
+## Create a stack
 
 Stacks are template `instances` - a running cloud infrastructure created based on a template. Use the following command to create a stack to be used with your Hadoop cluster:
 
 ```
 stack create --name "myStackName" --nodeCount 10
 ```
-### Select a blueprint
+## Select a blueprint
 
 We ship default Hadoop cluster blueprints with Cloudbreak. You can use these blueprints or add yours. To see the available blueprints and use one of them please use:
 
@@ -64,7 +64,7 @@ blueprint list
 
 blueprint select --name #NAME of the blueprint
 ```
-### Create a Hadoop cluster
+## Create a Hadoop cluster
 You are almost done - one more command and this will create your Hadoop cluster on your favorite cloud provider. Same as the API, or UI this will use your `template`, and by using CloudFormation will launch a cloud `stack` - once the `stack` is up and running (cloud provisioning is done) it will use your selected `blueprint` and install your custom Hadoop cluster with the selected components and services.
 
 ```
@@ -76,4 +76,4 @@ You are done - you can check the progress through the Ambari UI. If you log back
 
 With Cloudbreak shell you can recreate clusters based on earlier deployments. Each time you start the shell the executed commands are logged in a file line by line and later either with the `script` command or specifying an `—cmdfile` option the same commands can be executed again.
 
-With c`bd util cloudbreak-shell-quiet` you can specify a shell file and let the shell apply the configs step by step in a silent mode.
+With `cbd util cloudbreak-shell-quiet` you can specify a shell file and let the shell apply the configs step by step in a silent mode.
