@@ -10,7 +10,7 @@ Once the Cloudbreak deployer is installed it will generate some config files and
 advised that you create a dedicated directory for it:
 
 ```
-mkdir cloudbreak-deployment
+mkdir -p cloudbreak-deployment
 cd cloudbreak-deployment
 ```
 
@@ -25,33 +25,6 @@ cbd init
 It will create a `Profile` file in the current directory. Please edit the file - the only required
 configuration is the `PUBLIC_IP`. This IP will be used to access the Cloudbreak UI
 (called Uluwatu). In some cases the `cbd` tool tries to guess it, if can't than will give a hint.
-
-#### Change default username/Password
-
-The default credentials can be revealed by `cbd login` These values are used in the `uaa.yml` file's end section. To change these values, add 2 lines into your Profile:
-
-```
-export UAA_DEFAULT_USER_EMAIL=myself@example.com
-export UAA_DEFAULT_USER_PW=demo123
-```
-
-#### Regenerate your Profile
-
-You are done with the configuration of Cloudbreak deployer. The last thing you have to do is to regenerate the configurations in order to take effect.
-
-```
-rm *.yml
-cbd generate
-```
-
-#### Verify configs
-
-In order to verify that all configs are OK use the `doctor` command.
-
-```
-cbd doctor
-```
-
 
 ### Start Cloudbreak
 
@@ -74,4 +47,3 @@ This will start all the Docker containers and initialize the application. Please
 ```
 cbd logs
 ```
-
