@@ -27,6 +27,11 @@ template create --EC2 --name awstemplate --description aws-template --instanceTy
 ```
 You can check whether the template was created successfully by using the `template list` or `template show` command.
 
+You can delete your cloud template - when you’d like to delete one you will have to use:
+```
+template delete --name awstemplate
+```
+
 ### Create or select a blueprint
 
 You can define Ambari blueprints with cloudbreak-shell:
@@ -54,7 +59,7 @@ blueprint select --name hdp-small-default
 A network gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related networking, maintaining and updating them in an orderly and predictable fashion. A network can be used repeatedly to create identical copies of the same stack (or to use as a foundation to start a new stack).
 
 ```
-network create --EC2 --name awsnetwork --description aws-network --subnet 10.0.0.0/16
+network create --AWS --name awsnetwork --description aws-network --subnet 10.0.0.0/16
 ```
 
 Other available options:
@@ -130,7 +135,7 @@ instancegroup configure --instanceGroup host_group_slave_1 --nodecount 3 --templ
 
 Other available options:
 
-- --templateId "string": Id of the template
+`--templateId` Id of the template
 
 ### Create a Hadoop cluster
 You are almost done - two more command and this will create your Hadoop cluster on your favorite cloud provider. Same as the API, or UI this will use your `credential`, `instancegroups`, `network`, `securitygroup`, and by using CloudFormation will launch a cloud stack
@@ -163,10 +168,10 @@ The following example creates a hadoop cluster with `hdp-small-default` blueprin
 
 ```
 credential create --EC2 --description description --name my-aws-credential --roleArn <arn role> --sshKeyPath id_rsa.pub
-credential select --name mvCredentialName
+credential select --name my-aws-credential
 template create --EC2 --name awstemplate --description aws-template --instanceType M3Xlarge --volumeSize 100 --volumeCount 2
 blueprint select --name hdp-small-default
-instancegroup configure --instanceGroup cbgateway --nodecount 1 --templateName minviable-aws
+instancegroup configure --instanceGroup cbgateway --nodecount 1 --templateName awstemplate
 instancegroup configure --instanceGroup host_group_master_1 --nodecount 1 --templateName awstemplate
 instancegroup configure --instanceGroup host_group_master_2 --nodecount 1 --templateName awstemplate
 instancegroup configure --instanceGroup host_group_master_3 --nodecount 1 --templateName awstemplate

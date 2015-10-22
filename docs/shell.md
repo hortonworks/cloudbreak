@@ -13,7 +13,7 @@ The goal with the CLI was to provide an interactive command line tool which supp
 
 You have a few options to give it a try:
 
-- [use Cloudreak deployer](#deployer)
+- [use Cloudreak deployer - **recommended**](#deployer)
 - [use our prepared docker image](#dockerimage)
 - [build it from source](#fromsource)
 
