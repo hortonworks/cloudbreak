@@ -15,7 +15,7 @@ If you do not have an Active directory user then you have to configure it before
 3. Type the new user name into the box
 ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/azure4.png)
 
-4. You will see the new user in the list
+4. You will see the new user in the list. You have got a temporary password so you have to change it before you start using the new user.
 ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/azure5.png)
 
 5. After you add the user to the AD you need to add your AD user to the `manage.windowsazure.com` > `Settings` > `Administrators`
@@ -31,7 +31,6 @@ cbd azure configure-arm --app_name myapp --app_password password123 --subscripti
 ```
 The command first creates an Active Directory application with the configured name and password and adds the permissions that are needed to call the Azure Resource Manager API.
 Please use the output of the command when you creating your Azure credential in Cloudbreak.
-
 
 *Options:*
 
