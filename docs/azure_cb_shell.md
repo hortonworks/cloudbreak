@@ -10,7 +10,7 @@ You have to copy files into the cbd working directory, which you would like to u
 credential create --AZURE --description "credential description" --name myazurecredential --subscriptionId <your Azure subscription id> --appId <your Azure application id> --tenantId <your tenant id> --password <your Azure application password> --sshKeyPath <path of your public SSH key file>
 ```
 
-> Cloudbreak supporting simple rsa public key instead of X509 certificate file after 1.0.4 version
+> Cloudbreak is supporting simple rsa public key instead of X509 certificate file after 1.0.4 version
 
 Alternatively you can upload your public key from an url as well, by using the `—sshKeyUrl` switch. You can check whether the credential was creates successfully by using the `credential list` command.
 You can switch between your cloud credential - when you’d like to use one and act with that you will have to use:
@@ -113,33 +113,33 @@ There are two default security groups defined: `all-services-port` and `only-ssh
 
 * SSH (22)
 * HTTPS (443)
-* Ambari (8080) 
-* Consul (8500) 
-* NN (50070) 
-* RM Web (8088) 
-* Scheduler (8030RM) 
-* IPC (8050RM) 
-* Job history server (19888) 
-* HBase master (60000) 
-* HBase master web (60010) 
-* HBase RS (16020) 
-* HBase RS info (60030) 
-* Falcon (15000) 
-* Storm (8744) 
-* Hive metastore (9083) 
-* Hive server (10000) 
-* Hive server HTTP (10001) 
-* Accumulo master (9999) 
-* Accumulo Tserver (9997) 
-* Atlas (21000) 
-* KNOX (8443) 
-* Oozie (11000) 
-* Spark HS (18080) 
-* NM Web (8042) 
-* Zeppelin WebSocket (9996) 
-* Zeppelin UI (9995) 
-* Kibana (3080) 
-* Elasticsearch (9200) 
+* Ambari (8080)
+* Consul (8500)
+* NN (50070)
+* RM Web (8088)
+* Scheduler (8030RM)
+* IPC (8050RM)
+* Job history server (19888)
+* HBase master (60000)
+* HBase master web (60010)
+* HBase RS (16020)
+* HBase RS info (60030)
+* Falcon (15000)
+* Storm (8744)
+* Hive metastore (9083)
+* Hive server (10000)
+* Hive server HTTP (10001)
+* Accumulo master (9999)
+* Accumulo Tserver (9997)
+* Atlas (21000)
+* KNOX (8443)
+* Oozie (11000)
+* Spark HS (18080)
+* NM Web (8042)
+* Zeppelin WebSocket (9996)
+* Zeppelin UI (9995)
+* Kibana (3080)
+* Elasticsearch (9200)
 
 ## Configure instance groups
 

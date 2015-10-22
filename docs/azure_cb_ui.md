@@ -28,7 +28,7 @@ If you do not have an Azure Resource manager application you can simply create i
 
 `SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later
 
-> Cloudbreak supporting simple rsa public key instead of X509 certificate file after 1.0.4 version
+> Cloudbreak is supporting simple rsa public key instead of X509 certificate file after 1.0.4 version
 
 The ssh username is **cloudbreak**
 
