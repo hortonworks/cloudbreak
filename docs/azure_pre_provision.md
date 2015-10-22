@@ -31,6 +31,14 @@ cbd azure configure-arm --app_name myapp --app_password password123 --subscripti
 ```
 The command first creates an Active Directory application with the configured name and password and adds the permissions that are needed to call the Azure Resource Manager API.
 Please use the output of the command when you creating your Azure credential in Cloudbreak.
+The output of the command something like this:
+
+```
+Subscription ID: sdf324-26b3-sdf234-ad10-234dfsdfsd
+App ID: 234sdf-c469-sdf234-9062-dsf324
+Password: password123
+App Owner Tenant ID: sdwerwe1-d98e-dsf12-dsf123-df123232
+```
 
 *Options:*
 
