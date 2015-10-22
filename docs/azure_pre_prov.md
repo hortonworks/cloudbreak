@@ -6,22 +6,25 @@ Note that we use the new [Azure ARM](https://azure.microsoft.com/en-us/documenta
 
 If you do not have an Active directory user then you have to configure it before deploying a cluster with Cloudbreak.
 
-1. You can configure your AD users on `manage.windowsazure.com` > `Active Directory` > `Your active directory` > `Users` menu
+1. Go to `manage.windowsazure.com` > `Active Directory`
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/azure1.png)
+
+2. You can configure your AD users on `Your active directory` > `Users` menu
 ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/azure2.png)
 
-2. Here you can add the new user to AD. Simply click on `Add User` on the bottom of the page
+3. Here you can add the new user to AD. Simply click on `Add User` on the bottom of the page
 ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/azure3.png)
 
-3. Type the new user name into the box
+4. Type the new user name into the box
 ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/azure4.png)
 
-4. You will see the new user in the list. You have got a temporary password so you have to change it before you start using the new user.
+5. You will see the new user in the list. You have got a temporary password so you have to change it before you start using the new user.
 ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/azure5.png)
 
-5. After you add the user to the AD you need to add your AD user to the `manage.windowsazure.com` > `Settings` > `Administrators`
+6. After you add the user to the AD you need to add your AD user to the `manage.windowsazure.com` > `Settings` > `Administrators`
 ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/azure6.png)
 
-6. Here you can add the new user to Administrators. Simply click on `Add` on the bottom of the page
+7. Here you can add the new user to Administrators. Simply click on `Add` on the bottom of the page
 ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/azure7.png)
 
 In order for Cloudbreak to be able to launch clusters on Azure on your behalf you need to set up your **Azure ARM application**.
