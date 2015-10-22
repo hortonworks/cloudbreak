@@ -126,9 +126,7 @@ Note that the security groups are *not created* on AWS after the `Create Securit
 
 ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/ui-secgroup.png)
 
-## Cluster installation
-
-This section describes
+## Defining cluster services
 
 **Blueprints**
 
