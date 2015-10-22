@@ -142,7 +142,7 @@ Other available options:
 ### Create a Hadoop cluster
 You are almost done - two more command and this will create your Hadoop cluster on your favorite cloud provider. Same as the API, or UI this will use your `credential`, `instancegroups`, `network`, `securitygroup`, and by using OpenStack Heat will launch a cloud stack
 ```
-stack create --name my-first-stack
+stack create --name my-first-stack --region local
 ```
 Once the `stack` is up and running (cloud provisioning is done) it will use your selected `blueprint` and install your custom Hadoop cluster with the selected components and services.
 ```
@@ -182,6 +182,6 @@ instancegroup configure --instanceGroup host_group_slave_1 --nodecount 3 --templ
 network create --OPENSTACK --name osnetwork --description openstack-network --publicNetID <id of an OpenStack public network> --subnet 10.0.0.0/16
 network select --name osnetwork
 securitygroup select --name all-services-port
-stack create --name my-first-stack --region US_EAST_1
+stack create --name my-first-stack --region local
 cluster create --description "My first cluster"
 ```

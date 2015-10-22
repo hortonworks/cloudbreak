@@ -156,7 +156,7 @@ Other available options:
 ### Create a Hadoop cluster
 You are almost done - two more command and this will create your Hadoop cluster on your favorite cloud provider. Same as the API, or UI this will use your `credential`, `instancegroups`, `network`, `securitygroup`, and by using Azure ResourceManager will launch a cloud stack
 ```
-stack create --name my-first-stack
+stack create --name my-first-stack --region WEST_US
 ```
 Once the `stack` is up and running (cloud provisioning is done) it will use your selected `blueprint` and install your custom Hadoop cluster with the selected components and services.
 ```
