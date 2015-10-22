@@ -1,8 +1,6 @@
-#OpenStack based installation
+# OpenStack deployment
 
-##Deployment prerequisites
-
-###Download the Cloudbreak image
+## Download the Cloudbreak image
 
 You can download the latest Cloudbreak OpenStack image with the following commands
 ```
@@ -11,7 +9,8 @@ LOCAL_IMAGE_NAME="..."
 aws s3 cp s3://$LATEST_IMAGE $LOCAL_IMAGE_NAME
 ```
 
-###Import the image into OpenStack
+## Import the image into OpenStack
+
 ```
 OS_IMAGE_NAME="name_in_openstack"
 glance image-create --name "$OS_IMAGE_NAME" --file "$LOCAL_IMAGE_NAME"  --disk-format qcow2 --container-format bare --is-public True --progress
@@ -27,7 +26,7 @@ mkdir -p cloudbreak-deployment
 cd cloudbreak-deployment
 ```
 
-### Initialize Profile
+## Initialize your Profile
 
 First initialize your directory by creating a `Profile` file:
 
@@ -35,37 +34,44 @@ First initialize your directory by creating a `Profile` file:
 cbd init
 ```
 
-It will create a `Profile` file in the current directory. Please edit the file - the only required
-configuration is the `PUBLIC_IP`. This IP will be used to access the Cloudbreak UI
-(called Uluwatu). In some cases the `cbd` tool tries to guess it, if can't than will give a hint.
+It will create a `Profile` file in the current directory. Please edit the file - one of the required configurations is the `PUBLIC_IP`.
+This IP will be used to access the Cloudbreak UI (called Uluwatu). In some cases the `cbd` tool tries to guess it, if can't than will give a hint.
 
-###Configure the name of the Cloudbreak image
-You need to set the Cloudbreak image name you uploaded in your OpenStack cloud in the `Profile` file.
+The other required configuration in the `Profile` is the name of the Cloudbreak image you uploaded to your OpenStack cloud.
+
 ```
 export CB_OPENSTACK_IMAGE="$OS_IMAGE_NAME"
 ```
 
-### Start Cloudbreak
+## Generate your Profile
 
-To start all the containers run:
+You are done with the configuration of Cloudbreak deployer. The last thing you have to do is to regenerate the configurations in order to take effect.
+
+```
+rm *.yml
+cbd generate
+```
+
+## Start Cloudbreak
+
+To start the Cloudbreak application use the following command.
+This will start all the Docker containers and initialize the application. It will take a few minutes until all the services start.
 
 ```
 cbd start
 ```
 
-Launching the first time will take more time as it does some additional steps:
+Launching it the first time will take more time as it does some additional steps:
 
-- download all the docker images, needed by Cloudbreak.
-- create **docker-compose.yml**: Full configuration of containers needed for the Cloudbreak deployment.
-- create **uaa.yml**: Identity Server configuration.
+- downloads all the docker images needed by Cloudbreak.
+- creates the **docker-compose.yml** file that describes the configuration of all the Docker containers needed for the Cloudbreak deployment.
+- creates the **uaa.yml** file that holds the configuration of the identity server used to authenticate users to Cloudbreak.
 
-This will start all the Docker containers and initialize the application. Please give a few minutes until all services starts. While the services are starting you can check the logs.
-
-### Watch the logs
+After the `cbd generate` command finishes you can check the logs of the Cloudbreak server with this command:
 
 ```
 cbd logs cloudbreak
 ```
->You can check the logs when the application is ready. It is about 30 seconds.
+>Cloudbreak server should start within a minute - you should see a line like this: `Started CloudbreakApplication in 36.823 seconds`
 
-Once Cloudbreak is up and running you can launch clusters in two different ways. You can use the [Cloudbreak UI](openstack_cb_ui.md) or use the [Cloudbreak shell](openstack_cb_shell.md) but before the provisioning please create the [Provisioning prerequisites](openstack_pre_prov.md).
+Once Cloudbreak is up and running you should check out the [prerequisites](openstack_pre_prov.md) needed to create OpenStack clusters with Cloudbreak.

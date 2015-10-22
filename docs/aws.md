@@ -1,95 +1,66 @@
-# Launch/configure your instance
+# AWS Deployment
 
-We have pre-built a custom AWS AMI image with all the required tooling and Cloudbreak deployer installed. In order to launch this image on AWS please use the following [Cloudformation] link().
+If you already have cloudbreak-deployer installed you can start to setup the Cloudbreak application.
 
-Cloudbreak will already be installed, thus you can follow these steps to launch the application.
-
-# Configure Cloudbreak deployer
-
-Enter into the `cloudbreak-deployment folder`.
+Create a cloudbreak-deployment directory for the config files and the supporting binaries that will be downloaded by cloudbreak-deployer:
 
 ```
-cd ~/cloudbreak-deployment
+mkdir cloudbreak-deployer
+cd cloudbreak-deployment
 ```
 
-In this folder you will find a `Profile` file.
+## Initialize your Profile
 
-#### Configure Cloudbreak UI access
+First initialize cbd by creating a `Profile` file:
 
-Please edit the Profile file - the only mandatory configuration is the `PUBLIC_IP`. This IP will be used to access the Cloudbreak UI
-(called Uluwatu). In some cases the `cbd` tool tries to guess it, if can't than will give a hint.
+```
+cbd init
+```
 
-#### AWS access setup
+It will create a `Profile` file in the current directory. Please edit the file - one of the required configurations is the `PUBLIC_IP`.
+This IP will be used to access the Cloudbreak UI (called Uluwatu). In some cases the `cbd` tool tries to guess it, if can't than will give a hint.
 
-In order for Cloudbreak to be able to launch clusters on AWS on your behalf you need to set up your AWS keys in the Profile file:
+The other required configuration in the `Profile` are the AWS keys belonging to the AWS account used by the Cloudbreak application.
+In order for Cloudbreak to be able to launch clusters on AWS on your behalf you need to set your AWS keys in the Profile file.
+We suggest to use the keys of an *IAM User* here. The IAM User's policies must be configured to have permission to assume roles (`sts:AssumeRole`) on all (`*`) resources.
 
 ```
 export AWS_ACCESS_KEY_ID=AKIA**************W7SA
 export AWS_SECRET_ACCESS_KEY=RWCT4Cs8******************/*skiOkWD
 ```
 
-#### SMTP configurations
+You can learn more about the concepts used by Cloudbreak with AWS accounts in the [prerequisites chapter](aws_pre_prov.md) 
 
-During registration or cluster provisioning Cloudbreak sends emails to the user. In order for email sending to work put these lines into your `Profile` file.
+## Generate your Profile
 
-```
-export CLOUDBREAK_SMTP_SENDER_USERNAME=
-export CLOUDBREAK_SMTP_SENDER_PASSWORD=
-export CLOUDBREAK_SMTP_SENDER_HOST=
-export CLOUDBREAK_SMTP_SENDER_PORT=
-export CLOUDBREAK_SMTP_SENDER_FROM=
-```
-
-#### Generate an AWS role
-
-One key point is that Cloudbreak **does not** store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by the end user. Cloudbreak is purely acting on behalf of the end user - without having access to the user's account. In order to launch clusters on your behalf we need an AWS IAM role - that can be used in the Cloudbreak application as a credential.
-
-```
-cbd aws generate-role  - Generates an AWS IAM role for Cloudbreak provisioning on AWS
-cbd aws show-role      - Show assumers and policies for an AWS role
-cbd aws delete-role    - Deletes an AWS IAM role, removes all inline policies
-```
-
-You can check the generated role on your AWS console, under IAM roles.
-
-#### Change default username/Password
-
-The default credentials can be revealed by `cbd login` These values are used in the `uaa.yml` file's end section. To change these values, add 2 lines into your Profile:
-
-```
-export UAA_DEFAULT_USER_EMAIL=myself@example.com
-export UAA_DEFAULT_USER_PW=demo123
-```
-
-#### Regenerate your Profile
-
-You are done with the configuration of Cloudbreak deployer. The last thing you have to do is to regenerate the configurations in order to take effect.
+You are done with the initialization of Cloudbreak deployer. The last thing you have to do is to regenerate the configurations in order to take effect.
 
 ```
 rm *.yml
 cbd generate
 ```
 
-#### Verify configs
-
-In order to verify that all configs are OK use the `doctor` command.
-
-```
-cbd doctor
-```
-
-# Use Cloudbreak 
+## Start Cloudbreak
 
 To start the Cloudbreak application use the following command.
+This will start all the Docker containers and initialize the application. It will take a few minutes until all the services start.
 
 ```
 cbd start
 ```
 
-This will start all the Docker containers and initialize the application. Please give a few minutes until all services starts. While the services are starting you can check the logs.
+Launching it the first time will take more time as it does some additional steps:
+
+- downloads all the docker images needed by Cloudbreak.
+- creates the **docker-compose.yml** file that describes the configuration of all the Docker containers needed for the Cloudbreak deployment.
+- creates the **uaa.yml** file that holds the configuration of the identity server used to authenticate users to Cloudbreak.
+
+After the `cbd generate` command finishes you can check the logs of the Cloudbreak server with this command:
 
 ```
-cbd logs
+cbd logs cloudbreak
 ```
+>Cloudbreak server should start within a minute - you should see a line like this: `Started CloudbreakApplication in 36.823 seconds`
 
 Once Cloudbreak is up and running you should check out the [prerequisites](aws_pre_prov.md) needed to create AWS clusters with Cloudbreak.
+
