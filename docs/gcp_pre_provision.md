@@ -14,6 +14,8 @@ Make sure that at API level (**APIs and auth** menu) you have enabled:
 * Google Cloud Storage
 * Google Cloud Storage JSON API
 
+>If you enabled every API then you have to wait about **10 minutes** for the provider.
+
 When creating GCP credentials in Cloudbreak you will have to provide the email address of the Service Account and the project ID (from Google Developers Console - Projects) where the service account is created. You'll also have to upload the generated P12 file and provide an OpenSSH formatted public key that will be used as an SSH key.
 
 Once Cloudbreak is up and running you can launch clusters in two different ways. You can follow the [Provisioning prerequisites](gcp_pre_provision.md).

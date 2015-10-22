@@ -1,6 +1,6 @@
 #GCP deployment
 
-You already have a cloudbreak-deployer on the machine now we have to start cloudbreak.
+You already have a cloudbreak-deployer on the machine now we have to start Cloudbreak.
 
 ```
 mkdir -p cloudbreak-deployer
