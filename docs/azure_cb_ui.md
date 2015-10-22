@@ -1,6 +1,17 @@
-## Manage cloud credentials
+You can log into the Cloudbreak application at http://PUBLIC_IP:3000.
 
-You can now log into the Cloudbreak application at http://PUBLIC_IP:3000. Once logged in go to **Manage credentials**. Using manage credentials will  link your cloud account with the Cloudbreak account.
+The main goal of the Cloudbreak UI is to easily create clusters on your own cloud provider account.
+This description details the AZURE setup - if you'd like to use a different cloud provider check out its manual.
+
+This document explains the four steps that need to be followed to create Cloudbreak clusters from the UI:
+
+- connect your AZURE account with Cloudbreak
+- create some template resources on the UI that describe the infrastructure of your clusters
+- create a blueprint that describes the HDP services in your clusters and add some recipes for customization
+- launch the cluster itself based on these template resources
+
+## Setting up AZURE credentials
+
 If you do not have an Azure Resource manager application you can simply create it with Cloudbreak deployer. Please read the [Provisioning prerequisites](azure_pre_provision.md) for more information.
 
 `Name:` name of your credential
@@ -21,7 +32,19 @@ If you do not have an Azure Resource manager application you can simply create i
 
 The ssh username is **cloudbreak**
 
-##Manage resources
+## Infrastructure templates
+
+After your AZURE account is linked to Cloudbreak you can start creating templates that describe your clusters' infrastructure:
+
+- resources
+- networks
+- security groups
+
+When you create a template, Cloudbreak *doesn't make any requests* to AZURE.
+Resources are only created on AZURE after the `Create cluster` button is pushed.
+These templates are saved to Cloudbreak's database and can be reused with multiple clusters to describe the infrastructure.
+
+**Manage resources**
 
 Using manage resources you can create infrastructure templates. Templates describes the infrastructure where the HDP cluster will be provisioned. We support heterogenous clusters - this means that one cluster can be built by combining different templates.
 
@@ -37,7 +60,7 @@ Using manage resources you can create infrastructure templates. Templates descri
 
 `Public in account:` share it with others in the account
 
-## Manage blueprints
+**Manage blueprints**
 Blueprints are your declarative definition of a Hadoop cluster.
 
 `Name:` name of your blueprint
@@ -50,7 +73,7 @@ Blueprints are your declarative definition of a Hadoop cluster.
 
 `Public in account:` share it with others in the account
 
-## Manage networks
+**Manage networks**
 
 Manage networks allows you to create or reuse existing networks and configure them.
 
@@ -64,16 +87,23 @@ Manage networks allows you to create or reuse existing networks and configure th
 
 `Public in account:` share it with others in the account
 
-## Manage security groups
+**Security groups**
 
-Security groups allows configuration of traffic/access to the cluster. Currently there are two default groups, and later versions will allow setup of new groups.
+They describe the allowed inbound traffic to the instances in the cluster.
+Currently only one security group template can be selected for a Cloudbreak cluster and all the instances have a public IP address so all the instances in the cluster will belong to the same security group.
+This may change in a later release.
 
-`only-ssh-and-ssl:` all ports are locked down (you can't access Hadoop services outside of the VPN)
+You can define your own security group by adding all the ports, protocols and CIDR range you'd like to use. 443 needs to be there in every security group otherwise Cloudbreak won't be able to
+The rules defined here doesn't need to contain the internal rules, those are automatically added by Cloudbreak to the security group on AZURE.
+
+You can also use the two pre-defined security groups in Cloudbreak:
+
+`only-ssh-and-ssl:` all ports are locked down except for SSH and gateway HTTPS (you can't access Hadoop services outside of the VPC):
 
 * SSH (22)
 * HTTPS (443)
 
-`all-services-port:` all Hadoop services + SSH/HTTP are accessible by default:
+`all-services-port:` all Hadoop services and SSH/gateway HTTPS are accessible by default:
 
 * SSH (22)
 * HTTPS (443)
@@ -103,46 +133,68 @@ Security groups allows configuration of traffic/access to the cluster. Currently
 * Zeppelin WebSocket (9996)
 * Zeppelin UI (9995)
 * Kibana (3080)
-* Elasticsearch (9200) 
+* Elasticsearch (9200)
 
-## Create a cluster
+If `Public in account` is checked all the users belonging to your account will be able to use this security group template to create clusters, but cannot delete or modify it.
 
-Using the create cluster functionality Cloudbreak will create a cloud Stack and a Hadoop Cluster. In order to create a cluster you will have to select a credential first.
+Note that the security groups are *not created* on AZURE after the `Create Security Group` button is pushed, only after the cluster provisioning starts with the selected security group template.
 
-`Cluster name:` your cluster name
+## Cluster installation
 
-`Region:` the region where the cluster is started
+This section describes
 
-`Network:` the network template
+**Blueprints**
 
-`Security Group:` the security group
+Blueprints are your declarative definition of a Hadoop cluster. These are the same blueprints that are [used by Ambari](https://cwiki.apache.org/confluence/display/AMBARI/Blueprints).
 
-`Blueprint:` your Hadoop cluster blueprint. Once the blueprint is selected we parse it and give you the option to select the followings for each **hostgroup**.
+You can use the 3 default blueprints pre-defined in Cloudbreak or you can create your own.
+Blueprints can be added from an URL or the whole JSON can be copied to the `Manual copy` field.
 
-`Hostgroup configuration`
+The hostgroups added in the JSON will be mapped to a set of instances when starting the cluster and the services and components defined in the hostgroup will be installed on the corresponding nodes.
+It is not necessary to define all the configuration fields in the blueprints - if a configuration is missing, Ambari will fill that with a default value.
+The configurations defined in the blueprint can also be modified later from the Ambari UI.
 
-  `Group size:` the number of instances to be started
+If `Public in account` is checked all the users belonging to your account will be able to use this blueprint to create clusters, but cannot delete or modify it.
 
-  `Template:` the stack template associated to the hostgroup
+A blueprint can be exported from a running Ambari cluster that can be reused in Cloudbreak with slight modifications.
+There is no automatic way to modify an exported blueprint and make it instantly usable in Cloudbreak, the modifications have to be done manually.
+When the blueprint is exported some configurations will have for example hardcoded domain names, or memory configurations that won't be applicable to the Cloudbreak cluster.
 
-`DASH Account Name:` values printed by Cloudbreak deployer when the DASH service was deployed
+**Cluster customization**
 
-`DASH Account Key:` values printed by Cloudbreak deployer when the DASH service was deployed
+Sometimes it can be useful to define some custom scripts that run during cluster creation and add some additional functionality.
+For example it can be a service you'd like to install but it's not supported by Ambari or some script that automatically downloads some data to the necessary nodes.
+The most notable example is Ranger setup: it has a prerequisite of a running database when Ranger Admin is installing.
+A PostgreSQL database can be easily started and configured with a recipe before the blueprint installation starts.
 
-  **Important:** For better performance DASH service and the Cloudbreak cluster must be in the same Azure region.
+To learn more about these so called *Recipes*, and to check out the Ranger database recipe, take a look at the [Cluster customization](recipes.md) part of the documentation.
 
-`Enable security:` Install KDC and Kerberize the cluster
 
-`Public in account:` share it with others in the account
+## Cluster deployment
 
-**Advanced features**:
+After all the templates are configured you can deploy a new HDP cluster. Start by selecting a previously created credential in the header.
+Click on `create cluster`, give it a `Name`, select a `Region` where the cluster infrastructure will be provisioned and select one of the `Networks` and `Security Groups` created earlier.
+After you've selected a `Blueprint` as well you should be able to configure the `Template resources` and the number of nodes for all of the hostgroups in the blueprint.
 
-`Consul server count:` the number of Consul servers (odd number), by default is 3. It varies with the cluster size.
+If `Public in account` is checked all the users belonging to your account will be able to see the newly created cluster on the UI, but cannot delete or modify it.
+
+If `Enable security` is checked as well, Cloudbreak will install KDC and the cluster will be Kerberized. See more about it in the [Kerberos](kerberos.md) section of this documentation.
+
+After the `create and start cluster` button is pushed Cloudbreak will start to create resources on your AZURE account.
+Cloudbreak uses *ARM template* to create the resources - you can check out the resources created by Cloudbreak on the ARM Console under the Resourcegroups page.
+
+**Important!** Always use Cloudbreak to delete the cluster, or if that fails for some reason always try to delete the ARM first.
+
+**Advanced features**
+
+There are some advanced features when deploying a new cluster, these are the following:
+
+`File system:` read more [Deploying a DASH service with Cloudbreak deployer](azure_pre_prov.md)
 
 `Minimum cluster size:` the provisioning strategy in case of the cloud provider can't allocate all the requested nodes
 
 `Validate blueprint:` feature to validate or not the Ambari blueprint. By default is switched on.
 
-`Ambari Repository config:` you can take the stack RPM's from a custom stack repository
+`Consul server count:` the number of Consul servers, by default is 3.
 
-Once you have launched the cluster creation you can track the progress either on Cloudbreak UI or your cloud provider management UI.
+`Ambari Repository config:` you can take the stack RPM's from a custom stack repository

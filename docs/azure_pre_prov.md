@@ -2,6 +2,31 @@
 
 Note that we use the new [Azure ARM](https://azure.microsoft.com/en-us/documentation/articles/resource-group-overview/) in order to launch clusters. In order to work we need to create an Active Directory application with the configured name and password and adds the permissions that are needed to call the Azure Resource Manager API. Cloudbreak deployer automates all this for you.
 
+## Generate a new SSH key
+
+With Terminal still open, copy and paste the text below.
+```
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+# Creates a new ssh key, using the provided email as a label
+# Generating public/private rsa key pair.
+```
+
+```
+# Enter file in which to save the key (/Users/you/.ssh/id_rsa): [Press enter]
+You'll be asked to enter a passphrase.
+
+# Enter passphrase (empty for no passphrase): [Type a passphrase]
+# Enter same passphrase again: [Type passphrase again]
+```
+
+After you enter a passphrase, you'll be given the fingerprint, or id, of your SSH key. It will look something like this:
+```
+# Your identification has been saved in /Users/you/.ssh/id_rsa.
+# Your public key has been saved in /Users/you/.ssh/id_rsa.pub.
+# The key fingerprint is:
+# 01:0f:f4:3b:ca:85:sd:17:sd:7d:sd:68:9d:sd:a2:sd your_email@example.com
+```
+
 ## Azure access setup
 
 If you do not have an Active directory user then you have to configure it before deploying a cluster with Cloudbreak.

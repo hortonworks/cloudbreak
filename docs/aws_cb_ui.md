@@ -78,7 +78,7 @@ They describe the allowed inbound traffic to the instances in the cluster.
 Currently only one security group template can be selected for a Cloudbreak cluster and all the instances have a public IP address so all the instances in the cluster will belong to the same security group.
 This may change in a later release.
 
-You can define your own security group by adding all the ports, protocols and CIDR range you'd like to use. **443 needs to be there in every security group otherwise Cloudbreak won't be able to 
+You can define your own security group by adding all the ports, protocols and CIDR range you'd like to use. 443 needs to be there in every security group otherwise Cloudbreak won't be able to
 The rules defined here doesn't need to contain the internal rules, those are automatically added by Cloudbreak to the security group on AWS.
 
 You can also use the two pre-defined security groups in Cloudbreak:
@@ -96,12 +96,22 @@ You can also use the two pre-defined security groups in Cloudbreak:
 * Consul (8500)
 * NN (50070)
 * RM Web (8088)
-* RM Scheduler (8030)
-* RM IPC (8050)
+* Scheduler (8030RM)
+* IPC (8050RM)
 * Job history server (19888)
-* HBase master (60010)
+* HBase master (60000)
+* HBase master web (60010)
+* HBase RS (16020)
+* HBase RS info (60030)
 * Falcon (15000)
 * Storm (8744)
+* Hive metastore (9083)
+* Hive server (10000)
+* Hive server HTTP (10001)
+* Accumulo master (9999)
+* Accumulo Tserver (9997)
+* Atlas (21000)
+* KNOX (8443)
 * Oozie (11000)
 * Spark HS (18080)
 * NM Web (8042)
@@ -109,7 +119,6 @@ You can also use the two pre-defined security groups in Cloudbreak:
 * Zeppelin UI (9995)
 * Kibana (3080)
 * Elasticsearch (9200)
-* Swarm (3376)
 
 If `Public in account` is checked all the users belonging to your account will be able to use this security group template to create clusters, but cannot delete or modify it.
 
@@ -172,7 +181,7 @@ Instances are started in an Auto Scaling Group so they may be restarted if you t
 
 There are some advanced features when deploying a new cluster, these are the following:
 
-`Availability Zone`: You can restrict the instances to a specific availability zone. It may be useful if you're using reserved instances. 
+`Availability Zone`: You can restrict the instances to a specific availability zone. It may be useful if you're using reserved instances.
 
 `Dedicated instances:` Use [dedicated instances](https://aws.amazon.com/ec2/purchasing-options/dedicated-instances/) on EC2
 
