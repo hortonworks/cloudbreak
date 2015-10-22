@@ -1,17 +1,18 @@
 # Interactive mode
 
 Start the shell with `cbd util cloudbreak-shell`. This will launch the Cloudbreak shell inside a Docker container and you are ready to start using it.
-You have to copy files into the cbd working directory, which you would like to use from shell.
+
+You have to copy files into the cbd working directory, which you would like to use from shell. For example if your `cbd` working directory is `~/prj/cbd` then copy your blueprint and public ssh key file into this directory. You can refer to these files with their names from the shell.
 
 ### Create a cloud credential
 
-In order to start using Cloudbreak you will need to have an AWS cloud use configured. Note that Cloudbreak **does not** store you cloud user details - we work around the concept of [IAM](http://aws.amazon.com/iam/) - on Amazon (or other cloud providers) you will have to create an IAM role, a policy and associate that with your Cloudbreak account.
+In order to start using Cloudbreak you will need to have an AWS cloud credential configured. Note that Cloudbreak **does not** store your cloud user details - we work around the concept of [IAM](http://aws.amazon.com/iam/) - on Amazon (or other cloud providers) you will have to create an IAM role, a policy and associate that with your Cloudbreak account.
 
 ```
-credential create --EC2 --description "description" --name my-aws-credential --roleArn <arn role> --sshKeyUrl <URL towards your AWS public key>
+credential create --EC2 --description "description" --name my-aws-credential --roleArn <arn role> --sshKeyFile <path of your AWS public key>
 ```
 
-Alternatively you can upload your public key from a file as well, by using the `—sshKeyPath` switch. You can check whether the credential was creates successfully by using the `credential list` command. You can switch between your cloud credential - when you’d like to use one and act with that you will have to use:
+Alternatively you can upload your public key from an url as well, by using the `—sshKeyUrl` switch. You can check whether the credential was created successfully by using the `credential list` command. You can switch between your cloud credentials - when you’d like to use one and act with that you will have to use:
 
 ```
 credential select --name my-aws-credential
@@ -28,18 +29,19 @@ You can check whether the template was created successfully by using the `templa
 
 ### Create or select a blueprint
 
-You can define Hadoop cluster blueprints with cloudbreak-shell:
+You can define Ambari blueprints with cloudbreak-shell:
 
 ```
-blueprint add --name myblueprint --description myblueprint-description --url <url of blueprint>
+blueprint add --name myblueprint --description myblueprint-description --file <the path of the blueprint>
 ```
 
 Other available options:
 
-- --file
-- --publicInAccount
+`--url` the url of the blueprint
 
-We ship default Hadoop cluster blueprints with Cloudbreak. You can use these blueprints or add yours. To see the available blueprints and use one of them please use:
+`--publicInAccount` flags if the network is public in the account
+
+We ship default Ambari blueprints with Cloudbreak. You can use these blueprints or add yours. To see the available blueprints and use one of them please use:
 
 ```
 blueprint list
@@ -57,13 +59,13 @@ network create --EC2 --name awsnetwork --description aws-network --subnet 10.0.0
 
 Other available options:
 
-- --vpcID "string": your existing vpc on amazon
+`--vpcID` your existing vpc on amazon
 
-- --internetGatewayID "string": your amazon internet gateway
+`--internetGatewayID` your amazon internet gateway of the given VPC
 
-- --publicInAccount "flag": flags if the network is public in the account
+`--publicInAccount` flags if the network is public in the account
 
-There is a default network with name "default-aws-network".
+There is a default network with name `default-aws-network`. If we use this for cluster creation, Cloudbreak will create a new VPC with 10.0.0.0/16 subnet.
 
 You can check whether the network was created successfully by using the `network list` command. Check the network and select it if you are happy with it:
 
@@ -75,7 +77,7 @@ network select --name awsnetwork
 
 ### Create a security group
 
-A security group gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related security rules, maintaining and updating them in an orderly and predictable fashion. A security group can be used repeatedly to create identical copies of the same stack (or to use as a foundation to start a new stack).
+A security group gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related security rules.
 
 ```
 securitygroup create --name secgroup_example --description securitygroup-example --rules 0.0.0.0/0:tcp:8080,9090;10.0.33.0/24:tcp:1234,1235
@@ -89,7 +91,34 @@ securitygroup show --name secgroup_example
 securitygroup select --name secgroup_example
 ```
 
-There are two default security groups defined: "all-services-port" and "only-ssh-and-ssl"
+There are two default security groups defined: `all-services-port` and `only-ssh-and-ssl`
+
+`only-ssh-and-ssl:` all ports are locked down (you can't access Hadoop services outside of the VPN)
+
+* SSH (22)
+* HTTPS (443)
+
+`all-services-port:` all Hadoop services + SSH/HTTP are accessible by default:
+
+* SSH (22)
+* HTTPS (443)
+* Ambari (8080)
+* Consul (8500)
+* NN (50070)
+* RM Web (8088)
+* RM Scheduler (8030)
+* RM IPC (8050)
+* Job history server (19888)
+* HBase master (60010)
+* Falcon (15000)
+* Storm (8744)
+* Oozie (11000)
+* Spark HS (18080)
+* NM Web (8042)
+* Zeppelin WebSocket (9996)
+* Zeppelin UI (9995)
+* Kibana (3080)
+* Elasticsearch (9200)
 
 ## Configure instance groups
 
@@ -104,7 +133,7 @@ Other available options:
 - --templateId "string": Id of the template
 
 ### Create a Hadoop cluster
-You are almost done - two more command and this will create your Hadoop cluster on your favorite cloud provider. Same as the API, or UI this will use your `template`, and by using CloudFormation will launch a cloud stack
+You are almost done - two more command and this will create your Hadoop cluster on your favorite cloud provider. Same as the API, or UI this will use your `credential`, `instancegroups`, `network`, `securitygroup`, and by using CloudFormation will launch a cloud stack
 ```
 stack create --name my-first-stack
 ```
@@ -116,16 +145,24 @@ You are done - you can check the progress through the Ambari UI. If you log back
 
 # Silent mode
 
-With Cloudbreak shell you can recreate clusters based on earlier deployments. Each time you start the shell the executed commands are logged in a file line by line and later either with the `script` command or specifying an `—cmdfile` option the same commands can be executed again.
+With Cloudbreak shell you can execute script files as well. A script file contains cloudbreak shell commands and can be executed with the `script` cloudbreak shell command 
 
-With `cbd util cloudbreak-shell-quiet` you can specify a shell file and let the shell apply the configs step by step in a silent mode.
+```
+script <your script file>
+```
+
+or with the `cbd util cloudbreak-shell-quiet` cbd command:
+
+```
+cbd util cloudbreak-shell-quiet < example.sh
+```
 
 # Example
 
-The following example creates a hadoop cluster with `hdp-small-default` blueprint on M3Xlarge instances with 2X100G attached disks on `default-aws-network` network using `all-services-port` security group:
+The following example creates a hadoop cluster with `hdp-small-default` blueprint on M3Xlarge instances with 2X100G attached disks on `default-aws-network` network using `all-services-port` security group. You should copy your ssh public key file into your cbd working directory with name `id_rsa.pub` and change the `<arn role>` part with your arn role.
 
 ```
-credential create --EC2 --description description --name my-aws-credential --roleArn <arn role> --sshKeyPath <path of your AWS public key>
+credential create --EC2 --description description --name my-aws-credential --roleArn <arn role> --sshKeyPath id_rsa.pub
 credential select --name mvCredentialName
 template create --EC2 --name awstemplate --description aws-template --instanceType M3Xlarge --volumeSize 100 --volumeCount 2
 blueprint select --name hdp-small-default
