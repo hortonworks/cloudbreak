@@ -348,6 +348,21 @@ function continueInit() {
     });
 
     // proxy =======================================================================
+    function eliminateConfidentialParametersFromCredentials(req, data) {
+      if (req.url.indexOf('/credentials') > -1) {
+          if( Object.prototype.toString.call( data ) === '[object Array]' ) {
+              data.forEach(function(el) {
+                if (el.parameters !== undefined && el.parameters.secretKey !== undefined) {
+                    delete el.parameters.secretKey;
+                }
+              });
+          } else {
+            if (el.parameters !== undefined && el.parameters.secretKey !== undefined) {
+                delete el.parameters.secretKey;
+            }
+          }
+        };
+    }
 
     function proxyCloudbreakRequest(req, res, method) {
         if (req.body) {
@@ -355,6 +370,7 @@ function continueInit() {
         }
         cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
         method(config.cloudbreakAddress + req.url, cbRequestArgs, function(data, response) {
+            eliminateConfidentialParametersFromCredentials(req, data);
             res.status(response.statusCode).send(data);
         }).on('error', function(err) {
             res.status(500).send("Uluwatu could not connect to Cloudbreak.");
