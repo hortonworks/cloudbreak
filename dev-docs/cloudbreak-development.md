@@ -4,8 +4,30 @@ To make local development easier we introduced some environment configuration at
 
 ## Uluwatu
 
-To configure local Uluwatu source location use ULUWATU_VOLUME_HOST variable. Please note that you need to generate your config files after variables changed. So the usual process is:
-# edit Profile by adding for example ULUWATU_VOLUME_HOST
+To configure local Uluwatu source location use ULUWATU_VOLUME_HOST variable. Please note that you need to regenerate your config files after variable changed. So the usual process is:
+# edit Profile by adding the line below:
+```
+export ULUWATU_VOLUME_HOST=/path/of/uluwatu/source
+```
+and than restart Cloudbreak:
+```
+cbd kill
+cbd regenerate
+cbd start
+```
+
+If you make changes to html/css/client side js you just refresh the browser.
+If you make changes in server side js, you have to restart the container
+docker restart cbreak_uluwatu_1
+
+## Sultans
+
+Sultans like Uluwatu has it's own variable named SULTANS_VOLUME_HOST. Please note that you need to reregenerate your config files after variable changed. So the usual process is:
+# edit Profile by adding the line below:
+```
+export SULTANS_VOLUME_HOST=/path/of/sultans/source
+```
+and than restart Cloudbreak:
 ```
 cbd kill
 cbd regenerate
@@ -13,8 +35,7 @@ cbd start
 ```
 If you make changes to html/css/client side js you just refresh the browser.
 If you make changes in server side js, you have to restart the container
-docker restart cbreak_uluwatu_1
-
+docker restart cbreak_sultans_1
 
 ## Database migration
 

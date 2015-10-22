@@ -17,6 +17,7 @@
 - Uaa db migration
 - SMTP default parameters added: `CB_MAIL_SMTP_AUTH` and `CB_MAIL_SMTP_STARTTLS_ENABLE`
 - Local development Uluwatu configuration by ULUWATU_VOLUME_HOST environment variable
+- Local development Sultans configuration by SULTANS_VOLUME_HOST environment variable
 
 ### Removed
 

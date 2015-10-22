@@ -8,6 +8,12 @@ compose-init() {
     else
       ULUWATU_VOLUME_CONTAINER=/tmp/null
     fi
+    env-import SULTANS_VOLUME_HOST /dev/null
+    if [[ "$SULTANS_VOLUME_HOST" != "/dev/null" ]]; then
+      SULTANS_VOLUME_CONTAINER=/sultans
+    else
+      SULTANS_VOLUME_CONTAINER=/tmp/null
+    fi
 }
 
 dockerCompose() {
@@ -319,6 +325,8 @@ sultans:
         - SL_UAA_SERVICEID=identity.service.consul
     ports:
         - 3001:3000
+    volumes:
+        - $SULTANS_VOLUME_HOST:$SULTANS_VOLUME_CONTAINER
     dns: $PRIVATE_IP
     image: sequenceiq/sultans-bin:$DOCKER_TAG_SULTANS
 
