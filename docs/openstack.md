@@ -1,8 +1,21 @@
 #OpenStack based installation
 
-We have pre-built a custom OpenStack image available on VM Depot with all the required tooling and Cloudbreak deployer installed. In order to launch this image on OpenStack please use the following [image]().
+##Deployment prerequisites
 
-Cloudbreak will already be installed, thus you can follow these steps to launch the application.
+###Download the Cloudbreak image
+
+You can download the latest Cloudbreak OpenStack image with the following commands
+```
+LATEST_IMAGE="cb-openstack-images/cb-centos71-amb212-2015-10-09.img"
+LOCAL_IMAGE_NAME="..."
+aws s3 cp s3://$LATEST_IMAGE $LOCAL_IMAGE_NAME
+```
+
+###Import the image into OpenStack
+```
+OS_IMAGE_NAME="name_in_openstack"
+glance image-create --name "$OS_IMAGE_NAME" --file "$LOCAL_IMAGE_NAME"  --disk-format qcow2 --container-format bare --is-public True --progress
+```
 
 ## Usage
 
@@ -25,6 +38,12 @@ cbd init
 It will create a `Profile` file in the current directory. Please edit the file - the only required
 configuration is the `PUBLIC_IP`. This IP will be used to access the Cloudbreak UI
 (called Uluwatu). In some cases the `cbd` tool tries to guess it, if can't than will give a hint.
+
+###Configure the name of the Cloudbreak image
+You need to set the Cloudbreak image name you uploaded in your OpenStack cloud in the `Profile` file.
+```
+export CB_OPENSTACK_IMAGE="$OS_IMAGE_NAME"
+```
 
 ### Start Cloudbreak
 

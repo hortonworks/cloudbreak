@@ -30,6 +30,7 @@ pages:
             - 'Provisioning - CLI': gcp_cb_shell.md
         - OpenStack :
             - Deployment: openstack.md
+            - 'Provisioning prerequisites': openstack_pre_prov.md
             - 'Provisioning - UI': openstack_cb_ui.md
             - 'Provisioning - CLI': openstack_cb_shell.md
     - Docs:
