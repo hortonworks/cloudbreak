@@ -61,6 +61,7 @@ Using manage resources you can create infrastructure templates. Templates descri
 `Public in account:` share it with others in the account
 
 **Manage blueprints**
+
 Blueprints are your declarative definition of a Hadoop cluster.
 
 `Name:` name of your blueprint
