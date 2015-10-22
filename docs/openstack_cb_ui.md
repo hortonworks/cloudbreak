@@ -191,3 +191,8 @@ Cloudbreak uses *ARM template* to create the resources - you can check out the r
 `Ambari Repository config:` you can take the stack RPM's from a custom stack repository
 
 Once you have launched the cluster creation you can track the progress either on Cloudbreak UI or your cloud provider management UI.
+
+## Next steps
+
+Congrats! Your cluster should now be up and running. To learn more about it we have some [interesting insights](insights.md) about Cloudbreak clusters.
+

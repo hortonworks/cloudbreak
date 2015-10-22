@@ -4,7 +4,12 @@ Note that we use the new [Azure ARM](https://azure.microsoft.com/en-us/documenta
 
 ## Generate a new SSH key
 
-With Terminal still open, copy and paste the text below.
+All the instances created by Cloudbreak are configured to allow key-based SSH,
+so you'll need to provide an SSH public key that can be used later to SSH onto the instances in the clusters you'll create with Cloudbreak.
+You can use one of your existing keys or you can generate a new one.
+
+To generate a new SSH keypair:
+
 ```
 ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
 # Creates a new ssh key, using the provided email as a label
@@ -13,19 +18,21 @@ ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
 
 ```
 # Enter file in which to save the key (/Users/you/.ssh/id_rsa): [Press enter]
-You'll be asked to enter a passphrase.
+You'll be asked to enter a passphrase, but you can leave it empty.
 
 # Enter passphrase (empty for no passphrase): [Type a passphrase]
 # Enter same passphrase again: [Type passphrase again]
 ```
 
-After you enter a passphrase, you'll be given the fingerprint, or id, of your SSH key. It will look something like this:
+After you enter a passphrase the keypair is generated. The output should look something like below.
 ```
 # Your identification has been saved in /Users/you/.ssh/id_rsa.
 # Your public key has been saved in /Users/you/.ssh/id_rsa.pub.
 # The key fingerprint is:
 # 01:0f:f4:3b:ca:85:sd:17:sd:7d:sd:68:9d:sd:a2:sd your_email@example.com
 ```
+
+Later you'll need to pass the `.pub` file's contents to Cloudbreak and use the private part to SSH to the instances.
 
 ## Azure access setup
 
@@ -105,4 +112,6 @@ The command first creates the namespace account and the scaleout storage account
 
 The WASB filesystem configured with DASH can be used as a data lake - when multiple clusters are deployed with the same DASH filesystem configuration the same data can be accessed from all the clusters, but every cluster can have a different service configured as well. In that case deploy as many DASH services with cbd as clusters with Cloudbreak and configure them accordingly.
 
-Once your prerequisites created you can use the [Cloudbreak UI](azure_cb_ui.md) or use the [Cloudbreak shell](azure_cb_shell.md).
+## Next steps
+
+After these prerequisites are done you can move on to create clusters on the [UI](azure_cb_ui.md) or with the [Shell](azure_cb_shell.md).

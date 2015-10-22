@@ -52,5 +52,7 @@ cbd logs cloudbreak
 ```
 >Cloudbreak server should start within a minute - you should see a line like this: `Started CloudbreakApplication in 36.823 seconds`
 
+## Next steps
+
 Once Cloudbreak is up and running you should check out the [prerequisites](gcp.md) needed to create Google Cloud clusters with Cloudbreak.
 

@@ -185,3 +185,8 @@ securitygroup select --name all-services-port
 stack create --name my-first-stack --region local
 cluster create --description "My first cluster"
 ```
+
+## Next steps
+
+Congrats! Your cluster should now be up and running. To learn more about it we have some [interesting insights](insights.md) about Cloudbreak clusters.
+
