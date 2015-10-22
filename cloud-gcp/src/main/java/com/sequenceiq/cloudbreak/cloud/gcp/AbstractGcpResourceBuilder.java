@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.model.Operation;
+import com.sequenceiq.cloudbreak.cloud.CloudPlatformAware;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -24,16 +25,27 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
-public abstract class AbstractGcpResourceBuilder {
+public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
 
     protected static final String OPERATION_ID = "opid";
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractGcpResourceBuilder.class);
 
     @Inject
     private GcpResourceNameService resourceNameService;
+
+    @Override
+    public String platform() {
+        return CloudPlatform.GCP.name();
+    }
+
+    @Override
+    public String variant() {
+        return CloudPlatform.GCP.name();
+    }
 
     public GcpResourceNameService getResourceNameService() {
         return resourceNameService;

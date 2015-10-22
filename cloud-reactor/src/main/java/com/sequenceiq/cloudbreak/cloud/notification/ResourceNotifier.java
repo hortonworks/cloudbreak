@@ -18,7 +18,7 @@ import reactor.rx.Promise;
 import reactor.rx.Promises;
 
 @Component
-public class ResourceNotifier implements PersistenceNotifier<ResourcePersisted> {
+public class ResourceNotifier implements PersistenceNotifier {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceNotifier.class);
 
     @Inject

@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
@@ -43,7 +42,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
     private ContextBuilders contextBuilders;
 
     @Override
-    public List<CloudResourceStatus> launch(AuthenticatedContext auth, CloudStack stack, PersistenceNotifier<ResourcePersisted> notifier,
+    public List<CloudResourceStatus> launch(AuthenticatedContext auth, CloudStack stack, PersistenceNotifier notifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
         String platform = cloudContext.getPlatform();

@@ -3,6 +3,11 @@ package com.sequenceiq.cloudbreak.cloud;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Platform parameters.
+ *
+ * Note: this interface is going to be completely refactored
+ */
 public interface PlatformParameters {
 
     String diskPrefix();

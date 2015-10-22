@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.notification.model;
 
+/**
+ * Used for confirming that a resource has been persisted
+ */
 public class ResourcePersisted {
 
-    private ResourceNotification request;
+    private final ResourceNotification request;
 
     public ResourcePersisted(ResourceNotification request) {
         this.request = request;

@@ -5,6 +5,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,6 +26,8 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 @Service
 public class ImageService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImageService.class);
+
     private static final String NAME = "image";
 
     @Inject
@@ -39,15 +43,19 @@ public class ImageService {
     private TlsSecurityService tlsSecurityService;
 
     public Image getImage(Long stackId) {
-        Component component = componentRepository.findComponentByStackIdComponentTypeName(stackId, ComponentType.IMAGE, NAME);
+
         try {
+            Component component = componentRepository.findComponentByStackIdComponentTypeName(stackId, ComponentType.IMAGE, NAME);
             if (component == null) {
-                return null;
+                throw new CloudbreakServiceException(String.format("Image not found: stackId: %d, componentType: %d, name: %d",
+                        stackId, ComponentType.IMAGE, NAME));
             }
+            LOGGER.debug("Image found! stackId: {}, component: {}", stackId, component);
             return component.getAttributes().get(Image.class);
         } catch (IOException e) {
             throw new CloudbreakServiceException("Failed to read image", e);
         }
+
     }
 
     public void create(Stack stack, PlatformParameters params) {
@@ -60,6 +68,7 @@ public class ImageService {
             Image image = new Image(imageName, userData);
             Component component = new Component(ComponentType.IMAGE, NAME, new Json(image), stack);
             componentRepository.save(component);
+            LOGGER.debug("Image saved: stackId: {}, component: {}", stack.getId(), component);
         } catch (JsonProcessingException e) {
             throw new CloudbreakServiceException("Failed to create json", e);
         } catch (CloudbreakSecuritySetupException e) {

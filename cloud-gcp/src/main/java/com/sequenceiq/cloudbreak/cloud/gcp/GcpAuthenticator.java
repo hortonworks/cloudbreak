@@ -17,6 +17,11 @@ public class GcpAuthenticator implements Authenticator {
     }
 
     @Override
+    public String variant() {
+        return CloudPlatform.GCP.name();
+    }
+
+    @Override
     public AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential) {
         return new AuthenticatedContext(cloudContext, cloudCredential);
     }

@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
-import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.AbstractOpenStackResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
@@ -57,11 +56,6 @@ public abstract class AbstractOpenStackNetworkResourceBuilder extends AbstractOp
             throw new OpenStackResourceException(String.format("No resource order found for class: %s", getClass()));
         }
         return order;
-    }
-
-    @Override
-    public String platform() {
-        return OpenStackConstants.OPENSTACK;
     }
 
     @Override

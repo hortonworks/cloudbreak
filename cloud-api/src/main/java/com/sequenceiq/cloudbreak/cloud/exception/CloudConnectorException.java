@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.exception;
 
 /**
- * Base for cloud provider specific errors.
+ * Base {@link RuntimeException} for Cloud provider specific errors.
  */
 public class CloudConnectorException extends RuntimeException {
 

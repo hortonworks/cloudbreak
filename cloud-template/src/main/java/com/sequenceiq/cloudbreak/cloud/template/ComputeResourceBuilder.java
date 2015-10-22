@@ -13,7 +13,8 @@ import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 /**
- * Cloud providers which do not support template based deployments (like AWS Cloudformation or Azure ARM) this interface is used to create the compute
+ * Cloud providers which do not support template based deployments (like AWS Cloudformation, Azure ARM or OpenStack Heat) this interface is used to create the
+ * compute
  * resources <b>individually</b>. Compute resources are grouped by the {@link ResourceType}. These types of builders will be called after all the
  * {@link NetworkResourceBuilder} are finished.
  * For example to create an instance on the Google Cloud Platform it is required to create

@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.common.type.CloudRegion;
@@ -43,6 +42,7 @@ public class ArmSetup implements Setup {
     public static final String IMAGES = "images";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArmSetup.class);
+
     private static final String LOCALLY_REDUNDANT_STORAGE = "Standard_LRS";
 
     @Inject
@@ -56,6 +56,7 @@ public class ArmSetup implements Setup {
 
     @Override
     public void prepareImage(AuthenticatedContext ac, Image image) {
+        LOGGER.info("prepare image: {}", image);
         String storageName = armUtils.getStorageName(ac.getCloudCredential(), ac.getCloudContext(), ac.getCloudContext().getLocation().getRegion().value());
         String imageResourceGroupName = armUtils.getImageResourceGroupName(ac.getCloudContext());
         AzureRMClient client = armClient.createAccess(ac.getCloudCredential());
@@ -105,7 +106,7 @@ public class ArmSetup implements Setup {
     }
 
     @Override
-    public void execute(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier<ResourcePersisted> persistenceNotifier) {
+    public void prerequisites(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier persistenceNotifier) {
         String storageGroup = armUtils.getResourceGroupName(ac.getCloudContext());
         AzureRMClient client = armClient.createAccess(ac.getCloudCredential());
         CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.ARM_TEMPLATE).name(storageGroup).build();

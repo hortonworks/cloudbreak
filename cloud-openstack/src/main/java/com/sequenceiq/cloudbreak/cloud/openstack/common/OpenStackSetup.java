@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
@@ -45,7 +44,7 @@ public class OpenStackSetup implements Setup {
     }
 
     @Override
-    public void execute(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier<ResourcePersisted> persistenceNotifier) {
+    public void prerequisites(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier) {
         OSClient osClient = openStackClient.createOSClient(authenticatedContext);
         verifyFlavors(osClient, stack.getGroups());
         LOGGER.debug("setup has been executed");

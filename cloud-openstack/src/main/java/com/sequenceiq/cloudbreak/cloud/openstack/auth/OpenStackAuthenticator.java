@@ -26,6 +26,11 @@ public class OpenStackAuthenticator implements Authenticator {
     }
 
     @Override
+    public String variant() {
+        return null;
+    }
+
+    @Override
     public AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential) {
         LOGGER.info("Authenticating to openstack ...");
         return openStackClient.createAuthenticatedContext(cloudContext, cloudCredential);

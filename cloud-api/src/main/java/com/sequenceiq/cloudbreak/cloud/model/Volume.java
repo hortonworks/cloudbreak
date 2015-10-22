@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 public class Volume {
 
-    private String mount;
+    private final String mount;
 
-    private String type;
+    private final String type;
 
-    private int size;
+    private final int size;
 
     public Volume(String mount, String type, int size) {
         this.mount = mount;

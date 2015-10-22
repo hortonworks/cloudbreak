@@ -10,7 +10,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.template.NetworkResourceBuilder;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
 public abstract class AbstractGcpNetworkBuilder extends AbstractGcpResourceBuilder implements NetworkResourceBuilder<GcpContext> {
 
@@ -23,11 +22,6 @@ public abstract class AbstractGcpNetworkBuilder extends AbstractGcpResourceBuild
     public CloudResourceStatus update(GcpContext context, AuthenticatedContext auth,
             Network network, Security security, CloudResource resource) throws Exception {
         return null;
-    }
-
-    @Override
-    public String platform() {
-        return CloudPlatform.GCP.name();
     }
 
 }

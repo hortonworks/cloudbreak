@@ -9,6 +9,9 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 import reactor.core.support.Assert;
 
+/**
+ * Cloudbreak handles the entities on the Cloud provider side as Generic resources, and this class represent a generic resource.
+ */
 public class CloudResource extends DynamicModel {
     private ResourceType type;
     private CommonStatus status;

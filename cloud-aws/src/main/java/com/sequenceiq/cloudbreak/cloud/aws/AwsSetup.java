@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 
@@ -55,7 +54,7 @@ public class AwsSetup implements Setup {
     }
 
     @Override
-    public void execute(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier<ResourcePersisted> persistenceNotifier) {
+    public void prerequisites(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier persistenceNotifier) {
         Network network = stack.getNetwork();
         if (!awsSpotinstanceEnabled) {
             for (Group group : stack.getGroups()) {

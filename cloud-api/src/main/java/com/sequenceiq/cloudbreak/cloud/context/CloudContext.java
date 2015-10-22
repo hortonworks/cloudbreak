@@ -3,6 +3,11 @@ package com.sequenceiq.cloudbreak.cloud.context;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 
+/**
+ * Context object is used to identify messages exchanged between core and Cloud Platfrom. This context object passed along
+ * with the flow to all methods and also sent back in the Response objects.
+ *
+ */
 public class CloudContext {
 
     private final Long id;

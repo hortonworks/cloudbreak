@@ -64,4 +64,9 @@ public class OpenStackContextBuilder implements ResourceContextBuilder<OpenStack
     public String platform() {
         return OpenStackConstants.OPENSTACK;
     }
+
+    @Override
+    public String variant() {
+        return OpenStackConstants.Variant.NATIVE.name();
+    }
 }
