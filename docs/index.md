@@ -29,19 +29,19 @@ You can follow the AWS provider specific documentation using this [link](aws.md)
 
 We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
 
-You can follow the AWS provider specific documentation using this [link](azure.md)
+You can follow the Azure provider specific documentation using this [link](azure.md)
 
 **GCP based installation**
 
 We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
 
-You can follow the AWS provider specific documentation using this [link](gcp.md)
+You can follow the GCP provider specific documentation using this [link](gcp.md)
 
 **OpenStack based installation**
 
 We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
 
-You can follow the AWS provider specific documentation using this [link](openstack.md)
+You can follow the OpenStack provider specific documentation using this [link](openstack.md)
 
 ##Release notes - 1.1.0
 

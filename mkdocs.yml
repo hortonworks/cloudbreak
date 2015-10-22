@@ -18,11 +18,13 @@ pages:
             - 'Provisioning - UI': aws_cb_ui.md
             - 'Provisioning - CLI': aws_cb_shell.md
         - Azure :
-            - Deployment: azure.md
+            - Installation: azure.md
+            - 'Provisioning prerequisites': azure_pre_provision.md
             - 'Provisioning - UI': azure_cb_ui.md
             - 'Provisioning - CLI': azure_cb_shell.md
         - GCP :
             - Deployment: gcp.md
+            - 'Provisioning prerequisites': gcp_pre_provision.md
             - 'Provisioning - UI': gcp_cb_ui.md
             - 'Provisioning - CLI': gcp_cb_shell.md
         - OpenStack :
