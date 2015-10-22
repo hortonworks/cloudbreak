@@ -92,4 +92,4 @@ This will start all the Docker containers and initialize the application. Please
 cbd logs
 ```
 
-Once Cloudbreak is up and running you can launch clusters in two different ways. You can use the [Cloudbreak UI](aws_cb_ui.md) or use the [Cloudbreak shell](aws_cb_shell.md).
+Once Cloudbreak is up and running you should check out the [prerequisites](aws_pre_prov.md) needed to create AWS clusters with Cloudbreak.

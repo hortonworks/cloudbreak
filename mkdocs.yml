@@ -15,6 +15,7 @@ pages:
     - Providers:
         - AWS :
             - Deployment: aws.md
+            - 'Provisioning prerequisites': aws_pre_prov.md
             - 'Provisioning - UI': aws_cb_ui.md
             - 'Provisioning - CLI': aws_cb_shell.md
         - Azure :
