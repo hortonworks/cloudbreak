@@ -44,7 +44,9 @@ public class ServiceProviderCredentialAdapter implements CredentialHandler<Crede
 
     @Override
     public Credential init(Credential credential) {
-        rsaPublicKeyValidator.validate(credential);
+        if (!credential.passwordAuthenticationRequired()) {
+            rsaPublicKeyValidator.validate(credential.getPublicKey());
+        }
         CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(), credential.cloudPlatform().name(), credential.getOwner());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
 
