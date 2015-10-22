@@ -272,9 +272,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Adding new containers to the cluster.");
         fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_ADD_CONTAINERS, UPDATE_IN_PROGRESS.name());
         containerRunner.addClusterContainers(actualContext);
-        Map<InstanceGroupType, InstanceStatus> statusByGroupType = new HashMap<>();
-        statusByGroupType.put(InstanceGroupType.CORE, InstanceStatus.UNREGISTERED);
-        instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.CREATED, statusByGroupType);
+        instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.UNREGISTERED, actualContext.getUpscaleCandidateAddresses());
         return context;
     }
 
@@ -309,10 +307,10 @@ public class AmbariClusterFacade implements ClusterFacade {
             stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Running cluster containers.");
             fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_RUN_CONTAINERS, UPDATE_IN_PROGRESS.name());
             containerRunner.runClusterContainers(actualContext);
-            Map<InstanceGroupType, InstanceStatus> statusByGroupType = new HashMap<>();
-            statusByGroupType.put(InstanceGroupType.GATEWAY, InstanceStatus.REGISTERED);
-            statusByGroupType.put(InstanceGroupType.CORE, InstanceStatus.UNREGISTERED);
-            instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.CREATED, statusByGroupType);
+            Map<InstanceGroupType, InstanceStatus> newStatusByGroupType = new HashMap<>();
+            newStatusByGroupType.put(InstanceGroupType.GATEWAY, InstanceStatus.REGISTERED);
+            newStatusByGroupType.put(InstanceGroupType.CORE, InstanceStatus.UNREGISTERED);
+            instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), newStatusByGroupType);
             InstanceGroup gateway = stack.getGatewayInstanceGroup();
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
             context = new ProvisioningContext.Builder()
