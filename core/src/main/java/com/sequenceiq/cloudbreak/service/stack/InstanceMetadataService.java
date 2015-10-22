@@ -23,20 +23,29 @@ public class InstanceMetadataService {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
-    public void updateInstanceStatus(Set<InstanceGroup> instanceGroup, com.sequenceiq.cloudbreak.common.type.InstanceStatus currentStatus,
-            Map<InstanceGroupType, com.sequenceiq.cloudbreak.common.type.InstanceStatus> statusByGroupType) {
+    public void updateInstanceStatus(Set<InstanceGroup> instanceGroup,
+            Map<InstanceGroupType, com.sequenceiq.cloudbreak.common.type.InstanceStatus> newStatusByGroupType) {
         for (InstanceGroup group : instanceGroup) {
-            com.sequenceiq.cloudbreak.common.type.InstanceStatus newStatus = statusByGroupType.get(group.getInstanceGroupType());
+            com.sequenceiq.cloudbreak.common.type.InstanceStatus newStatus = newStatusByGroupType.get(group.getInstanceGroupType());
             if (newStatus != null) {
                 for (InstanceMetaData instanceMetaData : group.getInstanceMetaData()) {
-                    if (currentStatus == instanceMetaData.getInstanceStatus()) {
-                        instanceMetaData.setInstanceStatus(newStatus);
-                        instanceMetaDataRepository.save(instanceMetaData);
-                    }
+                    instanceMetaData.setInstanceStatus(newStatus);
+                    instanceMetaDataRepository.save(instanceMetaData);
                 }
             }
         }
+    }
 
+    public void updateInstanceStatus(Set<InstanceGroup> instanceGroup, com.sequenceiq.cloudbreak.common.type.InstanceStatus newStatus,
+            Set<String> candidateAddresses) {
+        for (InstanceGroup group : instanceGroup) {
+            for (InstanceMetaData instanceMetaData : group.getInstanceMetaData()) {
+                if (candidateAddresses.contains(instanceMetaData.getPrivateIp())) {
+                    instanceMetaData.setInstanceStatus(newStatus);
+                    instanceMetaDataRepository.save(instanceMetaData);
+                }
+            }
+        }
     }
 
     public void saveInstanceRequests(Stack stack, List<Group> groups) {
