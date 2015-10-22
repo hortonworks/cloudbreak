@@ -24,3 +24,4 @@ After you enter a passphrase, you'll be given the fingerprint, or id, of your SS
 # 01:0f:f4:3b:ca:85:sd:17:sd:7d:sd:68:9d:sd:a2:sd your_email@example.com
 ```
 
+Once your prerequisites created you can use the [Cloudbreak UI](openstack_cb_ui.md) or use the [Cloudbreak shell](openstack_cb_shell.md).

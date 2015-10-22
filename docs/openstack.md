@@ -64,5 +64,8 @@ This will start all the Docker containers and initialize the application. Please
 ### Watch the logs
 
 ```
-cbd logs
+cbd logs cloudbreak
 ```
+>You can check the logs when the application is ready. It is about 30 seconds.
+
+Once Cloudbreak is up and running you can launch clusters in two different ways. You can use the [Cloudbreak UI](openstack_cb_ui.md) or use the [Cloudbreak shell](openstack_cb_shell.md) but before the provisioning please create the [Provisioning prerequisites](openstack_pre_prov.md).
