@@ -47,6 +47,6 @@ This will start all the Docker containers and initialize the application. Please
 ```
 cbd logs cloudbreak
 ```
->You can check the logs when the application is ready. It is about 30 minutes.
+>You can check the logs when the application is ready. It is about 30 seconds.
 
 Once Cloudbreak is up and running you can launch clusters in two different ways. You can follow the [Provisioning prerequisites](azure_pre_provision.md).

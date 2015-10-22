@@ -71,6 +71,6 @@ This will start all the Docker containers and initialize the application. Please
 ```
 cbd logs
 ```
->You can check the logs when the application is ready. It is about 30 minutes.
+>You can check the logs when the application is ready. It is about 30 seconds.
 
 Once Cloudbreak is up and running you have to make some provider based configuration. You can use the [Cloudbreak UI]().
