@@ -76,7 +76,7 @@ Other available options:
 
 `--publicInAccount` flags if the network is public in the account
 
-There is a default network with name `default-aws-network` with 10.0.0.0/16 subnet and 10.0.0.0/8 addressPrefix.
+There is a default network with name `default-azure-network` with 10.0.0.0/16 subnet and 10.0.0.0/8 addressPrefix.
 
 You can check whether the network was created successfully by using the `network list` command. Check the network and select it if you are happy with it:
 
@@ -113,30 +113,40 @@ There are two default security groups defined: `all-services-port` and `only-ssh
 
 * SSH (22)
 * HTTPS (443)
-* Ambari (8080)
-* Consul (8500)
-* NN (50070)
-* RM Web (8088)
-* RM Scheduler (8030)
-* RM IPC (8050)
-* Job history server (19888)
-* HBase master (60010)
-* Falcon (15000)
-* Storm (8744)
-* Oozie (11000)
-* Spark HS (18080)
-* NM Web (8042)
-* Zeppelin WebSocket (9996)
-* Zeppelin UI (9995)
-* Kibana (3080)
-* Elasticsearch (9200)
+* Ambari (8080) 
+* Consul (8500) 
+* NN (50070) 
+* RM Web (8088) 
+* Scheduler (8030RM) 
+* IPC (8050RM) 
+* Job history server (19888) 
+* HBase master (60000) 
+* HBase master web (60010) 
+* HBase RS (16020) 
+* HBase RS info (60030) 
+* Falcon (15000) 
+* Storm (8744) 
+* Hive metastore (9083) 
+* Hive server (10000) 
+* Hive server HTTP (10001) 
+* Accumulo master (9999) 
+* Accumulo Tserver (9997) 
+* Atlas (21000) 
+* KNOX (8443) 
+* Oozie (11000) 
+* Spark HS (18080) 
+* NM Web (8042) 
+* Zeppelin WebSocket (9996) 
+* Zeppelin UI (9995) 
+* Kibana (3080) 
+* Elasticsearch (9200) 
 
 ## Configure instance groups
 
 You have to configure the instancegroups before the provisioning. An instancegroup is defining a group of your nodes with a specified template. Usually we create instancegroups for the hostgroups defined in the blueprints.
 
 ```
-instancegroup configure --instanceGroup host_group_slave_1 --nodecount 3 --templateName minviable-aws
+instancegroup configure --instanceGroup host_group_slave_1 --nodecount 3 --templateName minviable-azure
 ```
 
 Other available options:

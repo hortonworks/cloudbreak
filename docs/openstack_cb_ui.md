@@ -59,7 +59,7 @@ Manage networks allows you to create or reuse existing networks and configure th
 
 `Description:` short description of your network
 
-`Subnet (CIDR):` a subnet in the VPC with CIDR block
+`Subnet (CIDR):` a subnet with CIDR block under the given `public network`
 
 `Public network ID` id of an OpenStack public network
 
