@@ -57,11 +57,23 @@ public class ArmSetup implements Setup {
     @Override
     public void prepareImage(AuthenticatedContext ac, Image image) {
         LOGGER.info("prepare image: {}", image);
-        String storageName = armUtils.getStorageName(ac.getCloudCredential(), ac.getCloudContext(), ac.getCloudContext().getLocation().getRegion().value());
+        String storageName;
+        if (armUtils.isPersistentStorage()) {
+            storageName = armUtils.getPersistentStorageName(ac.getCloudCredential(), ac.getCloudContext().getLocation().getRegion().value());
+        } else {
+            storageName = armUtils.getStorageName(ac.getCloudCredential(), ac.getCloudContext(), ac.getCloudContext().getLocation().getRegion().value());
+        }
+        String attachedStorageName = armUtils.getStorageName(ac.getCloudCredential(), ac.getCloudContext(),
+                ac.getCloudContext().getLocation().getRegion().value());
+        String resourceGroupName = armUtils.getResourceGroupName(ac.getCloudContext());
         String imageResourceGroupName = armUtils.getImageResourceGroupName(ac.getCloudContext());
         AzureRMClient client = armClient.createAccess(ac.getCloudCredential());
         String region = ac.getCloudContext().getLocation().getRegion().value();
         try {
+            if (!resourceGroupExist(client, resourceGroupName)) {
+                client.createResourceGroup(resourceGroupName, CloudRegion.valueOf(region).value());
+            }
+            createStorage(ac, client, attachedStorageName, resourceGroupName, region);
             if (!resourceGroupExist(client, imageResourceGroupName)) {
                 client.createResourceGroup(imageResourceGroupName, CloudRegion.valueOf(region).value());
             }
@@ -79,7 +91,12 @@ public class ArmSetup implements Setup {
 
     @Override
     public ImageStatusResult checkImageStatus(AuthenticatedContext ac, Image image) {
-        String storageName = armUtils.getStorageName(ac.getCloudCredential(), ac.getCloudContext(), ac.getCloudContext().getLocation().getRegion().value());
+        String storageName;
+        if (armUtils.isPersistentStorage()) {
+            storageName = armUtils.getPersistentStorageName(ac.getCloudCredential(), ac.getCloudContext().getLocation().getRegion().value());
+        } else {
+            storageName = armUtils.getStorageName(ac.getCloudCredential(), ac.getCloudContext(), ac.getCloudContext().getLocation().getRegion().value());
+        }
         String imageResourceGroupName = armUtils.getImageResourceGroupName(ac.getCloudContext());
         ArmCredentialView armCredentialView = new ArmCredentialView(ac.getCloudCredential());
         AzureRMClient client = armClient.createAccess(armCredentialView);

@@ -6,6 +6,10 @@
             "type": "string",
             "defaultValue" : "${storage_account_name}"
         },
+        "userAttachedDiskStorageAccountName": {
+            "type": "string",
+            "defaultValue" : "${attached_disk_storage_account_name}"
+        },
         "userImageStorageContainerName" : {
             "type" : "string",
             "defaultValue" : "${image_storage_container_name}"
@@ -80,7 +84,7 @@
   	"variables" : {
       "userImageName" : "[concat('https://',parameters('userImageStorageAccountName'),'.blob.core.windows.net/',parameters('userImageStorageContainerName'),'/',parameters('userImageVhdName'))]",
       "osDiskVhdName" : "[concat('https://',parameters('userImageStorageAccountName'),'.blob.core.windows.net/',parameters('userDataStorageContainerName'),'/',parameters('vmNamePrefix'),'osDisk')]",
-      "dataDiskVhdName" : "[concat('https://',parameters('userImageStorageAccountName'),'.blob.core.windows.net/',parameters('userDataStorageContainerName'),'/',parameters('vmNamePrefix'),'datadisk')]",
+      "dataDiskVhdName" : "[concat('https://',parameters('userAttachedDiskStorageAccountName'),'.blob.core.windows.net/',parameters('userDataStorageContainerName'),'/',parameters('vmNamePrefix'),'datadisk')]",
       "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkNamePrefix'))]",
       "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]",
       "staticIpRef": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('gatewaystaticipname'))]",

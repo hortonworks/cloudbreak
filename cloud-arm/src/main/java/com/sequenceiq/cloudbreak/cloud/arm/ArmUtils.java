@@ -119,23 +119,28 @@ public class ArmUtils {
 
     public String getStorageName(CloudCredential cloudCredential, CloudContext cloudContext, String region) {
         String result;
-        if (isPersistentStorage()) {
-            ArmCredentialView acv = new ArmCredentialView(cloudCredential);
-            String subscriptionIdPart = acv.getSubscriptionId().replaceAll("-", "").toLowerCase();
-            String regionInitials = WordUtils.initials(region, '_').toLowerCase();
-            result = String.format("%s%s%s", persistentStorage, regionInitials, subscriptionIdPart);
-        } else {
-            String name = cloudContext.getName().toLowerCase().replaceAll("\\s+|-", "");
-            name = name.length() > MAX_LENGTH_OF_NAME_SLICE ? name.substring(0, MAX_LENGTH_OF_NAME_SLICE) : name;
-            MessageDigest messageDigest;
-            try {
-                messageDigest = MessageDigest.getInstance("MD5");
-                messageDigest.update((cloudCredential.getId().toString() + cloudContext.getId() + cloudContext.getOwner()).getBytes());
-                result = name + new BigInteger(1, messageDigest.digest()).toString(RADIX);
-            } catch (NoSuchAlgorithmException e) {
-                result = name + cloudCredential.getId() + cloudContext.getId() + cloudContext.getOwner();
-            }
+        String name = cloudContext.getName().toLowerCase().replaceAll("\\s+|-", "");
+        name = name.length() > MAX_LENGTH_OF_NAME_SLICE ? name.substring(0, MAX_LENGTH_OF_NAME_SLICE) : name;
+        MessageDigest messageDigest;
+        try {
+            messageDigest = MessageDigest.getInstance("MD5");
+            messageDigest.update((cloudCredential.getId().toString() + cloudContext.getId() + cloudContext.getOwner()).getBytes());
+            result = name + new BigInteger(1, messageDigest.digest()).toString(RADIX);
+        } catch (NoSuchAlgorithmException e) {
+            result = name + cloudCredential.getId() + cloudContext.getId() + cloudContext.getOwner();
         }
+        if (result.length() > MAX_LENGTH_OF_RESOURCE_NAME) {
+            result = result.substring(0, MAX_LENGTH_OF_RESOURCE_NAME);
+        }
+        LOGGER.info("Storage account name: {}", result);
+        return result;
+    }
+
+    public String getPersistentStorageName(CloudCredential cloudCredential, String region) {
+        ArmCredentialView acv = new ArmCredentialView(cloudCredential);
+        String subscriptionIdPart = acv.getSubscriptionId().replaceAll("-", "").toLowerCase();
+        String regionInitials = WordUtils.initials(region, '_').toLowerCase();
+        String result = String.format("%s%s%s", persistentStorage, regionInitials, subscriptionIdPart);
         if (result.length() > MAX_LENGTH_OF_RESOURCE_NAME) {
             result = result.substring(0, MAX_LENGTH_OF_RESOURCE_NAME);
         }
