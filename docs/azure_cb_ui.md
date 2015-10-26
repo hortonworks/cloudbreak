@@ -41,7 +41,7 @@ After your AZURE account is linked to Cloudbreak you can start creating template
 - security groups
 
 When you create a template, Cloudbreak *doesn't make any requests* to AZURE.
-Resources are only created on AZURE after the `Create cluster` button is pushed.
+Resources are only created on AZURE after the `create cluster` button is pushed.
 These templates are saved to Cloudbreak's database and can be reused with multiple clusters to describe the infrastructure.
 
 **Manage resources**
@@ -94,8 +94,7 @@ They describe the allowed inbound traffic to the instances in the cluster.
 Currently only one security group template can be selected for a Cloudbreak cluster and all the instances have a public IP address so all the instances in the cluster will belong to the same security group.
 This may change in a later release.
 
-You can define your own security group by adding all the ports, protocols and CIDR range you'd like to use. 443 needs to be there in every security group otherwise Cloudbreak won't be able to
-The rules defined here doesn't need to contain the internal rules, those are automatically added by Cloudbreak to the security group on AZURE.
+You can define your own security group by adding all the ports, protocols and CIDR range you'd like to use. 443 needs to be there in every security group otherwise Cloudbreak won't be able to communicate with the provisioned cluster. The rules defined here doesn't need to contain the internal rules, those are automatically added by Cloudbreak to the security group on Azure.
 
 You can also use the two pre-defined security groups in Cloudbreak:
 
