@@ -112,7 +112,7 @@ public class TlsSetupService {
     }
 
     private void waitForSsh(Stack stack, String publicIp, HostKeyVerifier hostKeyVerifier, String user, String privateKeyLocation) {
-        sshCheckerTaskContextPollingService.pollWithTimeout(
+        sshCheckerTaskContextPollingService.pollWithTimeoutSingleFailure(
                 sshCheckerTask,
                 new SshCheckerTaskContext(stack, hostKeyVerifier, publicIp, user, tlsSecurityService.getSshPrivateFileLocation(stack.getId())),
                 SSH_POLLING_INTERVAL,

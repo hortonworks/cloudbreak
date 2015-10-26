@@ -942,7 +942,7 @@ public class AmbariClusterConnector {
 
     private PollingResult waitForHosts(Stack stack, AmbariClient ambariClient, int nodeCount, Set<HostMetadata> hostsInCluster) {
         LOGGER.info("Waiting for hosts to connect.[Ambari server address: {}]", stack.getAmbariIp());
-        return hostsPollingService.pollWithTimeout(
+        return hostsPollingService.pollWithTimeoutSingleFailure(
                 ambariHostsStatusCheckerTask, new AmbariHostsCheckerContext(stack, ambariClient, hostsInCluster, nodeCount),
                 AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_HOSTS);
     }
@@ -1020,7 +1020,7 @@ public class AmbariClusterConnector {
             return SUCCESS;
         }
         LOGGER.info("Waiting for RegionServers to move the regions to other servers");
-        return rsPollerService.pollWithTimeout(
+        return rsPollerService.pollWithTimeoutSingleFailure(
                 rsDecommissionStatusCheckerTask,
                 new AmbariHostsWithNames(stack, ambariClient, hosts),
                 AMBARI_POLLING_INTERVAL,

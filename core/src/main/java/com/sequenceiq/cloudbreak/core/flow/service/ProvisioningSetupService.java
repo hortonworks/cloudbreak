@@ -20,6 +20,7 @@ public class ProvisioningSetupService {
 
     public static final int MAX_ATTEMPTS_FOR_IMAGE_OPS = -1;
     public static final int IMAGE_POLLING_INTERVAL = 5000;
+    public static final int MAX_FAILURE_COUNT = 5;
 
     @Inject
     private StackRepository stackRepository;
@@ -49,7 +50,7 @@ public class ProvisioningSetupService {
 
     public CheckImageComplete checkImage(Stack stack) throws Exception {
         imageCheckerContextPollingService.pollWithTimeout(imageStatusCheckerTask, new ImageCheckerContext(stack),
-                IMAGE_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_IMAGE_OPS);
+                IMAGE_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_IMAGE_OPS, MAX_FAILURE_COUNT);
         return new CheckImageComplete(stack.cloudPlatform(), stack.getId());
     }
 

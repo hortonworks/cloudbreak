@@ -136,7 +136,7 @@ public class AmbariClusterConnectorTest {
         when(hadoopConfigurationService.getHostGroupConfiguration(any(Cluster.class))).thenReturn(new HashMap<String, Map<String, Map<String, String>>>());
         when(ambariClientProvider.getAmbariClient(any(TLSClientConfig.class), anyString(), anyString())).thenReturn(ambariClient);
         when(ambariClientProvider.getDefaultAmbariClient(any(TLSClientConfig.class))).thenReturn(ambariClient);
-        when(hostsPollingService.pollWithTimeout(any(AmbariHostsStatusCheckerTask.class), any(AmbariHostsCheckerContext.class), anyInt(), anyInt()))
+        when(hostsPollingService.pollWithTimeoutSingleFailure(any(AmbariHostsStatusCheckerTask.class), any(AmbariHostsCheckerContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(hostGroupRepository.findHostGroupsInCluster(anyLong())).thenReturn(cluster.getHostGroups());
         when(ambariOperationService.waitForAmbariOperations(any(Stack.class), any(AmbariClient.class), anyMap())).thenReturn(PollingResult.SUCCESS);

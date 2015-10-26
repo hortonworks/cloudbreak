@@ -82,7 +82,7 @@ public class ClusterBootstrapper {
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
                     gatewayInstance.getPublicIp(), gatewayInstance.getPrivateIp());
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
-            bootstrapApiPollingService.pollWithTimeout(
+            bootstrapApiPollingService.pollWithTimeoutSingleFailure(
                     bootstrapApiCheckerTask,
                     new BootstrapApiContext(stack, gatewayConfig, containerOrchestrator),
                     POLLING_INTERVAL,
@@ -91,20 +91,20 @@ public class ClusterBootstrapper {
             containerOrchestrator.bootstrap(gatewayConfig, nodeMap.get(0), stack.getConsulServers(), CONSUL_LOG_LOCATION,
                     stackDeletionBasedExitCriteriaModel(stack.getId()));
             if (nodeMap.size() > 1) {
-                clusterAvailabilityPollingService.pollWithTimeout(clusterAvailabilityCheckerTask,
+                clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(clusterAvailabilityCheckerTask,
                         new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodeMap.get(0)),
                         POLLING_INTERVAL,
                         MAX_POLLING_ATTEMPTS);
                 for (int i = 1; i < nodeMap.size(); i++) {
                     containerOrchestrator.bootstrapNewNodes(gatewayConfig, nodeMap.get(i), CONSUL_LOG_LOCATION,
                             stackDeletionBasedExitCriteriaModel(stack.getId()));
-                    clusterAvailabilityPollingService.pollWithTimeout(clusterAvailabilityCheckerTask,
+                    clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(clusterAvailabilityCheckerTask,
                             new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodeMap.get(i)),
                             POLLING_INTERVAL,
                             MAX_POLLING_ATTEMPTS);
                 }
             }
-            PollingResult pollingResult = clusterAvailabilityPollingService.pollWithTimeout(
+            PollingResult pollingResult = clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(
                     clusterAvailabilityCheckerTask,
                     new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodes),
                     POLLING_INTERVAL,
@@ -138,12 +138,12 @@ public class ClusterBootstrapper {
             for (int i = 0; i < nodeMap.size(); i++) {
                 containerOrchestrator.bootstrapNewNodes(gatewayConfig, nodeMap.get(i), CONSUL_LOG_LOCATION,
                         stackDeletionBasedExitCriteriaModel(stack.getId()));
-                clusterAvailabilityPollingService.pollWithTimeout(clusterAvailabilityCheckerTask,
+                clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(clusterAvailabilityCheckerTask,
                         new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodeMap.get(i)),
                         POLLING_INTERVAL,
                         MAX_POLLING_ATTEMPTS);
             }
-            PollingResult pollingResult = clusterAvailabilityPollingService.pollWithTimeout(
+            PollingResult pollingResult = clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(
                     clusterAvailabilityCheckerTask,
                     new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodes),
                     POLLING_INTERVAL,

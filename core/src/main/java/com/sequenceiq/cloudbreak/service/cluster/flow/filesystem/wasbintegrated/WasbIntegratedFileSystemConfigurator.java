@@ -3,12 +3,15 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.wasbintegrated
 import static com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfiguration.STORAGE_CONTAINER;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType.WASB_INTEGRATED;
 
-import javax.inject.Inject;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
@@ -19,9 +22,8 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfi
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemScriptConfig;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType;
+
 import groovyx.net.http.HttpResponseException;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 @Component
 public class WasbIntegratedFileSystemConfigurator extends AbstractFileSystemConfigurator<WasbIntegratedFileSystemConfiguration> {
@@ -74,7 +76,7 @@ public class WasbIntegratedFileSystemConfigurator extends AbstractFileSystemConf
             try {
                 azureClient.createStorageAccount(resourceGroupName, storageName, region, "Standard_LRS");
 
-                storagePollingService.pollWithTimeout(storageAccountStatusCheckerTask,
+                storagePollingService.pollWithTimeoutSingleFailure(storageAccountStatusCheckerTask,
                         new StorageAccountCheckerContext(tenantId, subscriptionId, appId, appPassword, storageName, resourceGroupName),
                         POLLING_INTERVAL, MAX_ATTEMPTS);
 

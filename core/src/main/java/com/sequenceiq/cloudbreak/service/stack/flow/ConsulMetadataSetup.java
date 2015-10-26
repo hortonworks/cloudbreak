@@ -108,7 +108,7 @@ public class ConsulMetadataSetup {
                 privateIps.add(instance.getPrivateIp());
             }
         }
-        return consulPollingService.pollWithTimeout(
+        return consulPollingService.pollWithTimeoutSingleFailure(
                 consulHostCheckerTask,
                 new ConsulContext(stack, client, privateIps),
                 POLLING_INTERVAL,
