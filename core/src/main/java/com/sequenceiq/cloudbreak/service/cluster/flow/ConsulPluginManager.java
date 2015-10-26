@@ -142,7 +142,7 @@ public class ConsulPluginManager implements PluginManager {
         ConsulClient client = ConsulUtils.createClient(clientConfig);
         List<String> keys = generateKeys(eventIds);
         int calculatedMaxAttempt = (timeout * ONE_THOUSAND * SECONDS_IN_MINUTE) / POLLING_INTERVAL;
-        keyValuePollingService.pollWithTimeout(
+        keyValuePollingService.pollWithTimeoutSingleFailure(
                 consulKVCheckerTask,
                 new ConsulKVCheckerContext(stack, client, keys, FINISH_SIGNAL, FAILED_SIGNAL),
                 POLLING_INTERVAL, calculatedMaxAttempt

@@ -203,7 +203,7 @@ public class StackScalingService {
 
     private void removeAgentFromConsul(Stack stack, ConsulClient client, InstanceMetaData metaData) {
         String nodeName = metaData.getDiscoveryFQDN().replace(ConsulUtils.CONSUL_DOMAIN, "");
-        consulPollingService.pollWithTimeout(
+        consulPollingService.pollWithTimeoutSingleFailure(
                 consulAgentLeaveCheckerTask,
                 new ConsulContext(stack, client, Collections.singletonList(nodeName)),
                 POLLING_INTERVAL,

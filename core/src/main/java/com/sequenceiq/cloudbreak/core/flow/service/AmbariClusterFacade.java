@@ -178,7 +178,7 @@ public class AmbariClusterFacade implements ClusterFacade {
             AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(clientConfig);
             AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, actualContext.getAmbariIp(), ambariClient);
             PollingResult pollingResult = ambariStartupPollerObjectPollingService
-                    .pollWithTimeout(ambariStartupListenerTask, ambariStartupPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+                    .pollWithTimeoutSingleFailure(ambariStartupListenerTask, ambariStartupPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
 
             if (isSuccess(pollingResult)) {
                 LOGGER.info("Ambari has successfully started! Polling result: {}", pollingResult);

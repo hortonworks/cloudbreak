@@ -63,7 +63,7 @@ public class PollingService<T> {
         return PollingResult.SUCCESS;
     }
 
-    public PollingResult pollWithTimeout(StatusCheckerTask<T> statusCheckerTask, T t, int interval, int maxAttempts) {
+    public PollingResult pollWithTimeoutSingleFailure(StatusCheckerTask<T> statusCheckerTask, T t, int interval, int maxAttempts) {
         return pollWithTimeout(statusCheckerTask, t, interval, maxAttempts, 1);
     }
 
