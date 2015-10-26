@@ -171,10 +171,6 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                     value: 'Southeast Asia',
                     cloud: 'AZURE'
                 }, {
-                    key: 'BRAZIL_SOUTH',
-                    value: 'Brazil South',
-                    cloud: 'AZURE'
-                }, {
                     key: 'WEST_US',
                     value: 'West US',
                     cloud: 'AZURE'
@@ -344,10 +340,6 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                 }, {
                     key: 'SOUTHEAST_ASIA',
                     value: 'Southeast Asia',
-                    cloud: 'AZURE'
-                }, {
-                    key: 'BRAZIL_SOUTH',
-                    value: 'Brazil South',
                     cloud: 'AZURE'
                 }, {
                     key: 'WEST_US',
