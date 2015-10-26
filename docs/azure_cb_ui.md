@@ -12,7 +12,7 @@ This document explains the four steps that need to be followed to create Cloudbr
 
 ## Setting up AZURE credentials
 
-If you do not have an Azure Resource manager application you can simply create it with Cloudbreak deployer. Please read the [Provisioning prerequisites](azure_pre_provision.md) for more information.
+If you do not have an Azure Resource manager application you can simply create it with Cloudbreak deployer. Please read the [Provisioning prerequisites](azure_pre_prov.md) for more information.
 
 `Name:` name of your credential
 
@@ -203,4 +203,3 @@ There are some advanced features when deploying a new cluster, these are the fol
 ## Next steps
 
 Congrats! Your cluster should now be up and running. To learn more about it we have some [interesting insights](insights.md) about Cloudbreak clusters.
-
