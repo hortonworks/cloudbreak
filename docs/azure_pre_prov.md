@@ -91,7 +91,7 @@ App Owner Tenant ID: sdwerwe1-d98e-dsf12-dsf123-df123232
 
 ## Filesystem configuration
 
-When starting a cluster with Cloudbreak on Azure, the default filesystem is “Windows Azure blob storage with DASH”. Hadoop has built-in support for the [WASB filesystem](https://hadoop.apache.org/docs/current/hadoop-azure/index.html) so it can be used easily as HDFS instead of disks.
+When starting a cluster with Cloudbreak on Azure, the default filesystem is “Windows Azure Blob Storage with DASH”. Hadoop has built-in support for the [WASB filesystem](https://hadoop.apache.org/docs/current/hadoop-azure/index.html) so it can be used easily as HDFS instead of disks.
 
 ### Disks and blob storage
 
