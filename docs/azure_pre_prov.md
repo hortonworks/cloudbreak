@@ -59,6 +59,8 @@ If you do not have an Active directory user then you have to configure it before
 7. Here you can add the new user to Administrators. Simply click on `Add` on the bottom of the page
 ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/azure7.png)
 
+##Azure application setup with Cloudbreak Deployer
+
 In order for Cloudbreak to be able to launch clusters on Azure on your behalf you need to set up your **Azure ARM application**.
 
 ```
