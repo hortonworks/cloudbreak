@@ -10,7 +10,7 @@ This document explains the four steps that need to be followed to create Cloudbr
 - create a blueprint that describes the HDP services in your clusters and add some recipes for customization
 - launch the cluster itself based on these template resources
 
-## Setting up AZURE credentials
+## Setting up Azure credentials
 
 If you do not have an Azure Resource manager application you can simply create it with Cloudbreak deployer. Please read the [Provisioning prerequisites](azure_pre_prov.md) for more information.
 
@@ -18,13 +18,13 @@ If you do not have an Azure Resource manager application you can simply create i
 
 `Description:` short description of your linked credential
 
-`Subscription Id:` your Azure subscription id - see Accounts (Browse all> Subscription)
+`Subscription Id:` your Azure subscription id - see Accounts (`portal.azure.com`> `Browse all`> `Subscription`)
 
 `Password:` your password which was setted up when you create the AD app
 
-`App ID:` You app Id (`Browse all`> `Subscription`> `Subscription detail`> `Users`> `You application`> `Properties`)
+`App Id:` You app Id (`portal.azure.com`> `Browse all`> `Subscription`> `Subscription detail`> `Users`> `You application`> `Properties`)
 
-`App Owner Tenant ID:` You Tenant Id (`Browse all`> `Subscription`> `Subscription detail`> `Users`> `You application`> `Properties`)
+`App Owner Tenant Id:` You Tenant Id (`portal.azure.com`> `Browse all`> `Subscription`> `Subscription detail`> `Users`> `You application`> `Properties`)
 
 `SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later
 
