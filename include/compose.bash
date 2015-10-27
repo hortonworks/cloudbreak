@@ -281,6 +281,8 @@ cloudbreak:
         - CB_IDENTITY_SERVICEID=identity.service.consul
         - CB_DB_SERVICEID=cbdb.service.consul
         - SECURE_RANDOM=$SECURE_RANDOM
+        - CB_MAIL_SMTP_AUTH=$CB_MAIL_SMTP_AUTH
+        - CB_MAIL_SMTP_STARTTLS_ENABLE=$CB_MAIL_SMTP_STARTTLS_ENABLE
     ports:
         - 8080:8080
     volumes:
