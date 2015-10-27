@@ -99,35 +99,35 @@ There are two default security groups defined: `all-services-port` and `only-ssh
 
 * SSH (22)
 * HTTPS (443)
-* Ambari (8080) 
-* Consul (8500) 
-* NN (50070) 
-* RM Web (8088) 
-* Scheduler (8030RM) 
-* IPC (8050RM) 
-* Job history server (19888) 
-* HBase master (60000) 
-* HBase master web (60010) 
-* HBase RS (16020) 
-* HBase RS info (60030) 
-* Falcon (15000) 
-* Storm (8744) 
-* Hive metastore (9083) 
-* Hive server (10000) 
-* Hive server HTTP (10001) 
-* Accumulo master (9999) 
-* Accumulo Tserver (9997) 
-* Atlas (21000) 
-* KNOX (8443) 
-* Oozie (11000) 
-* Spark HS (18080) 
-* NM Web (8042) 
-* Zeppelin WebSocket (9996) 
-* Zeppelin UI (9995) 
-* Kibana (3080) 
-* Elasticsearch (9200) 
+* Ambari (8080)
+* Consul (8500)
+* NN (50070)
+* RM Web (8088)
+* Scheduler (8030RM)
+* IPC (8050RM)
+* Job history server (19888)
+* HBase master (60000)
+* HBase master web (60010)
+* HBase RS (16020)
+* HBase RS info (60030)
+* Falcon (15000)
+* Storm (8744)
+* Hive metastore (9083)
+* Hive server (10000)
+* Hive server HTTP (10001)
+* Accumulo master (9999)
+* Accumulo Tserver (9997)
+* Atlas (21000)
+* KNOX (8443)
+* Oozie (11000)
+* Spark HS (18080)
+* NM Web (8042)
+* Zeppelin WebSocket (9996)
+* Zeppelin UI (9995)
+* Kibana (3080)
+* Elasticsearch (9200)
 
-## Configure instance groups
+### Configure instance groups
 
 You have to configure the instancegroups before the provisioning. An instancegroup is defining a group of your nodes with a specified template. Usually we create instancegroups for the hostgroups defined in the blueprints.
 
@@ -139,7 +139,7 @@ Other available options:
 
 `--templateId` Id of the template
 
-### Create a Hadoop cluster
+## Create a Hadoop cluster
 You are almost done - two more command and this will create your Hadoop cluster on your favorite cloud provider. Same as the API, or UI this will use your `credential`, `instancegroups`, `network`, `securitygroup`, and by using OpenStack Heat will launch a cloud stack
 ```
 stack create --name my-first-stack --region local
@@ -152,7 +152,7 @@ You are done - you can check the progress through the Ambari UI. If you log back
 
 # Silent mode
 
-With Cloudbreak shell you can execute script files as well. A script file contains cloudbreak shell commands and can be executed with the `script` cloudbreak shell command 
+With Cloudbreak shell you can execute script files as well. A script file contains cloudbreak shell commands and can be executed with the `script` cloudbreak shell command
 
 ```
 script <your script file>
@@ -189,4 +189,3 @@ cluster create --description "My first cluster"
 ## Next steps
 
 Congrats! Your cluster should now be up and running. To learn more about it we have some [interesting insights](insights.md) about Cloudbreak clusters.
-

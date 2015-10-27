@@ -141,7 +141,7 @@ There are two default security groups defined: `all-services-port` and `only-ssh
 * Kibana (3080)
 * Elasticsearch (9200)
 
-## Configure instance groups
+### Configure instance groups
 
 You have to configure the instancegroups before the provisioning. An instancegroup is defining a group of your nodes with a specified template. Usually we create instancegroups for the hostgroups defined in the blueprints.
 
@@ -153,7 +153,7 @@ Other available options:
 
 `--templateId` Id of the template
 
-### Create a Hadoop cluster
+## Create a Hadoop cluster
 You are almost done - two more command and this will create your Hadoop cluster on your favorite cloud provider. Same as the API, or UI this will use your `credential`, `instancegroups`, `network`, `securitygroup`, and by using Azure ResourceManager will launch a cloud stack
 ```
 stack create --name my-first-stack --region WEST_US
