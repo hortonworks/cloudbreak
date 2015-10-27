@@ -32,6 +32,8 @@ public class EnvironmentVariableConfig {
     public static final String CB_TEMPLATE_DEFAULTS = "minviable-gcp,minviable-azure,minviable-aws";
 
     public static final String CB_SMTP_SENDER_FROM = "no-reply@sequenceiq.com";
+    public static final String CB_MAIL_SMTP_AUTH = "true";
+    public static final String CB_MAIL_SMTP_STARTTLS_ENABLE = "true";
     public static final String CB_SUCCESS_CLUSTER_INSTALLER_MAIL_TEMPLATE_PATH = "templates/cluster-installer-mail-success.ftl";
     public static final String CB_FAILED_CLUSTER_INSTALLER_MAIL_TEMPLATE_PATH = "templates/cluster-installer-mail-fail.ftl";
 
