@@ -5,6 +5,8 @@
 : ${SOURCE_DIR:=/data/jars}
 : ${STORAGE_JAR:=dash-azure-storage-2.2.0.jar}
 : ${MR_TAR_NAME:=mapreduce.tar.gz}
+: ${TEZ_TAR_NAME:=tez.tar.gz}
+: ${TMP_EXTRACT_DIR:=temp_extract_dir}
 
 main(){
   SOURCE_JAR="$SOURCE_DIR/$STORAGE_JAR"
@@ -17,28 +19,29 @@ main(){
   echo "Replacing azure-storage.jar with $STORAGE_JAR"
   find / -name "azure-storage*.jar" | while read line; do echo "Replacing $line"; \cp -f "$SOURCE_JAR" "${line%azure*}"; rm -f $line; done
 
-  mapred_tars=$(find / -name "$MR_TAR_NAME")
-  for mapred_tar in $mapred_tars; do
-    if [ -f $mapred_tar ]; then
-      cd ${mapred_tar%$MR_TAR_NAME}
+  tar_files=$(find / -regextype posix-extended -regex "^(.*$MR_TAR_NAME|.*$TEZ_TAR_NAME)$")
+  for tar_file in $tar_files; do
+    if [ -f $tar_file ]; then
+      cd ${tar_file%$(basename $tar_file)}
 
-      echo "Extracting $mapred_tar."
-      tar -xzf $mapred_tar
+      rm -rf $TMP_EXTRACT_DIR && mkdir $TMP_EXTRACT_DIR && cd $TMP_EXTRACT_DIR
+
+      echo "Extracting $tar_file."
+      tar -xzf $tar_file
 
       echo "Replacing azure-storage.jar with $STORAGE_JAR."
-      find "hadoop/" -name "azure-storage*.jar" | while read line; do echo "Replacing $line"; \cp -f $SOURCE_JAR ${line%azure*}; rm -f $line; done
+      find . -name "azure-storage*.jar" | while read line; do echo "Replacing $line"; \cp -f $SOURCE_JAR ${line%azure*}; rm -f $line; done
 
-      echo "Removing $MR_TAR_NAME."
-      rm -f "$mapred_tar"
+      echo "Removing $tar_file."
+      rm -f "$tar_file"
 
       echo "Creating new $MR_TAR_NAME with the replaced libs."
-      tar -zcf "$mapred_tar" "hadoop/"
+      tar -zcf "$tar_file" $(ls)
 
       echo "Cleaning up extracted directory."
-      rm -rf "hadoop/"
+      cd .. && rm -rf $TMP_EXTRACT_DIR
     fi
   done
-
 }
 
 exec &>> "$LOGFILE"
