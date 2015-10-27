@@ -20,12 +20,12 @@ public class CloudResource extends DynamicModel {
     private boolean persistent;
 
     private CloudResource(ResourceType type, CommonStatus status, String name, String reference, boolean persistent, Map<String, Object> params) {
+        super(params);
         this.type = type;
         this.status = status;
         this.name = name;
         this.reference = reference;
         this.persistent = persistent;
-        putAll(params);
     }
 
     public ResourceType getType() {

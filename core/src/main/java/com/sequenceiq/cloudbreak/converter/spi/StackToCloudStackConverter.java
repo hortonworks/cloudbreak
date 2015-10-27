@@ -100,8 +100,7 @@ public class StackToCloudStackConverter {
     private Network buildNetwork(Stack stack) {
         com.sequenceiq.cloudbreak.domain.Network stackNetwork = stack.getNetwork();
         Subnet subnet = new Subnet(stackNetwork.getSubnetCIDR());
-        Network network = new Network(subnet);
-        network.putAll(ReflectionUtils.getDeclaredFields(stackNetwork));
+        Network network = new Network(subnet, ReflectionUtils.getDeclaredFields(stackNetwork));
         return network;
     }
 

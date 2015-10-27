@@ -28,7 +28,7 @@ public class ImageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageService.class);
 
-    private static final String NAME = "image";
+    private static final String IMAGE_NAME = "IMAGE";
 
     @Inject
     private ImageNameUtil imageNameUtil;
@@ -45,10 +45,10 @@ public class ImageService {
     public Image getImage(Long stackId) {
 
         try {
-            Component component = componentRepository.findComponentByStackIdComponentTypeName(stackId, ComponentType.IMAGE, NAME);
+            Component component = componentRepository.findComponentByStackIdComponentTypeName(stackId, ComponentType.IMAGE, IMAGE_NAME);
             if (component == null) {
                 throw new CloudbreakServiceException(String.format("Image not found: stackId: %d, componentType: %d, name: %d",
-                        stackId, ComponentType.IMAGE, NAME));
+                        stackId, ComponentType.IMAGE, IMAGE_NAME));
             }
             LOGGER.debug("Image found! stackId: {}, component: {}", stackId, component);
             return component.getAttributes().get(Image.class);
@@ -66,7 +66,7 @@ public class ImageService {
             String sshUser = stack.getCredential().getLoginUserName();
             Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(cloudPlatform, tmpSshKey, sshUser, params);
             Image image = new Image(imageName, userData);
-            Component component = new Component(ComponentType.IMAGE, NAME, new Json(image), stack);
+            Component component = new Component(ComponentType.IMAGE, IMAGE_NAME, new Json(image), stack);
             componentRepository.save(component);
             LOGGER.debug("Image saved: stackId: {}, component: {}", stack.getId(), component);
         } catch (JsonProcessingException e) {

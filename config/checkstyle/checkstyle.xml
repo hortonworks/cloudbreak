@@ -80,6 +80,7 @@
         </module>
         <module name="CyclomaticComplexity">
             <property name="max" value="10" />
+            <!-- property name="switchBlockAsSingleDecisionPoint" value="true" / -->
         </module>
         <module name="NPathComplexity">
             <property name="max" value="256" />

@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
@@ -48,7 +49,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     private static final Logger LOGGER = LoggerFactory.getLogger(SwarmContainerOrchestrator.class);
     private static final int READ_TIMEOUT = 180_000;
     private static final String MUNCHAUSEN_WAIT = "3600";
-    private static final String MUNCHAUSEN_DOCKER_IMAGE = "sequenceiq/munchausen:0.5.5";
+
     private static final int MAX_IP_FOR_ONE_REQUEST = 600;
 
 
@@ -61,7 +62,8 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
      * @return The API address of the container orchestrator
      */
     @Override
-    public void bootstrap(GatewayConfig gatewayConfig, Set<Node> nodes, int consulServerCount, String consulLogLocation, ExitCriteriaModel exitCriteriaModel)
+    public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount, String consulLogLocation,
+            ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
         try {
             String privateGatewayIp = getPrivateGatewayIp(gatewayConfig.getPublicAddress(), nodes);
@@ -73,7 +75,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             String[] cmd = {"--debug", "bootstrap", "--wait", MUNCHAUSEN_WAIT, "--consulLogLocation", consulLogLocation, "--consulServers",
                     concatToString(consulServers), concatToString(result)};
 
-            runner(munchausenBootstrap(gatewayConfig, cmd),
+            runner(munchausenBootstrap(gatewayConfig, imageName(config), cmd),
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
 
         } catch (CloudbreakOrchestratorCancelledException | CloudbreakOrchestratorFailedException coe) {
@@ -84,15 +86,16 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> nodes, String consulLogLocation, ExitCriteriaModel exitCriteriaModel)
-        throws CloudbreakOrchestratorException {
+    public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, String consulLogLocation, ExitCriteriaModel
+            exitCriteriaModel)
+            throws CloudbreakOrchestratorException {
         try {
             Set<String> privateAddresses = getPrivateAddresses(nodes);
             Set<String> result = prepareDockerAddressInventory(privateAddresses);
             String[] cmd = {"--debug", "add", "--wait", MUNCHAUSEN_WAIT, "--consulLogLocation", consulLogLocation,
                     "--join", getConsulJoinIp(gatewayConfig.getPublicAddress()), concatToString(result)};
 
-            runner(munchausenNewNodeBootstrap(gatewayConfig, cmd),
+            runner(munchausenNewNodeBootstrap(gatewayConfig, imageName(config), cmd),
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
 
         } catch (CloudbreakOrchestratorCancelledException | CloudbreakOrchestratorFailedException coe) {
@@ -103,11 +106,11 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void startRegistrator(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
+    public void startRegistrator(ContainerOrchestratorCluster cluster, ContainerConfig config, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
         try {
             Node gateway = getGatewayNode(cluster.getGatewayConfig().getPublicAddress(), cluster.getNodes());
-            runner(registratorBootstrap(cluster.getGatewayConfig(), imageName, gateway), getExitCriteria(), exitCriteriaModel,
+            runner(registratorBootstrap(cluster.getGatewayConfig(), imageName(config), gateway), getExitCriteria(), exitCriteriaModel,
                     MDC.getCopyOfContextMap()).call();
         } catch (CloudbreakOrchestratorCancelledException | CloudbreakOrchestratorFailedException coe) {
             throw coe;
@@ -117,18 +120,18 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void startAmbariServer(ContainerOrchestratorCluster cluster, String dbImageName, String serverImageName, String platform,
+    public void startAmbariServer(ContainerOrchestratorCluster cluster, ContainerConfig dbConfig, ContainerConfig serverConfig, String platform,
             LogVolumePath logVolumePath, Boolean localAgentRequired, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
         try {
             Node gateway = getGatewayNode(cluster.getGatewayConfig().getPublicAddress(), cluster.getNodes());
-            runner(ambariServerDatabaseBootstrap(cluster.getGatewayConfig(), dbImageName, gateway, logVolumePath),
+            runner(ambariServerDatabaseBootstrap(cluster.getGatewayConfig(), imageName(dbConfig), gateway, logVolumePath),
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
-            runner(ambariServerBootstrap(cluster.getGatewayConfig(), serverImageName, gateway, platform, logVolumePath),
+            runner(ambariServerBootstrap(cluster.getGatewayConfig(), imageName(serverConfig), gateway, platform, logVolumePath),
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
             if (localAgentRequired) {
-                runner(ambariAgentBootstrap(cluster.getGatewayConfig(), serverImageName, gateway, String.valueOf(new Date().getTime()), platform, logVolumePath),
-                        getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
+                runner(ambariAgentBootstrap(cluster.getGatewayConfig(), imageName(serverConfig), gateway, String.valueOf(new Date().getTime()),
+                        platform, logVolumePath), getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
             }
         } catch (CloudbreakOrchestratorCancelledException | CloudbreakOrchestratorFailedException coe) {
             throw coe;
@@ -138,7 +141,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, String platform, LogVolumePath logVolumePath,
+    public void startAmbariAgents(ContainerOrchestratorCluster cluster, ContainerConfig config, String platform, LogVolumePath logVolumePath,
             ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
         try {
@@ -148,7 +151,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             for (Node node : nodes) {
                 String time = String.valueOf(new Date().getTime()) + i++;
                 AmbariAgentBootstrap ambariAgentBootstrap =
-                        ambariAgentBootstrap(cluster.getGatewayConfig(), imageName, node, time, platform, logVolumePath);
+                        ambariAgentBootstrap(cluster.getGatewayConfig(), imageName(config), node, time, platform, logVolumePath);
                 futures.add(getParallelContainerRunner()
                         .submit(runner(ambariAgentBootstrap, getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap())));
             }
@@ -161,15 +164,15 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException {
+    public void startConsulWatches(ContainerOrchestratorCluster cluster, ContainerConfig config, LogVolumePath logVolumePath,
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         try {
             List<Future<Boolean>> futures = new ArrayList<>();
             int i = 0;
             for (Node node : cluster.getNodes()) {
                 String time = String.valueOf(new Date().getTime()) + i++;
                 Callable<Boolean> runner = runner(
-                        consulWatchBootstrap(cluster.getGatewayConfig(), imageName, node, time, logVolumePath), getExitCriteria(),
+                        consulWatchBootstrap(cluster.getGatewayConfig(), imageName(config), node, time, logVolumePath), getExitCriteria(),
                         exitCriteriaModel, MDC.getCopyOfContextMap());
                 futures.add(getParallelContainerRunner().submit(runner));
             }
@@ -182,12 +185,12 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void startKerberosServer(ContainerOrchestratorCluster cluster, String serverImageName, LogVolumePath logVolumePath,
+    public void startKerberosServer(ContainerOrchestratorCluster cluster, ContainerConfig config, LogVolumePath logVolumePath,
             KerberosConfiguration kerberosConfiguration, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
         try {
             Node gateway = getGatewayNode(cluster.getGatewayConfig().getPublicAddress(), cluster.getNodes());
-            runner(kerberosServerBootstrap(kerberosConfiguration, cluster.getGatewayConfig(), serverImageName, gateway, logVolumePath),
+            runner(kerberosServerBootstrap(kerberosConfiguration, cluster.getGatewayConfig(), imageName(config), gateway, logVolumePath),
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
         } catch (CloudbreakOrchestratorCancelledException | CloudbreakOrchestratorFailedException coe) {
             throw coe;
@@ -197,11 +200,11 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void startBaywatchServer(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
+    public void startBaywatchServer(ContainerOrchestratorCluster cluster, ContainerConfig config, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
         try {
             Node gateway = getGatewayNode(cluster.getGatewayConfig().getPublicAddress(), cluster.getNodes());
-            runner(baywatchServerBootstrap(cluster.getGatewayConfig(), imageName, gateway),
+            runner(baywatchServerBootstrap(cluster.getGatewayConfig(), imageName(config), gateway),
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
         } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {
             throw cloudbreakOrchestratorCancelledExceptionException;
@@ -213,7 +216,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void startBaywatchClients(ContainerOrchestratorCluster cluster, String imageName, String consulDomain, LogVolumePath logVolumePath,
+    public void startBaywatchClients(ContainerOrchestratorCluster cluster, ContainerConfig config, String consulDomain, LogVolumePath logVolumePath,
             String externServerLocation, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
         try {
@@ -222,7 +225,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             for (Node node : cluster.getNodes()) {
                 String time = String.valueOf(new Date().getTime()) + i++;
                 BaywatchClientBootstrap baywatchClientBootstrap =
-                        baywatchClientBootstrap(cluster.getGatewayConfig(), imageName, time, node,
+                        baywatchClientBootstrap(cluster.getGatewayConfig(), imageName(config), time, node,
                                 consulDomain, logVolumePath, externServerLocation);
                 futures.add(getParallelContainerRunner().submit(runner(baywatchClientBootstrap, getExitCriteria(), exitCriteriaModel,
                         MDC.getCopyOfContextMap())));
@@ -236,14 +239,15 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void startLogrotate(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
+    public void startLogrotate(ContainerOrchestratorCluster cluster, ContainerConfig config, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
         try {
             List<Future<Boolean>> futures = new ArrayList<>();
             int i = 0;
             for (Node node : cluster.getNodes()) {
                 String time = String.valueOf(new Date().getTime()) + i;
-                Callable<Boolean> runner = runner(logrotateBootsrap(cluster.getGatewayConfig(), imageName, node, time), getExitCriteria(), exitCriteriaModel,
+                Callable<Boolean> runner = runner(logrotateBootsrap(cluster.getGatewayConfig(), imageName(config), node, time), getExitCriteria(),
+                        exitCriteriaModel,
                         MDC.getCopyOfContextMap());
                 futures.add(getParallelContainerRunner().submit(runner));
             }
@@ -420,15 +424,15 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @VisibleForTesting
-    MunchausenBootstrap munchausenBootstrap(GatewayConfig gatewayConfig, String[] cmd) {
+    MunchausenBootstrap munchausenBootstrap(GatewayConfig gatewayConfig, String imageName, String[] cmd) {
         DockerClient dockerApiClient = dockerClient(gatewayConfig);
-        return new MunchausenBootstrap(dockerApiClient, MUNCHAUSEN_DOCKER_IMAGE, cmd);
+        return new MunchausenBootstrap(dockerApiClient, imageName, cmd);
     }
 
     @VisibleForTesting
-    MunchausenBootstrap munchausenNewNodeBootstrap(GatewayConfig gatewayConfig, String[] cmd) {
+    MunchausenBootstrap munchausenNewNodeBootstrap(GatewayConfig gatewayConfig, String imageName, String[] cmd) {
         DockerClient dockerApiClient = swarmClient(gatewayConfig);
-        return new MunchausenBootstrap(dockerApiClient, MUNCHAUSEN_DOCKER_IMAGE, cmd);
+        return new MunchausenBootstrap(dockerApiClient, imageName, cmd);
     }
 
     @VisibleForTesting
@@ -500,5 +504,9 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     private String getConsulJoinIp(String publicIp) {
         return String.format("consul://%s:8500", publicIp);
+    }
+
+    private String imageName(ContainerConfig containerConfig) {
+        return containerConfig.getName() + ":" + containerConfig.getVersion();
     }
 }

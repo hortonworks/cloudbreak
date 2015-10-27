@@ -4,17 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
-import com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration;
-import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
-import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
+import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
-import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
+import com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
 public class MockContainerOrchestrator implements ContainerOrchestrator {
 
@@ -29,65 +30,67 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
-    public void bootstrap(GatewayConfig gatewayConfig, Set<Node> nodes, int consulServerCount, String consulLogLocation, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
-        return;
-    }
-
-    @Override
-    public void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> nodes, String consulLogLocation, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
-        return;
-    }
-
-    @Override
-    public void startRegistrator(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
-        return;
-    }
-
-    @Override
-    public void startAmbariServer(ContainerOrchestratorCluster cluster, String dbImageName, String serverImageName, String platform,
-            LogVolumePath logVolumePath, Boolean localAgentRequired, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
-        return;
-    }
-
-    @Override
-    public void startAmbariAgents(ContainerOrchestratorCluster cluster, String imageName, String platform, LogVolumePath logVolumePath,
+    public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, int consulServerCount, String consulLogLocation,
             ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         return;
     }
 
     @Override
-    public void startConsulWatches(ContainerOrchestratorCluster cluster, String imageName, LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
+    public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, String consulLogLocation, ExitCriteriaModel
+            exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         return;
     }
 
     @Override
-    public void startKerberosServer(ContainerOrchestratorCluster cluster, String serverImageName, LogVolumePath logVolumePath,
+    public void startRegistrator(ContainerOrchestratorCluster cluster, ContainerConfig containerConfig, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+        return;
+    }
+
+    @Override
+    public void startAmbariServer(ContainerOrchestratorCluster cluster, ContainerConfig dbConfig, ContainerConfig serverConfig, String platform,
+            LogVolumePath logVolumePath, Boolean localAgentRequired, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+        return;
+    }
+
+    @Override
+    public void startAmbariAgents(ContainerOrchestratorCluster cluster, ContainerConfig config, String platform, LogVolumePath logVolumePath,
+            ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+        return;
+    }
+
+    @Override
+    public void startConsulWatches(ContainerOrchestratorCluster cluster, ContainerConfig config, LogVolumePath logVolumePath,
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+        return;
+    }
+
+    @Override
+    public void startKerberosServer(ContainerOrchestratorCluster cluster, ContainerConfig config, LogVolumePath logVolumePath,
             KerberosConfiguration kerberosConfiguration, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         return;
     }
 
     @Override
-    public void startBaywatchServer(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
+    public void startBaywatchServer(ContainerOrchestratorCluster cluster, ContainerConfig config, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         return;
     }
 
     @Override
-    public void startBaywatchClients(ContainerOrchestratorCluster cluster, String imageName, String consulDomain, LogVolumePath logVolumePath,
+    public void startBaywatchClients(ContainerOrchestratorCluster cluster, ContainerConfig config, String consulDomain, LogVolumePath logVolumePath,
             String externServerLocation, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         return;
     }
 
     @Override
-    public void startLogrotate(ContainerOrchestratorCluster cluster, String imageName, ExitCriteriaModel exitCriteriaModel)
+    public void startLogrotate(ContainerOrchestratorCluster cluster, ContainerConfig config, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         return;
     }

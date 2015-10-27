@@ -15,11 +15,13 @@ public enum DockerContainer {
 
     private final String name;
 
-    private DockerContainer(String name) {
+    DockerContainer(String name) {
         this.name = name;
     }
 
     public String getName() {
         return name;
     }
+
+
 }
