@@ -1,3 +1,5 @@
+#Provisioning via Browser
+
 You can log into the Cloudbreak application at http://PUBLIC_IP:3000.
 
 The main goal of the Cloudbreak UI is to easily create clusters on your own cloud provider account.
@@ -40,7 +42,7 @@ After your OpenStack is linked to Cloudbreak you can start creating templates th
 - security groups
 
 When you create a template, Cloudbreak *doesn't make any requests* to OpenStack.
-Resources are only created on OpenStack after the `Create cluster` button is pushed.
+Resources are only created on OpenStack after the `create cluster` button is pushed.
 These templates are saved to Cloudbreak's database and can be reused with multiple clusters to describe the infrastructure.
 
 **Manage resources**
@@ -89,9 +91,15 @@ Manage networks allows you to create or reuse existing networks and configure th
 
 **Security groups**
 
-Security groups allows configuration of traffic/access to the cluster. Currently there are two default groups, and later versions will allow setup of new groups.
+They describe the allowed inbound traffic to the instances in the cluster.
+Currently only one security group template can be selected for a Cloudbreak cluster and all the instances have a public IP address so all the instances in the cluster will belong to the same security group.
+This may change in a later release.
 
-`only-ssh-and-ssl:` all ports are locked down (you can't access Hadoop services outside of the VPN) but 
+You can define your own security group by adding all the ports, protocols and CIDR range you'd like to use. 443 needs to be there in every security group otherwise Cloudbreak won't be able to communicate with the provisioned cluster. The rules defined here doesn't need to contain the internal rules, those are automatically added by Cloudbreak to the security group on OpenStack.
+
+You can also use the two pre-defined security groups in Cloudbreak:
+
+`only-ssh-and-ssl:` all ports are locked down (you can't access Hadoop services outside of the VPN) but
 
 * SSH (22)
 * HTTPS (443)
@@ -100,33 +108,33 @@ Security groups allows configuration of traffic/access to the cluster. Currently
 
 * SSH (22)
 * HTTPS (443)
-* Ambari (8080) 
-* Consul (8500) 
-* NN (50070) 
-* RM Web (8088) 
-* Scheduler (8030RM) 
-* IPC (8050RM) 
-* Job history server (19888) 
-* HBase master (60000) 
-* HBase master web (60010) 
-* HBase RS (16020) 
-* HBase RS info (60030) 
-* Falcon (15000) 
-* Storm (8744) 
-* Hive metastore (9083) 
-* Hive server (10000) 
-* Hive server HTTP (10001) 
-* Accumulo master (9999) 
-* Accumulo Tserver (9997) 
-* Atlas (21000) 
-* KNOX (8443) 
-* Oozie (11000) 
-* Spark HS (18080) 
-* NM Web (8042) 
-* Zeppelin WebSocket (9996) 
-* Zeppelin UI (9995) 
-* Kibana (3080) 
-* Elasticsearch (9200) 
+* Ambari (8080)
+* Consul (8500)
+* NN (50070)
+* RM Web (8088)
+* Scheduler (8030RM)
+* IPC (8050RM)
+* Job history server (19888)
+* HBase master (60000)
+* HBase master web (60010)
+* HBase RS (16020)
+* HBase RS info (60030)
+* Falcon (15000)
+* Storm (8744)
+* Hive metastore (9083)
+* Hive server (10000)
+* Hive server HTTP (10001)
+* Accumulo master (9999)
+* Accumulo Tserver (9997)
+* Atlas (21000)
+* KNOX (8443)
+* Oozie (11000)
+* Spark HS (18080)
+* NM Web (8042)
+* Zeppelin WebSocket (9996)
+* Zeppelin UI (9995)
+* Kibana (3080)
+* Elasticsearch (9200)
 
 
 ## Cluster installation
@@ -175,7 +183,7 @@ Cloudbreak uses *ARM template* to create the resources - you can check out the r
 
 **Important!** Always use Cloudbreak to delete the cluster, or if that fails for some reason always try to delete the ARM first.
 
-**Advanced features**:
+**Advanced options**:
 
 `Consul server count:` the number of Consul servers (odd number), by default is 3. It varies with the cluster size.
 
@@ -195,4 +203,3 @@ Once you have launched the cluster creation you can track the progress either on
 ## Next steps
 
 Congrats! Your cluster should now be up and running. To learn more about it we have some [interesting insights](insights.md) about Cloudbreak clusters.
-

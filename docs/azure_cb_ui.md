@@ -187,7 +187,7 @@ Cloudbreak uses *ARM template* to create the resources - you can check out the r
 
 **Important!** Always use Cloudbreak to delete the cluster, or if that fails for some reason always try to delete the ARM first.
 
-**Advanced features**
+**Advanced options**
 
 There are some advanced features when deploying a new cluster, these are the following:
 

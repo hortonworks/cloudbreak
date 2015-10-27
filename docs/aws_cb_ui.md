@@ -1,3 +1,5 @@
+#Provisioning via Browser
+
 You can log into the Cloudbreak application at http://PUBLIC_IP:3000.
 
 The main goal of the Cloudbreak UI is to easily create clusters on your own cloud provider account.
@@ -34,7 +36,7 @@ After your AWS account is linked to Cloudbreak you can start creating templates 
 - security groups
 
 When you create a template, Cloudbreak *doesn't make any requests* to AWS.
-Resources are only created on AWS after the `Create cluster` button is pushed.
+Resources are only created on AWS after the `create cluster` button is pushed.
 These templates are saved to Cloudbreak's database and can be reused with multiple clusters to describe the infrastructure.
 
 **Resources**
@@ -78,8 +80,7 @@ They describe the allowed inbound traffic to the instances in the cluster.
 Currently only one security group template can be selected for a Cloudbreak cluster and all the instances have a public IP address so all the instances in the cluster will belong to the same security group.
 This may change in a later release.
 
-You can define your own security group by adding all the ports, protocols and CIDR range you'd like to use. 443 needs to be there in every security group otherwise Cloudbreak won't be able to
-The rules defined here doesn't need to contain the internal rules, those are automatically added by Cloudbreak to the security group on AWS.
+You can define your own security group by adding all the ports, protocols and CIDR range you'd like to use. 443 needs to be there in every security group otherwise Cloudbreak won't be able to communicate with the provisioned cluster. The rules defined here doesn't need to contain the internal rules, those are automatically added by Cloudbreak to the security group on AWS.
 
 You can also use the two pre-defined security groups in Cloudbreak:
 
@@ -175,7 +176,7 @@ Cloudbreak uses *CloudFormation* to create the resources - you can check out the
 **Important!** Always use Cloudbreak to delete the cluster, or if that fails for some reason always try to delete the CloudFormation stack first.
 Instances are started in an Auto Scaling Group so they may be restarted if you terminate an instance manually!
 
-**Advanced features**
+**Advanced options**
 
 There are some advanced features when deploying a new cluster, these are the following:
 
