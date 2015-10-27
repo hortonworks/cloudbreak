@@ -17,10 +17,10 @@ public class CloudInstance extends DynamicModel {
     }
 
     public CloudInstance(String instanceId, CloudInstanceMetaData metaData, InstanceTemplate template, Map<String, Object> params) {
+        super(params);
         this.instanceId = instanceId;
         this.metaData = metaData;
         this.template = template;
-        putAll(params);
     }
 
     public String getInstanceId() {

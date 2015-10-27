@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.HostConfigBuilder;
 public class RegistratorBootstrap implements ContainerBootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(RegistratorBootstrap.class);
 
-    private static final int PORT = 9999;
     private final DockerClient docker;
     private final String nodeName;
     private final String privateIp;

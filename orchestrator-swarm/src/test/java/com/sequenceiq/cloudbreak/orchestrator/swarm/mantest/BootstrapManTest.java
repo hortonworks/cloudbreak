@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
+import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
@@ -65,12 +66,12 @@ public class BootstrapManTest {
         //if(true) return;
 
         ContainerOrchestratorCluster cluster = new ContainerOrchestratorCluster(gatewayConfig, nodes);
-        o.startRegistrator(cluster, "sequenceiq/registrator:v5.2", new NoExitModel());
+        o.startRegistrator(cluster, new ContainerConfig("sequenceiq/registrator", "v5.2"), new NoExitModel());
 
         for (int i = 0; i < LOOP_SIZE; i++) {
             LOGGER.info("Iteration: {}", i);
-            o.startConsulWatches(cluster, "sequenceiq/docker-consul-watch-plugn:2.0.0-consul", new LogVolumePath("/hadoopfs/fs1", "/hadoopfs/fs1"),
-                    new NoExitModel());
+            o.startConsulWatches(cluster, new ContainerConfig("sequenceiq/docker-consul-watch-plugn", "2.0.0-consul"), new LogVolumePath("/hadoopfs/fs1",
+                    "/hadoopfs/fs1"), new NoExitModel());
         }
 
         LOGGER.info("FINISHED");

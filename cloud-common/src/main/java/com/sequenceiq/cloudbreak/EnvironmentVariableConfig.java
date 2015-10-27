@@ -49,6 +49,7 @@ public class EnvironmentVariableConfig {
     public static final String CB_DOCKER_CONTAINER_BAYWATCH_SERVER = "sequenceiq/baywatch:v0.5.3";
     public static final String CB_DOCKER_CONTAINER_BAYWATCH_CLIENT = "sequenceiq/baywatch-client:v1.0.0";
     public static final String CB_DOCKER_CONTAINER_LOGROTATE = "sequenceiq/logrotate:v0.5.1";
+    public static final String CB_DOCKER_CONTAINER_MUNCHAUSEN = "sequenceiq/munchausen:0.5.5";
 
     public static final String CB_DOCKER_RELOCATE = "true";
 

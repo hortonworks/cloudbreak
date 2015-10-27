@@ -15,12 +15,12 @@ public class InstanceTemplate extends DynamicModel {
     private final InstanceStatus status;
 
     public InstanceTemplate(String flavor, String groupName, Long privateId, List<Volume> volumes, InstanceStatus status, Map<String, Object> parameters) {
+        super(parameters);
         this.flavor = flavor;
         this.groupName = groupName;
         this.privateId = privateId;
         this.volumes = ImmutableList.copyOf(volumes);
         this.status = status;
-        super.putAll(parameters);
     }
 
     public String getFlavor() {
