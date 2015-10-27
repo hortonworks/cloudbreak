@@ -15,6 +15,7 @@
 - Integration tests are added, where cbd binary is called, not only sourced functions
 - Docker based CentOS integration test make target added
 - Uaa db migration
+- SMTP default parameters added: `CB_MAIL_SMTP_AUTH` and `CB_MAIL_SMTP_STARTTLS_ENABLE`
 
 ### Removed
 
