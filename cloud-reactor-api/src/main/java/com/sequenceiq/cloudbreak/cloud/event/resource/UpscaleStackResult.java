@@ -57,6 +57,7 @@ public class UpscaleStackResult {
                 + "stackContext=" + cloudContext
                 + ", status=" + status
                 + ", statusReason='" + statusReason + '\''
+                + ", exception=" + exception
                 + ", results=" + results
                 + '}';
     }

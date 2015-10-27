@@ -209,8 +209,8 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
             UpscaleStackResult res = upscaleRequest.await();
             LOGGER.info("Upscale stack result: {}", res);
             List<CloudResourceStatus> results = res.getResults();
-            updateNodeCount(stack.getId(), cloudStack.getGroups(), results, false);
             validateResourceResults(cloudContext, res);
+            updateNodeCount(stack.getId(), cloudStack.getGroups(), results, false);
             Set<Resource> resourceSet = transformResults(results, stack);
             if (resourceSet.isEmpty()) {
                 throw new OperationException("Failed to upscale the cluster since all create request failed: " + results.get(0).getStatusReason());
