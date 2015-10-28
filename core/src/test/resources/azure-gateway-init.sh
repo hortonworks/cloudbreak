@@ -53,6 +53,7 @@ format_disks() {
       mkdir /hadoopfs/fs${i}
       echo $DEVICE /hadoopfs/fs${i} ext4  defaults,noatime 0 2 >> /etc/fstab
       mount /hadoopfs/fs${i}
+      chmod 777 /hadoopfs/fs${i}
     fi
   done
   cd /hadoopfs/fs1 && mkdir logs logs/ambari-server logs/ambari-agent logs/consul-watch logs/kerberos
