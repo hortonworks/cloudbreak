@@ -64,7 +64,7 @@ If you do not have an Active directory user then you have to configure it before
 In order for Cloudbreak to be able to launch clusters on Azure on your behalf you need to set up your **Azure ARM application**. We have automated the Azure configurations in the Cloudbreak Deployer (CBD). After the CBD has installed, simply run the following command:
 
 ```
-cbd azure configure-arm --app_name myapp --app_password password123 --subscription_id 1234-abcd-efgh-1234 --username testuser@company.onmicrosoft.com --password password123
+cbd azure configure-arm --app_name myapp --app_password password123 --subscription_id 1234-abcd-efgh-1234
 ```
 The command first creates an Active Directory application with the configured name and password and adds the permissions that are needed to call the Azure Resource Manager API.
 Please use the output of the command when you creating your Azure credential in Cloudbreak.
