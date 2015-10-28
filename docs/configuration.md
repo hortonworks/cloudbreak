@@ -42,13 +42,15 @@ For permanent setting you can `export CBD_DEFAULT_PROFILE=prod` in your `.bash_p
 
 ## SMTP
 
-Put these lines into your `Profile`
+If you want to change SMTP parameters, put the corresponding lines into your `Profile`. You can also see the default values of the parameters in the following box.
 ```
 export CLOUDBREAK_SMTP_SENDER_USERNAME=
 export CLOUDBREAK_SMTP_SENDER_PASSWORD=
 export CLOUDBREAK_SMTP_SENDER_HOST=
-export CLOUDBREAK_SMTP_SENDER_PORT=
+export CLOUDBREAK_SMTP_SENDER_PORT=25
 export CLOUDBREAK_SMTP_SENDER_FROM=
+export CB_MAIL_SMTP_AUTH=true
+export CB_MAIL_SMTP_STARTTLS_ENABLE=true
 ```
 
 ## Consul
