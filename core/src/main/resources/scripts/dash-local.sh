@@ -8,6 +8,13 @@
 : ${TEZ_TAR_NAME:=tez.tar.gz}
 : ${TMP_EXTRACT_DIR:=temp_extract_dir}
 
+restart_services(){
+  if curl -s http://localhost:11000/oozie; then
+    /usr/hdp/current/oozie-server/bin/oozie-stop.sh
+    /usr/hdp/current/oozie-server/bin/oozie-start.sh
+  fi
+}
+
 main(){
   SOURCE_JAR="$SOURCE_DIR/$STORAGE_JAR"
   if [ ! -f "$SOURCE_JAR" ]; then
@@ -42,6 +49,8 @@ main(){
       cd .. && rm -rf $TMP_EXTRACT_DIR
     fi
   done
+
+  restart_services
 }
 
 exec &>> "$LOGFILE"

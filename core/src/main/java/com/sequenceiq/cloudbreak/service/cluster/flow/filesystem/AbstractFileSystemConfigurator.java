@@ -38,6 +38,7 @@ public abstract class AbstractFileSystemConfigurator<T extends FileSystemConfigu
         bpConfigs.add(new BlueprintConfigurationEntry("webhcat-site", "templeton.sqoop.archive", defaultFs + "/hdp/apps/${hdp.version}/sqoop/sqoop.tar.gz"));
         bpConfigs.add(new BlueprintConfigurationEntry(
                 "webhcat-site", "templeton.streaming.jar", defaultFs + "/hdp/apps/${hdp.version}/mapreduce/hadoop-streaming.jar"));
+        bpConfigs.add(new BlueprintConfigurationEntry("oozie-site", "oozie.service.HadoopAccessorService.supported.filesystems", "*"));
         return bpConfigs;
     }
 
