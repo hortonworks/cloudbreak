@@ -57,6 +57,43 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         getUluwatuClusters();
         initCluster();
         initPlatformVariants();
+        initWizard();
+
+        function initWizard() {
+            $scope.configureHostGroups = false;
+            $scope.configureFailureAction = false;
+            $scope.configureAmbariRepository = false;
+            $scope.configureSecurity = false;
+            $scope.configureFileSystem = false;
+            $scope.configureCluster = true;
+            $scope.configureReview = false;
+        }
+
+        $scope.showWizardActualElement = function(element) {
+            $scope.configureHostGroups = false;
+            $scope.configureFailureAction = false;
+            $scope.configureAmbariRepository = false;
+            $scope.configureSecurity = false;
+            $scope.configureFileSystem = false;
+            $scope.configureCluster = false;
+            $scope.configureReview = false;
+
+            if (element == 'configureHostGroups') {
+                $scope.configureHostGroups = true;
+            } else if (element == 'configureFailureAction') {
+                $scope.configureFailureAction = true;
+            } else if (element == 'configureAmbariRepository') {
+                $scope.configureAmbariRepository = true;
+            } else if (element == 'configureSecurity') {
+                $scope.configureSecurity = true;
+            } else if (element == 'configureFileSystem') {
+                $scope.configureFileSystem = true;
+            } else if (element == 'configureCluster') {
+                $scope.configureCluster = true;
+            } else if (element == 'configureReview') {
+                $scope.configureReview = true;
+            }
+        }
 
         $scope.showAdvancedOption = function() {
             if ($scope.showAdvancedOptionForm === false) {
@@ -421,6 +458,10 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.cluster.availabilityZone = null;
                 $scope.cluster.region = null;
                 setFileSystem();
+                setNetwork();
+                setSecurityGroup();
+                setRegion();
+                initWizard();
             }
         });
 
@@ -440,6 +481,38 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 } else {
                     delete $scope.cluster.fileSystem;
                 }
+            }
+        }
+
+        function setNetwork() {
+            if ($rootScope.activeCredential != undefined) {
+                angular.forEach($rootScope.networks, function(data) {
+                    if (data.cloudPlatform === $rootScope.activeCredential.cloudPlatform.split("_")[0]) {
+                        $scope.cluster.networkId = data.id;
+                        return;
+                    }
+                });
+            }
+        }
+
+        function setRegion() {
+            if ($rootScope.activeCredential != undefined) {
+                if ("AWS" === $rootScope.activeCredential.cloudPlatform.split("_")[0]) {
+                    $scope.cluster.region = "US_WEST_1";
+                } else if ("GCP" === $rootScope.activeCredential.cloudPlatform.split("_")[0]) {
+                    $scope.cluster.region = "US_CENTRAL1_B";
+                } else if ("OPENSTACK" === $rootScope.activeCredential.cloudPlatform.split("_")[0]) {
+                    $scope.cluster.region = "LOCAL";
+                } else if ("AZURE" === $rootScope.activeCredential.cloudPlatform.split("_")[0]) {
+                    $scope.cluster.region = "WEST_US";
+                }
+
+            }
+        }
+
+        function setSecurityGroup() {
+            if ($rootScope.securitygroups && $rootScope.securitygroups.length != 0) {
+                $scope.cluster.securityGroupId = $rootScope.securitygroups[0].id;
             }
         }
 
@@ -661,6 +734,10 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
             };
             setFileSystem();
+            initWizard();
+            setNetwork();
+            setSecurityGroup();
+            setRegion();
         }
 
         function initPlatformVariants() {

@@ -60,6 +60,17 @@ function addClusterListPanelJQEventListeners() {
 }
 
 function addClusterFormJQEventListeners() {
+    $jq('#create-cluster-panel-collapse .btn-segmented-control .wizard-button').click(function(e) {
+        var selected = 'btn-info';
+        var active = 'btn-default';
+        var control = $jq(this).parent().parent();
+        e.preventDefault();
+        control.find('a').each(function() {
+            $jq(this).removeClass(selected).addClass(active);
+        });
+        $jq(this).removeClass(active).addClass(selected);
+    });
+
     $jq('#cluster-form-panel .panel-heading > h5 > a').click(function(e) {
         e.preventDefault();
         accordion = $jq(this).attr("data-parent");
@@ -154,6 +165,7 @@ function addActiveClusterJQEventListeners() {
 }
 
 function addPanelJQueryEventListeners(panel) {
+
     $jq('#panel-' + panel + ' .panel-heading > h5 > a').click(function(e) {
         e.preventDefault();
         accordion = $jq(this).attr("data-parent");
