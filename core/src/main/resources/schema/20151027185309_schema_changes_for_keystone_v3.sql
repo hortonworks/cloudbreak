@@ -13,7 +13,7 @@ ALTER TABLE credential ADD COLUMN projectname character varying(255);
 ALTER TABLE credential ADD COLUMN userdomain character varying(255);
 
 -- //@UNDO
--- SQL to undo the change goes here.
+-- SQL to undo the change goes here. 
 
 ALTER TABLE credential DROP COLUMN keystoneversion;
 

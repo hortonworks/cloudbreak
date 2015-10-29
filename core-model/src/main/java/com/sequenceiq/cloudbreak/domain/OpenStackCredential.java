@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Entity;
 
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+
 @Entity
 public class OpenStackCredential extends Credential implements ProvisionEntity {
 
@@ -37,9 +39,13 @@ public class OpenStackCredential extends Credential implements ProvisionEntity {
         this.tenantName = tenantName;
     }
 
-    public String getUserDomain() { return userDomain; }
+    public String getUserDomain() { 
+		return userDomain; 
+	}
 
-    public void setUserDomain(String userDomain) { this.userDomain = userDomain; }
+    public void setUserDomain(String userDomain) { 
+		this.userDomain = userDomain; 
+	}
 
     public String getEndpoint() {
         return endpoint;
@@ -57,25 +63,45 @@ public class OpenStackCredential extends Credential implements ProvisionEntity {
         this.userName = userName;
     }
 
-    public String getKeystoneVersion() { return keystoneVersion; }
+    public String getKeystoneVersion() { 
+		return keystoneVersion; 
+	}
 
-    public void setKeystoneVersion(String keystoneVersion) { this.keystoneVersion = keystoneVersion; }
+    public void setKeystoneVersion(String keystoneVersion) { 
+		this.keystoneVersion = keystoneVersion; 
+	}
 
-    public String getKeystoneAuthScope() { return keystoneAuthScope; }
+    public String getKeystoneAuthScope() { 
+		return keystoneAuthScope; 
+	}
 
-    public void setKeystoneAuthScope(String keystoneAuthScope) { this.keystoneAuthScope = keystoneAuthScope; }
+    public void setKeystoneAuthScope(String keystoneAuthScope) { 
+		this.keystoneAuthScope = keystoneAuthScope; 
+	}
 
-    public String getProjectName() { return projectName; }
+    public String getProjectName() { 
+		return projectName; 
+	}
 
-    public void setProjectName(String projectName) { this.projectName = projectName; }
+    public void setProjectName(String projectName) { 
+		this.projectName = projectName; 
+	}
 
-    public String getProjectDomainName() { return projectDomainName; }
+    public String getProjectDomainName() { 
+		return projectDomainName; 
+	}
 
-    public void setProjectDomainName(String projectDomainName) { this.projectDomainName = projectDomainName; }
+    public void setProjectDomainName(String projectDomainName) { 
+		this.projectDomainName = projectDomainName; 
+	}
 
-    public String getDomainName() { return domainName; }
+    public String getDomainName() { 
+		return domainName; 
+	}
 
-    public void setDomainName(String domainName) { this.domainName = domainName; }
+    public void setDomainName(String domainName) { 
+		this.domainName = domainName; 
+	}
 
     @Override
     public CloudPlatform cloudPlatform() {

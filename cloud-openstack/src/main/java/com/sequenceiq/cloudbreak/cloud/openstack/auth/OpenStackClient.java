@@ -1,19 +1,19 @@
-package com.sequenceiq.cloudbreak.cloud.openstack;
+package com.sequenceiq.cloudbreak.cloud.openstack.auth;
 
-import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_OPENSTACK_API_DEBUG;
+
+import javax.annotation.PostConstruct;
+
 import org.openstack4j.api.OSClient;
-import org.openstack4j.model.common.Identifier;
 import org.openstack4j.model.identity.Access;
 import org.openstack4j.openstack.OSFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_OPENSTACK_API_DEBUG;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 
 @Component
 public class OpenStackClient {
@@ -28,7 +28,7 @@ public class OpenStackClient {
 
     public AuthenticatedContext createAuthenticatedContext(CloudContext cloudContext, CloudCredential cloudCredential) {
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
-        Access access = createAccess(cloudCredential);
+        Access access = createAccess(authenticatedContext);
         authenticatedContext.putParameter(Access.class, access);
         return authenticatedContext;
     }
@@ -38,12 +38,12 @@ public class OpenStackClient {
         return createOSClient(access);
     }
 
-    public KeystoneCredentialView createKeystoneCredential(CloudCredential credential) {
-        return new KeystoneCredentialView(credential);
+    public KeystoneCredentialView createKeystoneCredential(AuthenticatedContext authenticatedContext) {
+        return new KeystoneCredentialView(authenticatedContext);
     }
 
-    public Access createAccess(CloudCredential credential) {
-        KeystoneCredentialView osCredential = createKeystoneCredential(credential);
+    public Access createAccess(AuthenticatedContext authenticatedContext) {
+        KeystoneCredentialView osCredential = createKeystoneCredential(authenticatedContext);
         if ( osCredential.getVersion().equals(KeystoneCredentialView.CB_KEYSTONE_V2) )
             return OSFactory.builder().endpoint(osCredential.getEndpoint())
                     .credentials(osCredential.getUserName(), osCredential.getPassword())
@@ -69,10 +69,8 @@ public class OpenStackClient {
                     .getAccess();
     }
 
-
     public OSClient createOSClient(Access access) {
         return OSFactory.clientFromAccess(access);
     }
-
 
 }

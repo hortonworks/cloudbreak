@@ -1,13 +1,14 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import javax.inject.Inject;
+
+import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.CredentialRequest;
 import com.sequenceiq.cloudbreak.controller.validation.OpenStackCredentialParam;
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
-import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
 
 @Component
 public class JsonToOpenStackCredentialConverter extends AbstractConversionServiceAwareConverter<CredentialRequest, OpenStackCredential> {
