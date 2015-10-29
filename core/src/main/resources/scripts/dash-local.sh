@@ -9,9 +9,9 @@
 : ${TMP_EXTRACT_DIR:=temp_extract_dir}
 
 restart_services(){
-  if curl -s http://localhost:11000/oozie; then
-    /usr/hdp/current/oozie-server/bin/oozie-stop.sh
-    /usr/hdp/current/oozie-server/bin/oozie-start.sh
+  if [ -f /var/run/oozie/oozie.pid ] && jps | grep -wq "$(cat /var/run/oozie/oozie.pid)"; then
+    su oozie -c '/usr/hdp/current/oozie-server/bin/oozie-stop.sh'
+    su oozie -c '/usr/hdp/current/oozie-server/bin/oozie-start.sh'
   fi
 }
 
