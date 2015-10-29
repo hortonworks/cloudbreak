@@ -85,6 +85,12 @@ angular.module('uluwatuControllers').controller('securityGroupController', ['$sc
             }
         }
 
+        $rootScope.changeRule = function(rules) {
+            angular.forEach(rules, function(rule) {
+                rule.portarray = rule.ports.toString().split(",");
+            });
+            return rules;
+        }
 
         $scope.deleteSecurityGroup = function(securityGroup) {
             GlobalSecurityGroup.delete({
@@ -123,5 +129,6 @@ angular.module('uluwatuControllers').controller('securityGroupController', ['$sc
             $scope.tmpsecportForm = {};
             $scope.securitygroupForm = {};
         }
+
     }
 ]);

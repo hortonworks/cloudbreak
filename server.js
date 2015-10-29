@@ -349,18 +349,18 @@ function continueInit() {
 
     // proxy =======================================================================
     function eliminateConfidentialParametersFromCredentials(req, data) {
-      if (req.url.indexOf('/credentials') > -1) {
-          if( Object.prototype.toString.call( data ) === '[object Array]' ) {
-              data.forEach(function(el) {
+        if (req.url.indexOf('/credentials') > -1) {
+            if (Object.prototype.toString.call(data) === '[object Array]') {
+                data.forEach(function(el) {
+                    if (el.parameters !== undefined && el.parameters.secretKey !== undefined) {
+                        delete el.parameters.secretKey;
+                    }
+                });
+            } else {
                 if (el.parameters !== undefined && el.parameters.secretKey !== undefined) {
                     delete el.parameters.secretKey;
                 }
-              });
-          } else {
-            if (el.parameters !== undefined && el.parameters.secretKey !== undefined) {
-                delete el.parameters.secretKey;
             }
-          }
         };
     }
 
