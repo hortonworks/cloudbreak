@@ -46,4 +46,3 @@
         </div>
     </div>
 </div>
-$(document).ready(function() { $('#rootwizard').bootstrapWizard(); });
