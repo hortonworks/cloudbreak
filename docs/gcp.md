@@ -54,5 +54,4 @@ cbd logs cloudbreak
 
 ## Next steps
 
-Once Cloudbreak is up and running you should check out the [prerequisites](gcp.md) needed to create Google Cloud clusters with Cloudbreak.
-
+Once Cloudbreak is up and running you should check out the [prerequisites](gcp_pre_prov.md) needed to create Google Cloud clusters with Cloudbreak.
