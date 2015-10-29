@@ -21,7 +21,7 @@ export OS_IMAGE_NAME="name_in_openstack"
 export OS_USERNAME=...
 export OS_AUTH_URL="http://.../v2.0"
 export OS_TENANT_NAME=...
-glance image-create --name "$OS_IMAGE_NAME" --file "$LOCAL_IMAGE_NAME"  --disk-format qcow2 --container-format bare --progress
+glance image-create --name "$OS_IMAGE_NAME" --file "$LOCAL_IMAGE_NAME" --disk-format qcow2 --container-format bare --progress
 ```
 
 ## Usage
