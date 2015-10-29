@@ -1039,27 +1039,6 @@
       }
     },
     {
-      "spark-defaults": {
-        "properties": {
-          "spark.driver.extraJavaOptions": "",
-          "spark.history.kerberos.keytab": "none",
-          "spark.history.kerberos.principal": "none",
-          "spark.history.provider": "org.apache.spark.deploy.yarn.history.YarnHistoryProvider",
-          "spark.history.ui.port": "18080",
-          "spark.yarn.am.extraJavaOptions": "",
-          "spark.yarn.applicationMaster.waitTries": "10",
-          "spark.yarn.containerLauncherMaxThreads": "25",
-          "spark.yarn.driver.memoryOverhead": "384",
-          "spark.yarn.executor.memoryOverhead": "384",
-          "spark.yarn.max.executor.failures": "3",
-          "spark.yarn.preserve.staging.files": "false",
-          "spark.yarn.queue": "default",
-          "spark.yarn.scheduler.heartbeat.interval-ms": "5000",
-          "spark.yarn.submit.file.replication": "3"
-        }
-      }
-    },
-    {
       "spark-env": {
         "properties": {
           "content": "\n#!/usr/bin/env bash\n\n# This file is sourced when running various Spark programs.\n# Copy it as spark-env.sh and edit that to configure Spark for your site.\n\n# Options read in YARN client mode\n#SPARK_EXECUTOR_INSTANCES=\"2\" #Number of workers to start (Default: 2)\n#SPARK_EXECUTOR_CORES=\"1\" #Number of cores for the workers (Default: 1).\n#SPARK_EXECUTOR_MEMORY=\"1G\" #Memory per Worker (e.g. 1000M, 2G) (Default: 1G)\n#SPARK_DRIVER_MEMORY=\"512 Mb\" #Memory for Master (e.g. 1000M, 2G) (Default: 512 Mb)\n#SPARK_YARN_APP_NAME=\"spark\" #The name of your application (Default: Spark)\n#SPARK_YARN_QUEUE=\"~@~Xdefault~@~Y\" #The hadoop queue to use for allocation requests (Default: @~Xdefault~@~Y)\n#SPARK_YARN_DIST_FILES=\"\" #Comma separated list of files to be distributed with the job.\n#SPARK_YARN_DIST_ARCHIVES=\"\" #Comma separated list of archives to be distributed with the job.\n\n# Generic options for the daemons used in the standalone deploy mode\n\n# Alternate conf dir. (Default: ${SPARK_HOME}/conf)\nexport SPARK_CONF_DIR=${SPARK_HOME:-{{spark_home}}}/conf\n\n# Where log files are stored.(Default:${SPARK_HOME}/logs)\n#export SPARK_LOG_DIR=${SPARK_HOME:-{{spark_home}}}/logs\nexport SPARK_LOG_DIR={{spark_log_dir}}\n\n# Where the pid file is stored. (Default: /tmp)\nexport SPARK_PID_DIR={{spark_pid_dir}}\n\n# A string representing this instance of spark.(Default: $USER)\nSPARK_IDENT_STRING=$USER\n\n# The scheduling priority for daemons. (Default: 0)\nSPARK_NICENESS=0\n\nexport HADOOP_HOME=${HADOOP_HOME:-{{hadoop_home}}}\nexport HADOOP_CONF_DIR=${HADOOP_CONF_DIR:-{{hadoop_conf_dir}}}\n\n# The java implementation to use.\nexport JAVA_HOME={{java_home}}\n\nif [ -d \"/etc/tez/conf/\" ]; then\n  export TEZ_CONF_DIR=/etc/tez/conf\nelse\n  export TEZ_CONF_DIR=\nfi",
