@@ -2,11 +2,12 @@ package com.sequenceiq.cloudbreak.cloud.event.platform;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 public class CheckPlatformVariantResult extends CloudPlatformResult {
-    private String defaultPlatformVariant;
+    private Variant defaultPlatformVariant;
 
-    public CheckPlatformVariantResult(CloudPlatformRequest<?> request, String defaultPlatformVariant) {
+    public CheckPlatformVariantResult(CloudPlatformRequest<?> request, Variant defaultPlatformVariant) {
         super(request);
         this.defaultPlatformVariant = defaultPlatformVariant;
     }
@@ -15,7 +16,7 @@ public class CheckPlatformVariantResult extends CloudPlatformResult {
         super(statusReason, errorDetails, request);
     }
 
-    public String getDefaultPlatformVariant() {
+    public Variant getDefaultPlatformVariant() {
         return defaultPlatformVariant;
     }
 }

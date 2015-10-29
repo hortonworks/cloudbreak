@@ -38,6 +38,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
@@ -218,6 +219,7 @@ public class Stack implements ProvisionEntity {
     private String account;
     private boolean publicInAccount;
     private String region;
+    @Transient
     private String availabilityZone;
     private int consulServers;
     @Column(length = 1000000, columnDefinition = "TEXT")
