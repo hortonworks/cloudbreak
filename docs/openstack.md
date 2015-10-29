@@ -11,7 +11,7 @@ You can download the latest Cloudbreak OpenStack image with the following comman
 ```
 LATEST_IMAGE="cb-openstack-images/cb-centos71-amb212-2015-10-09.img"
 LOCAL_IMAGE_NAME="..."
-aws s3 cp s3://$LATEST_IMAGE $LOCAL_IMAGE_NAME
+aws s3 cp "s3://$LATEST_IMAGE" "$LOCAL_IMAGE_NAME" --region eu-west-1
 ```
 
 ## Import the image into OpenStack
