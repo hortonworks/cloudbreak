@@ -191,7 +191,7 @@ The following example creates a hadoop cluster with `hdp-small-default` blueprin
 ```
 credential create --GCP --description "my credential" --name my-gcp-credential --projectId <your gcp projectid> --serviceAccountId < your GCP service account mail address> --serviceAccountPrivateKeyPath gcp.p12 --sshKeyFile id_rsa.pub
 credential select --name my-gcp-credential
-template create --EC2 --name gcptemplate --description gcp-template --instanceType N1_STANDARD_4 --volumeSize 100 --volumeCount 2
+template create --GCP --name gcptemplate --description gcp-template --instanceType N1_STANDARD_4 --volumeSize 100 --volumeCount 2
 blueprint select --name hdp-small-default
 instancegroup configure --instanceGroup cbgateway --nodecount 1 --templateName gcptemplate
 instancegroup configure --instanceGroup host_group_master_1 --nodecount 1 --templateName gcptemplate
