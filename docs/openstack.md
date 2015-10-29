@@ -17,8 +17,11 @@ aws s3 cp "s3://$LATEST_IMAGE" "$LOCAL_IMAGE_NAME" --region eu-west-1
 ## Import the image into OpenStack
 
 ```
-OS_IMAGE_NAME="name_in_openstack"
-glance image-create --name "$OS_IMAGE_NAME" --file "$LOCAL_IMAGE_NAME"  --disk-format qcow2 --container-format bare --is-public True --progress
+export OS_IMAGE_NAME="name_in_openstack"
+export OS_USERNAME=...
+export OS_AUTH_URL="http://.../v2.0"
+export OS_TENANT_NAME=...
+glance image-create --name "$OS_IMAGE_NAME" --file "$LOCAL_IMAGE_NAME"  --disk-format qcow2 --container-format bare --progress
 ```
 
 ## Usage
