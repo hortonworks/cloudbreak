@@ -45,6 +45,9 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
                     case "IMAGE_COPY_STATE":
                         handleCopyStatus(notification);
                         break;
+                    case "AMBARI_PROGRESS_STATE":
+                        handleAmbariProgressState(notification);
+                        break;
                     case "AVAILABLE":
                         handleAvailableNotification(notification);
                         break;
@@ -84,6 +87,15 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
             })[0];
             if (actCluster != undefined) {
                 actCluster.copyState = notification.eventMessage;
+            }
+        }
+
+        function handleAmbariProgressState(notification) {
+            var actCluster = $filter('filter')($rootScope.clusters, {
+                id: notification.stackId
+            })[0];
+            if (actCluster != undefined) {
+                actCluster.ambariProgressState = notification.eventMessage;
             }
         }
 
