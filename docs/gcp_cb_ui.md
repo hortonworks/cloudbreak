@@ -182,9 +182,8 @@ If `Public in account` is checked all the users belonging to your account will b
 If `Enable security` is checked as well, Cloudbreak will install KDC and the cluster will be Kerberized. See more about it in the [Kerberos](kerberos.md) section of this documentation.
 
 After the `create and start cluster` button is pushed Cloudbreak will start to create resources on your GCP account.
-Cloudbreak uses *ARM template* to create the resources - you can check out the resources created by Cloudbreak on the ARM Console under the Resourcegroups page.
 
-**Important!** Always use Cloudbreak to delete the cluster, or if that fails for some reason always try to delete the ARM first.
+**Important!** Always use Cloudbreak to delete the cluster, or if that fails for some reason always try to delete the Google Cloud first.
 
 **Advanced options**
 
