@@ -60,6 +60,16 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="form-group" ng-show="activeCluster.ambariProgressState && activeCluster.ambariProgressState!=100 && (activeCluster.status != 'AVAILABLE' || activeCluster.status != 'DELETE_IN_PROGRESS' || activeCluster.status != 'CREATE_FAILED')">
+                                <label class="col-sm-3 control-label" for="sl_imagecopy">{{msg.active_cluster_ambari_progress_label}}</label>
+                                <div class="col-sm-6" style="padding-left: 10px;">
+                                    <div class="progress" style="height: 25px;margin-bottom: 0px;">
+                                        <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="{{activeCluster.ambariProgressState}}" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em;width: {{activeCluster.ambariProgressState}}%;;padding-top: 4px;">
+                                            {{activeCluster.ambariProgressState}}%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="form-group">
                                 <label class="col-sm-3 control-label" for="sl_platformVariant">{{msg.active_cluster_variant_label}}</label>
                                 <div class="col-sm-9">
