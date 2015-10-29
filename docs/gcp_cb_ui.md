@@ -53,9 +53,9 @@ Using manage resources you can create infrastructure templates. Templates descri
 
 `Description:` short description of your template
 
-`Instance type:` the Amazon instance type to be used - we suggest to use at least small or medium instances
+`Instance type:` the Google Cloud instance type to be used - we suggest to use at least n1-standard-4 instances
 
-`Volume type:` option to choose are SSD, regular HDD (both EBS) or Ephemeral
+`Volume type:` option to choose are SSD, regular Magnetic
 
 `Attached volumes per instance:` the number of disks to be attached
 
