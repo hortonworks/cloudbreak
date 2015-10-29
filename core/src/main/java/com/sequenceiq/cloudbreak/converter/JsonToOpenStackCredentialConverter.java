@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import javax.inject.Inject;
-
-import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.CredentialRequest;
 import com.sequenceiq.cloudbreak.controller.validation.OpenStackCredentialParam;
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
+import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
 
 @Component
 public class JsonToOpenStackCredentialConverter extends AbstractConversionServiceAwareConverter<CredentialRequest, OpenStackCredential> {
@@ -27,7 +26,13 @@ public class JsonToOpenStackCredentialConverter extends AbstractConversionServic
         openStackCredential.setUserName(encryptor.encrypt(userName));
         String password = String.valueOf(source.getParameters().get(OpenStackCredentialParam.PASSWORD.getName()));
         openStackCredential.setPassword(encryptor.encrypt(password));
+        openStackCredential.setKeystoneVersion(String.valueOf(source.getParameters().get(OpenStackCredentialParam.KEYSTONE_VERSION.getName())));
+        openStackCredential.setKeystoneAuthScope(String.valueOf(source.getParameters().get(OpenStackCredentialParam.KEYSTONE_AUTH_SCOPE.getName())));
         openStackCredential.setTenantName(String.valueOf(source.getParameters().get(OpenStackCredentialParam.TENANT_NAME.getName())));
+        openStackCredential.setUserDomain(String.valueOf(source.getParameters().get(OpenStackCredentialParam.USER_DOMAIN.getName())));
+        openStackCredential.setDomainName(String.valueOf(source.getParameters().get(OpenStackCredentialParam.DOMAIN_NAME.getName())));
+        openStackCredential.setProjectDomainName(String.valueOf(source.getParameters().get(OpenStackCredentialParam.PROJECT_DOMAIN_NAME.getName())));
+        openStackCredential.setProjectName(String.valueOf(source.getParameters().get(OpenStackCredentialParam.PROJECT_NAME.getName())));
         openStackCredential.setEndpoint(String.valueOf(source.getParameters().get(OpenStackCredentialParam.ENDPOINT.getName())));
         openStackCredential.setPublicKey(source.getPublicKey());
         if (source.getLoginUserName() != null) {

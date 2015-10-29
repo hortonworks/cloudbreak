@@ -6,7 +6,13 @@ public enum OpenStackCredentialParam implements TemplateParam {
 
     USER("user", true, String.class, Optional.<String>absent()),
     PASSWORD("password", true, String.class, Optional.<String>absent()),
-    TENANT_NAME("tenantName", true, String.class, Optional.<String>absent()),
+    TENANT_NAME("tenantName", false, String.class, Optional.<String>absent()),
+    USER_DOMAIN("userDomain", false, String.class, Optional.<String>absent()),
+    KEYSTONE_VERSION("keystoneVersion", true, String.class, Optional.<String>absent()),
+    KEYSTONE_AUTH_SCOPE("keystoneAuthScope", false, String.class, Optional.<String>absent()),
+    PROJECT_DOMAIN_NAME("projectDomainName", false, String.class, Optional.<String>absent()),
+    PROJECT_NAME("projectName", false, String.class, Optional.<String>absent()),
+    DOMAIN_NAME("domainName", false, String.class, Optional.<String>absent()),
     ENDPOINT("endpoint", true, String.class, Optional.<String>absent());
 
     private final String paramName;

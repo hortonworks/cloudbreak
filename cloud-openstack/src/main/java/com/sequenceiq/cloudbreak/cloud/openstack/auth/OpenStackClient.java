@@ -1,19 +1,19 @@
-package com.sequenceiq.cloudbreak.cloud.openstack.auth;
+package com.sequenceiq.cloudbreak.cloud.openstack;
 
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_OPENSTACK_API_DEBUG;
-
-import javax.annotation.PostConstruct;
-
+import com.sequenceiq.cloudbreak.cloud.event.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.event.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import org.openstack4j.api.OSClient;
+import org.openstack4j.model.common.Identifier;
 import org.openstack4j.model.identity.Access;
 import org.openstack4j.openstack.OSFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
+import javax.annotation.PostConstruct;
+
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_OPENSTACK_API_DEBUG;
 
 @Component
 public class OpenStackClient {
@@ -28,7 +28,7 @@ public class OpenStackClient {
 
     public AuthenticatedContext createAuthenticatedContext(CloudContext cloudContext, CloudCredential cloudCredential) {
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
-        Access access = createAccess(authenticatedContext);
+        Access access = createAccess(cloudCredential);
         authenticatedContext.putParameter(Access.class, access);
         return authenticatedContext;
     }
@@ -38,20 +38,41 @@ public class OpenStackClient {
         return createOSClient(access);
     }
 
-    public KeystoneCredentialView createKeystoneCredential(AuthenticatedContext authenticatedContext) {
-        return new KeystoneCredentialView(authenticatedContext);
+    public KeystoneCredentialView createKeystoneCredential(CloudCredential credential) {
+        return new KeystoneCredentialView(credential);
     }
 
-    public Access createAccess(AuthenticatedContext authenticatedContext) {
-        KeystoneCredentialView osCredential = createKeystoneCredential(authenticatedContext);
-        return OSFactory.builder().endpoint(osCredential.getEndpoint())
-                .credentials(osCredential.getUserName(), osCredential.getPassword())
-                .tenantName(osCredential.getTenantName())
-                .authenticate().getAccess();
+    public Access createAccess(CloudCredential credential) {
+        KeystoneCredentialView osCredential = createKeystoneCredential(credential);
+        if ( osCredential.getVersion().equals(KeystoneCredentialView.CB_KEYSTONE_V2) )
+            return OSFactory.builder().endpoint(osCredential.getEndpoint())
+                    .credentials(osCredential.getUserName(), osCredential.getPassword())
+                    .tenantName(osCredential.getTenantName())
+                    .authenticate().getAccess();
+
+        if ( osCredential.getScope().equals(KeystoneCredentialView.CB_KEYSTONE_V3_DEFAULT_SCOPE) )
+            return OSFactory.builderV3().endpoint(osCredential.getEndpoint())
+                    .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()/*"DEV"*/))
+                    .authenticate()
+                    .getAccess();
+        else if ( osCredential.getScope().equals(KeystoneCredentialView.CB_KEYSTONE_V3_DOMAIN_SCOPE) )
+            return OSFactory.builderV3().endpoint(osCredential.getEndpoint())
+                    .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()/*"DEV"*/))
+                    .scopeToDomain(Identifier.byName(osCredential.getDomainName()))
+                    .authenticate()
+                    .getAccess();
+        else
+            return OSFactory.builderV3().endpoint(osCredential.getEndpoint())
+                    .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()/*"DEV"*/))
+                    .scopeToProject(Identifier.byName(osCredential.getProjectName()/*"vivek-madani"*/), Identifier.byName(osCredential.getProjectDomain()/*"DEV"*/))
+                    .authenticate()
+                    .getAccess();
     }
+
 
     public OSClient createOSClient(Access access) {
         return OSFactory.clientFromAccess(access);
     }
+
 
 }
