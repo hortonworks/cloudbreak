@@ -52,19 +52,19 @@ public class OpenStackClient {
 
         if ( osCredential.getScope().equals(KeystoneCredentialView.CB_KEYSTONE_V3_DEFAULT_SCOPE) )
             return OSFactory.builderV3().endpoint(osCredential.getEndpoint())
-                    .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()/*"DEV"*/))
+                    .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
                     .authenticate()
                     .getAccess();
         else if ( osCredential.getScope().equals(KeystoneCredentialView.CB_KEYSTONE_V3_DOMAIN_SCOPE) )
             return OSFactory.builderV3().endpoint(osCredential.getEndpoint())
-                    .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()/*"DEV"*/))
+                    .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
                     .scopeToDomain(Identifier.byName(osCredential.getDomainName()))
                     .authenticate()
                     .getAccess();
         else
             return OSFactory.builderV3().endpoint(osCredential.getEndpoint())
-                    .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()/*"DEV"*/))
-                    .scopeToProject(Identifier.byName(osCredential.getProjectName()/*"vivek-madani"*/), Identifier.byName(osCredential.getProjectDomain()/*"DEV"*/))
+                    .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
+                    .scopeToProject(Identifier.byName(osCredential.getProjectName()), Identifier.byName(osCredential.getProjectDomain()))
                     .authenticate()
                     .getAccess();
     }
