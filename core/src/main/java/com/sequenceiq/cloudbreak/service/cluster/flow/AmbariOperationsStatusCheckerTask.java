@@ -1,16 +1,22 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
+import com.sequenceiq.cloudbreak.service.notification.Notification;
+import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 
 @Component
 public class AmbariOperationsStatusCheckerTask extends StackBasedStatusCheckerTask<AmbariOperations> {
@@ -21,6 +27,9 @@ public class AmbariOperationsStatusCheckerTask extends StackBasedStatusCheckerTa
     private static final BigDecimal FAILED = new BigDecimal(-1.0);
     private static final int MAX_RETRY = 3;
 
+    @Inject
+    private NotificationSender notificationSender;
+
     @Override
     public boolean checkStatus(AmbariOperations t) {
         Map<String, Integer> installRequests = t.getRequests();
@@ -29,6 +38,7 @@ public class AmbariOperationsStatusCheckerTask extends StackBasedStatusCheckerTa
             AmbariClient ambariClient = t.getAmbariClient();
             BigDecimal installProgress = ambariClient.getRequestProgress(request.getValue());
             LOGGER.info("Ambari operation: '{}', Progress: {}", request.getKey(), installProgress);
+            notificationSender.send(getAmbariProgressNotification(installProgress.longValue(), t.getStack()));
             allFinished = allFinished && installProgress != null && COMPLETED.compareTo(installProgress) == 0;
             if (installProgress != null && FAILED.compareTo(installProgress) == 0) {
                 boolean failed = true;
@@ -39,6 +49,7 @@ public class AmbariOperationsStatusCheckerTask extends StackBasedStatusCheckerTa
                     }
                 }
                 if (failed) {
+                    notificationSender.send(getAmbariProgressNotification(Long.parseLong("100"), t.getStack()));
                     throw new AmbariOperationFailedException(String.format("Ambari operation failed: [component: '%s', requestID: '%s']", request.getKey(),
                             request.getValue()));
                 }
@@ -47,10 +58,24 @@ public class AmbariOperationsStatusCheckerTask extends StackBasedStatusCheckerTa
         return allFinished;
     }
 
+    private Notification getAmbariProgressNotification(Long progressValue, Stack stack) {
+        Notification notification = new Notification();
+        notification.setEventType("AMBARI_PROGRESS_STATE");
+        notification.setEventTimestamp(new Date());
+        notification.setEventMessage(String.valueOf(progressValue));
+        notification.setOwner(stack.getOwner());
+        notification.setAccount(stack.getAccount());
+        notification.setCloud(stack.cloudPlatform().toString());
+        notification.setRegion(stack.getRegion());
+        notification.setStackId(stack.getId());
+        notification.setStackName(stack.getName());
+        notification.setStackStatus(stack.getStatus());
+        return notification;
+    }
+
     @Override
     public void handleTimeout(AmbariOperations t) {
         throw new IllegalStateException(String.format("Ambari operations timed out: %s", t.getRequests()));
-
     }
 
     @Override
