@@ -15,6 +15,14 @@ restart_services(){
   fi
 }
 
+set_spark_cp(){
+  SPARK_ENV='/usr/hdp/current/spark-client/conf/spark-env.sh'
+  SPARK_CP='SPARK_CLASSPATH=$SPARK_CLASSPATH:/usr/hdp/current/hadoop-client/lib/dash-azure-storage-2.2.0.jar:/usr/hdp/current/hadoop-client/hadoop-azure.jar'
+  if [ -f /usr/hdp/current/spark-client/conf/spark-env.sh ] && ! grep -q "$SPARK_CP" $SPARK_ENV; then
+    echo "$SPARK_CP" >> $SPARK_ENV
+  fi
+}
+
 main(){
   SOURCE_JAR="$SOURCE_DIR/$STORAGE_JAR"
   if [ ! -f "$SOURCE_JAR" ]; then
@@ -51,6 +59,7 @@ main(){
   done
 
   restart_services
+  set_spark_cp
 }
 
 exec &>> "$LOGFILE"
