@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -14,6 +16,7 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 @Component
@@ -66,6 +69,12 @@ public class AwsClient {
     public String getKeyPairName(AuthenticatedContext ac) {
         return String.format("%s%s%s%s", ac.getCloudCredential().getName(), ac.getCloudCredential().getId(),
                 ac.getCloudContext().getName(), ac.getCloudContext().getId());
+    }
+
+    public void checkAwsEnvironmentVariables() {
+        if (isEmpty(System.getenv("AWS_ACCESS_KEY_ID")) || isEmpty(System.getenv("AWS_SECRET_ACCESS_KEY"))) {
+            throw new CloudConnectorException("For this operation the 'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' environment variables must be set!");
+        }
     }
 
 
