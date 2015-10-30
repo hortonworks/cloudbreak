@@ -28,7 +28,7 @@ You can now log into the Cloudbreak application at http://PUBLIC_IP:3000. Once l
 
 `Endpoint:` Openstack Identity Service (Keystone) endpont (e.g. http://PUBLIC_IP:5000/v2.0)
 
-`SSH certificate:` the SSH public certificate in OpenSSH format that's private keypair can be used to log into the launched instances later with the ssh username **centos**
+`SSH public key:` the SSH public certificate in OpenSSH format that's private keypair can be used to log into the launched instances later with the **ssh username: centos**
 
 `Public in account:` share it with others in the account
 
@@ -75,7 +75,7 @@ Blueprints are your declarative definition of a Hadoop cluster.
 
 `Public in account:` share it with others in the account
 
-*Manage networks*
+**Manage networks**
 
 Manage networks allows you to create or reuse existing networks and configure them.
 
@@ -85,7 +85,7 @@ Manage networks allows you to create or reuse existing networks and configure th
 
 `Subnet (CIDR):` a subnet with CIDR block under the given `public network`
 
-`Public network ID` id of an OpenStack public network
+`Public network ID:` id of an OpenStack public network
 
 `Public in account:` share it with others in the account
 
@@ -104,7 +104,7 @@ You can also use the two pre-defined security groups in Cloudbreak:
 * SSH (22)
 * HTTPS (443)
 
-`all-services-port:` all Hadoop services + SSH/HTTP are accessible by default:
+`all-services-port:` all Hadoop services + SSH/HTTPS are accessible by default:
 
 * SSH (22)
 * HTTPS (443)
@@ -136,6 +136,9 @@ You can also use the two pre-defined security groups in Cloudbreak:
 * Kibana (3080)
 * Elasticsearch (9200)
 
+If `Public in account` is checked all the users belonging to your account will be able to use this security group template to create clusters, but cannot delete or modify it.
+
+**Note** that the security groups are *not created* on OpenStack after the `Create Security Group` button is pushed, only after the cluster provisioning starts with the selected security group template.
 
 ## Cluster installation
 
@@ -176,16 +179,15 @@ After you've selected a `Blueprint` as well you should be able to configure the 
 
 If `Public in account` is checked all the users belonging to your account will be able to see the newly created cluster on the UI, but cannot delete or modify it.
 
-If `Enable security` is checked as well, Cloudbreak will install KDC and the cluster will be Kerberized. See more about it in the [Kerberos](kerberos.md) section of this documentation.
+If `Enable security` is checked as well, Cloudbreak will install Key Distribution Center (KDC) and the cluster will be Kerberized. See more about it in the [Kerberos](kerberos.md) section of this documentation.
 
 After the `create and start cluster` button is pushed Cloudbreak will start to create resources on your OpenStack.
-Cloudbreak uses *ARM template* to create the resources - you can check out the resources created by Cloudbreak on the ARM Console under the Resourcegroups page.
 
-**Important!** Always use Cloudbreak to delete the cluster, or if that fails for some reason always try to delete the ARM first.
+**Important!** Always use Cloudbreak to delete the cluster. If that fails for some reason, always try to delete via OpenStack Dashboard.
 
 **Advanced options**:
 
-`Consul server count:` the number of Consul servers (odd number), by default is 3. It varies with the cluster size.
+`Consul server count:` the number of Consul servers (add number), by default is 3. It varies with the cluster size.
 
 `Platform variant:` Cloudbreak provides two implementation for creating OpenStack cluster
 
