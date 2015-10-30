@@ -139,10 +139,10 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
     }
 
     private Group getScalingGroup(Group scalingGroup) {
-        List<InstanceTemplate> instances = new ArrayList<>(scalingGroup.getInstances());
-        Iterator<InstanceTemplate> iterator = instances.iterator();
+        List<CloudInstance> instances = new ArrayList<>(scalingGroup.getInstances());
+        Iterator<CloudInstance> iterator = instances.iterator();
         while (iterator.hasNext()) {
-            if (InstanceStatus.CREATE_REQUESTED != iterator.next().getStatus()) {
+            if (InstanceStatus.CREATE_REQUESTED != iterator.next().getTemplate().getStatus()) {
                 iterator.remove();
             }
         }
@@ -162,7 +162,8 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
 
     private String getGroupName(CloudStack stack) {
         for (Group group : stack.getGroups()) {
-            for (InstanceTemplate instanceTemplate : group.getInstances()) {
+            for (CloudInstance instance : group.getInstances()) {
+                InstanceTemplate instanceTemplate = instance.getTemplate();
                 if (InstanceStatus.CREATE_REQUESTED == instanceTemplate.getStatus()) {
                     return instanceTemplate.getGroupName();
                 }

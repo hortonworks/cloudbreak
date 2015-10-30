@@ -25,9 +25,7 @@
           "instanceId": "instance",
           "volumeCount": 1,
           "ambariServer": false,
-          "dockerSubnet": "0.0.0.0/0",
           "discoveryFQDN": "instance",
-          "containerCount": 5,
           "instanceGroup": "gateway-group",
           "instanceStatus": "REGISTERED"
         }

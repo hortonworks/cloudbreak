@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 import javax.inject.Inject;
 
@@ -18,8 +18,13 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.Tag;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -29,15 +34,15 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 
 @Service
 public class AwsMetadataCollector implements MetadataCollector {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsMetadataCollector.class);
-    private static final String CBNAME = "cbname";
+    private static final String TAG_NAME = "cbname";
 
     @Inject
     private AwsClient awsClient;
@@ -49,8 +54,8 @@ public class AwsMetadataCollector implements MetadataCollector {
     private AwsPollTaskFactory awsPollTaskFactory;
 
     @Override
-    public List<CloudVmInstanceStatus> collect(AuthenticatedContext ac, List<CloudResource> resources, List<InstanceTemplate> vms) {
-        List<CloudInstance> cloudInstances = new ArrayList<>();
+    public List<CloudVmMetaDataStatus> collect(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
+        List<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = new ArrayList<>();
         try {
             String region = ac.getCloudContext().getLocation().getRegion().value();
             AmazonCloudFormationClient amazonCFClient =
@@ -59,93 +64,109 @@ public class AwsMetadataCollector implements MetadataCollector {
                     awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()), region);
             AmazonEC2Client amazonEC2Client =
                     awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), region);
-            Map<String, List<InstanceTemplate>> instanceIds1 = getInstanceIds(vms);
 
+            //contains all instances
+            ListMultimap<String, CloudInstance> groupByInstanceGroup = groupByInstanceGroup(vms);
 
-            scheduleStatusChecks(ac, amazonCFClient, instanceIds1);
+            scheduleStatusChecks(ac, amazonCFClient, groupByInstanceGroup);
 
-            for (Map.Entry<String, List<InstanceTemplate>> stringListEntry : instanceIds1.entrySet()) {
-                List<String> instanceIds = new ArrayList<>();
-                String asGroupName = cloudFormationStackUtil.getAutoscalingGroupName(ac, amazonCFClient, stringListEntry.getKey());
-                instanceIds.addAll(cloudFormationStackUtil.getInstanceIds(ac, amazonASClient, amazonCFClient, asGroupName));
-                DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
-                DescribeInstancesResult instancesResult = amazonEC2Client.describeInstances(instancesRequest);
-
-                List<String> visibleTags = getVisibleTagsFromInstanceResult(instancesResult);
-
-                List<InstanceTemplate> remainingTemplates = getRemainingTemplates(stringListEntry, visibleTags);
-
-                for (Reservation reservation : instancesResult.getReservations()) {
-                    LOGGER.info("Number of instances found in reservation: {}", reservation.getInstances().size());
-                    for (com.amazonaws.services.ec2.model.Instance instance : reservation.getInstances()) {
-                        boolean tagWasCreated = false;
-                        String tagName = null;
-                        for (Tag tag : instance.getTags()) {
-                            if (CBNAME.equals(tag.getKey())) {
-                                tagWasCreated = true;
-                                tagName = tag.getValue();
-                                break;
-                            }
-                        }
-                        if (!tagWasCreated) {
-                            InstanceTemplate instanceTemplate = remainingTemplates.get(0);
-                            tagName = awsClient.getCbName(stringListEntry.getKey(), instanceTemplate.getPrivateId());
-                            Tag t = new Tag();
-                            t.setKey(CBNAME);
-                            t.setValue(tagName);
-                            CreateTagsRequest ctr = new CreateTagsRequest();
-                            ctr.setTags(Arrays.asList(t));
-                            ctr.withResources(instance.getInstanceId());
-                            amazonEC2Client.createTags(ctr);
-                            remainingTemplates.remove(instanceTemplate);
-                        }
-                        CloudInstanceMetaData md = new CloudInstanceMetaData(instance.getPrivateIpAddress(), instance.getPublicIpAddress());
-                        InstanceTemplate instanceTemplate = getInstanceTemplate(stringListEntry.getKey(), stringListEntry.getValue(), tagName);
-                        if (instanceTemplate != null) {
-                            InstanceTemplate template = stringListEntry.getValue().get(reservation.getInstances().indexOf(instance));
-                            cloudInstances.add(new CloudInstance(instance.getInstanceId(), md, template));
-                        }
-                    }
-                }
+            for (String key : groupByInstanceGroup.keySet()) {
+                List<CloudInstance> cloudInstances = groupByInstanceGroup.get(key);
+                cloudVmMetaDataStatuses.addAll(collectGroupMetaData(ac, amazonASClient, amazonEC2Client, amazonCFClient, key, cloudInstances));
             }
 
-            return createInstanceStatusFromInstances(cloudInstances);
+            return cloudVmMetaDataStatuses;
         } catch (Exception e) {
             throw new CloudConnectorException(e.getMessage(), e);
         }
     }
 
-    private List<InstanceTemplate> getRemainingTemplates(Map.Entry<String, List<InstanceTemplate>> stringListEntry, List<String> visibleTags) {
-        List<InstanceTemplate> remainingTemplates = new ArrayList<>();
-        for (InstanceTemplate instanceTemplate : stringListEntry.getValue()) {
-            String cbName = awsClient.getCbName(instanceTemplate.getGroupName(), instanceTemplate.getPrivateId());
-            if (!visibleTags.contains(cbName)) {
-                remainingTemplates.add(instanceTemplate);
-            }
-        }
-        return remainingTemplates;
-    }
+    private List<CloudVmMetaDataStatus> collectGroupMetaData(AuthenticatedContext ac, AmazonAutoScalingClient amazonASClient,
+            AmazonEC2Client amazonEC2Client, AmazonCloudFormationClient amazonCFClient, String groupName, List<CloudInstance> cloudInstances) {
 
-    private List<String> getVisibleTagsFromInstanceResult(DescribeInstancesResult instancesResult) {
-        List<String> visibleTags = new ArrayList<>();
+        List<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = new ArrayList<>();
+
+        String asGroupName = cloudFormationStackUtil.getAutoscalingGroupName(ac, amazonCFClient, groupName);
+        List<String> instanceIds = cloudFormationStackUtil.getInstanceIds(amazonASClient, asGroupName);
+
+        DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
+        DescribeInstancesResult instancesResult = amazonEC2Client.describeInstances(instancesRequest);
+
+        //contains instances with instanceId
+        Map<String, CloudInstance> mapByInstanceId = mapByInstanceId(cloudInstances);
+
+        //contains instances with privateId (without instanceId)
+        Queue<CloudInstance> untrackedInstances = untrackedInstances(cloudInstances);
+
         for (Reservation reservation : instancesResult.getReservations()) {
-            for (com.amazonaws.services.ec2.model.Instance instance : reservation.getInstances()) {
-                for (Tag tag : instance.getTags()) {
-                    if (CBNAME.equals(tag.getKey())) {
-                        visibleTags.add(tag.getValue());
-                        break;
-                    }
+            LOGGER.info("Number of instances found in reservation: {}", reservation.getInstances().size());
+            for (Instance instance : reservation.getInstances()) {
+
+                String instanceId = instance.getInstanceId();
+                CloudInstance cloudInstance = getCloudInstance(mapByInstanceId, instance, instanceId, untrackedInstances, amazonEC2Client);
+                if (cloudInstance != null) {
+                    CloudInstanceMetaData md = new CloudInstanceMetaData(instance.getPrivateIpAddress(), instance.getPublicIpAddress());
+                    CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
+                    CloudVmMetaDataStatus cloudVmMetaDataStatus = new CloudVmMetaDataStatus(cloudVmInstanceStatus, md);
+                    cloudVmMetaDataStatuses.add(cloudVmMetaDataStatus);
                 }
             }
         }
-        return visibleTags;
+
+        return cloudVmMetaDataStatuses;
     }
 
-    private void scheduleStatusChecks(AuthenticatedContext ac, AmazonCloudFormationClient amazonCFClient, Map<String, List<InstanceTemplate>> instanceIds1) {
-        for (Map.Entry<String, List<InstanceTemplate>> stringListEntry : instanceIds1.entrySet()) {
-            if (stringListEntry.getValue().get(0).getParameter("spotPrice", Long.class) == null) {
-                String asGroupName = cloudFormationStackUtil.getAutoscalingGroupName(ac, amazonCFClient, stringListEntry.getKey());
-                PollTask<Boolean> task = awsPollTaskFactory.newASGroupStatusCheckerTask(ac, asGroupName, stringListEntry.getValue().size(),
+    private CloudInstance getCloudInstance(Map<String, CloudInstance> mapByInstanceId, Instance instance, String instanceId, Queue<CloudInstance>
+            untrackedInstances, AmazonEC2Client amazonEC2Client) {
+
+        CloudInstance cloudInstance = mapByInstanceId.get(instanceId);
+        if (cloudInstance == null) {
+            // we need to figure out whether it is already tracked or not, if it is already tracked then it has a tag
+            String tag = getTag(instance);
+            if (tag == null) {
+                // so it is not tracked at the moment, therefore it considered as a new instance, and we shall track it by tagging it, with the private id of
+                // an untracked CloudInstance
+                cloudInstance = untrackedInstances.remove();
+                cloudInstance = new CloudInstance(instanceId, cloudInstance.getTemplate());
+                addTag(amazonEC2Client, cloudInstance, instance);
+            }
+
+        }
+        return cloudInstance;
+    }
+
+
+    private String getTag(Instance instance) {
+        for (Tag tag : instance.getTags()) {
+            if (TAG_NAME.equals(tag.getKey())) {
+                String value = tag.getValue();
+                LOGGER.info("Instance: {} was already tagged: {}", instance.getInstanceId(), value);
+                return value;
+            }
+        }
+        return null;
+    }
+
+
+    private void addTag(AmazonEC2Client amazonEC2Client, CloudInstance cloudInstance, Instance instance) {
+        String tagName = awsClient.getCbName(cloudInstance.getTemplate().getGroupName(), cloudInstance.getTemplate().getPrivateId());
+        Tag t = new Tag();
+        t.setKey(TAG_NAME);
+        t.setValue(tagName);
+        CreateTagsRequest ctr = new CreateTagsRequest();
+        ctr.setTags(Arrays.asList(t));
+        ctr.withResources(instance.getInstanceId());
+        amazonEC2Client.createTags(ctr);
+    }
+
+    private void scheduleStatusChecks(AuthenticatedContext ac, AmazonCloudFormationClient amazonCFClient, ListMultimap<String,
+            CloudInstance> groupByInstanceGroup) {
+
+        for (String key : groupByInstanceGroup.keySet()) {
+            List<CloudInstance> cloudInstances = groupByInstanceGroup.get(key);
+            if (cloudInstances.get(0).getParameter("spotPrice", Long.class) == null) {
+                String asGroupName = cloudFormationStackUtil.getAutoscalingGroupName(ac, amazonCFClient, key);
+                PollTask<Boolean> task = awsPollTaskFactory.newASGroupStatusCheckerTask(ac, asGroupName, cloudInstances.size(),
                         awsClient, cloudFormationStackUtil);
                 try {
                     Boolean statePollerResult = task.call();
@@ -159,36 +180,36 @@ public class AwsMetadataCollector implements MetadataCollector {
         }
     }
 
-    private List<CloudVmInstanceStatus> createInstanceStatusFromInstances(List<CloudInstance> cloudInstances) {
-        List<CloudVmInstanceStatus> results = new ArrayList<>();
-        for (CloudInstance cloudInstance : cloudInstances) {
-            results.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED));
+    private ListMultimap<String, CloudInstance> groupByInstanceGroup(List<CloudInstance> vms) {
+        ListMultimap<String, CloudInstance> groupByInstanceGroup = ArrayListMultimap.create();
+        for (CloudInstance vm : vms) {
+            String groupName = vm.getTemplate().getGroupName();
+            groupByInstanceGroup.put(groupName, vm);
         }
-        return results;
-    }
-
-    private InstanceTemplate getInstanceTemplate(String group, List<InstanceTemplate> instanceTemplates, String search) {
-        for (InstanceTemplate instanceTemplate : instanceTemplates) {
-            if (awsClient.getCbName(group, instanceTemplate.getPrivateId()).equals(search)) {
-                return instanceTemplate;
-            }
-        }
-        return null;
+        return groupByInstanceGroup;
     }
 
 
-    private Map<String, List<InstanceTemplate>> getInstanceIds(List<InstanceTemplate> vms) {
-        Map<String, List<InstanceTemplate>> result = new HashMap<>();
-        for (InstanceTemplate vm : vms) {
-            if (result.keySet().contains(vm.getGroupName())) {
-                result.get(vm.getGroupName()).add(vm);
-            } else {
-                List<InstanceTemplate> tmp = new ArrayList<>();
-                tmp.add(vm);
-                result.put(vm.getGroupName(), tmp);
+    private Map<String, CloudInstance> mapByInstanceId(List<CloudInstance> vms) {
+        Map<String, CloudInstance> groupByInstanceId = Maps.newHashMap();
+        for (CloudInstance vm : vms) {
+            String instanceId = vm.getInstanceId();
+            if (instanceId != null) {
+                groupByInstanceId.put(instanceId, vm);
             }
         }
-        return result;
+        return groupByInstanceId;
+    }
+
+
+    private Queue<CloudInstance> untrackedInstances(List<CloudInstance> vms) {
+        Queue<CloudInstance> cloudInstances = Lists.newLinkedList();
+        for (CloudInstance vm : vms) {
+            if (vm.getInstanceId() == null) {
+                cloudInstances.add(vm);
+            }
+        }
+        return cloudInstances;
     }
 
 }

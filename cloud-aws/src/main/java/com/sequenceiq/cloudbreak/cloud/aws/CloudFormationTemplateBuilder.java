@@ -15,6 +15,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsGroupView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -32,7 +33,7 @@ public class CloudFormationTemplateBuilder {
         Map<String, Object> model = new HashMap<>();
         List<AwsGroupView> awsGroupViews = new ArrayList<>();
         for (Group group : stack.getGroups()) {
-            InstanceTemplate instanceTemplate = group.getInstances().get(0);
+            InstanceTemplate instanceTemplate = group.getInstances().get(0).getTemplate();
             awsGroupViews.add(
                     new AwsGroupView(
                             group.getInstances().size(),
@@ -87,9 +88,9 @@ public class CloudFormationTemplateBuilder {
     private List<String> getGroups(CloudStack cloudStack) {
         List<String> groups = new ArrayList<>();
         for (Group group : cloudStack.getGroups()) {
-            for (InstanceTemplate vm : group.getInstances()) {
-                if (!groups.contains(vm.getGroupName())) {
-                    groups.add(vm.getGroupName());
+            for (CloudInstance vm : group.getInstances()) {
+                if (!groups.contains(vm.getTemplate().getGroupName())) {
+                    groups.add(vm.getTemplate().getGroupName());
                 }
             }
         }

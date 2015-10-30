@@ -7,6 +7,9 @@ public enum FlowPhases {
     PROVISIONING,
     METADATA_SETUP,
     METADATA_COLLECT,
+    //TODO fix flow initializer and avoid using singleton map
+    UPSCALE_METADATA_COLLECT,
+    DOWNSCALE_METADATA_COLLECT,
     TLS_SETUP,
     BOOTSTRAP_CLUSTER,
     CONSUL_METADATA_SETUP,

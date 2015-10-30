@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 
 import reactor.bus.Event;
 
@@ -33,11 +33,11 @@ public class CollectMetadataHandler implements CloudPlatformEventHandler<Collect
     @Override
     public void accept(Event<CollectMetadataRequest> launchStackRequestEvent) {
         LOGGER.info("Received event: {}", launchStackRequestEvent);
-        CollectMetadataRequest<CollectMetadataResult> request = launchStackRequestEvent.getData();
+        CollectMetadataRequest request = launchStackRequestEvent.getData();
         try {
             CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
-            List<CloudVmInstanceStatus> instanceStatuses = connector.metadata().collect(ac, request.getCloudResource(), request.getVms());
+            List<CloudVmMetaDataStatus> instanceStatuses = connector.metadata().collect(ac, request.getCloudResource(), request.getVms());
             CollectMetadataResult collectMetadataResult = new CollectMetadataResult(request.getCloudContext(), instanceStatuses);
             request.getResult().onNext(collectMetadataResult);
             LOGGER.info("Metadata collection successfully finished");

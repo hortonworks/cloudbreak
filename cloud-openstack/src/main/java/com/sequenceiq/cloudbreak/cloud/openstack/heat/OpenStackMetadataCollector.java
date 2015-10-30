@@ -13,6 +13,7 @@ import org.openstack4j.model.heat.Stack;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
@@ -38,13 +40,21 @@ public class OpenStackMetadataCollector implements MetadataCollector {
     @Named("cloudInstanceMetadataExtractor")
     private CloudInstanceMetaDataExtractor cloudInstanceMetaDataExtractor;
 
-    public List<CloudVmInstanceStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<InstanceTemplate> vms) {
+    @Override
+    public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
         CloudResource resource = utils.getHeatResource(resources);
 
         String stackName = authenticatedContext.getCloudContext().getName();
         String heatStackId = resource.getName();
 
-        Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(vms, new Function<InstanceTemplate, String>() {
+        List<InstanceTemplate> templates = Lists.transform(vms, new Function<CloudInstance, InstanceTemplate>() {
+            @Override
+            public InstanceTemplate apply(CloudInstance input) {
+                return input.getTemplate();
+            }
+        });
+
+        Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(templates, new Function<InstanceTemplate, String>() {
             public String apply(InstanceTemplate from) {
                 return utils.getPrivateInstanceId(from.getGroupName(), Long.toString(from.getPrivateId()));
             }
@@ -54,7 +64,7 @@ public class OpenStackMetadataCollector implements MetadataCollector {
 
         Stack heatStack = client.heat().stacks().getDetails(stackName, heatStackId);
 
-        List<CloudVmInstanceStatus> results = new ArrayList<>();
+        List<CloudVmMetaDataStatus> results = new ArrayList<>();
 
 
         List<Map<String, Object>> outputs = heatStack.getOutputs();
@@ -65,16 +75,15 @@ public class OpenStackMetadataCollector implements MetadataCollector {
             String privateInstanceId = utils.getPrivateInstanceId(metadata);
             InstanceTemplate template = templateMap.get(privateInstanceId);
             if (template != null) {
-                CloudInstance cloudInstance = createInstanceMetaData(client, server, instanceUUID, template);
-                results.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED));
+                CloudInstanceMetaData md = cloudInstanceMetaDataExtractor.extractMetadata(client, server, instanceUUID);
+                CloudInstance cloudInstance = new CloudInstance(instanceUUID, template);
+                CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
+                results.add(new CloudVmMetaDataStatus(status, md));
             }
         }
 
         return results;
     }
 
-    private CloudInstance createInstanceMetaData(OSClient client, Server server, String instanceId, InstanceTemplate template) {
-        CloudInstanceMetaData md = cloudInstanceMetaDataExtractor.extractMetadata(client, server, instanceId);
-        return new CloudInstance(instanceId, md, template);
-    }
+
 }

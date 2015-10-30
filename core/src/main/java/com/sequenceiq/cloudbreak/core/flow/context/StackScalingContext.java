@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 
-public class StackScalingContext extends DefaultFlowContext implements FlowContext {
+public class StackScalingContext extends DefaultFlowContext {
 
     private Integer scalingAdjustment;
     private String instanceGroup;

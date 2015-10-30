@@ -7,19 +7,16 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 public class CloudInstance extends DynamicModel {
 
     private String instanceId;
-    private CloudInstanceMetaData metaData;
     private InstanceTemplate template;
 
-    public CloudInstance(String instanceId, CloudInstanceMetaData metaData, InstanceTemplate template) {
+    public CloudInstance(String instanceId, InstanceTemplate template) {
         this.instanceId = instanceId;
-        this.metaData = metaData;
         this.template = template;
     }
 
-    public CloudInstance(String instanceId, CloudInstanceMetaData metaData, InstanceTemplate template, Map<String, Object> params) {
+    public CloudInstance(String instanceId, InstanceTemplate template, Map<String, Object> params) {
         super(params);
         this.instanceId = instanceId;
-        this.metaData = metaData;
         this.template = template;
     }
 
@@ -27,9 +24,6 @@ public class CloudInstance extends DynamicModel {
         return instanceId;
     }
 
-    public CloudInstanceMetaData getMetaData() {
-        return metaData;
-    }
 
     public InstanceTemplate getTemplate() {
         return template;
@@ -39,7 +33,6 @@ public class CloudInstance extends DynamicModel {
     public String toString() {
         final StringBuilder sb = new StringBuilder("CloudInstance{");
         sb.append("instanceId='").append(instanceId).append('\'');
-        sb.append(", metaData=").append(metaData);
         sb.append(", template=").append(template);
         sb.append('}');
         return sb.toString();

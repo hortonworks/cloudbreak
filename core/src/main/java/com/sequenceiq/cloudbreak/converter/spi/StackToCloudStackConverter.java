@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -58,19 +59,19 @@ public class StackToCloudStackConverter {
         List<Group> groups = new ArrayList<>();
         long privateId = getFirstValidPrivateId(instanceGroups);
         for (InstanceGroup instanceGroup : instanceGroups) {
-            List<InstanceTemplate> instances = new ArrayList<>();
+            List<CloudInstance> instances = new ArrayList<>();
             Template template = instanceGroup.getTemplate();
             int desiredNodeCount = instanceGroup.getNodeCount();
             // existing instances
             for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
                 InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
-                instances.add(buildInstanceTemplate(template, instanceGroup.getGroupName(), metaData.getPrivateId(), status));
+                instances.add(buildInstance(metaData.getInstanceId(), template, instanceGroup.getGroupName(), metaData.getPrivateId(), status));
             }
             // new instances
             int existingNodesSize = instances.size();
             if (existingNodesSize < desiredNodeCount) {
                 for (long i = 0; i < desiredNodeCount - existingNodesSize; i++) {
-                    instances.add(buildInstanceTemplate(template, instanceGroup.getGroupName(), privateId++, InstanceStatus.CREATE_REQUESTED));
+                    instances.add(buildInstance(null, template, instanceGroup.getGroupName(), privateId++, InstanceStatus.CREATE_REQUESTED));
                 }
             }
             groups.add(new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType(), instances));
@@ -78,13 +79,18 @@ public class StackToCloudStackConverter {
         return groups;
     }
 
-    public List<InstanceTemplate> buildInstanceTemplates(Stack stack) {
+    public List<CloudInstance> buildInstances(Stack stack) {
         List<Group> groups = buildInstanceGroups(stack.getInstanceGroupsAsList(), Collections.<String>emptySet());
-        List<InstanceTemplate> instanceTemplates = new ArrayList<>();
+        List<CloudInstance> cloudInstances = new ArrayList<>();
         for (Group group : groups) {
-            instanceTemplates.addAll(group.getInstances());
+            cloudInstances.addAll(group.getInstances());
         }
-        return instanceTemplates;
+        return cloudInstances;
+    }
+
+    public CloudInstance buildInstance(String id, Template template, String name, Long privateId, InstanceStatus status) {
+        InstanceTemplate instanceTemplate = buildInstanceTemplate(template, name, privateId, status);
+        return new CloudInstance(id, instanceTemplate);
     }
 
     public InstanceTemplate buildInstanceTemplate(Template template, String name, Long privateId, InstanceStatus status) {
@@ -100,8 +106,7 @@ public class StackToCloudStackConverter {
     private Network buildNetwork(Stack stack) {
         com.sequenceiq.cloudbreak.domain.Network stackNetwork = stack.getNetwork();
         Subnet subnet = new Subnet(stackNetwork.getSubnetCIDR());
-        Network network = new Network(subnet, ReflectionUtils.getDeclaredFields(stackNetwork));
-        return network;
+        return new Network(subnet, ReflectionUtils.getDeclaredFields(stackNetwork));
     }
 
     private Security buildSecurity(Stack stack) {

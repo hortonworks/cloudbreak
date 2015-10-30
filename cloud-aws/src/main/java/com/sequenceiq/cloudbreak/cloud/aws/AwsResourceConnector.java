@@ -157,8 +157,8 @@ public class AwsResourceConnector implements ResourceConnector {
 
         CloudResource reservedIp = new CloudResource.Builder().type(ResourceType.AWS_RESERVED_IP).name(allocateAddressResult.getAllocationId()).build();
         resourceNotifier.notifyAllocation(reservedIp, ac.getCloudContext());
-        List<String> instanceIds = cfStackUtil.getInstanceIds(ac, amazonASClient, client,
-                cfStackUtil.getAutoscalingGroupName(ac, client, stack.getGroups().get(0).getName()));
+        List<String> instanceIds = cfStackUtil.getInstanceIds(amazonASClient, cfStackUtil.getAutoscalingGroupName(ac, client, stack.getGroups().get(0)
+                .getName()));
         if (!instanceIds.isEmpty()) {
             AssociateAddressRequest associateAddressRequest = new AssociateAddressRequest()
                     .withAllocationId(allocateAddressResult.getAllocationId())
@@ -285,7 +285,8 @@ public class AwsResourceConnector implements ResourceConnector {
 
     private boolean isEncryptedVolumeRequested(CloudStack stack) {
         for (Group group : stack.getGroups()) {
-            for (InstanceTemplate instanceTemplate : group.getInstances()) {
+            for (CloudInstance cloudInstance : group.getInstances()) {
+                InstanceTemplate instanceTemplate = cloudInstance.getTemplate();
                 if (instanceTemplate.getParameter("encrypted", AwsEncryption.class).equals(AwsEncryption.TRUE)) {
                     return true;
                 }
