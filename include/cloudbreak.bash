@@ -214,11 +214,13 @@ _cloudbreak-shell() {
 
     docker run "$@" \
         --rm \
+        --name cloudbreak-shell \
         --dns=$PRIVATE_IP \
         -e CLOUDBREAK_ADDRESS=http://cloudbreak.service.consul:8080 \
         -e IDENTITY_ADDRESS=http://identity.service.consul:8089 \
         -e SEQUENCEIQ_USER=$UAA_DEFAULT_USER_EMAIL \
         -e SEQUENCEIQ_PASSWORD=$UAA_DEFAULT_USER_PW \
+        -w /data \
         -v $PWD:/data \
         sequenceiq/cb-shell:$DOCKER_TAG_CLOUDBREAK_SHELL
 }
