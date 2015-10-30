@@ -95,7 +95,7 @@ There are two default security groups defined: `all-services-port` and `only-ssh
 * SSH (22)
 * HTTPS (443)
 
-`all-services-port:` all Hadoop services + SSH/HTTP are accessible by default:
+`all-services-port:` all Hadoop services + SSH/HTTPS are accessible by default:
 
 * SSH (22)
 * HTTPS (443)

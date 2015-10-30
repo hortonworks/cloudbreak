@@ -6,10 +6,9 @@ You have to copy files into the cbd working directory, which you would like to u
 
 ### Create a cloud credential
 
-In order to start using Cloudbreak to provision a cluster in Google Cloud you will need to have an GCP credential. If you do not want to Cloubreak to reach you google cloud resources then you have to delete the service account.
-
+In order to start using Cloudbreak to provision a cluster in Google Cloud you will need to have a GCP credential. If you do not want to Cloubreak to reach your Google Cloud resources then you have to delete the service account.
 ```
-credential create --GCP --description "description" --name my-gcp-credential --projectId <your gcp projectid> --serviceAccountId < your GCP service account mail address> --serviceAccountPrivateKeyPath <path of your GCP service account generated private key> --sshKeyFile <path of your GCP public key>
+credential create --GCP --description "short description of your linked credential" --name my-gcp-credential --projectId <your gcp projectid> --serviceAccountId <your GCP service account mail address> --serviceAccountPrivateKeyPath <path of your GCP service account generated private key> --sshKeyPath <path of your GCP public key>
 ```
 
 Alternatively you can upload your public key from an url as well, by using the `—sshKeyUrl` switch. You can check whether the credential was creates successfully by using the `credential list` command.
@@ -150,7 +149,6 @@ There are two default security groups defined: `all-services-port` and `only-ssh
 ### Configure instance groups
 
 You have to configure the instancegroups before the provisioning. An instancegroup is defining a group of your nodes with a specified template. Usually we create instancegroups for the hostgroups defined in the blueprints.
-
 ```
 instancegroup configure --instanceGroup host_group_slave_1 --nodecount 3 --templateName minviable-gcp
 ```
@@ -189,7 +187,7 @@ cbd util cloudbreak-shell-quiet < example.sh
 The following example creates a hadoop cluster with `hdp-small-default` blueprint on M3Xlarge instances with 2X100G attached disks on `default-gcp-network` network using `all-services-port` security group. You should copy your ssh public key file and your GCP service account generated private key into your cbd working directory with name `id_rsa.pub` and `gcp.p12` and change the `<...>` parts with your gcp credential details.
 
 ```
-credential create --GCP --description "my credential" --name my-gcp-credential --projectId <your gcp projectid> --serviceAccountId < your GCP service account mail address> --serviceAccountPrivateKeyPath gcp.p12 --sshKeyFile id_rsa.pub
+credential create --GCP --description "my credential" --name my-gcp-credential --projectId <your gcp projectid> --serviceAccountId <your GCP service account mail address> --serviceAccountPrivateKeyPath gcp.p12 --sshKeyFile id_rsa.pub
 credential select --name my-gcp-credential
 template create --GCP --name gcptemplate --description gcp-template --instanceType N1_STANDARD_4 --volumeSize 100 --volumeCount 2
 blueprint select --name hdp-small-default
