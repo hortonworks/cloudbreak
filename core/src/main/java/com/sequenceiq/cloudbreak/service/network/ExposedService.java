@@ -1,36 +1,23 @@
 package com.sequenceiq.cloudbreak.service.network;
 
 public enum ExposedService {
-    SSH("SSH"),
-    GATEWAY("Gateway"),
     AMBARI("Ambari"),
-    CONSUL("Consul"),
     NAMENODE("NameNode", "NAMENODE"),
     RESOURCEMANAGER_WEB("RM Web", "RESOURCEMANAGER"),
-    RESOURCEMANAGER_SCHEDULER("RM Scheduler"),
-    RESOURCEMANAGER_IPC("RM IPC"),
     JOB_HISTORY_SERVER("Job History Server", "HISTORYSERVER"),
-    HBASE_MASTER("HBase Master", "HBASE_MASTER"),
     HBASE_MASTER_WEB("HBase Master Web", "HBASE_MASTER"),
-    HBASE_REGION("HBase Region Server", "HBASE_REGIONSERVER"),
-    HBASE_REGION_INFO("HBase Region Server Info", "HBASE_REGIONSERVER"),
-    HIVE_METASTORE("Hive Metastore", "HIVE_METASTORE"),
-    HIVE_SERVER("Hive Server", "HIVE_SERVER"),
-    HIVE_SERVER_HTTP("Hive Server Http", "HIVE_SERVER"),
     FALCON("Falcon", "FALCON_SERVER"),
     STORM("Storm", "STORM"),
     OOZIE("Oozie", "OOZIE_SERVER", "/oozie"),
     ACCUMULO_MASTER("Accumulo Master", "ACCUMULO_MASTER"),
     ACCUMULO_TSERVER("Accumulo Tserver", "ACCUMULO_TSERVER"),
     ATLAS("Atlas", "ATLAS_SERVER"),
-    KNOX_GW("Knox GW", "KNOX_GATEWAY"),
     SPARK_HISTORY_SERVER("Spark History server", "SPARK_JOBHISTORYSERVER"),
     CONTAINER_LOGS("Container logs"),
-    ZEPPELIN_WEB_SOCKET("Zeppelin web socket"),
     ZEPPELIN_UI("Zeppelin ui", "ZEPPELIN_MASTER"),
     KIBANA("Kibana", "KIBANA"),
     ELASTIC_SEARCH("Elastic Search", "ELASTIC_SEARCH"),
-    SWARM("Swarm", "SWARM");
+    RANGER("Ranger", "RANGER");
 
     private String serviceName;
     private String portName;
