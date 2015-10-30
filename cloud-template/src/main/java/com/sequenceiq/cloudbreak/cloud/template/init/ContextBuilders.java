@@ -9,7 +9,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.template.ResourceContextBuilder;
 
 @Service
@@ -17,7 +16,7 @@ public class ContextBuilders {
 
     @Inject
     private List<ResourceContextBuilder> contextBuilders;
-    private Map<Platform, ResourceContextBuilder> map = new HashMap<>();
+    private Map<String, ResourceContextBuilder> map = new HashMap<>();
 
     @PostConstruct
     public void init() {
@@ -26,7 +25,7 @@ public class ContextBuilders {
         }
     }
 
-    public ResourceContextBuilder get(Platform platform) {
+    public ResourceContextBuilder get(String platform) {
         return map.get(platform);
     }
 

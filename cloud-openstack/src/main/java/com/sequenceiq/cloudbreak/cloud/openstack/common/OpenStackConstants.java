@@ -1,11 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.Variant;
-
 public class OpenStackConstants {
     public static final String OPENSTACK = "OPENSTACK";
-    public static final Platform OPENSTACK_PLATFORM = Platform.platform("OPENSTACK");
 
     public static final String TENANT_ID = "tenantId";
     public static final String NETWORK_ID = "networkId";
@@ -22,18 +18,8 @@ public class OpenStackConstants {
     private OpenStackConstants() {
     }
 
-    public enum OpenStackVariant {
-        HEAT("HEAT"),
-        NATIVE("NATIVE");
-
-        private Variant variant;
-
-        OpenStackVariant(String variant) {
-            this.variant = Variant.variant(variant);
-        }
-
-        public Variant variant() {
-            return this.variant;
-        }
+    public enum Variant {
+        HEAT,
+        NATIVE
     }
 }

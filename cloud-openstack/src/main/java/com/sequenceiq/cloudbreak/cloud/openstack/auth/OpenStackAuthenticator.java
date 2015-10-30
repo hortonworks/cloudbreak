@@ -10,8 +10,6 @@ import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 
 @Service
@@ -23,13 +21,13 @@ public class OpenStackAuthenticator implements Authenticator {
     private OpenStackClient openStackClient;
 
     @Override
-    public Platform platform() {
-        return OpenStackConstants.OPENSTACK_PLATFORM;
+    public String platform() {
+        return OpenStackConstants.OPENSTACK;
     }
 
     @Override
-    public Variant variant() {
-        return Variant.EMPTY;
+    public String variant() {
+        return null;
     }
 
     @Override

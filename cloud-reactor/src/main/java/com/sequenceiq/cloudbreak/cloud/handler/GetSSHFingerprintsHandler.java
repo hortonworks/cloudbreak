@@ -17,10 +17,9 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.InstanceConsoleOutputResult;
-import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
@@ -49,7 +48,7 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
         GetSSHFingerprintsRequest fingerprintsRequest = getSSHFingerprintsRequestEvent.getData();
         try {
             CloudContext cloudContext = fingerprintsRequest.getCloudContext();
-            Platform platform = cloudContext.getPlatform();
+            String platform = cloudContext.getPlatform();
             CloudInstance cloudInstance = fingerprintsRequest.getCloudInstance();
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, fingerprintsRequest.getCloudCredential());

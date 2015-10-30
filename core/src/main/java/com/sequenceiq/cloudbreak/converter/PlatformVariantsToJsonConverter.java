@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.controller.json.PlatformVariantsJson;
-import com.sequenceiq.cloudbreak.converter.util.PlatformConverterUtil;
 
 @Component
 public class PlatformVariantsToJsonConverter extends AbstractConversionServiceAwareConverter<PlatformVariants, PlatformVariantsJson> {
@@ -12,8 +11,8 @@ public class PlatformVariantsToJsonConverter extends AbstractConversionServiceAw
     @Override
     public PlatformVariantsJson convert(PlatformVariants source) {
         PlatformVariantsJson json = new PlatformVariantsJson();
-        json.setPlatformToVariants(PlatformConverterUtil.convertPlatformMap(source.getPlatformToVariants()));
-        json.setDefaultVariants(PlatformConverterUtil.convertDefaults(source.getDefaultVariants()));
+        json.setPlatformToVariants(source.getPlatformToVariants());
+        json.setDefaultVariants(source.getDefaultVariants());
         return json;
     }
 }

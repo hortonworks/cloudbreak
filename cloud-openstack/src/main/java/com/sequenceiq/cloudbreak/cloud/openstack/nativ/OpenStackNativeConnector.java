@@ -14,8 +14,6 @@ import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackAuthenticator;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackCredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
@@ -44,13 +42,13 @@ public class OpenStackNativeConnector implements CloudConnector {
 
 
     @Override
-    public Platform platform() {
-        return OpenStackConstants.OPENSTACK_PLATFORM;
+    public String platform() {
+        return OpenStackConstants.OPENSTACK;
     }
 
     @Override
-    public Variant variant() {
-        return OpenStackConstants.OpenStackVariant.NATIVE.variant();
+    public String variant() {
+        return OpenStackConstants.Variant.NATIVE.name();
     }
 
     @Override

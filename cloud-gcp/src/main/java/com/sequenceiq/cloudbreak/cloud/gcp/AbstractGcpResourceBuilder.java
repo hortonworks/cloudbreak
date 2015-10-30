@@ -23,10 +23,9 @@ import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
@@ -39,13 +38,13 @@ public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
     private GcpResourceNameService resourceNameService;
 
     @Override
-    public Platform platform() {
-        return GcpConstants.GCP_PLATFORM;
+    public String platform() {
+        return CloudPlatform.GCP.name();
     }
 
     @Override
-    public Variant variant() {
-        return GcpConstants.GCP_VARIANT;
+    public String variant() {
+        return CloudPlatform.GCP.name();
     }
 
     public GcpResourceNameService getResourceNameService() {

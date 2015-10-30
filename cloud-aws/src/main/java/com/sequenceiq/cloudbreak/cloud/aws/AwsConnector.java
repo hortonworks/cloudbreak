@@ -14,8 +14,6 @@ import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 @Service
 public class AwsConnector implements CloudConnector {
@@ -40,13 +38,13 @@ public class AwsConnector implements CloudConnector {
     private AwsAuthenticator awsAuthenticator;
 
     @Override
-    public Platform platform() {
-        return AwsConstants.AWS_PLATFORM;
+    public String platform() {
+        return AwsConstants.AWS;
     }
 
     @Override
-    public Variant variant() {
-        return AwsConstants.AWS_VARIANT;
+    public String variant() {
+        return AwsConstants.AWS;
     }
 
     @Override

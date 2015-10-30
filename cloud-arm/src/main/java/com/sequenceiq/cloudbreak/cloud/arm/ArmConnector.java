@@ -14,8 +14,6 @@ import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 @Service
 public class ArmConnector implements CloudConnector {
@@ -40,13 +38,13 @@ public class ArmConnector implements CloudConnector {
     private ArmAuthenticator armAuthenticator;
 
     @Override
-    public Platform platform() {
-        return ArmConstants.AZURE_RM_PLATFORM;
+    public String platform() {
+        return ArmConstants.AZURE_RM;
     }
 
     @Override
-    public Variant variant() {
-        return ArmConstants.AZURE_RM_VARIANT;
+    public String variant() {
+        return ArmConstants.AZURE_RM;
     }
 
     @Override

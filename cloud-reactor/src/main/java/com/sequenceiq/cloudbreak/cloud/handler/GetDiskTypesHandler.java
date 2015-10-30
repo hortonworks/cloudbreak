@@ -9,14 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-import com.sequenceiq.cloudbreak.cloud.model.DiskType;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
-import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 import reactor.bus.Event;
 
@@ -37,16 +33,14 @@ public class GetDiskTypesHandler implements CloudPlatformEventHandler<GetDiskTyp
         LOGGER.info("Received event: {}", getDiskTypesRequestEvent);
         GetDiskTypesRequest request = getDiskTypesRequestEvent.getData();
         try {
-            Map<Platform, Collection<DiskType>> platformDiskTypes = Maps.newHashMap();
-            Map<Platform, DiskType> defaultDiskTypes = Maps.newHashMap();
-
-            for (Map.Entry<Platform, Collection<Variant>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
-                DiskType defaultDiskType = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().diskTypes().defaultType();
-                Collection<DiskType> diskTypes = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().diskTypes().types();
-                defaultDiskTypes.put(connector.getKey(), defaultDiskType);
-                platformDiskTypes.put(connector.getKey(), diskTypes);
+            PlatformDisks pv = new PlatformDisks();
+            for (Map.Entry<String, Collection<String>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
+                String defaultDiskType = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().defaultDiskType();
+                Map<String, String> stringStringMap = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().diskTypes();
+                pv.getDefaultDisks().put(connector.getKey(), defaultDiskType);
+                pv.getDiskTypes().put(connector.getKey(), stringStringMap);
             }
-            GetDiskTypesResult getDiskTypesResult = new GetDiskTypesResult(request, new PlatformDisks(platformDiskTypes, defaultDiskTypes));
+            GetDiskTypesResult getDiskTypesResult = new GetDiskTypesResult(request, pv);
             request.getResult().onNext(getDiskTypesResult);
             LOGGER.info("Query platform disk types finished.");
         } catch (Exception e) {

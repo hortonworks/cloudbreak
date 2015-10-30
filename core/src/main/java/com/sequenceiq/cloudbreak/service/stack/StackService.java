@@ -208,7 +208,7 @@ public class StackService {
     }
 
     private void setPlatformVariant(Stack stack) {
-        stack.setPlatformVariant(platformResolver.connector(stack.cloudPlatform()).checkAndGetPlatformVariant(stack).value());
+        stack.setPlatformVariant(platformResolver.connector(stack.cloudPlatform()).checkAndGetPlatformVariant(stack));
     }
 
     public void delete(Long id, CbUser user) {

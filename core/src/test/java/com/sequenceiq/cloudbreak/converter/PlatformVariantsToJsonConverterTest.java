@@ -11,16 +11,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.google.api.client.util.Maps;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
-import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.controller.json.PlatformVariantsJson;
 
 public class PlatformVariantsToJsonConverterTest extends AbstractEntityConverterTest<PlatformVariants> {
 
-    private static final Platform PLATFORM = Platform.platform("PLATFORM");
-    private static final Variant VARIANT_1 = Variant.variant("VARIANT1");
-    private static final Variant VARIANT_2 = Variant.variant("VARIANT2");
+    private static final String PLATFORM = "PLATFORM";
+    private static final String VARIANT_1 = "VARIANT1";
+    private static final String VARIANT_2 = "VARIANT2";
 
     private PlatformVariantsToJsonConverter underTest;
 
@@ -35,8 +33,8 @@ public class PlatformVariantsToJsonConverterTest extends AbstractEntityConverter
         // WHEN
         PlatformVariantsJson result = underTest.convert(getSource());
         // THEN
-        assertTrue(result.getPlatformToVariants().get(PLATFORM.value()).contains(VARIANT_1.value()));
-        assertEquals(VARIANT_2.value(), result.getDefaultVariants().get(PLATFORM.value()));
+        assertTrue(result.getPlatformToVariants().get(PLATFORM).contains(VARIANT_1));
+        assertEquals(VARIANT_2, result.getDefaultVariants().get(PLATFORM));
         assertAllFieldsNotNull(result);
     }
 
@@ -44,9 +42,9 @@ public class PlatformVariantsToJsonConverterTest extends AbstractEntityConverter
 
     @Override
     public PlatformVariants createSource() {
-        Map<Platform, Collection<Variant>> platformToVariants = Maps.newHashMap();
+        Map<String, Collection<String>> platformToVariants = Maps.newHashMap();
         platformToVariants.put(PLATFORM, Arrays.asList(VARIANT_1, VARIANT_2));
-        Map<Platform, Variant> defaultVariants = Maps.newHashMap();
+        Map<String, String> defaultVariants = Maps.newHashMap();
         defaultVariants.put(PLATFORM, VARIANT_2);
         return new PlatformVariants(platformToVariants, defaultVariants);
     }

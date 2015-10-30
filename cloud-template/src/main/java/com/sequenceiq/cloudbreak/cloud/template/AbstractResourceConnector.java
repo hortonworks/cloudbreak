@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
@@ -46,7 +45,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
     public List<CloudResourceStatus> launch(AuthenticatedContext auth, CloudStack stack, PersistenceNotifier notifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
-        Platform platform = cloudContext.getPlatform();
+        String platform = cloudContext.getPlatform();
 
         //context
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, null, true);
@@ -66,7 +65,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
     @Override
     public List<CloudResourceStatus> terminate(AuthenticatedContext auth, CloudStack stack, List<CloudResource> cloudResources) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
-        Platform platform = cloudContext.getPlatform();
+        String platform = cloudContext.getPlatform();
 
         //context
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, cloudResources, false);
@@ -84,7 +83,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
     @Override
     public List<CloudResourceStatus> upscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
-        Platform platform = cloudContext.getPlatform();
+        String platform = cloudContext.getPlatform();
 
         //context
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, resources, true);
@@ -102,7 +101,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
     public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack,
             List<CloudResource> resources, List<CloudInstance> vms) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
-        Platform platform = cloudContext.getPlatform();
+        String platform = cloudContext.getPlatform();
 
         //context
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, resources, false);
@@ -116,7 +115,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
     @Override
     public List<CloudResourceStatus> update(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
-        Platform platform = cloudContext.getPlatform();
+        String platform = cloudContext.getPlatform();
 
         //context
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, resources, true);

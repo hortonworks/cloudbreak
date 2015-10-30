@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
@@ -63,12 +61,12 @@ public class OpenStackContextBuilder implements ResourceContextBuilder<OpenStack
     }
 
     @Override
-    public Platform platform() {
-        return OpenStackConstants.OPENSTACK_PLATFORM;
+    public String platform() {
+        return OpenStackConstants.OPENSTACK;
     }
 
     @Override
-    public Variant variant() {
-        return OpenStackConstants.OpenStackVariant.NATIVE.variant();
+    public String variant() {
+        return OpenStackConstants.Variant.NATIVE.name();
     }
 }
