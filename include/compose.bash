@@ -162,6 +162,10 @@ compose-generate-yaml-force() {
 
     declare composeFile=${1:? required: compose file path}
     debug "Generating docker-compose yaml: ${composeFile} ..."
+    if [[ -z "$AWS_SECRET_ACCESS_KEY" && -n "$AWS_SECRET_KEY"  ]]; then
+        debug "AWS_SECRET_ACCESS_KEY is not set, fall back to deprecated AWS_SECRET_KEY"
+        export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
+    fi
     cat > ${composeFile} <<EOF
 consul:
     privileged: true
