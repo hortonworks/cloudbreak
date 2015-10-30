@@ -1,100 +1,79 @@
 package com.sequenceiq.cloudbreak.cloud.arm;
 
-import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmType;
-
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
-import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
-import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
-import com.sequenceiq.cloudbreak.cloud.model.DiskType;
-import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
-import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.cloud.model.Regions;
-import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
-import com.sequenceiq.cloudbreak.cloud.model.VmType;
-import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 
 @Service
 public class ArmPlatformParameters implements PlatformParameters {
 
     private static final int START_LABEL = 98;
-    private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("sd", START_LABEL);
 
     @Override
-    public ScriptParams scriptParams() {
-        return SCRIPT_PARAMS;
+    public String diskPrefix() {
+        return "sd";
     }
 
     @Override
-    public DiskTypes diskTypes() {
-        return new DiskTypes(getDiskTypes(), defaultDiskType());
-
+    public Integer startLabel() {
+        return START_LABEL;
     }
 
-    private Collection<DiskType> getDiskTypes() {
-        Collection<DiskType> disks = Lists.newArrayList();
-        disks.add(diskType("HDD"));
+    @Override
+    public Map<String, String> diskTypes() {
+        Map<String, String> disks = new HashMap<>();
+        disks.put("HDD", "HDD");
         return disks;
     }
 
-    private DiskType defaultDiskType() {
-        return diskType("HDD");
+    @Override
+    public String defaultDiskType() {
+        return diskTypes().get("HDD");
     }
 
     @Override
-    public Regions regions() {
-        return new Regions(getRegions(), defaultRegion());
-    }
-
-    private Collection<Region> getRegions() {
-        Collection<Region> regions = Lists.newArrayList();
-        for (ArmRegion region : ArmRegion.values()) {
-            regions.add(region(region.value()));
+    public Map<String, String> regions() {
+        Map<String, String> regions = new HashMap<>();
+        for (Region region : Region.values()) {
+            regions.put(region.name(), region.value());
         }
         return regions;
     }
 
-    private Region defaultRegion() {
-        return region(ArmRegion.CENTRAL_US.value());
+    @Override
+    public String defaultRegion() {
+        return Region.CENTRAL_US.name();
     }
 
     @Override
-    public AvailabilityZones availabilityZones() {
-        Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
-        for (ArmRegion region : ArmRegion.values()) {
-            regions.put(region(region.value()), new ArrayList<AvailabilityZone>());
+    public Map<String, List<String>> availabiltyZones() {
+        Map<String, List<String>> regions = new HashMap<>();
+        for (Region region : Region.values()) {
+            regions.put(region.name(), new ArrayList<String>());
         }
-        return new AvailabilityZones(regions);
+        return regions;
     }
 
     @Override
-    public VmTypes vmTypes() {
-        return new VmTypes(virtualMachines(), defaultVirtualMachine());
-    }
-
-    private Collection<VmType> virtualMachines() {
-        Collection<VmType> vmTypes = Lists.newArrayList();
-        for (ArmVmType vmType : ArmVmType.values()) {
-            vmTypes.add(vmType(vmType.vmType()));
+    public Map<String, String> virtualMachines() {
+        Map<String, String> vmTypes = new HashMap<>();
+        for (VmType vmType : VmType.values()) {
+            vmTypes.put(vmType.name(), vmType.vmType());
         }
         return vmTypes;
     }
 
-    private VmType defaultVirtualMachine() {
-        return vmType(ArmVmType.STANDARD_D3.vmType());
+    @Override
+    public String defaultVirtualMachine() {
+        return VmType.STANDARD_D3.name();
     }
 
-    private enum ArmVmType {
+    private enum VmType {
 
         A5("A5", 4),
         A6("A6", 4),
@@ -123,7 +102,7 @@ public class ArmPlatformParameters implements PlatformParameters {
         private final String vmType;
         private final int maxDiskSize;
 
-        private ArmVmType(String vmType, int maxDiskSize) {
+        private VmType(String vmType, int maxDiskSize) {
             this.vmType = vmType;
             this.maxDiskSize = maxDiskSize;
         }
@@ -137,7 +116,7 @@ public class ArmPlatformParameters implements PlatformParameters {
         }
     }
 
-    private enum ArmRegion {
+    private enum Region {
         EAST_ASIA("East Asia"),
         NORTH_EUROPE("North Europe"),
         WEST_EUROPE("West Europe"),
@@ -154,7 +133,7 @@ public class ArmPlatformParameters implements PlatformParameters {
 
         private final String value;
 
-        private ArmRegion(String value) {
+        private Region(String value) {
             this.value = value;
         }
 

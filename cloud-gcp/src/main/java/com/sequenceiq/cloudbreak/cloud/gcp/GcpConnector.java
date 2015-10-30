@@ -12,8 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
 @Service
 public class GcpConnector implements CloudConnector {
@@ -69,13 +68,13 @@ public class GcpConnector implements CloudConnector {
     }
 
     @Override
-    public Platform platform() {
-        return GcpConstants.GCP_PLATFORM;
+    public String platform() {
+        return CloudPlatform.GCP.name();
     }
 
     @Override
-    public Variant variant() {
-        return GcpConstants.GCP_VARIANT;
+    public String variant() {
+        return CloudPlatform.GCP.name();
     }
 
 }

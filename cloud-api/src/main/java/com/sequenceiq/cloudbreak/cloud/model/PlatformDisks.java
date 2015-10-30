@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public class PlatformDisks {
-    private Map<Platform, Collection<DiskType>> diskTypes;
-    private Map<Platform, DiskType> defaultDisks;
+    private Map<String, Map<String, String>> diskTypes;
+    private Map<String, String> defaultDisks;
 
-    public PlatformDisks(Map<Platform, Collection<DiskType>> diskTypes, Map<Platform, DiskType> defaultDisks) {
+    public PlatformDisks(Map<String, Map<String, String>> diskTypes, Map<String, String> defaultDisks) {
         this.diskTypes = diskTypes;
         this.defaultDisks = defaultDisks;
     }
@@ -18,11 +17,11 @@ public class PlatformDisks {
         this.defaultDisks = new HashMap<>();
     }
 
-    public Map<Platform, Collection<DiskType>> getDiskTypes() {
+    public Map<String, Map<String, String>> getDiskTypes() {
         return diskTypes;
     }
 
-    public Map<Platform, DiskType> getDefaultDisks() {
+    public Map<String, String> getDefaultDisks() {
         return defaultDisks;
     }
 

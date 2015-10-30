@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -67,24 +68,23 @@ public class CloudConnectorController {
     @ResponseBody
     public ResponseEntity<Collection<String>> getPlatformVariantByType(@PathVariable String type) {
         PlatformVariants pv = cloudConnectorParameterService.getPlatformVariants();
-        Collection<String> strings = conversionService.convert(pv, PlatformVariantsJson.class).getPlatformToVariants().get(type.toUpperCase());
+        Collection<String> strings = pv.getPlatformToVariants().get(type.toUpperCase());
         return new ResponseEntity<>(strings == null ? new ArrayList<String>() : strings, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/connectors/disktypes", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<PlatformDisksJson> getDisktypes() {
-        PlatformDisks dts = cloudConnectorParameterService.getDiskTypes();
-        return new ResponseEntity<>(conversionService.convert(dts, PlatformDisksJson.class), HttpStatus.OK);
+        PlatformDisks diskTypes = cloudConnectorParameterService.getDiskTypes();
+        return new ResponseEntity<>(conversionService.convert(diskTypes, PlatformDisksJson.class), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/connectors/disktypes/{type}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Collection<String>> getDisktypeByType(@PathVariable String type) {
+    public ResponseEntity<Map<String, String>> getDisktypeByType(@PathVariable String type) {
         PlatformDisks diskTypes = cloudConnectorParameterService.getDiskTypes();
-        Collection<String> strings = conversionService.convert(diskTypes, PlatformDisksJson.class)
-                .getDiskTypes().get(type.toUpperCase());
-        return new ResponseEntity<>(strings == null ? new ArrayList<String>() : strings, HttpStatus.OK);
+        Map<String, String> strings = diskTypes.getDiskTypes().get(type.toUpperCase());
+        return new ResponseEntity<>(strings == null ? new HashMap<String, String>() : strings, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/connectors/vmtypes", method = RequestMethod.GET)
@@ -96,11 +96,10 @@ public class CloudConnectorController {
 
     @RequestMapping(value = "/connectors/vmtypes/{type}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Collection<String>> getVmTypeByType(@PathVariable String type) {
+    public ResponseEntity<Map<String, String>> getVmTypeByType(@PathVariable String type) {
         PlatformVirtualMachines vmtypes = cloudConnectorParameterService.getVmtypes();
-        Collection<String> vmTypes = conversionService.convert(vmtypes, PlatformVirtualMachinesJson.class)
-                .getVirtualMachines().get(type.toUpperCase());
-        return new ResponseEntity<>(vmTypes == null ? new ArrayList<String>() : vmTypes, HttpStatus.OK);
+        Map<String, String> stringStringMap = vmtypes.getVirtualMachines().get(type.toUpperCase());
+        return new ResponseEntity<>(stringStringMap == null ? new HashMap<String, String>() : stringStringMap, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/connectors/regions", method = RequestMethod.GET)
@@ -112,20 +111,18 @@ public class CloudConnectorController {
 
     @RequestMapping(value = "/connectors/regions/r/{type}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Collection<String>> getRegionRByType(@PathVariable String type) {
+    public ResponseEntity<Map<String, String>> getRegionRByType(@PathVariable String type) {
         PlatformRegions pv = cloudConnectorParameterService.getRegions();
-        Collection<String> regions = conversionService.convert(pv, PlatformRegionsJson.class)
-                .getRegions().get(type.toUpperCase());
-        return new ResponseEntity<>(regions == null ? new ArrayList<String>() : regions, HttpStatus.OK);
+        Map<String, String> stringStringMap = pv.getRegions().get(type.toUpperCase());
+        return new ResponseEntity<>(stringStringMap == null ? new HashMap<String, String>() : stringStringMap, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/connectors/regions/av/{type}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Map<String, Collection<String>>> getRegionAvByType(@PathVariable String type) {
+    public ResponseEntity<Map<String, List<String>>> getRegionAvByType(@PathVariable String type) {
         PlatformRegions pv = cloudConnectorParameterService.getRegions();
-        Map<String, Collection<String>> azs = conversionService.convert(pv, PlatformRegionsJson.class)
-                .getAvailabiltyZones().get(type.toUpperCase());
-        return new ResponseEntity<>(azs == null ? new HashMap<String, Collection<String>>() : azs, HttpStatus.OK);
+        Map<String, List<String>> stringStringMap = pv.getAvailabiltyZones().get(type.toUpperCase());
+        return new ResponseEntity<>(stringStringMap == null ? new HashMap<String, List<String>>() : stringStringMap, HttpStatus.OK);
     }
 
 }

@@ -9,14 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineTypesResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
-import com.sequenceiq.cloudbreak.cloud.model.Variant;
-import com.sequenceiq.cloudbreak.cloud.model.VmType;
 
 import reactor.bus.Event;
 
@@ -37,16 +33,13 @@ public class GetVirtualMachineTypesHandler implements CloudPlatformEventHandler<
         LOGGER.info("Received event: {}", getVirtualMachineTypesRequestEvent);
         GetVirtualMachineTypesRequest request = getVirtualMachineTypesRequestEvent.getData();
         try {
-            Map<Platform, Collection<VmType>> platformVms = Maps.newHashMap();
-            Map<Platform, VmType> platformDefaultVm = Maps.newHashMap();
-            for (Map.Entry<Platform, Collection<Variant>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
-                VmType defaultVm = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().vmTypes().defaultType();
-                Collection<VmType> vmTypes = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().vmTypes().types();
-
-                platformDefaultVm.put(connector.getKey(), defaultVm);
-                platformVms.put(connector.getKey(), vmTypes);
+            PlatformVirtualMachines pv = new PlatformVirtualMachines();
+            for (Map.Entry<String, Collection<String>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
+                String virtualMachine = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().defaultVirtualMachine();
+                Map<String, String> stringStringMap = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().virtualMachines();
+                pv.getDefaultVirtualMachines().put(connector.getKey(), virtualMachine);
+                pv.getVirtualMachines().put(connector.getKey(), stringStringMap);
             }
-            PlatformVirtualMachines pv = new PlatformVirtualMachines(platformVms, platformDefaultVm);
             GetVirtualMachineTypesResult getVirtualMachineTypesResult = new GetVirtualMachineTypesResult(request, pv);
             request.getResult().onNext(getVirtualMachineTypesResult);
             LOGGER.info("Query platform machine types types finished.");

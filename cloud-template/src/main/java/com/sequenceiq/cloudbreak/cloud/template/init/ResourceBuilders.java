@@ -13,7 +13,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.NetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.OrderedBuilder;
@@ -25,8 +24,8 @@ public class ResourceBuilders {
     private List<NetworkResourceBuilder> network;
     @Inject
     private List<ComputeResourceBuilder> compute;
-    private Map<Platform, List<NetworkResourceBuilder>> networkChain = new HashMap<>();
-    private Map<Platform, List<ComputeResourceBuilder>> computeChain = new HashMap<>();
+    private Map<String, List<NetworkResourceBuilder>> networkChain = new HashMap<>();
+    private Map<String, List<ComputeResourceBuilder>> computeChain = new HashMap<>();
 
     @PostConstruct
     public void init() {
@@ -35,11 +34,11 @@ public class ResourceBuilders {
         initCompute(comparator);
     }
 
-    public List<NetworkResourceBuilder> network(Platform platform) {
+    public List<NetworkResourceBuilder> network(String platform) {
         return new ArrayList<>(networkChain.get(platform));
     }
 
-    public List<ComputeResourceBuilder> compute(Platform platform) {
+    public List<ComputeResourceBuilder> compute(String platform) {
         return new ArrayList<>(computeChain.get(platform));
     }
 

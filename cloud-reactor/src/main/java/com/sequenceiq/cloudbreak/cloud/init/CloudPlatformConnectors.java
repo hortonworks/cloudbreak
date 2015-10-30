@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.init;
 
-import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -22,9 +20,7 @@ import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.EnvironmentVariableConfig;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
-import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 @Component
 public class CloudPlatformConnectors {
@@ -33,12 +29,12 @@ public class CloudPlatformConnectors {
     @Value("${cb.platform.default.variants:}")
     private String platformDefaultVariants;
 
-    private Map<Platform, Variant> defaultVariants = new HashMap<>();
+    private Map<String, String> defaultVariants = new HashMap<>();
 
     @Inject
     private List<CloudConnector> cloudConnectors;
     private Map<CloudPlatformVariant, CloudConnector> map = new HashMap<>();
-    private Multimap<Platform, Variant> platformToVariants;
+    private Multimap<String, String> platformToVariants;
 
     @PostConstruct
     public void cloudPlatformConnectors() {
@@ -47,13 +43,13 @@ public class CloudPlatformConnectors {
             map.put(new CloudPlatformVariant(connector.platform(), connector.variant()), connector);
             platformToVariants.put(connector.platform(), connector.variant());
         }
-        Map<Platform, Variant> environmentDefaults = extractEnvironmentDefaultVariants();
+        Map<String, String> environmentDefaults = extractEnvironmentDefaultVariants();
         setupDefaultVariants(platformToVariants, environmentDefaults);
         LOGGER.debug(map.toString());
         LOGGER.debug(defaultVariants.toString());
     }
 
-    private Map<Platform, Variant> extractEnvironmentDefaultVariants() {
+    private Map<String, String> extractEnvironmentDefaultVariants() {
         String variants = EnvironmentVariableConfig.CB_PLATFORM_DEFAULT_VARIANTS;
         if (!Strings.isNullOrEmpty(platformDefaultVariants)) {
             variants = platformDefaultVariants;
@@ -61,21 +57,21 @@ public class CloudPlatformConnectors {
         return toMap(variants);
     }
 
-    private Map<Platform, Variant> toMap(String s) {
-        Map<Platform, Variant> result = Maps.newHashMap();
+    private Map<String, String> toMap(String s) {
+        Map<String, String> result = Maps.newHashMap();
         if (!Strings.isNullOrEmpty(s)) {
             for (String entry : s.split(",")) {
                 String[] keyValue = entry.split(":");
-                result.put(platform(keyValue[0]), Variant.variant(keyValue[1]));
+                result.put(keyValue[0], keyValue[1]);
             }
         }
         return result;
     }
 
-    private void setupDefaultVariants(Multimap<Platform, Variant> platformToVariants, Map<Platform, Variant> environmentDefaults) {
-        for (Map.Entry<Platform, Collection<Variant>> platformVariants : platformToVariants.asMap().entrySet()) {
+    private void setupDefaultVariants(Multimap<String, String> platformToVariants, Map<String, String> environmentDefaults) {
+        for (Map.Entry<String, Collection<String>> platformVariants : platformToVariants.asMap().entrySet()) {
             if (platformVariants.getValue().size() == 1) {
-                defaultVariants.put(platformVariants.getKey(), platformVariants.getValue().toArray(new Variant[]{})[0]);
+                defaultVariants.put(platformVariants.getKey(), platformVariants.getValue().toArray(new String[]{})[0]);
             } else {
                 if (platformVariants.getValue().contains(environmentDefaults.get(platformVariants.getKey()))) {
                     defaultVariants.put(platformVariants.getKey(), environmentDefaults.get(platformVariants.getKey()));
@@ -86,16 +82,16 @@ public class CloudPlatformConnectors {
         }
     }
 
-    public Variant getDefaultVariant(Platform platform) {
+    public String getDefaultVariant(String platform) {
         return defaultVariants.get(platform);
     }
 
-    public CloudConnector getDefault(Platform platform) {
-        Variant variant = getDefaultVariant(platform);
+    public CloudConnector getDefault(String platform) {
+        String variant = getDefaultVariant(platform);
         return map.get(new CloudPlatformVariant(platform, variant));
     }
 
-    public CloudConnector get(Platform platform, Variant variant) {
+    public CloudConnector get(String platform, String variant) {
         return get(new CloudPlatformVariant(platform, variant));
     }
 

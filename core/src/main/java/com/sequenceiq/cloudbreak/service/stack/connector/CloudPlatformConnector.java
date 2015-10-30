@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
-import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -34,5 +33,5 @@ public interface CloudPlatformConnector {
 
     PlatformParameters getPlatformParameters(Stack stack);
 
-    Variant checkAndGetPlatformVariant(Stack stack);
+    String checkAndGetPlatformVariant(Stack stack);
 }

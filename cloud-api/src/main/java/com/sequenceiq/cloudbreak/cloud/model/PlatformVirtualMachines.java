@@ -1,15 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public class PlatformVirtualMachines {
+    private Map<String, Map<String, String>> virtualMachines;
+    private Map<String, String> defaultVirtualMachines;
 
-    private final Map<Platform, Collection<VmType>> virtualMachines;
-    private final Map<Platform, VmType> defaultVirtualMachines;
-
-    public PlatformVirtualMachines(Map<Platform, Collection<VmType>> virtualMachines, Map<Platform, VmType> defaultVirtualMachines) {
+    public PlatformVirtualMachines(Map<String, Map<String, String>> virtualMachines, Map<String, String> defaultVirtualMachines) {
         this.virtualMachines = virtualMachines;
         this.defaultVirtualMachines = defaultVirtualMachines;
     }
@@ -19,11 +17,11 @@ public class PlatformVirtualMachines {
         this.defaultVirtualMachines = new HashMap<>();
     }
 
-    public Map<Platform, Collection<VmType>> getVirtualMachines() {
+    public Map<String, Map<String, String>> getVirtualMachines() {
         return virtualMachines;
     }
 
-    public Map<Platform, VmType> getDefaultVirtualMachines() {
+    public Map<String, String> getDefaultVirtualMachines() {
         return defaultVirtualMachines;
     }
 }

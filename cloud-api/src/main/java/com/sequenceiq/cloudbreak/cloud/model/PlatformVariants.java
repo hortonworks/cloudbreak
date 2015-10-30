@@ -4,19 +4,19 @@ import java.util.Collection;
 import java.util.Map;
 
 public class PlatformVariants {
-    private Map<Platform, Collection<Variant>> platformToVariants;
-    private Map<Platform, Variant> defaultVariants;
+    private Map<String, Collection<String>> platformToVariants;
+    private Map<String, String> defaultVariants;
 
-    public PlatformVariants(Map<Platform, Collection<Variant>> platformToVariants, Map<Platform, Variant> defaultVariants) {
+    public PlatformVariants(Map<String, Collection<String>> platformToVariants, Map<String, String> defaultVariants) {
         this.platformToVariants = platformToVariants;
         this.defaultVariants = defaultVariants;
     }
 
-    public Map<Platform, Collection<Variant>> getPlatformToVariants() {
+    public Map<String, Collection<String>> getPlatformToVariants() {
         return platformToVariants;
     }
 
-    public Map<Platform, Variant> getDefaultVariants() {
+    public Map<String, String> getDefaultVariants() {
         return defaultVariants;
     }
 

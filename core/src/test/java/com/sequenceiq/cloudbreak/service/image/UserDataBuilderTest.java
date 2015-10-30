@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,15 +11,6 @@ import org.junit.Test;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
-import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
-import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
-import com.sequenceiq.cloudbreak.cloud.model.DiskType;
-import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
-import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.cloud.model.Regions;
-import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
-import com.sequenceiq.cloudbreak.cloud.model.VmType;
-import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -55,28 +45,48 @@ public class UserDataBuilderTest {
     public PlatformParameters getPlatformParameters() {
         return new PlatformParameters() {
             @Override
-            public ScriptParams scriptParams() {
-                return new ScriptParams("sd", 98);
+            public String diskPrefix() {
+                return "sd";
             }
 
             @Override
-            public DiskTypes diskTypes() {
-                return new DiskTypes(new ArrayList<DiskType>(), DiskType.diskType(""));
+            public Integer startLabel() {
+                return 98;
             }
 
             @Override
-            public Regions regions() {
-                return new Regions(new ArrayList<Region>(), Region.region(""));
+            public Map<String, String> diskTypes() {
+                return new HashMap<>();
             }
 
             @Override
-            public AvailabilityZones availabilityZones() {
-                return new AvailabilityZones(new HashMap<Region, List<AvailabilityZone>>());
+            public String defaultDiskType() {
+                return "";
             }
 
             @Override
-            public VmTypes vmTypes() {
-                return new VmTypes(new ArrayList<VmType>(), VmType.vmType(""));
+            public Map<String, String> regions() {
+                return new HashMap<>();
+            }
+
+            @Override
+            public String defaultRegion() {
+                return "";
+            }
+
+            @Override
+            public Map<String, List<String>> availabiltyZones() {
+                return new HashMap<>();
+            }
+
+            @Override
+            public Map<String, String> virtualMachines() {
+                return new HashMap<>();
+            }
+
+            @Override
+            public String defaultVirtualMachine() {
+                return "";
             }
         };
     }

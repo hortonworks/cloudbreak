@@ -22,6 +22,7 @@ import com.google.common.collect.Ordering;
 import com.google.common.primitives.Ints;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -29,10 +30,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
-import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -96,7 +95,7 @@ public class ComputeResourceService {
             List<CloudResource> resources, boolean cancellable) throws Exception {
         List<CloudResourceStatus> results = new ArrayList<>();
         List<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
-        Platform platform = auth.getCloudContext().getPlatform();
+        String platform = auth.getCloudContext().getPlatform();
         List<ComputeResourceBuilder> builders = resourceBuilders.compute(platform);
         int numberOfBuilders = builders.size();
         for (int i = numberOfBuilders - 1; i >= 0; i--) {
@@ -138,7 +137,7 @@ public class ComputeResourceService {
             AuthenticatedContext auth, List<CloudResource> resources, List<CloudInstance> instances) throws Exception {
         List<CloudVmInstanceStatus> results = new ArrayList<>();
         List<Future<ResourceRequestResult<List<CloudVmInstanceStatus>>>> futures = new ArrayList<>();
-        Platform platform = auth.getCloudContext().getPlatform();
+        String platform = auth.getCloudContext().getPlatform();
         List<ComputeResourceBuilder> builders = resourceBuilders.compute(platform);
         if (!context.isBuild()) {
             Collections.reverse(builders);

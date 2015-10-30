@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.init;
 
-import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-import static com.sequenceiq.cloudbreak.cloud.model.Variant.variant;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
@@ -19,8 +17,6 @@ import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 public class CloudPlatformConnectorsTest {
 
@@ -39,34 +35,34 @@ public class CloudPlatformConnectorsTest {
 
     @Test
     public void getDefaultForOpenstack() {
-        CloudConnector conn = c.getDefault(platform("MULTIWITHDEFAULT"));
-        assertEquals("ONE", conn.variant().value());
+        CloudConnector conn = c.getDefault("MULTIWITHDEFAULT");
+        assertEquals("ONE", conn.variant());
     }
 
     @Test
     public void getDefaultForGcp() {
-        CloudConnector conn = c.getDefault(platform("SINGLE"));
-        assertEquals("SINGLE", conn.variant().value());
+        CloudConnector conn = c.getDefault("SINGLE");
+        assertEquals("SINGLE", conn.variant());
     }
 
     @Test
     public void getOpenstackNative() {
-        CloudConnector conn = c.get(platform("MULTIWITHDEFAULT"), variant("TWO"));
-        assertEquals("TWO", conn.variant().value());
+        CloudConnector conn = c.get("MULTIWITHDEFAULT", "TWO");
+        assertEquals("TWO", conn.variant());
     }
 
     @Test
     public void getWithNullVariant() {
-        CloudConnector conn = c.get(platform("MULTIWITHDEFAULT"), variant(null));
+        CloudConnector conn = c.get("MULTIWITHDEFAULT", null);
         //should fall back to default
-        assertEquals("ONE", conn.variant().value());
+        assertEquals("ONE", conn.variant());
     }
 
     @Test
     public void getWithEmptyVariant() {
-        CloudConnector conn = c.get(platform("MULTIWITHDEFAULT"), variant(""));
+        CloudConnector conn = c.get("MULTIWITHDEFAULT", "");
         //should fall back to default
-        assertEquals("ONE", conn.variant().value());
+        assertEquals("ONE", conn.variant());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -116,13 +112,13 @@ public class CloudPlatformConnectorsTest {
             }
 
             @Override
-            public Variant variant() {
-                return Variant.variant(variant);
+            public String variant() {
+                return variant;
             }
 
             @Override
-            public Platform platform() {
-                return Platform.platform(platform);
+            public String platform() {
+                return platform;
             }
         };
     }
