@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventSpecifications;
@@ -69,6 +70,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<CloudbreakEvent> cloudbreakEvents(String owner, Long since) {
         List<CloudbreakEvent> events = null;
         if (null == since) {
@@ -106,10 +108,13 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     }
 
     private void populateClusterData(CloudbreakEvent stackEvent, Stack stack) {
-        if (null != stack.getCluster()) {
-            stackEvent.setBlueprintId(stack.getCluster().getBlueprint().getId());
-            stackEvent.setBlueprintName(stack.getCluster().getBlueprint().getBlueprintName());
-            stackEvent.setClusterStatus(stack.getCluster().getStatus());
+        Cluster cluster = stack.getCluster();
+        if (cluster != null) {
+            stackEvent.setClusterStatus(cluster.getStatus());
+            if (cluster.getBlueprint() != null) {
+                stackEvent.setBlueprintId(cluster.getBlueprint().getId());
+                stackEvent.setBlueprintName(cluster.getBlueprint().getBlueprintName());
+            }
         } else {
             LOGGER.debug("No cluster data available for the stack: {}", stack.getId());
         }
