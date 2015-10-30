@@ -50,6 +50,12 @@
         </select>
     </div>
 </div>
+<div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AWS'">
+    <label class="col-sm-3 control-label" for="awsDedicatedInstancesRequested">{{msg.cluster_form_dedicated_label}}</label>
+    <div class="col-sm-9">
+        <input type="checkbox" id="awsDedicatedInstancesRequested" ng-model="cluster.parameters.dedicatedInstances" name="awsDedicatedInstancesRequested">
+    </div>
+</div>
 <div class="form-group" ng-show="showAdvancedOptionForm && cluster.platformVariant">
     <label class="col-sm-3 control-label" for="platformVariant">{{msg.cluster_form_platform_variant_label}}</label>
     <div class="col-sm-3">
@@ -58,7 +64,7 @@
         </select>
     </div>
 </div>
-<div class="form-group" ng-show="showAdvancedOptionForm">
+<div class="form-group">
     <label class="col-sm-3 control-label" for="emailneeded">{{msg.cluster_form_email_label}}</label>
     <div class="col-sm-9">
         <input type="checkbox" id="emailneeded" ng-model="cluster.email" name="emailneeded">
@@ -72,12 +78,12 @@
 </div>
 <div class="btn-group btn-group-justified" role="group" style="padding-top: 40px" aria-label="...">
     <div class="btn-group" role="group" style="opacity: 0;">
-        <button type="button" class="btn btn-default"></button>
+        <button type="button" class="btn btn-sm btn-default"></button>
     </div>
     <div class="btn-group" role="group" style="opacity: 0;">
-        <button type="button" class="btn btn-default"></button>
+        <button type="button" class="btn btn-sm btn-default"></button>
     </div>
     <div class="btn-group" role="group">
-        <button type="button" class="btn btn-default" ng-click="showWizardActualElement('configureSecurity')">Configure Network and Security <i class="fa fa-angle-double-right"></i></button>
+        <button type="button" class="btn btn-sm btn-sm btn-default" ng-click="showWizardActualElement('configureSecurity')">{{msg.cluster_form_ambari_network_tag}} <i class="fa fa-angle-double-right"></i></button>
     </div>
 </div>

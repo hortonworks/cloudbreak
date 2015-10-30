@@ -55,26 +55,20 @@
         </div>
     </div>
 </div>
-<div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AWS'">
-    <label class="col-sm-3 control-label" for="awsDedicatedInstancesRequested">{{msg.cluster_form_dedicated_label}}</label>
-    <div class="col-sm-9">
-        <input type="checkbox" id="awsDedicatedInstancesRequested" ng-model="cluster.parameters.dedicatedInstances" name="awsDedicatedInstancesRequested">
-    </div>
-</div>
 <div class="btn-group btn-group-justified" role="group" style="padding-top: 40px" aria-label="...">
     <div class="btn-group" role="group">
-        <button type="button" class="btn btn-default" ng-click="showWizardActualElement('configureSecurity')"><i class="fa fa-angle-double-left"></i> Configure Network and Security</button>
+        <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureSecurity')"><i class="fa fa-angle-double-left"></i> {{msg.cluster_form_ambari_network_tag}}</button>
     </div>
     <div class="btn-group" role="group" style="opacity: 0;">
-        <button type="button" class="btn btn-default"></button>
+        <button type="button" class="btn btn-sm btn-default"></button>
     </div>
     <div class="btn-group" role="group" ng-if="activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'AZURE_RM' || activeCredential.cloudPlatform == 'GCP'">
-        <button type="button" class="btn btn-default" ng-click="showWizardActualElement('configureFileSystem')">Configure File System <i class="fa fa-angle-double-right"></i></button>
+        <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureFileSystem')">{{msg.cluster_form_ambari_filesystem_tag}} <i class="fa fa-angle-double-right"></i></button>
     </div>
     <div class="btn-group" role="group" ng-if="activeCredential.cloudPlatform != 'AZURE' && activeCredential.cloudPlatform != 'AZURE_RM' && activeCredential.cloudPlatform != 'GCP'" ng-hide="!showAdvancedOptionForm">
-        <button type="button" class="btn btn-default" ng-click="showWizardActualElement('configureFailureAction')">Configure Failure Action <i class="fa fa-angle-double-right"></i></button>
+        <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureFailureAction')">{{msg.cluster_form_ambari_failure_tag}} <i class="fa fa-angle-double-right"></i></button>
     </div>
     <div class="btn-group" role="group" ng-if="activeCredential.cloudPlatform != 'AZURE' && activeCredential.cloudPlatform != 'AZURE_RM' && activeCredential.cloudPlatform != 'GCP'" ng-hide="clusterCreationForm.$invalid || showAdvancedOptionForm">
-        <button type="button" class="btn btn-default" ng-click="showWizardActualElement('configureReview')">Review and Launch <i class="fa fa-angle-double-right"></i></button>
+        <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureReview')">{{msg.cluster_form_ambari_launch_tag}} <i class="fa fa-angle-double-right"></i></button>
     </div>
 </div>
