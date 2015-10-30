@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.cloud;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 
 /**
  * Cloudbreak collects metadata about VM instances like private and floating (public) addresses.
@@ -20,5 +20,5 @@ public interface MetadataCollector {
      * @param vms                  the VM instances for which the metadata needs to be collected
      * @return status of instances including the metadata
      */
-    List<CloudVmInstanceStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<InstanceTemplate> vms);
+    List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms);
 }

@@ -18,10 +18,12 @@ public class DefaultFlowContext implements FlowContext {
         this.errorReason = errorReason;
     }
 
+    @Override
     public Long getStackId() {
         return stackId;
     }
 
+    @Override
     public CloudPlatform getCloudPlatform() {
         return cloudPlatform;
     }

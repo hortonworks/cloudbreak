@@ -54,7 +54,7 @@ public class OpenStackSetup implements Setup {
         List<? extends Flavor> flavors = osClient.compute().flavors().list();
         Set<String> notFoundFlavors = new HashSet<>();
         for (Group instanceGroup : instanceGroups) {
-            String instanceType = instanceGroup.getInstances().get(0).getFlavor();
+            String instanceType = instanceGroup.getInstances().get(0).getTemplate().getFlavor();
             boolean found = false;
             for (Flavor flavor : flavors) {
                 if (flavor.getName().equalsIgnoreCase(instanceType)) {

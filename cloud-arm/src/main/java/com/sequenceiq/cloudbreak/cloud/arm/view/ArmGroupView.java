@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.arm.view;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 
 public class ArmGroupView {
 
@@ -19,8 +19,8 @@ public class ArmGroupView {
     public List<ArmInstanceView> getFlatArmView() {
         List<ArmInstanceView> armInstances = new ArrayList<>();
         for (Group group : groups) {
-            for (InstanceTemplate instance : group.getInstances()) {
-                ArmInstanceView novaInstance = new ArmInstanceView(instance, group.getType());
+            for (CloudInstance instance : group.getInstances()) {
+                ArmInstanceView novaInstance = new ArmInstanceView(instance.getTemplate(), group.getType());
                 armInstances.add(novaInstance);
             }
         }

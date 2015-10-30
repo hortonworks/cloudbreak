@@ -5,7 +5,6 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -20,14 +19,13 @@ public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversion
     private StackToCloudStackConverter stackToCloudStackConverter;
 
     @Override
-    public CloudInstance convert(InstanceMetaData metaData) {
-        InstanceGroup group = metaData.getInstanceGroup();
-        Template template = metaData.getInstanceGroup().getTemplate();
-        InstanceStatus status = getInstanceStatus(metaData);
-        InstanceTemplate instance = stackToCloudStackConverter.buildInstanceTemplate(
-                template, group.getGroupName(), metaData.getPrivateId(), status);
-        CloudInstanceMetaData md = new CloudInstanceMetaData(metaData.getPrivateIp(), metaData.getPublicIp());
-        return new CloudInstance(metaData.getInstanceId(), md, instance);
+    public CloudInstance convert(InstanceMetaData metaDataEnity) {
+        InstanceGroup group = metaDataEnity.getInstanceGroup();
+        Template template = metaDataEnity.getInstanceGroup().getTemplate();
+        InstanceStatus status = getInstanceStatus(metaDataEnity);
+        InstanceTemplate instanceTemplate = stackToCloudStackConverter.buildInstanceTemplate(
+                template, group.getGroupName(), metaDataEnity.getPrivateId(), status);
+        return new CloudInstance(metaDataEnity.getInstanceId(), instanceTemplate);
     }
 
     private InstanceStatus getInstanceStatus(InstanceMetaData metaData) {

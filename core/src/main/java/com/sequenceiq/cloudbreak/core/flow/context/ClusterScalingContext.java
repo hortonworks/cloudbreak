@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 
-public class ClusterScalingContext extends DefaultFlowContext implements FlowContext {
+public class ClusterScalingContext extends DefaultFlowContext {
 
     private HostGroupAdjustmentJson hostGroupAdjustment;
     private List<HostMetadata> candidates;

@@ -52,7 +52,7 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
                 getAuthenticatedContext().getCloudContext().getLocation().getRegion().value());
         AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(getAuthenticatedContext().getCloudCredential()),
                 getAuthenticatedContext().getCloudContext().getLocation().getRegion().value());
-        List<String> instanceIds = cloudFormationStackUtil.getInstanceIds(autoScalingGroupName, amazonASClient);
+        List<String> instanceIds = cloudFormationStackUtil.getInstanceIds(amazonASClient, autoScalingGroupName);
         if (instanceIds.size() < requiredInstances) {
             LOGGER.debug("Instances in AS group: {}, needed: {}", instanceIds.size(), requiredInstances);
             DescribeScalingActivitiesRequest describeScalingActivitiesRequest =

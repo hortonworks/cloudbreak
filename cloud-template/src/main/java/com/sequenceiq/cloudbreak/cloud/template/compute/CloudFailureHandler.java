@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -146,7 +147,8 @@ public class CloudFailureHandler {
 
     private List<InstanceTemplate> getRemovableInstanceTemplates(Group group, Set<Long> ids) {
         List<InstanceTemplate> instanceTemplates = new ArrayList<>();
-        for (InstanceTemplate instanceTemplate : group.getInstances()) {
+        for (CloudInstance cloudInstance : group.getInstances()) {
+            InstanceTemplate instanceTemplate = cloudInstance.getTemplate();
             if (!ids.contains(instanceTemplate.getPrivateId())) {
                 instanceTemplates.add(instanceTemplate);
             }

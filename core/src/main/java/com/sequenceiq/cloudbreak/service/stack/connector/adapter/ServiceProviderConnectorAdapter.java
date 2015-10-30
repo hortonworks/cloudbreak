@@ -51,7 +51,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Status;
@@ -460,8 +459,8 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
 
     private Set<Long> getPrivateIds(Group group) {
         Set<Long> ids = new HashSet<>();
-        for (InstanceTemplate template : group.getInstances()) {
-            ids.add(template.getPrivateId());
+        for (CloudInstance cloudInstance : group.getInstances()) {
+            ids.add(cloudInstance.getTemplate().getPrivateId());
         }
         return ids;
     }

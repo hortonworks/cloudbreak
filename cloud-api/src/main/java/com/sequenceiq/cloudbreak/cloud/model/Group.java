@@ -9,9 +9,9 @@ public class Group {
 
     private final String name;
     private final InstanceGroupType type;
-    private final List<InstanceTemplate> instances;
+    private final List<CloudInstance> instances;
 
-    public Group(String name, InstanceGroupType type, List<InstanceTemplate> instances) {
+    public Group(String name, InstanceGroupType type, List<CloudInstance> instances) {
         this.name = name;
         this.type = type;
         this.instances = ImmutableList.copyOf(instances);
@@ -25,7 +25,7 @@ public class Group {
         return type;
     }
 
-    public List<InstanceTemplate> getInstances() {
+    public List<CloudInstance> getInstances() {
         return instances;
     }
 

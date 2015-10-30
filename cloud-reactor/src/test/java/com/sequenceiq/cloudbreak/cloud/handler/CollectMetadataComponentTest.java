@@ -17,7 +17,7 @@ public class CollectMetadataComponentTest extends AbstractComponentTest<CollectM
         CollectMetadataResult result = sendCloudRequest();
 
         assertEquals(1, result.getResults().size());
-        assertEquals(InstanceStatus.IN_PROGRESS, result.getResults().get(0).getStatus());
+        assertEquals(InstanceStatus.IN_PROGRESS, result.getResults().get(0).getCloudVmInstanceStatus().getStatus());
         assertNull(result.getException());
     }
 
@@ -31,6 +31,6 @@ public class CollectMetadataComponentTest extends AbstractComponentTest<CollectM
                 g().createCloudContext(),
                 g().createCloudCredential(),
                 g().createCloudResourceList(),
-                g().createCloudInstanceTemplates());
+                g().createCloudInstances());
     }
 }

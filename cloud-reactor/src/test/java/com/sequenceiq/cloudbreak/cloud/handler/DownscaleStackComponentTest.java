@@ -32,6 +32,6 @@ public class DownscaleStackComponentTest extends AbstractComponentTest<Downscale
                 g().createCloudCredential(),
                 g().createCloudStack(),
                 g().createCloudResourceList(),
-                g().createCloudInstanceTemplates());
+                g().createCloudInstances());
     }
 }

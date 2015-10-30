@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -39,7 +40,8 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
     @Override
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
         List<CloudResource> cloudResources = new ArrayList<>();
-        InstanceTemplate template = group.getInstances().get(0);
+        CloudInstance instance = group.getInstances().get(0);
+        InstanceTemplate template = instance.getTemplate();
         GcpResourceNameService resourceNameService = getResourceNameService();
         String groupName = group.getName();
         final CloudContext cloudContext = auth.getCloudContext();
@@ -54,7 +56,8 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
     @Override
     public List<CloudResource> build(GcpContext context, long privateId, final AuthenticatedContext auth, Group group, Image image,
             List<CloudResource> buildableResource) throws Exception {
-        InstanceTemplate template = group.getInstances().get(0);
+        CloudInstance instance = group.getInstances().get(0);
+        InstanceTemplate template = instance.getTemplate();
         Volume volume = template.getVolumes().get(0);
 
         final List<CloudResource> resources = new ArrayList<>();

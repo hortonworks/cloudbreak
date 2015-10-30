@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow.context;
 
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
-public class ClusterAuthenticationContext extends DefaultFlowContext implements FlowContext {
+public class ClusterAuthenticationContext extends DefaultFlowContext {
 
     private String user;
     private String password;
