@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_BAYWATCH_ENABLED;
-import static com.sequenceiq.cloudbreak.service.network.ExposedService.CONSUL;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.ELASTIC_SEARCH;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.KIBANA;
 
@@ -110,19 +109,11 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             }
             if (ambariIp != null) {
                 collectLoggingPorts(ambariIp, result, ports);
-                collectAdditionalPorts(ambariIp, result, ports);
             }
         } catch (Exception ex) {
             return result;
         }
         return result;
-    }
-
-    private void collectAdditionalPorts(String ambariIp, Map<String, String> result, List<Port> ports) {
-        Optional<Port> consulOnGateWay = getPortForService(CONSUL, ports);
-        if (consulOnGateWay.isPresent()) {
-            result.put(consulOnGateWay.get().getExposedService().getPortName(), String.format("%s:%s", ambariIp, consulOnGateWay.get().getPort()));
-        }
     }
 
     private void collectLoggingPorts(String ambariIp, Map<String, String> result, List<Port> ports) {
