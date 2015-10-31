@@ -1,9 +1,3 @@
-<div class="form-group" ng-show="showAdvancedOptionForm">
-    <label class="col-sm-3 control-label" for="consulServerCount">{{msg.cluster_form_consul_server_count_label}}</label>
-    <div class="col-sm-3">
-        <input class="form-control" type="number" id="consulServerCount" ng-model="cluster.consulServerCount">
-    </div>
-</div>
 <div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE'">
     <label class="col-sm-3 control-label" for="diskPerStorageAccount">{{msg.cluster_form_disk_per_storage_label}}</label>
     <div class="col-sm-3">
@@ -47,15 +41,15 @@
 </div>
 <div class="btn-group btn-group-justified" role="group" style="padding-top: 40px" aria-label="...">
     <div class="btn-group" role="group" ng-show="activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'AZURE_RM' || activeCredential.cloudPlatform == 'GCP'">
-        <button type="button" class="btn btn-default" ng-click="showWizardActualElement('configureFileSystem')"><i class="fa fa-angle-double-left"></i> Configure File System</button>
+        <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureFileSystem')"><i class="fa fa-angle-double-left"></i> {{msg.cluster_form_ambari_filesystem_tag}}</button>
     </div>
     <div class="btn-group" role="group" ng-show="activeCredential.cloudPlatform != 'AZURE' && activeCredential.cloudPlatform != 'AZURE_RM' && activeCredential.cloudPlatform != 'GCP'">
-        <button type="button" class="btn btn-default" ng-click="showWizardActualElement('configureHostGroups')"><i class="fa fa-angle-double-left"></i> Configure Host Groups</button>
+        <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureHostGroups')"><i class="fa fa-angle-double-left"></i> {{msg.cluster_form_ambari_blueprint_tag}}</button>
     </div>
     <div class="btn-group" role="group" style="opacity: 0;">
-        <button type="button" class="btn btn-default"></button>
+        <button type="button" class="btn btn-sm btn-default"></button>
     </div>
     <div class="btn-group" role="group">
-        <button type="button" class="btn btn-default" ng-click="showWizardActualElement('configureAmbariRepository')">Configure Ambari Repository <i class="fa fa-angle-double-right"></i></button>
+        <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureAmbariRepository')">{{msg.cluster_form_ambari_hdprepo_tag}} <i class="fa fa-angle-double-right"></i></button>
     </div>
 </div>

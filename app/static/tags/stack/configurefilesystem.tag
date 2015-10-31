@@ -88,15 +88,15 @@
 </div>
 <div class="btn-group btn-group-justified" role="group" style="padding-top: 40px" aria-label="...">
     <div class="btn-group" role="group">
-        <button type="button" class="btn btn-default" ng-click="showWizardActualElement('configureHostGroups')"><i class="fa fa-angle-double-left"></i> Configure Host Groups</button>
+        <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureHostGroups')"><i class="fa fa-angle-double-left"></i> {{msg.cluster_form_ambari_blueprint_tag}}</button>
     </div>
     <div class="btn-group" role="group" style="opacity: 0;">
-        <button type="button" class="btn btn-default"></button>
+        <button type="button" class="btn btn-sm btn-default"></button>
     </div>
     <div class="btn-group" role="group" ng-hide="clusterCreationForm.$invalid || showAdvancedOptionForm">
-        <button type="button" class="btn btn-default" ng-click="showWizardActualElement('configureReview')">Review and Launch <i class="fa fa-angle-double-right"></i></button>
+        <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureReview')">{{msg.cluster_form_ambari_launch_tag}} <i class="fa fa-angle-double-right"></i></button>
     </div>
     <div class="btn-group" role="group" ng-show="showAdvancedOptionForm">
-        <button type="button" class="btn btn-default" ng-click="showWizardActualElement('configureFailureAction')">Configure Failure Action <i class="fa fa-angle-double-right"></i></button>
+        <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureFailureAction')">{{msg.cluster_form_ambari_failure_tag}} <i class="fa fa-angle-double-right"></i></button>
     </div>
 </div>
