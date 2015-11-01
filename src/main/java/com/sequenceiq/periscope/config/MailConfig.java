@@ -34,9 +34,9 @@ public class MailConfig {
     private String userName;
     @Value("${periscope.smtp.password:}")
     private String password;
-    @Value("${cb.mail.smtp.auth:true}")
+    @Value("${periscope.mail.smtp.auth:true}")
     private String smtpAuth;
-    @Value("${cb.mail.smtp.starttls.enable:true}")
+    @Value("${periscope.mail.smtp.starttls.enable:true}")
     private String smtpStarttlsEnable;
 
     @Bean
