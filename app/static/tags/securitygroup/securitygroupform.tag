@@ -92,7 +92,7 @@
     <div class="row btn-row">
         <div class="col-sm-9 col-sm-offset-3">
             <a id="createSecurityGroup" ng-disabled="securitygroupForm.$invalid" class="btn btn-success btn-block" ng-click="createSecurityGroup()" role="button"><i
-                     class="fa fa-plus fa-fw"></i> Create SecurityGroup</a>
+                     class="fa fa-plus fa-fw"></i> {{msg.securitygroup_form_create}}</a>
         </div>
     </div>
 
