@@ -34,6 +34,10 @@ public class MailConfig {
     private String userName;
     @Value("${periscope.smtp.password:}")
     private String password;
+    @Value("${cb.mail.smtp.auth:true}")
+    private String smtpAuth;
+    @Value("${cb.mail.smtp.starttls.enable:true}")
+    private String smtpStarttlsEnable;
 
     @Bean
     public freemarker.template.Configuration freemarkerConfiguration() throws IOException, TemplateException {
@@ -67,8 +71,8 @@ public class MailConfig {
     private Properties getJavaMailProperties() {
         Properties props = new Properties();
         props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", true);
-        props.put("mail.smtp.starttls.enable", true);
+        props.put("mail.smtp.auth", smtpAuth);
+        props.put("mail.smtp.starttls.enable", smtpStarttlsEnable);
         props.put("mail.debug", true);
         return props;
     }
