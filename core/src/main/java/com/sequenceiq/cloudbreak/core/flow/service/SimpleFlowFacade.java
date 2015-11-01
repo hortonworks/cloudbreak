@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.concurrent.GuardedMethod;
+import com.sequenceiq.cloudbreak.concurrent.LockedMethod;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
@@ -310,6 +312,7 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
+    @LockedMethod(lockPrefix = "stopStack")
     public FlowContext stopStack(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Stopping stack. Context: {}", context);
         try {
@@ -345,6 +348,7 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
+    @LockedMethod(lockPrefix = "startCluster")
     public FlowContext startCluster(FlowContext flowContext) throws CloudbreakException {
         LOGGER.debug("Starting cluster. Context: {}", flowContext);
         try {
@@ -541,6 +545,7 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
+    @GuardedMethod(lockPrefix = "terminate")
     public FlowContext terminateStack(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Termination of stack. Context: {}", context);
         try {

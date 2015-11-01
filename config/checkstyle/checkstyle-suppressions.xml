@@ -11,6 +11,7 @@
     <!-- cases are increasing the the complexity since the switchBlockAsSingleDecisionPoint=true parameter does not work  -->
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="ContainerConfigService.java"/>
     <suppress checks="IllegalCatch" files="GcpProvisionSetup.java"/>
+    <suppress checks="IllegalThrow" files="ConcurrentMethodExecutionAspect.java"/>
 
     <!-- suppressing checks in application runner classes -->
     <suppress id="sysout" files="VersionedApplication.java"/>
