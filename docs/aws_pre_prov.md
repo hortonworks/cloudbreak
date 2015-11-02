@@ -5,6 +5,7 @@
 Cloudbreak works by connecting your AWS account through so called *Credentials*, and then uses these credentials to create resources on your behalf.
 
 **Important!** Cloudbreak deployment uses two different AWS accounts for two different purposes:
+
 - The account belonging to the *Cloudbreak webapp* itself that acts as a *third party* that creates resources on the account of the *end-user*. This account is configured at server-deployment time.
 - The account belonging to the *end user* who uses the UI or the Shell to create clusters. This account is configured when setting up credentials.
 
@@ -12,7 +13,7 @@ These two accounts are usually *the same* when the end user is the same who depl
 
 Credentials use [IAM Roles](http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html) to give access to the third party to act on behalf of the end user without giving full access to your resources.
 This IAM Role will be *assumed* later by the deployment account.
-This section is about how to setup the IAM role to see how to setup the *deployment* account check out [this description](aws.md).
+This section is about how to setup the IAM role, to see how to setup the *deployment* account check out [this description](aws.md).
 
 To connect your (*end user*) AWS account with a credential in Cloudbreak you'll have to create an IAM role on your AWS account that is configured to allow the third-party account to access and create resources on your behalf.
 The easiest way to do this is with cbd commands (but it can also be done manually from the [AWS Console](https://console.aws.amazon.com)):
