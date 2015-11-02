@@ -15,11 +15,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.json.BlueprintRequest;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -45,22 +45,9 @@ public class DefaultBlueprintLoaderService {
 
     public Set<Blueprint> loadBlueprints(CbUser user) {
         Set<Blueprint> blueprints = new HashSet<>();
-        if (blueprintRepository.findAllDefaultInAccount(user.getAccount()).isEmpty()) {
-            blueprints.addAll(createDefaultBlueprints(user));
-        }
-        return blueprints;
-    }
-
-    private Set<Blueprint> createDefaultBlueprints(CbUser user) {
-        Set<Blueprint> blueprints = new HashSet<>();
+        Set<String> blueprintNames = getDefaultBlueprintNames(user);
         for (String blueprintName : blueprintArray) {
-            Blueprint oneByName = null;
-            try {
-                oneByName = blueprintService.getByName(blueprintName, user);
-            } catch (Exception e) {
-                oneByName = null;
-            }
-            if (oneByName == null) {
+            if (!blueprintNames.contains(blueprintName)) {
                 LOGGER.info("Adding default blueprint '{}' for user '{}'", blueprintName, user.getUsername());
                 try {
                     BlueprintRequest blueprintJson = new BlueprintRequest();
@@ -81,6 +68,15 @@ public class DefaultBlueprintLoaderService {
             }
         }
         return blueprints;
+    }
+
+    private Set<String> getDefaultBlueprintNames(CbUser user) {
+        Set<String> defaultBpNames = new HashSet<>();
+        Set<Blueprint> defaultBlueprints = blueprintRepository.findAllDefaultInAccount(user.getAccount());
+        for (Blueprint defaultBlueprint : defaultBlueprints) {
+            defaultBpNames.add(defaultBlueprint.getName());
+        }
+        return defaultBpNames;
     }
 
 }
