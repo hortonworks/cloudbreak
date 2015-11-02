@@ -64,7 +64,7 @@ consul-recursors() {
 
 cloudbreak-conf-consul() {
     [[ "$cloudbreakConfConsulExecuted" ]] && return
-    
+
     env-import DOCKER_CONSUL_OPTIONS ""
     if ! [[ $DOCKER_CONSUL_OPTIONS =~ .*recursor.* ]]; then
         DOCKER_CONSUL_OPTIONS="$DOCKER_CONSUL_OPTIONS $(consul-recursors <(docker run -it --rm --net=host alpine cat /etc/resolv.conf) ${BRIDGE_IP} $(docker-ip))"
