@@ -357,8 +357,8 @@ function continueInit() {
                     }
                 });
             } else {
-                if (el.parameters !== undefined && el.parameters.secretKey !== undefined) {
-                    delete el.parameters.secretKey;
+                if (data.parameters !== undefined && data.parameters.secretKey !== undefined) {
+                    delete data.parameters.secretKey;
                 }
             }
         };
