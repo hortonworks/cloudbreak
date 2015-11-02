@@ -15,7 +15,7 @@ This document explains the four steps that need to be followed to create Cloudbr
 ## Setting up AWS credentials
 
 Cloudbreak works by connecting your AWS account through so called *Credentials*, and then uses these credentials to create resources on your behalf.
-The credentials can be configured on the "manage credentials" tab.
+The credentials can be configured on the "manage credentials".
 
 Add a `name` and a `description` for the credential, copy your IAM role's Amazon Resource Name (ARN) to the corresponding field (`IAM Role ARN`) and copy your SSH public key to the `SSH public key` field.
 To learn more about how to setup the IAM Role on your AWS account check out the [prerequisites](aws_pre_prov.md).
@@ -47,8 +47,8 @@ For example you may want to attach multiple large disks to the datanodes or have
 
 There are some additional configuration options here:
 
-- Spot price is not mandatory, if specified Cloudbreak will request spot price instances (which might take a while or never be fulfilled by Amazon). This option is *not supported* by the default RedHat images.
-- EBS encryption is supported for all volume types. If this option is checked then all the attached disks [will be encrypted](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html) by Amazon using the AWS KMS master keys.
+- `Spot price (USD)` is not mandatory, if specified Cloudbreak will request spot price instances (which might take a while or never be fulfilled by Amazon). This option is *not supported* by the default RedHat images.
+- `EBS encryption` is supported for all volume types. If this option is checked then all the attached disks [will be encrypted](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html) by Amazon using the AWS KMS master keys.
 - If `Public in account` is checked all the users belonging to your account will be able to use this resource to create clusters, but cannot delete or modify it.
 
 ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/aws-resources.png)
@@ -65,11 +65,12 @@ It will create a new VPC with a `10.0.0.0/16` subnet every time a cluster is cre
 If you'd like to deploy a cluster to an already existing VPC you'll have to create a new network template where you configure the identifier of your VPC and the internet gateway (IGW) that's attached to the VPC.
 In this case you'll have to create a different network template for every one of your clusters because the Subnet CIDR cannot overlap an already existing subnet in the VPC.
 For example you can create 3 different clusters with 3 different network templates for the subnets `10.0.0.0/24`, `10.0.1.0/24`, `10.0.2.0/24` but with the same VPC and IGW identifiers.
-Please make sure that the subnet you define here doesn't overlap with any of your already deployed subnets in the VPC because the validation only happens after the cluster creation starts.
+
+**Important!** Please make sure that the subnet you define here doesn't overlap with any of your already deployed subnets in the VPC because the validation only happens after the cluster creation starts.
 
 If `Public in account` is checked all the users belonging to your account will be able to use this network template to create clusters, but cannot delete or modify it.
 
-Note that the VPCs, IGWs and/or subnets are *not created* on AWS after the `Create Network` button is pushed, only after the cluster provisioning starts with the selected network template.
+**Note** that the VPCs, IGWs and/or subnets are *not created* on AWS after the `Create Network` button is pushed, only after the cluster provisioning starts with the selected network template.
 
 ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/aws-network.png)
 
@@ -123,7 +124,7 @@ You can also use the two pre-defined security groups in Cloudbreak:
 
 If `Public in account` is checked all the users belonging to your account will be able to use this security group template to create clusters, but cannot delete or modify it.
 
-Note that the security groups are *not created* on AWS after the `Create Security Group` button is pushed, only after the cluster provisioning starts with the selected security group template.
+**Note** that the security groups are *not created* on AWS after the `Create Security Group` button is pushed, only after the cluster provisioning starts with the selected security group template.
 
 ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/ui-secgroup.png)
 
@@ -134,7 +135,7 @@ Note that the security groups are *not created* on AWS after the `Create Securit
 Blueprints are your declarative definition of a Hadoop cluster. These are the same blueprints that are [used by Ambari](https://cwiki.apache.org/confluence/display/AMBARI/Blueprints).
 
 You can use the 3 default blueprints pre-defined in Cloudbreak or you can create your own.
-Blueprints can be added from an URL or the whole JSON can be copied to the `Manual copy` field.
+Blueprints can be added from an URL (an example [blueprint](https://github.com/sequenceiq/ambari-rest-client/raw/1.6.0/src/main/resources/blueprints/multi-node-hdfs-yarn)) or the whole JSON can be copied to the `Manual copy` field.
 
 The hostgroups added in the JSON will be mapped to a set of instances when starting the cluster and the services and components defined in the hostgroup will be installed on the corresponding nodes.
 It is not necessary to define all the configuration fields in the blueprints - if a configuration is missing, Ambari will fill that with a default value.
@@ -146,7 +147,7 @@ If `Public in account` is checked all the users belonging to your account will b
 
 A blueprint can be exported from a running Ambari cluster that can be reused in Cloudbreak with slight modifications.
 There is no automatic way to modify an exported blueprint and make it instantly usable in Cloudbreak, the modifications have to be done manually.
-When the blueprint is exported some configurations will have for example hardcoded domain names, or memory configurations that won't be applicable to the Cloudbreak cluster.
+When the blueprint is exported some configurations will have hardcoded for example domain names, or memory configurations that won't be applicable to the Cloudbreak cluster.
 
 **Cluster customization**
 
@@ -160,20 +161,18 @@ To learn more about these so called *Recipes*, and to check out the Ranger datab
 
 ## Cluster deployment
 
-After all the templates are configured you can deploy a new HDP cluster. Start by selecting a previously created credential in the header.
-Click on `create cluster`, give it a `Name`, select a `Region` where the cluster infrastructure will be provisioned and select one of the `Networks` and `Security Groups` created earlier.
+After all the templates are configured you can deploy a new HDP cluster. Start by selecting a previously created AWS credential in the header.
+Click on `create cluster`, give it a `name`, select a `Region` where the cluster infrastructure will be provisioned and select one of the `Networks` and `Security Groups` created earlier.
 After you've selected a `Blueprint` as well you should be able to configure the `Template resources` and the number of nodes for all of the hostgroups in the blueprint.
 
 If `Public in account` is checked all the users belonging to your account will be able to see the newly created cluster on the UI, but cannot delete or modify it.
 
-If `Enable security` is checked as well, Cloudbreak will install KDC and the cluster will be Kerberized. See more about it in the [Kerberos](kerberos.md) section of this documentation.
-
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/aws-create-cluster.png)
+If `Enable security` is checked as well, Cloudbreak will install Key Distribution Center (KDC) and the cluster will be Kerberized. See more about it in the [Kerberos](kerberos.md) section of this documentation.
 
 After the `create and start cluster` button is pushed Cloudbreak will start to create resources on your AWS account.
 Cloudbreak uses *CloudFormation* to create the resources - you can check out the resources created by Cloudbreak on the AWS Console under the CloudFormation page.
 
-**Important!** Always use Cloudbreak to delete the cluster, or if that fails for some reason always try to delete the CloudFormation stack first.
+**Important!** Always use Cloudbreak to delete the cluster. If that fails for some reason always try to delete the CloudFormation stack first.
 Instances are started in an Auto Scaling Group so they may be restarted if you terminate an instance manually!
 
 **Advanced options**
@@ -182,15 +181,11 @@ There are some advanced features when deploying a new cluster, these are the fol
 
 `Availability Zone`: You can restrict the instances to a specific availability zone. It may be useful if you're using reserved instances.
 
-`Dedicated instances:` Use [dedicated instances](https://aws.amazon.com/ec2/purchasing-options/dedicated-instances/) on EC2
+`Use dedicated instances:` You can use [dedicated instances](https://aws.amazon.com/ec2/purchasing-options/dedicated-instances/) on EC2
 
-`Minimum cluster size:` the provisioning strategy in case of the cloud provider can't allocate all the requested nodes
+`Minimum cluster size:` the provisioning strategy in case of the cloud provider cannot allocate all the requested nodes
 
-`Validate blueprint:` feature to validate or not the Ambari blueprint. By default is switched on.
-
-`Consul server count:` the number of Consul servers, by default is 3.
-
-`Ambari Repository config:` you can take the stack RPM's from a custom stack repository
+`Validate blueprint:` feature to validate the Ambari blueprint. By default is switched on.
 
 ## Next steps
 

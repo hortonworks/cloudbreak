@@ -99,12 +99,12 @@ You can define your own security group by adding all the ports, protocols and CI
 
 You can also use the two pre-defined security groups in Cloudbreak:
 
-`only-ssh-and-ssl:` all ports are locked down (you can't access Hadoop services outside of the VPN) but
+`only-ssh-and-ssl:` all ports are locked down (you can't access Hadoop services outside of the Virtual Private Cloud) but
 
 * SSH (22)
 * HTTPS (443)
 
-`all-services-port:` all Hadoop services + SSH/HTTPS are accessible by default:
+`all-services-port:` all Hadoop services + SSH/gateway HTTPS are accessible by default:
 
 * SSH (22)
 * HTTPS (443)
@@ -197,8 +197,6 @@ After the `create and start cluster` button is pushed Cloudbreak will start to c
 `Minimum cluster size:` the provisioning strategy in case of the cloud provider can't allocate all the requested nodes
 
 `Validate blueprint:` feature to validate or not the Ambari blueprint. By default is switched on.
-
-`Ambari Repository config:` you can take the stack RPM's from a custom stack repository
 
 Once you have launched the cluster creation you can track the progress either on Cloudbreak UI or your cloud provider management UI.
 

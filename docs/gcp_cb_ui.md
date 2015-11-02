@@ -193,10 +193,6 @@ There are some advanced features when deploying a new cluster, these are the fol
 
 `Validate blueprint:` feature to validate or not the Ambari blueprint. By default is switched on.
 
-`Consul server count:` the number of Consul servers, by default is 3.
-
-`Ambari Repository config:` you can take the stack RPM's from a custom stack repository
-
 ## Next steps
 
 Congrats! Your cluster should now be up and running. To learn more about it we have some [interesting insights](insights.md) about Cloudbreak clusters.
