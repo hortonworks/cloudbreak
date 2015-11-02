@@ -404,11 +404,6 @@ Please write clean code. Universally formatted code promotes ease of writing, re
 ###Thank you
 Huge thanks go to the contributors from the community who have been actively working with the SequenceIQ team. Kudos for that.
 
-###Jobs
-Do you like what we are doing? We are looking for exceptional software engineers to join our development team. Would you like to work with others in the open source community?
-Please consider submitting your resume and applying for open positions at jobs@sequenceiq.com.
-
-
 ### Legal
 
 *Brought to you courtesy of our legal counsel.*
