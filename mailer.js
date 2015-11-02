@@ -14,14 +14,22 @@ exports.sendMail = function(to, subject, templateFile, data) {
 };
 
 sendSimpleEmail = function(to, subject, content) {
-    var transport = nodemailer.createTransport(smtpTransport({
-        host: process.env.SL_SMTP_SENDER_HOST,
-        port: process.env.SL_SMTP_SENDER_PORT,
-        auth: {
-            user: process.env.SL_SMTP_SENDER_USERNAME,
-            pass: process.env.SL_SMTP_SENDER_PASSWORD
-        }
-    }));
+    var transport = null;
+    if (process.env.SL_SMTP_SENDER_USERNAME == null && process.env.SL_SMTP_SENDER_PASSWORD == null) {
+      transport = nodemailer.createTransport(smtpTransport({
+          host: process.env.SL_SMTP_SENDER_HOST,
+          port: process.env.SL_SMTP_SENDER_PORT
+      }));
+    } else {
+      transport = nodemailer.createTransport(smtpTransport({
+          host: process.env.SL_SMTP_SENDER_HOST,
+          port: process.env.SL_SMTP_SENDER_PORT,
+          auth: {
+              user: process.env.SL_SMTP_SENDER_USERNAME,
+              pass: process.env.SL_SMTP_SENDER_PASSWORD
+          }
+      }));
+    }
     console.log('sending mail to ' +  to);
     transport.sendMail({
         from: process.env.SL_SMTP_SENDER_FROM,
