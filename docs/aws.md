@@ -21,7 +21,7 @@ It will create a `Profile` file in the current directory. Please edit the file -
 This IP will be used to access the Cloudbreak UI (called Uluwatu). In some cases the `cbd` tool tries to guess it, if can't than will give a hint.
 
 The other required configuration in the `Profile` are the AWS keys belonging to the AWS account used by the Cloudbreak application.
-In order for Cloudbreak to be able to launch clusters on AWS on your behalf you need to set your AWS keys in the Profile file.
+In order for Cloudbreak to be able to launch clusters on AWS on your behalf you need to set your AWS keys in the `Profile` file.
 We suggest to use the keys of an *IAM User* here. The IAM User's policies must be configured to have permission to assume roles (`sts:AssumeRole`) on all (`*`) resources.
 
 ```
