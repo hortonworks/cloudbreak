@@ -238,7 +238,6 @@ Ranger installation also has some required properties that must be added to the 
           "ranger.service.https.attrib.keystore.pass": "ranger",
           "ranger.service.https.attrib.ssl.enabled": "false",
           "ranger.service.https.port": "6182",
-          "ranger.solr.url": "http://solr_host:6083/solr/ranger_audits",
           "ranger.unixauth.remote.login.enabled": "true",
           "ranger.unixauth.service.hostname": "localhost",
           "ranger.unixauth.service.port": "5151"
@@ -286,10 +285,10 @@ Ranger installation also has some required properties that must be added to the 
           "xasecure.audit.db.async.max.queue.size": "10240",
           "xasecure.audit.db.batch.size": "100",
           "xasecure.audit.db.is.async": "true",
-          "xasecure.audit.db.is.enabled": "false",
+          "xasecure.audit.destination.db": "true",
           "xasecure.audit.hdfs.async.max.flush.interval.ms": "30000",
           "xasecure.audit.hdfs.async.max.queue.size": "1048576",
-          "xasecure.audit.hdfs.config.destination.directory": "hdfs://NAMENODE_HOST:8020/ranger/audit/%app-type%/%time:yyyyMMdd%",
+          "xasecure.audit.destination.hdfs.dir": "/ranger/audit/%app-type%/%time:yyyyMMdd%",
           "xasecure.audit.hdfs.config.destination.file": "%hostname%-audit.log",
           "xasecure.audit.hdfs.config.destination.flush.interval.seconds": "900",
           "xasecure.audit.hdfs.config.destination.open.retry.interval.seconds": "60",
@@ -303,7 +302,6 @@ Ranger installation also has some required properties that must be added to the 
           "xasecure.audit.hdfs.config.local.buffer.flush.interval.seconds": "60",
           "xasecure.audit.hdfs.config.local.buffer.rollover.interval.seconds": "600",
           "xasecure.audit.hdfs.is.async": "true",
-          "xasecure.audit.hdfs.is.enabled": "false",
           "xasecure.audit.is.enabled": "true",
           "xasecure.audit.jpa.javax.persistence.jdbc.driver": "{{jdbc_driver}}",
           "xasecure.audit.jpa.javax.persistence.jdbc.url": "{{audit_jdbc_url}}",
@@ -316,11 +314,7 @@ Ranger installation also has some required properties that must be added to the 
           "xasecure.audit.log4j.async.max.flush.interval.ms": "30000",
           "xasecure.audit.log4j.async.max.queue.size": "10240",
           "xasecure.audit.log4j.is.async": "false",
-          "xasecure.audit.log4j.is.enabled": "false",
-          "xasecure.audit.solr.async.max.flush.interval.ms": "1000",
-          "xasecure.audit.solr.async.max.queue.size": "1",
-          "xasecure.audit.solr.is.enabled": "false",
-          "xasecure.audit.solr.solr_url": "http://localhost:6083/solr/ranger_audits"
+          "xasecure.audit.log4j.is.enabled": "false"
         }
       }
     },
@@ -359,16 +353,16 @@ Ranger installation also has some required properties that must be added to the 
           "xasecure.audit.db.async.max.queue.size": "10240",
           "xasecure.audit.db.batch.size": "100",
           "xasecure.audit.db.is.async": "true",
-          "xasecure.audit.db.is.enabled": "false",
+          "xasecure.audit.destination.db": "true",
+          "xasecure.audit.destination.hdfs.dir": "/ranger/audit/%app-type%/%time:yyyyMMdd%",
           "xasecure.audit.hdfs.async.max.flush.interval.ms": "30000",
           "xasecure.audit.hdfs.async.max.queue.size": "1048576",
-          "xasecure.audit.hdfs.config.destination.directory": "hdfs://NAMENODE_HOST:8020/ranger/audit/%app-type%/%time:yyyyMMdd%",
           "xasecure.audit.hdfs.config.destination.file": "%hostname%-audit.log",
           "xasecure.audit.hdfs.config.destination.flush.interval.seconds": "900",
           "xasecure.audit.hdfs.config.destination.open.retry.interval.seconds": "60",
           "xasecure.audit.hdfs.config.destination.rollover.interval.seconds": "86400",
           "xasecure.audit.hdfs.config.encoding": "",
-          "xasecure.audit.hdfs.config.local.arcïœ©ïœ©ïœ©ïœ©ïœ©.directory": "/var/log/hadoop/audit/archive/%app-type%",
+          "xasecure.audit.hdfs.config.local.archive.directory": "/var/log/hadoop/audit/archive/%app-type%",
           "xasecure.audit.hdfs.config.local.archive.max.file.count": "10",
           "xasecure.audit.hdfs.config.local.buffer.directory": "/var/log/hadoop/audit/%app-type%",
           "xasecure.audit.hdfs.config.local.buffer.file": "%time:yyyyMMdd-HHmm.ss%.log",
@@ -376,7 +370,6 @@ Ranger installation also has some required properties that must be added to the 
           "xasecure.audit.hdfs.config.local.buffer.flush.interval.seconds": "60",
           "xasecure.audit.hdfs.config.local.buffer.rollover.interval.seconds": "600",
           "xasecure.audit.hdfs.is.async": "true",
-          "xasecure.audit.hdfs.is.enabled": "false",
           "xasecure.audit.is.enabled": "true",
           "xasecure.audit.jpa.javax.persistence.jdbc.driver": "{{jdbc_driver}}",
           "xasecure.audit.jpa.javax.persistence.jdbc.url": "{{audit_jdbc_url}}",
@@ -389,11 +382,7 @@ Ranger installation also has some required properties that must be added to the 
           "xasecure.audit.log4j.async.max.flush.interval.ms": "30000",
           "xasecure.audit.log4j.async.max.queue.size": "10240",
           "xasecure.audit.log4j.is.async": "false",
-          "xasecure.audit.log4j.is.enabled": "false",
-          "xasecure.audit.solr.async.max.flush.interval.ms": "1000",
-          "xasecure.audit.solr.async.max.queue.size": "1",
-          "xasecure.audit.solr.is.enabled": "false",
-          "xasecure.audit.solr.solr_url": "http://localhost:6083/solr/ranger_audits"
+          "xasecure.audit.log4j.is.enabled": "false"
         }
       }
     },
