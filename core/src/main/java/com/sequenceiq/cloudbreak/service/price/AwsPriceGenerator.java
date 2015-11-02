@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.service.price;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.type.AwsInstanceType;
-import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Template;
 
@@ -12,10 +10,7 @@ public class AwsPriceGenerator implements PriceGenerator {
 
     @Override
     public Double calculate(Template template, Long hours) {
-        Double result = 0.0;
-        AwsTemplate temp = (AwsTemplate) template;
-        AwsInstanceType vmType = temp.getInstanceType();
-        return result;
+        return 0.0;
     }
 
     @Override

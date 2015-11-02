@@ -49,7 +49,7 @@ tests:
   - name: create cluster
     parameters: {
       stackName: it-aws-stack8,
-      region: US_WEST_2,
+      region: us-west-2,
       clusterName: it-aws-cluster8
     }
     classes:

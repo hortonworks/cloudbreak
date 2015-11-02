@@ -80,7 +80,6 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 import com.sequenceiq.cloudbreak.common.type.AwsEncryption;
-import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
@@ -251,7 +250,7 @@ public class AwsResourceConnector implements ResourceConnector {
         if (describeSnapshotsResult.getSnapshots().isEmpty()) {
             DescribeAvailabilityZonesResult availabilityZonesResult = client.describeAvailabilityZones(new DescribeAvailabilityZonesRequest()
                     .withFilters(new Filter().withName("region-name")
-                            .withValues(CloudRegion.valueOf(ac.getCloudContext().getLocation().getRegion().value()).value())));
+                            .withValues(ac.getCloudContext().getLocation().getRegion().value())));
             CreateVolumeResult volumeResult = client.createVolume(new CreateVolumeRequest()
                     .withSize(SNAPSHOT_VOLUME_SIZE)
                     .withAvailabilityZone(availabilityZonesResult.getAvailabilityZones().get(0).getZoneName())

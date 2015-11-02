@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.controller.json.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
@@ -24,7 +25,7 @@ public class CloudbreakEventToJsonConverterTest extends AbstractEntityConverterT
         CloudbreakEventsJson result = underTest.convert(getSource());
         // THEN
         assertEquals("message", result.getEventMessage());
-        assertAllFieldsNotNull(result);
+        assertAllFieldsNotNull(result, Lists.newArrayList("availabilityZone"));
     }
 
     @Override

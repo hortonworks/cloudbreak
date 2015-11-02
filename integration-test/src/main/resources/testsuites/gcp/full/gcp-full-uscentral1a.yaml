@@ -49,7 +49,8 @@ tests:
   - name: create cluster
     parameters: {
       stackName: it-gcp-stack7,
-      region: US_CENTRAL1_A,
+      region: us-central1,
+      availabilityZone: us-central1-a,
       clusterName: it-gcp-cluster7
     }
     classes:

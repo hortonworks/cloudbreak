@@ -11,14 +11,14 @@ import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.common.type.CloudRegion;
-import com.sequenceiq.cloudbreak.common.type.GcpRawDiskType;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Component
@@ -37,14 +37,14 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
     public List<CloudResource> build(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
             List<CloudResource> buildableResources) throws Exception {
         String projectId = context.getProjectId();
-        CloudRegion region = CloudRegion.valueOf(context.getRegion());
+        Location location = context.getLocation();
 
         Disk disk = new Disk();
         disk.setSizeGb(DEFAULT_ROOT_DISK_SIZE);
         disk.setName(buildableResources.get(0).getName());
-        disk.setKind(GcpRawDiskType.HDD.getUrl(projectId, region));
+        disk.setKind(GcpPlatformParameters.GcpDiskType.HDD.getUrl(projectId, location.getAvailabilityZone()));
 
-        Compute.Disks.Insert insDisk = context.getCompute().disks().insert(projectId, region.value(), disk);
+        Compute.Disks.Insert insDisk = context.getCompute().disks().insert(projectId, location.getAvailabilityZone().value(), disk);
         insDisk.setSourceImage(GcpStackUtil.getAmbariImage(projectId, image.getImageName()));
         try {
             Operation operation = insDisk.execute();
@@ -62,7 +62,7 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
         String resourceName = resource.getName();
         try {
             Operation operation = context.getCompute().disks()
-                    .delete(context.getProjectId(), CloudRegion.valueOf(context.getRegion()).value(), resourceName).execute();
+                    .delete(context.getProjectId(), context.getLocation().getAvailabilityZone().value(), resourceName).execute();
             return createOperationAwareCloudResource(resource, operation);
         } catch (GoogleJsonResponseException e) {
             exceptionHandler(e, resourceName, resourceType());

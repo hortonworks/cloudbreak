@@ -86,7 +86,8 @@ tests:
   - name: create cluster
     parameters: {
       stackName: it-gcp-fullhdp-stack1,
-      region: ASIA_EAST1_A,
+      region: asia-east1,
+      availabilityZone: asia-east1-a,
       clusterName: it-gcp-fullhdp-cluster1
     }
     classes:

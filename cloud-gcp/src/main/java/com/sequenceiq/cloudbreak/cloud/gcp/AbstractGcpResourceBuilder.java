@@ -23,10 +23,11 @@ import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.type.CloudRegion;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
@@ -38,13 +39,13 @@ public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
     private GcpResourceNameService resourceNameService;
 
     @Override
-    public String platform() {
-        return CloudPlatform.GCP.name();
+    public Platform platform() {
+        return GcpConstants.GCP_PLATFORM;
     }
 
     @Override
-    public String variant() {
-        return CloudPlatform.GCP.name();
+    public Variant variant() {
+        return GcpConstants.GCP_VARIANT;
     }
 
     public GcpResourceNameService getResourceNameService() {
@@ -84,14 +85,15 @@ public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
             return execute;
         } catch (GoogleJsonResponseException e) {
             if (e.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND)) {
-                CloudRegion region = CloudRegion.valueOf(context.getRegion());
+                Location location = context.getLocation();
                 try {
-                    Operation execute = GcpStackUtil.regionOperations(context.getCompute(), context.getProjectId(), operation, region).execute();
+                    Operation execute = GcpStackUtil.regionOperations(context.getCompute(), context.getProjectId(), operation, location.getRegion()).execute();
                     checkError(execute);
                     return execute;
                 } catch (GoogleJsonResponseException e1) {
                     if (e1.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND)) {
-                        Operation execute = GcpStackUtil.zoneOperations(context.getCompute(), context.getProjectId(), operation, region).execute();
+                        Operation execute = GcpStackUtil.zoneOperations(context.getCompute(), context.getProjectId(), operation,
+                                location.getAvailabilityZone()).execute();
                         checkError(execute);
                         return execute;
                     } else {

@@ -1,7 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
+import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,82 +14,97 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.ec2.model.InstanceType;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
+import com.sequenceiq.cloudbreak.cloud.model.DiskType;
+import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.Regions;
+import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
+import com.sequenceiq.cloudbreak.cloud.model.VmType;
+import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 
 @Service
 public class AwsPlatformParameters implements PlatformParameters {
 
     private static final Integer START_LABEL = Integer.valueOf(97);
+    private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("xvd", START_LABEL);
 
     @Override
-    public String diskPrefix() {
-        return "xvd";
+    public ScriptParams scriptParams() {
+        return SCRIPT_PARAMS;
     }
 
     @Override
-    public Integer startLabel() {
-        return START_LABEL;
+    public DiskTypes diskTypes() {
+        return new DiskTypes(getDiskTypes(), defaultDiskType());
     }
 
-    @Override
-    public Map<String, String> diskTypes() {
-        Map<String, String> disks = new HashMap<>();
-        for (DiskType diskType : DiskType.values()) {
-            disks.put(diskType.name(), diskType.value);
+    private Collection<DiskType> getDiskTypes() {
+        Collection<DiskType> disks = Lists.newArrayList();
+        for (AwsDiskType diskType : AwsDiskType.values()) {
+            disks.add(diskType(diskType.value));
         }
         return disks;
     }
 
-    @Override
-    public String defaultDiskType() {
-        return diskTypes().get(DiskType.Standard);
+    private DiskType defaultDiskType() {
+        return diskType(AwsDiskType.Standard.value());
     }
 
     @Override
-    public Map<String, String> regions() {
-        Map<String, String> regions = new HashMap<>();
-        for (Region region : Region.values()) {
-            regions.put(region.name(), region.value());
+    public Regions regions() {
+        return new Regions(getRegions(), defaultRegion());
+    }
+
+    private Collection<Region> getRegions() {
+        Collection<Region> regions = Lists.newArrayList();
+        for (AwsRegion region : AwsRegion.values()) {
+            regions.add(region(region.value()));
         }
         return regions;
     }
 
-    @Override
-    public String defaultRegion() {
-        return Region.US_WEST_1.name();
+    private Region defaultRegion() {
+        return region(AwsRegion.US_WEST_1.value());
     }
 
     @Override
-    public Map<String, List<String>> availabiltyZones() {
-        Map<String, List<String>> regions = new HashMap<>();
-        for (Region region : Region.values()) {
-            regions.put(region.name(), region.availabilityZones());
+    public AvailabilityZones availabilityZones() {
+        Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
+        for (AwsRegion region : AwsRegion.values()) {
+            regions.put(region(region.value), region.availabilityZones());
         }
-        return regions;
+        return new AvailabilityZones(regions);
     }
 
     @Override
-    public Map<String, String> virtualMachines() {
-        Map<String, String> vms = new HashMap<>();
+    public VmTypes vmTypes() {
+        return new VmTypes(virtualMachines(), defaultVirtualMachine());
+    }
+
+    private Collection<VmType> virtualMachines() {
+        Collection<VmType> vms = Lists.newArrayList();
         for (InstanceType instanceType : InstanceType.values()) {
-            vms.put(instanceType.name(), instanceType.toString());
+            vms.add(VmType.vmType(instanceType.toString()));
         }
         return vms;
     }
 
-    @Override
-    public String defaultVirtualMachine() {
-        return InstanceType.M1Large.name();
+    private VmType defaultVirtualMachine() {
+        return VmType.vmType(InstanceType.M1Large.toString());
     }
 
-    private enum DiskType {
+    private enum AwsDiskType {
         Standard("standard"),
         Ephemeral("ephemeral"),
         Gp2("gp2");
 
         private final String value;
 
-        private DiskType(String value) {
+        private AwsDiskType(String value) {
             this.value = value;
         }
 
@@ -93,23 +113,24 @@ public class AwsPlatformParameters implements PlatformParameters {
         }
     }
 
-    private enum Region {
-        GovCloud("us-gov-west-1", new ArrayList<String>()),
-        US_EAST_1("us-east-1", Arrays.asList("us-east-1a", "us-east-1b", "us-east-1d", "us-east-1e")),
-        US_WEST_1("us-west-1", Arrays.asList("us-west-1a", "us-west-1b")),
-        US_WEST_2("us-west-2", Arrays.asList("us-west-2a", "us-west-2b", "us-west-2c")),
-        EU_WEST_1("eu-west-1", Arrays.asList("eu-west-1a", "eu-west-1b", "eu-west-1c")),
-        EU_CENTRAL_1("eu-central-1", Arrays.asList("eu-central-1a", "eu-central-1b")),
-        AP_SOUTHEAST_1("ap-southeast-1", Arrays.asList("ap-southeast-1a", "ap-southeast-1b")),
-        AP_SOUTHEAST_2("ap-southeast-2", Arrays.asList("ap-southeast-2a", "ap-southeast-2b")),
-        AP_NORTHEAST_1("ap-northeast-1", Arrays.asList("ap-northeast-1a", "ap-northeast-1c")),
-        SA_EAST_1("sa-east-1", Arrays.asList("sa-east-1a", "sa-east-1b", "sa-east-1c")),
-        CN_NORTH_1("cn-north-1", new ArrayList<String>());
+    private enum AwsRegion {
+        GovCloud("us-gov-west-1", new ArrayList<AvailabilityZone>()),
+        US_EAST_1("us-east-1", Arrays.asList(availabilityZone("us-east-1a"), availabilityZone("us-east-1b"),
+                availabilityZone("us-east-1d"), availabilityZone("us-east-1e"))),
+        US_WEST_1("us-west-1", Arrays.asList(availabilityZone("us-west-1a"), availabilityZone("us-west-1b"))),
+        US_WEST_2("us-west-2", Arrays.asList(availabilityZone("us-west-2a"), availabilityZone("us-west-2b"), availabilityZone("us-west-2c"))),
+        EU_WEST_1("eu-west-1", Arrays.asList(availabilityZone("eu-west-1a"), availabilityZone("eu-west-1b"), availabilityZone("eu-west-1c"))),
+        EU_CENTRAL_1("eu-central-1", Arrays.asList(availabilityZone("eu-central-1a"), availabilityZone("eu-central-1b"))),
+        AP_SOUTHEAST_1("ap-southeast-1", Arrays.asList(availabilityZone("ap-southeast-1a"), availabilityZone("ap-southeast-1b"))),
+        AP_SOUTHEAST_2("ap-southeast-2", Arrays.asList(availabilityZone("ap-southeast-2a"), availabilityZone("ap-southeast-2b"))),
+        AP_NORTHEAST_1("ap-northeast-1", Arrays.asList(availabilityZone("ap-northeast-1a"), availabilityZone("ap-northeast-1c"))),
+        SA_EAST_1("sa-east-1", Arrays.asList(availabilityZone("sa-east-1a"), availabilityZone("sa-east-1b"), availabilityZone("sa-east-1c"))),
+        CN_NORTH_1("cn-north-1", new ArrayList<AvailabilityZone>());
 
         private final String value;
-        private final List<String> availabilityZones;
+        private final List<AvailabilityZone> availabilityZones;
 
-        private Region(String value, List<String> availabilityZones) {
+        private AwsRegion(String value, List<AvailabilityZone> availabilityZones) {
             this.value = value;
             this.availabilityZones = availabilityZones;
         }
@@ -118,7 +139,7 @@ public class AwsPlatformParameters implements PlatformParameters {
             return this.value;
         }
 
-        public List<String> availabilityZones() {
+        public List<AvailabilityZone> availabilityZones() {
             return this.availabilityZones;
         }
     }

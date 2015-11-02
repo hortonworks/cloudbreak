@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.regions.Regions;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -45,7 +44,7 @@ public class ImageNameUtil {
         String selectedImage;
         switch (cloudPlatform) {
             case AWS:
-                selectedImage = prepareAmis().get(Regions.valueOf(region).getName());
+                selectedImage = prepareAmis().get(region);
                 break;
             case AZURE:
                 selectedImage = selectImageName(azureImage, CB_AZURE_IMAGE_URI);
@@ -72,7 +71,7 @@ public class ImageNameUtil {
         String selectedImage;
         switch (cloudPlatform) {
             case AWS:
-                selectedImage = prepareAmis().get(Regions.valueOf(stack.getRegion()).getName());
+                selectedImage = prepareAmis().get(stack.getRegion());
                 break;
             case AZURE:
                 selectedImage = selectImageName(azureImage, CB_AZURE_IMAGE_URI);

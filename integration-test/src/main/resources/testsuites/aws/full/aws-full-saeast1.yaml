@@ -49,7 +49,7 @@ tests:
   - name: create cluster
     parameters: {
       stackName: it-aws-stack5,
-      region: SA_EAST_1,
+      region: sa-east-1,
       clusterName: it-aws-cluster5
     }
     classes:

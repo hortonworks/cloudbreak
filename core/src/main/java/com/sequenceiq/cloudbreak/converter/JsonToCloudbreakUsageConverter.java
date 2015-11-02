@@ -14,6 +14,7 @@ public class JsonToCloudbreakUsageConverter extends AbstractConversionServiceAwa
         entity.setAccount(json.getAccount());
         entity.setProvider(json.getProvider());
         entity.setRegion(json.getRegion());
+        entity.setAvailabilityZone(json.getAvailabilityZone());
         entity.setInstanceHours(json.getInstanceHours());
         entity.setStackId(json.getStackId());
         entity.setStackName(json.getStackName());

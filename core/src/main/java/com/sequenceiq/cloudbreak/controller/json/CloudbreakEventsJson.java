@@ -26,6 +26,8 @@ public class CloudbreakEventsJson implements JsonEntity {
     private String cloud;
     @ApiModelProperty(StackModelDescription.REGION)
     private String region;
+    @ApiModelProperty(StackModelDescription.AVAILABILITY_ZONE)
+    private String availabilityZone;
     @ApiModelProperty(StackModelDescription.BLUEPRINT_ID)
     private long blueprintId;
     @ApiModelProperty(BlueprintModelDescription.BLUEPRINT_NAME)
@@ -161,5 +163,13 @@ public class CloudbreakEventsJson implements JsonEntity {
 
     public void setClusterStatus(Status clusterStatus) {
         this.clusterStatus = clusterStatus;
+    }
+
+    public String getAvailabilityZone() {
+        return availabilityZone;
+    }
+
+    public void setAvailabilityZone(String availabilityZone) {
+        this.availabilityZone = availabilityZone;
     }
 }
