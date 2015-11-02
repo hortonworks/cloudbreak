@@ -151,9 +151,11 @@ final class VersionStrategies {
             } else if ("rc".equals(state.stageFromProp)) {
                 if ("".equals(nearestAny.preReleaseVersion)) {
                     return state.copyWith(inferredNormal: nearestAny.incrementPatchVersion())
-                } else {
+                } else if (state.scopeFromProp == ChangeScope.PATCH) {
                     def rcVersion = VersionUtils.getNearestRcVersion(grgit, state)
                     return state.copyWith(inferredNormal: rcVersion.normalVersion)
+                } else {
+                    return state.copyWith(inferredNormal: nearestAny.normalVersion)
                 }
 >>>>>>> a08b5f0... CLOUD-932 always work with latest rc tag when scope is rc
             } else {
