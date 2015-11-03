@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.model;
 
-public class GatewayConfig {
+public class  GatewayConfig {
 
     private String publicAddress;
     private String privateAddress;

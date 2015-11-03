@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
+import com.sequenceiq.cloudbreak.cloud.arm.view.ArmGroupView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -74,7 +75,7 @@ public class ArmTemplateBuilder {
             model.put("region", CloudRegion.valueOf(cloudContext.getLocation().getRegion().value()).value());
             model.put("subnet1Prefix", cloudStack.getNetwork().getSubnet().getCidr());
             model.put("addressPrefix", cloudStack.getNetwork().getParameter("subnetCIDR", String.class));
-            model.put("groups", cloudStack.getGroups());
+            model.put("groups", new ArmGroupView(cloudStack.getGroups()).getGroups());
             model.put("ports", cloudStack.getSecurity().getRules().get(0).getPorts());
             model.put("port_protocol", cloudStack.getSecurity().getRules().get(0).getProtocol());
             model.put("corecustomData", base64EncodedUserData(cloudStack.getImage().getUserData(InstanceGroupType.CORE)));

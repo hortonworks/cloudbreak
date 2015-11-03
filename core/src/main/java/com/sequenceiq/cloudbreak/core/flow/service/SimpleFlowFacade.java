@@ -13,11 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.type.BillingStatus;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
-import com.sequenceiq.cloudbreak.common.type.BillingStatus;
-import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -173,12 +173,13 @@ public class SimpleFlowFacade implements FlowFacade {
     public FlowContext collectMetadata(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Metadata collect. Context: {}", context);
         try {
-            StackStatusUpdateContext stackStatusUpdateContext = (StackStatusUpdateContext) context;
-            Stack stack = stackService.getById(stackStatusUpdateContext.getStackId());
+            Long stackId = context.getStackId();
+            CloudPlatform cloudPlarform = context.getCloudPlatform();
+            Stack stack = stackService.getById(stackId);
             MDCBuilder.buildMdcContext(stack);
-            metadataSetupService.collectMetadata(stackStatusUpdateContext.getCloudPlatform(), stack);
+            metadataSetupService.collectMetadata(cloudPlarform, stack);
             LOGGER.debug("Metadata collect DONE.");
-            return stackStatusUpdateContext;
+            return context;
         } catch (Exception e) {
             LOGGER.error("Exception during metadata collect: {}", e.getMessage());
             throw new CloudbreakException(e);
@@ -189,8 +190,7 @@ public class SimpleFlowFacade implements FlowFacade {
     public FlowContext setupTls(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Metadata setup. Context: {}", context);
         try {
-            ProvisioningContext provisioningContext = (ProvisioningContext) context;
-            Stack stack = stackService.getById(provisioningContext.getStackId());
+            Stack stack = stackService.getById(context.getStackId());
             MDCBuilder.buildMdcContext(stack);
             return stackFacade.setupTls(context);
         } catch (Exception e) {

@@ -13,34 +13,37 @@ import static org.mockito.Mockito.when;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.BootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ContainerOrchestratorClusterContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
-import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -70,8 +73,16 @@ public class ClusterBootstrapperTest {
     @Mock
     private TlsSecurityService tlsSecurityService;
 
+    @Mock
+    private ContainerConfigService containerConfigService;
+
     @InjectMocks
     private ClusterBootstrapper underTest;
+
+    @Before
+    public void setUp() {
+        ReflectionTestUtils.setField(containerConfigService, "munchausenImageName", "sequence/testcont:0.1.1");
+    }
 
     @Test
     public void bootstrapClusterWhenEverythingWorksNormally() throws CloudbreakException, CloudbreakOrchestratorFailedException {
@@ -326,7 +337,8 @@ public class ClusterBootstrapperTest {
 
     class FailedNewNodesMockContainerOrchestrator extends MockContainerOrchestrator {
         @Override
-        public void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> nodes, String consulLocation, ExitCriteriaModel exitCriteriaModel)
+        public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, String consulLocation, ExitCriteriaModel
+                exitCriteriaModel)
                 throws CloudbreakOrchestratorFailedException {
             throw new CloudbreakOrchestratorFailedException("failed");
         }
@@ -334,7 +346,7 @@ public class ClusterBootstrapperTest {
 
     class CancelledMockContainerOrchestrator extends MockContainerOrchestrator {
         @Override
-        public void bootstrap(GatewayConfig gatewayConfig, Set<Node> nodes, int consulServerCount,
+        public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, int consulServerCount,
                 String consulLocation, ExitCriteriaModel exitCriteriaModel)
                 throws CloudbreakOrchestratorCancelledException {
             throw new CloudbreakOrchestratorCancelledException("cancelled");
@@ -343,7 +355,8 @@ public class ClusterBootstrapperTest {
 
     class CancelledNewNodesMockContainerOrchestrator extends MockContainerOrchestrator {
         @Override
-        public void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> nodes, String consulLocation, ExitCriteriaModel exitCriteriaModel)
+        public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, String consulLocation, ExitCriteriaModel
+                exitCriteriaModel)
                 throws CloudbreakOrchestratorCancelledException {
             throw new CloudbreakOrchestratorCancelledException("cancelled");
         }
@@ -358,7 +371,7 @@ public class ClusterBootstrapperTest {
 
     class FailedMockContainerOrchestrator extends MockContainerOrchestrator {
         @Override
-        public void bootstrap(GatewayConfig gatewayConfig, Set<Node> nodes, int consulServerCount,
+        public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, int consulServerCount,
                 String consulLocation, ExitCriteriaModel exitCriteriaModel)
                 throws CloudbreakOrchestratorFailedException {
             throw new CloudbreakOrchestratorFailedException("failed");

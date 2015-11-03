@@ -6,7 +6,6 @@ public class CoreInstanceMetaData {
     private String privateIp;
     private String publicIp;
     private Integer volumeCount;
-    private Integer containerCount = 0;
     private Long privateId;
     private String instanceGroupName;
 
@@ -33,10 +32,6 @@ public class CoreInstanceMetaData {
 
     public Integer getVolumeCount() {
         return volumeCount;
-    }
-
-    public Integer getContainerCount() {
-        return containerCount;
     }
 
     public String getInstanceGroupName() {

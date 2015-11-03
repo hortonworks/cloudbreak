@@ -17,6 +17,10 @@ public class DynamicModel {
         parameters = new HashMap<>();
     }
 
+    public DynamicModel(Map<String, Object> parameters) {
+        this.parameters = parameters;
+    }
+
     @SuppressWarnings("unchecked")
     public <T> T getParameter(String key, Class<T> clazz) {
         return (T) parameters.get(key);
@@ -39,7 +43,4 @@ public class DynamicModel {
         putParameter(clazz.getName(), value);
     }
 
-    public void putAll(Map<String, Object> params) {
-        parameters.putAll(params);
-    }
 }

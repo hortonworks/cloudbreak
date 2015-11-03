@@ -60,7 +60,10 @@ public class ParameterGenerator {
 
         String name = "master";
         List<Volume> volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
-        InstanceTemplate instance = new InstanceTemplate("m1.medium", name, 0L, volumes, InstanceStatus.CREATE_REQUESTED, new HashMap<String, Object>());
+        InstanceTemplate instanceTemplate = new InstanceTemplate("m1.medium", name, 0L, volumes, InstanceStatus.CREATE_REQUESTED,
+                new HashMap<String, Object>());
+
+        CloudInstance instance = new CloudInstance("SOME_ID", instanceTemplate);
 
         groups.add(new Group(name, InstanceGroupType.CORE, Arrays.asList(instance)));
 
@@ -93,9 +96,6 @@ public class ParameterGenerator {
         return Lists.newArrayList();
     }
 
-    public List<InstanceTemplate> createCloudInstanceTemplates() {
-        return Lists.newArrayList();
-    }
 
     public LaunchStackRequest createLaunchStackRequest() {
         return new LaunchStackRequest(createCloudContext(), createCloudCredential(), createCloudStack(), AdjustmentType.BEST_EFFORT, 0L);

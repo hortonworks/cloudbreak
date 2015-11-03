@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -22,19 +23,20 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration;
@@ -67,8 +69,23 @@ public class ClusterContainerRunnerTest {
     @Mock
     private FailedMockContainerOrchestrator failedMockContainerOrchestrator;
 
+    @Mock
+    private ContainerConfigService containerConfigService;
+
     @InjectMocks
     private ClusterContainerRunner underTest;
+
+    @Before
+    public void setUp() {
+        ReflectionTestUtils.setField(containerConfigService, "ambariDockerImageName", "sequence/testcont:0.1.1");
+        ReflectionTestUtils.setField(containerConfigService, "registratorDockerImageName", "sequence/testcont:0.1.1");
+        ReflectionTestUtils.setField(containerConfigService, "consulWatchPlugnDockerImageName", "sequence/testcont:0.1.1");
+        ReflectionTestUtils.setField(containerConfigService, "postgresDockerImageName", "sequence/testcont:0.1.1");
+        ReflectionTestUtils.setField(containerConfigService, "kerberosDockerImageName", "sequence/testcont:0.1.1");
+        ReflectionTestUtils.setField(containerConfigService, "baywatchServerDockerImageName", "sequence/testcont:0.1.1");
+        ReflectionTestUtils.setField(containerConfigService, "baywatchClientDockerImageName", "sequence/testcont:0.1.1");
+        ReflectionTestUtils.setField(containerConfigService, "logrotateDockerImageName", "sequence/testcont:0.1.1");
+    }
 
     @Test
     public void runClusterContainersWhenSecurityEnabled() throws CloudbreakException, CloudbreakOrchestratorFailedException,
@@ -88,10 +105,10 @@ public class ClusterContainerRunnerTest {
 
         underTest.runClusterContainers(provisioningContext);
 
-        verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyString(), any(LogVolumePath.class), eq(true), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startKerberosServer(any(ContainerOrchestratorCluster.class), anyString(), any(LogVolumePath.class),
-                any(KerberosConfiguration.class), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
+                any(ContainerConfig.class), anyString(), any(LogVolumePath.class), eq(true), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startKerberosServer(any(ContainerOrchestratorCluster.class),
+                any(ContainerConfig.class), any(LogVolumePath.class), any(KerberosConfiguration.class), any(ExitCriteriaModel.class));
     }
 
     @Test
@@ -110,18 +127,20 @@ public class ClusterContainerRunnerTest {
 
         underTest.runClusterContainers(provisioningContext);
 
-        verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
+        verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
                 any(LogVolumePath.class), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
+        verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
+                any(ContainerConfig.class), anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
+                any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
                 any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),
+        verify(mockContainerOrchestrator, times(1)).startBaywatchServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
                 any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), anyString(), any(LogVolumePath.class),
-                any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startRegistrator(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
+                any(LogVolumePath.class), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startRegistrator(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), any(ExitCriteriaModel
+                .class));
     }
 
     @Test(expected = CloudbreakException.class)
@@ -180,18 +199,20 @@ public class ClusterContainerRunnerTest {
 
         underTest.runClusterContainers(provisioningContext);
 
-        verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
+        verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
                 any(LogVolumePath.class), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
+        verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
+                any(ContainerConfig.class), anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
                 any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),
+        verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
                 any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), anyString(), any(LogVolumePath.class),
+        verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
+                any(LogVolumePath.class), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
                 any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startRegistrator(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startRegistrator(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
+                any(ExitCriteriaModel.class));
     }
 
     @Test
@@ -210,18 +231,20 @@ public class ClusterContainerRunnerTest {
 
         underTest.runClusterContainers(provisioningContext);
 
-        verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
+        verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
                 any(LogVolumePath.class), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
+        verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
+                any(ContainerConfig.class), anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(0)).startBaywatchClients(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
                 any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),
+        verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
                 any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), anyString(), any(LogVolumePath.class),
+        verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
+                any(LogVolumePath.class), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
                 any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startRegistrator(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startRegistrator(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
+                any(ExitCriteriaModel.class));
     }
 
     @Test
@@ -240,18 +263,20 @@ public class ClusterContainerRunnerTest {
 
         underTest.addClusterContainers(context);
 
-        verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                any(LogVolumePath.class), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
+        verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
+                anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(0)).startAmbariServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
+                any(ContainerConfig.class), anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
                 any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),
+        verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
                 any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), anyString(), any(LogVolumePath.class),
+        verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
+                any(LogVolumePath.class), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
                 any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startRegistrator(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(0)).startRegistrator(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
+                any(ExitCriteriaModel.class));
     }
 
     @Test(expected = CloudbreakException.class)
@@ -305,18 +330,20 @@ public class ClusterContainerRunnerTest {
 
         underTest.addClusterContainers(context);
 
-        verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
+        verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
                 any(LogVolumePath.class), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
+        verify(mockContainerOrchestrator, times(0)).startAmbariServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
+                any(ContainerConfig.class), anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
                 any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),
+        verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
                 any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), anyString(), any(LogVolumePath.class),
+        verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
+                any(LogVolumePath.class), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
                 any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startRegistrator(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(0)).startRegistrator(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
+                any(ExitCriteriaModel.class));
     }
 
     @Test
@@ -336,18 +363,20 @@ public class ClusterContainerRunnerTest {
 
         underTest.addClusterContainers(context);
 
-        verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
+        verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
                 any(LogVolumePath.class), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startAmbariServer(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
-                anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startBaywatchClients(any(ContainerOrchestratorCluster.class), anyString(), anyString(),
+        verify(mockContainerOrchestrator, times(0)).startAmbariServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
+                any(ContainerConfig.class), anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(0)).startBaywatchClients(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
                 any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), anyString(),
+        verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
                 any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), anyString(), any(LogVolumePath.class),
+        verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
+                any(LogVolumePath.class), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
                 any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startRegistrator(any(ContainerOrchestratorCluster.class), anyString(), any(ExitCriteriaModel.class));
+        verify(mockContainerOrchestrator, times(0)).startRegistrator(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
+                any(ExitCriteriaModel.class));
     }
 
     private Set<String> getPrivateIps(Stack stack) {

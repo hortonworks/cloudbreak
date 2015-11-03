@@ -2,19 +2,19 @@ package com.sequenceiq.cloudbreak.cloud.event.instance;
 
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 
-public class CollectMetadataRequest<T> extends CloudPlatformRequest<T> {
+public class CollectMetadataRequest extends CloudPlatformRequest<CollectMetadataResult> {
 
     private List<CloudResource> cloudResource;
 
-    private List<InstanceTemplate> vms;
+    private List<CloudInstance> vms;
 
-    public CollectMetadataRequest(CloudContext cloudContext, CloudCredential cloudCredential, List<CloudResource> cloudResource, List<InstanceTemplate> vms) {
+    public CollectMetadataRequest(CloudContext cloudContext, CloudCredential cloudCredential, List<CloudResource> cloudResource, List<CloudInstance> vms) {
         super(cloudContext, cloudCredential);
         this.cloudResource = cloudResource;
         this.vms = vms;
@@ -24,7 +24,7 @@ public class CollectMetadataRequest<T> extends CloudPlatformRequest<T> {
         return cloudResource;
     }
 
-    public List<InstanceTemplate> getVms() {
+    public List<CloudInstance> getVms() {
         return vms;
     }
 

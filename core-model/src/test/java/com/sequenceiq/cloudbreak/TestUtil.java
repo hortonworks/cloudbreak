@@ -343,7 +343,6 @@ public class TestUtil {
         instanceMetaData.setVolumeCount(1);
         instanceMetaData.setAmbariServer(ambariServer);
         instanceMetaData.setConsulServer(true);
-        instanceMetaData.setContainerCount(1);
         instanceMetaData.setDiscoveryFQDN("test");
         instanceMetaData.setInstanceId("test");
         instanceMetaData.setPrivateIp("1.1.1." + (id + Math.abs(new Random().nextInt(255))));
@@ -351,7 +350,6 @@ public class TestUtil {
         instanceMetaData.setId(id);
         instanceMetaData.setInstanceGroup(instanceGroup);
         instanceMetaData.setStartDate(new Date().getTime());
-        instanceMetaData.setDockerSubnet("dockerSubnet");
         return instanceMetaData;
     }
 

@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 
@@ -33,13 +35,19 @@ public class ArmMetadataCollector implements MetadataCollector {
     private ArmUtils armTemplateUtils;
 
     @Override
-    public List<CloudVmInstanceStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<InstanceTemplate> vms) {
+    public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
         AzureRMClient access = armClient.createAccess(authenticatedContext.getCloudCredential());
         final CloudResource resource = armTemplateUtils.getTemplateResource(resources);
-        List<CloudVmInstanceStatus> results = new ArrayList<>();
-        List<CloudInstance> cloudInstances = new ArrayList<>();
+        List<CloudVmMetaDataStatus> results = new ArrayList<>();
 
-        Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(vms, new Function<InstanceTemplate, String>() {
+        List<InstanceTemplate> templates = Lists.transform(vms, new Function<CloudInstance, InstanceTemplate>() {
+            @Override
+            public InstanceTemplate apply(CloudInstance input) {
+                return input.getTemplate();
+            }
+        });
+
+        Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(templates, new Function<InstanceTemplate, String>() {
             public String apply(InstanceTemplate from) {
                 return armTemplateUtils.getPrivateInstanceId(resource.getName(), from.getGroupName(), Long.toString(from.getPrivateId()));
             }
@@ -68,19 +76,19 @@ public class ArmMetadataCollector implements MetadataCollector {
                 String privateIp = properties.get("privateIPAddress").toString();
                 String instanceId = instance.getKey();
                 if (publicIp == null) {
-                    throw new CloudConnectorException(String.format("Public ip addres can not be null but it was on %s instance.", instance.getKey()));
+                    throw new CloudConnectorException(String.format("Public ip address can not be null but it was on %s instance.", instance.getKey()));
                 }
                 CloudInstanceMetaData md = new CloudInstanceMetaData(privateIp, publicIp);
 
                 InstanceTemplate template = templateMap.get(instanceId);
                 if (template != null) {
-                    cloudInstances.add(new CloudInstance(instanceId, md, template));
+                    CloudInstance cloudInstance = new CloudInstance(instanceId, template);
+                    CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
+                    results.add(new CloudVmMetaDataStatus(status, md));
+
                 }
             }
 
-            for (CloudInstance cloudInstance : cloudInstances) {
-                results.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED));
-            }
         } catch (HttpResponseException e) {
             throw new CloudConnectorException(e.getResponse().getData().toString(), e);
         } catch (Exception e) {

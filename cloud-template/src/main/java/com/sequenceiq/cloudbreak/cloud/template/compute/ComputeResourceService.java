@@ -22,16 +22,15 @@ import com.google.common.collect.Ordering;
 import com.google.common.primitives.Ints;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
+import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -69,9 +68,9 @@ public class ComputeResourceService {
         List<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
         List<ComputeResourceBuilder> builders = resourceBuilders.compute(cloudContext.getPlatform());
         for (Group group : getOrderedCopy(groups)) {
-            List<InstanceTemplate> instances = group.getInstances();
+            List<CloudInstance> instances = group.getInstances();
             for (int i = 0; i < instances.size(); i++) {
-                ResourceCreateThread thread = createThread(ResourceCreateThread.NAME, instances.get(i).getPrivateId(), group, ctx, auth, image);
+                ResourceCreateThread thread = createThread(ResourceCreateThread.NAME, instances.get(i).getTemplate().getPrivateId(), group, ctx, auth, image);
                 Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(thread);
                 futures.add(future);
                 if (isRequestFullWithCloudPlatform(builders.size(), futures.size(), ctx)) {

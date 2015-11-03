@@ -2,18 +2,12 @@ package com.sequenceiq.cloudbreak.core.flow.context;
 
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateAllowedSubnetsRequest;
 
-public class UpdateAllowedSubnetsContext extends DefaultFlowContext implements FlowContext {
+public class UpdateAllowedSubnetsContext extends DefaultFlowContext {
 
     private List<SecurityRule> allowedSecurityRules;
-
-    public UpdateAllowedSubnetsContext(Long stackId, CloudPlatform cloudPlatform, List<SecurityRule> allowedSecurityRules) {
-        super(stackId, cloudPlatform);
-        this.allowedSecurityRules = allowedSecurityRules;
-    }
 
     public UpdateAllowedSubnetsContext(UpdateAllowedSubnetsRequest request) {
         super(request.getStackId(), request.getCloudPlatform());
