@@ -143,7 +143,7 @@ You have to configure the instancegroups before the provisioning. An instancegro
 instancegroup configure --instanceGroup host_group_slave_1 --nodecount 3 --templateName minviable-aws
 ```
 
-Other available options:
+Other available option:
 
 `--templateId` Id of the template
 
