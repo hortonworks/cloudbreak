@@ -42,18 +42,20 @@ For permanent setting you can `export CBD_DEFAULT_PROFILE=prod` in your `.bash_p
 
 ## SMTP
 
-Put these lines into your `Profile`
+If you want to change SMTP parameters, put the corresponding lines into your `Profile`. You can also see the default values of the parameters in the following box.
 ```
 export CLOUDBREAK_SMTP_SENDER_USERNAME=
 export CLOUDBREAK_SMTP_SENDER_PASSWORD=
 export CLOUDBREAK_SMTP_SENDER_HOST=
-export CLOUDBREAK_SMTP_SENDER_PORT=
+export CLOUDBREAK_SMTP_SENDER_PORT=25
 export CLOUDBREAK_SMTP_SENDER_FROM=
+export CB_MAIL_SMTP_AUTH=true
+export CB_MAIL_SMTP_STARTTLS_ENABLE=true
 ```
 
 ## Consul
 
-[Consul](http://consul.io) is used for dns resolution. All cloudbreak related services are registered as
+[Consul](http://consul.io) is used for dns resolution. All Cloudbreak related services are registered as
 **someservice.service.consul**. Consul’s built in dns server is able to “fall-back” on an other dns server.
 This option is called `-recursor`. Clodbreak Deployer first tries to discover the dns settings of the host,
 by looking for **nameserver** entry in `/etc/resolv.conf`. If it finds one consul will use it as a recursor,

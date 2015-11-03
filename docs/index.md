@@ -1,126 +1,84 @@
-Cloudbreak Deployer helps to deploy a Cloudbreak environment into Docker containers.
-For recent changes please check the [changelog](http://sequenceiq.com/cloudbreak-deployer/latest/changelog/).
+##Overview
 
-Full documentation is generated [here](http://sequenceiq.com/cloudbreak-deployer/latest/)
+Cloudbreak is a cloud agnostic Hadoop as a Service API. Abstracts the provisioning and ease management and monitoring of on-demand HDP clusters in different virtual environments. Once it is deployed in your favorite servlet container exposes a REST API allowing to span up Hadoop clusters of arbitrary sizes on your selected cloud provider. Provisioning Hadoop has never been easier.
+Cloudbreak is built on the foundation of cloud providers API (Microsoft Azure, Amazon AWS, Google Cloud Platform, OpenStack), Apache Ambari, Docker containers, Swarm and Consul.
 
-## Requirements
+For a detailed overview please follow this [link](overview.md)
 
-Currently only **Linux** and **OSX** 64 bit binaries are released for Cloudbreak Deployer. For anything else we will create a special Docker container.
-The deployment itself needs only **Docker 1.7.0** or later.
-Your firewall must be configured to let docker containers talk to each other, this is especially important on CentOS 7 where firewalld blocks some connections by default.
+Cloudbreak has two main components - the [Cloudbreak deployer](http://sequenceiq.com/cloudbreak-deployer) and the Cloudbreak application, which is made up from Microservices (Cloudbreak, Uluwatu, Sultans, ...). Cloudbreak deployer helps you to deploy the Cloudbreak application automatically in environments with Docker support. Once the Cloudbreak application is deployed you can use it to provision HDP clusters in different cloud environments.
 
-## Installation
+##Technology
 
-To install Cloudbreak Deployer, you just have to unzip the platform specific
-single binary to your PATH. The one-liner way is:
+For an architectural overview of the [Cloudbreak deployer](http://sequenceiq.com/cloudbreak-deployer) and the Cloudbreak application please follow this [link](technology.md).
 
-```
-curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install | sh && cbd --version
-```
+##Process Overview
 
-## Usage
+The full proceess to be able to use an HDP cluster includes the following steps:
 
-**cbd** will generate some config files, and will download supporting binaries. It is
-advised that you create a dedicated directory for it:
+- **Cloudbreak Deployer Installation**: You need to install Cloudbreak Deployer which is a small cli tool called
+`cbd`. It will help you to deploy the CloudBreak Application consisting several Docker containers. You have
+finished this step if you can issue `cbd --version`.
+- **CloudBreak Deployment**: Once you have installed Cloudbreak Deployer (cbd), it will start up several
+Docker containers: CloudBreak API, CloudBreak UI (called Uluwatu), Identity Server, and supporting databases.
+You have finished this step, if you are able to login in your browser to Cloudbreak UI (Uluwatu).
+- **HDP Cluster Provisioning**: To be able to provision a HDP cluster, you will use the browser, to:
+  - Create Credentials: You give access to Cloudbreak, to act on behalf of you, and start resources on the
+    cloud provider.
+  - Create Resources: Optionally you can define infrastructure parameters, such as, instance type,
+    memory size, disk type/size, network ...
+  - Blueprint configuration: You can choose which Ambari Blueprint you want to use (or upload a custom one)
+    and assign hostgroups to resource types (created in the previous step)
+  - Create Cluster: You define the region, where you want to create the HDP cluster. Once Cloudbreak
+    recognize that Ambari Server is up and running, it posts the configured blueprint to it, which
+    triggers a cluster wide HDP component installation process.
 
-```
-mkdir cloudbreak-deployment
-cd cloudbreak-deployment
-```
+##Installation
 
-### Initialize Profile
-First initialize your directory by creating a `Profile` file:
+Currently only **Linux** and **OSX** 64 bit binaries are released for Cloudbreak Deployer. For anything else we can create a special Docker container - please contact us. The deployment itself needs only **Docker 1.7.0** or later. You can install the Cloudbreak installation anywhere (on-prem or cloud VMs), however we suggest to installed it as close to the desired HDP clusters as possible. For further information check the **Provider** section of the documentation.
 
-```
-cbd init
-```
-It will create a `Profile` file in the current directory. The only required
-configuration is the `PUBLIC_IP`. This IP will be used for the Cloudbreak UI
-(called Uluwatu). In some case the `cbd` tool tries to guess it, if can't than will give a hint.
+**On-prem installation**
 
+For on premise installations of the Cloudbreak application please follow the [link](onprem.md)
 
-### Deploy Cloudbreak
+**AWS based installation**
 
-To start all the containers run:
+We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
 
-```
-cbd start
-```
+You can follow the AWS provider specific documentation using this [link](aws.md)
 
-At the first time it will take more time, as it does additional steps:
-- download all the docker images, neded by Cloudbreak.
-- create **docker-compose.yml**: Full confirguration of containers needed for Cloudbreak deployment.
-- create **uaa.yml**: Identity Server configuration. (For example default user/password in the last line)
+**Azure based installation**
 
-### Watch the logs
+We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
 
-```
-cbd logs
-```
+You can follow the Azure provider specific documentation using this [link](azure.md)
 
-### Pull Docker images
+**GCP based installation**
 
-All Cloudbreak components and the backend database is running inside containers.
-The **pull command is optional** but you can run it prior to `cbd start`
+We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
 
-```
-cbd pull
-```
+You can follow the GCP provider specific documentation using this [link](gcp.md)
 
-It will take some time, depending on your network connection, so you can grab a cup of coffee.
+**OpenStack based installation**
 
+We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
 
-## Default Credentials
+You can follow the OpenStack provider specific documentation using this [link](openstack.md)
 
-The default credentials can be revealed by `cbd login`
+##Release notes - 1.1.0
 
-These values are used in the `uaa.yml` end section. To change these values, add 2 lines into your Profile:
+| Components    | GA            | Tech preview  |
+| ------------- |:-------------:| -----:|
+| AWS   | yes |
+| Azure ARM   | yes      |    |
+| Azure ARM   | yes      |    |
+| GCP  | yes      |    |
+| OpenStack Juno   |       | yes   |
+| SPI interface   |       | yes   |
+| CLI/shell  |   yes    |    |
+| Recipes  |       | yes   |
+| Kerberos   |       | yes   |
 
-```
-export UAA_DEFAULT_USER_EMAIL=myself@example.com
-export UAA_DEFAULT_USER_PW=demo123
-```
-and than you need to recreate configs:
-```
-rm *.yml
-cbd generate
-```
-
-## Cloud Provider configuration
-
-In order to be able to assume roles on AWS you need to set up your AWS keys in the Profile file:
-```
-export AWS_ACCESS_KEY_ID=AKIA**************W7SA
-export AWS_SECRET_ACCESS_KEY=RWCT4Cs8******************/*skiOkWD
-```
-If you do not have plans to launch clusters in AWS, then you can safely skip these settings.
-
-For more details regarding accounts please check [Cloudbreak documentation](http://sequenceiq.com/cloudbreak/#accounts).
-
-
-## Debug
-
-If you want to have more detailed output set the `DEBUG` env variable to non-zero:
-
-```
-DEBUG=1 cbd some_command
-```
-
-You can also use the `doctor` command to diagnose your environment:
-
-```
-cbd doctor
-```
-
-## Update
-
-The tool is capable to upgrade itself to a newer version.
-
-```
-cbd update
-```
-
-## Credits
+**Credits**
 
 This tool, and the PR driven release, is inspired from [glidergun](https://github.com/gliderlabs/glidergun). Actually it
 could be a fork of it. The reason it’s not a fork, because we wanted to have our own binary with all modules
