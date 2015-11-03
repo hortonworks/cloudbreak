@@ -285,13 +285,20 @@ public class AmbariClusterFacade implements ClusterFacade {
         stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Scaling up ambari cluster.");
         fireEventAndLog(stack.getId(), actualContext, Msg.AMBARI_CLUSTER_SCALING_UP, UPDATE_IN_PROGRESS.name());
         Set<String> hostNames = ambariClusterConnector.installAmbariNode(stack.getId(), actualContext.getHostGroupAdjustment());
+        int failedNodes = actualContext.getHostGroupAdjustment().getScalingAdjustment() - hostNames.size();
+        boolean success = failedNodes == 0;
         updateInstanceMetadataAfterScaling(false, hostNames, stack);
-        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Ambari cluster successfully upscaled.");
-        fireEventAndLog(stack.getId(), actualContext, Msg.AMBARI_CLUSTER_SCALED_UP, AVAILABLE.name());
+        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, success ? "Ambari cluster successfully upscaled." : "Ambari cluster upscale failed.");
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
-        if (cluster.getEmailNeeded()) {
-            emailSenderService.sendUpscaleSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), cluster.getName());
-            fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
+        if (success) {
+            fireEventAndLog(stack.getId(), actualContext, Msg.AMBARI_CLUSTER_SCALED_UP, AVAILABLE.name());
+            if (cluster.getEmailNeeded()) {
+                emailSenderService.sendUpscaleSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), cluster.getName());
+                fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
+            }
+        } else {
+            fireEventAndLog(stack.getId(), actualContext, Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added",
+                    String.format("Ambari upscale operation failed on %d node(s).", failedNodes));
         }
         return context;
     }
