@@ -342,6 +342,7 @@ uluwatu:
         - NODE_TLS_REJECT_UNAUTHORIZED=0
 
         - ULU_ADDRESS_RESOLVING_TIMEOUT=$ADDRESS_RESOLVING_TIMEOUT
+        - ULU_SULTANS_SERVICEID=sultans.service.consul
         - ULU_IDENTITY_SERVICEID=identity.service.consul
         - ULU_CLOUDBREAK_SERVICEID=cloudbreak.service.consul
         - ULU_PERISCOPE_SERVICEID=periscope.service.consul
