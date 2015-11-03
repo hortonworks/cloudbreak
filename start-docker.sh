@@ -12,8 +12,8 @@ if [ -z "$ULU_IDENTITY_ADDRESS" ] && [ -z "$ULU_IDENTITY_SERVICEID" ]; then
   MISSING_ENV_VARS=true;
 fi
 
-if [ -z "$ULU_SULTANS_ADDRESS" ] && [ -z "$ULU_SULTANS_SERVICEID" ]; then
-  echo ULU_SULTANS_ADDRESS or ULU_SULTANS_SERVICEID must be set;
+if [ -z "$ULU_SULTANS_ADDRESS" ]; then
+  echo ULU_SULTANS_ADDRESS must be set;
   MISSING_ENV_VARS=true;
 fi
 
