@@ -9,7 +9,7 @@ You have to copy files into the cbd working directory, which you would like to u
 In order to start using Cloudbreak you will need to have an AWS cloud credential configured. Note that Cloudbreak **does not** store your cloud user details - we work around the concept of [IAM](http://aws.amazon.com/iam/) - on Amazon (or other cloud providers) you will have to create an IAM role, a policy and associate that with your Cloudbreak account.
 
 ```
-credential create --EC2 --description "description" --name my-aws-credential --roleArn <arn role> --sshKeyFile <path of your AWS public key>
+credential create --EC2 --description "description" --name my-aws-credential --roleArn <arn role> --sshKeyPath <path of your AWS public key>
 ```
 
 Alternatively you can upload your public key from an url as well, by using the `—sshKeyUrl` switch. You can check whether the credential was created successfully by using the `credential list` command. You can switch between your cloud credentials - when you’d like to use one and act with that you will have to use:
