@@ -66,12 +66,12 @@
             "type": "string",
             "defaultValue": "${stackname}ipcn"
         },
-        <#list groups as instanceGroup>
-        <#list instanceGroup.instances as instance>
-        <#if instanceGroup.type == "GATEWAY">
+        <#list groups?keys as instanceGroup>
+        <#list groups[instanceGroup] as instance>
+        <#if instanceGroup == "GATEWAY">
         "gatewaystaticipname": {
             "type": "string",
-            "defaultValue": "${stackname}${instanceGroup.name?replace('_', '')}${instance.privateId}"
+            "defaultValue": "${stackname}${instance.instanceId}"
         },
         </#if>
         </#list>
@@ -116,13 +116,13 @@
                   ]
               }
           },
-          <#list groups as instanceGroup>
-          <#list instanceGroup.instances as instance>
-              <#if instanceGroup.type == "GATEWAY">
+          <#list groups?keys as instanceGroup>
+          <#list groups[instanceGroup] as instance>
+              <#if instanceGroup == "GATEWAY">
               {
                     "apiVersion": "2015-05-01-preview",
                     "type": "Microsoft.Network/publicIPAddresses",
-                    "name": "[concat(parameters('publicIPNamePrefix'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}')]",
+                    "name": "[concat(parameters('publicIPNamePrefix'), '${instance.instanceId}')]",
                     "location": "[parameters('region')]",
                     "properties": {
                         "publicIPAllocationMethod": "Static"
@@ -134,7 +134,7 @@
                     "name": "[parameters('loadBalancerName')]",
                     "location": "[parameters('region')]",
                     "dependsOn": [
-                      "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPNamePrefix'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}')]"
+                      "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPNamePrefix'), '${instance.instanceId}')]"
                     ],
                     "properties": {
                       "frontendIPConfigurations": [
@@ -171,11 +171,11 @@
                     }
                   },
               </#if>
-              <#if instanceGroup.type == "CORE">
+              <#if instanceGroup == "CORE">
               {
                 "apiVersion": "2015-05-01-preview",
                 "type": "Microsoft.Network/publicIPAddresses",
-                "name": "[concat(parameters('publicIPNamePrefix'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}')]",
+                "name": "[concat(parameters('publicIPNamePrefix'), '${instance.instanceId}')]",
                 "location": "[parameters('region')]",
                 "properties": {
                     "publicIPAllocationMethod": "Dynamic"
@@ -186,13 +186,13 @@
               {
                 "apiVersion": "2015-05-01-preview",
                 "type": "Microsoft.Network/networkInterfaces",
-                "name": "[concat(parameters('nicNamePrefix'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}')]",
+                "name": "[concat(parameters('nicNamePrefix'), '${instance.instanceId}')]",
                 "location": "[parameters('region')]",
                 "dependsOn": [
-                    <#if instanceGroup.type == "CORE">
-                    "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPNamePrefix'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}')]",
+                    <#if instanceGroup == "CORE">
+                    "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPNamePrefix'), '${instance.instanceId}')]",
                     </#if>
-                    <#if instanceGroup.type == "GATEWAY">
+                    <#if instanceGroup == "GATEWAY">
                     "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]",
                     </#if>
                     "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkNamePrefix'))]"
@@ -203,15 +203,15 @@
                             "name": "ipconfig1",
                             "properties": {
                                 "privateIPAllocationMethod": "Dynamic",
-                                <#if instanceGroup.type == "CORE">
+                                <#if instanceGroup == "CORE">
                                 "publicIPAddress": {
-                                    "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(parameters('publicIPNamePrefix'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}'))]"
+                                    "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(parameters('publicIPNamePrefix'), '${instance.instanceId}'))]"
                                 },
                                 </#if>
                                 "subnet": {
                                     "id": "[variables('subnet1Ref')]"
                                 }
-                                <#if instanceGroup.type == "GATEWAY">
+                                <#if instanceGroup == "GATEWAY">
                                 ,"loadBalancerBackendAddressPools": [
                                     {
                                         "id": "[variables('ilbBackendAddressPoolID')]"
@@ -234,17 +234,17 @@
               {
                 "apiVersion": "2015-05-01-preview",
                 "type": "Microsoft.Compute/virtualMachines",
-                "name": "[concat(parameters('vmNamePrefix'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}')]",
+                "name": "[concat(parameters('vmNamePrefix'), '${instance.instanceId}')]",
                 "location": "[parameters('region')]",
                 "dependsOn": [
-                    "[concat('Microsoft.Network/networkInterfaces/', parameters('nicNamePrefix'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}')]"
+                    "[concat('Microsoft.Network/networkInterfaces/', parameters('nicNamePrefix'), '${instance.instanceId}')]"
                 ],
                 "properties": {
                     "hardwareProfile": {
-                        "vmSize": "${instanceGroup.instances[0].flavor}"
+                        "vmSize": "${instance.flavor}"
                     },
                     "osProfile": {
-                        "computername": "[concat('vm', '${instanceGroup.name?replace('_', '')}', '${instance.privateId}')]",
+                        "computername": "[concat('vm', '${instance.instanceId}')]",
                         "adminUsername": "[parameters('adminUsername')]",
                         <#if disablePasswordAuthentication == false>
                         "adminPassword": "${adminPassword}",
@@ -262,33 +262,33 @@
                                 ]
                             }
                         },
-                        <#if instanceGroup.type == "CORE">
+                        <#if instanceGroup == "CORE">
                         "customData": "${corecustomData}"
                         </#if>
-                        <#if instanceGroup.type == "GATEWAY">
+                        <#if instanceGroup == "GATEWAY">
                         "customData": "${gatewaycustomData}"
                         </#if>
                     },
                     "storageProfile": {
                         "osDisk" : {
-                            "name" : "[concat(parameters('vmNamePrefix'),'-osDisk', '${instanceGroup.name?replace('_', '')}', '${instance.privateId}')]",
+                            "name" : "[concat(parameters('vmNamePrefix'),'-osDisk', '${instance.instanceId}')]",
                             "osType" : "linux",
                             "image" : {
                                 "uri" : "[variables('userImageName')]"
                             },
                             "vhd" : {
-                                "uri" : "[concat(variables('osDiskVhdName'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}','.vhd')]"
+                                "uri" : "[concat(variables('osDiskVhdName'), '${instance.instanceId}','.vhd')]"
                             },
                             "createOption": "FromImage"
                         },
                         "dataDisks": [
                         <#list instance.volumes as volume>
                             {
-                                "name": "[concat('datadisk', '${instanceGroup.name?replace('_', '')}', '${volume_index}', '${instance.privateId}')]",
+                                "name": "[concat('datadisk', '${instance.instanceId}', '${volume_index}')]",
                                 "diskSizeGB": ${volume.size},
                                 "lun":  ${volume_index},
                                 "vhd": {
-                                    "Uri": "[concat(variables('dataDiskVhdName'), 'datadisk', '${instanceGroup.name?replace('_', '')}', '${volume_index}', '${instance.privateId}', '.vhd')]"
+                                    "Uri": "[concat(variables('dataDiskVhdName'), 'datadisk', '${instance.instanceId}', '${volume_index}', '.vhd')]"
                                 },
                                 "caching": "None",
                                 "createOption": "Empty"
@@ -299,7 +299,7 @@
                     "networkProfile": {
                         "networkInterfaces": [
                             {
-                                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}'))]"
+                                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'), '${instance.instanceId}'))]"
                             }
                         ],
                         "inputEndpoints": [
@@ -315,7 +315,7 @@
                         ]
                     }
                 }
-              }<#if (instance_index + 1) != instanceGroup.instances?size>,</#if>
+              }<#if (instance_index + 1) != groups[instanceGroup]?size>,</#if>
           </#list>
           <#if (instanceGroup_index + 1) != groups?size>,</#if>
           </#list>

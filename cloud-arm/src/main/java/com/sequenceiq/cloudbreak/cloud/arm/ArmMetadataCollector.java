@@ -76,7 +76,7 @@ public class ArmMetadataCollector implements MetadataCollector {
                 String privateIp = properties.get("privateIPAddress").toString();
                 String instanceId = instance.getKey();
                 if (publicIp == null) {
-                    throw new CloudConnectorException(String.format("Public ip addres can not be null but it was on %s instance.", instance.getKey()));
+                    throw new CloudConnectorException(String.format("Public ip address can not be null but it was on %s instance.", instance.getKey()));
                 }
                 CloudInstanceMetaData md = new CloudInstanceMetaData(privateIp, publicIp);
 

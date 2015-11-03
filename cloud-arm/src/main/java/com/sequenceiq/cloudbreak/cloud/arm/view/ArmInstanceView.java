@@ -31,7 +31,7 @@ public class ArmInstanceView {
     }
 
     public String getInstanceId() {
-        return instance.getGroupName().replaceAll("_", "") + "_" + instance.getPrivateId();
+        return instance.getGroupName().replaceAll("_", "") + instance.getPrivateId();
     }
 
     public long getPrivateId() {
