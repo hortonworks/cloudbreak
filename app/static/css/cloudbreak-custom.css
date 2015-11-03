@@ -293,3 +293,10 @@ a.list-group-item, button.list-group-item {
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
 }
+
+.wizard-button {
+  border-left-color: rgb(204, 204, 204) !important;
+  border-left-style: solid !important;
+  border-left-width: 1px !important; 
+  border-radius: 0 !important;
+}

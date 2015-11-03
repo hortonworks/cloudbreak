@@ -11,10 +11,10 @@
             </a>
         </div>
         <div id="create-cluster-panel-collapse" class="panel panel-default" style="margin-bottom: 0px;">
-            <div class="btn-segmented-control" id="providerSelector2">
+            <div class="" id="providerSelector2">
 
                 <div class="panel-body">
-                    <div class="btn-group btn-group-sm btn-group-justified" role="group" style="padding-top: 20px" aria-label="...">
+                    <div class="btn-group btn-group-justified" role="group" style="margin: 0 auto;display: table;" aria-label="...">
                         <a type="button" ng-class="{'btn-info': configureCluster, 'btn-default': !configureCluster}" class="btn btn-info ng-binding wizard-button" role="presentation" ng-click="showWizardActualElement('configureCluster')">{{msg.cluster_form_ambari_cluster_tag}}</a>
                         <a type="button" ng-class="{'btn-info': configureSecurity, 'btn-default': !configureSecurity}" ng-disabled="!cluster.name || !cluster.region" class="btn ng-binding wizard-button" role="presentation" ng-click="showWizardActualElement('configureSecurity')">{{msg.cluster_form_ambari_network_tag}}</a>
                         <a type="button" ng-class="{'btn-info': configureHostGroups, 'btn-default': !configureHostGroups}" ng-disabled="!cluster.name || !cluster.region || !cluster.securityGroupId || !cluster.networkId" class="btn ng-binding wizard-button" role="presentation" ng-click="showWizardActualElement('configureHostGroups')">{{msg.cluster_form_ambari_blueprint_tag}}</a>
@@ -23,25 +23,26 @@
                         <a type="button" ng-class="{'btn-info': configureAmbariRepository, 'btn-default': !configureAmbariRepository}" class="btn ng-binding wizard-button" role="presentation" ng-click="showWizardActualElement('configureAmbariRepository')" ng-disabled="!cluster.name || !cluster.region || !cluster.securityGroupId || !cluster.networkId || !cluster.blueprintId" ng-show="showAdvancedOptionForm">{{msg.cluster_form_ambari_hdprepo_tag}}</a>
                         <a type="button" ng-class="{'btn-info': configureReview, 'btn-default': !configureReview}" class="btn ng-binding" role="presentation wizard-button" ng-click="showWizardActualElement('configureReview')" ng-hide="clusterCreationForm.$invalid">{{msg.cluster_form_ambari_launch_tag}}</a>
                     </div>
+
+                    <form class="form-horizontal" role="form" name="$parent.clusterCreationForm" style="padding-top: 20px;    padding-bottom: 20px;">
+
+                        <div id="configure_cluster" class="container" ng-show="configureCluster" ng-include src="'tags/stack/configurecluster.tag'">
+                        </div>
+                        <div id="configure_security_group" class="container" ng-show="configureSecurity" ng-include src="'tags/stack/configuresecuritygroup.tag'">
+                        </div>
+                        <div id="ambari_repository_config" class="container" ng-show="showAdvancedOptionForm && configureAmbariRepository" ng-include src="'tags/stack/ambarirepositoryconfig.tag'">
+                        </div>
+                        <div id="configure_failure_action" class="container" ng-show="configureFailureAction" ng-include src="'tags/stack/configurefailureaction.tag'">
+                        </div>
+                        <div id="configure_filesystem" class="container" ng-show="configureFileSystem && (activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'AZURE_RM' || activeCredential.cloudPlatform == 'GCP')" ng-include src="'tags/stack/configurefilesystem.tag'">
+                        </div>
+                        <div id="configure_host_groups" class="container" ng-show="configureHostGroups" ng-include src="'tags/stack/configurehostgroups.tag'">
+                        </div>
+                        <div id="configure_review" class="container" ng-show="configureReview" ng-include src="'tags/stack/configurereview.tag'">
+                        </div>
+                    </form>
                 </div>
 
-                <form class="form-horizontal container" role="form" name="$parent.clusterCreationForm" style="padding-top: 20px;    padding-bottom: 20px;">
-
-                    <div id="configure_cluster" ng-show="configureCluster" ng-include src="'tags/stack/configurecluster.tag'">
-                    </div>
-                    <div id="configure_security_group" ng-show="configureSecurity" ng-include src="'tags/stack/configuresecuritygroup.tag'">
-                    </div>
-                    <div id="ambari_repository_config" ng-show="showAdvancedOptionForm && configureAmbariRepository" ng-include src="'tags/stack/ambarirepositoryconfig.tag'">
-                    </div>
-                    <div id="configure_failure_action" ng-show="configureFailureAction" ng-include src="'tags/stack/configurefailureaction.tag'">
-                    </div>
-                    <div id="configure_filesystem" ng-show="configureFileSystem && (activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'AZURE_RM' || activeCredential.cloudPlatform == 'GCP')" ng-include src="'tags/stack/configurefilesystem.tag'">
-                    </div>
-                    <div id="configure_host_groups" ng-show="configureHostGroups" ng-include src="'tags/stack/configurehostgroups.tag'">
-                    </div>
-                    <div id="configure_review" ng-show="configureReview" ng-include src="'tags/stack/configurereview.tag'">
-                    </div>
-                </form>
             </div>
         </div>
     </div>

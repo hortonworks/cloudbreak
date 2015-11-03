@@ -1,36 +1,36 @@
 <form class="form-horizontal" role="document">
     <div class="form-group">
         <label class="col-sm-3 control-label" for="sl_cloudPlatform">{{msg.active_cluster_platform_label}}</label>
-        <div class="col-sm-9">
+        <div class="col-sm-8">
             <p id="sl_cloudPlatform" class="form-control-static">{{activeCredential.cloudPlatform}}</p>
         </div>
     </div>
     <div class="form-group">
         <label class="col-sm-3 control-label" for="sl_username">
             </i>{{msg.active_cluster_username_label}}</label>
-        <div class="col-sm-9">
+        <div class="col-sm-8">
             <p id="sl_cloudPlatform" class="form-control-static">{{cluster.userName}}</p>
         </div>
     </div>
     <div class="form-group">
         <label class="col-sm-3 control-label" for="sl_username">
             </i>{{msg.active_cluster_password_label}}</label>
-        <div class="col-sm-9">
+        <div class="col-sm-8">
             <p id="sl_cloudPlatform" class="form-control-static">{{cluster.password}}</p>
         </div>
     </div>
     <div class="form-group">
         <label class="col-sm-3 control-label" for="sl_region">{{msg.active_cluster_region_label}}</label>
-        <div class="col-sm-9" ng-if="activeCredential.cloudPlatform == 'AWS' ">
+        <div class="col-sm-8" ng-if="activeCredential.cloudPlatform == 'AWS' ">
             <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.AWS.awsRegions | filter:{key: cluster.region}:true">{{item.value}}</p>
         </div>
-        <div class="col-sm-9" ng-if="activeCredential.cloudPlatform == 'GCP' ">
+        <div class="col-sm-8" ng-if="activeCredential.cloudPlatform == 'GCP' ">
             <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.GCP.gcpRegions | filter:{key: cluster.region}:true">{{item.value}}</p>
         </div>
-        <div class="col-sm-9" ng-if="activeCredential.cloudPlatform == 'AZURE_RM' ">
+        <div class="col-sm-8" ng-if="activeCredential.cloudPlatform == 'AZURE_RM' ">
             <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.AZURE_RM.azureRegions | filter:{key: cluster.region}:true">{{item.value}}</p>
         </div>
-        <div class="col-sm-9" ng-if="activeCredential.cloudPlatform == 'OPENSTACK' ">
+        <div class="col-sm-8" ng-if="activeCredential.cloudPlatform == 'OPENSTACK' ">
             <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.OPENSTACK.regions | filter:{key: cluster.region}:true">{{item.value}}</p>
         </div>
     </div>
