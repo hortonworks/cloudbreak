@@ -98,8 +98,10 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $scope.showAdvancedOption = function() {
             if ($scope.showAdvancedOptionForm === false) {
                 $scope.showAdvancedOptionForm = true;
+                initWizard();
             } else {
                 $scope.showAdvancedOptionForm = false;
+                initWizard();
             }
         }
 
