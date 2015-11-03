@@ -98,12 +98,12 @@ securitygroup select --name secgroup_example
 
 There are two default security groups defined: `all-services-port` and `only-ssh-and-ssl`
 
-`only-ssh-and-ssl:` all ports are locked down (you can't access Hadoop services outside of the VPN)
+`only-ssh-and-ssl:` all ports are locked down except for SSH and gateway HTTPS (you can't access Hadoop services outside of the VPC)
 
 * SSH (22)
 * HTTPS (443)
 
-`all-services-port:` all Hadoop services + SSH/HTTP are accessible by default:
+`all-services-port:` all Hadoop services and SSH/gateway HTTPS are accessible by default:
 
 * SSH (22)
 * HTTPS (443)
