@@ -2,11 +2,11 @@
 
 To install Cloudbreak Deployer on your selected environment you have to follow the steps below.
 
-#### SELinux, firewalls
+## SELinux, firewalls
 
 Make sure that SELinux is disabled and if there is a firewall installed than allows communication between Docker Containers
 
-#### Install Cloudbreak deployer
+## Install Cloudbreak deployer
 
 Install the Cloudbreak deployer and unzip the platform specific single binary to your PATH. The one-liner way is:
 
@@ -14,47 +14,57 @@ Install the Cloudbreak deployer and unzip the platform specific single binary to
 curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install | sh && cbd --version
 ```
 
-Once the Cloudbreak deployer is installed it will generate some config files and will download supporting binaries. It is
-advised that you create a dedicated directory for it:
+Once the Cloudbreak deployer is installed, you can start to setup the Cloudbreak application.
+
+Create a cloudbreak-deployment directory for the config files and the supporting binaries that will be downloaded by cloudbreak-deployer:
 
 ```
-mkdir cloudbreak-deployment
+mkdir cloudbreak-deployer
 cd cloudbreak-deployment
 ```
 
-All Cloudbreak components and the backend database is running inside containers.
-The **pull command is optional** but you can run it prior to `cbd start`
+## Initialize Profile
 
-```
-cbd pull
-```
-#### Initialize Profile
-
-First initialize your directory by creating a `Profile` file:
+First initialize cbd by creating a `Profile` file:
 
 ```
 cbd init
 ```
 
-It will create a `Profile` file in the current directory. Please edit the file - the only required
-configuration is the `PUBLIC_IP`. This IP will be used to access the Cloudbreak UI
-(called Uluwatu). In some cases the `cbd` tool tries to guess it, if can't than will give a hint.
+It will create a `Profile` file in the current directory. Please edit the file - one of the required configurations is the `PUBLIC_IP`.
+This IP will be used to access the Cloudbreak UI (called Uluwatu). In some cases the `cbd` tool tries to guess it, if can't than will give a hint.
 
-#### Pull Docker images
+## Generate your Profile
 
-All Cloudbreak components and the backend database is running inside containers.
-The **pull command is optional** but you can run it prior to `cbd start`
+You are done with the initialization of Cloudbreak deployer. The last thing you have to do is to regenerate the configurations in order to take effect.
 
 ```
-cbd pull
+rm *.yml
+cbd generate
 ```
 
-It will take some time - depending on your network connection - so you can grab a cup of coffee.
+## Start Cloudbreak
 
-# Configure Cloudbreak deployer
+To start the Cloudbreak application use the following command.
+This will start all the Docker containers and initialize the application. It will take a few minutes until all the services start.
 
-Now that you all pre-requisites for Cloudbreak are in place you can follow with the **cloud provider specific** configuration. Based on the location where you plan to launch HDP clusters select one of the providers documentation and follow the steps from the  **Configure Cloudbreak deployer** section.
+```
+cbd start
+```
 
-# Use Cloudbreak
+Launching it the first time will take more time as it does some additional steps:
 
-Now that you are ready to provision clusters you can follow with the **cloud provider specific** documentation. Based on the location where you plan to launch HDP clusters select one of the providers documentation and follow the steps from the  **Use Cloudbreak** section.
+- downloads all the docker images needed by Cloudbreak.
+- creates the **docker-compose.yml** file that describes the configuration of all the Docker containers needed for the Cloudbreak deployment.
+- creates the **uaa.yml** file that holds the configuration of the identity server used to authenticate users to Cloudbreak.
+
+After the `cbd generate` command finishes you can check the logs of the Cloudbreak server with this command:
+
+```
+cbd logs cloudbreak
+```
+>Cloudbreak server should start within a minute - you should see a line like this: `Started CloudbreakApplication in 36.823 seconds`
+
+## Next steps
+
+Now that you all pre-requisites for Cloudbreak are in place you can follow with the **cloud provider specific** configuration. Based on the location where you plan to launch HDP clusters select one of the providers documentation and follow the steps from the  **Deployment** section.
