@@ -48,10 +48,6 @@ You have finished this step, if you are able to login in your browser to Cloudbr
 
 Currently only **Linux** and **OSX** 64 bit binaries are released for Cloudbreak Deployer. For anything else we can create a special Docker container - please contact us. The deployment itself needs only **Docker 1.7.0** or later. You can install the Cloudbreak installation anywhere (on-prem or cloud VMs), however we suggest to installed it as close to the desired HDP clusters as possible. For further information check the **Provider** section of the documentation.
 
-**On-prem installation**
-
-For on premise installations of the Cloudbreak application please follow the [link](onprem.md)
-
 **AWS based installation**
 
 We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
@@ -75,6 +71,10 @@ You can follow the GCP provider specific documentation using this [link](gcp.md)
 We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration and launching clusters using that provider.
 
 You can follow the OpenStack provider specific documentation using this [link](openstack.md)
+
+**On-prem installation**
+
+For on premise installations of the Cloudbreak application please follow the [link](onprem.md)
 
 ##Release notes - 1.1.0
 
