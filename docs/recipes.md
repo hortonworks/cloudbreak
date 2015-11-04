@@ -25,21 +25,22 @@ To add recipe via shell use the following command:
 recipe store --name [recipe-name] --executionType [ONE_NODE|ALL_NODES] --preInstallScriptFile /path/of/the/pre-install-script --postInstallScriptFile /path/of/the/post-install-script
 ```
 
-This command has two optional parameters:
+This command has optional parameters:
 
-- --description "string": description of the recipe
-- --timeout "integer": timeout of the script execution
-- --publicInAccount "flag": flags if the template is public in the account
+`--description` "string" description of the recipe
+`--timeout` "integer" timeout of the script execution
+`--publicInAccount` "flag" flags if the template is public in the account
 
 In the background Cloudbreak pushes recipe to Consul key/value store during cluster creation.
 
-Stored recipes has limitation on size, because they are stored in Consul key/value store, the base64 encoded content of the scripts must be less then 512kB.
+Stored recipes has limitation on size, because they are stored in Consul key/value store, the base64 encoded content of the scripts must be less than 512kB.
 
 ##Downloadable recipes
 
 A downloadable recipe should be available on HTTP, HTTPS protocols optionally with basic authentication, or any kind of public Git repository.
 
-This kind of recipe must contain a plugin.toml file, with some basic information about the recipe, and at least a recipe-pre-install or recipe-post-install script.
+This kind of recipe must contain a plugin.toml file, with some basic information about the recipe. Besides this at least a recipe-pre-install or recipe-post-install script.
+
 Content of plugin.toml:
 
 ```

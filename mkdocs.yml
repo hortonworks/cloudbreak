@@ -8,6 +8,7 @@ pages:
         - Introduction : index.md
         - Technology : technology.md
         - Installation :
+            - On-prem: onprem.md
             - AWS: aws.md
             - Azure: azure.md
             - GCP: gcp.md
