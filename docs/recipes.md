@@ -28,18 +28,20 @@ recipe store --name [recipe-name] --executionType [ONE_NODE|ALL_NODES] --preInst
 This command has optional parameters:
 
 `--description` "string" description of the recipe
+
 `--timeout` "integer" timeout of the script execution
+
 `--publicInAccount` "flag" flags if the template is public in the account
 
 In the background Cloudbreak pushes recipe to Consul key/value store during cluster creation.
 
-Stored recipes has limitation on size, because they are stored in Consul key/value store, the base64 encoded content of the scripts must be less than 512kB.
+**Note** Stored recipes has limitation on size, because they are stored in Consul key/value store, the base64 encoded content of the scripts must be less than 512kB.
 
 ##Downloadable recipes
 
 A downloadable recipe should be available on HTTP, HTTPS protocols optionally with basic authentication, or any kind of public Git repository.
 
-This kind of recipe must contain a plugin.toml file, with some basic information about the recipe. Besides this at least a recipe-pre-install or recipe-post-install script.
+This kind of recipe must contain a plugin.toml file, with some basic information about the recipe. Besides this at least a recipe-pre-install or a recipe-post-install script.
 
 Content of plugin.toml:
 
@@ -73,9 +75,9 @@ To configure recipe or recipe groups in Cloudbreak you have to create a descript
 
 At this point we need to understand some element of the JSON above.
 
-First of all properties. Properties are saved to Consul key/value store, and they are available from the pre or post script by fetching http://localhost:8500/v1/kv/[key]?raw url. The limitation of the value's base64 representation is 512kB. This option is a good choice if you want to write reusable recipes.
+First of all `properties`. Properties are saved to Consul key/value store, and they are available from the pre or post script by fetching http://localhost:8500/v1/kv/[key]?raw. The limitation of the value's base64 representation is 512kB. This option is a good choice if you want to write reusable recipes.
 
-The next one is plugins. As you read before we support a few kind of protocols, and each of them has their own limitations:
+The next one is `plugins`. As you read before we support a few kind of protocols, and each of them has their own limitations:
 
   * Git
     * git repository must be public (or available from the cluster)
@@ -107,7 +109,7 @@ recipe add --url http(s)://mydomain.com/my-recipe.json
 
 Add command has an optional parameter
 
-- --publicInAccount, flags if the template is public in the account.
+`--publicInAccount` is checked all the users belonging to your account will be able to use this recipe for create clusters, but cannot delete it.
 
 ## Sample recipe for Ranger
 
@@ -115,7 +117,7 @@ To be able to install Ranger from a blueprint, a database must be running when A
 
 ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/ranger-recipe.png)
 
-And add this recipe to the same hostgroup where Ranger Admin is installed under 'Show Advanced Options' when creating a new cluster:
+And add this recipe to the same hostgroup where Ranger Admin is installed on the 'Choose Blueprint' when creating a new cluster:
 
 ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/ranger-hostgroup.png)
 
@@ -474,7 +476,7 @@ Ranger installation also has some required properties that must be added to the 
 }
 ```
 
-*Notes*
+**Notes**
 
 - Ranger plugins cannot be enabled by default in a blueprint due to some Ambari restrictions, so properties like `ranger-hdfs-plugin-enabled` must be set to *No* and the plugins must be enabled from the Ambari UI with the checkboxes and by restarting the necessary services.
 - If using the UNIX user sync, it may be necessary in some cases to restart the Ranger Usersync Services after the blueprint installation finished if the UNIX users cannot be seen on the Ranger Admin UI.

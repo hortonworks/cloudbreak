@@ -1,4 +1,4 @@
-# AWS Deployment
+# AWS deployment
 
 If you already have cloudbreak-deployer installed you can start to setup the Cloudbreak application.
 
