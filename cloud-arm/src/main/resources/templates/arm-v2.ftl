@@ -89,6 +89,7 @@
       "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]",
       "staticIpRef": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('gatewaystaticipname'))]",
       "ilbBackendAddressPoolName": "${stackname}bapn",
+      "secGroupName": "${stackname}secgname",
       "lbID": "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName'))]",
       "sshIPConfig": "[concat(variables('lbID'),'/frontendIPConfigurations/', parameters('sshIPConfigName'))]",
       "ilbBackendAddressPoolID": "[concat(variables('lbID'),'/backendAddressPools/', variables('ilbBackendAddressPoolName'))]",
@@ -98,6 +99,9 @@
         {
               "apiVersion": "2015-05-01-preview",
               "type": "Microsoft.Network/virtualNetworks",
+              "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('secGroupName'))]"
+              ],
               "name": "[parameters('virtualNetworkNamePrefix')]",
               "location": "[parameters('region')]",
               "properties": {
@@ -110,11 +114,53 @@
                       {
                           "name": "[parameters('subnet1Name')]",
                           "properties": {
-                              "addressPrefix": "[parameters('subnet1Prefix')]"
+                              "addressPrefix": "[parameters('subnet1Prefix')]",
+                              "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('secGroupName'))]"
+                              }
                           }
                       }
                   ]
               }
+          },
+          {
+            "apiVersion": "2015-05-01-preview",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('secGroupName')]",
+            "location": "[parameters('region')]",
+            "properties": {
+            "securityRules": [
+            {
+                "name": "endpoint1outr",
+                "properties": {
+                    "protocol": "*",
+                    "sourcePortRange": "*",
+                    "destinationPortRange": "*",
+                    "sourceAddressPrefix": "*",
+                    "destinationAddressPrefix": "*",
+                    "access": "Allow",
+                    "priority": 101,
+                    "direction": "Outbound"
+                }
+            },
+            <#list ports as port>
+            {
+                "name": "endpoint${port_index}inr",
+                "properties": {
+                    "protocol": "*",
+                    "sourcePortRange": "*",
+                    "destinationPortRange": "${port}",
+                    "sourceAddressPrefix": "*",
+                    "destinationAddressPrefix": "*",
+                    "access": "Allow",
+                    "priority": ${port_index + 102},
+                    "direction": "Inbound"
+                }
+            }<#if (port_index + 1) != ports?size>,</#if>
+            </#list>
+
+                ]
+            }
           },
           <#list groups as instanceGroup>
           <#list instanceGroup.instances as instance>
@@ -301,17 +347,6 @@
                             {
                                 "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}'))]"
                             }
-                        ],
-                        "inputEndpoints": [
-                            <#list ports as port>
-                            {
-                                "enableDirectServerReturn": "False",
-                                "endpointName": "endpoint${port_index}",
-                                "privatePort": ${port},
-                                "publicPort": ${port},
-                                "protocol": "${port_protocol}"
-                            }<#if (port_index + 1) != ports?size>,</#if>
-                            </#list>
                         ]
                     }
                 }
