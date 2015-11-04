@@ -89,6 +89,7 @@
       "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]",
       "staticIpRef": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('gatewaystaticipname'))]",
       "ilbBackendAddressPoolName": "${stackname}bapn",
+      "secGroupName": "${stackname}secgname",
       "lbID": "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName'))]",
       "sshIPConfig": "[concat(variables('lbID'),'/frontendIPConfigurations/', parameters('sshIPConfigName'))]",
       "ilbBackendAddressPoolID": "[concat(variables('lbID'),'/backendAddressPools/', variables('ilbBackendAddressPoolName'))]",
@@ -98,6 +99,9 @@
         {
               "apiVersion": "2015-05-01-preview",
               "type": "Microsoft.Network/virtualNetworks",
+              "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('secGroupName'))]"
+              ],
               "name": "[parameters('virtualNetworkNamePrefix')]",
               "location": "[parameters('region')]",
               "properties": {
@@ -110,11 +114,52 @@
                       {
                           "name": "[parameters('subnet1Name')]",
                           "properties": {
-                              "addressPrefix": "[parameters('subnet1Prefix')]"
+                              "addressPrefix": "[parameters('subnet1Prefix')]",
+                              "networkSecurityGroup": {
+                                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('secGroupName'))]"
+                              }
                           }
                       }
                   ]
               }
+          },
+          {
+            "apiVersion": "2015-05-01-preview",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('secGroupName')]",
+            "location": "[parameters('region')]",
+            "properties": {
+            "securityRules": [
+                {
+                    "name": "endpoint1outr",
+                    "properties": {
+                        "protocol": "*",
+                        "sourcePortRange": "*",
+                        "destinationPortRange": "*",
+                        "sourceAddressPrefix": "*",
+                        "destinationAddressPrefix": "*",
+                        "access": "Allow",
+                        "priority": 101,
+                        "direction": "Outbound"
+                    }
+                },
+                <#list securities.ports as port>
+                {
+                    "name": "endpoint${port_index}inr",
+                    "properties": {
+                        "protocol": "${port.capitalProtocol}",
+                        "sourcePortRange": "*",
+                        "destinationPortRange": "${port.port}",
+                        "sourceAddressPrefix": "${port.cidr}",
+                        "destinationAddressPrefix": "*",
+                        "access": "Allow",
+                        "priority": ${port_index + 102},
+                        "direction": "Inbound"
+                    }
+                }<#if (port_index + 1) != securities.ports?size>,</#if>
+                </#list>
+                ]
+            }
           },
           <#list groups?keys as instanceGroup>
           <#list groups[instanceGroup] as instance>
@@ -153,19 +198,19 @@
                         }
                       ],
                       "inboundNatRules": [
-                      <#list ports as port>
+                      <#list securities.ports as port>
                         {
                           "name": "endpoint${port_index}inr",
                           "properties": {
                             "frontendIPConfiguration": {
                               "id": "[variables('sshIPConfig')]"
                             },
-                            "protocol": "${port_protocol}",
-                            "frontendPort": "${port}",
-                            "backendPort": "${port}",
+                            "protocol": "${port.protocol}",
+                            "frontendPort": "${port.port}",
+                            "backendPort": "${port.port}",
                             "enableFloatingIP": false
                           }
-                        }<#if (port_index + 1) != ports?size>,</#if>
+                        }<#if (port_index + 1) != securities.ports?size>,</#if>
                         </#list>
                       ]
                     }
@@ -218,10 +263,10 @@
                                     }
                                 ],
                                 "loadBalancerInboundNatRules": [
-                                <#list ports as port>
+                                <#list securities.ports as port>
                                     {
                                         "id": "[concat(variables('lbID'),'/inboundNatRules/', 'endpoint${port_index}inr')]"
-                                    }<#if (port_index + 1) != ports?size>,</#if>
+                                    }<#if (port_index + 1) != securities.ports?size>,</#if>
                                 </#list>
                                 ]
                                 </#if>
@@ -301,17 +346,6 @@
                             {
                                 "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'), '${instance.instanceId}'))]"
                             }
-                        ],
-                        "inputEndpoints": [
-                            <#list ports as port>
-                            {
-                                "enableDirectServerReturn": "False",
-                                "endpointName": "endpoint${port_index}",
-                                "privatePort": ${port},
-                                "publicPort": ${port},
-                                "protocol": "${port_protocol}"
-                            }<#if (port_index + 1) != ports?size>,</#if>
-                            </#list>
                         ]
                     }
                 }
