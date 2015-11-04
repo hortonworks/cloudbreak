@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.StackDeletionBasedExitCriteriaModel.stackDeletionBasedExitCriteriaModel;
+import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.MUNCHAUSEN;
 import static com.sequenceiq.cloudbreak.service.PollingResult.TIMEOUT;
 
 import java.util.ArrayList;
@@ -23,9 +24,9 @@ import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
-import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -69,6 +70,9 @@ public class ClusterBootstrapper {
     @Inject
     private TlsSecurityService tlsSecurityService;
 
+    @Inject
+    private ContainerConfigService containerConfigService;
+
     public void bootstrapCluster(ProvisioningContext provisioningContext) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
@@ -88,7 +92,8 @@ public class ClusterBootstrapper {
                     POLLING_INTERVAL,
                     MAX_POLLING_ATTEMPTS);
             List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIp());
-            containerOrchestrator.bootstrap(gatewayConfig, nodeMap.get(0), stack.getConsulServers(), CONSUL_LOG_LOCATION,
+            containerOrchestrator.bootstrap(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), nodeMap.get(0), stack.getConsulServers(),
+                    CONSUL_LOG_LOCATION,
                     stackDeletionBasedExitCriteriaModel(stack.getId()));
             if (nodeMap.size() > 1) {
                 clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(clusterAvailabilityCheckerTask,
@@ -96,7 +101,7 @@ public class ClusterBootstrapper {
                         POLLING_INTERVAL,
                         MAX_POLLING_ATTEMPTS);
                 for (int i = 1; i < nodeMap.size(); i++) {
-                    containerOrchestrator.bootstrapNewNodes(gatewayConfig, nodeMap.get(i), CONSUL_LOG_LOCATION,
+                    containerOrchestrator.bootstrapNewNodes(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), nodeMap.get(i), CONSUL_LOG_LOCATION,
                             stackDeletionBasedExitCriteriaModel(stack.getId()));
                     clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(clusterAvailabilityCheckerTask,
                             new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodeMap.get(i)),
@@ -136,7 +141,7 @@ public class ClusterBootstrapper {
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
             List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIp());
             for (int i = 0; i < nodeMap.size(); i++) {
-                containerOrchestrator.bootstrapNewNodes(gatewayConfig, nodeMap.get(i), CONSUL_LOG_LOCATION,
+                containerOrchestrator.bootstrapNewNodes(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), nodeMap.get(i), CONSUL_LOG_LOCATION,
                         stackDeletionBasedExitCriteriaModel(stack.getId()));
                 clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(clusterAvailabilityCheckerTask,
                         new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodeMap.get(i)),

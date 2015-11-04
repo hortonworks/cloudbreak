@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
@@ -163,9 +162,9 @@ public class OpenStackResourceConnector implements ResourceConnector {
     private CloudStack removeDeleteRequestedInstances(CloudStack stack) {
         List<Group> groups = new ArrayList<>();
         for (Group group : stack.getGroups()) {
-            List<InstanceTemplate> instances = new ArrayList<>(group.getInstances());
-            for (InstanceTemplate instance : group.getInstances()) {
-                if (InstanceStatus.DELETE_REQUESTED == instance.getStatus()) {
+            List<CloudInstance> instances = new ArrayList<>(group.getInstances());
+            for (CloudInstance instance : group.getInstances()) {
+                if (InstanceStatus.DELETE_REQUESTED == instance.getTemplate().getStatus()) {
                     instances.remove(instance);
                 }
             }

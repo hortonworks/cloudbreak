@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
-public class ProvisioningContext extends DefaultFlowContext implements FlowContext {
+public class ProvisioningContext extends DefaultFlowContext {
     private Map<String, Object> setupProperties = new HashMap<>();
     private Map<String, String> userDataParams = new HashMap<>();
     private Set<Resource> resources = new HashSet<>();

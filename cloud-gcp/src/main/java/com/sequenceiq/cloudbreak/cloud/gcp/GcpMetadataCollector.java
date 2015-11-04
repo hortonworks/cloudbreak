@@ -21,8 +21,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
@@ -32,48 +32,84 @@ public class GcpMetadataCollector implements MetadataCollector {
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpMetadataCollector.class);
 
     @Override
-    public List<CloudVmInstanceStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<InstanceTemplate> vms) {
-        List<CloudVmInstanceStatus> instanceMetaData = new ArrayList<>();
-        CloudCredential credential = authenticatedContext.getCloudCredential();
-        CloudContext cloudContext = authenticatedContext.getCloudContext();
-        Compute compute = GcpStackUtil.buildCompute(credential);
-        Map<String, InstanceTemplate> templateMap = groupByInstanceName(resources, vms);
-        for (CloudResource resource : resources) {
-            if (ResourceType.GCP_INSTANCE == resource.getType()) {
-                try {
-                    String resourceName = resource.getName();
-                    InstanceTemplate template = templateMap.get(resourceName);
-                    if (template != null) {
-                        Instance executeInstance = getInstance(cloudContext, credential, compute, resourceName);
-                        CloudInstanceMetaData metaData = new CloudInstanceMetaData(
-                                executeInstance.getNetworkInterfaces().get(0).getNetworkIP(),
-                                executeInstance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP());
-                        CloudInstance cloudInstance = new CloudInstance(resourceName, metaData, template);
-                        instanceMetaData.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED));
-                    }
-                } catch (IOException e) {
-                    LOGGER.warn(String.format("Instance %s is not reachable", resource), e);
-                }
+    public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
+
+        List<CloudVmMetaDataStatus> instanceMetaData = new ArrayList<>();
+
+        Map<String, CloudResource> instanceNameMap = groupByInstanceName(resources);
+        Map<Long, CloudResource> privateIdMap = groupByPrivateId(resources);
+
+        for (CloudInstance cloudInstance : vms) {
+            String instanceId = cloudInstance.getInstanceId();
+            CloudResource cloudResource;
+            if (instanceId != null) {
+                cloudResource = instanceNameMap.get(instanceId);
+            } else {
+                cloudResource = privateIdMap.get(cloudInstance.getTemplate().getPrivateId());
             }
+            CloudVmMetaDataStatus cloudVmMetaDataStatus = getCloudVmMetaDataStatus(authenticatedContext, cloudResource, cloudInstance);
+            instanceMetaData.add(cloudVmMetaDataStatus);
         }
+
         return instanceMetaData;
     }
 
-    private Map<String, InstanceTemplate> groupByInstanceName(List<CloudResource> resources, List<InstanceTemplate> vms) {
-        Map<String, InstanceTemplate> templateMap = new HashMap<>();
+    private CloudVmMetaDataStatus getCloudVmMetaDataStatus(AuthenticatedContext authenticatedContext, CloudResource cloudResource,
+            CloudInstance matchedInstance) {
+        CloudVmMetaDataStatus cloudVmMetaDataStatus;
+        if (cloudResource != null) {
+            CloudInstance cloudInstance = new CloudInstance(cloudResource.getName(), matchedInstance.getTemplate());
+            try {
+                CloudCredential credential = authenticatedContext.getCloudCredential();
+                CloudContext cloudContext = authenticatedContext.getCloudContext();
+                Compute compute = GcpStackUtil.buildCompute(credential);
+                Instance executeInstance = getInstance(cloudContext, credential, compute, cloudResource.getName());
+
+
+                CloudInstanceMetaData metaData = new CloudInstanceMetaData(
+                        executeInstance.getNetworkInterfaces().get(0).getNetworkIP(),
+                        executeInstance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP());
+
+                CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
+                cloudVmMetaDataStatus = new CloudVmMetaDataStatus(status, metaData);
+
+            } catch (IOException e) {
+                LOGGER.warn(String.format("Instance %s is not reachable", cloudResource.getName()), e);
+                CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.UNKNOWN);
+                cloudVmMetaDataStatus = new CloudVmMetaDataStatus(status, null);
+            }
+        } else {
+            CloudVmInstanceStatus status = new CloudVmInstanceStatus(matchedInstance, InstanceStatus.TERMINATED);
+            cloudVmMetaDataStatus = new CloudVmMetaDataStatus(status, null);
+        }
+        return cloudVmMetaDataStatus;
+
+    }
+
+    private Map<String, CloudResource> groupByInstanceName(List<CloudResource> resources) {
+        Map<String, CloudResource> instanceNameMap = new HashMap<>();
+        for (CloudResource resource : resources) {
+            if (ResourceType.GCP_INSTANCE == resource.getType()) {
+                String resourceName = resource.getName();
+                instanceNameMap.put(resourceName, resource);
+            }
+        }
+        return instanceNameMap;
+    }
+
+    private Map<Long, CloudResource> groupByPrivateId(List<CloudResource> resources) {
+        Map<Long, CloudResource> privateIdMap = new HashMap<>();
         for (CloudResource resource : resources) {
             if (ResourceType.GCP_INSTANCE == resource.getType()) {
                 String resourceName = resource.getName();
                 Long privateId = GcpStackUtil.getPrivateId(resourceName);
-                for (InstanceTemplate vm : vms) {
-                    if (privateId == null || vm.getPrivateId().equals(privateId)) {
-                        templateMap.put(resourceName, vm);
-                        break;
-                    }
+                if (privateId != null) {
+                    privateIdMap.put(privateId, resource);
                 }
+
             }
         }
-        return templateMap;
+        return privateIdMap;
     }
 
     private Instance getInstance(CloudContext context, CloudCredential credential, Compute compute, String instanceName) throws IOException {

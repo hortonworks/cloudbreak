@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow.context;
 
 import com.sequenceiq.cloudbreak.service.stack.event.RemoveInstanceRequest;
 
-public class StackInstanceUpdateContext extends DefaultFlowContext implements FlowContext {
+public class StackInstanceUpdateContext extends DefaultFlowContext {
 
     private final String instanceId;
 

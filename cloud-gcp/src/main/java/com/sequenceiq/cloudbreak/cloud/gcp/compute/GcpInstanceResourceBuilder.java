@@ -54,7 +54,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     @Override
     public List<CloudResource> build(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
             List<CloudResource> buildableResource) throws Exception {
-        InstanceTemplate template = group.getInstances().get(0);
+        InstanceTemplate template = group.getInstances().get(0).getTemplate();
         String projectId = context.getProjectId();
         CloudRegion region = CloudRegion.valueOf(context.getRegion());
         Compute compute = context.getCompute();

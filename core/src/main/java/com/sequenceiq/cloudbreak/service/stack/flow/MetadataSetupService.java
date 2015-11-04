@@ -122,8 +122,6 @@ public class MetadataSetupService {
             instanceMetaDataEntry.setInstanceId(instanceId);
             instanceMetaDataEntry.setPrivateId(privateId);
             instanceMetaDataEntry.setVolumeCount(coreInstanceMetadataEntry.getVolumeCount());
-            instanceMetaDataEntry.setDockerSubnet(null);
-            instanceMetaDataEntry.setContainerCount(coreInstanceMetadataEntry.getContainerCount());
             instanceMetaDataEntry.setStartDate(timeInMillis);
             if (!ambariServerFound && InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
                 instanceMetaDataEntry.setAmbariServer(Boolean.TRUE);

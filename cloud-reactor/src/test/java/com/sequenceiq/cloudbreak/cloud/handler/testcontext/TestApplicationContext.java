@@ -27,7 +27,6 @@ import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
@@ -40,10 +39,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
+import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -62,10 +63,8 @@ import reactor.Environment;
 public class TestApplicationContext {
 
     private CloudInstance cloudInstance = new CloudInstance("instanceId",
-            new CloudInstanceMetaData("privateIp", "publicIp"),
             new InstanceTemplate("flavor", "groupName", 1L, Collections.<Volume>emptyList(), InstanceStatus.CREATE_REQUESTED, new HashMap<String, Object>()));
     private CloudInstance cloudInstanceBad = new CloudInstance("instanceIdBad",
-            new CloudInstanceMetaData("privateIp", "publicIp"),
             new InstanceTemplate("flavor", "groupName", 1L, Collections.<Volume>emptyList(), InstanceStatus.CREATE_REQUESTED, new HashMap<String, Object>()));
 
     @Mock
@@ -98,6 +97,11 @@ public class TestApplicationContext {
     @Inject
     private ParameterGenerator g;
 
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer propertyConfigInDev() {
+        return new PropertySourcesPlaceholderConfigurer();
+    }
+
     @PostConstruct
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
@@ -111,11 +115,6 @@ public class TestApplicationContext {
     @Bean(name = "bad-instance")
     public CloudInstance cloudInstanceBad() {
         return cloudInstanceBad;
-    }
-
-    @Bean
-    public static PropertySourcesPlaceholderConfigurer propertyConfigInDev() {
-        return new PropertySourcesPlaceholderConfigurer();
     }
 
     @Bean
@@ -154,8 +153,9 @@ public class TestApplicationContext {
                 .thenReturn(Arrays.asList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
         when(instanceConnector.check((AuthenticatedContext) any(), (List<CloudInstance>) any()))
                 .thenReturn(Arrays.asList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED)));
-        when(collector.collect((AuthenticatedContext) any(), (List<CloudResource>) any(), (List<InstanceTemplate>) any()))
-                .thenReturn(Arrays.asList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS)));
+        CloudVmInstanceStatus collectInstanceStatus = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS);
+        when(collector.collect((AuthenticatedContext) any(), (List<CloudResource>) any(), (List<CloudInstance>) any()))
+                .thenReturn(Arrays.asList(new CloudVmMetaDataStatus(collectInstanceStatus, new CloudInstanceMetaData("privateIp", "publicIp"))));
         when(instanceConnector.start((AuthenticatedContext) any(), (List<CloudResource>) any(), (List<CloudInstance>) any()))
                 .thenReturn(Arrays.asList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED)));
         when(instanceConnector.stop((AuthenticatedContext) any(), (List<CloudResource>) any(), (List<CloudInstance>) any()))

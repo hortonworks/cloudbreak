@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStopHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterSyncHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterUpscaleHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ConsulMetadataSetupHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.DownscaleMetadataCollectHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ExtendConsulMetadataHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ExtendMetadataHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.MetadataCollectHandler;
@@ -48,6 +49,7 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.StackSyncHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackTerminationHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.TlsSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.UpdateAllowedSubnetsHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.UpscaleMetadataCollectHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.UpscaleStackSyncHandler;
 
 import reactor.bus.Event;
@@ -89,6 +91,8 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.PROVISIONING.name()), getHandlerForClass(ProvisioningHandler.class));
         reactor.on($(FlowPhases.METADATA_SETUP.name()), getHandlerForClass(MetadataSetupHandler.class));
         reactor.on($(FlowPhases.METADATA_COLLECT.name()), getHandlerForClass(MetadataCollectHandler.class));
+        reactor.on($(FlowPhases.UPSCALE_METADATA_COLLECT.name()), getHandlerForClass(UpscaleMetadataCollectHandler.class));
+        reactor.on($(FlowPhases.DOWNSCALE_METADATA_COLLECT.name()), getHandlerForClass(DownscaleMetadataCollectHandler.class));
         reactor.on($(FlowPhases.TLS_SETUP.name()), getHandlerForClass(TlsSetupHandler.class));
         reactor.on($(FlowPhases.BOOTSTRAP_CLUSTER.name()), getHandlerForClass(BootstrapClusterHandler.class));
         reactor.on($(FlowPhases.CONSUL_METADATA_SETUP.name()), getHandlerForClass(ConsulMetadataSetupHandler.class));
@@ -231,7 +235,10 @@ public class FlowInitializer implements InitializingBean {
 
     private void registerUpscaleFlows() {
         transitionKeyService.registerTransition(UpscaleStackSyncHandler.class, TransitionFactory
-                .createTransition(FlowPhases.UPSCALE_STACK_SYNC.name(), FlowPhases.ADD_INSTANCES.name(), FlowPhases.NONE.name()));
+                .createTransition(FlowPhases.UPSCALE_STACK_SYNC.name(), FlowPhases.UPSCALE_METADATA_COLLECT.name(), FlowPhases.NONE.name()));
+
+        transitionKeyService.registerTransition(UpscaleMetadataCollectHandler.class, TransitionFactory
+                .createTransition(FlowPhases.UPSCALE_METADATA_COLLECT.name(), FlowPhases.ADD_INSTANCES.name(), FlowPhases.NONE.name()));
 
         transitionKeyService.registerTransition(AddInstancesHandler.class, TransitionFactory
                 .createTransition(FlowPhases.ADD_INSTANCES.name(), FlowPhases.EXTEND_METADATA.name(), FlowPhases.NONE.name()));
@@ -253,6 +260,9 @@ public class FlowInitializer implements InitializingBean {
     }
 
     private void registerDownscaleFlows() {
+        transitionKeyService.registerTransition(DownscaleMetadataCollectHandler.class, TransitionFactory
+                .createTransition(FlowPhases.DOWNSCALE_METADATA_COLLECT.name(), FlowPhases.CLUSTER_DOWNSCALE.name(), FlowPhases.NONE.name()));
+
         transitionKeyService.registerTransition(ClusterDownscaleHandler.class, TransitionFactory
                 .createTransition(FlowPhases.CLUSTER_DOWNSCALE.name(), FlowPhases.STACK_DOWNSCALE.name(), FlowPhases.NONE.name()));
 

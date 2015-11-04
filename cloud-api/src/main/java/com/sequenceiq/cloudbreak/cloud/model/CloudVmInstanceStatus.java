@@ -13,8 +13,7 @@ public class CloudVmInstanceStatus {
     }
 
     public CloudVmInstanceStatus(CloudInstance cloudInstance, InstanceStatus status) {
-        this.cloudInstance = cloudInstance;
-        this.status = status;
+        this(cloudInstance, status, null);
     }
 
     public CloudInstance getCloudInstance() {

@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -43,15 +44,14 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 @SpringApplicationConfiguration(classes = ArmFreemarkerConfiguration.class)
 public class ArmTemplateBuilderTest {
 
-    @InjectMocks
-    private ArmTemplateBuilder underTest;
-
-    private CloudStack cloudStack;
-    private CloudContext cloudContext;
-    private CloudCredential cloudCredential;
     private final int volume1Size = 100;
     private final int volume2Size = 20;
     private final Long three = 3L;
+    @InjectMocks
+    private ArmTemplateBuilder underTest;
+    private CloudStack cloudStack;
+    private CloudContext cloudContext;
+    private CloudCredential cloudCredential;
 
     @Before
     public void setUp() throws Exception {
@@ -73,17 +73,17 @@ public class ArmTemplateBuilderTest {
 
         InstanceTemplate instanceTemplate1 = new InstanceTemplate("Standard_A3", "cbgateway", 0L, asList(volume1, volume2),
                 InstanceStatus.CREATE_REQUESTED, new HashMap<String, Object>());
-        Group cbgateway = new Group("cbgateway", GATEWAY, asList(instanceTemplate1));
+        Group cbgateway = new Group("cbgateway", GATEWAY, asList(new CloudInstance("ID", instanceTemplate1)));
 
         InstanceTemplate instanceTemplate2 = new InstanceTemplate("Standard_A3", "master", 1L, asList(volume1), InstanceStatus.CREATE_REQUESTED,
                 new HashMap<String, Object>());
-        Group master = new Group("master", CORE, asList(instanceTemplate2));
+        Group master = new Group("master", CORE, asList(new CloudInstance("ID", instanceTemplate2)));
 
         InstanceTemplate instanceTemplate3 = new InstanceTemplate("Standard_A3", "slave_1", 2L, asList(volume1), InstanceStatus.CREATE_REQUESTED,
                 new HashMap<String, Object>());
         InstanceTemplate instanceTemplate4 = new InstanceTemplate("Standard_A3", "slave_1", three, asList(volume1), InstanceStatus.CREATE_REQUESTED,
                 new HashMap<String, Object>());
-        Group slave1 = new Group("slave_1", CORE, asList(instanceTemplate3, instanceTemplate4));
+        Group slave1 = new Group("slave_1", CORE, asList(new CloudInstance("ID", instanceTemplate3), new CloudInstance("ID", instanceTemplate4)));
 
         Network network = new Network(new Subnet("10.0.0.0/16"));
 

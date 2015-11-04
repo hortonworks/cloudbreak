@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -52,7 +53,8 @@ public class InstanceMetadataService {
         Set<InstanceGroup> instanceGroups = stack.getInstanceGroups();
         for (Group group : groups) {
             InstanceGroup instanceGroup = getInstanceGroup(instanceGroups, group.getName());
-            for (InstanceTemplate instanceTemplate : group.getInstances()) {
+            for (CloudInstance cloudInstance : group.getInstances()) {
+                InstanceTemplate instanceTemplate = cloudInstance.getTemplate();
                 if (InstanceStatus.CREATE_REQUESTED == instanceTemplate.getStatus()) {
                     InstanceMetaData instanceMetaData = new InstanceMetaData();
                     instanceMetaData.setPrivateId(instanceTemplate.getPrivateId());

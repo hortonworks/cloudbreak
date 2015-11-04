@@ -27,11 +27,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
-import com.sequenceiq.cloudbreak.converter.spi.CloudVmInstanceStatusToCoreInstanceMetaDataConverter;
+import com.sequenceiq.cloudbreak.converter.spi.CloudVmMetadataStatusToCoreInstanceMetaDataConverter;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
@@ -60,7 +59,7 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
     @Inject
     private InstanceMetaDataToCloudInstanceConverter metadataConverter;
     @Inject
-    private CloudVmInstanceStatusToCoreInstanceMetaDataConverter instanceConverter;
+    private CloudVmMetadataStatusToCoreInstanceMetaDataConverter instanceConverter;
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
     @Inject
@@ -72,9 +71,9 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
                 location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-        List<InstanceTemplate> instanceTemplates = cloudStackConverter.buildInstanceTemplates(stack);
+        List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(stack);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
-        CollectMetadataRequest<CollectMetadataResult> cmr = new CollectMetadataRequest<>(cloudContext, cloudCredential, cloudResources, instanceTemplates);
+        CollectMetadataRequest cmr = new CollectMetadataRequest(cloudContext, cloudCredential, cloudResources, cloudInstances);
         LOGGER.info("Triggering event: {}", cmr);
         eventBus.notify(cmr.selector(CollectMetadataRequest.class), Event.wrap(cmr));
         try {
@@ -97,9 +96,9 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
                 location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-        List<InstanceTemplate> instanceTemplates = getNewInstanceTemplates(stack);
+        List<CloudInstance> cloudInstances = getNewInstances(stack);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
-        CollectMetadataRequest<CollectMetadataResult> cmr = new CollectMetadataRequest<>(cloudContext, cloudCredential, cloudResources, instanceTemplates);
+        CollectMetadataRequest cmr = new CollectMetadataRequest(cloudContext, cloudCredential, cloudResources, cloudInstances);
         LOGGER.info("Triggering event: {}", cmr);
         eventBus.notify(cmr.selector(CollectMetadataRequest.class), Event.wrap(cmr));
         try {
@@ -163,15 +162,15 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
     }
 
 
-    private List<InstanceTemplate> getNewInstanceTemplates(Stack stack) {
-        List<InstanceTemplate> instanceTemplates = cloudStackConverter.buildInstanceTemplates(stack);
-        Iterator<InstanceTemplate> iterator = instanceTemplates.iterator();
+    private List<CloudInstance> getNewInstances(Stack stack) {
+        List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(stack);
+        Iterator<CloudInstance> iterator = cloudInstances.iterator();
         while (iterator.hasNext()) {
-            if (iterator.next().getStatus() != InstanceStatus.CREATE_REQUESTED) {
+            if (iterator.next().getTemplate().getStatus() != InstanceStatus.CREATE_REQUESTED) {
                 iterator.remove();
             }
         }
-        return instanceTemplates;
+        return cloudInstances;
     }
 
     private InstanceSyncState transform(InstanceStatus instanceStatus) {

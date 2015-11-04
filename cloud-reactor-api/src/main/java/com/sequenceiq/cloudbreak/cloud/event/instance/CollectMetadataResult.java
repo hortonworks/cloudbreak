@@ -3,15 +3,15 @@ package com.sequenceiq.cloudbreak.cloud.event.instance;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 
 public class CollectMetadataResult {
 
     private CloudContext cloudContext;
-    private List<CloudVmInstanceStatus> results;
+    private List<CloudVmMetaDataStatus> results;
     private Exception exception;
 
-    public CollectMetadataResult(CloudContext cloudContext, List<CloudVmInstanceStatus> results) {
+    public CollectMetadataResult(CloudContext cloudContext, List<CloudVmMetaDataStatus> results) {
         this.cloudContext = cloudContext;
         this.results = results;
     }
@@ -25,7 +25,7 @@ public class CollectMetadataResult {
         return cloudContext;
     }
 
-    public List<CloudVmInstanceStatus> getResults() {
+    public List<CloudVmMetaDataStatus> getResults() {
         return results;
     }
 

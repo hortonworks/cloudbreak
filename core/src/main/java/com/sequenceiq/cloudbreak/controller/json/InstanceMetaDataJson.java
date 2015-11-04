@@ -19,12 +19,8 @@ public class InstanceMetaDataJson implements JsonEntity {
     private Integer volumeCount;
     @ApiModelProperty(InstanceMetaDataModelDescription.AMBARI_SERVER)
     private Boolean ambariServer;
-    @ApiModelProperty(InstanceMetaDataModelDescription.DOCKER_SUBNET)
-    private String dockerSubnet;
     @ApiModelProperty(InstanceMetaDataModelDescription.DISCOVERY_FQDN)
     private String discoveryFQDN;
-    @ApiModelProperty(InstanceMetaDataModelDescription.CONTAINER_COUNT)
-    private Integer containerCount;
     @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_GROUP_NAME)
     private String instanceGroup;
     @ApiModelProperty(InstanceGroupModelDescription.STATUS)
@@ -82,28 +78,12 @@ public class InstanceMetaDataJson implements JsonEntity {
         this.ambariServer = ambariServer;
     }
 
-    public String getDockerSubnet() {
-        return dockerSubnet;
-    }
-
-    public void setDockerSubnet(String dockerSubnet) {
-        this.dockerSubnet = dockerSubnet;
-    }
-
     public String getDiscoveryFQDN() {
         return discoveryFQDN;
     }
 
     public void setDiscoveryFQDN(String discoveryFQDN) {
         this.discoveryFQDN = discoveryFQDN;
-    }
-
-    public Integer getContainerCount() {
-        return containerCount;
-    }
-
-    public void setContainerCount(Integer containerCount) {
-        this.containerCount = containerCount;
     }
 
     public InstanceStatus getInstanceStatus() {

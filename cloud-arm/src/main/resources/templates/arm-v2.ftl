@@ -66,12 +66,12 @@
             "type": "string",
             "defaultValue": "${stackname}ipcn"
         },
-        <#list groups as instanceGroup>
-        <#list instanceGroup.instances as instance>
-        <#if instanceGroup.type == "GATEWAY">
+        <#list groups?keys as instanceGroup>
+        <#list groups[instanceGroup] as instance>
+        <#if instanceGroup == "GATEWAY">
         "gatewaystaticipname": {
             "type": "string",
-            "defaultValue": "${stackname}${instanceGroup.name?replace('_', '')}${instance.privateId}"
+            "defaultValue": "${stackname}${instance.instanceId}"
         },
         </#if>
         </#list>
@@ -89,6 +89,7 @@
       "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]",
       "staticIpRef": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('gatewaystaticipname'))]",
       "ilbBackendAddressPoolName": "${stackname}bapn",
+      "secGroupName": "${stackname}secgname",
       "lbID": "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName'))]",
       "sshIPConfig": "[concat(variables('lbID'),'/frontendIPConfigurations/', parameters('sshIPConfigName'))]",
       "ilbBackendAddressPoolID": "[concat(variables('lbID'),'/backendAddressPools/', variables('ilbBackendAddressPoolName'))]",
@@ -98,6 +99,9 @@
         {
               "apiVersion": "2015-05-01-preview",
               "type": "Microsoft.Network/virtualNetworks",
+              "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('secGroupName'))]"
+              ],
               "name": "[parameters('virtualNetworkNamePrefix')]",
               "location": "[parameters('region')]",
               "properties": {
@@ -110,19 +114,60 @@
                       {
                           "name": "[parameters('subnet1Name')]",
                           "properties": {
-                              "addressPrefix": "[parameters('subnet1Prefix')]"
+                              "addressPrefix": "[parameters('subnet1Prefix')]",
+                              "networkSecurityGroup": {
+                                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('secGroupName'))]"
+                              }
                           }
                       }
                   ]
               }
           },
-          <#list groups as instanceGroup>
-          <#list instanceGroup.instances as instance>
-              <#if instanceGroup.type == "GATEWAY">
+          {
+            "apiVersion": "2015-05-01-preview",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('secGroupName')]",
+            "location": "[parameters('region')]",
+            "properties": {
+            "securityRules": [
+                {
+                    "name": "endpoint1outr",
+                    "properties": {
+                        "protocol": "*",
+                        "sourcePortRange": "*",
+                        "destinationPortRange": "*",
+                        "sourceAddressPrefix": "*",
+                        "destinationAddressPrefix": "*",
+                        "access": "Allow",
+                        "priority": 101,
+                        "direction": "Outbound"
+                    }
+                },
+                <#list securities.ports as port>
+                {
+                    "name": "endpoint${port_index}inr",
+                    "properties": {
+                        "protocol": "${port.capitalProtocol}",
+                        "sourcePortRange": "*",
+                        "destinationPortRange": "${port.port}",
+                        "sourceAddressPrefix": "${port.cidr}",
+                        "destinationAddressPrefix": "*",
+                        "access": "Allow",
+                        "priority": ${port_index + 102},
+                        "direction": "Inbound"
+                    }
+                }<#if (port_index + 1) != securities.ports?size>,</#if>
+                </#list>
+                ]
+            }
+          },
+          <#list groups?keys as instanceGroup>
+          <#list groups[instanceGroup] as instance>
+              <#if instanceGroup == "GATEWAY">
               {
                     "apiVersion": "2015-05-01-preview",
                     "type": "Microsoft.Network/publicIPAddresses",
-                    "name": "[concat(parameters('publicIPNamePrefix'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}')]",
+                    "name": "[concat(parameters('publicIPNamePrefix'), '${instance.instanceId}')]",
                     "location": "[parameters('region')]",
                     "properties": {
                         "publicIPAllocationMethod": "Static"
@@ -134,7 +179,7 @@
                     "name": "[parameters('loadBalancerName')]",
                     "location": "[parameters('region')]",
                     "dependsOn": [
-                      "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPNamePrefix'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}')]"
+                      "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPNamePrefix'), '${instance.instanceId}')]"
                     ],
                     "properties": {
                       "frontendIPConfigurations": [
@@ -153,29 +198,29 @@
                         }
                       ],
                       "inboundNatRules": [
-                      <#list ports as port>
+                      <#list securities.ports as port>
                         {
                           "name": "endpoint${port_index}inr",
                           "properties": {
                             "frontendIPConfiguration": {
                               "id": "[variables('sshIPConfig')]"
                             },
-                            "protocol": "${port_protocol}",
-                            "frontendPort": "${port}",
-                            "backendPort": "${port}",
+                            "protocol": "${port.protocol}",
+                            "frontendPort": "${port.port}",
+                            "backendPort": "${port.port}",
                             "enableFloatingIP": false
                           }
-                        }<#if (port_index + 1) != ports?size>,</#if>
+                        }<#if (port_index + 1) != securities.ports?size>,</#if>
                         </#list>
                       ]
                     }
                   },
               </#if>
-              <#if instanceGroup.type == "CORE">
+              <#if instanceGroup == "CORE">
               {
                 "apiVersion": "2015-05-01-preview",
                 "type": "Microsoft.Network/publicIPAddresses",
-                "name": "[concat(parameters('publicIPNamePrefix'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}')]",
+                "name": "[concat(parameters('publicIPNamePrefix'), '${instance.instanceId}')]",
                 "location": "[parameters('region')]",
                 "properties": {
                     "publicIPAllocationMethod": "Dynamic"
@@ -186,13 +231,13 @@
               {
                 "apiVersion": "2015-05-01-preview",
                 "type": "Microsoft.Network/networkInterfaces",
-                "name": "[concat(parameters('nicNamePrefix'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}')]",
+                "name": "[concat(parameters('nicNamePrefix'), '${instance.instanceId}')]",
                 "location": "[parameters('region')]",
                 "dependsOn": [
-                    <#if instanceGroup.type == "CORE">
-                    "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPNamePrefix'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}')]",
+                    <#if instanceGroup == "CORE">
+                    "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPNamePrefix'), '${instance.instanceId}')]",
                     </#if>
-                    <#if instanceGroup.type == "GATEWAY">
+                    <#if instanceGroup == "GATEWAY">
                     "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]",
                     </#if>
                     "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkNamePrefix'))]"
@@ -203,25 +248,25 @@
                             "name": "ipconfig1",
                             "properties": {
                                 "privateIPAllocationMethod": "Dynamic",
-                                <#if instanceGroup.type == "CORE">
+                                <#if instanceGroup == "CORE">
                                 "publicIPAddress": {
-                                    "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(parameters('publicIPNamePrefix'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}'))]"
+                                    "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(parameters('publicIPNamePrefix'), '${instance.instanceId}'))]"
                                 },
                                 </#if>
                                 "subnet": {
                                     "id": "[variables('subnet1Ref')]"
                                 }
-                                <#if instanceGroup.type == "GATEWAY">
+                                <#if instanceGroup == "GATEWAY">
                                 ,"loadBalancerBackendAddressPools": [
                                     {
                                         "id": "[variables('ilbBackendAddressPoolID')]"
                                     }
                                 ],
                                 "loadBalancerInboundNatRules": [
-                                <#list ports as port>
+                                <#list securities.ports as port>
                                     {
                                         "id": "[concat(variables('lbID'),'/inboundNatRules/', 'endpoint${port_index}inr')]"
-                                    }<#if (port_index + 1) != ports?size>,</#if>
+                                    }<#if (port_index + 1) != securities.ports?size>,</#if>
                                 </#list>
                                 ]
                                 </#if>
@@ -234,17 +279,17 @@
               {
                 "apiVersion": "2015-05-01-preview",
                 "type": "Microsoft.Compute/virtualMachines",
-                "name": "[concat(parameters('vmNamePrefix'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}')]",
+                "name": "[concat(parameters('vmNamePrefix'), '${instance.instanceId}')]",
                 "location": "[parameters('region')]",
                 "dependsOn": [
-                    "[concat('Microsoft.Network/networkInterfaces/', parameters('nicNamePrefix'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}')]"
+                    "[concat('Microsoft.Network/networkInterfaces/', parameters('nicNamePrefix'), '${instance.instanceId}')]"
                 ],
                 "properties": {
                     "hardwareProfile": {
-                        "vmSize": "${instanceGroup.instances[0].flavor}"
+                        "vmSize": "${instance.flavor}"
                     },
                     "osProfile": {
-                        "computername": "[concat('vm', '${instanceGroup.name?replace('_', '')}', '${instance.privateId}')]",
+                        "computername": "[concat('vm', '${instance.instanceId}')]",
                         "adminUsername": "[parameters('adminUsername')]",
                         <#if disablePasswordAuthentication == false>
                         "adminPassword": "${adminPassword}",
@@ -262,33 +307,33 @@
                                 ]
                             }
                         },
-                        <#if instanceGroup.type == "CORE">
+                        <#if instanceGroup == "CORE">
                         "customData": "${corecustomData}"
                         </#if>
-                        <#if instanceGroup.type == "GATEWAY">
+                        <#if instanceGroup == "GATEWAY">
                         "customData": "${gatewaycustomData}"
                         </#if>
                     },
                     "storageProfile": {
                         "osDisk" : {
-                            "name" : "[concat(parameters('vmNamePrefix'),'-osDisk', '${instanceGroup.name?replace('_', '')}', '${instance.privateId}')]",
+                            "name" : "[concat(parameters('vmNamePrefix'),'-osDisk', '${instance.instanceId}')]",
                             "osType" : "linux",
                             "image" : {
                                 "uri" : "[variables('userImageName')]"
                             },
                             "vhd" : {
-                                "uri" : "[concat(variables('osDiskVhdName'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}','.vhd')]"
+                                "uri" : "[concat(variables('osDiskVhdName'), '${instance.instanceId}','.vhd')]"
                             },
                             "createOption": "FromImage"
                         },
                         "dataDisks": [
                         <#list instance.volumes as volume>
                             {
-                                "name": "[concat('datadisk', '${instanceGroup.name?replace('_', '')}', '${volume_index}', '${instance.privateId}')]",
+                                "name": "[concat('datadisk', '${instance.instanceId}', '${volume_index}')]",
                                 "diskSizeGB": ${volume.size},
                                 "lun":  ${volume_index},
                                 "vhd": {
-                                    "Uri": "[concat(variables('dataDiskVhdName'), 'datadisk', '${instanceGroup.name?replace('_', '')}', '${volume_index}', '${instance.privateId}', '.vhd')]"
+                                    "Uri": "[concat(variables('dataDiskVhdName'), 'datadisk', '${instance.instanceId}', '${volume_index}', '.vhd')]"
                                 },
                                 "caching": "None",
                                 "createOption": "Empty"
@@ -299,23 +344,12 @@
                     "networkProfile": {
                         "networkInterfaces": [
                             {
-                                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'), '${instanceGroup.name?replace('_', '')}', '${instance.privateId}'))]"
+                                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'), '${instance.instanceId}'))]"
                             }
-                        ],
-                        "inputEndpoints": [
-                            <#list ports as port>
-                            {
-                                "enableDirectServerReturn": "False",
-                                "endpointName": "endpoint${port_index}",
-                                "privatePort": ${port},
-                                "publicPort": ${port},
-                                "protocol": "${port_protocol}"
-                            }<#if (port_index + 1) != ports?size>,</#if>
-                            </#list>
                         ]
                     }
                 }
-              }<#if (instance_index + 1) != instanceGroup.instances?size>,</#if>
+              }<#if (instance_index + 1) != groups[instanceGroup]?size>,</#if>
           </#list>
           <#if (instanceGroup_index + 1) != groups?size>,</#if>
           </#list>

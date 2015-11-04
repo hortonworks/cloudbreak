@@ -104,6 +104,8 @@ public class AwsResourceConnector implements ResourceConnector {
     private CloudFormationTemplateBuilder cloudFormationTemplateBuilder;
     @Inject
     private AwsPollTaskFactory awsPollTaskFactory;
+    @Inject
+    private CloudFormationStackUtil cloudFormationStackUtil;
 
     @Value("${cb.aws.cf.template.new.path:" + CB_AWS_CF_TEMPLATE_PATH + "}")
     private String awsCloudformationTemplatePath;
@@ -157,14 +159,17 @@ public class AwsResourceConnector implements ResourceConnector {
 
         CloudResource reservedIp = new CloudResource.Builder().type(ResourceType.AWS_RESERVED_IP).name(allocateAddressResult.getAllocationId()).build();
         resourceNotifier.notifyAllocation(reservedIp, ac.getCloudContext());
-        List<String> instanceIds = cfStackUtil.getInstanceIds(ac, amazonASClient, client,
-                cfStackUtil.getAutoscalingGroupName(ac, client, stack.getGroups().get(0).getName()));
+        List<String> instanceIds = cfStackUtil.getInstanceIds(amazonASClient, cfStackUtil.getAutoscalingGroupName(ac, client, stack.getGroups().get(0)
+                .getName()));
         if (!instanceIds.isEmpty()) {
             AssociateAddressRequest associateAddressRequest = new AssociateAddressRequest()
                     .withAllocationId(allocateAddressResult.getAllocationId())
                     .withInstanceId(instanceIds.get(0));
             amazonEC2Client.associateAddress(associateAddressRequest);
         }
+        AmazonCloudFormationClient cloudFormationClient = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
+        scheduleStatusChecks(stack, ac, cloudFormationClient);
         suspendAutoScaling(ac, stack);
         return check(ac, Arrays.asList(reservedIp));
     }
@@ -285,7 +290,8 @@ public class AwsResourceConnector implements ResourceConnector {
 
     private boolean isEncryptedVolumeRequested(CloudStack stack) {
         for (Group group : stack.getGroups()) {
-            for (InstanceTemplate instanceTemplate : group.getInstances()) {
+            for (CloudInstance cloudInstance : group.getInstances()) {
+                InstanceTemplate instanceTemplate = cloudInstance.getTemplate();
                 if (instanceTemplate.getParameter("encrypted", AwsEncryption.class).equals(AwsEncryption.TRUE)) {
                     return true;
                 }
@@ -428,19 +434,10 @@ public class AwsResourceConnector implements ResourceConnector {
                     .withDesiredCapacity(group.getInstances().size()));
             LOGGER.info("Updated Auto Scaling group's desiredCapacity: [stack: '{}', to: '{}']", ac.getCloudContext().getId(),
                     resources.size());
-            LOGGER.info("Polling Auto Scaling group until new instances are ready. [stack: {}, asGroup: {}]", ac.getCloudContext().getId(),
-                    asGroupName);
-            PollTask<Boolean> task = awsPollTaskFactory.newASGroupStatusCheckerTask(ac, asGroupName, group.getInstances().size(), awsClient, cfStackUtil);
-            try {
-                Boolean statePollerResult = task.call();
-                if (!task.completed(statePollerResult)) {
-                    syncPollingScheduler.schedule(task);
-                }
-            } catch (Exception e) {
-                throw new CloudConnectorException(e.getMessage(), e);
-            }
         }
+        scheduleStatusChecks(stack, ac, cloudFormationClient);
         suspendAutoScaling(ac, stack);
+
         return Arrays.asList(new CloudResourceStatus(getCloudFormationStackResource(resources), ResourceStatus.UPDATED));
     }
 
@@ -463,6 +460,26 @@ public class AwsResourceConnector implements ResourceConnector {
         amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(instanceIds));
         LOGGER.info("Terminated instances in stack '{}': '{}'", auth.getCloudContext().getId(), instanceIds);
         return check(auth, resources);
+    }
+
+    private void scheduleStatusChecks(CloudStack stack, AuthenticatedContext ac, AmazonCloudFormationClient cloudFormationClient) {
+
+        for (Group group : stack.getGroups()) {
+            String asGroupName = cfStackUtil.getAutoscalingGroupName(ac, cloudFormationClient, group.getName());
+            LOGGER.info("Polling Auto Scaling group until new instances are ready. [stack: {}, asGroup: {}]", ac.getCloudContext().getId(),
+                    asGroupName);
+            PollTask<Boolean> task = awsPollTaskFactory.newASGroupStatusCheckerTask(ac, asGroupName, group.getInstances().size(), awsClient, cfStackUtil);
+            try {
+                Boolean statePollerResult = task.call();
+                if (!task.completed(statePollerResult)) {
+                    syncPollingScheduler.schedule(task);
+                }
+            } catch (Exception e) {
+                throw new CloudConnectorException(e.getMessage(), e);
+            }
+        }
+
+
     }
 
     private CloudResource getCloudFormationStackResource(List<CloudResource> cloudResources) {

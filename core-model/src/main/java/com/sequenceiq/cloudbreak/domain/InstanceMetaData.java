@@ -73,11 +73,9 @@ public class InstanceMetaData implements ProvisionEntity {
     private String instanceId;
     private Boolean ambariServer;
     private Boolean consulServer;
-    private String dockerSubnet;
     private String discoveryFQDN;
     @Enumerated(EnumType.STRING)
     private InstanceStatus instanceStatus;
-    private Integer containerCount = 0;
     @ManyToOne
     private InstanceGroup instanceGroup;
     private Long startDate;
@@ -151,14 +149,6 @@ public class InstanceMetaData implements ProvisionEntity {
         this.ambariServer = ambariServer;
     }
 
-    public String getDockerSubnet() {
-        return dockerSubnet;
-    }
-
-    public void setDockerSubnet(String dockerSubnet) {
-        this.dockerSubnet = dockerSubnet;
-    }
-
     public String getDiscoveryFQDN() {
         return discoveryFQDN;
     }
@@ -177,14 +167,6 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setInstanceStatus(InstanceStatus instanceStatus) {
         this.instanceStatus = instanceStatus;
-    }
-
-    public Integer getContainerCount() {
-        return containerCount;
-    }
-
-    public void setContainerCount(Integer containerCount) {
-        this.containerCount = containerCount;
     }
 
     public Long getStartDate() {

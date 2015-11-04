@@ -30,15 +30,16 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
+import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration;
-import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
-import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
-import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariAgentBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariServerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariServerDatabaseBootstrap;
@@ -121,65 +122,73 @@ public class SwarmContainerOrchestratorTest {
     @Test
     public void bootstrapClusterWhenEverythingWorksFine() throws Exception {
         when(munchausenBootstrap.call()).thenReturn(true);
-        doReturn(munchausenBootstrap).when(underTestSpy).munchausenBootstrap(any(GatewayConfig.class), any(String[].class));
+        doReturn(munchausenBootstrap).when(underTestSpy).munchausenBootstrap(any(GatewayConfig.class), any(String.class), any(String[].class));
 
-        underTestSpy.bootstrap(gatewayConfig(), generateNodes(FIX_NODE_COUNT), FIX_CONSUL_SERVER_COUNT, CONSUL_LOG_PATH, exitCriteriaModel());
+        underTestSpy.bootstrap(gatewayConfig(), new ContainerConfig("seq/a", "v1.10"), generateNodes(FIX_NODE_COUNT), FIX_CONSUL_SERVER_COUNT, CONSUL_LOG_PATH,
+                exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorCancelledException.class)
     public void bootstrapClusterWhenOrchestratorCancelled() throws Exception {
         when(munchausenBootstrap.call()).thenThrow(new CloudbreakOrchestratorCancelledException("cancelled"));
-        doReturn(munchausenBootstrap).when(underTestSpy).munchausenBootstrap(any(GatewayConfig.class), any(String[].class));
+        doReturn(munchausenBootstrap).when(underTestSpy).munchausenBootstrap(any(GatewayConfig.class), any(String.class), any(String[].class));
 
-        underTestSpy.bootstrap(gatewayConfig(), generateNodes(FIX_NODE_COUNT), FIX_CONSUL_SERVER_COUNT, CONSUL_LOG_PATH, exitCriteriaModel());
+        underTestSpy.bootstrap(gatewayConfig(), new ContainerConfig("seq/a", "v1.10"), generateNodes(FIX_NODE_COUNT), FIX_CONSUL_SERVER_COUNT, CONSUL_LOG_PATH,
+                exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
     public void bootstrapClusterWhenOrchestratorFailed() throws Exception {
         when(munchausenBootstrap.call()).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
-        doReturn(munchausenBootstrap).when(underTestSpy).munchausenBootstrap(any(GatewayConfig.class), any(String[].class));
+        doReturn(munchausenBootstrap).when(underTestSpy).munchausenBootstrap(any(GatewayConfig.class), any(String.class), any(String[].class));
 
-        underTestSpy.bootstrap(gatewayConfig(), generateNodes(FIX_NODE_COUNT), FIX_CONSUL_SERVER_COUNT, CONSUL_LOG_PATH, exitCriteriaModel());
+        underTestSpy.bootstrap(gatewayConfig(), new ContainerConfig("seq/a", "v1.10"), generateNodes(FIX_NODE_COUNT), FIX_CONSUL_SERVER_COUNT, CONSUL_LOG_PATH,
+                exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
     public void bootstrapClusterWhenNullPointerOccurredAndOrchestratorFailedComes() throws Exception {
         when(munchausenBootstrap.call()).thenThrow(new NullPointerException("null"));
-        doReturn(munchausenBootstrap).when(underTestSpy).munchausenBootstrap(any(GatewayConfig.class), any(String[].class));
+        doReturn(munchausenBootstrap).when(underTestSpy).munchausenBootstrap(any(GatewayConfig.class), any(String.class), any(String[].class));
 
-        underTestSpy.bootstrap(gatewayConfig(), generateNodes(FIX_NODE_COUNT), FIX_CONSUL_SERVER_COUNT, CONSUL_LOG_PATH, exitCriteriaModel());
+        underTestSpy.bootstrap(gatewayConfig(), new ContainerConfig("seq/a", "v1.10"), generateNodes(FIX_NODE_COUNT), FIX_CONSUL_SERVER_COUNT, CONSUL_LOG_PATH,
+                exitCriteriaModel());
     }
 
     @Test
     public void bootstrapNewNodesInClusterWhenEverythingWorksFine() throws Exception {
         when(munchausenBootstrap.call()).thenReturn(true);
-        doReturn(munchausenBootstrap).when(underTestSpy).munchausenNewNodeBootstrap(any(GatewayConfig.class), any(String[].class));
+        doReturn(munchausenBootstrap).when(underTestSpy).munchausenNewNodeBootstrap(any(GatewayConfig.class), any(String.class), any(String[].class));
 
-        underTestSpy.bootstrapNewNodes(gatewayConfig(), generateNodes(FIX_NODE_COUNT), CONSUL_LOG_PATH, exitCriteriaModel());
+        underTestSpy.bootstrapNewNodes(gatewayConfig(), new ContainerConfig("seq/a", "v1.10"), generateNodes(FIX_NODE_COUNT), CONSUL_LOG_PATH,
+                exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorCancelledException.class)
     public void bootstrapNewNodesInClusterWhenOrchestratorCancelled() throws Exception {
         when(munchausenBootstrap.call()).thenThrow(new CloudbreakOrchestratorCancelledException("cancelled"));
-        doReturn(munchausenBootstrap).when(underTestSpy).munchausenNewNodeBootstrap(any(GatewayConfig.class), any(String[].class));
+        doReturn(munchausenBootstrap).when(underTestSpy).munchausenNewNodeBootstrap(any(GatewayConfig.class), any(String.class), any(String[].class));
 
-        underTestSpy.bootstrapNewNodes(gatewayConfig(), generateNodes(FIX_NODE_COUNT), CONSUL_LOG_PATH, exitCriteriaModel());
+        underTestSpy.bootstrapNewNodes(gatewayConfig(), new ContainerConfig("seq/a", "v1.10"), generateNodes(FIX_NODE_COUNT), CONSUL_LOG_PATH,
+                exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
     public void bootstrapNewNodesInClusterWhenOrchestratorFailed() throws Exception {
         when(munchausenBootstrap.call()).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
-        doReturn(munchausenBootstrap).when(underTestSpy).munchausenNewNodeBootstrap(any(GatewayConfig.class), any(String[].class));
+        doReturn(munchausenBootstrap).when(underTestSpy).munchausenNewNodeBootstrap(any(GatewayConfig.class), any(String.class), any(String[].class));
 
-        underTestSpy.bootstrapNewNodes(gatewayConfig(), generateNodes(FIX_NODE_COUNT), CONSUL_LOG_PATH, exitCriteriaModel());
+        underTestSpy.bootstrapNewNodes(gatewayConfig(), new ContainerConfig("seq/a", "v1.10"), generateNodes(FIX_NODE_COUNT), CONSUL_LOG_PATH,
+                exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
     public void bootstrapNewNodesInClusterWhenNullPointerOccurredAndOrchestratorFailedComes() throws Exception {
         when(munchausenBootstrap.call()).thenThrow(new NullPointerException("null"));
-        doReturn(munchausenBootstrap).when(underTestSpy).munchausenNewNodeBootstrap(any(GatewayConfig.class), any(String[].class));
+        doReturn(munchausenBootstrap).when(underTestSpy).munchausenNewNodeBootstrap(any(GatewayConfig.class), any(String.class), any(String[].class));
 
-        underTestSpy.bootstrapNewNodes(gatewayConfig(), generateNodes(FIX_NODE_COUNT), CONSUL_LOG_PATH, exitCriteriaModel());
+        underTestSpy.bootstrapNewNodes(gatewayConfig(), new ContainerConfig("seq/a", "v1.10"), generateNodes(FIX_NODE_COUNT), CONSUL_LOG_PATH,
+                exitCriteriaModel());
     }
 
     @Test
@@ -187,7 +196,8 @@ public class SwarmContainerOrchestratorTest {
         when(registratorBootstrap.call()).thenReturn(true);
         doReturn(registratorBootstrap).when(underTestSpy).registratorBootstrap(any(GatewayConfig.class), anyString(), any(Node.class));
 
-        underTestSpy.startRegistrator(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "registrator", exitCriteriaModel());
+        underTestSpy.startRegistrator(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("registrator",
+                "0.0.1"), exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorCancelledException.class)
@@ -195,7 +205,8 @@ public class SwarmContainerOrchestratorTest {
         when(registratorBootstrap.call()).thenThrow(new CloudbreakOrchestratorCancelledException("cancelled"));
         doReturn(registratorBootstrap).when(underTestSpy).registratorBootstrap(any(GatewayConfig.class), anyString(), any(Node.class));
 
-        underTestSpy.startRegistrator(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "registrator", exitCriteriaModel());
+        underTestSpy.startRegistrator(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("registrator",
+                "0.0.1"), exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -203,7 +214,8 @@ public class SwarmContainerOrchestratorTest {
         when(registratorBootstrap.call()).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
         doReturn(registratorBootstrap).when(underTestSpy).registratorBootstrap(any(GatewayConfig.class), anyString(), any(Node.class));
 
-        underTestSpy.startRegistrator(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "registrator", exitCriteriaModel());
+        underTestSpy.startRegistrator(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("registrator",
+                "0.0.1"), exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -211,7 +223,8 @@ public class SwarmContainerOrchestratorTest {
         when(registratorBootstrap.call()).thenThrow(new NullPointerException("null"));
         doReturn(registratorBootstrap).when(underTestSpy).registratorBootstrap(any(GatewayConfig.class), anyString(), any(Node.class));
 
-        underTestSpy.startRegistrator(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "registrator", exitCriteriaModel());
+        underTestSpy.startRegistrator(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("registrator",
+                "0.0.1"), exitCriteriaModel());
     }
 
     @Test
@@ -224,7 +237,7 @@ public class SwarmContainerOrchestratorTest {
                 any(Node.class), any(LogVolumePath.class));
 
         underTestSpy.startAmbariServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)),
-                "serverdb", "server", "azure", generateLogVolume(), false, exitCriteriaModel());
+                new ContainerConfig("serverdb", "0.0.1"), new ContainerConfig("serverdb", "0.0.1"), "azure", generateLogVolume(), false, exitCriteriaModel());
     }
 
     @Test
@@ -240,7 +253,7 @@ public class SwarmContainerOrchestratorTest {
                 any(Node.class), any(LogVolumePath.class));
 
         underTestSpy.startAmbariServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)),
-                "serverdb", "server", "azure", generateLogVolume(), true, exitCriteriaModel());
+                new ContainerConfig("serverdb", "0.0.1"), new ContainerConfig("serverdb", "0.0.1"), "azure", generateLogVolume(), true, exitCriteriaModel());
 
         verify(underTestSpy, times(1)).ambariAgentBootstrap(any(GatewayConfig.class), anyString(),
                 any(Node.class), anyString(), anyString(), any(LogVolumePath.class));
@@ -256,7 +269,7 @@ public class SwarmContainerOrchestratorTest {
                 any(Node.class), any(LogVolumePath.class));
 
         underTestSpy.startAmbariServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)),
-                "serverdb", "server", "azure", generateLogVolume(), false, exitCriteriaModel());
+                new ContainerConfig("serverdb", "0.0.1"), new ContainerConfig("serverdb", "0.0.1"), "azure", generateLogVolume(), false, exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -269,7 +282,7 @@ public class SwarmContainerOrchestratorTest {
                 any(LogVolumePath.class));
 
         underTestSpy.startAmbariServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)),
-                "serverdb", "server", "azure", generateLogVolume(), false, exitCriteriaModel());
+                new ContainerConfig("serverdb", "0.0.1"), new ContainerConfig("serverdb", "0.0.1"), "azure", generateLogVolume(), false, exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -282,7 +295,7 @@ public class SwarmContainerOrchestratorTest {
                 any(Node.class), any(LogVolumePath.class));
 
         underTestSpy.startAmbariServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)),
-                "serverdb", "server", "azure", generateLogVolume(), false, exitCriteriaModel());
+                new ContainerConfig("serverdb", "0.0.1"), new ContainerConfig("serverdb", "0.0.1"), "azure", generateLogVolume(), false, exitCriteriaModel());
     }
 
     @Test
@@ -291,8 +304,8 @@ public class SwarmContainerOrchestratorTest {
         doReturn(ambariAgentBootstrap).when(underTestSpy).ambariAgentBootstrap(any(GatewayConfig.class), anyString(),
                 any(Node.class), anyString(), anyString(), any(LogVolumePath.class));
 
-        underTestSpy.startAmbariAgents(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "agent", "azure", generateLogVolume(),
-                exitCriteriaModel());
+        underTestSpy.startAmbariAgents(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("agent", "0.0.1"),
+                "azure", generateLogVolume(), exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -301,8 +314,8 @@ public class SwarmContainerOrchestratorTest {
         doReturn(ambariAgentBootstrap).when(underTestSpy).ambariAgentBootstrap(any(GatewayConfig.class), anyString(),
                 any(Node.class), anyString(), anyString(), any(LogVolumePath.class));
 
-        underTestSpy.startAmbariAgents(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "agent", "azure", generateLogVolume(),
-                exitCriteriaModel());
+        underTestSpy.startAmbariAgents(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("agent", "0.0.1"),
+                "azure", generateLogVolume(), exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -311,8 +324,8 @@ public class SwarmContainerOrchestratorTest {
         doReturn(ambariAgentBootstrap).when(underTestSpy).ambariAgentBootstrap(any(GatewayConfig.class), anyString(),
                 any(Node.class), anyString(), anyString(), any(LogVolumePath.class));
 
-        underTestSpy.startAmbariAgents(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "agent", "azure", generateLogVolume(),
-                exitCriteriaModel());
+        underTestSpy.startAmbariAgents(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("agent", "0.0.1"),
+                "azure", generateLogVolume(), exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -321,8 +334,8 @@ public class SwarmContainerOrchestratorTest {
         doReturn(ambariAgentBootstrap).when(underTestSpy).ambariAgentBootstrap(any(GatewayConfig.class), anyString(),
                 any(Node.class), anyString(), anyString(), any(LogVolumePath.class));
 
-        underTestSpy.startAmbariAgents(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "agent", "azure", generateLogVolume(),
-                exitCriteriaModel());
+        underTestSpy.startAmbariAgents(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("agent", "0.0.1"),
+                "azure", generateLogVolume(), exitCriteriaModel());
     }
 
     @Test
@@ -330,7 +343,8 @@ public class SwarmContainerOrchestratorTest {
         when(logrotateBootsrap.call()).thenReturn(true);
         doReturn(logrotateBootsrap).when(underTestSpy).logrotateBootsrap(any(GatewayConfig.class), anyString(), any(Node.class), anyString());
 
-        underTestSpy.startLogrotate(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "rotate", exitCriteriaModel());
+        underTestSpy.startLogrotate(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("rotate", "0.0.1"),
+                exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -338,7 +352,8 @@ public class SwarmContainerOrchestratorTest {
         when(logrotateBootsrap.call()).thenThrow(new CloudbreakOrchestratorCancelledException("cancelled"));
         doReturn(logrotateBootsrap).when(underTestSpy).logrotateBootsrap(any(GatewayConfig.class), anyString(), any(Node.class), anyString());
 
-        underTestSpy.startLogrotate(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "rotate", exitCriteriaModel());
+        underTestSpy.startLogrotate(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("rotate", "0.0.1"),
+                exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -346,7 +361,8 @@ public class SwarmContainerOrchestratorTest {
         when(logrotateBootsrap.call()).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
         doReturn(logrotateBootsrap).when(underTestSpy).logrotateBootsrap(any(GatewayConfig.class), anyString(), any(Node.class), anyString());
 
-        underTestSpy.startLogrotate(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "rotate", exitCriteriaModel());
+        underTestSpy.startLogrotate(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("rotate", "0.0.1"),
+                exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -354,7 +370,8 @@ public class SwarmContainerOrchestratorTest {
         when(logrotateBootsrap.call()).thenThrow(new NullPointerException("null"));
         doReturn(logrotateBootsrap).when(underTestSpy).logrotateBootsrap(any(GatewayConfig.class), anyString(), any(Node.class), anyString());
 
-        underTestSpy.startLogrotate(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "rotate", exitCriteriaModel());
+        underTestSpy.startLogrotate(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("rotate", "0.0.1"),
+                exitCriteriaModel());
     }
 
     @Test
@@ -363,8 +380,8 @@ public class SwarmContainerOrchestratorTest {
         doReturn(consulWatchBootstrap).when(underTestSpy).consulWatchBootstrap(any(GatewayConfig.class), anyString(),
                 any(Node.class), anyString(), any(LogVolumePath.class));
 
-        underTestSpy.startConsulWatches(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "watch", generateLogVolume(),
-                exitCriteriaModel());
+        underTestSpy.startConsulWatches(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("watch", "0.0.1"),
+                generateLogVolume(), exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -373,8 +390,8 @@ public class SwarmContainerOrchestratorTest {
         doReturn(consulWatchBootstrap).when(underTestSpy).consulWatchBootstrap(any(GatewayConfig.class), anyString(),
                 any(Node.class), anyString(), any(LogVolumePath.class));
 
-        underTestSpy.startConsulWatches(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "watch", generateLogVolume(),
-                exitCriteriaModel());
+        underTestSpy.startConsulWatches(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("watch", "0.0.1"),
+                generateLogVolume(), exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -383,8 +400,8 @@ public class SwarmContainerOrchestratorTest {
         doReturn(consulWatchBootstrap).when(underTestSpy).consulWatchBootstrap(any(GatewayConfig.class), anyString(),
                 any(Node.class), anyString(), any(LogVolumePath.class));
 
-        underTestSpy.startConsulWatches(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "watch", generateLogVolume(),
-                exitCriteriaModel());
+        underTestSpy.startConsulWatches(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("watch", "0.0.1"),
+                generateLogVolume(), exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -393,8 +410,8 @@ public class SwarmContainerOrchestratorTest {
         doReturn(consulWatchBootstrap).when(underTestSpy).consulWatchBootstrap(any(GatewayConfig.class), anyString(),
                 any(Node.class), anyString(), any(LogVolumePath.class));
 
-        underTestSpy.startConsulWatches(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "watch", generateLogVolume(),
-                exitCriteriaModel());
+        underTestSpy.startConsulWatches(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("watch", "0.0.1"),
+                generateLogVolume(), exitCriteriaModel());
     }
 
     @Test
@@ -403,8 +420,8 @@ public class SwarmContainerOrchestratorTest {
         doReturn(kerberosServerBootstrap).when(underTestSpy).kerberosServerBootstrap(any(KerberosConfiguration.class), any(GatewayConfig.class), anyString(),
                 any(Node.class), any(LogVolumePath.class));
 
-        underTestSpy.startKerberosServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "bserver", generateLogVolume(),
-                new KerberosConfiguration("", "", ""), exitCriteriaModel());
+        underTestSpy.startKerberosServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bserver", "0.0.1"),
+                generateLogVolume(), new KerberosConfiguration("", "", ""), exitCriteriaModel());
     }
 
     @Test
@@ -413,8 +430,8 @@ public class SwarmContainerOrchestratorTest {
         doReturn(kerberosServerBootstrap).when(underTestSpy).kerberosServerBootstrap(any(KerberosConfiguration.class), any(GatewayConfig.class), anyString(),
                 any(Node.class), any(LogVolumePath.class));
 
-        underTestSpy.startKerberosServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "bserver", generateLogVolume(),
-                new KerberosConfiguration("", "", ""), exitCriteriaModel());
+        underTestSpy.startKerberosServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bserver", "0.0.1"),
+                generateLogVolume(), new KerberosConfiguration("", "", ""), exitCriteriaModel());
     }
 
     @Test
@@ -423,8 +440,8 @@ public class SwarmContainerOrchestratorTest {
         doReturn(kerberosServerBootstrap).when(underTestSpy).kerberosServerBootstrap(any(KerberosConfiguration.class), any(GatewayConfig.class), anyString(),
                 any(Node.class), any(LogVolumePath.class));
 
-        underTestSpy.startKerberosServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "bserver", generateLogVolume(),
-                new KerberosConfiguration("", "", ""), exitCriteriaModel());
+        underTestSpy.startKerberosServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bserver", "0.0.1"),
+                generateLogVolume(), new KerberosConfiguration("", "", ""), exitCriteriaModel());
     }
 
     @Test
@@ -433,8 +450,8 @@ public class SwarmContainerOrchestratorTest {
         doReturn(kerberosServerBootstrap).when(underTestSpy).kerberosServerBootstrap(any(KerberosConfiguration.class), any(GatewayConfig.class), anyString(),
                 any(Node.class), any(LogVolumePath.class));
 
-        underTestSpy.startKerberosServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "bserver", generateLogVolume(),
-                new KerberosConfiguration("", "", ""), exitCriteriaModel());
+        underTestSpy.startKerberosServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bserver", "0.0.1"),
+                generateLogVolume(), new KerberosConfiguration("", "", ""), exitCriteriaModel());
     }
 
     @Test
@@ -442,7 +459,8 @@ public class SwarmContainerOrchestratorTest {
         when(baywatchServerBootstrap.call()).thenReturn(true);
         doReturn(baywatchServerBootstrap).when(underTestSpy).baywatchServerBootstrap(any(GatewayConfig.class), anyString(), any(Node.class));
 
-        underTestSpy.startBaywatchServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "bserver", exitCriteriaModel());
+        underTestSpy.startBaywatchServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bserver", "0.0.1"),
+                exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorCancelledException.class)
@@ -450,7 +468,8 @@ public class SwarmContainerOrchestratorTest {
         when(baywatchServerBootstrap.call()).thenThrow(new CloudbreakOrchestratorCancelledException("cancelled"));
         doReturn(baywatchServerBootstrap).when(underTestSpy).baywatchServerBootstrap(any(GatewayConfig.class), anyString(), any(Node.class));
 
-        underTestSpy.startBaywatchServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "bserver", exitCriteriaModel());
+        underTestSpy.startBaywatchServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bserver", "0.0.1"),
+                exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -458,7 +477,8 @@ public class SwarmContainerOrchestratorTest {
         when(baywatchServerBootstrap.call()).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
         doReturn(baywatchServerBootstrap).when(underTestSpy).baywatchServerBootstrap(any(GatewayConfig.class), anyString(), any(Node.class));
 
-        underTestSpy.startBaywatchServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "bserver", exitCriteriaModel());
+        underTestSpy.startBaywatchServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bserver", "0.0.1"),
+                exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -466,7 +486,8 @@ public class SwarmContainerOrchestratorTest {
         when(baywatchServerBootstrap.call()).thenThrow(new NullPointerException("null"));
         doReturn(baywatchServerBootstrap).when(underTestSpy).baywatchServerBootstrap(any(GatewayConfig.class), anyString(), any(Node.class));
 
-        underTestSpy.startBaywatchServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "bserver", exitCriteriaModel());
+        underTestSpy.startBaywatchServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bserver", "0.0.1"),
+                exitCriteriaModel());
     }
 
     @Test
@@ -475,8 +496,8 @@ public class SwarmContainerOrchestratorTest {
         doReturn(baywatchClientBootstrap).when(underTestSpy).baywatchClientBootstrap(any(GatewayConfig.class), anyString(), anyString(),
                 any(Node.class), anyString(), any(LogVolumePath.class), anyString());
 
-        underTestSpy.startBaywatchClients(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "bclient", "consuldomain",
-                generateLogVolume(), "externallocation", exitCriteriaModel());
+        underTestSpy.startBaywatchClients(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)),
+                new ContainerConfig("bserver", "0.0.1"), "consuldomain", generateLogVolume(), "externallocation", exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -485,8 +506,8 @@ public class SwarmContainerOrchestratorTest {
         doReturn(baywatchClientBootstrap).when(underTestSpy).baywatchClientBootstrap(any(GatewayConfig.class), anyString(), anyString(),
                 any(Node.class), anyString(), any(LogVolumePath.class), anyString());
 
-        underTestSpy.startBaywatchClients(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "bclient", "consuldomain",
-                generateLogVolume(), "externallocation", exitCriteriaModel());
+        underTestSpy.startBaywatchClients(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)),
+                new ContainerConfig("bserver", "0.0.1"), "consuldomain", generateLogVolume(), "externallocation", exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -495,8 +516,8 @@ public class SwarmContainerOrchestratorTest {
         doReturn(baywatchClientBootstrap).when(underTestSpy).baywatchClientBootstrap(any(GatewayConfig.class), anyString(), anyString(),
                 any(Node.class), anyString(), any(LogVolumePath.class), anyString());
 
-        underTestSpy.startBaywatchClients(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "bclient", "consuldomain",
-                generateLogVolume(), "externallocation", exitCriteriaModel());
+        underTestSpy.startBaywatchClients(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bclient", "0.0.1"),
+                "consuldomain", generateLogVolume(), "externallocation", exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -505,8 +526,8 @@ public class SwarmContainerOrchestratorTest {
         doReturn(baywatchClientBootstrap).when(underTestSpy).baywatchClientBootstrap(any(GatewayConfig.class), anyString(), anyString(),
                 any(Node.class), anyString(), any(LogVolumePath.class), anyString());
 
-        underTestSpy.startBaywatchClients(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), "bclient", "consuldomain",
-                generateLogVolume(), "externallocation", exitCriteriaModel());
+        underTestSpy.startBaywatchClients(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bclient", "0.0.1"),
+                "consuldomain", generateLogVolume(), "externallocation", exitCriteriaModel());
     }
 
 
