@@ -19,6 +19,7 @@ You have the option to choose your favorite cloud provider and their different p
 
 <!--howitworks.md-->
 
+
 ##How it works?
 
 Cloudbreak launches on-demand Hadoop clusters on your favorite cloud provider in minutes. We have introduced 4 main notions - the core building blocks of the REST API.
@@ -30,7 +31,7 @@ Templates are cloud specific - and on top of the infrastructural setup they coll
 
 A template can be used repeatedly to create identical copies of the same stack (or to use as a foundation to start a new stack).
 
-The infrastructure specific configuration is available under the Cloudbreak [resources](https://github.com/sequenceiq/cloudbreak/blob/master/src/main/resources/templates).
+The infrastructure specific configuration is available under the Cloudbreak resources.
 As an example for Amazon EC2, we use [AWS Cloudformation](http://aws.amazon.com/cloudformation/) to define the cloud infrastructure.
 
 For further information please visit our [API documentation](https://cloudbreak-api.sequenceiq.com/api/index.html#/templates).

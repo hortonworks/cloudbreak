@@ -27,22 +27,13 @@ To run the Cloudbreak Deployer and install the Cloudbreak Application, you must 
 
 The full proceess to be able to use an HDP cluster includes the following steps:
 
-- **Cloudbreak Deployer Installation**: You need to install Cloudbreak Deployer which is a small cli tool called
-`cbd`. It will help you to deploy the CloudBreak Application consisting several Docker containers. You have
-finished this step if you can issue `cbd --version`.
-- **CloudBreak Deployment**: Once you have installed Cloudbreak Deployer (cbd), it will start up several
-Docker containers: CloudBreak API, CloudBreak UI (called Uluwatu), Identity Server, and supporting databases.
-You have finished this step, if you are able to login in your browser to Cloudbreak UI (Uluwatu).
-- **HDP Cluster Provisioning**: To be able to provision a HDP cluster, you will use the browser, to:
-  - Create Credentials: You give access to Cloudbreak, to act on behalf of you, and start resources on the
-    cloud provider.
-  - Create Resources: Optionally you can define infrastructure parameters, such as, instance type,
-    memory size, disk type/size, network ...
-  - Blueprint configuration: You can choose which Ambari Blueprint you want to use (or upload a custom one)
-    and assign hostgroups to resource types (created in the previous step)
-  - Create Cluster: You define the region, where you want to create the HDP cluster. Once Cloudbreak
-    recognize that Ambari Server is up and running, it posts the configured blueprint to it, which
-    triggers a cluster wide HDP component installation process.
+ * **Cloudbreak Deployer Installation**: You need to install Cloudbreak Deployer which is a small cli tool called `cbd`. It will help you to deploy the CloudBreak Application consisting several Docker containers. You have finished this step if you can issue `cbd --version`.
+ * **CloudBreak Deployment**: Once you have installed Cloudbreak Deployer (cbd), it will start up several Docker containers: CloudBreak API, CloudBreak UI (called Uluwatu), Identity Server, and supporting databases. You have finished this step, if you are able to login in your browser to Cloudbreak UI (Uluwatu).
+ * **HDP Cluster Provisioning**: To be able to provision a HDP cluster, you will use the browser, to:
+    * Create Credentials: You give access to Cloudbreak, to act on behalf of you, and start resources on the cloud provider.
+    * Create Resources: Optionally you can define infrastructure parameters, such as, instance type, memory size, disk type/size, network...
+    * Blueprint configuration: You can choose which Ambari Blueprint you want to use (or upload a custom one) and assign hostgroups to resource types (created in the previous step) 
+    * Create Cluster: You define the region, where you want to create the HDP cluster. Once Cloudbreak recognize that Ambari Server is up and running, it posts the configured blueprint to it, which triggers a cluster wide HDP component installation process.
 
 ##Installation
 
