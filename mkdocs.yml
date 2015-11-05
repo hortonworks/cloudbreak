@@ -8,11 +8,12 @@ pages:
         - Introduction : index.md
         - Technology : technology.md
         - Installation :
+            - On-prem: onprem.md
             - AWS: aws.md
             - Azure: azure.md
             - GCP: gcp.md
             - OpenStack: openstack.md
-            - On-prem: onprem.md
+        - Benefits : overview.md
     - Providers:
         - AWS :
             - Deployment: aws.md

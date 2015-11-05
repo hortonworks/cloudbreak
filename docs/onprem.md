@@ -1,4 +1,4 @@
-# Launch/configure your instance
+# Install Cloudbreak deployer
 
 To install Cloudbreak Deployer on your selected environment you have to follow the steps below.
 
