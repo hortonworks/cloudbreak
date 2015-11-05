@@ -47,8 +47,8 @@ public class ImageService {
         try {
             Component component = componentRepository.findComponentByStackIdComponentTypeName(stackId, ComponentType.IMAGE, IMAGE_NAME);
             if (component == null) {
-                throw new CloudbreakServiceException(String.format("Image not found: stackId: %d, componentType: %d, name: %d",
-                        stackId, ComponentType.IMAGE, IMAGE_NAME));
+                throw new CloudbreakServiceException(String.format("Image not found: stackId: %d, componentType: %s, name: %s",
+                        stackId, ComponentType.IMAGE.name(), IMAGE_NAME));
             }
             LOGGER.debug("Image found! stackId: {}, component: {}", stackId, component);
             return component.getAttributes().get(Image.class);
