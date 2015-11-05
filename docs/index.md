@@ -58,30 +58,14 @@ Uluwatu is a small [node.js](http://nodejs.org/) webapp with an [Angular.js](htt
 
 ###Running Uluwatu locally for development
 
-If you'd like to run Uluwatu on your local machine, you should have npm and node.js installed. After checking out the git repository, run `npm install` in Uluwatu's directory and set these environment variables:
-If you using the [cloudbreak-deployer](https://github.com/sequenceiq/cloudbreak-deployer) and you started with `cbd start` then the uluwatu container is running and the name is `cbreak_uluwatu_1` so you have to remove it with `docker rm -f cbreak_uluwatu_1`.
-After that you have to start an ambassador container with this command:
+If you'd like to run Uluwatu on your local machine, you should have npm and node.js installed. After checking out the git repository, run `npm install` in Uluwatu's directory.
 
+The easiest way to run development environment of Uluwatu is to use [cloudbreak-deployer](https://github.com/sequenceiq/cloudbreak-deployer).
+To configure local Uluwatu source location use ULUWATU_VOLUME_HOST variable in your Profile file.
 ```
-docker run -d -p 3000:3000 -e PORT=3000 -e SERVICE_NAME=uluwatu --name local_uluwatu_ambassador sequenceiq/ambassadord 192.168.59.3:3000
+export ULUWATU_VOLUME_HOST=/path/of/uluwatu/source
 ```
-> NOTE: Ambassador supports static forwards, DNS-based forwards (with SRV), Consul+Etcd based forwards, or forwards based on the connecting container's intended backend.
-
-Now you can start the local uluwatu just set some environment variable:
-
-```
-ULU_CLOUDBREAK_ADDRESS=http://192.168.59.103:9090
-ULU_PERISCOPE_ADDRESS=http://192.168.59.103:8085
-ULU_IDENTITY_ADDRESS=http://192.168.59.103:8089
-ULU_OAUTH_CLIENT_ID=uluwatu
-ULU_IDENTITY_PORT=443
-ULU_SULTANS_ADDRESS=http://192.168.59.103:3001
-ULU_HOST_ADDRESS=http://192.168.59.103:3000
-ULU_OAUTH_CLIENT_SECRET=cbsecret2015
-ULU_OAUTH_REDIRECT_URI=http://192.168.59.103:3000/authorize
-NODE_TLS_REJECT_UNAUTHORIZED=0
-```
-If the environment variables are set, simply run `node server.js`
+Please note that you need to (re)generate your config files after variable changed. After (re)generation you have to simply execute `cbd start` command.
 
 When you create a pull request please format your code with the `format.sh` script.
 
