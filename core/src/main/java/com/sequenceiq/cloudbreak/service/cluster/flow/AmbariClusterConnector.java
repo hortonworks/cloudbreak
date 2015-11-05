@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static com.sequenceiq.cloudbreak.common.type.CloudPlatform.AZURE_RM;
+import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_DB;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_SERVER;
@@ -44,6 +45,7 @@ import com.sequenceiq.ambari.client.AmbariConnectionException;
 import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.PluginExecutionType;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -51,7 +53,6 @@ import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.CloudbreakRecipeSetupException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.ClusterException;
 import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
@@ -214,13 +215,16 @@ public class AmbariClusterConnector {
             addHDFSRecipe(cluster, blueprintText, hostGroups);
 
             final boolean recipesFound = recipesFound(hostGroups);
-
-            preInstallRecipesRun(stack, hostGroups, recipesFound);
+            if (recipesFound) {
+                recipeEngine.setupRecipes(stack, hostGroups);
+                recipeEngine.executePreInstall(stack);
+            }
             ambariClient.createCluster(cluster.getName(), cluster.getBlueprint().getBlueprintName(), hostGroupMappings);
             PollingResult pollingResult = waitForClusterInstall(stack, ambariClient);
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
-
-            postInstallRecipesRun(stack, recipesFound);
+            if (recipesFound) {
+                recipeEngine.executePostInstall(stack);
+            }
             executeSmokeTest(stack, ambariClient);
             createDefaultViews(ambariClient, blueprintText, hostGroups);
             cluster = handleClusterCreationSuccess(stack, cluster);
@@ -247,20 +251,6 @@ public class AmbariClusterConnector {
         }
     }
 
-    private void postInstallRecipesRun(Stack stack, boolean recipesFound) throws CloudbreakSecuritySetupException, CloudbreakRecipeSetupException {
-        if (recipesFound) {
-            recipeEngine.executePostInstall(stack);
-        }
-    }
-
-    private void preInstallRecipesRun(Stack stack, Set<HostGroup> hostGroups, boolean recipesFound)
-            throws CloudbreakSecuritySetupException, CloudbreakRecipeSetupException {
-        if (recipesFound) {
-            recipeEngine.setupRecipes(stack, hostGroups);
-            recipeEngine.executePreInstall(stack);
-        }
-    }
-
     private void checkPollingResult(PollingResult pollingResult, String message) throws ClusterException {
         if (isExited(pollingResult)) {
             throw new CancellationException("Stack or cluster in delete in progress phase.");
@@ -269,8 +259,8 @@ public class AmbariClusterConnector {
         }
     }
 
-    public Set<String> installAmbariNode(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) throws CloudbreakSecuritySetupException {
-        Set<String> result = new HashSet<>();
+    public Set<HostMetadata> installAmbariNode(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) throws CloudbreakSecuritySetupException {
+        Set<String> successHosts = Collections.emptySet();
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
@@ -286,31 +276,50 @@ public class AmbariClusterConnector {
         Set<HostMetadata> hostMetadata = addHostMetadata(cluster, hosts, hostGroupAdjustment);
         Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
         PollingResult pollingResult = waitForHosts(stack, ambariClient, nodeCount, hostsInCluster);
-        if (SUCCESS.equals(pollingResult)) {
+        if (isSuccess(pollingResult)) {
             final boolean recipesFound = recipesFound(hostGroupAsSet);
-            if (recipesFound) {
-                recipeEngine.setupRecipesOnHosts(stack, hostGroup.getRecipes(), hostMetadata);
-                recipeEngine.executePreInstall(stack, hostMetadata);
-            }
-            try {
+            if (!recipesFound || prepareAndExecuteRecipes(true, stack, hostGroup, hostMetadata)) {
                 pollingResult = waitForAmbariOperations(stack, ambariClient, installServices(hosts, stack, ambariClient, hostGroupAdjustment));
                 if (isSuccess(pollingResult)) {
                     pollingResult = waitForAmbariOperations(stack, ambariClient, singletonMap("START_SERVICES", ambariClient.startAllServices()));
                     if (isSuccess(pollingResult)) {
                         pollingResult = restartHadoopServices(stack, ambariClient, false);
                         if (isSuccess(pollingResult)) {
-                            result.addAll(hosts);
-                            if (recipesFound) {
-                                recipeEngine.executePostInstall(stack, hostMetadata);
+                            successHosts = new HashSet<>(hosts);
+                            if (!prepareAndExecuteRecipes(false, stack, hostGroup, hostMetadata)) {
+                                eventService.fireCloudbreakEvent(stackId, UPDATE_FAILED.name(), "Post recipe installation failed.");
                             }
                         }
                     }
                 }
-            } catch (Exception ex) {
-                rollback(stack, cluster, ambariClient, hostGroupAdjustment, hostMetadata);
             }
         }
-        return result;
+        updateFailedHostMetaData(successHosts, hostMetadata);
+        return hostMetadata;
+    }
+
+    private boolean prepareAndExecuteRecipes(boolean preExecute, Stack stack, HostGroup hostGroup, Set<HostMetadata> hostMetadata) {
+        try {
+            if (preExecute) {
+                recipeEngine.setupRecipesOnHosts(stack, hostGroup.getRecipes(), hostMetadata);
+                recipeEngine.executePreInstall(stack, hostMetadata);
+            } else {
+                recipeEngine.executePostInstall(stack, hostMetadata);
+            }
+            return true;
+        } catch (CloudbreakSecuritySetupException e) {
+            LOGGER.error(e.getMessage());
+            return false;
+        }
+    }
+
+    private void updateFailedHostMetaData(Set<String> successHosts, Set<HostMetadata> hostMetadata) {
+        for (HostMetadata metaData : hostMetadata) {
+            if (!successHosts.contains(metaData.getHostName())) {
+                metaData.setHostMetadataState(HostMetadataState.UNHEALTHY);
+                hostMetadataRepository.save(metaData);
+            }
+        }
     }
 
     public AmbariClient getAmbariClientByStack(Stack stack) throws CloudbreakSecuritySetupException {
@@ -547,27 +556,6 @@ public class AmbariClusterConnector {
             }
         }
         return false;
-    }
-
-    private void rollback(Stack stack, Cluster cluster, AmbariClient ambariClient, HostGroupAdjustmentJson hostGroupAdjustment,
-            Set<HostMetadata> hostMetadata) throws CloudbreakSecuritySetupException {
-        Set<String> components = getHadoopComponents(cluster, ambariClient, hostGroupAdjustment.getHostGroup(),
-                cluster.getBlueprint().getBlueprintName());
-        Map<String, HostMetadata> hostsToRemove = new HashMap<>();
-        for (HostMetadata data : hostMetadata) {
-            hostsToRemove.put(data.getHostName(), data);
-        }
-        List<String> hostList = new ArrayList<>(hostsToRemove.keySet());
-        tryToDeleteHosts(stack, components, hostList);
-        PollingResult pollingResult = restartHadoopServices(stack, ambariClient, true);
-        if (isSuccess(pollingResult)) {
-            for (HostMetadata metadata : hostsToRemove.values()) {
-                HostMetadata hostMetaData = hostMetadataRepository.findHostInClusterByName(cluster.getId(), metadata.getHostName());
-                hostMetadataRepository.delete(hostMetaData.getId());
-                InstanceMetaData hostInStack = instanceMetadataRepository.findHostInStack(stack.getId(), metadata.getHostName());
-                instanceTerminationHandler.terminateInstance(stack, hostInStack);
-            }
-        }
     }
 
     private void tryToDeleteHosts(Stack stack, Set<String> components, List<String> hostList) {
@@ -886,6 +874,7 @@ public class AmbariClusterConnector {
             HostMetadata hostMetadataEntry = new HostMetadata();
             hostMetadataEntry.setHostName(host);
             hostMetadataEntry.setHostGroup(hostGroup);
+            hostMetadataRepository.save(hostMetadataEntry);
             hostMetadata.add(hostMetadataEntry);
         }
         hostGroup.getHostMetadata().addAll(hostMetadata);

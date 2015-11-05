@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.Status;
@@ -41,6 +42,7 @@ import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -284,10 +286,15 @@ public class AmbariClusterFacade implements ClusterFacade {
         MDCBuilder.buildMdcContext(cluster);
         stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Scaling up ambari cluster.");
         fireEventAndLog(stack.getId(), actualContext, Msg.AMBARI_CLUSTER_SCALING_UP, UPDATE_IN_PROGRESS.name());
-        Set<String> hostNames = ambariClusterConnector.installAmbariNode(stack.getId(), actualContext.getHostGroupAdjustment());
-        int failedNodes = actualContext.getHostGroupAdjustment().getScalingAdjustment() - hostNames.size();
-        boolean success = failedNodes == 0;
-        updateInstanceMetadataAfterScaling(false, hostNames, stack);
+        Set<HostMetadata> hostMetaData = ambariClusterConnector.installAmbariNode(stack.getId(), actualContext.getHostGroupAdjustment());
+        int failedHosts = 0;
+        for (HostMetadata hostMeta : hostMetaData) {
+            updateInstanceMetadataAfterScaling(false, hostMeta.getHostName(), stack);
+            if (hostMeta.getHostMetadataState() == HostMetadataState.UNHEALTHY) {
+                failedHosts++;
+            }
+        }
+        boolean success = failedHosts == 0;
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, success ? "Ambari cluster successfully upscaled." : "Ambari cluster upscale failed.");
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
         if (success) {
@@ -298,7 +305,7 @@ public class AmbariClusterFacade implements ClusterFacade {
             }
         } else {
             fireEventAndLog(stack.getId(), actualContext, Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added",
-                    String.format("Ambari upscale operation failed on %d node(s).", failedNodes));
+                    String.format("Ambari upscale operation failed on %d node(s).", failedHosts));
         }
         return context;
     }
@@ -524,13 +531,17 @@ public class AmbariClusterFacade implements ClusterFacade {
         }
     }
 
+    private void updateInstanceMetadataAfterScaling(boolean decommission, String hostName, Stack stack) {
+        if (decommission) {
+            stackService.updateMetaDataStatus(stack.getId(), hostName, InstanceStatus.DECOMMISSIONED);
+        } else {
+            stackService.updateMetaDataStatus(stack.getId(), hostName, InstanceStatus.REGISTERED);
+        }
+    }
+
     private void updateInstanceMetadataAfterScaling(boolean decommission, Set<String> hostNames, Stack stack) {
         for (String hostName : hostNames) {
-            if (decommission) {
-                stackService.updateMetaDataStatus(stack.getId(), hostName, InstanceStatus.DECOMMISSIONED);
-            } else {
-                stackService.updateMetaDataStatus(stack.getId(), hostName, InstanceStatus.REGISTERED);
-            }
+            updateInstanceMetadataAfterScaling(decommission, hostName, stack);
         }
     }
 
