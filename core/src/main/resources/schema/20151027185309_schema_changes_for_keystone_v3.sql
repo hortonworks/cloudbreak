@@ -1,6 +1,6 @@
 -- // schema changes for keystone v3
 -- Migration SQL that makes the change goes here.
-ALTER TABLE credential ADD COLUMN keystoneversion character varying(255);
+ALTER TABLE credential ADD COLUMN keystoneversion character varying(255) DEFAULT 'cb-keystone-v2';
 
 ALTER TABLE credential ADD COLUMN keystoneauthscope character varying(255);
 

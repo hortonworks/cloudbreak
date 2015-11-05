@@ -246,6 +246,7 @@ public class CredentialParametersValidatorTest {
         parameters.put(OpenStackCredentialParam.USER.getName(), "user");
         parameters.put(OpenStackCredentialParam.PASSWORD.getName(), "tenant");
         parameters.put(OpenStackCredentialParam.TENANT_NAME.getName(), "user");
+        parameters.put(OpenStackCredentialParam.KEYSTONE_VERSION.getName(), "cb-keystone-v2");
 
         credentialJson.setParameters(parameters);
         credentialJson.setPublicKey("ssh key");
