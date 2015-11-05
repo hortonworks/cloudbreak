@@ -30,10 +30,10 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
 
             if (successEvents.indexOf(eventType) > -1) {
                 $scope.showSuccess(notification.eventMessage, notification.stackName);
-                handleStatusChange(notification);
+                handleStatusChange(notification, true);
             } else if (errorEvents.indexOf(eventType) > -1) {
                 $scope.showErrorMessage(notification.eventMessage, notification.stackName);
-                handleStatusChange(notification);
+                handleStatusChange(notification, true);
             } else {
                 switch (eventType) {
                     case "DELETE_COMPLETED":
@@ -56,6 +56,7 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
                         break;
                     case "UPDATE_IN_PROGRESS":
                         handleUpdateInProgressNotification(notification);
+                        handleStatusChange(notification, false);
                         break;
                 }
             }
@@ -63,7 +64,7 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
             $scope.$apply();
         }
 
-        function handleStatusChange(notification) {
+        function handleStatusChange(notification, refresh) {
             var actCluster = $filter('filter')($rootScope.clusters, {
                 id: notification.stackId
             })[0];
@@ -77,6 +78,9 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
                 actCluster.cluster = actCluster.cluster || {};
                 actCluster.cluster.status = notification.clusterStatus;
                 actCluster.cluster.statusReason = notification.eventMessage;
+                if (refresh) {
+                    refreshMetadata(notification);
+                }
             }
             addNotificationToGlobalEvents(notification);
         }
@@ -143,7 +147,6 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
                 actCluster.cluster.ambariServerIp = msg.split(':')[1];
             }
             $scope.showSuccess(notification.eventMessage, notification.stackName);
-            handleStatusChange(notification);
         }
 
         function addNotificationToGlobalEvents(item) {
