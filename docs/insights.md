@@ -1,8 +1,8 @@
-##Insights
+# Insights
 
-####Cloudbreak deployer
+## Cloudbreak deployer
 
-**Debug**
+### Debug
 
 If you want to have more detailed output set the `DEBUG` env variable to non-zero:
 
@@ -10,7 +10,7 @@ If you want to have more detailed output set the `DEBUG` env variable to non-zer
 DEBUG=1 cbd some_command
 ```
 
-**Troubleshoot**
+### Troubleshoot
 
 You can use the `doctor` command to diagnose your environment.
 It can reveal some common problems with your docker or boot2docker configuration and it also checks the cbd versions.
@@ -19,7 +19,7 @@ It can reveal some common problems with your docker or boot2docker configuration
 cbd doctor
 ```
 
-**Logs**
+### Logs
 
 The aggregated logs of all the Cloudbreak components can be checked with:
 
@@ -35,7 +35,7 @@ cbd logs cloudbreak
 
 You can also check the individual logs of `uluwatu`, `periscope`, and `identity`.
 
-**Update**
+### Update
 
 The cloudbreak-deployer tool is capable of upgrading itself to a newer version.
 
@@ -43,7 +43,7 @@ The cloudbreak-deployer tool is capable of upgrading itself to a newer version.
 cbd update
 ```
 
-####Cloudbreak application
+## Cloudbreak application
 
 **SSH to the hosts**
 
@@ -57,7 +57,7 @@ ssh -i ~/.ssh/private-key.pem cloudbreak@<public-ip>
 
 The default user is `cloudbreak` except on EC2 where it is `ec2-user`.
 
-**Accessing HDP client services**
+### Accessing HDP client services
 
 The main difference between general HDP clusters and Cloudbreak-installed HDP clusters is that each host runs an Ambari server or agent Docker container and the HDP services will be installed in this container as well.
 It means that after `ssh` the client services won't be available instantly, first you'll have to enter the ambari-agent container.
@@ -89,7 +89,7 @@ Or you can use this one-step command as well:
 [root@docker-ambari tmp]#
 ```
 
-**Data volumes**
+### Data volumes
 
 The disks that are attached to the instances are automatically mounted to `/hadoopfs/fs1`, `/hadoopfs/fs2`, ... `/hadoopfs/fsN` respectively.
 These directories are mounted from the host into the ambari-agent container under the same name so these can be accessed from inside.
@@ -109,7 +109,7 @@ drwxr-xr-x   - hdfs supergroup          0 2015-10-21 13:46 /tmp/data
 drwx-wx-wx   - hive supergroup          0 2015-10-21 08:51 /tmp/hive
 ```
 
-**Internal hostnames**
+### Internal hostnames
 
 After a cluster is created with Cloudbreak, the nodes will have internal hostnames like this:
 
@@ -120,7 +120,7 @@ It means that you won't see entries to the other nodes inside the `/etc/hosts` f
 
 In the current version the `node.dc1.consul` domain is hardcoded and cannot be changed.
 
-**Accessing Ambari server from the other nodes**
+### Accessing Ambari server from the other nodes
 
 Ambari server is registered as a service in Consul, so it can always be accessed through its domain name `ambari-8080.service.consul` from the other ambari containers.
 It can be tried by pinging it from one of the `ambari-agent` containers:
@@ -129,7 +129,7 @@ It can be tried by pinging it from one of the `ambari-agent` containers:
 ping ambari-8080.service.consul
 ```
 
-**Cloudbreak gateway node**
+### Cloudbreak gateway node
 
 With every Cloudbreak cluster installation there is a special node called *cbgateway* started that won't run an ambari-agent container so it won't run HDP services either.
 It can be seen on the Cloudbreak UI among the hostgroups when creating a cluster, but its node count cannot be changed from 1 and it shouldn't be there in the Ambari blueprint.
@@ -141,11 +141,11 @@ It is by design because this instance has some special tasks:
 - it runs the Baywatch server that is responsible for collecting the operational logs from the cluster
 - it runs a Kerberos KDC container if Kerberos is configured
 
-**Hadoop logs**
+### Hadoop logs
 
 Hadoop logs are available from the host and from the container as well in the `/hadoopfs/fs1/logs` directory.
 
-**Ambari db**
+### Ambari db
 
 Ambari's database runs on the `cbgateway` node inside a PostgreSQL docker container. To access it ssh to the gateway node and run the following command:
 

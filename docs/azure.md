@@ -1,15 +1,20 @@
 # Azure deployment
 
+We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration then launch. If you do not have installed Cloudbreak deployer, you can [install this on premise](onprem.md).
+
+## Setup Cloudbreak deployer
+
 If you already have cloudbreak-deployer installed you can start to setup the Cloudbreak application.
 
-Create a cloudbreak-deployment directory for the config files and the supporting binaries that will be downloaded by cloudbreak-deployer:
+Open the `cloudbreak-deployment` directory:
 
 ```
-mkdir -p cloudbreak-deployer
-cd cloudbreak-deployer
+cd cloudbreak-deployment
 ```
 
-## Initialize your Profile
+This is the directory of the config files and the supporting binaries that will be downloaded by Cloudbreak deployer.
+
+### Initialize your Profile
 
 First initialize cbd by creating a `Profile` file:
 
@@ -21,7 +26,7 @@ It will create a `Profile` file in the current directory. Please edit the file -
 configuration is the `PUBLIC_IP`. This IP will be used to access the Cloudbreak UI
 (called Uluwatu). In some cases the `cbd` tool tries to guess it, if can't than will give a hint.
 
-## Generate your Profile
+### Generate your Profile
 
 You are done with the configuration of Cloudbreak deployer. The last thing you have to do is to regenerate the configurations in order to take effect.
 
@@ -30,7 +35,7 @@ rm *.yml
 cbd generate
 ```
 
-## Start Cloudbreak
+### Start Cloudbreak
 
 To start the Cloudbreak application use the following command.
 This will start all the Docker containers and initialize the application. It will take a few minutes until all the services start.
@@ -52,7 +57,7 @@ cbd logs cloudbreak
 ```
 >Cloudbreak server should start within a minute - you should see a line like this: `Started CloudbreakApplication in 36.823 seconds`
 
-## Next steps
+### Next steps
 
 Once Cloudbreak is up and running you should check out the [prerequisites](azure_pre_prov.md) needed to create Azure clusters with Cloudbreak.
 
