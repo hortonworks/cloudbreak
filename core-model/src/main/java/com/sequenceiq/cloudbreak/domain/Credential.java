@@ -59,8 +59,8 @@ import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 public abstract class Credential {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "credential_generator")
-    @SequenceGenerator(name = "credential_generator", sequenceName = "credential_table")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "credential_generator")
+    @SequenceGenerator(name = "credential_generator", sequenceName = "credential_id_seq", allocationSize = 1)
     private Long id;
 
     @Column(nullable = false)

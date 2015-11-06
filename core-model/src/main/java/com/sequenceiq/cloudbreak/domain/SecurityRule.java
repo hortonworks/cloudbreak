@@ -20,8 +20,8 @@ public class SecurityRule implements ProvisionEntity {
     private static final String PORT_DELIMITER = ",";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "security_rule_sequence_generator")
-    @SequenceGenerator(name = "security_rule_sequence_generator", sequenceName = "security_rule_seq")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "securityrule_generator")
+    @SequenceGenerator(name = "securityrule_generator", sequenceName = "securityrule_id_seq", allocationSize = 1)
     private Long id;
     @ManyToOne
     private SecurityGroup securityGroup;

@@ -8,12 +8,14 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 
@@ -26,8 +28,10 @@ import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
                         + "AND i.groupName = :groupName")
 })
 public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup> {
+
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "instancegroup_generator")
+    @SequenceGenerator(name = "instancegroup_generator", sequenceName = "instancegroup_id_seq", allocationSize = 1)
     private Long id;
     @OneToOne
     private Template template;

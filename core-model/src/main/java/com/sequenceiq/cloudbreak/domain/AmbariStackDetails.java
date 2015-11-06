@@ -10,8 +10,8 @@ import javax.persistence.SequenceGenerator;
 public class AmbariStackDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "amb_stack_generator")
-    @SequenceGenerator(name = "amb_stack_generator", sequenceName = "amb_stack_table")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "ambaristackdetails_generator")
+    @SequenceGenerator(name = "ambaristackdetails_generator", sequenceName = "ambaristackdetails_id_seq", allocationSize = 1)
     private Long id;
     private String stack;
     private String version;
@@ -21,6 +21,14 @@ public class AmbariStackDetails {
     private String utilsRepoId;
     private String utilsBaseURL;
     private boolean verify = true;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getStack() {
         return stack;

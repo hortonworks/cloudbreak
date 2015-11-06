@@ -4,10 +4,12 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.SequenceGenerator;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -28,7 +30,8 @@ import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 public class HostMetadata {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "hostmetadata_generator")
+    @SequenceGenerator(name = "hostmetadata_generator", sequenceName = "hostmetadata_id_seq", allocationSize = 1)
     private Long id;
 
     private String hostName;
@@ -45,6 +48,10 @@ public class HostMetadata {
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getHostName() {

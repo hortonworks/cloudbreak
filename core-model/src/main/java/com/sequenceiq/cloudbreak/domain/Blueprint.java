@@ -66,7 +66,7 @@ public class Blueprint implements ProvisionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "blueprint_generator")
-    @SequenceGenerator(name = "blueprint_generator", sequenceName = "blueprint_table")
+    @SequenceGenerator(name = "blueprint_generator", sequenceName = "blueprint_id_seq", allocationSize = 1)
     private Long id;
 
     @Column(nullable = false)
