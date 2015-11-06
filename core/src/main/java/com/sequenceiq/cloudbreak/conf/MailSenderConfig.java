@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.conf;
 
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_MAIL_SMTP_AUTH;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_MAIL_SMTP_STARTTLS_ENABLE;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_MAIL_SMTP_TYPE;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SMTP_SENDER_FROM;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SMTP_SENDER_HOST;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SMTP_SENDER_PASSWORD;
@@ -54,6 +55,9 @@ public class MailSenderConfig {
     @Value("${cb.mail.smtp.starttls.enable:" + CB_MAIL_SMTP_STARTTLS_ENABLE + "}")
     private String smtpStarttlsEnable;
 
+    @Value("${cb.mail.smtp.type:" + CB_MAIL_SMTP_TYPE + "}")
+    private boolean smtpType;
+
     @Bean
     public JavaMailSender mailSender() {
         JavaMailSender mailSender = null;
@@ -100,7 +104,7 @@ public class MailSenderConfig {
 
     private Properties getJavaMailProperties() {
         Properties props = new Properties();
-        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.transport.protocol", smtpType);
         props.put("mail.smtp.auth", smtpAuth);
         props.put("mail.smtp.starttls.enable", smtpStarttlsEnable);
         props.put("mail.debug", true);
