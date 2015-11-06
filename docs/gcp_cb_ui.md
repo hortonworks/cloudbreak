@@ -27,7 +27,7 @@ You can now log into the Cloudbreak application at http://PUBLIC_IP:3000. Once l
 
 `Service Account private (p12) key:` your GCP service account generated private key - see Accounts
 
-`SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later
+`SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to [log into the launched instances](http://sequenceiq.com/cloudbreak-deployer/1.1.0/insights/#ssh-to-the-host) later
 
 `Public in account:` share it with others in the account
 

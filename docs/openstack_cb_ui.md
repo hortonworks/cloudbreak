@@ -28,7 +28,7 @@ You can now log into the Cloudbreak application at http://PUBLIC_IP:3000. Once l
 
 `Endpoint:` Openstack Identity Service (Keystone) endpont (e.g. http://PUBLIC_IP:5000/v2.0)
 
-`SSH public key:` the SSH public certificate in OpenSSH format that's private keypair can be used to log into the launched instances later with the **ssh username: centos**
+`SSH public key:` the SSH public certificate in OpenSSH format that's private keypair can be used to [log into the launched instances](http://sequenceiq.com/cloudbreak-deployer/1.1.0/insights/#ssh-to-the-host) later with the **ssh username: centos**
 
 `Public in account:` share it with others in the account
 

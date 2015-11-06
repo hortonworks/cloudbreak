@@ -28,7 +28,7 @@ If you do not have an Azure Resource manager application you can simply create i
 
 `App Owner Tenant Id:` You Tenant Id (`portal.azure.com`> `Browse all`> `Subscription`> `Subscription detail`> `Users`> `You application`> `Properties`)
 
-`SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later
+`SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to [log into the launched instances](http://sequenceiq.com/cloudbreak-deployer/1.1.0/insights/#ssh-to-the-host) later
 
 > Cloudbreak is supporting simple rsa public key instead of X509 certificate file after 1.0.4 version
 
