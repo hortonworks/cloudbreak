@@ -16,8 +16,8 @@ import javax.persistence.SequenceGenerator;
 public class FileSystem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "filesystem_generator")
-    @SequenceGenerator(name = "filesystem_generator", sequenceName = "filesystem_table")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "filesystem_generator")
+    @SequenceGenerator(name = "filesystem_generator", sequenceName = "filesystem_id_seq", allocationSize = 1)
     private Long id;
 
     private String name;

@@ -72,8 +72,8 @@ import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 public abstract class Network {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "network_generator")
-    @SequenceGenerator(name = "network_generator", sequenceName = "network_table")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "network_generator")
+    @SequenceGenerator(name = "network_generator", sequenceName = "network_id_seq", allocationSize = 1)
     private Long id;
 
     @Column(nullable = false)
@@ -86,6 +86,7 @@ public abstract class Network {
     private String description;
 
     private String owner;
+
     private String account;
 
     private boolean publicInAccount;

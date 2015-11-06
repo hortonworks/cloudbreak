@@ -82,8 +82,8 @@ import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 public class SecurityGroup {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "security_group_sequence_generator")
-    @SequenceGenerator(name = "security_group_sequence_generator", sequenceName = "security_group_seq")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "securitygroup_generator")
+    @SequenceGenerator(name = "securitygroup_generator", sequenceName = "securitygroup_id_seq", allocationSize = 1)
     private Long id;
 
     @Column(nullable = false)

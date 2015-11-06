@@ -4,12 +4,16 @@ import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 
 @Entity
 public class CloudbreakUsage implements ProvisionEntity {
+
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "cloudbreakusage_generator")
+    @SequenceGenerator(name = "cloudbreakusage_generator", sequenceName = "cloudbreakusage_id_seq", allocationSize = 1)
     private Long id;
 
     private String owner;

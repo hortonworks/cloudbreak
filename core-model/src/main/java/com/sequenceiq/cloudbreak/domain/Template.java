@@ -67,8 +67,8 @@ import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 public abstract class Template {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "template_generator")
-    @SequenceGenerator(name = "template_generator", sequenceName = "sequence_table")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "template_generator")
+    @SequenceGenerator(name = "template_generator", sequenceName = "template_id_seq", allocationSize = 1)
     private Long id;
 
     @Column(nullable = false)

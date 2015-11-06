@@ -209,8 +209,8 @@ import com.sequenceiq.cloudbreak.common.type.Status;
 public class Stack implements ProvisionEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "stack_generator")
-    @SequenceGenerator(name = "stack_generator", sequenceName = "stack_table")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "stack_generator")
+    @SequenceGenerator(name = "stack_generator", sequenceName = "stack_id_seq", allocationSize = 1)
     private Long id;
     @Column(nullable = false)
     private String name;
