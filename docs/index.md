@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ##Introduction
+=======
+# Introduction
+>>>>>>> Add Content additions, minor cleanup
 
 Cloudbreak simplifies the provisioning, management and monitoring of on-demand HDP clusters in virtual and cloud environments. Cloudbreak leverages the cloud infrastructure platforms to create host instances, uses Docker technology to deploy the requisite containers cloud-agnostically, and uses Apache Ambari (via Ambari Blueprints) to install and manage the HDP cluster.
 
@@ -8,6 +12,7 @@ Use the Cloudbreak UI or CLI to launch HDP clusters on public cloud infrastructu
 
 Cloudbreak has two main components: the **Cloudbreak Application** and the **Cloudbreak Deployer**.
 
+<<<<<<< HEAD
 The **Cloudbreak Application** is made up from microservices (Cloudbreak, Uluwatu, Sultans, ...). The **Cloudbreak Deployer** helps you to deploy the Cloudbreak application automatically in environments with Docker support. Once the Cloudbreak Application is deployed you can use it to provision HDP clusters in different cloud environments.
 
 > For an architectural overview of the [Cloudbreak Deployer](http://sequenceiq.com/cloudbreak-deployer), the Cloudbreak Application, Apache Ambari, Docker and the rest of the Cloudbreak components, please follow this [link](technology.md).
@@ -20,6 +25,25 @@ To run the Cloudbreak Deployer and install the Cloudbreak Application, you must 
 - Docker 1.6.0 (or later)
     - [Docker for RHEL](http://docs.docker.com/engine/installation/rhel/)
     - [Docker for CentOS](https://docs.docker.com/installation/centos/)
+
+> You can install Cloudbreak on Mac OS X "Darwin" for **evaluation purposes only**. This operating system is not supported for a production deployment of Cloudbreak.
+=======
+The **Cloudbreak Application** is made up from microservices (Cloudbreak, Uluwatu, Sultans, ...). The **Cloudbreak 
+Deployer** helps you to deploy the Cloudbreak application automatically in environments with Docker support. Once the Cloudbreak Application is deployed you can use it to provision HDP clusters in different cloud environments.
+
+> For an architectural overview of the [Cloudbreak Deployer](http://sequenceiq.com/cloudbreak-deployer), the Cloudbreak Application, Apache Ambari, Docker and the rest of the Cloudbreak components, please follow this [link](technology.md).
+
+For an architectural overview of the Cloudbreak deployer and the Cloudbreak application please follow this [link](technology.md).
+>>>>>>> Add Content additions, minor cleanup
+
+##System Requirements
+
+To run the Cloudbreak Deployer and install the Cloudbreak Application, you must meet the following system requirements:
+
+* RHEL / CentOS / Oracle Linux 6 (64-bit)
+* Docker 1.6.0 (or later)
+  * [Docker for RHEL](http://docs.docker.com/engine/installation/rhel/)
+  * [Docker for CentOS](https://docs.docker.com/installation/centos/)
 
 > You can install Cloudbreak on Mac OS X "Darwin" for **evaluation purposes only**. This operating system is not supported for a production deployment of Cloudbreak.
 
