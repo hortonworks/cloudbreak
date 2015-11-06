@@ -21,7 +21,7 @@ Cloudbreak is built on the foundation of cloud providers APIs, Apache Ambari, Do
 
 The Apache Ambari project is aimed at making Hadoop management simpler by developing software for provisioning, managing, and monitoring Apache Hadoop clusters. Ambari provides an intuitive, easy-to-use Hadoop management web UI backed by its RESTful APIs.
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/ambari-overview.png)
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/1.1.0/docs/diagrams/ambari-overview.png)
 
 Ambari enables System Administrators to:
 
@@ -39,7 +39,7 @@ Ambari enables System Administrators to:
 Ambari enables to integrate Hadoop provisioning, management and monitoring capabilities into applications with the Ambari REST APIs.
 Ambari Blueprints are a declarative definition of a cluster. With a Blueprint, you can specify a Stack, the Component layout and the Configurations to materialise a Hadoop cluster instance (via a REST API) without having to use the Ambari Cluster Install Wizard.
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/ambari-create-cluster.png)
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/1.1.0/docs/diagrams/ambari-create-cluster.png)
 
 ###Docker
 
@@ -52,7 +52,7 @@ The main features of Docker are:
 3. VM - without the overhead of a VM
   * Each virtualised application includes not only the application and the necessary binaries and libraries, but also an entire guest operating system
   * The Docker Engine container comprises just the application and its dependencies. It runs as an isolated process in userspace on the host operating system, sharing the kernel with other containers.
-    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/vm.png)
+    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/1.1.0/docs/diagrams/vm.png)
 
 4. Containers are isolated
 5. It can be automated and scripted
@@ -62,7 +62,7 @@ The main features of Docker are:
 Docker Swarm is native clustering for Docker. It turns a pool of Docker hosts into a single, virtual host. Swarm serves the standard Docker API.
 
   * Distributed container orchestration: Allows to remotely orchestrate Docker containers on different hosts
-    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/swarm.png)
+    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/1.1.0/docs/diagrams/swarm.png)
   * Discovery services: Supports different discovery backends to provide service discovery, as such: token (hosted) and file based, etcd, Consul, Zookeeper.
   * Advanced scheduling: Swarm will schedule containers on hosts based on different filters and strategies
 
@@ -78,7 +78,7 @@ Consul it is a tool for discovering and configuring services in your infrastruct
 
   * Multi Datacenter: Consul supports multiple datacenters out of the box. This means users of Consul do not have to worry about building additional layers of abstraction to grow to multiple regions.
 
-    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/consul.png)
+    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/1.1.0/docs/diagrams/consul.png)
 
 <!--technologies.md-->
 

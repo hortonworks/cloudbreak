@@ -25,7 +25,7 @@ The SSH username for the EC2 instances is **ec2-user**.
 
 There is a last option called `Public in account` - it means that all the users belonging to your account will be able to use this credential to create clusters, but cannot delete or modify it.
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/aws-credential.png)
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/1.1.0/docs/images/aws-credential.png)
 
 ## Infrastructure templates
 
@@ -51,7 +51,7 @@ There are some additional configuration options here:
 - `EBS encryption` is supported for all volume types. If this option is checked then all the attached disks [will be encrypted](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html) by Amazon using the AWS KMS master keys.
 - If `Public in account` is checked all the users belonging to your account will be able to use this resource to create clusters, but cannot delete or modify it.
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/aws-resources.png)
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/1.1.0/docs/images/aws-resources.png)
 
 **Networks**
 
@@ -72,7 +72,7 @@ If `Public in account` is checked all the users belonging to your account will b
 
 **Note** that the VPCs, IGWs and/or subnets are *not created* on AWS after the `Create Network` button is pushed, only after the cluster provisioning starts with the selected network template.
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/aws-network.png)
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/1.1.0/docs/images/aws-network.png)
 
 **Security groups**
 
@@ -126,7 +126,7 @@ If `Public in account` is checked all the users belonging to your account will b
 
 **Note** that the security groups are *not created* on AWS after the `Create Security Group` button is pushed, only after the cluster provisioning starts with the selected security group template.
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/ui-secgroup.png)
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/1.1.0/docs/images/ui-secgroup.png)
 
 ## Defining cluster services
 
@@ -143,7 +143,7 @@ The configurations defined in the blueprint can also be modified later from the 
 
 If `Public in account` is checked all the users belonging to your account will be able to use this blueprint to create clusters, but cannot delete or modify it.
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/ui-blueprints.png)
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/1.1.0/docs/images/ui-blueprints.png)
 
 A blueprint can be exported from a running Ambari cluster that can be reused in Cloudbreak with slight modifications.
 There is no automatic way to modify an exported blueprint and make it instantly usable in Cloudbreak, the modifications have to be done manually.

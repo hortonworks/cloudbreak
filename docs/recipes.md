@@ -115,11 +115,11 @@ Add command has an optional parameter
 
 To be able to install Ranger from a blueprint, a database must be running when Ambari starts to install Ranger Admin. With Cloudbreak a database can be configured and started from a recipe. We've created a sample recipe that can be used to initialize and start a PostgreSQL database that will be able to accept connections from Ranger and store its data. Add the `ONE_NODE` recipe from [this URL](https://github.com/sequenceiq/consul-plugins-ranger-db.git) on the Cloudbreak UI:
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/ranger-recipe.png)
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/1.1.0/docs/images/ranger-recipe.png)
 
 And add this recipe to the same hostgroup where Ranger Admin is installed on the 'Choose Blueprint' when creating a new cluster:
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/docsupdate/docs/images/ranger-hostgroup.png)
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/1.1.0/docs/images/ranger-hostgroup.png)
 
 Ranger installation also has some required properties that must be added to the blueprint. We've created a sample one-node blueprint with the necessary configurations to install Ranger Admin and Ranger Usersync. The configuration values in this blueprint match the sample recipe above - they are set to use a PostgreSQL database on the same host where Ranger Admin is installed. Usersync is configured to use UNIX as the authentication method and it should also be installed on the same host where Ranger Admin is installed.
 
