@@ -11,6 +11,8 @@ import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.quartz.simpl.SimpleJobFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,9 +26,6 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
-import com.sequenceiq.periscope.log.Logger;
-import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
-
 import freemarker.template.TemplateException;
 
 @Configuration
@@ -34,7 +33,7 @@ import freemarker.template.TemplateException;
 @EnableScheduling
 public class AppConfig implements AsyncConfigurer {
 
-    private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(AppConfig.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
 
     @Value("${periscope.threadpool.core.size:50}")
     private int corePoolSize;
@@ -91,7 +90,7 @@ public class AppConfig implements AsyncConfigurer {
         try {
             return getThreadPoolExecutorFactoryBean().getObject();
         } catch (Exception e) {
-            LOGGER.error(Logger.NOT_CLUSTER_RELATED, "Error creating task executor.", e);
+            LOGGER.error("Error creating task executor.", e);
         }
         return null;
     }

@@ -6,19 +6,18 @@ import java.util.Date;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.quartz.CronExpression;
-
-import com.sequenceiq.periscope.log.Logger;
-import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class DateUtils {
 
-    private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(DateUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DateUtils.class);
 
     private DateUtils() {
         throw new IllegalStateException();
     }
 
-    public static boolean isTrigger(long clusterId, String cron, String timeZone, long monitorUpdateRate) {
+    public static boolean isTrigger(String cron, String timeZone, long monitorUpdateRate) {
         try {
             CronExpression cronExpression = getCronExpression(cron);
             Date currentTime = getCurrentDate(timeZone);
@@ -27,7 +26,7 @@ public final class DateUtils {
             long interval = nextDateTime.toDate().getTime() - currentTime.getTime();
             return interval > 0 && interval < monitorUpdateRate;
         } catch (ParseException e) {
-            LOGGER.warn(clusterId, "Invalid cron expression, {}", e.getMessage());
+            LOGGER.warn("Invalid cron expression, {}", e.getMessage());
             return false;
         }
     }

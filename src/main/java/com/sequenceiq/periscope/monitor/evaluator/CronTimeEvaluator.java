@@ -2,14 +2,15 @@ package com.sequenceiq.periscope.monitor.evaluator;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.TimeAlert;
-import com.sequenceiq.periscope.log.Logger;
-import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
+import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.monitor.MonitorUpdateRate;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
@@ -19,7 +20,7 @@ import com.sequenceiq.periscope.utils.DateUtils;
 @Scope("prototype")
 public class CronTimeEvaluator extends AbstractEventPublisher implements EvaluatorExecutor {
 
-    private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(CronTimeEvaluator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CronTimeEvaluator.class);
 
     @Autowired
     private TimeAlertRepository alertRepository;
@@ -34,18 +35,19 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
     @Override
     public void run() {
         for (TimeAlert alert : alertRepository.findAllByCluster(clusterId)) {
+            MDCBuilder.buildMdcContext(alert.getCluster());
             String alertName = alert.getName();
-            LOGGER.info(clusterId, "Checking time based alert: '{}'", alertName);
-            if (isTrigger(alert, clusterId) && isPolicyAttached(alert)) {
-                LOGGER.info(clusterId, "Time alert: '{}' triggers", alertName);
+            LOGGER.info("Checking time based alert: '{}'", alertName);
+            if (isTrigger(alert) && isPolicyAttached(alert)) {
+                LOGGER.info("Time alert: '{}' triggers", alertName);
                 publishEvent(new ScalingEvent(alert));
                 break;
             }
         }
     }
 
-    private boolean isTrigger(TimeAlert alert, long clusterId) {
-        return DateUtils.isTrigger(clusterId, alert.getCron(), alert.getTimeZone(), MonitorUpdateRate.CLUSTER_UPDATE_RATE);
+    private boolean isTrigger(TimeAlert alert) {
+        return DateUtils.isTrigger(alert.getCron(), alert.getTimeZone(), MonitorUpdateRate.CLUSTER_UPDATE_RATE);
     }
 
     private boolean isPolicyAttached(BaseAlert alert) {

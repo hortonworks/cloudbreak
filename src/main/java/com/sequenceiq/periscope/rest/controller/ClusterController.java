@@ -2,6 +2,8 @@ package com.sequenceiq.periscope.rest.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
-import com.sequenceiq.periscope.log.Logger;
-import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
+import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.rest.converter.AmbariConverter;
 import com.sequenceiq.periscope.rest.converter.ClusterConverter;
@@ -31,7 +32,7 @@ import com.sequenceiq.periscope.service.security.ClusterSecurityService;
 @RequestMapping("/clusters")
 public class ClusterController {
 
-    private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(ClusterController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterController.class);
 
     @Autowired
     private ClusterService clusterService;
@@ -44,34 +45,40 @@ public class ClusterController {
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<ClusterJson> addCluster(@ModelAttribute("user") PeriscopeUser user, @RequestBody AmbariJson ambariServer) {
+        MDCBuilder.buildUserMdcContext(user);
         return setCluster(user, ambariServer, null);
     }
 
     @RequestMapping(value = "/{clusterId}", method = RequestMethod.PUT)
     public ResponseEntity<ClusterJson> modifyCluster(@ModelAttribute("user") PeriscopeUser user,
             @RequestBody AmbariJson ambariServer, @PathVariable long clusterId) {
+        MDCBuilder.buildMdcContext(user, clusterId);
         return setCluster(user, ambariServer, clusterId);
     }
 
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<ClusterJson>> getClusters(@ModelAttribute("user") PeriscopeUser user) {
+        MDCBuilder.buildUserMdcContext(user);
         List<Cluster> clusters = clusterService.findAllByUser(user);
         return new ResponseEntity<>(clusterConverter.convertAllToJson(clusters), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{clusterId}", method = RequestMethod.GET)
-    public ResponseEntity<ClusterJson> getCluster(@PathVariable long clusterId) {
+    public ResponseEntity<ClusterJson> getCluster(@ModelAttribute("user") PeriscopeUser user, @PathVariable long clusterId) {
+        MDCBuilder.buildMdcContext(user, clusterId);
         return createClusterJsonResponse(clusterService.findOneByUser(clusterId));
     }
 
     @RequestMapping(value = "/{clusterId}", method = RequestMethod.DELETE)
-    public ResponseEntity<ClusterJson> deleteCluster(@PathVariable long clusterId) {
+    public ResponseEntity<ClusterJson> deleteCluster(@ModelAttribute("user") PeriscopeUser user, @PathVariable long clusterId) {
+        MDCBuilder.buildMdcContext(user, clusterId);
         clusterService.remove(clusterId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @RequestMapping(value = "/{clusterId}/state", method = RequestMethod.POST)
-    public ResponseEntity<ClusterJson> setState(@PathVariable long clusterId, @RequestBody StateJson stateJson) {
+    public ResponseEntity<ClusterJson> setState(@ModelAttribute("user") PeriscopeUser user, @PathVariable long clusterId, @RequestBody StateJson stateJson) {
+        MDCBuilder.buildMdcContext(user, clusterId);
         return createClusterJsonResponse(clusterService.setState(clusterId, stateJson.getState()));
     }
 
@@ -88,7 +95,7 @@ public class ClusterController {
         boolean access = clusterSecurityService.hasAccess(user, ambari);
         if (!access) {
             String host = ambari.getHost();
-            LOGGER.info(-1, "Illegal access to Ambari cluster '{}' from user '{}'", host, user.getEmail());
+            LOGGER.info("Illegal access to Ambari cluster '{}' from user '{}'", host, user.getEmail());
             throw new AccessDeniedException(String.format("Accessing Ambari cluster '%s' is not allowed", host));
         } else {
             AmbariStack resolvedAmbari = clusterSecurityService.tryResolve(ambari);

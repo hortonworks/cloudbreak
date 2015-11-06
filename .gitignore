@@ -18,6 +18,7 @@ gradle
 atlassian*
 userdatas/
 <<<<<<< HEAD
+<<<<<<< HEAD
 out/
 curl_config_admin_user
 *.suml
@@ -49,3 +50,6 @@ hs_err_pid*
 >>>>>>> 9599263... Initial commit
 =======
 >>>>>>> b494fa7... IDEA stuff + others added
+=======
+certs/
+>>>>>>> 071443d... CLOUD-43527 owner based logging context
