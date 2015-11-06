@@ -2,6 +2,14 @@
 
 We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration then launch. If you do not have installed Cloudbreak deployer, you can [install this on premise](onprem.md).
 
+## Configured image
+
+You can import the pre-configured GCP image with the following script:
+
+```
+gcloud compute images create cb-centos71-amb212-2015-11-05 --source-uri gs://sequenceiqimage/cb-centos71-amb212-2015-11-05.tar.gz
+```
+
 ## Setup Cloudbreak deployer
 
 If you already have cloudbreak-deployer installed you can start to setup the Cloudbreak application.

@@ -101,6 +101,26 @@
                   $("#versions-dropdown").append('<li><a href="{{ config.site_url }}/'+value+'">'+value+'</a></li>');
                 });
                });
+
+               <!--AWS Table-->
+               $.getJSON("/aws.json", function(data) {
+               $("#aws-images").append('<table cellspacing="20" cellpadding="20">');
+                 $("#aws-images").append('<thead>');
+                  $("#aws-images").append('<tr>');
+                   $("#aws-images").append('<th text-align="center" style="font-size: 20px">' + "Region" + '</th>');
+                   $("#aws-images").append('<th text-align="center" style="font-size: 20px">' + "Image Name" + '</th>');
+                  $("#aws-images").append('</tr>');
+                 $("#aws-images").append('</thead>');
+                $("#aws-images").append('<tbody>');
+                 $.each(data.aws, function( index, value ) {
+                  $("#aws-images").append('<tr>');
+                   $("#aws-images").append('<td text-align="left" style="font-size: 20px">' + index + '</td>');
+                   $("#aws-images").append('<td text-align="right" style="font-size: 20px">' + value + '</td>');
+                  $("#aws-images").append('</tr>');
+                 });
+                $("#aws-images").append('</tbody>');
+               $("#aws-images").append('</table>');
+               });
            });
          </script>
     </body>
