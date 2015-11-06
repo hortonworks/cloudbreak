@@ -5,7 +5,7 @@ theme_dir: mkdocs_theme
 dev_addr: 0.0.0.0:8000
 pages:
     - Home:
-        - Overview : index.md
+        - Introduction : index.md
         - Technology : technology.md
         - Installation :
             - AWS: aws.md
@@ -35,7 +35,7 @@ pages:
             - 'Provisioning - CLI': openstack_cb_shell.md
     - Docs:
         - API : api.md
-        - Shell : shell.md
+        - CLI : shell.md
         - Recipes: recipes.md
         - SPI: spi.md
         - Kerberos: kerberos.md
