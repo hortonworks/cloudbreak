@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
+import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.template.SimpleTemplateLoaderService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.wordnik.swagger.annotations.Api;
@@ -55,11 +56,15 @@ public class TemplateController {
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
+    @Inject
+    private EmailSenderService emailSenderService;
+
     @RequestMapping(value = "user/templates", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = TemplateOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES)
     public ResponseEntity<IdJson> createPrivateTemplate(@ModelAttribute("user") CbUser user, @RequestBody @Valid TemplateRequest templateRequest) {
         MDCBuilder.buildUserMdcContext(user);
+        emailSenderService.sendProvisioningSuccessEmail(user.getUserId(), "192.168.59.103", "teszt");
         return createTemplate(user, templateRequest, false);
     }
 
@@ -68,6 +73,7 @@ public class TemplateController {
     @ApiOperation(value = TemplateOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES)
     public ResponseEntity<IdJson> createAccountTemplate(@ModelAttribute("user") CbUser user, @RequestBody @Valid TemplateRequest templateRequest) {
         MDCBuilder.buildUserMdcContext(user);
+        emailSenderService.sendProvisioningSuccessEmail(user.getUserId(), "192.168.59.103", "teszt");
         return createTemplate(user, templateRequest, true);
     }
 
