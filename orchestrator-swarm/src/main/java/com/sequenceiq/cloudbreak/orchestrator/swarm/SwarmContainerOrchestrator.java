@@ -93,7 +93,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             Set<String> privateAddresses = getPrivateAddresses(nodes);
             Set<String> result = prepareDockerAddressInventory(privateAddresses);
             String[] cmd = {"--debug", "add", "--wait", MUNCHAUSEN_WAIT, "--consulLogLocation", consulLogLocation,
-                    "--join", getConsulJoinIp(gatewayConfig.getPublicAddress()), concatToString(result)};
+                    "--join", getConsulJoinIp(gatewayConfig.getPrivateAddress()), concatToString(result)};
 
             runner(munchausenNewNodeBootstrap(gatewayConfig, imageName(config), cmd),
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
@@ -502,8 +502,8 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         return new ContainerBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, mdcMap);
     }
 
-    private String getConsulJoinIp(String publicIp) {
-        return String.format("consul://%s:8500", publicIp);
+    private String getConsulJoinIp(String privateIp) {
+        return String.format("consul://%s:8500", privateIp);
     }
 
     private String imageName(ContainerConfig containerConfig) {
