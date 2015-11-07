@@ -25,7 +25,7 @@ Start the shell with `cbd util cloudbreak-shell`. This will launch the Cloudbrea
 <a name="dockerimage"></a>
 ### Starting Cloudbreak shell with our prepared docker image
 
-<i class="icon-folder-open"></i> You can find the docker image and its documentation [here](https://github.com/sequenceiq/docker-cb-shell).
+:open_file_folder: You can find the docker image and its documentation [here](https://github.com/sequenceiq/docker-cb-shell).
 
 <a name="fromsource"></a>
 ### Build from source
@@ -58,7 +58,7 @@ Options:
 Note:
   You should specify at least your username and password.
 ```
-Once you are connected you can start to create a cluster. If you are lost and need guidance through the process you can use `hint`. You can always use `TAB` for completion.
+Once you are connected you can start to create a cluster. If you are lost and need guidance through the process you can use `hint`. You can always use <kbd>TAB</kbd> for completion.
 
 > **Note**
 > All commands are `context aware` - they are available only when it makes sense - this way you are never confused and guided by the system on the right path.
