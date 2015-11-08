@@ -104,7 +104,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     private void putNetworkToContext(CloudbreakClient client, String cloudProvider, String networkName) throws Exception {
         client.getAccountNetworks();
         if (StringUtils.isEmpty(networkName)) {
-            String defaultNetworkName =  itProps.getDefaultNetwork(cloudProvider);
+            String defaultNetworkName = itProps.getDefaultNetwork(cloudProvider);
             networkName = defaultNetworkName;
         }
         if (StringUtils.hasLength(networkName)) {
@@ -118,13 +118,17 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     private void putSecurityGroupToContext(CloudbreakClient client, String securityGroupName) throws Exception {
         client.getAccountSecurityGroups();
         if (StringUtils.isEmpty(securityGroupName)) {
-            String defaultSecurityGroupName =  itProps.getDefaultSecurityGroup();
+            String defaultSecurityGroupName = itProps.getDefaultSecurityGroup();
             securityGroupName = defaultSecurityGroupName;
         }
         if (StringUtils.hasLength(securityGroupName)) {
-            String resourceId = getId(client.getSecurityGroupByName(securityGroupName));
-            if (resourceId != null) {
-                itContext.putContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID, resourceId);
+            try {
+                String resourceId = getId(client.getSecurityGroupByName(securityGroupName));
+                if (resourceId != null) {
+                    itContext.putContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID, resourceId);
+                }
+            } catch (Exception e) {
+                LOG.warn("Could not set security group id", e);
             }
         }
     }
@@ -140,7 +144,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
 
     private void putCredentialToContext(CloudbreakClient client, String cloudProvider, String credentialName) throws Exception {
         if (StringUtils.isEmpty(credentialName)) {
-            String defaultCredentialName =  itProps.getCredentialName(cloudProvider);
+            String defaultCredentialName = itProps.getCredentialName(cloudProvider);
             if (!"__ignored__".equals(defaultCredentialName)) {
                 credentialName = defaultCredentialName;
             }
@@ -213,6 +217,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             deleteCredential(client, itContext.getCleanUpParameter(CloudbreakITContextConstants.CREDENTIAL_ID));
             deleteBlueprint(client, itContext.getCleanUpParameter(CloudbreakITContextConstants.BLUEPRINT_ID));
             deleteNetwork(client, itContext.getCleanUpParameter(CloudbreakITContextConstants.NETWORK_ID));
+            deleteSecurityGroup(client, itContext.getCleanUpParameter(CloudbreakITContextConstants.SECURITY_GROUP_ID));
         }
     }
 
@@ -239,6 +244,18 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         if (networkId != null) {
             client.deleteNetwork(networkId);
             result = true;
+        }
+        return result;
+    }
+
+    private boolean deleteSecurityGroup(CloudbreakClient client, String securityGroupId) throws Exception {
+        boolean result = false;
+        if (securityGroupId != null) {
+            Map securityGroup = (Map) client.getSecurityGroup(securityGroupId);
+            if (!securityGroup.get("name").equals(itProps.getDefaultSecurityGroup())) {
+                client.deleteSecurityGroup(securityGroupId);
+                result = true;
+            }
         }
         return result;
     }

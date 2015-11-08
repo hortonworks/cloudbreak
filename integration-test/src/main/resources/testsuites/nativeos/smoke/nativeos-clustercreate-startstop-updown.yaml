@@ -17,6 +17,12 @@ tests:
     classes:
       - com.sequenceiq.it.cloudbreak.OpenStackNetworkCreationTest
 
+  - name: create security group
+    parameters:
+      name: restricted-ambari-osn
+    classes:
+      - com.sequenceiq.it.cloudbreak.SecurityGroupCreationTest
+
   - name: create gateway template
     parameters:
       templateName: it-nativeos-smoke-gateway-ssud
