@@ -12,9 +12,12 @@ import java.util.Date;
 import java.util.Properties;
 
 import javax.mail.Message;
+import javax.mail.MessagingException;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -41,6 +44,7 @@ import freemarker.template.TemplateException;
 @RunWith(MockitoJUnitRunner.class)
 public class EmailSenderServiceTest {
     private static final String NAME_OF_THE_CLUSTER = "name-of-the-cluster";
+    private GreenMail greenMail;
 
     @Mock
     private UserDetailsService userDetailsService;
@@ -55,6 +59,10 @@ public class EmailSenderServiceTest {
 
     @Before
     public void before() throws IOException, TemplateException {
+        greenMail = new GreenMail(new ServerSetup(3465, null, ServerSetup.PROTOCOL_SMTP));
+        greenMail.setUser("demouser", "demopwd");
+        greenMail.start();
+
         cbUser = new CbUser("sdf", "testuser", "testaccount", new ArrayList<CbUserRole>(), "familyname", "givenName", new Date());
         ReflectionTestUtils.setField(emailSenderService, "msgFrom", "no-reply@sequenceiq.com");
         ReflectionTestUtils.setField(emailSenderService, "freemarkerConfiguration", freemarkerConfiguration());
@@ -88,92 +96,97 @@ public class EmailSenderServiceTest {
 
     }
 
-//    @Test
-//    public void testSendTerminationSuccessEmail() throws IOException {
-//        // GIVEN
-//        String content = getFileContent("mail/termination-success-email");
-//        String subject = String.format("Cloudbreak - %s cluster termination", NAME_OF_THE_CLUSTER);
-//        when(emailMimeMessagePreparator.prepareMessage(cbUser, subject, content)).thenReturn(mimeMessagePreparator);
-//        // WHEN
-//        emailSenderService.sendTerminationSuccessEmail("xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
-//        // THEN
-//        verify(emailMimeMessagePreparator, times(1)).prepareMessage(cbUser, subject,
-//                getFileContent("mail/termination-success-email"));
-//        verify(mailSender, times(1)).send(mimeMessagePreparator);
-//    }
-//
-//    @Test
-//    public void testSendTerminationFailureEmail() throws IOException {
-//        // GIVEN
-//        String content = getFileContent("mail/termination-failure-email");
-//        String subject = String.format("Cloudbreak - %s cluster termination", NAME_OF_THE_CLUSTER);
-//        when(emailMimeMessagePreparator.prepareMessage(cbUser, subject, content)).thenReturn(mimeMessagePreparator);
-//        //WHEN
-//        emailSenderService.sendTerminationFailureEmail("xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
-//        //THEN
-//        verify(emailMimeMessagePreparator, times(1)).prepareMessage(cbUser, subject,
-//                getFileContent("mail/termination-failure-email"));
-//        verify(mailSender, times(1)).send(mimeMessagePreparator);
-//
-//    }
-//
-//    @Test
-//    public void testSendProvisioningFailureEmail() throws IOException {
-//        //GIVEN
-//        String contenct = getFileContent("mail/provisioning-failure-email");
-//        String subject = String.format("Cloudbreak - %s cluster installation", NAME_OF_THE_CLUSTER);
-//        when(emailMimeMessagePreparator.prepareMessage(cbUser, subject, contenct)).thenReturn(mimeMessagePreparator);
-//        //WHEN
-//        emailSenderService.sendProvisioningFailureEmail("xxx", NAME_OF_THE_CLUSTER);
-//        //THEN
-//        verify(emailMimeMessagePreparator, times(1)).prepareMessage(cbUser, subject,
-//                getFileContent("mail/provisioning-failure-email"));
-//        verify(mailSender, times(1)).send(mimeMessagePreparator);
-//
-//    }
+    @After
+    public void tearDown() {
+        greenMail.stop();
+    }
 
     @Test
-    public void testSendProvisioningSuccessEmail() throws IOException {
-        GreenMail greenMail = new GreenMail(ServerSetupTest.SMTPS);
-        greenMail.setUser("demouser", "demopwd");
-        greenMail.start();
+    public void testSendTerminationSuccessEmail() throws IOException, MessagingException {
+        // GIVEN
+        String content = getFileContent("mail/termination-success-email").replaceAll("\\n", "");
+        String subject = String.format("Cloudbreak - %s cluster termination", NAME_OF_THE_CLUSTER);
+        // WHEN
+        emailSenderService.sendTerminationSuccessEmail("xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
+        // THEN
+        greenMail.waitForIncomingEmail(5000, 1);
+        Message[] messages = greenMail.getReceivedMessages();
+
+        Assert.assertEquals(1, messages.length);
+        Assert.assertEquals(subject, messages[0].getSubject());
+        Assert.assertTrue(String.valueOf(messages[0].getContent()).replaceAll("\\n", "").replaceAll("\\r", "").contains(content));
+
+    }
+
+    @Test
+    public void testSendTerminationFailureEmail() throws IOException, MessagingException {
+        // GIVEN
+        String content = getFileContent("mail/termination-failure-email").replaceAll("\\n", "");
+        String subject = String.format("Cloudbreak - %s cluster termination", NAME_OF_THE_CLUSTER);
+        //WHEN
+        emailSenderService.sendTerminationFailureEmail("xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
+        //THEN
+        greenMail.waitForIncomingEmail(5000, 1);
+        Message[] messages = greenMail.getReceivedMessages();
+
+        Assert.assertEquals(1, messages.length);
+        Assert.assertEquals(subject, messages[0].getSubject());
+        Assert.assertTrue(String.valueOf(messages[0].getContent()).replaceAll("\\n", "").replaceAll("\\r", "").contains(content));
+
+    }
+
+    @Test
+    public void testSendProvisioningFailureEmail() throws IOException, MessagingException {
         //GIVEN
-        String contenct = getFileContent("mail/provisioning-success-email");
+        String content = getFileContent("mail/provisioning-failure-email").replaceAll("\\n", "");
         String subject = String.format("Cloudbreak - %s cluster installation", NAME_OF_THE_CLUSTER);
         //WHEN
-        emailSenderService.sendProvisioningSuccessEmail("test@example.com", "123.123.123.123", "testcluster");
+        emailSenderService.sendProvisioningFailureEmail("xxx", NAME_OF_THE_CLUSTER);
+        //THEN
+        greenMail.waitForIncomingEmail(5000, 1);
+        Message[] messages = greenMail.getReceivedMessages();
 
+        Assert.assertEquals(1, messages.length);
+        Assert.assertEquals(subject, messages[0].getSubject());
+        Assert.assertTrue(String.valueOf(messages[0].getContent()).replaceAll("\\n", "").replaceAll("\\r", "").contains(content));
+    }
+    @Ignore
+    @Test
+    public void testSendProvisioningSuccessEmailSMTPS() throws IOException, MessagingException {
+        //To run this test, please download the greenmail.jks from the following link:
+        // https://github.com/greenmail-mail-test/greenmail/blob/master/greenmail-core/src/main/resources/greenmail.jks
+        // and put into the /cert/trusted directory, and set the mail.transport.protocol variable to smtps.
+        greenMail = new GreenMail(ServerSetupTest.SMTPS);
+        greenMail.start();
+        //GIVEN
+        String content = getFileContent("mail/provisioning-success-email").replaceAll("\\n", "");
+        String subject = String.format("Cloudbreak - %s cluster installation", NAME_OF_THE_CLUSTER);
+        //WHEN
+        emailSenderService.sendProvisioningSuccessEmail("test@example.com", "123.123.123.123", NAME_OF_THE_CLUSTER);
 
         //THEN
         greenMail.waitForIncomingEmail(5000, 1);
         Message[] messages = greenMail.getReceivedMessages();
 
         Assert.assertEquals(1, messages.length);
-        greenMail.stop();
-
+        Assert.assertEquals(subject, messages[0].getSubject());
+        Assert.assertTrue(String.valueOf(messages[0].getContent()).replaceAll("\\n", "").replaceAll("\\r", "").contains(content));
     }
 
     @Test
-    public void testSendProvisioningSuccessEmailSmtp() throws IOException {
-        GreenMail greenMail = new GreenMail(new ServerSetup(3465, null, ServerSetup.PROTOCOL_SMTP));
-        greenMail.setUser("demouser", "demopwd");
-        greenMail.start();
+    public void testSendProvisioningSuccessEmailSmtp() throws IOException, MessagingException {
         //GIVEN
-        String contenct = getFileContent("mail/provisioning-success-email");
+        String content = getFileContent("mail/provisioning-success-email").replaceAll("\\n", "");
         String subject = String.format("Cloudbreak - %s cluster installation", NAME_OF_THE_CLUSTER);
-//        when(emailMimeMessagePreparator.prepareMessage(cbUser, subject, contenct)).thenReturn(mimeMessagePreparator);
-        //WHEN
-        emailSenderService.sendProvisioningSuccessEmail("xxx@alma.com", "123.123.123.123", "mialofasz");
+        emailSenderService.sendProvisioningSuccessEmail("xxx@alma.com", "123.123.123.123", NAME_OF_THE_CLUSTER);
 
+        //THEN
         greenMail.waitForIncomingEmail(5000, 1);
         Message[] messages = greenMail.getReceivedMessages();
 
-        //THEN
-//        verify(emailMimeMessagePreparator, times(1)).prepareMessage(cbUser, subject,
-//                getFileContent("mail/provisioning-success-email"));
-//        verify(mailSender, times(1)).send(mimeMessagePreparator);
-
-        greenMail.stop();
+        Assert.assertEquals(1, messages.length);
+        Assert.assertEquals(subject, messages[0].getSubject());
+        Assert.assertTrue(String.valueOf(messages[0].getContent()).replaceAll("\\n", "").replaceAll("\\r", "").contains(content));
 
     }
 
