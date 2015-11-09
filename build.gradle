@@ -20,6 +20,7 @@ import static org.ajoberstar.gradle.git.release.semver.StrategyUtil.*
 
 final class VersionUtils {
     final static Version getNearestPreReleaseVersion(Grgit grgit, SemVerStrategyState state, String label) {
+<<<<<<< HEAD
         List versionTags = grgit.tag.list().inject([]) { list, tag ->
             Version version = TagUtil.parseAsVersion(tag)
             if (version) {
@@ -75,6 +76,8 @@ import static org.ajoberstar.gradle.git.release.semver.StrategyUtil.*
 
 final class VersionUtils {
     final static Version getNearestRcVersion(Grgit grgit, SemVerStrategyState state) {
+=======
+>>>>>>> 8dc4711... CLOUD-50000 release failed on master when master is ff-merged to rc
         List versionTags = grgit.tag.list().inject([]) { list, tag ->
             Version version = TagUtil.parseAsVersion(tag)
             if (version) {
@@ -90,12 +93,12 @@ final class VersionUtils {
             list
         }
 
-        Map rc = versionTags.findAll { versionTag ->
-            versionTag.version.preReleaseVersion.contains("rc")
+        Map preRelease = versionTags.findAll { versionTag ->
+            versionTag.version.preReleaseVersion.contains(label)
         }.min { a, b ->
             a.distance <=> b.distance ?: (a.version <=> b.version) * -1
         }
-        return rc.version
+        return preRelease.version
     }
 }
 
@@ -152,7 +155,7 @@ final class VersionStrategies {
                 if ("".equals(nearestAny.preReleaseVersion)) {
                     return state.copyWith(inferredNormal: nearestAny.incrementPatchVersion())
                 } else if (state.scopeFromProp == ChangeScope.PATCH) {
-                    def rcVersion = VersionUtils.getNearestRcVersion(grgit, state)
+                    def rcVersion = VersionUtils.getNearestPreReleaseVersion(grgit, state, "rc")
                     return state.copyWith(inferredNormal: rcVersion.normalVersion)
                 } else {
                     return state.copyWith(inferredNormal: nearestAny.normalVersion)
@@ -166,6 +169,7 @@ final class VersionStrategies {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     final class PreRelStrategies {
 
         private Grgit grgit
@@ -176,16 +180,25 @@ final class VersionStrategies {
             this.preReleaseLabel = preReleaseLabel
 =======
     final class RcStrategies {
+=======
+    final class PreRelStrategies {
+>>>>>>> 8dc4711... CLOUD-50000 release failed on master when master is ff-merged to rc
 
         private Grgit grgit
+        private String preReleaseLabel
 
-        public RcStrategies(Grgit grgit) {
+        public PreRelStrategies(Grgit grgit, String preReleaseLabel) {
             this.grgit = grgit
+<<<<<<< HEAD
 >>>>>>> a08b5f0... CLOUD-932 always work with latest rc tag when scope is rc
+=======
+            this.preReleaseLabel = preReleaseLabel
+>>>>>>> 8dc4711... CLOUD-50000 release failed on master when master is ff-merged to rc
         }
 
         final PartialSemVerStrategy COUNT_INCREMENTED = closure { state ->
             def nearest = state.nearestVersion
+<<<<<<< HEAD
 <<<<<<< HEAD
             def nearestPreRelease
             def nearestRc = VersionUtils.getNearestPreReleaseVersion(grgit, state, "rc")
@@ -201,12 +214,25 @@ final class VersionStrategies {
                 def nearestPreIdents = nearestPreRelease.preReleaseVersion.split('\\.')
 =======
             def nearestRc = VersionUtils.getNearestRcVersion(grgit, state)
+=======
+            def nearestPreRelease
+            def nearestRc = VersionUtils.getNearestPreReleaseVersion(grgit, state, "rc")
+>>>>>>> 8dc4711... CLOUD-50000 release failed on master when master is ff-merged to rc
             def currentPreIdents = state.inferredPreRelease ? state.inferredPreRelease.split('\\.') as List : []
-            if (nearestRc == nearest.normal || nearestRc.normalVersion != state.inferredNormal) {
+            if (preReleaseLabel.equals("rc") || (preReleaseLabel.equals("dev") && nearestRc.preReleaseVersion.equals("rc.1"))){
+                nearestPreRelease = nearestRc
+            } else {
+                nearestPreRelease = VersionUtils.getNearestPreReleaseVersion(grgit, state, "dev")
+            }
+            if (nearestPreRelease == nearest.normal || nearestPreRelease.normalVersion != state.inferredNormal) {
                 currentPreIdents << '1'
             } else {
+<<<<<<< HEAD
                 def nearestPreIdents = nearestRc.preReleaseVersion.split('\\.')
 >>>>>>> a08b5f0... CLOUD-932 always work with latest rc tag when scope is rc
+=======
+                def nearestPreIdents = nearestPreRelease.preReleaseVersion.split('\\.')
+>>>>>>> 8dc4711... CLOUD-50000 release failed on master when master is ff-merged to rc
                 if (nearestPreIdents.size() <= currentPreIdents.size()) {
                     currentPreIdents << '1'
                 } else if (currentPreIdents == nearestPreIdents[0..(currentPreIdents.size() - 1)]) {
@@ -243,6 +269,7 @@ final class VersionStrategies {
             allowDirtyRepo: true,
             normalStrategy: new Normal(grgit).INCREMENT_FROM_PRE_RELEASE,
             preReleaseStrategy: all(PreRelease.STAGE_FIXED, new PreRelStrategies(grgit, "dev").COUNT_INCREMENTED)
+<<<<<<< HEAD
     )
 
     final SemVerStrategy RC = Strategies.DEFAULT.copyWith(
@@ -265,6 +292,8 @@ final class VersionStrategies {
             allowDirtyRepo: true,
             normalStrategy: new Normal(grgit).INCREMENT_FROM_PRE_RELEASE,
             preReleaseStrategy: all(PreRelease.STAGE_FIXED, PreRelease.COUNT_INCREMENTED)
+=======
+>>>>>>> 8dc4711... CLOUD-50000 release failed on master when master is ff-merged to rc
     )
 
     final SemVerStrategy RC = Strategies.DEFAULT.copyWith(
@@ -272,7 +301,7 @@ final class VersionStrategies {
             stages: ['rc'] as SortedSet,
             allowDirtyRepo: true,
             normalStrategy: new Normal(grgit).INCREMENT_FROM_PRE_RELEASE,
-            preReleaseStrategy: all(PreRelease.STAGE_FIXED, new RcStrategies(grgit).COUNT_INCREMENTED),
+            preReleaseStrategy: all(PreRelease.STAGE_FIXED, new PreRelStrategies(grgit, "rc").COUNT_INCREMENTED),
             enforcePrecedence: false
     )
 
