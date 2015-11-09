@@ -1010,7 +1010,9 @@ We recommend discussing your plans on the [mailing list](https://groups.google.c
 
 ###Development environment
 
-If you would like to contribute then probably you need a comfortable development environment. We have created a detailed description about [how to set up Cloudbreak on your local machine with IDEA](https://github.com/sequenceiq/cloudbreak/blob/master/dev/development.md).
+If you would like to contribute then probably you need a comfortable development environment. We have created a detailed description about [how to set up Cloudbreak on your local machine](https://github.com/sequenceiq/cloudbreak/blob/master/docs/dev/development.md).
+
+To run Cloudbreak
 
 ####Conventions
 

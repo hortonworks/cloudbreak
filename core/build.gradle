@@ -17,6 +17,11 @@ apply plugin: 'spring-boot'
 
 mainClassName = 'com.sequenceiq.cloudbreak.CloudbreakApplication'
 
+bootRun {
+    systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
+    systemProperty 'spring.config.location', System.properties['spring.config.location']
+}
+  
 jar {
     baseName = 'cloudbreak'
 }
