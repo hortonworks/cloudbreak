@@ -10,6 +10,12 @@ tests:
       - com.sequenceiq.it.TestSuiteInitializer
       - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
 
+  - name: create security group
+    parameters:
+      name: restricted-ambari-arm
+    classes:
+      - com.sequenceiq.it.cloudbreak.SecurityGroupCreationTest
+
   - name: create gateway template
     parameters: {
       azureTemplateName: it-azurerm-smoke-gateway-ssud,
