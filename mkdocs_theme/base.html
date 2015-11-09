@@ -104,26 +104,26 @@
 
                <!--AWS Table-->
                $.getJSON("https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/1.1.0/mkdocs_theme/aws.json", function(data) {
-               $("#images").append('<br>');
-               $("#images").append('<br>');
-               $("#images").append('<table>');
-                 $("#images").append('<col width="290">');
-                 $("#images").append('<col width="290">');
-                 $("#images").append('<thead>');
-                  $("#images").append('<tr>');
-                   $("#images").append('<th text-align="center" style="font-size: 20px">' + "Region" + '</th>');
-                   $("#images").append('<th text-align="center" style="font-size: 20px">' + "Image Name" + '</th>');
-                  $("#images").append('</tr>');
-                 $("#images").append('</thead>');
-                $("#images").append('<tbody>');
+               $("#aws-image-details").append('<br>');
+               $("#aws-image-details").append('<br>');
+               $("#aws-image-details").append('<table>');
+                 $("#aws-image-details").append('<col width="290">');
+                 $("#aws-image-details").append('<col width="290">');
+                 $("#aws-image-details").append('<thead>');
+                  $("#aws-image-details").append('<tr>');
+                   $("#aws-image-details").append('<th text-align="center" style="font-size: 20px">' + "Region" + '</th>');
+                   $("#aws-image-details").append('<th text-align="center" style="font-size: 20px">' + "Image Name" + '</th>');
+                  $("#aws-image-details").append('</tr>');
+                 $("#aws-image-details").append('</thead>');
+                $("#aws-image-details").append('<tbody>');
                  $.each(data.aws, function( index, value ) {
-                  $("#images").append('<tr>');
-                   $("#images").append('<td text-align="left" style="font-size: 20px">' + index + '</td>');
-                   $("#images").append('<td text-align="right" style="font-size: 20px">' + value + '</td>');
-                  $("#images").append('</tr>');
+                  $("#aws-image-details").append('<tr>');
+                   $("#aws-image-details").append('<td text-align="left" style="font-size: 20px">' + index + '</td>');
+                   $("#aws-image-details").append('<td text-align="right" style="font-size: 20px">' + value + '</td>');
+                  $("#aws-image-details").append('</tr>');
                  });
-                $("#images").append('</tbody>');
-               $("#images").append('</table>');
+                $("#aws-image-details").append('</tbody>');
+               $("#aws-image-details").append('</table>');
                });
 
                <!--OpenStack-->

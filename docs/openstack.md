@@ -6,7 +6,7 @@ Cloudbreak currently only supports the `OpenStack Juno` release.
 
 ##Download the Cloudbreak image
 
-You can download the latest Cloudbreak OpenStack image with below command.
+You can download the latest pre-configured Cloudbreak Deployer OpenStack image with the following script.
 
 ###OpenStack image details
 

@@ -4,9 +4,9 @@ We have pre-built custom cloud images with Cloudbreak deployer pre-configured. F
 
 ## Configured images
 
-You can find the pre-configured AWS images below.
+You can find the latest pre-configured Cloudbreak Deployer AWS images below.
 
-### Images
+### AWS image details
 
 
 ## Setup Cloudbreak deployer

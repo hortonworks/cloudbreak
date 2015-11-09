@@ -4,7 +4,7 @@ We have pre-built custom cloud images with Cloudbreak deployer pre-configured. F
 
 ## Configured image
 
-You can import the pre-configured GCP image with the following script:
+You can download the latest pre-configured Cloudbreak Deployer Google Cloud image with the following script.
 
 ### GCP image details
 
