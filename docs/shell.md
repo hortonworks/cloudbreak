@@ -70,3 +70,4 @@ Once you are connected you can start to create a cluster. If you are lost and ne
 - [GCP](gcp_cb_shell.md)
 - [OpenStack](openstack_cb_shell.md)
 
+or you can find a more detailed documentation about Cloudbreak-shell in its [Github repositiry](https://github.com/sequenceiq/cloudbreak-shell).

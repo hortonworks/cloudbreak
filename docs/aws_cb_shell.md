@@ -161,6 +161,53 @@ cluster create --description "my first cluster"
 ```
 You are done - you can check the progress through the Ambari UI. If you log back to Cloudbreak UI you can check the progress over there as well, and learn the IP address of Ambari.
 
+### Stopping and restarting a stack or a cluster
+
+After a stack is created, its virtual machines can be stopped by running:
+```
+stack stop
+```
+
+A stopped stack can be restarted with:
+```
+stack start
+```
+
+You can start or stop a cluster with:
+```
+cluster start
+```
+or
+```
+cluster stop
+```
+
+### Upscaling and downscaling a stack or a cluster
+
+```
+stack node --ADD --instanceGroup host_group_slave_1 --adjustment 2
+```
+Other available options:
+
+`--withClusterUpScale` indicates cluster upscale after stack upscale
+
+or
+```
+stack node --REMOVE  --instanceGroup host_group_slave_1 --adjustment -2
+```
+
+You can also upscale or downscale your cluster:
+```
+cluster node --ADD --hostgroup host_group_slave_1 --adjustment 2
+```
+or
+```
+cluster node --REMOVE  --hostgroup host_group_slave_1 --adjustment -2
+```
+Other available options:
+
+`--withStackDownScale` indicates stack downscale after the cluster downscale
+
 # Silent mode
 
 With Cloudbreak shell you can execute script files as well. A script file contains cloudbreak shell commands and can be executed with the `script` cloudbreak shell command
