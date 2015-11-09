@@ -314,7 +314,7 @@ database:
 zones:
  internal:
    hostnames:
-     - 192.168.59.103
+     - ${PRIVATE_IP}
      - node1.node.dc1.consul
      - identity.service.consul
 
