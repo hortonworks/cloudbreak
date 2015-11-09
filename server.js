@@ -8,7 +8,8 @@ var session = require('express-session');
 var sessionStore = new session.MemoryStore();
 var cookieParser = require('cookie-parser')(sessionSecret)
 var sessionSocketIo = require('session.socket.io');
-var sessionSockets = new sessionSocketIo(io, sessionStore, cookieParser);
+var connectSid = 'uluwatu.sid';
+var sessionSockets = new sessionSocketIo(io, sessionStore, cookieParser, connectSid);
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
@@ -26,6 +27,7 @@ app.set('view engine', 'html')
 app.use(express.static(path.join(__dirname, 'app/static')));
 app.use(cookieParser);
 app.use(session({
+    name: connectSid,
     genid: function(req) {
         return uid(30);
     },
@@ -215,13 +217,7 @@ function continueInit() {
         var sourceUrl = req.protocol + '://' + req.headers.host;
         var source = new Buffer(sourceUrl).toString('base64')
         req.session.destroy(function() {
-            res.clearCookie('connect.sid', {
-                path: '/'
-            });
-            res.clearCookie('JSESSIONID', {
-                path: '/'
-            });
-            res.clearCookie('uaa_cookie', {
+            res.clearCookie(connectSid, {
                 path: '/'
             });
             res.redirect(config.sultansRedirectAddress + '?logout=true&source=' + source)
