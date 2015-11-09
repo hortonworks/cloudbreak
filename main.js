@@ -63,6 +63,7 @@ function continueInit() {
   app.use(express.static(path.join(__dirname, 'public')));
   app.use(favicon(path.join(__dirname,'public','img','favicon.ico')));
   app.use(session({
+    name: 'sultans.sid',
     genid: function(req) {
       return uid(30);
     },
@@ -86,9 +87,7 @@ function continueInit() {
       var logout = req.query.logout
       if (logout != null && logout == 'true'){
           req.session.destroy(function() {
-              res.clearCookie('connect.sid', { path: '/' });
-              res.clearCookie('JSESSIONID', { path: '/' });
-              res.clearCookie('uaa_cookie', { path: '/' });
+              res.clearCookie('sultans.sid', { path: '/' });
               res.cookie('source', req.query.source);
               res.render('login',{ errorMessage: "" });
           })
@@ -163,7 +162,7 @@ function continueInit() {
                   var sessionId = getCookieFieldValue(cookieArray, 'JSESSIONID');
 
                   if (sessionId) {
-                      res.cookie('uaa_cookie', sessionId)
+                      req.session.uaa_sessionid = sessionId;
                   }
 
                   if (req.session.client_id == null) {
@@ -206,7 +205,7 @@ function continueInit() {
   });
 
   isUaaSession = function(req) {
-      return (getCookie(req, 'uaa_cookie') != null)
+      return (req.session.uaa_sessionid != null)
   }
   
   parseCookies = function (request) {
@@ -234,7 +233,7 @@ function continueInit() {
       var confirmOptions = {
                         headers: {
                           'Accept' : 'application/json',
-                          'Cookie': 'JSESSIONID=' + getCookie(req, 'uaa_cookie')
+                          'Cookie': 'JSESSIONID=' + req.session.uaa_sessionid
                            }
                     }
        needle.post(config.uaaAddress + '/oauth/authorize', confirmData, confirmOptions, function (err, confirmResp){
@@ -245,13 +244,11 @@ function continueInit() {
                 } else {
                       if (confirmResp.statusCode == 200){
                           req.session.userScopes = confirmResp.body.auth_request.scope
-                          res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
                           res.render('confirm', {client_id : req.session.client_id})
                       } else if (confirmResp.statusCode == 302){
                           if (endsWith(confirmResp.headers.location, '/login')){ // when redirects to UAA API login page
                             res.render('login',{ errorMessage: "" });
                           } else {
-                            res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
                             res.redirect(confirmResp.headers.location)
                           }
                       } else {
@@ -275,7 +272,7 @@ function continueInit() {
       var confirmOptions = {
           headers: {
                  'Accept' : 'text/html,application/xhtml+xml,application/xml',
-                 'Cookie' : 'JSESSIONID=' + getCookie(req, 'uaa_cookie'),
+                 'Cookie' : 'JSESSIONID=' + req.session.uaa_sessionid,
                  'Content-Type' : 'application/x-www-form-urlencoded'
           }
       }
@@ -294,7 +291,6 @@ function continueInit() {
                  res.render('login',{ errorMessage: "Client cannot access resource server. Check UAA server is running." });
              } else {
                  if (confirmResp.statusCode == 302){
-                     res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
                      res.redirect(confirmResp.headers.location)
                  } else {
                      console.log('Authorization failed - ' + confirmResp.message)
