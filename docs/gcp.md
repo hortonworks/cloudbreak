@@ -6,9 +6,8 @@ We have pre-built custom cloud images with Cloudbreak deployer pre-configured. F
 
 You can import the pre-configured GCP image with the following script:
 
-```
-gcloud compute images create cb-centos71-amb212-2015-11-05 --source-uri gs://sequenceiqimage/cb-centos71-amb212-2015-11-05.tar.gz
-```
+### GCP image details
+
 
 ## Setup Cloudbreak deployer
 

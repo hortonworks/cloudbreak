@@ -6,11 +6,12 @@ Cloudbreak currently only supports the `OpenStack Juno` release.
 
 ##Download the Cloudbreak image
 
-You can download the latest Cloudbreak OpenStack image with the following commands
+You can download the latest Cloudbreak OpenStack image with below command.
+
+###OpenStack image details
+
 ```
-LATEST_IMAGE="cb-openstack-images/cb-centos71-amb212-2015-10-09.img"
-LOCAL_IMAGE_NAME="..."
-aws s3 cp "s3://$LATEST_IMAGE" "$LOCAL_IMAGE_NAME" --region eu-west-1
+curl -L  https://atlas.hashicorp.com/api/v1/artifacts/sequenceiq/cloudbreak/openstack.image/$VERSION/file | tar -xz
 ```
 
 ##Import the image into OpenStack
@@ -20,7 +21,7 @@ export OS_IMAGE_NAME="name_in_openstack"
 export OS_USERNAME=...
 export OS_AUTH_URL="http://.../v2.0"
 export OS_TENANT_NAME=...
-glance image-create --name "$OS_IMAGE_NAME" --file "$LOCAL_IMAGE_NAME" --disk-format qcow2 --container-format bare --progress
+glance image-create --name "$OS_IMAGE_NAME" --file "$LATEST_IMAGE" --disk-format qcow2 --container-format bare --progress
 ```
 
 ##Usage

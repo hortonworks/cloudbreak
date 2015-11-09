@@ -1,0 +1,26 @@
+{
+  "docker_images": {
+    "cb_docker_container_alpine": "gliderlabs/alpine:3.1",
+    "cb_docker_container_ambari": "sequenceiq/ambari:2.1.2-v4",
+    "cb_docker_container_ambari_db": "postgres:9.4.1",
+    "cb_docker_container_ambari_warmup": "sequenceiq/ambari:2.1.2-v4",
+    "cb_docker_container_baywatch_client": "sequenceiq/baywatch-client:v1.0.0",
+    "cb_docker_container_baywatch_server": "sequenceiq/baywatch:v0.5.3",
+    "cb_docker_container_cert_tool": "ehazlett/cert-tool:0.0.3",
+    "cb_docker_container_consul": "sequenceiq/consul:v0.5.0-v5",
+    "cb_docker_container_docker_consul_watch_plugn": "sequenceiq/docker-consul-watch-plugn:1.0",
+    "cb_docker_container_gateway": "sequenceiq/cb-gateway-nginx:0.3",
+    "cb_docker_container_kerberos": "sequenceiq/kerberos:2.1.0-consul",
+    "cb_docker_container_list_others": null,
+    "cb_docker_container_logrotate": "sequenceiq/logrotate:v0.5.1",
+    "cb_docker_container_munchausen": "sequenceiq/munchausen:0.5.5",
+    "cb_docker_container_registrator": "sequenceiq/registrator:v5.2",
+    "cb_docker_container_swarm": "swarm:0.4.0"
+  },
+  "gce": {
+    "builder": "packer.googlecompute",
+    "id": "cb-centos71-amb212-2015-11-05",
+    "import_script": "gcloud compute images create cb-centos71-amb212-2015-11-05 --source-uri gs://sequenceiqimage/cb-centos71-amb212-2015-11-05.tar.gz",
+    "source_image": "sequenceiqimage/cb-centos71-amb212-2015-11-05.tar.gz"
+  }
+}

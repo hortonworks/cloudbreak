@@ -1,0 +1,13 @@
+{
+  "username": "sequenceiq",
+  "name": "cloudbreak",
+  "tag": "sequenceiq/cloudbreak",
+  "slug": "sequenceiq/cloudbreak/openstack.image/18",
+  "artifact_type": "openstack.image",
+  "id": "cb-centos71-amb212-2015-11-05.img",
+  "version": 18,
+  "metadata": {
+    "created_at": "1446722210"
+  },
+  "file": true
+}
