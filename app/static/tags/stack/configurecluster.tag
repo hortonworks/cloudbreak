@@ -26,26 +26,26 @@
     <label class="col-sm-3 control-label" for="selectRegion">{{msg.cluster_form_region_label}}</label>
     <div class="col-sm-8">
         <select class="form-control" id="selectRegion" ng-model="cluster.region" required ng-show="activeCredential.cloudPlatform == 'AWS'">
-            <option ng-repeat="region in $root.config.AWS.awsRegions" value="{{region.key}}">{{region.value}}</option>
+            <option ng-repeat="region in $root.regions.AWS" value="{{region}}">{{$root.config.regionDisplayNames.get(activeCredential.cloudPlatform, region)}}</option>
         </select>
         <select class="form-control" id="selectRegion" ng-model="cluster.region" required ng-show="activeCredential.cloudPlatform == 'AZURE'">
             <option ng-repeat="region in $root.config.AZURE.azureRegions" value="{{region.key}}">{{region.value}}</option>
         </select>
         <select class="form-control" id="selectRegion" ng-model="cluster.region" ng-show="activeCredential.cloudPlatform == 'GCP'">
-            <option ng-repeat="region in $root.config.GCP.gcpRegions" value="{{region.key}}">{{region.value}}</option>
+            <option ng-repeat="region in $root.regions.GCP" value="{{region}}">{{$root.config.regionDisplayNames.get(activeCredential.cloudPlatform, region)}}</option>
         </select>
         <select class="form-control" id="selectRegion" ng-model="cluster.region" ng-show="activeCredential.cloudPlatform == 'OPENSTACK'">
-            <option ng-repeat="region in $root.config.OPENSTACK.regions" value="{{region.key}}">{{region.value}}</option>
+            <option ng-repeat="region in $root.regions.OPENSTACK" value="{{region}}">{{region}}</option>
         </select>
         <select class="form-control" id="selectRegion" ng-model="cluster.region" ng-show="activeCredential.cloudPlatform == 'AZURE_RM'">
-            <option ng-repeat="region in $root.config.AZURE_RM.azureRegions" value="{{region.key}}">{{region.value}}</option>
+            <option ng-repeat="region in $root.regions.AZURE_RM" value="{{region}}">{{region}}</option>
         </select>
     </div>
 </div>
-<div class="form-group" ng-show="activeCredential.cloudPlatform == 'AWS' && cluster.region && showAdvancedOptionForm">
+<div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AWS' && cluster.region && showAdvancedOptionForm) || (activeCredential.cloudPlatform == 'GCP' && cluster.region)">
     <label class="col-sm-3 control-label" for="selectavailabilityZone">{{msg.availability_zone}}</label>
     <div class="col-sm-8">
-        <select class="form-control" id="selectavailabilityZone" ng-model="cluster.availabilityZone">
+        <select class="form-control" id="selectavailabilityZone" ng-model="cluster.availabilityZone" ng-required="activeCredential.cloudPlatform === 'GCP'">
             <option ng-repeat="avZone in avZones" value="{{avZone}}">{{avZone}}</option>
         </select>
     </div>

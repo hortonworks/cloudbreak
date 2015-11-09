@@ -22,16 +22,16 @@
     <div class="form-group">
         <label class="col-sm-3 control-label" for="sl_region">{{msg.active_cluster_region_label}}</label>
         <div class="col-sm-8" ng-if="activeCredential.cloudPlatform == 'AWS' ">
-            <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.AWS.awsRegions | filter:{key: cluster.region}:true">{{item.value}}</p>
+            <p id="sl_region" class="form-control-static">{{$root.config.regionDisplayNames.get(activeCredential.cloudPlatform, cluster.region)}}</p>
         </div>
         <div class="col-sm-8" ng-if="activeCredential.cloudPlatform == 'GCP' ">
-            <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.GCP.gcpRegions | filter:{key: cluster.region}:true">{{item.value}}</p>
+            <p id="sl_region" class="form-control-static">{{$root.config.regionDisplayNames.get(activeCredential.cloudPlatform, cluster.region)}}</p>
         </div>
         <div class="col-sm-8" ng-if="activeCredential.cloudPlatform == 'AZURE_RM' ">
-            <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.AZURE_RM.azureRegions | filter:{key: cluster.region}:true">{{item.value}}</p>
+            <p id="sl_region" class="form-control-static">{{cluster.region}}</p>
         </div>
         <div class="col-sm-8" ng-if="activeCredential.cloudPlatform == 'OPENSTACK' ">
-            <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.OPENSTACK.regions | filter:{key: cluster.region}:true">{{item.value}}</p>
+            <p id="sl_region" class="form-control-static">{{cluster.region}}</p>
         </div>
     </div>
     <div class="panel panel-default" ng-repeat="group in cluster.instanceGroups">

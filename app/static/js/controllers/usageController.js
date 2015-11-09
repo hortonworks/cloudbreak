@@ -14,7 +14,7 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             initSums();
             var filterStartDate = $scope.usageFilter.startDate;
             var filterEndDate = new Date($scope.usageFilter.endDate.getTime());
-            var param = createRequestParams(filterStartDate);
+            var param = createRequestParamObj(filterStartDate);
             var chartsData = {
                 gcp: [],
                 azure: [],
@@ -26,31 +26,35 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             populateChartsDataBySelectedPeriod(chartsData, filterStartDate, filterEndDate);
 
             if ($scope.$parent.user.admin != undefined && $scope.$parent.user.admin) {
-                $scope.usages = AccountUsages.query({
-                    param: param
-                }, function(success) {
+                $scope.usages = AccountUsages.query(param, function(success) {
                     processUsages(success, chartsData);
                 });
             } else {
-                $scope.usages = UserUsages.query({
-                    param: param
-                }, function(success) {
+                $scope.usages = UserUsages.query(param, function(success) {
                     processUsages(success, chartsData);
                 });
             }
         }
 
-        function createRequestParams(filterStartDate) {
-            var param = "";
+        function createRequestParamObj(filterStartDate) {
+            var param = {};
             var filterEndDate = new Date($scope.usageFilter.endDate.getTime());
             filterEndDate.setDate(filterEndDate.getDate() + 1);
-            param = param.concat(filterStartDate !== null ? "since=".concat(filterStartDate.getTime().toString().concat("&")) : "");
-            param = param.concat(filterEndDate !== null ? "filterenddate=".concat(filterEndDate.getTime().toString().concat("&")) : "");
-            param = param.concat($scope.usageFilter.user !== "all" ? "user=".concat($scope.usageFilter.user.concat("&")) : "");
-            param = param.concat($scope.usageFilter.provider !== "all" ? "cloud=".concat($scope.usageFilter.provider.concat("&")) : "");
-            param = param.concat($scope.usageFilter.region !== "all" ? "zone=".concat($scope.usageFilter.region.concat("&")) : "");
-            if (param.substr(-1) === "&") {
-                param = param.substring(0, param.length - 1);
+
+            if (filterStartDate !== null) {
+                param.since = filterStartDate.getTime().toString();
+            }
+            if (filterEndDate !== null) {
+                param.filterenddate = filterEndDate.getTime().toString();
+            }
+            if ($scope.usageFilter.user !== "all") {
+                param.user = $scope.usageFilter.user;
+            }
+            if ($scope.usageFilter.provider !== "all") {
+                param.cloud = $scope.usageFilter.provider;
+            }
+            if ($scope.usageFilter.region !== "all") {
+                param.zone = $scope.usageFilter.region;
             }
             return param;
         }
@@ -167,36 +171,30 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             $scope.usageFilter.region = 'all';
 
             if ($scope.usageFilter.provider == 'AWS' || $scope.usageFilter.provider == 'all') {
-                $rootScope.config.AWS.awsRegions.forEach(function(item) {
+                $rootScope.regions.AWS.forEach(function(item) {
                     $scope.regions.push(item);
                 });
             }
 
-            if ($scope.usageFilter.provider == 'AZURE' || $scope.usageFilter.provider == 'all') {
-                $rootScope.config.AZURE.azureRegions.forEach(function(item) {
+            if ($scope.usageFilter.provider == 'AZURE_RM' || $scope.usageFilter.provider == 'all') {
+                $rootScope.regions.AZURE_RM.forEach(function(item) {
                     $scope.regions.push(item);
                 });
             }
 
             if ($scope.usageFilter.provider == 'GCP' || $scope.usageFilter.provider == 'all') {
-                $rootScope.config.GCP.gcpRegions.forEach(function(item) {
+                $rootScope.regions.GCP.forEach(function(item) {
                     $scope.regions.push(item);
                 });
             }
         };
 
         $scope.selectProviderByRegion = function() {
-            if ($filter('filter')($rootScope.config.AWS.awsRegions, {
-                    key: $scope.usageFilter.region
-                }).length === 1) {
+            if ($filter('filter')($rootScope.regions.AWS, $scope.usageFilter.region).length === 1) {
                 $scope.usageFilter.provider = 'AWS';
-            } else if ($filter('filter')($rootScope.config.AZURE.azureRegions, {
-                    key: $scope.usageFilter.region
-                }).length === 1) {
-                $scope.usageFilter.provider = 'AZURE';
-            } else if ($filter('filter')($rootScope.config.GCP.gcpRegions, {
-                    key: $scope.usageFilter.region
-                }).length === 1) {
+            } else if ($filter('filter')($rootScope.regions.AZURE_RM, $scope.usageFilter.region).length === 1) {
+                $scope.usageFilter.provider = 'AZURE_RM';
+            } else if ($filter('filter')($rootScope.regions.GCP, $scope.usageFilter.region).length === 1) {
                 $scope.usageFilter.provider = 'GCP';
             }
         }

@@ -143,13 +143,13 @@ uluwatuServices.factory('PlatformVariant', ['$resource',
 
 uluwatuServices.factory('UserUsages', ['$resource',
     function($resource) {
-        return $resource('user/usages?:param');
+        return $resource('user/usages');
     }
 ]);
 
 uluwatuServices.factory('AccountUsages', ['$resource',
     function($resource) {
-        return $resource('account/usages?:param');
+        return $resource('account/usages');
     }
 ]);
 
@@ -503,6 +503,12 @@ uluwatuServices.factory('AccountSecurityGroup', ['$resource',
 uluwatuServices.factory('GlobalSecurityGroup', ['$resource',
     function($resource) {
         return $resource('securitygroups/:id');
+    }
+]);
+
+uluwatuServices.factory('PlatformParameters', ['$resource',
+    function($resource) {
+        return $resource('connectors');
     }
 ]);
 

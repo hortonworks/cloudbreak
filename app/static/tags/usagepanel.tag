@@ -66,7 +66,7 @@
                             <select class="form-control input-sm" id="cloudProvider" ng-model="usageFilter.provider" ng-change="selectRegionsByProvider()">
                                 <option>{{msg.usage_events_form_all_label}}</option>
                                 <option value="AWS">{{msg.usage_events_form_provider_amazon_label}}</option>
-                                <option value="AZURE">{{msg.usage_events_form_provider_microsoft_label}}</option>
+                                <option value="AZURE_RM">{{msg.usage_events_form_provider_microsoft_label}}</option>
                                 <option value="GCP">{{msg.usage_events_form_provider_google_label}}</option>
                                 <option value="OPENSTACK">{{msg.usage_events_form_provider_openstack_label}}</option>
                             </select>
@@ -77,7 +77,7 @@
                         <div>
                             <select class="form-control input-sm" id="region" ng-model="usageFilter.region" ng-change="selectProviderByRegion()">
                                 <option value="all">{{msg.usage_events_form_all_label}}</option>
-                                <option ng-repeat="region in regions" value="{{region.key}}">{{region.value}}</option>
+                                <option ng-repeat="region in regions" value="{{region}}">{{$root.config.regionDisplayNames.getById(region)}}</option>
                             </select>
                         </div>
                     </div>
@@ -118,7 +118,7 @@
                                 <td>{{usage.stackName}}</td>
                                 <td>{{usage.username}}</td>
                                 <td>
-                                    <p id="awsregion" ng-repeat="item in $root.config.GCP.gcpRegions | filter:{key: usage.region}">{{item.value}}</p>
+                                    <p>{{$root.config.regionDisplayNames.get('GCP', usage.region)}}</p>
                                 </td>
                                 <td>
                                     <table class="table usage-inline-table" style="background-color: #FFFFFF; margin-bottom: 0px;">
@@ -156,7 +156,7 @@
                                 <td>{{usage.stackName}}</td>
                                 <td>{{usage.username}}</td>
                                 <td>
-                                    <p ng-repeat="item in $root.config.AWS.awsRegions | filter:{key: usage.region}">{{item.value}}</p>
+                                    <p>{{$root.config.regionDisplayNames.get('AWS', usage.region)}}</p>
                                 </td>
                                 <td>
                                     <table class="table usage-inline-table" style="background-color: #FFFFFF; margin-bottom: 0px;">
@@ -194,7 +194,7 @@
                                 <td>{{usage.stackName}}</td>
                                 <td>{{usage.username}}</td>
                                 <td>
-                                    <p ng-repeat="item in $root.config.AZURE.azureRegions | filter:{key: usage.region}">{{item.value}}</p>
+                                    <p>{{usage.region}}</p>
                                 </td>
                                 <td>
                                     <table class="table usage-inline-table" style="background-color: #FFFFFF; margin-bottom: 0px;">
