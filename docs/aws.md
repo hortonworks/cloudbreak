@@ -4,19 +4,10 @@ We have pre-built custom cloud images with Cloudbreak deployer pre-configured. F
 
 ## Configured images
 
-You can find the pre-configured AWS images as:
+You can find the pre-configured AWS images below.
 
-|   Regions |   Images  |
-| ------------- |:-------------:|
-| ap-northeast-1 |	ami-b43f18da |
-| ap-southeast-1 |	ami-4955922a |
-| ap-southeast-2 |	ami-2a257b49 |
-| eu-central-1 |	ami-8c2b38e0 |
-| eu-west-1 |	ami-bdb861ce |
-| sa-east-1 |	ami-5c64df30 |
-| us-east-1 |	ami-3c611d56 |
-| us-west-1 |	ami-f75b3497 |
-| us-west-2 |	ami-fcc1d69d |
+### Images
+
 
 ## Setup Cloudbreak deployer
 
