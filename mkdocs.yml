@@ -22,6 +22,7 @@ pages:
             - 'Provisioning - CLI': aws_cb_shell.md
         - Azure :
             - Deployment: azure.md
+            - 'Install docker on Centos 7.1': azure_cb_install.md
             - 'Provisioning prerequisites': azure_pre_prov.md
             - 'Provisioning - UI': azure_cb_ui.md
             - 'Provisioning - CLI': azure_cb_shell.md
