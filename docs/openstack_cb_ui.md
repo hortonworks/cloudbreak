@@ -183,7 +183,8 @@ If `Enable security` is checked as well, Cloudbreak will install Key Distributio
 
 After the `create and start cluster` button is pushed Cloudbreak will start to create resources on your OpenStack.
 
-**Important!** Always use Cloudbreak to delete the cluster. If that fails for some reason, always try to delete via OpenStack Dashboard.
+>**Important** Always use Cloudbreak to delete the cluster. If that fails for some reason, always try to delete via 
+OpenStack Dashboard.
 
 **Advanced options**:
 

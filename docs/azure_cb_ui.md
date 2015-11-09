@@ -139,7 +139,8 @@ You can also use the two pre-defined security groups in Cloudbreak:
 
 If `Public in account` is checked all the users belonging to your account will be able to use this security group template to create clusters, but cannot delete or modify it.
 
-Note that the security groups are *not created* on AZURE after the `Create Security Group` button is pushed, only after the cluster provisioning starts with the selected security group template.
+>Note that the security groups are *not created* on AZURE after the `Create Security Group` button is pushed, only 
+after the cluster provisioning starts with the selected security group template.
 
 ## Cluster installation
 
@@ -185,7 +186,8 @@ If `Enable security` is checked as well, Cloudbreak will install KDC and the clu
 After the `create and start cluster` button is pushed Cloudbreak will start to create resources on your AZURE account.
 Cloudbreak uses *ARM template* to create the resources - you can check out the resources created by Cloudbreak on the [ARM Portal](https://portal.azure.com) on the 'Resource groups' page.
 
-**Important!** Always use Cloudbreak to delete the cluster, or if that fails for some reason always try to delete the ARM first.
+>**Important** Always use Cloudbreak to delete the cluster, or if that fails for some reason always try to delete 
+the ARM first.
 
 **Advanced options**
 

@@ -4,7 +4,7 @@
 
 Cloudbreak works by connecting your AWS account through so called *Credentials*, and then uses these credentials to create resources on your behalf.
 
-**Important!** Cloudbreak deployment uses two different AWS accounts for two different purposes:
+>**Important** Cloudbreak deployment uses two different AWS accounts for two different purposes:
 
 - The account belonging to the *Cloudbreak webapp* itself that acts as a *third party* that creates resources on the account of the *end-user*. This account is configured at server-deployment time.
 - The account belonging to the *end user* who uses the UI or the Shell to create clusters. This account is configured when setting up credentials.

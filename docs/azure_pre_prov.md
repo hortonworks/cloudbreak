@@ -1,6 +1,7 @@
 # Provision prerequisites
 
-Note that we use the new [Azure ARM](https://azure.microsoft.com/en-us/documentation/articles/resource-group-overview/) in order to launch clusters. In order to work we need to create an Active Directory application with the configured name and password and adds the permissions that are needed to call the Azure Resource Manager API. Cloudbreak deployer automates all this for you.
+We use the new [Azure ARM](https://azure.microsoft.com/en-us/documentation/articles/resource-group-overview/) in 
+order to launch clusters. In order to work we need to create an Active Directory application with the configured name and password and adds the permissions that are needed to call the Azure Resource Manager API. Cloudbreak deployer automates all this for you.
 
 ## Generate a new SSH key
 
@@ -101,7 +102,7 @@ To bypass those limits Microsoft created a small service called [DASH](https://g
 DASH works by sharding the storage access across multiple storage accounts. It can be configured to distribute storage account load to at most 15 **scaleout** storage accounts. It needs one more **namespace** storage account where it keeps track of where the data is stored.
 When configuring a WASB filesystem with Hadoop, the only required config entries are the ones where the access details are described. To access a storage account Azure generates an access key that is displayed on the Azure portal or can be queried through the API while the account name is the name of the storage account itself. A DASH service has a similar account name and key, those can be configured in the configuration file while deploying the cloud service.
 
-![](/images/dash.png)
+![](/diagrams/dash.png)
 
 ### Deploying a DASH service with Cloudbreak deployer
 

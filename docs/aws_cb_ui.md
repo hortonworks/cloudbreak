@@ -66,7 +66,8 @@ If you'd like to deploy a cluster to an already existing VPC you'll have to crea
 In this case you'll have to create a different network template for every one of your clusters because the Subnet CIDR cannot overlap an already existing subnet in the VPC.
 For example you can create 3 different clusters with 3 different network templates for the subnets `10.0.0.0/24`, `10.0.1.0/24`, `10.0.2.0/24` but with the same VPC and IGW identifiers.
 
-**Important!** Please make sure that the subnet you define here doesn't overlap with any of your already deployed subnets in the VPC because the validation only happens after the cluster creation starts.
+>**Important** Please make sure that the subnet you define here doesn't overlap with any of your already deployed 
+subnets in the VPC because the validation only happens after the cluster creation starts.
 
 If `Public in account` is checked all the users belonging to your account will be able to use this network template to create clusters, but cannot delete or modify it.
 
@@ -174,7 +175,8 @@ If `Enable security` is checked as well, Cloudbreak will install Key Distributio
 After the `create and start cluster` button is pushed Cloudbreak will start to create resources on your AWS account.
 Cloudbreak uses *CloudFormation* to create the resources - you can check out the resources created by Cloudbreak on the AWS Console under the CloudFormation page.
 
-**Important!** Always use Cloudbreak to delete the cluster. If that fails for some reason always try to delete the CloudFormation stack first.
+>**Important** Always use Cloudbreak to delete the cluster. If that fails for some reason always try to delete the 
+CloudFormation stack first.
 Instances are started in an Auto Scaling Group so they may be restarted if you terminate an instance manually!
 
 **Advanced options**

@@ -6,7 +6,10 @@ You have to copy files into the cbd working directory, which you would like to u
 
 ### Create a cloud credential
 
-In order to start using Cloudbreak you will need to have an AWS cloud credential configured. Note that Cloudbreak **does not** store your cloud user details - we work around the concept of [IAM](http://aws.amazon.com/iam/) - on Amazon (or other cloud providers) you will have to create an IAM role, a policy and associate that with your Cloudbreak account.
+In order to start using Cloudbreak you will need to have an AWS cloud credential configured.
+
+>**Note** that Cloudbreak **does not** store your cloud user details - we work around the concept of [IAM](http://aws
+.amazon.com/iam/) - on Amazon (or other cloud providers) you will have to create an IAM role, a policy and associate that with your Cloudbreak account.
 
 ```
 credential create --EC2 --description "description" --name my-aws-credential --roleArn <arn role> --sshKeyPath <path of your AWS public key>
