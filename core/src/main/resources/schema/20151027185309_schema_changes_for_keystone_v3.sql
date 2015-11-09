@@ -1,6 +1,6 @@
 -- // schema changes for keystone v3
 -- Migration SQL that makes the change goes here.
-ALTER TABLE credential ADD COLUMN keystoneversion character varying(255) DEFAULT 'cb-keystone-v2' WHERE dtype='OpenStackCredential';
+ALTER TABLE credential ADD COLUMN keystoneversion character varying(255);
 
 ALTER TABLE credential ADD COLUMN keystoneauthscope character varying(255);
 
@@ -11,6 +11,8 @@ ALTER TABLE credential ADD COLUMN domainname character varying(255);
 ALTER TABLE credential ADD COLUMN projectname character varying(255);
 
 ALTER TABLE credential ADD COLUMN userdomain character varying(255);
+
+UPDATE credential SET keystoneversion='cb-keystone-v2' WHERE dtype='OpenStackCredential';
 
 -- //@UNDO
 -- SQL to undo the change goes here. 

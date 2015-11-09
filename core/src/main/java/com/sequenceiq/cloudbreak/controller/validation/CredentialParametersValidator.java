@@ -17,6 +17,7 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
     private static final String KEYSTONE_V3_DEFAULT_SCOPE = "cb-keystone-v3-default-scope";
     private static final String KEYSTONE_V3_DOMAIN_SCOPE = "cb-keystone-v3-domain-scope";
     private static final String KEYSTONE_V3_PROJECT_SCOPE = "cb-keystone-v3-project-scope";
+    private static final String NULL_STRING = "null";
 
     @Inject
     private List<ParameterValidator> parameterValidators;
@@ -76,7 +77,7 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
     private boolean validateOpenStackParams(Map<String, Object> params, ConstraintValidatorContext context, List<TemplateParam> paramConstraints) {
         boolean valid = true;
         String keystoneVersion = String.valueOf(params.get(OpenStackCredentialParam.KEYSTONE_VERSION.getName()));
-        if (keystoneVersion.equals(KEYSTONE_VERSION_V2)) {
+        if (keystoneVersion.equals(NULL_STRING) || keystoneVersion.equals(KEYSTONE_VERSION_V2)) {
             valid = validateParams(params, context, paramConstraints)
                     && validateOpenStackV2Params(params, context, paramConstraints);
         } else if (keystoneVersion.equals(KEYSTONE_VERSION_V3)) {

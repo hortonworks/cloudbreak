@@ -27,7 +27,11 @@ public class JsonToOpenStackCredentialConverter extends AbstractConversionServic
         openStackCredential.setUserName(encryptor.encrypt(userName));
         String password = String.valueOf(source.getParameters().get(OpenStackCredentialParam.PASSWORD.getName()));
         openStackCredential.setPassword(encryptor.encrypt(password));
-        openStackCredential.setKeystoneVersion(String.valueOf(source.getParameters().get(OpenStackCredentialParam.KEYSTONE_VERSION.getName())));
+        if (!source.getParameters().containsKey(OpenStackCredentialParam.KEYSTONE_VERSION.getName())) {
+            openStackCredential.setKeystoneVersion("cb-keystone-v2");
+        } else {
+            openStackCredential.setKeystoneVersion(String.valueOf(source.getParameters().get(OpenStackCredentialParam.KEYSTONE_VERSION.getName())));
+        }
         openStackCredential.setKeystoneAuthScope(String.valueOf(source.getParameters().get(OpenStackCredentialParam.KEYSTONE_AUTH_SCOPE.getName())));
         openStackCredential.setTenantName(String.valueOf(source.getParameters().get(OpenStackCredentialParam.TENANT_NAME.getName())));
         openStackCredential.setUserDomain(String.valueOf(source.getParameters().get(OpenStackCredentialParam.USER_DOMAIN.getName())));
