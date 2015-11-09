@@ -21,7 +21,8 @@
     "jade": "~1.7.0",
     "needle": "~0.7",
     "request": "~2.48.0",
-    "MD5": "~1.2.1"
+    "MD5": "~1.2.1",
+    "cookie": "~0.2.3"
   },
   "repository": {
     "type": "git",

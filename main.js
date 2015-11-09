@@ -11,6 +11,7 @@ var md5 = require('MD5');
 var request = require('request');
 var dns = require('dns');
 var morgan = require('morgan');
+var cookieParser = require('cookie');
 
 var domain = require('domain'),
 d = domain.create();
@@ -74,7 +75,6 @@ function continueInit() {
   app.use(bodyParser.json())
   app.use( morgan(':status :method :url - proxied-for: :req[proxied-for]'))
 
-
   var pjson = require('./package.json');
 
   app.get('/info', function(req, res) {
@@ -130,42 +130,61 @@ function continueInit() {
   });
 
 
+  getCookieFieldValue = function(cookieArray, fieldName) {
+      for (var i = cookieArray.length - 1; i >= 0; i--) {
+          var cookiePart = cookieParser.parse(cookieArray[i]);
+          if(cookiePart[fieldName]) {
+              return cookiePart[fieldName];
+          }
+      }
+      return undefined;
+  }
+
   app.post('/', function(req, res){
-      var username = req.body.email
-      var password = req.body.password
-      var userCredentials = {username: username, password: password}
-      needle.post(config.uaaAddress + '/login.do', userCredentials,
-         function(err, tokenResp) {
-          if (err == null) {
-          var splittedLocation = tokenResp.headers.location.split('?')
-          if (splittedLocation.length == 1 || splittedLocation[1] != 'error=true'){
-              var cookies = tokenResp.headers['set-cookie'][0].split(';')
-              var sessionId;
-              for (var i = 0 ; i < cookies.length; i++) {
-                  var cookie = cookies[i].split('=')
-                  if (cookie.length == 2 && cookie[0] == 'JSESSIONID'){
-                     sessionId = cookie[1]
-                  }
+      needle.get(config.uaaAddress + '/login', function(err, resp){
+          var cookies = resp.headers['set-cookie'];
+          var csrfToken = getCookieFieldValue(cookies, 'X-Uaa-Csrf');
+          var username = req.body.email
+          var password = req.body.password
+          var userCredentials = "username="+username+"&password="+password+"&X-Uaa-Csrf="+csrfToken;
+          var options = {
+              headers: {
+                'Accept' : 'application/json',
+                'Cookie': 'X-Uaa-Csrf=' + csrfToken,
+                'Authorization': 'Basic ' + new Buffer(config.clientId + ':'+ config.clientSecret).toString('base64')
               }
-              res.cookie('uaa_cookie', sessionId) // TODO check sessionId
-              if (req.session.client_id == null) {
-                  var sourceCookie = getCookie(req, 'source')
-                  if (sourceCookie == null || sourceCookie == 'undefined'){
-                      res.redirect('dashboard')
+          }
+
+          needle.post(config.uaaAddress + '/login.do', userCredentials, options, function(err, tokenResp) {
+              if (err == null) {
+              var splittedLocation = tokenResp.headers.location.split('?')
+              if (splittedLocation.length == 1 || splittedLocation[1] != 'error=login_failure'){
+                  var cookieArray = tokenResp.headers['set-cookie'];
+                  var sessionId = getCookieFieldValue(cookieArray, 'JSESSIONID');
+
+                  if (sessionId) {
+                      res.cookie('uaa_cookie', sessionId)
+                  }
+
+                  if (req.session.client_id == null) {
+                      var sourceCookie = getCookie(req, 'source')
+                      if (sourceCookie == null || sourceCookie == 'undefined'){
+                          res.redirect('dashboard')
+                      } else {
+                          var sourceUrl = new Buffer(sourceCookie, 'base64').toString('utf-8')
+                          res.redirect(sourceUrl)
+                      }
                   } else {
-                      var sourceUrl = new Buffer(sourceCookie, 'base64').toString('utf-8')
-                      res.redirect(sourceUrl)
+                      res.redirect('confirm')
                   }
               } else {
-                  res.redirect('confirm')
+                  res.render('login',{ errorMessage: "Incorrect email/password or account is disabled." });
               }
-          } else {
-              res.render('login',{ errorMessage: "Incorrect email/password or account is disabled." });
-          }
-          } else {
-              console.log("POST login.do - Client cannot access resource server. Check UAA address.");
-              res.render('login',{ errorMessage: "Client cannot access resource server." });
-          }
+              } else {
+                  console.log("POST login.do - Client cannot access resource server. Check UAA address.");
+                  res.render('login',{ errorMessage: "Client cannot access resource server." });
+              }
+          });
       });
   });
 
@@ -424,7 +443,7 @@ function continueInit() {
       var errorResult = validator.validateReset(email, req.body.password)
       if (errorResult == null){
           getToken(req, res, function(token){
-              getUserByName(req, res, token, email, 'id,userName,familyName,givenName,version,emails,meta.lastModified', function(userData){
+              getUserByName(req, res, token, email, function(userData){
                   if (resetToken == md5(userData.id + userData['meta.lastModified'])){
                       var userOptions = {
                            headers: {
@@ -511,7 +530,7 @@ function continueInit() {
       if (validator.validateEmail(inviteEmail)){
           getUserName(req, res, function(adminUserName){
              getToken(req, res, function(token){
-                getUserByName(req, res, token, adminUserName, 'id,userName,groups', function(userData){
+                getUserByName(req, res, token, adminUserName, function(userData){
                   isUserAdmin(req, res, userData, function(companyId){
                      inviteUser(req, res, token, inviteEmail, requestedScopes, adminUserName, companyId)
                   });
@@ -530,7 +549,7 @@ function continueInit() {
       var errorResult = validator.validateForget(userName)
       if (errorResult == null) {
           getToken(req, res, function(token){
-              getUserByName(req, res, token, userName, 'id,givenName,meta.lastModified,userName', function(userData){
+              getUserByName(req, res, token, userName, function(userData){
                  var usrIdAndLastModified = userData.id + userData['meta.lastModified']
                  var resetToken = md5(usrIdAndLastModified)
                  var templateFile = path.join(__dirname,'templates','reset-password-email.jade')
@@ -551,7 +570,7 @@ function continueInit() {
       req.session.acc_email = req.param('email')
       var inviter = req.param('inviter')
       getToken(req, res, function(token) {
-          getUserByName(req, res, token, inviter, 'id,userName,groups', function(userData){
+          getUserByName(req, res, token, inviter, function(userData){
               isUserAdmin(req, res, userData, function(companyId){
                   var company = companyId.split(".")[3]
                   res.render('regacc',
@@ -579,15 +598,14 @@ function continueInit() {
           var errorResult = validator.validateRegister(req.body.email, req.body.password, req.body.firstName, req.body.lastName, req.body.company)
           if (errorResult == null) {
               getToken(req, res, function(token) {
-                  getUserByName(req, res, token, email, 'id,userName,familyName,givenName,version,emails,active',
-                      function(userData){
+                  getUserByName(req, res, token, email, function(userData){
                        if(userData.active == false){
                           var updateOptions = {
                                headers: {
                                  'Accept' : 'application/json',
                                  'Authorization' : 'Bearer ' + token,
                                  'Content-Type' : 'application/json',
-                                 'If-Match': userData.version}
+                                 'If-Match': userData.meta.version}
                           }
                           var updateData = {
                              'userName' : req.body.email,
@@ -625,7 +643,7 @@ function continueInit() {
   app.get('/account/details', function(req, res){
       getUserName(req, res, function(userName){
           getToken(req, res, function(token){
-              getUserByName(req, res, token, userName, 'userName,familyName,givenName,groups,meta', function(userData){
+              getUserByName(req, res, token, userName, function(userData){
                   var companyName = null
                   var groups = userData.groups
                   var adminUserId = null
@@ -645,7 +663,7 @@ function continueInit() {
                    }
                    needle.get(config.uaaAddress + '/Users/' + userData.id, usrOptions, function(err, adminUserData) {
                       if (adminUserData.statusCode == 200) {
-                         res.json({userName: userData.userName, givenName: userData.givenName, familyName: userData.familyName, company: companyName, companyOwner: adminUserData.userName, meta: userData.meta, groups: userData.groups})
+                         res.json({userName: userData.userName, givenName: userData.name.givenName, familyName: userData.name.familyName, company: companyName, companyOwner: adminUserData.userName, meta: userData.meta, groups: userData.groups})
                       } else {
                           // workaround for default users
                          res.json({userName: userData.userName, givenName: userData.givenName, familyName: userData.familyName, company: companyName, companyOwner: 'DEFAULT_USER', meta: userData.meta, groups: userData.groups})
@@ -663,9 +681,9 @@ function continueInit() {
       if (activate != null && (activate === true || activate === false) && validator.validateEmail(email)) {
           getUserName(req, res, function(adminUserName){
               getToken(req, res, function(token){
-                  getUserByName(req, res, token, adminUserName, 'id,userName,groups', function(adminUserData){
+                  getUserByName(req, res, token, adminUserName, function(adminUserData){
                       isUserAdmin(req, res, adminUserData, function(companyId){
-                          getUserByName(req, res, token, email, 'id,userName,familyName,givenName,version,groups', function(userData){
+                          getUserByName(req, res, token, email, function(userData){
                               var userCompanyId = null
                               var groups = userData.groups
                               for (var i = 0; i < groups.length; i++ ){
@@ -680,7 +698,7 @@ function continueInit() {
                                         'Accept' : 'application/json',
                                         'Authorization' : 'Bearer ' + token,
                                         'Content-Type' : 'application/json',
-                                        'If-Match': userData.version
+                                        'If-Match': userData.meta.version
                                       }
                                   }
                                   var userActivateData = {
@@ -719,7 +737,7 @@ function continueInit() {
   app.get('/users', function(req, res){
       getUserName(req, res, function(adminUserName){
           getToken(req, res, function(token){
-              getUserByName(req, res, token, adminUserName, 'id,userName,groups', function(adminUserData){
+              getUserByName(req, res, token, adminUserName, function(adminUserData){
                   isUserAdmin(req, res, adminUserData, function(companyId){
                       getGroupByName(req, res, token, 'sequenceiq.cloudbreak.admin', 'members', function(adminGroupData){
                           var adminGroupMembers = adminGroupData.members
@@ -771,7 +789,7 @@ function continueInit() {
       if (role == 'admin') {
            getUserName(req, res, function(adminUserName){
               getToken(req, res, function(token){
-                  getUserByName(req, res, token, adminUserName, 'id,userName,groups', function(adminUserData){
+                  getUserByName(req, res, token, adminUserName, function(adminUserData){
                       isUserAdmin(req, res, adminUserData, function(companyId){
                           updateGroup(token, userId, 'sequenceiq.cloudbreak.admin')
                           updateGroup(token, userId, 'cloudbreak.usages.account')
@@ -789,7 +807,7 @@ function continueInit() {
   app.get('/permission', function(req, res){
           getUserName(req, res, function(userName){
                       getToken(req, res, function(token){
-                          getUserByName(req, res, token, userName, 'id,userName,groups', function(userData){
+                          getUserByName(req, res, token, userName, function(userData){
                               var groups = userData.groups
                               var isAdmin = false
                               for (var i = 0; i < groups.length; i++ ){
@@ -807,7 +825,7 @@ function continueInit() {
       var userId = req.param('userId')
       getUserName(req, res, function(userName){
           getToken(req, res, function(token){
-              getUserByName(req, res, token, userName, 'id,userName,groups', function(adminUserData) {
+              getUserByName(req, res, token, userName, function(adminUserData) {
                   isUserAdmin(req, res, adminUserData, function(companyId) {
                       getUserById(req, res, token, userId, function(userData) {
                           var userCompanyId = null
@@ -865,14 +883,14 @@ function continueInit() {
       });
   }
 
-  getUserByName = function(req, res, token, userName, attributes, callback) {
+  getUserByName = function(req, res, token, userName, callback) {
       var usrOptions = {
             headers: {
               'Accept' : 'application/json',
               'Authorization' : 'Bearer ' + token,
               'Content-Type' : 'application/json' }
       }
-      needle.get(config.uaaAddress + '/Users?attributes=' + attributes + '&filter=userName eq "' + userName + '"', usrOptions , function(err, usrResp){
+      needle.get(config.uaaAddress + '/Users?filter=userName eq "' + userName + '"', usrOptions , function(err, usrResp){
          if (usrResp.statusCode == 200){
               if (usrResp.body.resources.length == 1){
                   callback(usrResp.body.resources[0])
@@ -927,9 +945,9 @@ function continueInit() {
   }
 
   updateUserData = function(req, res, token, userId, updateData, updateOptions, callback) {
-      needle.put(config.uaaAddress + '/Users/' + userId, JSON.stringify(updateData), updateOptions,
-          function(err, updateResp){
-            if (updateResp.statusCode == 200){
+      needle.put(config.uaaAddress + '/Users/' + userId, JSON.stringify(updateData), updateOptions, function(err, updateResp){
+            if (err) { console.log(err)};
+            if (updateResp.statusCode == 200) {
               callback(updateResp);
             } else {
               console.log('User update failed.')
@@ -991,7 +1009,7 @@ function continueInit() {
                        updateCloudbreakGroups(token, createResp.body.id)
                        res.json({status: 200, message: 'SUCCESS'})
                    } else if (createResp.statusCode == 409) {
-                      getUserByName(req, res, token, req.body.email, 'id,active,version', function(userData) {
+                      getUserByName(req, res, token, req.body.email, function(userData) {
                            if (userData.active == false) { // TODO: check verified instead & refresh user data?
                               var updateOptions = {
                                     headers: {
@@ -1125,7 +1143,7 @@ function continueInit() {
              invite: process.env.SL_ADDRESS + '/account/register?token=' + userTempToken + '&email=' + inviteEmail + '&inviter=' + adminUserName})
              res.json({message: 'SUCCESS'})
          } else if (createResp.statusCode == 409) {
-              getUserByName(req, res, token, inviteEmail, 'givenName,active', function(userData) {
+              getUserByName(req, res, token, inviteEmail, function(userData) {
                   if (userData.active == false) { // TODO: check verified instead
                       var tempToken = userData.givenName;
                       console.log(tempToken)
