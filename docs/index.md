@@ -16,10 +16,10 @@ The **Cloudbreak Application** is made up from microservices (Cloudbreak, Uluwat
 
 To run the Cloudbreak Deployer and install the Cloudbreak Application, you must meet the following system requirements:
 
-- RHEL / CentOS / Oracle Linux 6 (64-bit)
-- Docker 1.6.0 (or later)
-    - [Docker for RHEL](http://docs.docker.com/engine/installation/rhel/)
-    - [Docker for CentOS](https://docs.docker.com/installation/centos/)
+ * RHEL / CentOS / Oracle Linux 6 (64-bit)
+ * Docker 1.6.0 (or later)
+    * [Docker for RHEL](http://docs.docker.com/engine/installation/rhel/)
+    * [Docker for CentOS](https://docs.docker.com/installation/centos/)
 
 > You can install Cloudbreak on Mac OS X "Darwin" for **evaluation purposes only**. This operating system is not supported for a production deployment of Cloudbreak.
 

@@ -70,7 +70,8 @@ For example you can create 3 different clusters with 3 different network templat
 
 If `Public in account` is checked all the users belonging to your account will be able to use this network template to create clusters, but cannot delete or modify it.
 
-**Note** that the VPCs, IGWs and/or subnets are *not created* on AWS after the `Create Network` button is pushed, only after the cluster provisioning starts with the selected network template.
+>**Note** that the VPCs, IGWs and/or subnets are *not created* on AWS after the `Create Network` button is pushed, 
+only after the cluster provisioning starts with the selected network template.
 
 ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/1.1.0/docs/images/aws-network.png)
 
@@ -124,7 +125,8 @@ You can also use the two pre-defined security groups in Cloudbreak:
 
 If `Public in account` is checked all the users belonging to your account will be able to use this security group template to create clusters, but cannot delete or modify it.
 
-**Note** that the security groups are *not created* on AWS after the `Create Security Group` button is pushed, only after the cluster provisioning starts with the selected security group template.
+>**Note** that the security groups are *not created* on AWS after the `Create Security Group` button is pushed, only 
+after the cluster provisioning starts with the selected security group template.
 
 ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/1.1.0/docs/images/ui-secgroup.png)
 

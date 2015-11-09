@@ -1,4 +1,4 @@
-### Migrate the databases
+# Migrate the databases
 Create the database schema or migrate it to the latest version:
 
 ```

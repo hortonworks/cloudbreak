@@ -25,7 +25,7 @@ Start the shell with `cbd util cloudbreak-shell`. This will launch the Cloudbrea
 <a name="dockerimage"></a>
 ### Starting Cloudbreak shell with our prepared docker image
 
-:open_file_folder: You can find the docker image and its documentation [here](https://github.com/sequenceiq/docker-cb-shell).
+You can find the docker image and its documentation [here](https://github.com/sequenceiq/docker-cb-shell).
 
 <a name="fromsource"></a>
 ### Build from source

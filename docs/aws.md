@@ -6,7 +6,7 @@ We have pre-built custom cloud images with Cloudbreak deployer pre-configured. F
 
 You can find the pre-configured AWS images as:
 
-#### AWS Images
+###awsimages
 
 
 ## Setup Cloudbreak deployer
