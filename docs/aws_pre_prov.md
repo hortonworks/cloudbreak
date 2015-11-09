@@ -34,7 +34,7 @@ export AWS_ROLE_NAME=my-cloudbreak-role
 
 You can check the generated role on your AWS console, under IAM roles:
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/1.1.0/docs/images/aws-iam-role.png)
+![](/images/aws-iam-role.png)
 
 ## Generate a new SSH key
 
