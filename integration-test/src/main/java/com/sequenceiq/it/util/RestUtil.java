@@ -57,9 +57,7 @@ public class RestUtil {
                     String.class
             );
             if (HttpStatus.FOUND == authResponse.getStatusCode() && authResponse.getHeaders().get("Location") != null) {
-                String location = authResponse.getHeaders().get("Location").get(0);
-                String[] parts = location.split("#|&|=");
-                token = parts[2];
+                token = parseTokenFromLocationHeader(authResponse);
             } else {
                 LOG.error("Couldn't get an access token from the identity server, check its configuration! " + "Perhaps cloudbreak_shell is not autoapproved?");
                 LOG.error("Response from identity server: ");
@@ -75,8 +73,22 @@ public class RestUtil {
             }
             LOG.error("Something unexpected happened, couldn't get token from identity server. Please check your configurations.");
         } catch (Exception e) {
-            LOG.error("Something unexpected happened, couldn't get token from identity server. Please check your configurations.");
+            LOG.error("Something unexpected happened, couldn't get token from identity server. Please check your configurations.", e);
         }
         return token;
+    }
+
+    private static String parseTokenFromLocationHeader(ResponseEntity<String> authResponse) {
+        String location = authResponse.getHeaders().get("Location").get(0);
+        String[] parts = location.split("#");
+        String[] parameters = parts[1].split("&|=");
+        for (int i = 0; i < parameters.length; i++) {
+            String param = parameters[i];
+            int nextIndex = i + 1;
+            if ("access_token".equals(param) && !(nextIndex > parameters.length)) {
+                return parameters[nextIndex];
+            }
+        }
+        throw new RuntimeException("Token could not be found in the 'Location' header.");
     }
 }
