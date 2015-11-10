@@ -749,7 +749,7 @@ function continueInit() {
                                   groupMemberIds.forEach(function(groupMember) {
                                       request({
                                       method: 'GET',
-                                      url: config.uaaAddress + '/Users?attributes=id,userName,groups,active&filter=id eq  "' + groupMember.value + '"',
+                                      url: config.uaaAddress + '/Users?filter=id eq  "' + groupMember.value + '"',
                                       headers: {'Accept' : 'application/json',
                                            'Authorization' : 'Bearer ' + token,
                                             'Content-Type' : 'application/json'
