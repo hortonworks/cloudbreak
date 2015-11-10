@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.service.user;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
@@ -14,19 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
-import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
-import com.sequenceiq.cloudbreak.repository.CredentialRepository;
-import com.sequenceiq.cloudbreak.repository.NetworkRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.repository.TemplateRepository;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -41,6 +28,20 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestOperations;
+
+import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
+import com.sequenceiq.cloudbreak.repository.CredentialRepository;
+import com.sequenceiq.cloudbreak.repository.NetworkRepository;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 
 @Service
 public class RemoteUserDetailsService implements UserDetailsService {
@@ -141,14 +142,32 @@ public class RemoteUserDetailsService implements UserDetailsService {
             }
             String userId = userNode.get("id").asText();
             String email = userNode.get("userName").asText();
-            String givenName = userNode.get("name").get("givenName").asText();
-            String familyName = userNode.get("name").get("familyName").asText();
+            String givenName = getGivenName(userNode);
+            String familyName = getFamilyName(userNode);
             String dateOfCreation = userNode.get("meta").get("created").asText();
             Date created = parseUserCreated(dateOfCreation);
             return new CbUser(userId, email, account, roles, givenName, familyName, created);
         } catch (IOException e) {
             throw new UserDetailsUnavailableException("User details cannot be retrieved from identity server.", e);
         }
+    }
+
+    private String getGivenName(JsonNode userNode) {
+        if (userNode.get("name") != null) {
+            if (userNode.get("name").get("givenName") != null) {
+                return userNode.get("name").get("givenName").asText();
+            }
+        }
+        return "";
+    }
+
+    private String getFamilyName(JsonNode userNode) {
+        if (userNode.get("name") != null) {
+            if (userNode.get("name").get("familyName") != null) {
+                return userNode.get("name").get("familyName").asText();
+            }
+        }
+        return "";
     }
 
     @Override
