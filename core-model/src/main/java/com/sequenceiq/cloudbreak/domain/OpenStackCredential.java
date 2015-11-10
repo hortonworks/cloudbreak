@@ -13,6 +13,12 @@ public class OpenStackCredential extends Credential implements ProvisionEntity {
     private String password;
     private String tenantName;
     private String endpoint;
+    private String userDomain;
+    private String keystoneVersion;
+    private String keystoneAuthScope;
+    private String projectName;
+    private String projectDomainName;
+    private String domainName;
 
     public OpenStackCredential() {
     }
@@ -33,6 +39,14 @@ public class OpenStackCredential extends Credential implements ProvisionEntity {
         this.tenantName = tenantName;
     }
 
+    public String getUserDomain() {
+        return userDomain;
+    }
+
+    public void setUserDomain(String userDomain) {
+        this.userDomain = userDomain;
+    }
+
     public String getEndpoint() {
         return endpoint;
     }
@@ -47,6 +61,46 @@ public class OpenStackCredential extends Credential implements ProvisionEntity {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public String getKeystoneVersion() {
+        return keystoneVersion;
+    }
+
+    public void setKeystoneVersion(String keystoneVersion) {
+        this.keystoneVersion = keystoneVersion;
+    }
+
+    public String getKeystoneAuthScope() {
+        return keystoneAuthScope;
+    }
+
+    public void setKeystoneAuthScope(String keystoneAuthScope) {
+        this.keystoneAuthScope = keystoneAuthScope;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
+    public String getProjectDomainName() {
+        return projectDomainName;
+    }
+
+    public void setProjectDomainName(String projectDomainName) {
+        this.projectDomainName = projectDomainName;
+    }
+
+    public String getDomainName() {
+        return domainName;
+    }
+
+    public void setDomainName(String domainName) {
+        this.domainName = domainName;
     }
 
     @Override
