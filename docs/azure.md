@@ -145,7 +145,8 @@ rm -rf /var/lib/docker && systemctl daemon-reload && service docker start && sys
 Download **cloudbreak-deployer**:
 
 ```
-mkdir -p cloudbreak-deployer && cd cloudbreak-deployer && curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install | sh && cbd --version
+mkdir -p cloudbreak-deployer && cd cloudbreak-deployer && curl https://raw.githubusercontent
+.com/sequenceiq/cloudbreak-deployer/master/install | sh && cbd --version
 ```
 
 ### Initialize your Profile
@@ -183,7 +184,7 @@ This will start all the Docker containers and initialize the application. It wil
 cbd start
 ```
 
-Launching it the first will take more time as it downloads all the docker images needed by Cloudbreak.
+Launching it first will take more time as it downloads all the docker images needed by Cloudbreak.
 
 After the `cbd start` command finishes you can check the logs of the Cloudbreak server with this command:
 
