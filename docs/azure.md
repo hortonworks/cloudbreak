@@ -169,6 +169,11 @@ rm *.yml
 cbd generate
 ```
 
+This command applies the following steps: 
+
+- creates the **docker-compose.yml** file that describes the configuration of all the Docker containers needed for the Cloudbreak deployment.
+- creates the **uaa.yml** file that holds the configuration of the identity server used to authenticate users to Cloudbreak.
+
 ### Start Cloudbreak
 
 To start the Cloudbreak application use the following command.
@@ -178,13 +183,9 @@ This will start all the Docker containers and initialize the application. It wil
 cbd start
 ```
 
-Launching it the first time will take more time as it does some additional steps:
+Launching it the first will take more time as it downloads all the docker images needed by Cloudbreak.
 
-- downloads all the docker images needed by Cloudbreak.
-- creates the **docker-compose.yml** file that describes the configuration of all the Docker containers needed for the Cloudbreak deployment.
-- creates the **uaa.yml** file that holds the configuration of the identity server used to authenticate users to Cloudbreak.
-
-After the `cbd generate` command finishes you can check the logs of the Cloudbreak server with this command:
+After the `cbd start` command finishes you can check the logs of the Cloudbreak server with this command:
 
 ```
 cbd logs cloudbreak
