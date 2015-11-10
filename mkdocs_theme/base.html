@@ -130,8 +130,8 @@
                $.getJSON("https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/1.1.0/mkdocs_theme/openstack.json", function(data) {
                $("#openstack-image-details").append('<br>');
                $("#openstack-image-details").append('<br>');
-               $("#openstack-image-details").append('<p style="font-size: 15px"> VERSION: ' + data.version + '</p>');
-               $("#openstack-image-details").append('<p style="font-size: 15px"> LATEST_IMAGE: ' + data.id + '</p>');
+               $("#openstack-image-details").append('<p style="font-size: 12pt"><code>VERSION:</code>' + data.version + '</p>');
+               $("#openstack-image-details").append('<p style="font-size: 12pt"><code>LATEST_IMAGE:</code>' + data.id + '</p>');
                });
 
                <!--GCP-->
