@@ -38,7 +38,7 @@
                         </div>
                         <div id="configure_host_groups" class="container" ng-show="configureHostGroups" ng-include src="'tags/stack/configurehostgroups.tag'">
                         </div>
-                        <div id="configure_review" class="container" ng-show="configureReview" ng-include src="'tags/stack/configurereview.tag'">
+                        <div id="configure_review" class="container col-sm-12" ng-show="configureReview" ng-include src="'tags/stack/configurereview.tag'">
                         </div>
                     </form>
                 </div>
