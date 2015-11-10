@@ -1,13 +1,20 @@
-CBD_VERSION=1.1.0
 CBD_DIR=cloudbreak-deployer
 : ${GIT_ORG:=sequenceiq}
 : ${GIT_PROJECT:=cloudbreak-deployer}
 
 main() {
+    mkdir -p cloudbreak-deployer
     mkdir -p $CBD_DIR && cd $_
+    local redirect=$(
+    curl -s \
+        -o /dev/null \
+        -w "%{redirect_url}" \
+        https://github.com/sequenceiq/cloudbreak-deployer/releases/latest
+    )
+    local latest=${redirect##*v}
     local osarch=$(uname -sm|tr " " _)
 
-    local url="https://github.com/${GIT_ORG}/${GIT_PROJECT}/releases/download/v${CBD_VERSION}/${GIT_PROJECT}_${CBD_VERSION}_${osarch}.tgz"
+    local url="https://github.com/${GIT_ORG}/${GIT_PROJECT}/releases/download/v${latest}/${GIT_PROJECT}_${latest}_${osarch}.tgz"
 
     local dest=/bin
     hash -r > /dev/null

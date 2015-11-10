@@ -19,6 +19,7 @@
 - SMTP default parameters added: `CB_MAIL_SMTP_AUTH` and `CB_MAIL_SMTP_STARTTLS_ENABLE`
 - Local development Uluwatu configuration by ULUWATU_VOLUME_HOST environment variable
 - Local development Sultans configuration by SULTANS_VOLUME_HOST environment variable
+- install script for fixed version and install-latest for latest release added
 
 ### Removed
 
