@@ -111,15 +111,15 @@
                  $("#aws-image-details").append('<col width="290">');
                  $("#aws-image-details").append('<thead>');
                   $("#aws-image-details").append('<tr>');
-                   $("#aws-image-details").append('<th text-align="center" style="font-size: 20px">' + "Region" + '</th>');
-                   $("#aws-image-details").append('<th text-align="center" style="font-size: 20px">' + "Image Name" + '</th>');
+                   $("#aws-image-details").append('<th halign="center" style="font-size: 14pt;border:none;border-bottom:solid #DDDDDD 1.5pt;padding:6.0pt 6.0pt 6.0pt 6.0pt">' + "Region" + '</th>');
+                   $("#aws-image-details").append('<th halign="center" style="font-size: 14pt;border:none;border-bottom:solid #DDDDDD 1.5pt;padding:6.0pt 6.0pt 6.0pt 6.0pt">' + "Image Name" + '</th>');
                   $("#aws-image-details").append('</tr>');
                  $("#aws-image-details").append('</thead>');
                 $("#aws-image-details").append('<tbody>');
                  $.each(data.aws, function( index, value ) {
                   $("#aws-image-details").append('<tr>');
-                   $("#aws-image-details").append('<td text-align="left" style="font-size: 20px">' + index + '</td>');
-                   $("#aws-image-details").append('<td text-align="right" style="font-size: 20px">' + value + '</td>');
+                   $("#aws-image-details").append('<td halign="center" valign="center" text-align="left" style="font-size: 12pt;border:none;border-bottom:solid #DDDDDD 1.5pt;padding:6.0pt 6.0pt 6.0pt 6.0pt">' + index + '</td>');
+                   $("#aws-image-details").append('<td halign="center" valign="center" text-align="right" style="font-size: 12pt;border:none;border-bottom:solid #DDDDDD 1.5pt;padding:6.0pt 6.0pt 6.0pt 6.0pt">' + value + '</td>');
                   $("#aws-image-details").append('</tr>');
                  });
                 $("#aws-image-details").append('</tbody>');
