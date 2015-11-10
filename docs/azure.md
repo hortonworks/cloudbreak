@@ -145,8 +145,7 @@ rm -rf /var/lib/docker && systemctl daemon-reload && service docker start && sys
 Download **cloudbreak-deployer**:
 
 ```
-mkdir -p cloudbreak-deployer && cd cloudbreak-deployer && curl https://raw.githubusercontent
-.com/sequenceiq/cloudbreak-deployer/master/install | sh && cbd --version
+mkdir -p cloudbreak-deployer && cd cloudbreak-deployer && curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install-latest | sh && cbd --version
 ```
 
 ### Initialize your Profile
@@ -170,7 +169,7 @@ rm *.yml
 cbd generate
 ```
 
-This command applies the following steps: 
+This command applies the following steps:
 
 - creates the **docker-compose.yml** file that describes the configuration of all the Docker containers needed for the Cloudbreak deployment.
 - creates the **uaa.yml** file that holds the configuration of the identity server used to authenticate users to Cloudbreak.
@@ -195,5 +194,5 @@ cbd logs cloudbreak
 
 ### Next steps
 
-Once Cloudbreak is up and running you should check out the [prerequisites](azure_pre_prov.md) needed to create Azure 
+Once Cloudbreak is up and running you should check out the [prerequisites](azure_pre_prov.md) needed to create Azure
 clusters with Cloudbreak. Besides these you can check out some useful [configurations for Cloudbreak deployer](configuration.md).

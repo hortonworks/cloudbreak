@@ -83,7 +83,7 @@ rm -rf /var/lib/docker && systemctl daemon-reload && service docker start && sys
 Install the Cloudbreak deployer and unzip the platform specific single binary to your PATH. The one-liner way is:
 
 ```
-mkdir -p cloudbreak-deployer && cd cloudbreak-deployer && curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install | sh && cbd --version
+mkdir -p cloudbreak-deployer && cd cloudbreak-deployer && curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install-latest | sh && cbd --version
 ```
 
 Once the Cloudbreak deployer is installed, you can start to setup the Cloudbreak application.
