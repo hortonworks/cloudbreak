@@ -1,34 +1,17 @@
 {
   "aws": {
-    "ap-northeast-1": "ami-b43f18da",
-    "ap-southeast-1": "ami-4955922a",
-    "ap-southeast-2": "ami-2a257b49",
-    "eu-central-1": "ami-8c2b38e0",
-    "eu-west-1": "ami-bdb861ce",
-    "sa-east-1": "ami-5c64df30",
-    "us-east-1": "ami-3c611d56",
-    "us-west-1": "ami-f75b3497",
-    "us-west-2": "ami-fcc1d69d"
-  },
-  "docker_images": {
-    "cb_docker_container_alpine": "gliderlabs/alpine:3.1",
-    "cb_docker_container_ambari": "sequenceiq/ambari:2.1.2-v4",
-    "cb_docker_container_ambari_db": "postgres:9.4.1",
-    "cb_docker_container_ambari_warmup": "sequenceiq/ambari:2.1.2-v4",
-    "cb_docker_container_baywatch_client": "sequenceiq/baywatch-client:v1.0.0",
-    "cb_docker_container_baywatch_server": "sequenceiq/baywatch:v0.5.3",
-    "cb_docker_container_cert_tool": "ehazlett/cert-tool:0.0.3",
-    "cb_docker_container_consul": "sequenceiq/consul:v0.5.0-v5",
-    "cb_docker_container_docker_consul_watch_plugn": "sequenceiq/docker-consul-watch-plugn:1.0",
-    "cb_docker_container_gateway": "sequenceiq/cb-gateway-nginx:0.3",
-    "cb_docker_container_kerberos": "sequenceiq/kerberos:2.1.0-consul",
-    "cb_docker_container_list_others": null,
-    "cb_docker_container_logrotate": "sequenceiq/logrotate:v0.5.1",
-    "cb_docker_container_munchausen": "sequenceiq/munchausen:0.5.5",
-    "cb_docker_container_registrator": "sequenceiq/registrator:v5.2",
-    "cb_docker_container_swarm": "swarm:0.4.0"
+    "ap-northeast-1": "ami-3e735250",
+    "ap-southeast-1": "ami-6fd2140c",
+    "ap-southeast-2": "ami-56b3ed35",
+    "eu-central-1": "ami-ea809386",
+    "eu-west-1": "ami-a9e53dda",
+    "sa-east-1": "ami-21fb414d",
+    "us-east-1": "ami-8d047de7",
+    "us-west-1": "ami-bedcb3de",
+    "us-west-2": "ami-bdcbdddc"
   },
   "versions": {
+    "cbd-version": "1.0.3",
     "docker-version": "1.8.3",
     "kernel-version": "3.10.0-229.14.1.el7",
     "systemd-version": "208-20.el71.6"
