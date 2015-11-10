@@ -61,3 +61,5 @@ Once the PR is merged, CircleCI will:
 - create a new release on [GitHub releases tab](https://github.com/sequenceiq/cloudbreak-deployer/releases), with the help of [gh-release](https://github.com/progrium/gh-release).
 - it will create the git tag with `v` prefix like: `v0.0.3`
 
+## Custom domains
+In case of using custom domains the 'UAA_ZONE_DOMAIN' variable should be set in the profile to the exact domain name of the identity server. For example in our hosted deployment the 'identity.sequenceiq.com' domain refers to our identity server and the 'UAA_ZONE_DOMAIN' variable has to be set to that domain. This variable is neccessary for UAA to identify which zone provider should handle the requests that arrives to the given domain.
