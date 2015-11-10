@@ -80,5 +80,6 @@ cbd logs cloudbreak
 
 ### Next steps
 
-Once Cloudbreak is up and running you should check out the [prerequisites](aws_pre_prov.md) needed to create AWS clusters with Cloudbreak.
+Once Cloudbreak is up and running you should check out the [prerequisites](aws_pre_prov.md) needed to create AWS 
+clusters with Cloudbreak. Besides these you can check out some useful [configurations for Cloudbreak deployer](configuration.md).
 

@@ -53,7 +53,7 @@ export CB_MAIL_SMTP_AUTH=true
 export CB_MAIL_SMTP_STARTTLS_ENABLE=true
 ```
 
-## Consul
+### Consul
 
 [Consul](http://consul.io) is used for DNS resolution. All Cloudbreak related services are registered as
 **someservice.service.consul**. Consul’s built in DNS server is able to “fall-back” on an other DNS server.
@@ -64,30 +64,6 @@ otherwise **8.8.8.8** will be used.
 For a full list of available consul config options, see the [docs](https://consul.io/docs/agent/options.html).
 
 You can pass any additional consul configuration by defining a `DOCKER_CONSUL_OPTIONS` in `Profile`.
-
-## List of configurations
-
-- **CB_AWS_AMI_MAP** : tbd
-- **CB_AZURE_IMAGE_URI** : tbd
-- **CB_BLUEPRINT_DEFAULTS** : tbd
-- **CB_TEMPLATE_DEFAULTS** : tbd
-- **CB_DB_ENV_DB** : tbd
-- **CB_DB_ENV_PASS** : tbd
-- **CB_DB_ENV_USER** : tbd
-- **CB_GCP_SOURCE_IMAGE_PATH** : tbd
-- **CB_HBM2DDL_STRATEGY** : tbd
-- **CB_OPENSTACK_IMAGE** : tbd
-- **DOCKER_TAG_ALPINE** : tbd
-- **DOCKER_TAG_CBSHELL** : tbd
-- **DOCKER_TAG_CLOUDBREAK** : tbd
-- **DOCKER_TAG_CONSUL** : tbd
-- **DOCKER_TAG_PERISCOPE** : tbd
-- **DOCKER_TAG_POSTGRES** : tbd
-- **DOCKER_TAG_REGISTRATOR** : tbd
-- **DOCKER_TAG_SULTANS** : tbd
-- **DOCKER_TAG_UAA** : tbd
-- **DOCKER_TAG_ULUWATU** : tbd
-- **PERISCOPE_DB_HBM2DDL_STRATEGY** : tbd
 
 ## Azure Resource manager command
 - **cbd azure configure-arm**
