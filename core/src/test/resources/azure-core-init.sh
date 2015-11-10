@@ -98,6 +98,7 @@ main() {
     release_udev_cookie
     echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/cb-init-executed
   fi
+  [ -e /usr/bin/ssh-aliases ] && /usr/bin/ssh-aliases create
 }
 
 [[ "$0" == "$BASH_SOURCE" ]] && main "$@"
