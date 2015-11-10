@@ -40,7 +40,7 @@ compose-pull-parallel() {
 
     [ -f docker-compose.yml ] || deployer-generate
 
-    sed -n "s/.*image: //p" docker-compose.yml | xargs -n1 -P 20 docker pull
+    sed -n "s/.*image://p" docker-compose.yml |sort -u|xargs -n1 -P 20 docker pull
 }
 
 create-logfile() {
