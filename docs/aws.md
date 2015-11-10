@@ -4,7 +4,10 @@ We have pre-built custom cloud images with Cloudbreak deployer pre-configured. F
 
 ## Configured images
 
-You can find the latest pre-configured Cloudbreak Deployer AWS images below.
+You can launch the latest Cloudbreak deployer image based on your region at the [AWS Management Console](https://aws
+.amazon.com/console/).
+
+You can check the name of the available images in the following section.
 
 ### AWS image details
 
@@ -66,7 +69,7 @@ This will start all the Docker containers and initialize the application. It wil
 cbd start
 ```
 
-Launching it first will take more time as it downloads all the docker images needed by Cloudbreak.
+>Launching it first will take more time as it downloads all the docker images needed by Cloudbreak.
 
 After the `cbd start` command finishes you can check the logs of the Cloudbreak server with this command:
 

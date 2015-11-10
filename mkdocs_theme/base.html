@@ -138,8 +138,8 @@
                $.getJSON("https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/1.1.0/mkdocs_theme/gcp.json", function(data) {
                $("#gcp-image-details").append('<br>');
                $("#gcp-image-details").append('<br>');
-               $("#gcp-image-details").append('<p style="font-size: 15px"> SOURCE_IMAGE: ' + data.gce.source_image + '</p>');
-               $("#gcp-image-details").append('<pre><code>'+ data.gce.import_script +'</code></pre>');
+               $("#gcp-image-details").append('<p style="font-size: 12pt"><code>SOURCE_IMAGE:</code>' + data.gce.source_image + '</p>');
+               $("#gcp-image-details").append('<pre><code style="font-size: 12pt;color:#333333">'+ data.gce.import_script +'</code></pre>');
                });
            });
          </script>

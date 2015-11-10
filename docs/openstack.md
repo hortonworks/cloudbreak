@@ -6,7 +6,9 @@ Cloudbreak currently only supports the `OpenStack Juno` release.
 
 ##Download the Cloudbreak image
 
-You can download the latest pre-configured Cloudbreak Deployer OpenStack image with the following script.
+You can download the latest pre-configured Cloudbreak deployer OpenStack image with the following script in the 
+following section.
+
 
 ###OpenStack image details
 
@@ -80,7 +82,7 @@ This will start all the Docker containers and initialize the application. It wil
 cbd start
 ```
 
-Launching it first will take more time as it downloads all the docker images needed by Cloudbreak.
+>Launching it first will take more time as it downloads all the docker images needed by Cloudbreak.
 
 After the `cbd start` command finishes you can check the logs of the Cloudbreak server with this command:
 

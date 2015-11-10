@@ -123,7 +123,7 @@ This will start all the Docker containers and initialize the application. It wil
 cbd start
 ```
 
-Launching it first will take more time as it downloads all the docker images needed by Cloudbreak.
+>Launching it first will take more time as it downloads all the docker images needed by Cloudbreak.
 
 After the `cbd start` command finishes you can check the logs of the Cloudbreak server with this command:
 

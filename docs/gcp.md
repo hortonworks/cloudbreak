@@ -4,7 +4,10 @@ We have pre-built custom cloud images with Cloudbreak deployer pre-configured. F
 
 ## Configured image
 
-You can download the latest pre-configured Cloudbreak Deployer Google Cloud image with the following script.
+You can create the latest Cloudbreak deployer Google Compute Engine image with the help of the [gcloud command-line 
+tool](https://cloud.google.com/compute/docs/gcloud-compute/) and the script in the following section.
+
+Images are global resources, so they can be used across zones and projects.
 
 ### GCP image details
 
@@ -56,7 +59,7 @@ This will start all the Docker containers and initialize the application. It wil
 cbd start
 ```
 
-Launching it first will take more time as it downloads all the docker images needed by Cloudbreak.
+>Launching it first will take more time as it downloads all the docker images needed by Cloudbreak.
 
 After the `cbd start` command finishes you can check the logs of the Cloudbreak server with this command:
 
