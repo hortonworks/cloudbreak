@@ -139,9 +139,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         $scope.selectedBlueprintChange = function() {
             var tmpCloudPlatform = $rootScope.activeCredential.cloudPlatform;
-            var tmpTemplate = $filter('filter')($rootScope.templates, {
-                cloudPlatform: tmpCloudPlatform.split("_")[0]
-            }, true)[0];
+            var templatesByProvider = $filter('filter')($rootScope.templates, { cloudPlatform: tmpCloudPlatform.split("_")[0] }, true);
+            var tmpTemplate = $filter('orderBy')(templatesByProvider, 'name', false)[0];
             var tmpTemplateId = null;
             if (tmpTemplate != null) {
                 tmpTemplateId = tmpTemplate.id;
@@ -514,7 +513,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         function setSecurityGroup() {
             if ($rootScope.securitygroups && $rootScope.securitygroups.length != 0) {
-                $scope.cluster.securityGroupId = $rootScope.securitygroups[0].id;
+                var sgroups = $filter('orderBy')($rootScope.securitygroups, 'name', false);
+                $scope.cluster.securityGroupId = sgroups[0].id;
             }
         }
 
