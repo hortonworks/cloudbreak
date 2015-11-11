@@ -13,6 +13,12 @@
                 <div class="tab-content">
                     <section id="cluster-details-pane" ng-class="{ 'active': detailsShow }" ng-show="detailsShow" class="tab-pane fade in">
                         <p class="text-right">
+                            <a href="" class="btn btn-success" role="button" data-toggle="modal" ng-show="activeCluster.cluster.status == 'AVAILABLE' && activeCluster.status == 'AVAILABLE'" data-target="#modal-upscale-cluster">
+                                <i class="fa fa-arrow-up"></i><span> {{msg.active_cluster_command_add_node_label}}</span>
+                            </a>
+                            <a href="" class="btn btn-success" role="button" data-toggle="modal" ng-show="activeCluster.cluster.status == 'AVAILABLE' && activeCluster.status == 'AVAILABLE'" data-target="#modal-downscale-cluster">
+                                <i class="fa fa-arrow-down"></i><span> {{msg.active_cluster_command_remove_node_label}}</span>
+                            </a>
                             <a href="" class="btn btn-info" role="button" data-toggle="modal" data-target="#modal-sync-cluster">
                                 <i class="fa fa-refresh fa-fw"></i><span> {{msg.active_cluster_command_sync_label}}</span>
                             </a>
@@ -422,6 +428,84 @@
                         <div class="col-xs-6">
                             <button type="button" class="btn btn-block btn-info" data-dismiss="modal" id="stackStackBtn" ng-click="syncCluster(activeCluster)"><i class="fa fa-refresh fa-fw"></i>{{msg.active_cluster_command_sync_label}}</button>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modal-upscale-cluster" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <!-- .modal-header -->
+                <div class="modal-body">
+                    <p>{{msg.cluster_list_upscale_dialog_prefix}} <strong>{{activeCluster.name}}</strong> {{msg.cluster_upscale_dialog_suffix}}</p>
+                    <form class="form-horizontal" role="form" name="upscaleCluster1">
+                            <div class="form-group">
+                                <label class="col-sm-3 col-sm-offset-1 control-label" for="hostgroupselected">{{msg.cluster_upscale_form_hostgroup}}</label>
+                                <div class="col-sm-6">
+                                    <select class="form-control" id="hostgroupselected" ng-model="upscaleCluster.hostGroup">
+                                      <option ng-repeat="group in $root.activeCluster.instanceGroups| filter:{group: '!cbgateway'}" value="{{group.group}}">{{group.group}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 col-sm-offset-1 control-label" for="hostgroupselectednumber">{{msg.cluster_upscale_form_hostgroup_number}}</label>
+                                <div class="col-sm-6">
+                                    <div class="input-group">
+                                      <span class="input-group-addon" id="basic-addon1">+</span>
+                                      <input type="number" class="form-control" id="numberOfInstances" ng-model="upscaleCluster.numberOfInstances" placeholder="1" aria-describedby="basic-addon1">
+                                    </div>
+                                </div>
+                            </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <div class="row">
+                      <div class="col-xs-6">
+                          <button type="button" class="btn btn-block btn-default" data-dismiss="modal">{{msg.cluster_list_cancel_command_label}}</button>
+                      </div>
+                      <div class="col-xs-6">
+                          <button type="button" class="btn btn-block btn-success" data-dismiss="modal" id="stackStackBtn" ng-click="startUpScaleCluster()"><i class="fa fa-play fa-fw"></i>{{msg.active_cluster_command_start_upscale_label}}</button>
+                      </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modal-downscale-cluster" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <!-- .modal-header -->
+                <div class="modal-body">
+                    <p>{{msg.cluster_list_downscale_dialog_prefix}} <strong>{{activeCluster.name}}</strong> {{msg.cluster_upscale_dialog_suffix}}</p>
+                    <form class="form-horizontal" role="form" name="downscaleCluster1">
+                            <div class="form-group">
+                                <label class="col-sm-3 col-sm-offset-1 control-label" for="hostgroupselected">{{msg.cluster_upscale_form_hostgroup}}</label>
+                                <div class="col-sm-6">
+                                    <select class="form-control" id="hostgroupselected" ng-model="downscaleCluster.hostGroup">
+                                      <option ng-repeat="group in $root.activeCluster.instanceGroups| filter:{group: '!cbgateway'}" value="{{group.group}}">{{group.group}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 col-sm-offset-1 control-label" for="hostgroupselectednumber">{{msg.cluster_upscale_form_hostgroup_number}}</label>
+                                <div class="col-sm-6">
+                                    <div class="input-group">
+                                      <span class="input-group-addon" id="basic-addon1">-</span>
+                                      <input type="number" class="form-control" id="numberOfInstances" ng-model="downscaleCluster.numberOfInstances" placeholder="1" aria-describedby="basic-addon1">
+                                    </div>
+                                </div>
+                            </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <div class="row">
+                      <div class="col-xs-6">
+                          <button type="button" class="btn btn-block btn-default" data-dismiss="modal">{{msg.cluster_list_cancel_command_label}}</button>
+                      </div>
+                      <div class="col-xs-6">
+                          <button type="button" class="btn btn-block btn-success" data-dismiss="modal" id="stackStackBtn" ng-click="startDownScaleCluster()"><i class="fa fa-play fa-fw"></i>{{msg.active_cluster_command_start_downscale_label}}</button>
+                      </div>
                     </div>
                 </div>
             </div>
