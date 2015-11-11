@@ -56,7 +56,7 @@ public class MailSenderConfig {
     private String smtpStarttlsEnable;
 
     @Value("${cb.mail.smtp.type:" + CB_MAIL_SMTP_TYPE + "}")
-    private boolean smtpType;
+    private String smtpType;
 
     @Bean
     public JavaMailSender mailSender() {
