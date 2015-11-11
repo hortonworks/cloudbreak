@@ -101,10 +101,13 @@ release: prepare-release
 release-next-ver: deps
 	./release-next-ver.sh
 
+generate-aws-json:
+	curl -L https://atlas.hashicorp.com/api/v1/artifacts/sequenceiq/cbd/amazon.image/search | jq .versions[0] > mkdocs_theme/aws.json
+
 circleci:
 	rm ~/.gitconfig
 
 clean:
 	rm -rf build release
 
-.PHONY: build release
+.PHONY: build release generate-aws-json

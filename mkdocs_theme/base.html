@@ -103,7 +103,7 @@
                });
 
                <!--AWS Table-->
-               $.getJSON("https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/1.1.0/mkdocs_theme/aws.json", function(data) {
+               $.getJSON("../aws.json", function(data) {
                $("#aws-image-details").append('<br>');
                $("#aws-image-details").append('<br>');
                $("#aws-image-details").append('<table>');
@@ -116,11 +116,14 @@
                   $("#aws-image-details").append('</tr>');
                  $("#aws-image-details").append('</thead>');
                 $("#aws-image-details").append('<tbody>');
-                 $.each(data.aws, function( index, value ) {
+                 $.each(data.metadata, function( index, value ) {
+                 if (index.indexOf("region.") === 0) {
+                   shortIndex = index.substring(7)
                   $("#aws-image-details").append('<tr>');
-                   $("#aws-image-details").append('<td halign="center" valign="center" text-align="left" style="font-size: 12pt;border:none;border-bottom:solid #DDDDDD 1.5pt;padding:6.0pt 6.0pt 6.0pt 6.0pt">' + index + '</td>');
+                   $("#aws-image-details").append('<td halign="center" valign="center" text-align="left" style="font-size: 12pt;border:none;border-bottom:solid #DDDDDD 1.5pt;padding:6.0pt 6.0pt 6.0pt 6.0pt">' + shortIndex + '</td>');
                    $("#aws-image-details").append('<td halign="center" valign="center" text-align="right" style="font-size: 12pt;border:none;border-bottom:solid #DDDDDD 1.5pt;padding:6.0pt 6.0pt 6.0pt 6.0pt">' + value + '</td>');
                   $("#aws-image-details").append('</tr>');
+                  }
                  });
                 $("#aws-image-details").append('</tbody>');
                $("#aws-image-details").append('</table>');
