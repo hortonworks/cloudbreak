@@ -74,15 +74,15 @@ public class EnvironmentVariableConfig {
             .append(String.format("BRAZIL_SOUTH:https://sequenceiqbrazilsouth.blob.core.windows.net/images/%s", CB_AZURE_IMAGE_NAME))
             .toString();
     public static final String CB_AWS_AMI_MAP = new StringBuilder()
-            .append("ap-northeast-1:ami-78b2e816,")
-            .append("ap-southeast-1:ami-01935462,")
-            .append("ap-southeast-2:ami-097d2833,")
-            .append("eu-central-1:ami-2e6a6533,")
-            .append("eu-west-1:ami-cfaf96b8,")
-            .append("sa-east-1:ami-8d4ef6e1,")
-            .append("us-east-1:ami-531b6a39,")
-            .append("us-west-1:ami-5ab8d43a,")
-            .append("us-west-2:ami-8e779abd")
+            .append("ap-northeast-1:ami-4ea78120,")
+            .append("ap-southeast-1:ami-babd7bd9,")
+            .append("ap-southeast-2:ami-9188d6f2,")
+            .append("eu-central-1:ami-1cedfe70,")
+            .append("eu-west-1:ami-24a47c57,")
+            .append("sa-east-1:ami-6408b308,")
+            .append("us-east-1:ami-2393ed49,")
+            .append("us-west-1:ami-4af49b2a,")
+            .append("us-west-2:ami-203c2a41")
             .toString();
     public static final String CB_OPENSTACK_IMAGE = "cb-centos71-amb212-2015-10-27";
     public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos71-amb212-2015-10-279.tar.gz";
