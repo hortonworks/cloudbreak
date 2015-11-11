@@ -1,10 +1,10 @@
-# Interactive mode
+## Interactive mode
 
 Start the shell with `cbd util cloudbreak-shell`. This will launch the Cloudbreak shell inside a Docker container and you are ready to start using it.
 
 You have to copy files into the cbd working directory, which you would like to use from shell. For example if your `cbd` working directory is `~/prj/cbd` then copy your blueprint and public ssh key file into this directory. You can refer to these files with their names from the shell.
 
-## Create a cloud credential
+### Create a cloud credential
 
 ```
 credential create --AZURE --description "credential description" --name myazurecredential --subscriptionId <your Azure subscription id> --appId <your Azure application id> --tenantId <your tenant id> --password <your Azure application password> --sshKeyPath <path of your public SSH key file>
@@ -28,7 +28,7 @@ You can show your cloud credential - when you’d like to show one you will have
 credential show --name myazurecredential
 ```
 
-## Create a template
+### Create a template
 
 A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. A template can be used repeatedly to create identical copies of the same stack (or to use as a foundation to start a new stack).
 
@@ -153,7 +153,7 @@ Other available options:
 
 `--templateId` Id of the template
 
-## Create a Hadoop cluster
+### Create a Hadoop cluster
 You are almost done - two more command and this will create your Hadoop cluster on your favorite cloud provider. Same as the API, or UI this will use your `credential`, `instancegroups`, `network`, `securitygroup`, and by using Azure ResourceManager will launch a cloud stack
 ```
 stack create --name my-first-stack --region WEST_US
@@ -164,29 +164,44 @@ cluster create --description "my first cluster"
 ```
 You are done - you can check the progress through the Ambari UI. If you log back to Cloudbreak UI you can check the progress over there as well, and learn the IP address of Ambari.
 
-### Stopping and restarting a stack or a cluster
+### Stopping and restarting a stack
+You have the ability to stop your existing stack in case if you want to suspend the work on it.
 
-After a stack is created, its virtual machines can be stopped by running:
+Select a stack for example with its name:
+```
+stack select --name my-stack
+```
+Other available option to define a stack is its `--id` (instead of the `--name`).
+
+Apply the following command to **stop the previously selected stack**:
 ```
 stack stop
 ```
-
-A stopped stack can be restarted with:
+Apply the following command to **start the previously selected and stopped stack**:
 ```
 stack start
 ```
 
-You can start or stop a cluster with:
+### Stopping and restarting a cluster
+You also have the ability to stop your existing cluster in case if you want to suspend the work on it.
+
+Select a cluster for example with its name:
 ```
-cluster start
+cluster select --name my-cluster
 ```
-or
+Other available option to define a cluster is its `--id` (instead of the `--name`).
+
+Apply the following command to **stop the previously selected cluster**:
 ```
 cluster stop
 ```
+Apply the following command to **start the previously selected and stopped cluster**:
+```
+cluster start
+```
 
-### Upscaling and downscaling a stack or a cluster
-
+### Upscaling and downscaling a stack
+You can upscale or downscale your selected stack:
 ```
 stack node --ADD --instanceGroup host_group_slave_1 --adjustment 2
 ```
@@ -199,7 +214,8 @@ or
 stack node --REMOVE  --instanceGroup host_group_slave_1 --adjustment -2
 ```
 
-You can also upscale or downscale your cluster:
+### Upscaling and downscaling a cluster
+You can also upscale or downscale your selected cluster:
 ```
 cluster node --ADD --hostgroup host_group_slave_1 --adjustment 2
 ```
@@ -211,7 +227,7 @@ Other available options:
 
 `--withStackDownScale` indicates stack downscale after the cluster downscale
 
-# Silent mode
+## Silent mode
 
 With Cloudbreak shell you can execute script files as well. A script file contains cloudbreak shell commands and can be executed with the `script` cloudbreak shell command
 
@@ -225,7 +241,7 @@ or with the `cbd util cloudbreak-shell-quiet` cbd command:
 cbd util cloudbreak-shell-quiet < example.sh
 ```
 
-# Example
+## Example
 
 The following example creates a hadoop cluster with `hdp-small-default` blueprint on STANDARD_D3 instances with 2X100G attached disks on `default-azure-network` network using `all-services-port` security group. You should copy your ssh public key file into your cbd working directory with name `id_rsa.pub` and change the `<...>` parts with your azure credential details.
 
