@@ -18,11 +18,19 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-if="credential.parameters.keystoneVersion == 'v2'">
         <label class="col-sm-3 control-label" for="openstacktenantName">{{msg.credential_openstack_form_tenant_label}}</label>
 
         <div class="col-sm-9">
             <p id="openstacktenantName" class="form-control-static">{{credential.parameters.tenantName}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+    <div class="form-group" ng-if="credential.parameters.keystoneVersion == 'v3'">
+        <label class="col-sm-3 control-label" for="openstackprojectName">{{msg.credential_openstack_form_project_label}}</label>
+
+        <div class="col-sm-9">
+            <p id="openstackprojectName" class="form-control-static">{{credential.parameters.projectName}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
