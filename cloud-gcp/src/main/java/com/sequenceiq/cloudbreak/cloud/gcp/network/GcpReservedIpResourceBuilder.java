@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
-import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
@@ -29,7 +28,7 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpNetworkBuilder {
     @Override
     public CloudResource build(GcpContext context, AuthenticatedContext auth, Network network, Security security, CloudResource resource) throws Exception {
         String projectId = context.getProjectId();
-        String region = CloudRegion.valueOf(context.getRegion()).region();
+        String region = context.getLocation().getRegion().value();
 
         Address address = new Address();
         address.setName(resource.getName());
@@ -50,9 +49,9 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpNetworkBuilder {
     public CloudResource delete(GcpContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
         Compute compute = context.getCompute();
         String projectId = context.getProjectId();
-        String region = context.getRegion();
+        String region = context.getLocation().getRegion().value();
         try {
-            Operation operation = compute.addresses().delete(projectId, CloudRegion.valueOf(region).region(), resource.getName()).execute();
+            Operation operation = compute.addresses().delete(projectId, region, resource.getName()).execute();
             return createOperationAwareCloudResource(resource, operation);
         } catch (GoogleJsonResponseException e) {
             exceptionHandler(e, resource.getName(), resourceType());

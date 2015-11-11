@@ -1,6 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
+import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmType;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,59 +13,73 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
+import com.sequenceiq.cloudbreak.cloud.model.DiskType;
+import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.Regions;
+import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
+import com.sequenceiq.cloudbreak.cloud.model.VmType;
+import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 
 @Service
 public class OpenStackParameters implements PlatformParameters {
     private static final Integer START_LABEL = Integer.valueOf(97);
+    private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("vd", START_LABEL);
 
     @Override
-    public String diskPrefix() {
-        return "vd";
+    public ScriptParams scriptParams() {
+        return SCRIPT_PARAMS;
     }
 
     @Override
-    public Integer startLabel() {
-        return START_LABEL;
+    public DiskTypes diskTypes() {
+        return new DiskTypes(getDiskTypes(), defaultDiskType());
     }
 
-    @Override
-    public Map<String, String> diskTypes() {
-        Map<String, String> disk = new HashMap<>();
-        disk.put("HDD", "HDD");
+    private Collection<DiskType> getDiskTypes() {
+        Collection<DiskType> disk = new ArrayList<>();
+        disk.add(diskType("HDD"));
         return disk;
     }
 
-    @Override
-    public String defaultDiskType() {
-        return diskTypes().get("HDD");
+    private DiskType defaultDiskType() {
+        return diskType("HDD");
     }
 
     @Override
-    public Map<String, String> regions() {
-        Map<String, String> regions = new HashMap<>();
-        regions.put("local", "local");
+    public Regions regions() {
+        return new Regions(getRegions(), defaultRegion());
+    }
+
+    private Collection<Region> getRegions() {
+        Collection<Region> regions = new ArrayList<>();
+        regions.add(region("local"));
         return regions;
     }
 
-    @Override
-    public String defaultRegion() {
-        return regions().get("local");
+    private Region defaultRegion() {
+        return region("local");
     }
 
     @Override
-    public Map<String, List<String>> availabiltyZones() {
-        Map<String, List<String>> availabiltyZones = new HashMap<>();
-        availabiltyZones.put("local", new ArrayList<String>());
-        return availabiltyZones;
+    public AvailabilityZones availabilityZones() {
+        Map<Region, List<AvailabilityZone>> availabiltyZones = new HashMap<>();
+        availabiltyZones.put(region("local"), new ArrayList<AvailabilityZone>());
+        return new AvailabilityZones(availabiltyZones);
     }
 
     @Override
-    public Map<String, String> virtualMachines() {
-        return new HashMap<>();
+    public VmTypes vmTypes() {
+        return new VmTypes(virtualMachines(), defaultVirtualMachine());
     }
 
-    @Override
-    public String defaultVirtualMachine() {
-        return "";
+    private Collection<VmType> virtualMachines() {
+        return new ArrayList<>();
+    }
+
+    private VmType defaultVirtualMachine() {
+        return vmType("");
     }
 }

@@ -25,8 +25,9 @@ import com.google.api.services.compute.model.Operation;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.common.type.CloudRegion;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
 
 public final class GcpStackUtil {
 
@@ -119,12 +120,13 @@ public final class GcpStackUtil {
         return compute.globalOperations().get(projectId, operationName);
     }
 
-    public static Compute.ZoneOperations.Get zoneOperations(Compute compute, String projectId, String operationName, CloudRegion region) throws IOException {
+    public static Compute.ZoneOperations.Get zoneOperations(Compute compute, String projectId, String operationName, AvailabilityZone region)
+            throws IOException {
         return compute.zoneOperations().get(projectId, region.value(), operationName);
     }
 
-    public static Compute.RegionOperations.Get regionOperations(Compute compute, String projectId, String operationName, CloudRegion region) throws IOException {
-        return compute.regionOperations().get(projectId, region.region(), operationName);
+    public static Compute.RegionOperations.Get regionOperations(Compute compute, String projectId, String operationName, Region region) throws IOException {
+        return compute.regionOperations().get(projectId, region.value(), operationName);
     }
 
     public static Storage buildStorage(CloudCredential gcpCredential, String name) {

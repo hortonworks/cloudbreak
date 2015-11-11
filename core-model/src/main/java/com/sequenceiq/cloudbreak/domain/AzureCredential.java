@@ -4,7 +4,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 
 @Entity
 public class AzureCredential extends Credential implements ProvisionEntity {
@@ -78,11 +77,4 @@ public class AzureCredential extends Credential implements ProvisionEntity {
         this.postFix = postFix;
     }
 
-    public String getAffinityGroupName(CloudRegion location) {
-        String result = subscriptionId.replaceAll("\\s+", "").replaceAll("-", "") + location.region().toLowerCase().replaceAll(" ", "");
-        if (result.length() > END_INDEX) {
-            return result.substring(result.length() - END_INDEX, result.length());
-        }
-        return result;
-    }
 }

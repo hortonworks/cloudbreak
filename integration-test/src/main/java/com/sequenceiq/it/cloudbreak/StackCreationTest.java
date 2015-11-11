@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.util.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Optional;
@@ -24,10 +23,10 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    @Parameters({ "stackName", "region", "onFailureAction", "threshold", "adjustmentType", "variant" })
-    public void testStackCreation(@Optional("testing1") String stackName, @Optional("EUROPE_WEST1_B") String region,
+    @Parameters({ "stackName", "region", "onFailureAction", "threshold", "adjustmentType", "variant", "availabilityZone" })
+    public void testStackCreation(@Optional("testing1") String stackName, @Optional("europe-west1") String region,
             @Optional("DO_NOTHING") String onFailureAction, @Optional("4") Long threshold, @Optional("EXACT") String adjustmentType,
-            @Optional("")String variant) throws Exception {
+            @Optional("")String variant, @Optional() String availabilityZone) throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
@@ -39,14 +38,8 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         String networkId = itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID);
         String securityGroupId = itContext.getContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID);
         // WHEN
-        String stackId;
-        if (StringUtils.isEmpty(variant)) {
-            stackId = getClient().postStack(stackName, credentialId, region, false, igMap, onFailureAction, threshold,
-                    adjustmentType, null, networkId, securityGroupId);
-        } else {
-            stackId = getClient().postStack(stackName, credentialId, region, false, igMap, onFailureAction, threshold,
-                    adjustmentType, null, networkId, securityGroupId, null, null, variant);
-        }
+        String stackId = getClient().postStack(stackName, credentialId, region, false, igMap, onFailureAction, threshold,
+                    adjustmentType, null, networkId, securityGroupId, null, null, variant, availabilityZone);
         // THEN
         Assert.assertNotNull(stackId);
         itContext.putCleanUpParam(CloudbreakITContextConstants.STACK_ID, stackId);

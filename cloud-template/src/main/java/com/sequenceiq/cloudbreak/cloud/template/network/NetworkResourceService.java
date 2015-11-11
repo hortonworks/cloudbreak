@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
@@ -102,7 +103,7 @@ public class NetworkResourceService {
         return results;
     }
 
-    public List<CloudResource> getNetworkResources(String platform, List<CloudResource> resources) {
+    public List<CloudResource> getNetworkResources(Platform platform, List<CloudResource> resources) {
         List<ResourceType> types = new ArrayList<>();
         for (NetworkResourceBuilder builder : resourceBuilders.network(platform)) {
             types.add(builder.resourceType());

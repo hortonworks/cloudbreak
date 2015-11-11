@@ -107,6 +107,7 @@ public class StackUsageGenerator {
         event.setEventTimestamp(cal.getTime());
         event.setCloud(startEvent.getCloud());
         event.setRegion(startEvent.getRegion());
+        event.setAvailabilityZone(startEvent.getAvailabilityZone());
         event.setStackId(startEvent.getStackId());
         event.setStackStatus(startEvent.getStackStatus());
         event.setStackName(startEvent.getStackName());

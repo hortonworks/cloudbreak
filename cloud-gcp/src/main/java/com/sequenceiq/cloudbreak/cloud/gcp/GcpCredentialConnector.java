@@ -19,9 +19,9 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
-import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 
 @Service
 public class GcpCredentialConnector implements CredentialConnector {
@@ -30,6 +30,9 @@ public class GcpCredentialConnector implements CredentialConnector {
 
     @Inject
     private GcpContextBuilder gcpContextBuilder;
+
+    @Inject
+    private GcpPlatformParameters gcpPlatformParameters;
 
     @Override
     public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
@@ -60,7 +63,7 @@ public class GcpCredentialConnector implements CredentialConnector {
 
     private void listDisks(GcpContext gcpContext, Compute compute) throws IOException {
         List<Disk> disks = new ArrayList<>();
-        for (CloudRegion gcpZone : CloudRegion.gcpRegions()) {
+        for (AvailabilityZone gcpZone : gcpPlatformParameters.availabilityZones().getAllAvailabilityZone()) {
             try {
                 Compute.Disks.List list = compute.disks().list(gcpContext.getProjectId(), gcpZone.value());
                 DiskList execute = list.execute();

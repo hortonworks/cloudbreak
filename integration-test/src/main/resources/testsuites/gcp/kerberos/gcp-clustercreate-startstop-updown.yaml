@@ -49,7 +49,8 @@ tests:
   - name: create cluster
     parameters: {
       stackName: it-gcp-kerberos-stack,
-      region: EUROPE_WEST1_B,
+      region: europe-west1,
+      availabilityZone: europe-west1-b,
       clusterName: it-gcp-kerberos-cluster,
       enableSecurity: true,
       kerberosMasterKey: masterkey,

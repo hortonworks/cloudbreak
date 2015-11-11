@@ -55,7 +55,7 @@ tests:
   - name: create cluster
     parameters: {
       stackName: it-aws-stack-ssud,
-      region: EU_WEST_1,
+      region: eu-west-1,
       clusterName: it-aws-cluster-ssud
     }
     classes:

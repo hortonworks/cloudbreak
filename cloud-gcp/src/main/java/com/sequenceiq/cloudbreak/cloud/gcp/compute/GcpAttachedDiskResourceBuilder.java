@@ -17,17 +17,18 @@ import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.cloudbreak.common.type.CloudRegion;
-import com.sequenceiq.cloudbreak.common.type.GcpRawDiskType;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Component
@@ -62,15 +63,15 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
 
         final List<CloudResource> resources = new ArrayList<>();
         final String projectId = context.getProjectId();
-        final CloudRegion region = CloudRegion.valueOf(context.getRegion());
+        final Location location = context.getLocation();
         final Compute compute = context.getCompute();
         List<Future<Void>> futures = new ArrayList<>();
         for (final CloudResource cloudResource : buildableResource) {
-            final Disk disk = createDisk(volume, projectId, region, cloudResource.getName());
+            final Disk disk = createDisk(volume, projectId, location.getAvailabilityZone(), cloudResource.getName());
             Future<Void> submit = intermediateBuilderExecutor.submit(new Callable<Void>() {
                 @Override
                 public Void call() throws Exception {
-                    Compute.Disks.Insert insDisk = compute.disks().insert(projectId, region.value(), disk);
+                    Compute.Disks.Insert insDisk = compute.disks().insert(projectId, location.getAvailabilityZone().value(), disk);
                     try {
                         Operation operation = insDisk.execute();
                         resources.add(createOperationAwareCloudResource(cloudResource, operation));
@@ -96,7 +97,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         String resourceName = resource.getName();
         try {
             Operation operation = context.getCompute().disks()
-                    .delete(context.getProjectId(), CloudRegion.valueOf(context.getRegion()).value(), resourceName).execute();
+                    .delete(context.getProjectId(), context.getLocation().getAvailabilityZone().value(), resourceName).execute();
             return createOperationAwareCloudResource(resource, operation);
         } catch (GoogleJsonResponseException e) {
             exceptionHandler(e, resourceName, resourceType());
@@ -114,11 +115,11 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         return 1;
     }
 
-    private Disk createDisk(Volume volume, String projectId, CloudRegion region, String resourceName) {
+    private Disk createDisk(Volume volume, String projectId, AvailabilityZone availabilityZone, String resourceName) {
         Disk disk = new Disk();
         disk.setSizeGb((long) volume.getSize());
         disk.setName(resourceName);
-        disk.setKind(GcpRawDiskType.valueOf(volume.getType()).getUrl(projectId, region));
+        disk.setKind(GcpPlatformParameters.GcpDiskType.valueOf(volume.getType()).getUrl(projectId, availabilityZone));
         return disk;
     }
 }

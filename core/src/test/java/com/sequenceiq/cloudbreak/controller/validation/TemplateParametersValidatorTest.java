@@ -31,12 +31,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.google.common.collect.ImmutableList;
-import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 import com.sequenceiq.cloudbreak.common.type.AzureVmType;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.type.GcpDiskType;
 import com.sequenceiq.cloudbreak.common.type.GcpInstanceType;
 import com.sequenceiq.cloudbreak.common.type.GcpRawDiskType;
+import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TemplateParametersValidatorTest {
@@ -58,15 +57,15 @@ public class TemplateParametersValidatorTest {
                         new ParametersRequiredValidator(),
                         new ParametersTypeValidator(),
                         new ParametersRegexValidator()
-                        )
-                );
+                )
+        );
         given(constraintValidatorContext.buildConstraintViolationWithTemplate(anyString())).willReturn(
                 new ConstraintValidatorContextImpl(
                         new ArrayList<String>(),
                         PathImpl.createRootPath(),
                         new DummyConstraintDescriptor()
                 ).buildConstraintViolationWithTemplate("dummytemplate")
-                );
+        );
     }
 
     @Test
@@ -267,7 +266,7 @@ public class TemplateParametersValidatorTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(GcpTemplateParam.CONTAINERCOUNT.getName(), 1);
         parameters.put(GcpTemplateParam.INSTANCETYPE.getName(), "invalid");
-        parameters.put(GcpTemplateParam.TYPE.getName(), GcpDiskType.PERSISTENT.name());
+        parameters.put(GcpTemplateParam.TYPE.getName(), "PERSISTENT");
 
         templateJson.setVolumeCount(6);
         templateJson.setVolumeSize(30);
@@ -283,7 +282,7 @@ public class TemplateParametersValidatorTest {
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(GcpTemplateParam.CONTAINERCOUNT.getName(), 1);
-        parameters.put(GcpTemplateParam.TYPE.getName(), GcpDiskType.PERSISTENT.name());
+        parameters.put(GcpTemplateParam.TYPE.getName(), "PERSISTENT");
 
         templateJson.setVolumeCount(6);
         templateJson.setVolumeSize(30);

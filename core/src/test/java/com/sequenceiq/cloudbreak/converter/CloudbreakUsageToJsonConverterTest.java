@@ -14,12 +14,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.controller.json.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
@@ -49,35 +49,36 @@ public class CloudbreakUsageToJsonConverterTest extends AbstractEntityConverterT
         // THEN
         assertEquals(CloudPlatform.AZURE.name(), result.getProvider());
         assertEquals("john.smith@example.com", result.getUsername());
-        assertAllFieldsNotNull(result);
+        assertAllFieldsNotNull(result, Lists.newArrayList("availabilityZone"));
     }
 
     @Test
     public void testConvertWithAwsProvider() {
         // GIVEN
         getSource().setProvider(CloudPlatform.AWS.name());
-        getSource().setRegion(CloudRegion.US_EAST_1.name());
+        getSource().setRegion("us_east_1");
         given(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).willReturn(user);
         // WHEN
         CloudbreakUsageJson result = underTest.convert(getSource());
         // THEN
         assertEquals(CloudPlatform.AWS.name(), result.getProvider());
         assertEquals("john.smith@example.com", result.getUsername());
-        assertAllFieldsNotNull(result);
+        assertAllFieldsNotNull(result, Lists.newArrayList("availabilityZone"));
     }
 
     @Test
     public void testConvertWithGcpProvider() {
         // GIVEN
         getSource().setProvider(CloudPlatform.GCP.name());
-        getSource().setRegion(CloudRegion.US_CENTRAL1_A.name());
+        getSource().setRegion("us_central1");
+        getSource().setAvailabilityZone("us_central1_a");
         given(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).willReturn(user);
         // WHEN
         CloudbreakUsageJson result = underTest.convert(getSource());
         // THEN
         assertEquals(CloudPlatform.GCP.name(), result.getProvider());
         assertEquals("john.smith@example.com", result.getUsername());
-        assertAllFieldsNotNull(result);
+        assertAllFieldsNotNull(result, Lists.newArrayList("availabilityZone"));
     }
 
     @Override

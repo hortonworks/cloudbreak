@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.event.platform.CheckPlatformVariantRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.CheckPlatformVariantResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 import reactor.bus.Event;
 
@@ -31,7 +32,7 @@ public class CheckPlatformVariantHandler implements CloudPlatformEventHandler<Ch
         CheckPlatformVariantRequest request = defaultPlatformVariantRequestEvent.getData();
         try {
             CloudConnector cc = cloudPlatformConnectors.get(request.getCloudContext().getPlatform(), request.getCloudContext().getVariant());
-            String defaultVariant = cc.variant();
+            Variant defaultVariant = cc.variant();
             CheckPlatformVariantResult platformParameterResult = new CheckPlatformVariantResult(request, defaultVariant);
             request.getResult().onNext(platformParameterResult);
             LOGGER.info("Query platform variant finished.");

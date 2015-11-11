@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractInstanceConnector;
-import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 
 @Service
 public class GcpInstanceConnector extends AbstractInstanceConnector {
@@ -62,7 +61,7 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
         try {
             Compute.Instances.GetSerialPortOutput instanceGet = GcpStackUtil.buildCompute(credential).instances()
                     .getSerialPortOutput(GcpStackUtil.getProjectId(credential),
-                            CloudRegion.valueOf(authenticatedContext.getCloudContext().getLocation().getRegion().value()).value(), vm.getInstanceId());
+                            authenticatedContext.getCloudContext().getLocation().getAvailabilityZone().value(), vm.getInstanceId());
             return instanceGet.execute().getContents();
         } catch (Exception e) {
             throw new GcpResourceException("Couldn't parse SSH fingerprint from console output.", e);
@@ -71,6 +70,6 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
 
     private Instance getInstance(CloudContext context, CloudCredential credential, Compute compute, String instanceName) throws IOException {
         return compute.instances().get(GcpStackUtil.getProjectId(credential),
-                CloudRegion.valueOf(context.getLocation().getRegion().value()).value(), instanceName).execute();
+                context.getLocation().getAvailabilityZone().value(), instanceName).execute();
     }
 }

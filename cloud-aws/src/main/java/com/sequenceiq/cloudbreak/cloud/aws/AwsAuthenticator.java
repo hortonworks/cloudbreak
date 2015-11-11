@@ -10,6 +10,8 @@ import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 @Service
 public class AwsAuthenticator implements Authenticator {
@@ -20,13 +22,13 @@ public class AwsAuthenticator implements Authenticator {
     private AwsClient awsClient;
 
     @Override
-    public String platform() {
-        return AwsConstants.AWS;
+    public Platform platform() {
+        return AwsConstants.AWS_PLATFORM;
     }
 
     @Override
-    public String variant() {
-        return AwsConstants.AWS;
+    public Variant variant() {
+        return AwsConstants.AWS_VARIANT;
     }
 
     @Override

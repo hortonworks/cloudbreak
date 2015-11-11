@@ -44,8 +44,8 @@ public class UserDataBuilder {
     private String build(InstanceGroupType type, CloudPlatform cloudPlatform, String tmpSshKey, String sshUser, PlatformParameters params) {
         Map<String, Object> model = new HashMap<>();
         model.put("cloudPlatform", cloudPlatform);
-        model.put("platformDiskPrefix", params.diskPrefix());
-        model.put("platformDiskStartLabel", params.startLabel());
+        model.put("platformDiskPrefix", params.scriptParams().getDiskPrefix());
+        model.put("platformDiskStartLabel", params.scriptParams().getStartLabel());
         if (type == InstanceGroupType.GATEWAY) {
             model.put("gateway", true);
             model.put("tmpSshKey", tmpSshKey);
