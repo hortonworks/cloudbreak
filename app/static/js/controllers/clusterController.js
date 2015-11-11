@@ -498,17 +498,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         function setRegion() {
-            if ($rootScope.activeCredential != undefined) {
-                if ("AWS" === $rootScope.activeCredential.cloudPlatform.split("_")[0]) {
-                    $scope.cluster.region = "US_WEST_1";
-                } else if ("GCP" === $rootScope.activeCredential.cloudPlatform.split("_")[0]) {
-                    $scope.cluster.region = "US_CENTRAL1_B";
-                } else if ("OPENSTACK" === $rootScope.activeCredential.cloudPlatform.split("_")[0]) {
-                    $scope.cluster.region = "LOCAL";
-                } else if ("AZURE" === $rootScope.activeCredential.cloudPlatform.split("_")[0]) {
-                    $scope.cluster.region = "WEST_US";
-                }
-
+            if ($rootScope.activeCredential !== undefined) {
+                $scope.cluster.region = $rootScope.defaultRegions[$rootScope.activeCredential.cloudPlatform];
             }
         }
 
@@ -690,16 +681,12 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.$watch('cluster.region', function() {
-            if ($rootScope.activeCredential != undefined && $rootScope.activeCredential.cloudPlatform == 'AWS') {
-                angular.forEach($rootScope.config.AWS.awsRegions, function(region) {
-                    if (region == null) {
-                        $scope.cluster.availabilityZone = null;
-                    }
-                    if (region.key == $scope.cluster.region) {
-                        $scope.avZones = region.availabilityZones;
-                        return;
-                    }
-                });
+            if ($rootScope.activeCredential !== undefined && ($rootScope.activeCredential.cloudPlatform === 'AWS' || $rootScope.activeCredential.cloudPlatform === 'GCP')) {
+                if ($scope.cluster.region === null) {
+                    $scope.cluster.availabilityZone = null;
+                } else {
+                    $scope.avZones = $rootScope.zones[$rootScope.activeCredential.cloudPlatform][$scope.cluster.region];
+                }
             } else {
                 $scope.cluster.availabilityZone = null;
             }
