@@ -2,9 +2,9 @@
     <label class="col-sm-3 control-label" for="openstack_keystone_version">{{msg.keystone_version_label}}</label>
 
     <div class="col-sm-9">
-        <select name="keystoneVersion" id="keystoneVersion" ng-model="credentialOpenstack.parameters.keystoneVersion" ng-dropdown required>
-            <option ng-option value="v2" selected>v2</option>
-            <option ng-option value="v3">v3</option>
+        <select name="keystoneVersion" id="keystoneVersion" ng-model="credentialOpenstack.parameters.keystoneVersion" ng-dropdown required ng-init="credentialOpenstack.parameters.keystoneVersion='cb-keystone-v2'">
+            <option ng-option value="cb-keystone-v2" ng-selected="true">v2</option>
+            <option ng-option value="cb-keystone-v3">v3</option>
         </select>
         <div class="help-block" ng-show="openstackCredentialForm.openstack_keystone_version.$dirty && openstackCredentialForm.openstack_keystone_version.$invalid">
             <i class="fa fa-warning"></i> {{msg.keystone_version_invalid}}
@@ -14,12 +14,12 @@
 
 </div>
 
-<div class="form-group" ng-if="credentialOpenstack.parameters.keystoneVersion == 'v3'" ng-class="{ 'has-error': openstackCredentialForm.openstack_keystone_scope.$dirty && openstackCredentialForm.openstack_keystone_scope.$invalid }">
+<div class="form-group" ng-if="credentialOpenstack.parameters.keystoneVersion == 'cb-keystone-v3'" ng-class="{ 'has-error': openstackCredentialForm.openstack_keystone_scope.$dirty && openstackCredentialForm.openstack_keystone_scope.$invalid }">
     <label class="col-sm-3 control-label" for="openstack_keystone_scope">{{msg.keystone_scope_label}}</label>
 
     <div class="col-sm-9">
-        <select name="keystoneAuthScope" id="keystoneAuthScope" ng-model="credentialOpenstack.parameters.keystoneAuthScope" ng-dropdown required>
-            <option ng-option value="cb-keystone-v3-default-scope" selected>Default</option>
+        <select name="keystoneAuthScope" id="keystoneAuthScope" ng-model="credentialOpenstack.parameters.keystoneAuthScope" ng-dropdown required ng-init="credentialOpenstack.parameters.keystoneAuthScope='cb-keystone-v3-default-scope'">
+            <option ng-option value="cb-keystone-v3-default-scope" ng-selected="true">Default</option>
             <option ng-option value="cb-keystone-v3-domain-scope">Domain</option>
             <option ng-option value="cb-keystone-v3-project-scope">Project</option>
         </select>
@@ -84,7 +84,7 @@
 </div>
 
 <!-- .form-group -->
-<div class="form-group" ng-if="credentialOpenstack.parameters.keystoneVersion == 'v3'" ng-class="{ 'has-error': openstackCredentialForm.ouserDomain.$dirty && openstackCredentialForm.ouserDomain.$invalid }">
+<div class="form-group" ng-if="credentialOpenstack.parameters.keystoneVersion == 'cb-keystone-v3'" ng-class="{ 'has-error': openstackCredentialForm.ouserDomain.$dirty && openstackCredentialForm.ouserDomain.$invalid }">
     <label class="col-sm-3 control-label" for="ouserDomain">{{msg.credential_openstack_form_user_domain_label}}</label>
 
     <div class="col-sm-9">
@@ -97,7 +97,7 @@
 </div>
 
 <!-- .form-group -->
-<div class="form-group" ng-if="credentialOpenstack.parameters.keystoneVersion == 'v2'" ng-class="{ 'has-error': openstackCredentialForm.otenantName.$dirty && openstackCredentialForm.otenantName.$invalid }">
+<div class="form-group" ng-if="credentialOpenstack.parameters.keystoneVersion == 'cb-keystone-v2'" ng-class="{ 'has-error': openstackCredentialForm.otenantName.$dirty && openstackCredentialForm.otenantName.$invalid }">
     <label class="col-sm-3 control-label" for="otenantName">{{msg.credential_openstack_form_tenant_label}}</label>
 
     <div class="col-sm-9">
@@ -110,7 +110,7 @@
 </div>
 
 <!-- .form-group -->
-<div class="form-group" ng-if="credentialOpenstack.parameters.keystoneVersion == 'v3' && credentialOpenstack.parameters.keystoneAuthScope == 'cb-keystone-v3-domain-scope'" ng-class="{ 'has-error': openstackCredentialForm.odomainName.$dirty && openstackCredentialForm.odomainName.$invalid }">
+<div class="form-group" ng-if="credentialOpenstack.parameters.keystoneVersion == 'cb-keystone-v3' && credentialOpenstack.parameters.keystoneAuthScope == 'cb-keystone-v3-domain-scope'" ng-class="{ 'has-error': openstackCredentialForm.odomainName.$dirty && openstackCredentialForm.odomainName.$invalid }">
     <label class="col-sm-3 control-label" for="odomainName">{{msg.credential_openstack_form_domain_label}}</label>
 
     <div class="col-sm-9">
@@ -123,7 +123,7 @@
 </div>
 
 <!-- .form-group -->
-<div class="form-group" ng-if="credentialOpenstack.parameters.keystoneVersion == 'v3' && credentialOpenstack.parameters.keystoneAuthScope == 'cb-keystone-v3-project-scope'" ng-class="{ 'has-error': openstackCredentialForm.oprojectName.$dirty && openstackCredentialForm.oprojectName.$invalid }">
+<div class="form-group" ng-if="credentialOpenstack.parameters.keystoneVersion == 'cb-keystone-v3' && credentialOpenstack.parameters.keystoneAuthScope == 'cb-keystone-v3-project-scope'" ng-class="{ 'has-error': openstackCredentialForm.oprojectName.$dirty && openstackCredentialForm.oprojectName.$invalid }">
     <label class="col-sm-3 control-label" for="oprojectName">{{msg.credential_openstack_form_project_label}}</label>
 
     <div class="col-sm-9">
@@ -136,7 +136,7 @@
 </div>
 
 <!-- .form-group -->
-<div class="form-group" ng-if="credentialOpenstack.parameters.keystoneVersion == 'v3' && credentialOpenstack.parameters.keystoneAuthScope == 'cb-keystone-v3-project-scope'" ng-class="{ 'has-error': openstackCredentialForm.oprojectDomainName.$dirty && openstackCredentialForm.oprojectDomainName.$invalid }">
+<div class="form-group" ng-if="credentialOpenstack.parameters.keystoneVersion == 'cb-keystone-v3' && credentialOpenstack.parameters.keystoneAuthScope == 'cb-keystone-v3-project-scope'" ng-class="{ 'has-error': openstackCredentialForm.oprojectDomainName.$dirty && openstackCredentialForm.oprojectDomainName.$invalid }">
     <label class="col-sm-3 control-label" for="oprojectDomainName">{{msg.credential_openstack_form_project_domain_label}}</label>
 
     <div class="col-sm-9">
