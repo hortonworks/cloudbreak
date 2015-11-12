@@ -686,6 +686,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     $scope.cluster.availabilityZone = null;
                 } else {
                     $scope.avZones = $rootScope.zones[$rootScope.activeCredential.cloudPlatform][$scope.cluster.region];
+                    if ($rootScope.activeCredential.cloudPlatform === 'GCP') {
+                        $scope.cluster.availabilityZone = $scope.avZones[0];
+                    }
                 }
             } else {
                 $scope.cluster.availabilityZone = null;
@@ -732,8 +735,12 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         function initPlatformVariants() {
             PlatformVariant.get().$promise.then(function(success) {
                 $scope.platformVariants = success.platformToVariants;
+                $scope.platformVariants.AZURE = ["AZURE"];
+                $scope.defaultVariants = success.defaultVariants;
+                $scope.defaultVariants.AZURE = ["AZURE"];
             }, function(error) {
-                $scope.platformVariants = [];
+                $scope.platformVariants = {};
+                $scope.defaultVariants = {};
             });
         }
 
@@ -741,10 +748,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             var variants = [];
             if ($rootScope.activeCredential !== undefined) {
                 variants = $scope.platformVariants[$rootScope.activeCredential.cloudPlatform];
-                var defaultVariant = $rootScope.config.DEFAULT_VARIANTS[$rootScope.activeCredential.cloudPlatform];
-                if (defaultVariant == null) {
-                    $scope.cluster.platformVariant = null;
-                } else if (variants.indexOf($scope.cluster.platformVariant) < 0) {
+                var defaultVariant = $scope.defaultVariants[$rootScope.activeCredential.cloudPlatform];
+                if (defaultVariant) {
                     $scope.cluster.platformVariant = defaultVariant;
                 }
             }
@@ -793,7 +798,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 return false;
             }
         }
-
         $scope.selectCluster = function(cluster) {
             $scope.selectedCluster = cluster
         }

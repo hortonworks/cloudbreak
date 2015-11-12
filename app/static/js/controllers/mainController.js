@@ -11,7 +11,9 @@ angular.module('uluwatuControllers')
                 $rootScope.defaultRegions = success.regions.defaultRegions;
                 $rootScope.zones = success.regions.availabilityZones;
             }, function(error) {
-                $rootScope.platformParams = {};
+                $rootScope.regions = {};
+                $rootScope.defaultRegions = {};
+                $rootScope.zones = {};
             });
         }
     ])
@@ -36,7 +38,7 @@ angular.module('uluwatuControllers')
             $rootScope.config = {
                 regionDisplayNames: {
                     get: function(provider, nameId) {
-                        if (provider !== undefined && nameId !== undefined && this[provider][nameId] !== undefined) {
+                        if (provider !== undefined && nameId !== undefined && this[provider] !== undefined && this[provider][nameId] !== undefined) {
                             return this[provider][nameId].value;
                         }
                         return nameId;
@@ -710,14 +712,7 @@ angular.module('uluwatuControllers')
                 }, {
                     key: 'Etc/GMT-12',
                     value: 'GMT+12'
-                }],
-                'DEFAULT_VARIANTS': {
-                    'GCP': 'GCP',
-                    'AZURE': 'AZURE',
-                    'AZURE_RM': 'AZURE_RM',
-                    'AWS': null,
-                    'OPENSTACK': 'HEAT'
-                }
+                }]
             }
 
 
