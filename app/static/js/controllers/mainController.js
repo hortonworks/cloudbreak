@@ -151,6 +151,13 @@ angular.module('uluwatuControllers')
                         key: 'N1_HIGHCPU_16',
                         value: 'n1-highcpu-16',
                         cloud: 'GCP'
+                    }],
+                    gcpDiskTypes: [{
+                        key: 'HDD',
+                        value: 'Magnetic'
+                    }, {
+                        key: 'SSD',
+                        value: 'SSD'
                     }]
                 },
                 'AZURE': {
