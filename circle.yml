@@ -23,11 +23,6 @@ deployment:
       - make upload-snapshot
       - eval $(docker run gliderlabs/pagebuilder circleci-cmd)
 
-  1.1.0:
-    branch: 1.1.0
-    commands:
-      - eval $(docker run gliderlabs/pagebuilder circleci-cmd)
-  
   release:
     branch: release
     commands:
