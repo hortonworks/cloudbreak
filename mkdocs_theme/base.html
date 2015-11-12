@@ -133,7 +133,7 @@
                $.getJSON("../providers/openstack.json", function(data) {
                $("#openstack-image-details").append('<br>');
                $("#openstack-image-details").append('<br>');
-               $("#openstack-image-details").append('<p style="font-size: 12pt"><code>LATEST_IMAGE:</code>' + data.metadata.filename + '</p>');
+               $("#openstack-image-details").append('<p style="font-size: 12pt"><code>LATEST_IMAGE:</code>' + data.id + '</p>');
                $("#openstack-image-details").append('<pre><code style="font-size: 12pt;color:#333333">curl -L  https://atlas.hashicorp.com/api/v1/artifacts/sequenceiq/cloudbreak/openstack.image/' + data.version + '/file | tar -xz</code></pre>');
                });
 
@@ -141,8 +141,7 @@
                $.getJSON("../providers/gcp.json", function(data) {
                $("#gcp-image-details").append('<br>');
                $("#gcp-image-details").append('<br>');
-               $("#gcp-image-details").append('<p style="font-size: 12pt"><code>SOURCE_IMAGE:</code>' + data.metadata.source_image + '</p>');
-               $("#gcp-image-details").append('<pre><code style="font-size: 12pt;color:#333333">'+ data.metadata.import_script +'</code></pre>');
+               $("#gcp-image-details").append('<pre><code style="font-size: 12pt;color:#333333">gcloud compute images create ' + data.gcp.id + ' --source-uri gs://' + data.gcp.source_image + '</code></pre>');
                });
            });
          </script>

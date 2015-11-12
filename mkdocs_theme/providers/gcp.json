@@ -17,7 +17,7 @@
     "cb_docker_container_registrator": "sequenceiq/registrator:v5.2",
     "cb_docker_container_swarm": "swarm:0.4.0"
   },
-  "gce": {
+  "gcp": {
     "builder": "packer.googlecompute",
     "id": "cb-centos71-amb212-2015-11-05",
     "import_script": "gcloud compute images create cb-centos71-amb212-2015-11-05 --source-uri gs://sequenceiqimage/cb-centos71-amb212-2015-11-05.tar.gz",
