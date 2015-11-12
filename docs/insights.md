@@ -1,4 +1,4 @@
-# Insights
+# Operations
 
 ##Cloudbreak deployer
 
@@ -43,7 +43,8 @@ The cloudbreak-deployer tool is capable of upgrading itself to a newer version.
 cbd update
 ```
 
----
+###Cloudbreak application
+
 
 ##Cloudbreak application
 
@@ -51,7 +52,7 @@ cbd update
 
 In the current version of Cloudbreak all the nodes have a public IP address and all the nodes are accessible via SSH.
 The public IP addresses of a running cluster can be checked on the Cloudbreak UI under the *Nodes* tab.
-Only key-based authentication is supported - the public key can be specified when creating a credential.
+Only key-based authentication is supported - the public key can be specified when creating a cloud credential.
 
 ```
 ssh -i ~/.ssh/private-key.pem cloudbreak@<public-ip>
@@ -62,8 +63,32 @@ The default user is `cloudbreak` except on EC2 where it is `ec2-user`.
 ###Accessing HDP client services
 
 The main difference between general HDP clusters and Cloudbreak-installed HDP clusters is that each host runs an Ambari server or agent Docker container and the HDP services will be installed in this container as well.
-It means that after `ssh` the client services won't be available instantly, first you'll have to enter the ambari-agent container.
-Inside the container everything works the same way as expected.
+It means that after `ssh` the client services won't be available instantly, first you'll have to `enter` the ambari-agent container.
+Inside the container everything works the same way as expected. In order to do so there are a few options.
+
+*Helper functions*
+
+We have created a few helper functions in order to help operations. Once yoy SSH into the host you should a message as such:
+```
+You are now logged in to the docker host ...
+Getting started with docker:
+
+  docker ps                : Listing running containers
+  docker logs -f <ID>      : Star tail -f on container stdout/stderr
+  docker exec -it <ID> sh  : Entering the container (instead of ssh)
+
+Helper commands:
+
+  h                        : prints this message
+  ambari-enter             : Enters the ambari container
+  ambari-log               : Watches the ambari logs
+```
+
+You can enter into the container where the HDP services are running using the `ambari-enter ` functions.
+
+*Docker exec*
+
+
 To check the containers running on the host enter:
 
 ```
@@ -77,7 +102,7 @@ a8ec90037aaf   swarm:0.4.0                              "/swarm join --addr=1" 4
 ef02b43eacee   sequenceiq/consul:v0.5.0-v5              "/bin/start"           4 hours ago  Up 4 hours            vmhostgroupmaster12-consul
 ```
 
-You should see the ambari-agent container running. Copy its id or name and `exec` into the container:
+You should see the `ambari-agent` container running. Copy its id or name and `exec` into the container:
 
 ```
 [cloudbreak@vmhostgroupclient11 ~]$ sudo docker exec -it ambari-agent-14454169805924 bash
@@ -143,13 +168,19 @@ It is by design because this instance has some special tasks:
 - it runs the Baywatch server that is responsible for collecting the operational logs from the cluster
 - it runs a Kerberos KDC container if Kerberos is configured
 
-###Hadoop logs
+**Logs**
+
+*Hadoop logs*
 
 Hadoop logs are available from the host and from the container as well in the `/hadoopfs/fs1/logs` directory.
 
-###Ambari db
+*Ambari logs*
 
-Ambari's database runs on the `cbgateway` node inside a PostgreSQL docker container. To access it ssh to the gateway node and run the following command:
+For Ambari logs you can use our helper function, `ambari-log`. For further information please check the *Helper functions* section. Alternatively you watch the Ambari logs on the host instance as well under the ``/hadoopfs/fs1/logs` folder as well.
+
+**Ambari database**
+
+Ambari's database runs on the `cbgateway` node inside a PostgreSQL docker container. To access it SSH to the `gateway` node and run the following command:
 
 ```
 [cloudbreak@vmcbgateway0 ~]$ sudo docker exec -it ambari_db psql -U postgres
