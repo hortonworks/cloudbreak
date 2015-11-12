@@ -1,4 +1,4 @@
-# Operations
+# Insights
 
 ##Cloudbreak deployer
 
@@ -185,3 +185,4 @@ Ambari's database runs on the `cbgateway` node inside a PostgreSQL docker contai
 ```
 [cloudbreak@vmcbgateway0 ~]$ sudo docker exec -it ambari_db psql -U postgres
 ```
+
