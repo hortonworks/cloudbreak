@@ -41,7 +41,7 @@ pages:
         - Recipes: recipes.md
         - SPI: spi.md
         - Kerberos: kerberos.md
-        - Insights: insights.md
+        - Operations: operations.md
         - Migration : database.md
         - Configuration : configuration.md
         - Development : development.md
