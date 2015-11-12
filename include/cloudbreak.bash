@@ -94,6 +94,7 @@ cloudbreak-conf-smtp() {
 cloudbreak-conf-mail() {
     env-import CB_MAIL_SMTP_AUTH "true"
     env-import CB_MAIL_SMTP_STARTTLS_ENABLE "true"
+    env-import CB_MAIL_SMTP_TYPE "smtp"
 }
 
 cloudbreak-conf-db() {
