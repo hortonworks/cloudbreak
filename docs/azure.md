@@ -3,7 +3,15 @@
 ## Setup Cloudbreak deployer
 
 If you want to use our cloudbreak-deployer on Azure then please follow the steps below.
-Start an [OpenLogic 7.1](https://azure.microsoft.com/en-in/marketplace/partners/openlogic/centosbased71/) on Azure. Make sure you opened the **22** port for SSH and **3000** and **3001** for our UI.
+Start an [OpenLogic 7.1](https://azure.microsoft.com/en-in/marketplace/partners/openlogic/centosbased71/) on Azure.
+
+Make sure you opened the following ports:
+ 
+ * SSH (22)
+ * Ambari (8080)
+ * Identity server (8089)
+ * Cloudbreak GUI (3000)
+ * User authentication (3001)
 
 Please log in to the machine with SSH or use username and password authentication (the following example shows how to ssh into the machine):
 

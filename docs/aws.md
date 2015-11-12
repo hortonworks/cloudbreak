@@ -7,10 +7,15 @@ We have pre-built custom cloud images with Cloudbreak deployer pre-configured. F
 You can launch the latest Cloudbreak deployer image based on your region at the [AWS Management Console](https://aws
 .amazon.com/console/).
 
-You can check the name of the available images in the following section.
+Please make sure you opened the following ports on your virtual machine:
+ 
+ * SSH (22)
+ * Ambari (8080)
+ * Identity server (8089)
+ * Cloudbreak GUI (3000)
+ * User authentication (3001)
 
 ### AWS image details
-
 
 ## Setup Cloudbreak deployer
 

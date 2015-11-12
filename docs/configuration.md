@@ -53,6 +53,18 @@ export CB_MAIL_SMTP_AUTH=true
 export CB_MAIL_SMTP_STARTTLS_ENABLE=true
 ```
 
+### Identity with custom domain 
+
+The Cloudbreak deployer uses UAA as identity provider, it supports multi tenancy. This is referred to as 
+identity zones. An identity zone is accessed through a unique subdomain. If the standard UAA responds to [https://uaa.10.244.0.34.xip.io](https://uaa.10.244.0.34.xip.io) a zone on this UAA would be accessed 
+ through [https://testzone1.uaa.10.244.0.34.xip.io](https://testzone1.uaa.10.244.0.34.xip.io).
+ 
+If you want to use a custom domain for your identity or deployment, put the `UAA_ZONE_DOMAIN` line into your 
+`Profile`. You can see an example in the following box:
+```
+export UAA_ZONE_DOMAIN=my-subdomain.example.com
+```
+
 ### Consul
 
 [Consul](http://consul.io) is used for DNS resolution. All Cloudbreak related services are registered as

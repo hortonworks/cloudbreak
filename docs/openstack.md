@@ -9,6 +9,14 @@ Cloudbreak currently only supports the `OpenStack Juno` release.
 You can download the latest pre-configured Cloudbreak deployer image for OpenStack with the following script in the 
 following section.
 
+Please make sure you opened the following ports on your virtual machine:
+ 
+ * SSH (22)
+ * Ambari (8080)
+ * Identity server (8089)
+ * Cloudbreak GUI (3000)
+ * User authentication (3001)
+
 ###OpenStack image details
 
 

@@ -16,6 +16,14 @@ Images are global resources, so they can be used across zones and projects.
 
 ![](/images/google-cloud-shell.png)
 
+Please make sure you opened the following ports on your virtual machine:
+ 
+ * SSH (22)
+ * Ambari (8080)
+ * Identity server (8089)
+ * Cloudbreak GUI (3000)
+ * User authentication (3001)
+
 ## Setup Cloudbreak deployer
 
 If you already have cloudbreak-deployer installed you can start to setup the Cloudbreak application.

@@ -1,7 +1,14 @@
 # Install Cloudbreak deployer
 
 To install Cloudbreak Deployer on your selected environment you have to follow the steps below (The instruction describe a CentOS based installation).
-Make sure you opened the **22** port for SSH and **3000** and **3001** for our UI.
+
+Make sure you opened the following ports:
+ 
+ * SSH (22)
+ * Ambari (8080)
+ * Identity server (8089)
+ * Cloudbreak GUI (3000)
+ * User authentication (3001)
 
 Assume **root** privileges with this command:
 
