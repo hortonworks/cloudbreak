@@ -16,7 +16,7 @@
 - Integration tests are added, where cbd binary is called, not only sourced functions
 - Docker based CentOS integration test make target added
 - Uaa db migration
-- SMTP default parameters added: `CB_MAIL_SMTP_AUTH` and `CB_MAIL_SMTP_STARTTLS_ENABLE` and `CB_MAIL_SMTP_TYPE`
+- SMTP default parameters added: `CLOUDBREAK_SMTP_AUTH` and `CLOUDBREAK_SMTP_STARTTLS_ENABLE` and `CLOUDBREAK_SMTP_TYPE`
 - Local development Uluwatu configuration by ULUWATU_VOLUME_HOST environment variable
 - Local development Sultans configuration by SULTANS_VOLUME_HOST environment variable
 - install script for fixed version and install-latest for latest release added
