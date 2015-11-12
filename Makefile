@@ -85,7 +85,7 @@ prepare-release: build
 	tar -zcf release/$(NAME)_$(VERSION)_Linux_$(ARCH).tgz -C build/Linux $(ARTIFACTS) $(BINARYNAME)
 	cp $(ARTIFACTS) build/Darwin/
 	tar -zcf release/$(NAME)_$(VERSION)_Darwin_$(ARCH).tgz -C build/Darwin $(ARTIFACTS) $(BINARYNAME)
-	
+
 release: prepare-release
 
 	gh-release checksums sha256
@@ -102,7 +102,10 @@ release-next-ver: deps
 	./release-next-ver.sh
 
 generate-aws-json:
-	curl -L https://atlas.hashicorp.com/api/v1/artifacts/sequenceiq/cbd/amazon.image/search | jq .versions[0] > mkdocs_theme/aws.json
+	curl -L https://atlas.hashicorp.com/api/v1/artifacts/sequenceiq/cbd/amazon.image/search | jq .versions[0] > mkdocs_theme/providers/aws.json
+
+generate-openstack-json:
+	curl -L  https://atlas.hashicorp.com/api/v1/artifacts/sequenceiq/cloudbreak/openstack.image/search | jq .versions[0] > mkdocs_theme/providers/openstack.json
 
 circleci:
 	rm ~/.gitconfig
