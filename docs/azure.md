@@ -153,7 +153,7 @@ rm -rf /var/lib/docker && systemctl daemon-reload && service docker start && sys
 Download **cloudbreak-deployer**:
 
 ```
-mkdir -p cloudbreak-deployer && cd cloudbreak-deployer && curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install-latest | sh && cbd --version
+curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install-latest | sh && cbd --version
 ```
 
 ### Initialize your Profile

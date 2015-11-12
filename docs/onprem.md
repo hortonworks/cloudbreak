@@ -28,7 +28,7 @@ You need to install iptables-services, otherwise the 'iptables save' command wil
 yum -y install iptables-services net-tools unzip
 ```
 
-Please configure you iptables on your machine:
+Please configure your iptables on your machine:
 
 ```
 iptables --flush INPUT && \
@@ -90,7 +90,7 @@ rm -rf /var/lib/docker && systemctl daemon-reload && service docker start && sys
 Install the Cloudbreak deployer and unzip the platform specific single binary to your PATH. The one-liner way is:
 
 ```
-mkdir -p cloudbreak-deployer && cd cloudbreak-deployer && curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install-latest | sh && cbd --version
+curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install-latest | sh && cbd --version
 ```
 
 Once the Cloudbreak deployer is installed, you can start to setup the Cloudbreak application.
