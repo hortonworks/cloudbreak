@@ -9,7 +9,6 @@ cloudbreak-config() {
   cloudbreak-conf-defaults
   cloudbreak-conf-uaa
   cloudbreak-conf-smtp
-  cloudbreak-conf-mail
   cloudbreak-conf-cloud-provider
   cloudbreak-conf-ui
   cloudbreak-conf-java
@@ -89,12 +88,9 @@ cloudbreak-conf-smtp() {
     env-import CLOUDBREAK_SMTP_SENDER_HOST " "
     env-import CLOUDBREAK_SMTP_SENDER_PORT 25
     env-import CLOUDBREAK_SMTP_SENDER_FROM " "
-}
-
-cloudbreak-conf-mail() {
-    env-import CB_MAIL_SMTP_AUTH "true"
-    env-import CB_MAIL_SMTP_STARTTLS_ENABLE "true"
-    env-import CB_MAIL_SMTP_TYPE "smtp"
+    env-import CLOUDBREAK_SMTP_AUTH "true"
+    env-import CLOUDBREAK_SMTP_STARTTLS_ENABLE "true"
+    env-import CLOUDBREAK_SMTP_TYPE "smtp"
 }
 
 cloudbreak-conf-db() {
