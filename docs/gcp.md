@@ -4,13 +4,17 @@ We have pre-built custom cloud images with Cloudbreak deployer pre-configured. F
 
 ## Configured image
 
-You can create the latest Cloudbreak deployer Google Compute Engine image with the help of the [gcloud command-line 
-tool](https://cloud.google.com/compute/docs/gcloud-compute/) and the script in the following section.
+You can create the latest Cloudbreak deployer image on the [Google Developers Console](https://console.developers.google.com/) with the help
+ of the [Google Cloud Shell](https://cloud.google.com/cloud-shell/docs/).
+ 
+![](/images/google-cloud-shell-launch.png)
 
 Images are global resources, so they can be used across zones and projects.
 
 ### GCP image details
 
+
+![](/images/google-cloud-shell.png)
 
 ## Setup Cloudbreak deployer
 
