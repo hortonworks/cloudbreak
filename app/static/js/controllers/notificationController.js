@@ -160,8 +160,11 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
                     id: notification.stackId
                 }, function(success) {
                     // refresh host metadata
-                    if (success.cluster != null && success.cluster.hostGroups != null) {
-                        $rootScope.activeCluster.cluster.hostGroups = success.cluster.hostGroups;
+                    if (success.cluster != null) {
+                        $rootScope.activeCluster.cluster.status = success.clusters.status;
+                        if (success.cluster.hostGroups != null) {
+                            $rootScope.activeCluster.cluster.hostGroups = success.cluster.hostGroups;
+                        }
                     }
                     // refresh instance metadata
                     var metadata = []

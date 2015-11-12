@@ -368,7 +368,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     PeriscopeCluster.update({
                         id: periCluster.id
                     }, ambariJson, function(success) {
-                        $scope.showMessage($rootScope.msg.alarm_creation_failed + ": " + error.data.message);
+                        $scope.showSuccess($rootScope.msg.cluster_credential_update_success);
                     }, function(error) {
                         $scope.showError(error, $rootScope.msg.cluster_credential_update_failed);
                     });
@@ -431,7 +431,90 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $rootScope.activeCluster.cloudPlatform = $rootScope.activeClusterCredential.cloudPlatform;
                 $scope.newCredential = {};
                 $scope.newCredential.newUserName = $rootScope.activeCluster.cluster.userName;
+                $scope.upscaleCluster = {
+                  hostGroup: $scope.getHostGroupName(),
+                  numberOfInstances: 1
+                };
+                $scope.downscaleCluster = {
+                  hostGroup: $scope.getHostGroupName(),
+                  numberOfInstances: 1
+                };
             });
+        };
+
+        $scope.startUpScaleCluster = function() {
+          if ($scope.upscaleCluster.numberOfInstances <= 0) {
+              $scope.showErrorMessage($rootScope.msg.cluster_upscale_valid_failed);
+              $scope.upscaleCluster.numberOfInstances = 1;
+              return;
+          }
+          var scaleJson = {
+              "instanceGroupAdjustment": {
+                  "instanceGroup": $scope.upscaleCluster.hostGroup,
+                  "scalingAdjustment": $scope.upscaleCluster.numberOfInstances,
+                  "withClusterEvent": true
+              }
+          };
+          GlobalStack.update({
+              id: $rootScope.activeCluster.id
+          },scaleJson, function(success) {
+              angular.forEach($rootScope.activeCluster.instanceGroups, function(igroup) {
+                if(igroup.group == $scope.upscaleCluster.hostGroup) {
+                  igroup.nodeCount += $scope.upscaleCluster.numberOfInstances;
+                  return;
+                }
+              });
+              $scope.showSuccess($rootScope.msg.cluster_upscale_update_success);
+              $scope.upscaleCluster = {
+                hostGroup: $scope.getHostGroupName(),
+                numberOfInstances: 1
+              };
+          }, function(error) {
+              $scope.showError(error, $rootScope.msg.cluster_upscale_update_failed);
+          });
+        };
+
+        $scope.startDownScaleCluster = function() {
+          if ($scope.downscaleCluster.numberOfInstances <= 0) {
+              $scope.showErrorMessage($rootScope.msg.cluster_downscale_valid_failed);
+              $scope.downscaleCluster.numberOfInstances = 1;
+              return;
+          }
+          var scaleJson = {
+              "hostGroupAdjustment": {
+                  "hostGroup": $scope.downscaleCluster.hostGroup,
+                  "scalingAdjustment": $scope.downscaleCluster.numberOfInstances * (-1),
+                  "withStackUpdate": true
+              }
+          };
+          Cluster.update({
+              id: $rootScope.activeCluster.id
+          },scaleJson, function(success) {
+              angular.forEach($rootScope.activeCluster.instanceGroups, function(igroup) {
+                if(igroup.group == $scope.upscaleCluster.hostGroup) {
+                  igroup.nodeCount += $scope.downscaleCluster.numberOfInstances;
+                  return;
+                }
+              });
+              $scope.showSuccess($rootScope.msg.cluster_downscale_update_success);
+              $scope.downscaleCluster = {
+                hostGroup: $scope.getHostGroupName(),
+                numberOfInstances: 1
+              };
+          }, function(error) {
+              $scope.showError(error, $rootScope.msg.cluster_downscale_update_failed);
+          });
+        };
+
+        $scope.getHostGroupName = function() {
+          var hgroup = "";
+          angular.forEach($rootScope.activeCluster.instanceGroups, function(igroup) {
+            if(igroup.group != 'cbgateway') {
+              hgroup = igroup.group;
+              return;
+            }
+          });
+          return hgroup;
         };
 
         $scope.initReinstallClusterObject = function() {
