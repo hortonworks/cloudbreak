@@ -43,8 +43,6 @@ The cloudbreak-deployer tool is capable of upgrading itself to a newer version.
 cbd update
 ```
 
-###Cloudbreak application
-
 
 ##Cloudbreak application
 
