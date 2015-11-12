@@ -20,6 +20,7 @@ deployment:
   master:
     branch: master
     commands:
+      - make upload-snapshot
       - eval $(docker run gliderlabs/pagebuilder circleci-cmd)
 
   1.1.0:

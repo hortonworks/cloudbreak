@@ -18,6 +18,23 @@ build: bindata
 	mkdir -p build/Linux  && GOOS=linux  go build -ldflags $(FLAGS) -o build/Linux/$(BINARYNAME)
 	mkdir -p build/Darwin && GOOS=darwin go build -ldflags $(FLAGS) -o build/Darwin/$(BINARYNAME)
 
+create-snapshot-tgz:
+	rm -rf snapshots
+	mkdir -p snapshots
+
+	tar -czf snapshots/cbd-snapshot-Linux.tgz -C build/Linux cbd
+	tar -czf snapshots/cbd-snapshot-Darwin.tgz -C build/Darwin cbd
+
+upload-snapshot: create-snapshot-tgz
+	@echo upload snapshot artifacts to $(S3_TARGET) ...
+	@docker run \
+		-v $(PWD):/data \
+		-w /data \
+		-e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) \
+		-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) \
+		anigeo/awscli s3 cp snapshots/ $(S3_TARGET) --recursive --include "$(NAME)_$(VERSION)_*.tgz"
+
+
 dev: bindata
 	go build -ldflags $(FLAGS) -o /usr/local/bin/$(BINARYNAME)
 

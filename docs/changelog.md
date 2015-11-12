@@ -20,6 +20,7 @@
 - Local development Uluwatu configuration by ULUWATU_VOLUME_HOST environment variable
 - Local development Sultans configuration by SULTANS_VOLUME_HOST environment variable
 - install script for fixed version and install-latest for latest release added
+- Each snapshot artifact is uploaded as http://public-repo-1.hortonworks.com/HDP/cloudbreak/cbd-snapshot-$(uname).tgz
 
 ### Removed
 

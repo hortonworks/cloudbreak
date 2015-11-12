@@ -22,6 +22,21 @@ If you want to test the binary CircleCI build from your branch named `fix-someth
 cbd update fix-something
 ```
 
+## Snapshots
+
+We recommend to always use the latest release, but you might want to check new features or bugfixes.
+All successful builds from master are uploaded to the public s3 bucker. You can download it:
+
+```
+curl -L public-repo-1.hortonworks.com/HDP/cloudbreak/cbd-snapshot-$(uname).tgz | tar -xz
+```
+
+Instead of overwriting the released version, download it to a **local directory** and useit by refering as `./cbd`
+
+```
+./cbd --version
+```
+
 ## Testing
 
 Shell scripts shouldn’t raise exceptions when it comes to unit testing. [basht](https://github.com/progrium/basht) is used for testing. See the reasoning: [why not bats or shunit2](https://github.com/progrium/basht#why-not-bats-or-shunit2)
