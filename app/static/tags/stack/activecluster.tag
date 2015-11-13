@@ -220,23 +220,25 @@
                                                 <th class="col-md-2 text-center">
                                                     <span>{{msg.active_cluster_stack_description_hostgroup_name_label}}</span>
                                                 </th>
-                                                <th class="col-md-2 text-center">
+                                                <th class="col-md-1 text-center">
                                                     <span>{{msg.active_cluster_stack_description_host_status_label}}</span>
+                                                </th>
+                                                <th class="col-md-1 text-center">
+                                                    <span>Action</span>
                                                 </th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr ng-repeat="instance in filteredActiveClusterData | orderBy: ['instanceGroup', 'privateIp']" ng-class="instance.state == 'UNHEALTHY' ? 'danger' : ''">
-                                                <td class="col-md-4" data-title="'name'" class="col-md-4">{{instance.instanceId||'pending...'}}</td>
-                                                <td class="col-md-2" data-title="'public IP'" class="col-md-3">{{instance.publicIp||'pending...'}}</td>
-                                                <td class="col-md-2" data-title="'private IP'" class="col-md-3">{{instance.privateIp||'pending...'}}</td>
-                                                <td class="col-md-2 text-center" data-title="'host group'" class="col-md-2"><span class="label label-default">{{instance.instanceGroup}}</span></td>
-                                                <td class="col-md-2 text-center" data-title="'state'" class="col-md-2">
+                                                <td class="col-md-4" data-title="'name'">{{instance.instanceId||'pending...'}}</td>
+                                                <td class="col-md-2" data-title="'public IP'">{{instance.publicIp||'pending...'}}</td>
+                                                <td class="col-md-2" data-title="'private IP'">{{instance.privateIp||'pending...'}}</td>
+                                                <td class="col-md-2 text-center" data-title="'host group'"><span class="label label-default">{{instance.instanceGroup}}</span></td>
+                                                <td class="col-md-1 text-center" data-title="'state'">
                                                     <div ng-if="activeCluster.status != 'WAIT_FOR_SYNC' && activeCluster.cluster.status != 'WAIT_FOR_SYNC'">
-                                                        <div ng-if="instance.instanceStatus === 'FAILED' || instance.state === 'UNHEALTHY' || instance.instanceStatus === 'DECOMMISSIONED'">
-                                                            <a ng-init="instance.unhealthyMessage=msg.active_cluster_stack_description_hostgroup_unhealthy_label" title="{{msg.active_cluster_stack_description_hostgroup_terminate_tooltip}}" href="" class="btn label label-block label-danger fa fa-trash-o fa-fw" ng-mouseover="activeCluster.instanceId=instance.instanceId; instance.unhealthyMessage=msg.active_cluster_stack_description_hostgroup_terminate_label" ng-mouseleave="instance.unhealthyMessage=msg.active_cluster_stack_description_hostgroup_unhealthy_label" role="button" style="font-size: 12px; width: 100px; display: inline-block; !important" data-toggle="modal" data-target="#modal-terminate-instance">
-                                                          {{instance.unhealthyMessage}}</a>
-                                                        </div>
+                                                        <span ng-if="instance.instanceStatus === 'FAILED' || instance.state === 'UNHEALTHY' || instance.instanceStatus === 'DECOMMISSIONED'" class="label label-danger" style="font-size: 12px;">
+                                                            {{msg.active_cluster_stack_description_hostgroup_unhealthy_label}}
+                                                        </span>
                                                         <span ng-if="activeCluster.status != 'AVAILABLE' && (instance.instanceStatus == 'REQUESTED' || instance.instanceStatus == 'CREATED' || instance.instanceStatus == 'UNREGISTERED')" title="{{msg.active_cluster_stack_description_hostgroup_state_tooltip}}" class="label label-warning" style="font-size: 12px;">
                                                         {{msg.active_cluster_stack_description_hostgroup_in_progress_label}}
                                                       </span>
@@ -249,6 +251,12 @@
                                                     </div>
                                                     <span ng-if="activeCluster.status == 'WAIT_FOR_SYNC' || activeCluster.cluster.status == 'WAIT_FOR_SYNC'" title="{{msg.active_cluster_stack_description_hostgroup_state_tooltip}}" class="label label-danger" style="font-size: 12px;">
                                                       {{msg.active_cluster_stack_description_hostgroup_unknown_label}}
+                                                    </span>
+                                                </td>
+                                                <td class="col-md-1" data-title="'action'">
+                                                    <span class="label label-danger" style="font-size: 12px;">
+                                                        <a title="{{msg.active_cluster_stack_description_hostgroup_terminate_tooltip}}" href="" class="btn label label-block label-danger fa fa-trash-o fa-fw" role="button" style="font-size: 12px; width: 100px; display: inline-block; !important" data-toggle="modal" data-target="#modal-terminate-instance" ng-mouseover="activeCluster.instanceId=instance.instanceId" ng-disabled="!(instance.instanceStatus === 'FAILED' || instance.state === 'UNHEALTHY' || instance.instanceStatus === 'DECOMMISSIONED')">
+                                                          {{msg.active_cluster_stack_description_hostgroup_terminate_label}}</a>
                                                     </span>
                                                 </td>
                                             </tr>
