@@ -19,12 +19,10 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 import com.sequenceiq.cloudbreak.common.type.AwsEncryption;
 import com.sequenceiq.cloudbreak.common.type.AwsInstanceType;
-import com.sequenceiq.cloudbreak.common.type.AwsVolumeType;
 import com.sequenceiq.cloudbreak.common.type.AzureVmType;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.GcpInstanceType;
-import com.sequenceiq.cloudbreak.common.type.GcpRawDiskType;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.PluginExecutionType;
@@ -182,7 +180,7 @@ public class TestUtil {
     public static Stack setEphemeral(Stack stack) {
         if (stack.cloudPlatform().equals(CloudPlatform.AWS)) {
             for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                ((AwsTemplate) instanceGroup.getTemplate()).setVolumeType(AwsVolumeType.Ephemeral);
+                ((AwsTemplate) instanceGroup.getTemplate()).setVolumeType("ephemeral");
             }
         }
         return stack;
@@ -377,7 +375,7 @@ public class TestUtil {
         awsTemplate.setId(id);
         awsTemplate.setVolumeCount(1);
         awsTemplate.setVolumeSize(100);
-        awsTemplate.setVolumeType(AwsVolumeType.Standard);
+        awsTemplate.setVolumeType("standard");
         awsTemplate.setId(1L);
         awsTemplate.setName(DUMMY_NAME);
         awsTemplate.setDescription(DUMMY_DESCRIPTION);
@@ -407,7 +405,7 @@ public class TestUtil {
         gcpTemplate.setId(id);
         gcpTemplate.setVolumeCount(1);
         gcpTemplate.setVolumeSize(100);
-        gcpTemplate.setGcpRawDiskType(GcpRawDiskType.SSD);
+        gcpTemplate.setGcpRawDiskType("pd-ssd");
         gcpTemplate.setDescription(DUMMY_DESCRIPTION);
         gcpTemplate.setPublicInAccount(true);
         gcpTemplate.setStatus(ResourceStatus.DEFAULT);

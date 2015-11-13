@@ -17,7 +17,7 @@ import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
@@ -119,7 +119,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         Disk disk = new Disk();
         disk.setSizeGb((long) volume.getSize());
         disk.setName(resourceName);
-        disk.setKind(GcpPlatformParameters.GcpDiskType.valueOf(volume.getType()).getUrl(projectId, availabilityZone));
+        disk.setKind(GcpDiskType.getUrl(projectId, availabilityZone, volume.getType()));
         return disk;
     }
 }

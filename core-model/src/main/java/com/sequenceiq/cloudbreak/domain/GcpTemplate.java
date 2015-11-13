@@ -6,15 +6,13 @@ import javax.persistence.Enumerated;
 
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.GcpInstanceType;
-import com.sequenceiq.cloudbreak.common.type.GcpRawDiskType;
 
 @Entity
 public class GcpTemplate extends Template implements ProvisionEntity {
 
     @Enumerated(EnumType.STRING)
     private GcpInstanceType gcpInstanceType;
-    @Enumerated(EnumType.STRING)
-    private GcpRawDiskType gcpRawDiskType = GcpRawDiskType.HDD;
+    private String gcpRawDiskType = "pd-standard";
 
     public GcpTemplate() {
 
@@ -28,11 +26,11 @@ public class GcpTemplate extends Template implements ProvisionEntity {
         this.gcpInstanceType = gcpInstanceType;
     }
 
-    public GcpRawDiskType getGcpRawDiskType() {
+    public String getGcpRawDiskType() {
         return gcpRawDiskType;
     }
 
-    public void setGcpRawDiskType(GcpRawDiskType gcpRawDiskType) {
+    public void setGcpRawDiskType(String gcpRawDiskType) {
         this.gcpRawDiskType = gcpRawDiskType;
     }
 
@@ -48,7 +46,7 @@ public class GcpTemplate extends Template implements ProvisionEntity {
 
     @Override
     public String getVolumeTypeName() {
-        return getGcpRawDiskType().name();
+        return getGcpRawDiskType();
     }
 
 }
