@@ -106,7 +106,8 @@ generate-aws-json:
 	curl -L https://atlas.hashicorp.com/api/v1/artifacts/sequenceiq/cbd/amazon.image/search | jq .versions[0] > mkdocs_theme/providers/aws.json
 
 generate-openstack-json:
-	curl -L  https://atlas.hashicorp.com/api/v1/artifacts/sequenceiq/cloudbreak/openstack.image/search | jq .versions[0] > mkdocs_theme/providers/openstack.json
+	curl -L  https://atlas.hashicorp.com/api/v1/artifacts/sequenceiq/cbd/openstack.image/search | jq .versions[0] > 
+	mkdocs_theme/providers/openstack.json
 
 circleci:
 	rm ~/.gitconfig

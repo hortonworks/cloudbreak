@@ -10,7 +10,7 @@ Cloudbreak has two main components: the **Cloudbreak Application** and the **Clo
 
 The **Cloudbreak Application** is made up from microservices (Cloudbreak, Uluwatu, Sultans, ...). The **Cloudbreak Deployer** helps you to deploy the Cloudbreak application automatically in environments with Docker support. Once the Cloudbreak Application is deployed you can use it to provision HDP clusters in different cloud environments.
 
-> For an architectural overview of the [Cloudbreak Deployer](http://sequenceiq.com/cloudbreak-deployer), the Cloudbreak Application, Apache Ambari, Docker and the rest of the Cloudbreak components, please follow this [link](technology.md).
+> For an architectural overview of the Cloudbreak Deployer, the Cloudbreak Application, Apache Ambari, Docker and the rest of the Cloudbreak components, please follow this [link](technology.md).
 
 ##System Requirements
 
