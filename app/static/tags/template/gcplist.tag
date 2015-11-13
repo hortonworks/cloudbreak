@@ -41,7 +41,7 @@
         <label class="col-sm-3 control-label" for="gcplgcpVolumeType">{{msg.template_form_volume_type_label}}</label>
 
         <div class="col-sm-9">
-            <p id="gcplgcpVolumeType" class="form-control-static" ng-repeat="item in $root.config.GCP.gcpDiskTypes | filter:{key: template.parameters.volumeType}">{{item.value}}</p>
+            <p id="gcplgcpVolumeType" class="form-control-static">{{$root.config.diskDisplayNames.get('GCP', template.parameters.volumeType)}}</p>
         </div>
     </div>
 

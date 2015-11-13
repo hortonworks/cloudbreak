@@ -7,13 +7,18 @@ angular.module('uluwatuControllers')
     .run(['$rootScope', 'PlatformParameters',
         function($rootScope, PlatformParameters) {
             PlatformParameters.get().$promise.then(function(success) {
-                $rootScope.regions = success.regions.regions;
-                $rootScope.defaultRegions = success.regions.defaultRegions;
-                $rootScope.zones = success.regions.availabilityZones;
+                $rootScope.params = {};
+                $rootScope.params.regions = success.regions.regions;
+                $rootScope.params.defaultRegions = success.regions.defaultRegions;
+                $rootScope.params.zones = success.regions.availabilityZones;
+                $rootScope.params.diskTypes = success.disks.diskTypes;
+                $rootScope.params.defaultDisks = success.disks.defaultDisks;
             }, function(error) {
-                $rootScope.regions = {};
-                $rootScope.defaultRegions = {};
-                $rootScope.zones = {};
+                $rootScope.params.regions = {};
+                $rootScope.params.defaultRegions = {};
+                $rootScope.params.zones = {};
+                $rootScope.params.diskTypes = {};
+                $rootScope.params.defaultDisks = {};
             });
         }
     ])
@@ -97,7 +102,23 @@ angular.module('uluwatuControllers')
                         }
                     }
                 },
-
+                diskDisplayNames: {
+                    get: function(provider, nameId) {
+                        if (provider !== undefined && nameId !== undefined && this[provider] !== undefined && this[provider][nameId] !== undefined) {
+                            return this[provider][nameId];
+                        }
+                        return nameId;
+                    },
+                    'GCP': {
+                        'pd-standard': 'Standard persistent disks (HDD)',
+                        'pd-ssd': 'Solid-state persistent disks (SSD)'
+                    },
+                    'AWS': {
+                        'ephemeral': 'Ephemeral',
+                        'standard': 'Magnetic',
+                        'gp2': 'General Purpose (SSD)'
+                    }
+                },
                 'GCP': {
                     gcpInstanceTypes: [{
                         key: 'N1_STANDARD_1',
@@ -407,19 +428,6 @@ angular.module('uluwatuControllers')
                     }]
                 },
                 'AWS': {
-                    volumeTypes: [{
-                        key: 'Gp2',
-                        value: 'SSD',
-                        encryptable: true
-                    }, {
-                        key: 'Standard',
-                        value: 'Magnetic',
-                        encryptable: true
-                    }, {
-                        key: 'Ephemeral',
-                        value: 'Ephemeral',
-                        encryptable: false
-                    }],
                     instanceType: [{
                         key: 'C3Large',
                         value: 'C3Large',

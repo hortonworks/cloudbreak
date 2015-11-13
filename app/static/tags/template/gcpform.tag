@@ -26,7 +26,7 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="gcp_tvolumetype">{{msg.template_form_volume_type_label}}</label>
     <div class="col-sm-9">
-        <select class="form-control" id="gcp_tvolumetype" ng-options="diskType.key as diskType.value for diskType in $root.config.GCP.gcpDiskTypes" ng-model="gcpTemp.parameters.volumeType">
+        <select class="form-control" id="gcp_tvolumetype" ng-options="diskType as $root.config.diskDisplayNames.get('GCP', diskType) for diskType in $root.params.diskTypes.GCP" ng-model="gcpTemp.parameters.volumeType">
         </select>
     </div>
 </div>

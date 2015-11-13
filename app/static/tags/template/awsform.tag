@@ -37,7 +37,7 @@
     <label class="col-sm-3 control-label" for="aws_tvolumetype">{{msg.template_form_volume_type_label}}</label>
 
     <div class="col-sm-9">
-        <select class="form-control" id="aws_tvolumetype" name="aws_tvolumetype" ng-options="volumeType.key as volumeType.value for volumeType in $root.config.AWS.volumeTypes | filter:filterByVolumetype" ng-model="awsTemp.parameters.volumeType" ng-change="changeAwsInstanceType()" required>
+        <select class="form-control" id="aws_tvolumetype" name="aws_tvolumetype" ng-options="volumeType as $root.config.diskDisplayNames.get('AWS', volumeType) for volumeType in $root.params.diskTypes.AWS | filter:filterByVolumetype" ng-model="awsTemp.parameters.volumeType" ng-change="changeAwsInstanceType()" required>
         </select>
     </div>
     <!-- .col-sm-9 -->
@@ -59,9 +59,9 @@
 
     <div class="col-sm-9">
 
-        <input type="number" name="aws_tvolumesize" class="form-control" ng-model="awsTemp.volumeSize" id="aws_tvolumesize" min="10" max="1000" placeholder="{{msg.template_form_volume_size_placeholder}}" ng-required="awsTemp.parameters.volumeType != 'Ephemeral'" ng-hide="awsTemp.parameters.volumeType == 'Ephemeral'">
+        <input type="number" name="aws_tvolumesize" class="form-control" ng-model="awsTemp.volumeSize" id="aws_tvolumesize" min="10" max="1000" placeholder="{{msg.template_form_volume_size_placeholder}}" ng-required="awsTemp.parameters.volumeType !== 'ephemeral'" ng-hide="awsTemp.parameters.volumeType == 'ephemeral'">
 
-        <input type="text" class="form-control" name="aws_ephemeral_volumesize" id="aws_ephemeral_volumesize" ng-disabled="true" ng-hide="awsTemp.parameters.volumeType != 'Ephemeral'" value="{{awsInstanceType.ephemeralVolumeSize}}">
+        <input type="text" class="form-control" name="aws_ephemeral_volumesize" id="aws_ephemeral_volumesize" ng-disabled="true" ng-hide="awsTemp.parameters.volumeType !== 'ephemeral'" value="{{awsInstanceType.ephemeralVolumeSize}}">
         <div class="help-block" ng-show="awsTemplateForm.aws_tvolumesize.$dirty && awsTemplateForm.aws_tvolumesize.$invalid"><i class="fa fa-warning"></i> {{msg.volume_size_invalid}}
         </div>
         <!-- .col-sm-9 -->
@@ -81,7 +81,7 @@
     </div>
 </div>
 
-<div class="form-group" ng-hide="awsTemp.parameters.volumeType == 'Ephemeral'">
+<div class="form-group" ng-hide="awsTemp.parameters.volumeType == 'ephemeral'">
     <label class="col-sm-3 control-label" for="aws_ebsencryption">{{msg.template_aws_form_ebs_label}}</label>
     <div class="col-sm-9">
         <input type="checkbox" name="aws_ebsencryption" id="aws_ebsencryption" ng-model="awsTemp.parameters.encrypted">
