@@ -168,8 +168,8 @@ cluster create --description "my first cluster"
 ```
 You are done - you can check the progress through the Ambari UI. If you log back to Cloudbreak UI you can check the progress over there as well, and learn the IP address of Ambari.
 
-### Stopping and restarting a stack
-You have the ability to stop your existing stack in case if you want to suspend the work on it.
+### Stop / Restart cluster and stack
+You have the ability to **stop your existing stack then its cluster** if you want to suspend the work on it.
 
 Select a stack for example with its name:
 ```
@@ -177,59 +177,45 @@ stack select --name my-stack
 ```
 Other available option to define a stack is its `--id` (instead of the `--name`).
 
-Apply the following command to **stop the previously selected stack**:
+Apply the following commands to stop the previously selected stack:
 ```
+cluster stop
 stack stop
 ```
-Apply the following command to **start the previously selected and stopped stack**:
+>**Important!** The related cluster should be stopped before you can stop the stack.
+
+
+Apply the following command to **restart the previously selected and stopped stack**:
 ```
 stack start
 ```
-
-### Stopping and restarting a cluster
-You also have the ability to stop your existing cluster in case if you want to suspend the work on it.
-
-Select a cluster for example with its name:
-```
-cluster select --name my-cluster
-```
-Other available option to define a cluster is its `--id` (instead of the `--name`).
-
-Apply the following command to **stop the previously selected cluster**:
-```
-cluster stop
-```
-Apply the following command to **start the previously selected and stopped cluster**:
+After the selected stack has restarted, you can **restart the related cluster as well**:
 ```
 cluster start
 ```
 
-### Upscaling and downscaling a stack
-You can upscale or downscale your selected stack:
+### Upscale / Downscaling cluster and stack
+You can **upscale your selected stack** if you need more instances to your infrastructure:
 ```
 stack node --ADD --instanceGroup host_group_slave_1 --adjustment 2
 ```
 Other available options:
 
 `--withClusterUpScale` indicates cluster upscale after stack upscale
-
-or
-```
-stack node --REMOVE  --instanceGroup host_group_slave_1 --adjustment -2
-```
-
-### Upscaling and downscaling a cluster
-You can also upscale or downscale your selected cluster:
+or you can upscale the related cluster separately as well:
 ```
 cluster node --ADD --hostgroup host_group_slave_1 --adjustment 2
 ```
-or
+
+
+Apply the following command to **downscale the previously selected stack**:
+```
+stack node --REMOVE  --instanceGroup host_group_slave_1 --adjustment -2
+```
+and the related cluster separately:
 ```
 cluster node --REMOVE  --hostgroup host_group_slave_1 --adjustment -2
 ```
-Other available options:
-
-`--withStackDownScale` indicates stack downscale after the cluster downscale
 
 ## Silent mode
 
