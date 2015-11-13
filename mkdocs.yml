@@ -38,6 +38,7 @@ pages:
     - Docs:
         - API : api.md
         - CLI : shell.md
+        - Periscope: periscope.md
         - Recipes: recipes.md
         - SPI: spi.md
         - Kerberos: kerberos.md

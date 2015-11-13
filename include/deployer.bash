@@ -281,7 +281,7 @@ start-and-migrate-cmd() {
 
     create-logfile
     compose-up $services
-    info "CloudBreak containers are started ..."
+    info "Cloudbreak containers are started ..."
     info "In a couple of minutes you can reach the UI (called Uluwatu)"
     echo "  $ULU_HOST_ADDRESS" | blue
     warn "Credentials are not printed here. You can get them by:"
@@ -301,7 +301,7 @@ main() {
     compose-init
     aws-init
 
-    debug "CloudBreak Deployer $(bin-version)"
+    debug "Cloudbreak Deployer $(bin-version)"
 
     cmd-export cmd-help help
     cmd-export cbd-version version

@@ -127,7 +127,7 @@ func Checksum(args []string) {
 
 func main() {
 	if len(os.Args) == 2 && os.Args[1] == "--version" {
-		fmt.Println("CloudBreak Deployer:", version())
+		fmt.Println("Cloudbreak Deployer:", version())
 		os.Exit(0)
 	}
 
