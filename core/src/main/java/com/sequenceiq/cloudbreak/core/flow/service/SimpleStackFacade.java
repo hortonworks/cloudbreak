@@ -431,7 +431,7 @@ public class SimpleStackFacade implements StackFacade {
             Stack stack = stackService.getById(actualContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
             if (!stack.isDeleteInProgress()) {
-                stackSyncService.sync(stack.getId());
+                stackSyncService.sync(stack.getId(), !(actualContext instanceof StackScalingContext));
             }
         } catch (Exception e) {
             LOGGER.error("Exception during the stack sync process: {}", e.getMessage());
