@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
@@ -92,16 +93,16 @@ public class StackSyncService {
         }
     }
 
-    public void sync(Long stackId) {
+    public void sync(Long stackId, boolean stackStatusUpdateEnabled) {
         Stack stack = stackService.getById(stackId);
         if (stack.isStackInDeletionPhase() || stack.isModificationInProgress()) {
             LOGGER.warn("Stack could not be synchronized in {} state!", stack.getStatus());
         } else {
-            sync(stack);
+            sync(stack, stackStatusUpdateEnabled);
         }
     }
 
-    private void sync(Stack stack) {
+    private void sync(Stack stack, boolean stackStatusUpdateEnabled) {
         Long stackId = stack.getId();
         Set<InstanceMetaData> instances = instanceMetaDataRepository.findNotTerminatedForStack(stackId);
         Map<InstanceSyncState, Integer> instanceStateCounts = initInstanceStateCounts();
@@ -127,7 +128,7 @@ public class StackSyncService {
                 instanceStateCounts.put(InstanceSyncState.UNKNOWN, instanceStateCounts.get(InstanceSyncState.UNKNOWN) + 1);
             }
         }
-        handleSyncResult(stack, instanceStateCounts);
+        handleSyncResult(stack, instanceStateCounts, stackStatusUpdateEnabled);
     }
 
     private void syncStoppedInstance(Stack stack, Long stackId, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance,
@@ -183,7 +184,7 @@ public class StackSyncService {
         }
     }
 
-    private void handleSyncResult(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts) {
+    private void handleSyncResult(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, boolean stackStatusUpdateEnabled) {
         if (instanceStateCounts.get(InstanceSyncState.UNKNOWN) > 0) {
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE.code()));
@@ -194,17 +195,23 @@ public class StackSyncService {
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_HOST_DELETED.code()));
         } else if (instanceStateCounts.get(InstanceSyncState.RUNNING) > 0) {
-            stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, SYNC_STATUS_REASON);
+            updateStackStatusIfEnabled(stack.getId(), AVAILABLE, SYNC_STATUS_REASON, stackStatusUpdateEnabled);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATE_SYNCED.code()));
         } else if (instanceStateCounts.get(InstanceSyncState.STOPPED) > 0) {
-            stackUpdater.updateStackStatus(stack.getId(), STOPPED, SYNC_STATUS_REASON);
+            updateStackStatusIfEnabled(stack.getId(), STOPPED, SYNC_STATUS_REASON, stackStatusUpdateEnabled);
             eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATE_SYNCED.code()));
         } else {
-            stackUpdater.updateStackStatus(stack.getId(), DELETE_FAILED, SYNC_STATUS_REASON);
+            updateStackStatusIfEnabled(stack.getId(), DELETE_FAILED, SYNC_STATUS_REASON, stackStatusUpdateEnabled);
             eventService.fireCloudbreakEvent(stack.getId(), DELETE_FAILED.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATE_SYNCED.code()));
+        }
+    }
+
+    private void updateStackStatusIfEnabled(Long stackId, Status status, String statusReason, boolean stackStatusUpdateEnabled) {
+        if (stackStatusUpdateEnabled) {
+            stackUpdater.updateStackStatus(stackId, status, statusReason);
         }
     }
 
