@@ -164,7 +164,7 @@ cluster create --description "my first cluster"
 ```
 You are done - you can check the progress through the Ambari UI. If you log back to Cloudbreak UI you can check the progress over there as well, and learn the IP address of Ambari.
 
-### Stop / Restart cluster and stack
+### Stop/Restart cluster and stack
 You have the ability to **stop your existing stack then its cluster** if you want to suspend the work on it.
 
 Select a stack for example with its name:
@@ -190,7 +190,7 @@ After the selected stack has restarted, you can **restart the related cluster as
 cluster start
 ```
 
-### Upscale / Downscaling cluster and stack
+### Upscale/Downscale cluster and stack
 You can **upscale your selected stack** if you need more instances to your infrastructure:
 ```
 stack node --ADD --instanceGroup host_group_slave_1 --adjustment 2
