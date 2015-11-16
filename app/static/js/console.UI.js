@@ -57,6 +57,40 @@ function addClusterListPanelJQEventListeners() {
         $jq('#toggle-cluster-block-btn').addClass('disabled');
         $jq('#sort-clusters-btn').addClass('disabled');
     });
+
+    $jq(document).on("click", ".credentialselect", function(e) {
+        e.stopPropagation();
+        goToPanel(this, 'credentials');
+    });
+    $jq(document).on("click", ".networkselect", function(e) {
+        e.stopPropagation();
+        goToPanel(this, 'network');
+    });
+    $jq(document).on("click", ".templateselect", function(e) {
+        e.stopPropagation();
+        goToPanel(this, 'templates');
+    });
+    $jq(document).on("click", ".securitygroupselect", function(e) {
+        e.stopPropagation();
+        goToPanel(this, 'securitygroup');
+    });
+
+    function goToPanel(pane, type) {
+        var segment = $jq(pane).attr('segment');
+        if (segment !== undefined) {
+            if ($jq('#panel-' + type + '-collapse').hasClass('in') == false) {
+                $jq('#' + type + '-btn').click();
+            }
+            if ($jq('' + segment).hasClass('in') == false) {
+              $jq('a[data-target=\'' + segment + '\']').click();
+            }
+            var panel = $jq('a[data-target=\'' + segment + '\']').parent();
+            var offset = panel.offset().top;
+            if (offset) {
+                $jq('html,body').animate({scrollTop: offset - 64}, 500);
+            }
+        }
+    }
 }
 
 function addClusterFormJQEventListeners() {
@@ -70,6 +104,38 @@ function addClusterFormJQEventListeners() {
         });
         $jq(this).removeClass(active).addClass(selected);
     });
+    $jq(document).on("click", ".credentialselect", function(e) {
+        goToPanel(this, 'credentials');
+    });
+    $jq(document).on("click", ".networkselect", function(e) {
+        e.stopPropagation();
+        goToPanel(this, 'network');
+    });
+    $jq(document).on("click", ".templateselect", function(e) {
+        e.stopPropagation();
+        goToPanel(this, 'templates');
+    });
+    $jq(document).on("click", ".securitygroupselect", function(e) {
+        e.stopPropagation();
+        goToPanel(this, 'securitygroup');
+    });
+
+    function goToPanel(pane, type) {
+      var segment = $jq(pane).attr('segment');
+      if (segment !== undefined) {
+          if ($jq('#panel-' + type + '-collapse').hasClass('in') == false) {
+              $jq('#' + type + '-btn').click();
+          }
+          if ($jq('' + segment).hasClass('in') == false) {
+            $jq('a[data-target=\'' + segment + '\']').click();
+          }
+          var panel = $jq('a[data-target=\'' + segment + '\']').parent();
+          var offset = panel.offset().top;
+          if (offset) {
+              $jq('html,body').animate({scrollTop: offset - 64}, 500);
+          }
+      }
+    }
 
     $jq('#cluster-form-panel .panel-heading > h5 > a').click(function(e) {
         e.preventDefault();
@@ -193,6 +259,13 @@ function addPanelJQueryEventListeners(panel) {
     $jq('#panel-' + panel + '-collapse .btn-row-over-panel > a').click(function(e) {
         e.preventDefault();
         $jq(this).parent().parent().next().collapse('toggle');
+        var panel = $jq(this).parent(); // panel
+        var offset = panel.offset().top;
+        if (offset) {
+            $jq('html,body').animate({
+                scrollTop: offset - 64
+            }, 500);
+        }
     });
     // create template/blueprint/credential panel shown
     $jq('#panel-create-' + panel + '-collapse').on('shown.bs.collapse', function(e) {
