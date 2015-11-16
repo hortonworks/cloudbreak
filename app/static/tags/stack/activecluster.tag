@@ -451,8 +451,7 @@
                             <div class="form-group">
                                 <label class="col-sm-3 col-sm-offset-1 control-label" for="hostgroupselected">{{msg.cluster_upscale_form_hostgroup}}</label>
                                 <div class="col-sm-6">
-                                    <select class="form-control" id="hostgroupselected" ng-model="upscaleCluster.hostGroup">
-                                      <option ng-repeat="group in $root.activeCluster.instanceGroups| filter:{group: '!cbgateway'}" value="{{group.group}}">{{group.group}}</option>
+                                    <select class="form-control" id="hostgroupselected" ng-model="upscaleCluster.hostGroup" ng-options="group.group as group.group for group in $root.activeCluster.instanceGroups | filter:{group: '!cbgateway'}">
                                     </select>
                                 </div>
                             </div>
@@ -490,8 +489,7 @@
                             <div class="form-group">
                                 <label class="col-sm-3 col-sm-offset-1 control-label" for="hostgroupselected">{{msg.cluster_upscale_form_hostgroup}}</label>
                                 <div class="col-sm-6">
-                                    <select class="form-control" id="hostgroupselected" ng-model="downscaleCluster.hostGroup">
-                                      <option ng-repeat="group in $root.activeCluster.instanceGroups| filter:{group: '!cbgateway'}" value="{{group.group}}">{{group.group}}</option>
+                                    <select class="form-control" id="hostgroupselected" ng-model="downscaleCluster.hostGroup" ng-options="group.group as group.group for group in $root.activeCluster.instanceGroups | filter:{group: '!cbgateway'}">
                                     </select>
                                 </div>
                             </div>
