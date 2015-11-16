@@ -37,8 +37,6 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariAgentBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariServerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariServerDatabaseBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.BaywatchClientBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.BaywatchServerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.ConsulWatchBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.KerberosServerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.LogrotateBootsrap;
@@ -194,45 +192,6 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
         } catch (CloudbreakOrchestratorCancelledException | CloudbreakOrchestratorFailedException coe) {
             throw coe;
-        } catch (Exception ex) {
-            throw new CloudbreakOrchestratorFailedException(ex);
-        }
-    }
-
-    @Override
-    public void startBaywatchServer(ContainerOrchestratorCluster cluster, ContainerConfig config, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException {
-        try {
-            Node gateway = getGatewayNode(cluster.getGatewayConfig().getPublicAddress(), cluster.getNodes());
-            runner(baywatchServerBootstrap(cluster.getGatewayConfig(), imageName(config), gateway),
-                    getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
-        } catch (CloudbreakOrchestratorCancelledException cloudbreakOrchestratorCancelledExceptionException) {
-            throw cloudbreakOrchestratorCancelledExceptionException;
-        } catch (CloudbreakOrchestratorFailedException cloudbreakOrchestratorFailedException) {
-            throw cloudbreakOrchestratorFailedException;
-        } catch (Exception ex) {
-            throw new CloudbreakOrchestratorFailedException(ex);
-        }
-    }
-
-    @Override
-    public void startBaywatchClients(ContainerOrchestratorCluster cluster, ContainerConfig config, String consulDomain, LogVolumePath logVolumePath,
-            String externServerLocation, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException {
-        try {
-            List<Future<Boolean>> futures = new ArrayList<>();
-            int i = 0;
-            for (Node node : cluster.getNodes()) {
-                String time = String.valueOf(new Date().getTime()) + i++;
-                BaywatchClientBootstrap baywatchClientBootstrap =
-                        baywatchClientBootstrap(cluster.getGatewayConfig(), imageName(config), time, node,
-                                consulDomain, logVolumePath, externServerLocation);
-                futures.add(getParallelContainerRunner().submit(runner(baywatchClientBootstrap, getExitCriteria(), exitCriteriaModel,
-                        MDC.getCopyOfContextMap())));
-            }
-            for (Future<Boolean> future : futures) {
-                future.get();
-            }
         } catch (Exception ex) {
             throw new CloudbreakOrchestratorFailedException(ex);
         }
@@ -445,20 +404,6 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     ConsulWatchBootstrap consulWatchBootstrap(GatewayConfig gatewayConfig, String imageName, Node node, String time, LogVolumePath logVolumePath) {
         DockerClient dockerApiClient = swarmClient(gatewayConfig);
         return new ConsulWatchBootstrap(dockerApiClient, imageName, node, time, logVolumePath);
-    }
-
-    @VisibleForTesting
-    BaywatchServerBootstrap baywatchServerBootstrap(GatewayConfig gatewayConfig, String imageName, Node gateway) {
-        DockerClient dockerApiClient = swarmClient(gatewayConfig);
-        return new BaywatchServerBootstrap(dockerApiClient, imageName, gateway.getHostname());
-    }
-
-    @VisibleForTesting
-    BaywatchClientBootstrap baywatchClientBootstrap(GatewayConfig gatewayConfig, String imageName, String time, Node node,
-            String consulDomain, LogVolumePath logVolumePath, String externServerLocation) {
-        DockerClient dockerApiClient = swarmClient(gatewayConfig);
-        return new BaywatchClientBootstrap(dockerApiClient, gatewayConfig.getPrivateAddress(), imageName, time, node, node.getDataVolumes(),
-                consulDomain, externServerLocation, logVolumePath);
     }
 
     @VisibleForTesting

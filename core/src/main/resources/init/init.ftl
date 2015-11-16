@@ -65,7 +65,7 @@ format_disks() {
 release_udev_cookie() {
 cat>/tmp/cookie.sh<<"EOF"
 : ${LOGFILE:=/var/log/cookie.log}
-: ${LAST_CONTAINER:=baywatch}
+: ${LAST_CONTAINER:=logrotate}
 : ${TIMEOUT:=2}
 echo "Cookie script started at $(date)" >> $LOGFILE
 while [ $(docker ps 2>/dev/null | grep $LAST_CONTAINER -c) -eq 0 ]; do

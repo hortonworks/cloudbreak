@@ -1,13 +1,9 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_BAYWATCH_ENABLED;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_BAYWATCH_EXTERN_LOCATION;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.StackDeletionBasedExitCriteriaModel.stackDeletionBasedExitCriteriaModel;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_DB;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_SERVER;
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.BAYWATCH_CLIENT;
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.BAYWATCH_SERVER;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.CONSUL_WATCH;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.KERBEROS;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.LOGROTATE;
@@ -19,9 +15,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
@@ -44,20 +38,12 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils;
-import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
 
 @Component
 public class ClusterContainerRunner {
 
     private static final String CONTAINER_VOLUME_PATH = "/var/log";
-    private static final String BAYWATCH_CONTAINER_VOLUME_PATH = CONTAINER_VOLUME_PATH + "/containers";
     private static final String HOST_VOLUME_PATH = VolumeUtils.getLogVolume("logs");
-
-    @Value("${cb.baywatch.enabled:" + CB_BAYWATCH_ENABLED + "}")
-    private Boolean baywatchEnabled;
-
-    @Value("${cb.baywatch.extern.location:" + CB_BAYWATCH_EXTERN_LOCATION + "}")
-    private String baywatchServerExternLocation;
 
     @Inject
     private ClusterService clusterService;
@@ -129,16 +115,6 @@ public class ClusterContainerRunner {
                 stackDeletionBasedExitCriteriaModel(stack.getId()));
         containerOrchestrator.startLogrotate(orchestratorCluster, containerConfigService.get(stack, LOGROTATE),
                 stackDeletionBasedExitCriteriaModel(stack.getId()));
-        if (baywatchEnabled) {
-            if (!add && StringUtils.isEmpty(baywatchServerExternLocation)) {
-                containerOrchestrator.startBaywatchServer(orchestratorCluster, containerConfigService.get(stack, BAYWATCH_CLIENT),
-                        stackDeletionBasedExitCriteriaModel(stack.getId()));
-            }
-            LogVolumePath baywatchLogVolumePath = new LogVolumePath(HOST_VOLUME_PATH, BAYWATCH_CONTAINER_VOLUME_PATH);
-            containerOrchestrator.startBaywatchClients(orchestratorCluster, containerConfigService.get(stack, BAYWATCH_SERVER), ConsulUtils
-                            .CONSUL_DOMAIN, baywatchLogVolumePath,
-                    baywatchServerExternLocation, stackDeletionBasedExitCriteriaModel(stack.getId()));
-        }
     }
 
     private Set<Node> getNodes(Boolean add, Stack stack, Set<String> candidateAddresses) {
