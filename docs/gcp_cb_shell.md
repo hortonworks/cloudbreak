@@ -199,10 +199,10 @@ You can **upscale your selected stack** if you need more instances to your infra
 ```
 stack node --ADD --instanceGroup host_group_slave_1 --adjustment 2
 ```
-Other available options:
+Other available option `--withClusterUpScale`. Its boolean value indicates the cluster upscale as well after the 
+stack upscale.
 
-`--withClusterUpScale` indicates cluster upscale after stack upscale
-or you can upscale the related cluster separately as well:
+You can upscale the related cluster separately as well:
 ```
 cluster node --ADD --hostgroup host_group_slave_1 --adjustment 2
 ```
