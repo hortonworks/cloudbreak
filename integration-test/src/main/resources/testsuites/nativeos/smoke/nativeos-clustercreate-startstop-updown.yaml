@@ -19,7 +19,7 @@ tests:
 
   - name: create security group
     parameters:
-      name: restricted-ambari-osn
+      name: it-restricted-ambari-osn
     classes:
       - com.sequenceiq.it.cloudbreak.SecurityGroupCreationTest
 
