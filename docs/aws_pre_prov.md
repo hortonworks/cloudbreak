@@ -1,4 +1,4 @@
-# Provision prerequisites
+# Provisioning Prerequisites
 
 ## IAM role setup
 

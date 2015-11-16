@@ -1,6 +1,17 @@
-# Install Cloudbreak deployer
+# Install Cloudbreak Deployer
 
-To install Cloudbreak Deployer on your selected environment you have to follow the steps below (The instruction describe a CentOS based installation).
+To install Cloudbreak Deployer on your selected environment you have to follow the steps below. The instruction describe a CentOS-based installation.
+
+> **IMPORTANT:** If you plan to use Cloudbreak on Azure, you **must** use the [Azure Setup](azure.md) instructions to install and configure the Cloudbreak.
+
+## System Requirements
+
+To run the Cloudbreak Deployer and install the Cloudbreak Application, you must meet the following system requirements:
+
+ * RHEL / CentOS / Oracle Linux 7 (64-bit)
+ * Docker 1.8.3 (or later)
+
+> You can install Cloudbreak on Mac OS X "Darwin" for **evaluation purposes only**. This operating system is not supported for a production deployment of Cloudbreak.
 
 Make sure you opened the following ports:
  

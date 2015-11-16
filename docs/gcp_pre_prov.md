@@ -1,4 +1,4 @@
-# Provision prerequisites
+# Provisioning Prerequisites
 
 ## Creating a Google Cloud Service Account
 
