@@ -12,7 +12,7 @@ tests:
 
   - name: create security group
     parameters:
-      name: restricted-ambari-aws
+      name: it-restricted-ambari-aws
     classes:
       - com.sequenceiq.it.cloudbreak.SecurityGroupCreationTest
 

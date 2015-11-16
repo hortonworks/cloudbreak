@@ -11,7 +11,7 @@ public class SecurityGroupCreationTest extends AbstractCloudbreakIntegrationTest
 
     @Test
     @Parameters({ "name", "ports" })
-    public void testGcpTemplateCreation(@Optional("restricted-ambari") String name, @Optional("22,443,8080,8088") String ports) throws Exception {
+    public void testSecurityGroupCreation(@Optional("it-restricted-ambari") String name, @Optional("22,443,8080") String ports) throws Exception {
         // GIVEN
         // WHEN
         String id = getClient().postSecurityGroup(name, "Security group created by IT", singletonMap("0.0.0.0/0", ports), null, false);

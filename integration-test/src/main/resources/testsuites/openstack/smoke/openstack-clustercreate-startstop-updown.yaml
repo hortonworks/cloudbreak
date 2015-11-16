@@ -19,7 +19,7 @@ tests:
 
   - name: create security group
     parameters:
-      name: restricted-ambari-os
+      name: it-restricted-ambari-os
     classes:
       - com.sequenceiq.it.cloudbreak.SecurityGroupCreationTest
 
