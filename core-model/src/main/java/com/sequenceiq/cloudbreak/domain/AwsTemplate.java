@@ -1,14 +1,11 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import static com.sequenceiq.cloudbreak.common.type.AwsVolumeType.Ephemeral;
-
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
 import com.sequenceiq.cloudbreak.common.type.AwsEncryption;
 import com.sequenceiq.cloudbreak.common.type.AwsInstanceType;
-import com.sequenceiq.cloudbreak.common.type.AwsVolumeType;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
 @Entity
@@ -17,8 +14,7 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private AwsInstanceType instanceType;
     private String sshLocation;
-    @Enumerated(EnumType.STRING)
-    private AwsVolumeType volumeType;
+    private String volumeType;
     private Double spotPrice;
     @Enumerated(EnumType.STRING)
     private AwsEncryption encrypted;
@@ -54,14 +50,14 @@ public class AwsTemplate extends Template implements ProvisionEntity {
 
     @Override
     public String getVolumeTypeName() {
-        return getVolumeType().getValue();
+        return getVolumeType();
     }
 
-    public AwsVolumeType getVolumeType() {
+    public String getVolumeType() {
         return volumeType;
     }
 
-    public void setVolumeType(AwsVolumeType volumeType) {
+    public void setVolumeType(String volumeType) {
         this.volumeType = volumeType;
     }
 
@@ -86,6 +82,6 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     }
 
     public boolean isEphemeral() {
-        return volumeType.equals(Ephemeral);
+        return "ephemeral".equals(volumeType);
     }
 }
