@@ -32,7 +32,7 @@ The full proceess to be able to use an HDP cluster includes the following steps:
  * **HDP Cluster Provisioning**: To be able to provision a HDP cluster, you will use the browser, to:
     * Create Credentials: You give access to Cloudbreak, to act on behalf of you, and start resources on the cloud provider.
     * Create Resources: Optionally you can define infrastructure parameters, such as, instance type, memory size, disk type/size, network...
-    * Blueprint configuration: You can choose which Ambari Blueprint you want to use (or upload a custom one) and assign hostgroups to resource types (created in the previous step) 
+    * Blueprint configuration: You can choose which Ambari Blueprint you want to use (or upload a custom one) and assign hostgroups to resource types (created in the previous step)
     * Create Cluster: You define the region, where you want to create the HDP cluster. Once Cloudbreak recognize that Ambari Server is up and running, it posts the configured blueprint to it, which triggers a cluster wide HDP component installation process.
 
 ## Installation
@@ -70,10 +70,10 @@ You can follow the OpenStack provider specific documentation using this [link](o
 | ------------- |:-------------:| -----:|
 | AWS   | yes |
 | Azure ARM   | yes      |    |
-| Azure ARM   | yes      |    |
 | GCP  | yes      |    |
-| OpenStack Juno   |       | yes   |
+| OpenStack Juno   |   yes    |    |
 | SPI interface   |       | yes   |
 | CLI/shell  |   yes    |    |
-| Recipes  |       | yes   |
+| Recipes  |    yes   |    |
 | Kerberos   |       | yes   |
+| Recipes  |    yes   |    |

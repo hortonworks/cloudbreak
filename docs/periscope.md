@@ -73,5 +73,5 @@ An SLA scaling policy can contain multiple alerts. When an alert is triggered a 
 
 Periscope will try to keep a healthy cluster, thus does several background checks during `downscale`.
 
-* We never remove `Application master nodes` from a cluster
+* We never remove `Application master nodes` from a cluster. In order to make sure that a node running AM is not removed Periscope has to be able to access the YARN Resource Manager - when creating a cluster using the `default` secure network template please make sure that the RM's port is open on the node
 * In order to keep a healthy HDFS during downscale we always keep the configured `replication` factor and make sure there is enough `space` on HDFS to rebalance data. Also during downscale in order to minimize the rebalancing, replication and HDFS storms we check block locations and compute the least costly operations.
