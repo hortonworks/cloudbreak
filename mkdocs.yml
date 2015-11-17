@@ -38,9 +38,11 @@ pages:
         - Blueprints : blueprints.md
         - API : api.md
         - CLI/Shell : shell.md
+        - Periscope : periscope.md
         - Recipes: recipes.md
         - Kerberos: kerberos.md
         - SPI: spi.md
+        - Operations : operations.md
         - Migration : database.md
         - Advanced Configuration : configuration.md
         - Development : development.md
