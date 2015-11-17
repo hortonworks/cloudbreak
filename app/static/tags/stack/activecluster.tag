@@ -114,7 +114,7 @@
                                     <p id="sl_region" class="form-control-static">{{activeCluster.region}}</p>
                                 </div>
                                 <div class="col-sm-9" ng-if="activeCluster.cloudPlatform == 'OPENSTACK' ">
-                                    <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.OPENSTACK.regions | filter:{key: activeCluster.region}:true">{{item.value}}</p>
+                                    <p id="sl_region" class="form-control-static">{{activeCluster.region}}</p>
                                 </div>
                             </div>
 

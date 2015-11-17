@@ -130,7 +130,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.showSuccess($filter("format")($rootScope.msg.gcp_template_success, String(result.id)));
                 $scope.gcpTemplateForm.$setPristine();
                 collapseCreateTemplateFormPanel();
-                unShowErrorMessageAlert();
+                $scope.unShowErrorMessageAlert();
             }
         }
 
@@ -174,9 +174,9 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             });
         }
 
-        $scope.filterByVolumetype = function(element) {
+        $scope.filterByVolumetype = function(volume) {
             try {
-                if ((element.encryptable && $scope.awsTemp.parameters.encrypted) || !$scope.awsTemp.parameters.encrypted) {
+                if ((isAwsVolumeEncryptable(volume) && isAwsEncryptionSet()) || !isAwsEncryptionSet()) {
                     return true;
                 }
                 return false;
@@ -185,12 +185,20 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             }
         }
 
+        function isAwsEncryptionSet() {
+            return $scope.awsTemp.parameters.encrypted;
+        }
+
+        function isAwsVolumeEncryptable(volume) {
+            return volume !== 'ephemeral';
+        }
+
         $scope.changeAwsInstanceType = function() {
             var instanceType = $scope.awsTemp.parameters.instanceType;
             $scope.awsInstanceType = $filter('filter')($rootScope.config.AWS.instanceType, {
                 key: instanceType
             }, true)[0];
-            if ($scope.awsTemp.parameters.volumeType == 'Ephemeral') {
+            if ($scope.awsTemp.parameters.volumeType == 'ephemeral') {
                 $scope.awsTemp.parameters.encrypted = false;
             }
         }
@@ -206,7 +214,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 parameters: {
                     sshLocation: "0.0.0.0/0",
                     instanceType: "M3Large",
-                    volumeType: "Standard",
+                    volumeType: $rootScope.params.defaultDisks.AWS,
                     encrypted: false
                 }
             }
@@ -237,7 +245,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 volumeSize: 100,
                 parameters: {
                     gcpInstanceType: "N1_STANDARD_2",
-                    volumeType: "HDD"
+                    volumeType: $rootScope.params.defaultDisks.GCP
                 }
             }
         }

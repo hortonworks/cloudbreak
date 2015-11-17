@@ -171,30 +171,30 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             $scope.usageFilter.region = 'all';
 
             if ($scope.usageFilter.provider == 'AWS' || $scope.usageFilter.provider == 'all') {
-                $rootScope.regions.AWS.forEach(function(item) {
+                $rootScope.params.regions.AWS.forEach(function(item) {
                     $scope.regions.push(item);
                 });
             }
 
             if ($scope.usageFilter.provider == 'AZURE_RM' || $scope.usageFilter.provider == 'all') {
-                $rootScope.regions.AZURE_RM.forEach(function(item) {
+                $rootScope.params.regions.AZURE_RM.forEach(function(item) {
                     $scope.regions.push(item);
                 });
             }
 
             if ($scope.usageFilter.provider == 'GCP' || $scope.usageFilter.provider == 'all') {
-                $rootScope.regions.GCP.forEach(function(item) {
+                $rootScope.params.regions.GCP.forEach(function(item) {
                     $scope.regions.push(item);
                 });
             }
         };
 
         $scope.selectProviderByRegion = function() {
-            if ($filter('filter')($rootScope.regions.AWS, $scope.usageFilter.region).length === 1) {
+            if ($filter('filter')($rootScope.params.regions.AWS, $scope.usageFilter.region).length === 1) {
                 $scope.usageFilter.provider = 'AWS';
-            } else if ($filter('filter')($rootScope.regions.AZURE_RM, $scope.usageFilter.region).length === 1) {
+            } else if ($filter('filter')($rootScope.params.regions.AZURE_RM, $scope.usageFilter.region).length === 1) {
                 $scope.usageFilter.provider = 'AZURE_RM';
-            } else if ($filter('filter')($rootScope.regions.GCP, $scope.usageFilter.region).length === 1) {
+            } else if ($filter('filter')($rootScope.params.regions.GCP, $scope.usageFilter.region).length === 1) {
                 $scope.usageFilter.provider = 'GCP';
             }
         }

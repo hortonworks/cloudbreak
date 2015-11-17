@@ -28,7 +28,7 @@
         <label class="col-sm-3 control-label" for="awsvolumetype">{{msg.template_form_volume_type_label}}</label>
 
         <div class="col-sm-9">
-            <p id="awsvolumetype" class="form-control-static" ng-repeat="item in $root.config.AWS.volumeTypes | filter:{key: template.parameters.volumeType}">{{item.value}}</p>
+            <p id="awsvolumetype" class="form-control-static">{{$root.config.diskDisplayNames.get('AWS', template.parameters.volumeType)}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
@@ -40,7 +40,7 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
-    <div class="form-group" ng-hide="template.parameters.volumeType == 'Ephemeral'">
+    <div class="form-group" ng-hide="template.parameters.volumeType === 'ephemeral'">
         <label class="col-sm-3 control-label" for="awsvolumesize">{{msg.template_form_volume_size_label}}</label>
 
         <div class="col-sm-9">

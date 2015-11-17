@@ -593,7 +593,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         function setRegion() {
             if ($rootScope.activeCredential !== undefined) {
-                $scope.cluster.region = $rootScope.defaultRegions[$rootScope.activeCredential.cloudPlatform];
+                $scope.cluster.region = $rootScope.params.defaultRegions[$rootScope.activeCredential.cloudPlatform];
             }
         }
 
@@ -686,7 +686,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                         id: item.templateId
                     });
                     if (actualTemplate.length > 0) {
-                        if (actualTemplate[0].parameters.volumeType === $rootScope.config.AWS.volumeTypes[2].value.toString()) {
+                        if (actualTemplate[0].parameters.volumeType === 'ephemeral') {
                             isEphemeral = true;
                         }
                     }
@@ -780,7 +780,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 if ($scope.cluster.region === null) {
                     $scope.cluster.availabilityZone = null;
                 } else {
-                    $scope.avZones = $rootScope.zones[$rootScope.activeCredential.cloudPlatform][$scope.cluster.region];
+                    $scope.avZones = $rootScope.params.zones[$rootScope.activeCredential.cloudPlatform][$scope.cluster.region];
                     if ($rootScope.activeCredential.cloudPlatform === 'GCP') {
                         $scope.cluster.availabilityZone = $scope.avZones[0];
                     }
