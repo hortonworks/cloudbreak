@@ -1,9 +1,9 @@
-# Azure deployment
+# Azure Setup
 
-## Setup Cloudbreak deployer
+## Setup Cloudbreak Deployer
 
-If you want to use our cloudbreak-deployer on Azure then please follow the steps below.
-Start an [OpenLogic 7.1](https://azure.microsoft.com/en-in/marketplace/partners/openlogic/centosbased71/) on Azure.
+To install and configure the Cloudbreak Deployer on Azure, start
+an [OpenLogic 7.1](https://azure.microsoft.com/en-in/marketplace/partners/openlogic/centosbased71/) VM on Azure.
 
 Make sure you opened the following ports:
  
@@ -202,5 +202,5 @@ cbd logs cloudbreak
 
 ### Next steps
 
-Once Cloudbreak is up and running you should check out the [prerequisites](azure_pre_prov.md) needed to create Azure
-clusters with Cloudbreak. Besides these you can check out some useful [configurations for Cloudbreak deployer](configuration.md).
+Once Cloudbreak is up and running you should check out the [Provisioning Prerequisites](azure_pre_prov.md) needed to create Azure
+clusters with Cloudbreak.

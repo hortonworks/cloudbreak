@@ -1,34 +1,12 @@
-# Google Cloud deployment
-
-We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration then launch. If you do not have installed Cloudbreak deployer, you can [install this on premise](onprem.md).
-
-## Configured image
-
-You can create the latest Cloudbreak deployer image on the [Google Developers Console](https://console.developers.google.com/) with the help
- of the [Google Cloud Shell](https://cloud.google.com/cloud-shell/docs/).
- 
-![](/images/google-cloud-shell-launch.png)
-
-Images are global resources, so they can be used across zones and projects.
-
-### GCP image details
+# Google Setup
 
 
-![](/images/google-cloud-shell.png)
+## Setup Cloudbreak Deployer
 
-Please make sure you opened the following ports on your virtual machine:
- 
- * SSH (22)
- * Ambari (8080)
- * Identity server (8089)
- * Cloudbreak GUI (3000)
- * User authentication (3001)
+If you already have Cloudbreak Deployer either by [using the GCP Cloud Images](gcp-image.md) or by [installing the Cloudbreak Deployer](onprem.md) manually on your own VM,
+you can start to setup the Cloudbreak Application with the deployer.
 
-## Setup Cloudbreak deployer
-
-If you already have cloudbreak-deployer installed you can start to setup the Cloudbreak application.
-
-Open the `cloudbreak-deployment` directory:
+Create and open the `cloudbreak-deployment` directory:
 
 ```
 cd cloudbreak-deployment
@@ -82,4 +60,4 @@ cbd logs cloudbreak
 
 ### Next steps
 
-Once Cloudbreak is up and running you should check out the [prerequisites](gcp_pre_prov.md) needed to create Google Cloud clusters with Cloudbreak. Besides these you can check out some useful [configurations for Cloudbreak deployer](configuration.md).
+Once Cloudbreak is up and running you should check out the [Provisioning Prerequisites](gcp_pre_prov.md) needed to create Google Cloud clusters with Cloudbreak.

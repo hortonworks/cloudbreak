@@ -1,44 +1,13 @@
-#OpenStack deployment
+#OpenStack Setup
 
-##Supported OpenStack version
+## Setup Cloudbreak Deployer
 
-Cloudbreak currently only supports the `OpenStack Juno` release.
+If you already have Cloudbreak Deployer either by [using the OpenStack Cloud Images](openstack-image.md) or by [installing the Cloudbreak Deployer](onprem.md) manually on your own VM,
+you can start to setup the Cloudbreak Application with the deployer.
 
-##Download the Cloudbreak image
+> Cloudbreak currently only supports the `OpenStack Juno` release.
 
-You can download the latest pre-configured Cloudbreak deployer image for OpenStack with the following script in the 
-following section.
-
-Please make sure you opened the following ports on your virtual machine:
- 
- * SSH (22)
- * Ambari (8080)
- * Identity server (8089)
- * Cloudbreak GUI (3000)
- * User authentication (3001)
-
-###OpenStack image details
-
-
-##Import the image into OpenStack
-
-```
-export OS_IMAGE_NAME="name_in_openstack"
-export OS_USERNAME=...
-export OS_AUTH_URL="http://.../v2.0"
-export OS_TENANT_NAME=...
-glance image-create --name "$OS_IMAGE_NAME" --file "$LATEST_IMAGE" --disk-format qcow2 --container-format bare --progress
-```
-
-##Usage
-
-We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the configuration then launch. If you do not have installed Cloudbreak deployer, you can [install this on premise](onprem.md).
-
-##Setup Cloudbreak deployer
-
-If you already have Cloudbreak deployer installed you can start to setup the Cloudbreak application.
-
-Open the `cloudbreak-deployment` directory:
+Create and open the `cloudbreak-deployment` directory:
 
 ```
 cd cloudbreak-deployment
@@ -97,4 +66,4 @@ cbd logs cloudbreak
 
 ###Next steps
 
-Once Cloudbreak is up and running you should check out the [prerequisites](openstack_pre_prov.md) needed to create OpenStack clusters with Cloudbreak. Besides these you can check out some useful [configurations for Cloudbreak deployer](configuration.md).
+Once Cloudbreak is up and running you should check out the [Provisioning Prerequisites](openstack_pre_prov.md) needed to create OpenStack clusters with Cloudbreak.

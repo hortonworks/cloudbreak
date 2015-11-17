@@ -1,27 +1,11 @@
-# AWS deployment
+# AWS Setup
 
-We have pre-built custom cloud images with Cloudbreak deployer pre-configured. Following the steps will guide you through the provider specific configuration then launch. If you do not have installed Cloudbreak deployer, you can [install this on premise](onprem.md).
+## Setup Cloudbreak Deployer
 
-## Configured images
+If you already have Cloudbreak Deployer either by [using the AWS Cloud Images](aws-image.md) or by [installing the Cloudbreak Deployer](onprem.md) manually on your own VM,
+you can start to setup the Cloudbreak Application with the deployer.
 
-You can launch the latest Cloudbreak deployer image based on your region at the [AWS Management Console](https://aws
-.amazon.com/console/).
-
-Please make sure you opened the following ports on your virtual machine:
- 
- * SSH (22)
- * Ambari (8080)
- * Identity server (8089)
- * Cloudbreak GUI (3000)
- * User authentication (3001)
-
-### AWS image details
-
-## Setup Cloudbreak deployer
-
-If you already have cloudbreak-deployer installed you can start to setup the Cloudbreak application.
-
-Open the `cloudbreak-deployment` directory:
+Create and open the `cloudbreak-deployment` directory:
 
 ```
 cd cloudbreak-deployment
@@ -85,6 +69,5 @@ cbd logs cloudbreak
 
 ### Next steps
 
-Once Cloudbreak is up and running you should check out the [prerequisites](aws_pre_prov.md) needed to create AWS 
-clusters with Cloudbreak. Besides these you can check out some useful [configurations for Cloudbreak deployer](configuration.md).
-
+Once Cloudbreak is up and running you should check out the [Provisioning Prerequisites](aws_pre_prov.md) needed to create AWS 
+clusters with Cloudbreak.
