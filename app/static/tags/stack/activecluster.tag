@@ -117,6 +117,7 @@
                                     <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.OPENSTACK.regions | filter:{key: activeCluster.region}:true">{{item.value}}</p>
                                 </div>
                             </div>
+
                             <div class="form-group" ng-if="activeCluster.cluster.statusReason === null && (activeCluster.statusReason != null && activeCluster.statusReason != '')">
                                 <label class="col-sm-3 control-label" for="sl_cloudStatus">{{msg.active_cluster_status_label}}</label>
                                 <div class="col-sm-9">
@@ -130,6 +131,62 @@
                                 <label class="col-sm-3 control-label" for="sl_cloudStatus">{{msg.active_cluster_status_label}}</label>
                                 <div class="col-sm-9">
                                     <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.cluster.statusReason}}</p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="sl_credential_active">{{msg.active_cluster_credential_label}}</label>
+                                <div class="credentialselect col-sm-8">
+                                    <a id="sl_credential_active" segment="#panel-credential-collapse{{activeClusterCredential.id}}" class="credentialselect form-control-static review-a" ng-repeat="credential in $root.credentials|filter: { id: activeClusterCredential.id }:true">{{activeClusterCredential.name}}</a>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="sl_network_active">{{msg.active_cluster_network_label}}</label>
+                                <div class="networkselect col-sm-8">
+                                    <a id="sl_network_active" class="networkselect form-control-static review-a" ng-repeat="network in $root.networks|filter: { id: $root.activeCluster.networkId }:false" segment="#panel-network-collapse{{$root.activeCluster.networkId}}">{{network.name}}</a>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top: 20px;    margin-bottom: 30px;">
+                                <div class="col-sm-8 col-md-offset-2" data-example-id="togglable-tabs">
+                                    <ul id="myTabs" class="nav nav-tabs" role="tablist">
+                                        <li role="presentation" ng-class="{true:'active', false:''}[group.group == $root.activeCluster.activeGroup]" ng-repeat="group in $root.activeCluster.instanceGroups| orderBy: 'group'"><a  ng-click="changeActiveClusterGroup(group.group)" href="" id="{{group.group}}-tab" role="tab" data-toggle="tab" aria-controls="{{group.group}}" aria-expanded="true">{{group.group}}</a></li>
+                                    </ul>
+                                    <div id="myTabContent" class="tab-content">
+                                        <div role="tabpanel" class="tab-pane fade active review-tab" ng-class="{true:'in', false:''}[group.group == $root.activeCluster.activeGroup]" ng-hide="group.group != $root.activeCluster.activeGroup" ng-show="group.group == $root.activeCluster.activeGroup" ng-repeat="group in $root.activeCluster.instanceGroups" id="{{group.group}}" aria-labelledby="{{group.group}}-tab">
+                                            <div class="container">
+                                                <div class="form-group">
+                                                    <label class="col-sm-2 control-label" for="sl_template_active">Template: </label>
+                                                    <div class="templateselect col-sm-9">
+                                                        <a id="sl_template_active" class="templateselect form-control-static review-a" ng-repeat="template in $root.templates|filter: { id: group.templateId }:true" segment="#panel-template-collapse{{template.id}}">{{template.name}}</a>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="col-sm-2 control-label" for="sl_securitygroup_active">Security group: </label>
+                                                    <div class="securitygroupselect col-sm-9">
+                                                        <a id="sl_securitygroup_active" class="securitygroupselect form-control-static review-a" ng-repeat="securitygroup in $root.securitygroups|filter: { id: $root.activeCluster.securityGroupId }:true" segment="#panel-securitygroup-collapse{{securitygroup.id}}">{{securitygroup.name}}</a>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-sm-2 control-label" for="sl_nodecount">Node count: </label>
+                                                    <div class="col-sm-9">
+                                                        <p id="sl_nodecount" class="form-control-static">{{group.nodeCount}}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group" ng-show="group.group != 'cbgateway'">
+                                                    <label class="col-sm-2 control-label" for="sl_comps_active">Components: </label>
+                                                    <div class="col-sm-5 col-lg-6">
+                                                        <div class="host-group-table row" ng-repeat="hostgroup in $root.activeClusterBlueprint.ambariBlueprint.host_groups|filter: { name: group.group }:true">
+                                                            <div class="list-group">
+                                                                <a href="" class="list-group-item active" style="text-decoration: none;    font-size: 15px;">{{hostgroup.name}}</a>
+                                                                <a href="" ng-repeat="component in hostgroup.components" class="list-group-item" style="text-decoration: none;    font-size: 15px;">{{component.name}}</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </form>
@@ -163,32 +220,6 @@
                                                 </table>
                                             </div>
                                         </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="panel panel-default panel-cluster-history">
-                            <div class="panel-heading">
-                                <h5><a data-toggle="collapse" data-target="#cluster-history-collapse01"><i class="fa fa-clock-o fa-fw"></i>{{msg.active_cluster_event_history_label}}</a></h5>
-                            </div>
-
-                            <div id="cluster-history-collapse01" class="panel-collapse collapse" style="height: auto;">
-
-                                <div class="panel-body">
-
-                                    <form class="form-horizontal" role="document">
-
-                                        <div class="form-group">
-                                            <div class="col-sm-12">
-                                                <pre class="form-control-static event-history" style="overflow: auto; word-wrap: normal; height:300px; white-space: pre;">
-<span ng-repeat="actual in $root.events |filter:logFilterFunction|orderBy:eventTimestampAsFloat"><span class="{{$root.config.EVENT_CLASS[actual .eventType]}}" style="word-wrap: break-word">{{actual.customTimeStamp}} {{actual.stackName}} - {{$root.config.EVENT_TYPE[actual .eventType]}}: {{actual.eventMessage}}</span><br/></span>
-                                                </pre>
-                                            </div>
-                                            <!-- .col-sm-12  -->
-                                        </div>
-                                        <!-- .form-group -->
-
                                     </form>
                                 </div>
                             </div>
@@ -266,86 +297,33 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="panel panel-default" ng-repeat="group in $root.activeCluster.instanceGroups">
+                        <div class="panel panel-default panel-cluster-history">
                             <div class="panel-heading">
-                                <h5><a href="" data-toggle="collapse" data-target='#panel-collapsetmp-{{$index}}-{{group.templateId}}'><span class="badge pull-right ng-binding">{{group.group}}: {{group.nodeCount}} {{msg.active_cluster_instance_group_node_label}}</span><i class="fa fa-file-o fa-fw"></i>Template: {{getSelectedTemplate(group.templateId).name}}</a></h5>
+                                <h5><a data-toggle="collapse" data-target="#cluster-history-collapse01"><i class="fa fa-clock-o fa-fw"></i>{{msg.active_cluster_event_history_label}}</a></h5>
                             </div>
-                            <div id="panel-collapsetmp-{{$index}}-{{group.templateId}}" class="panel-collapse collapse">
-                                <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'AWS' ">
-                                    <div ng-include="'tags/template/awslist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}:true"></div>
-                                </div>
-                                <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'AZURE' || $root.activeCluster.cloudPlatform == 'AZURE_RM'">
-                                    <div ng-include="'tags/template/azurelist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}:true"></div>
-                                </div>
-                                <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'GCP' ">
-                                    <div ng-include="'tags/template/gcplist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}:true"></div>
-                                </div>
-                                <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'OPENSTACK' ">
-                                    <div ng-include="'tags/template/openstacklist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}:true"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h5><a href="" data-toggle="collapse" data-target='#panel-collapsetmp-securitygroup-{{$root.activeCluster.securityGroupId}}'><i class="fa fa-lock fa-fw"></i>{{msg.active_cluster_securitygroup_label}}: {{activeClusterSecurityGroup.name}}</a></h5>
-                            </div>
-                            <div id="panel-collapsetmp-securitygroup-{{$root.activeCluster.securityGroupId}}" class="panel-collapse collapse">
+
+                            <div id="cluster-history-collapse01" class="panel-collapse collapse" style="height: auto;">
+
                                 <div class="panel-body">
-                                    <div ng-include="'tags/securitygroup/securitygrouplist.tag'" ng-repeat="securitygroup in [activeClusterSecurityGroup]"></div>
+
+                                    <form class="form-horizontal" role="document">
+
+                                        <div class="form-group">
+                                            <div class="col-sm-12">
+                                                <pre class="form-control-static event-history" style="overflow: auto; word-wrap: normal; height:300px; white-space: pre;">
+<span ng-repeat="actual in $root.events |filter:logFilterFunction|orderBy:eventTimestampAsFloat"><span class="{{$root.config.EVENT_CLASS[actual .eventType]}}" style="word-wrap: break-word">{{actual.customTimeStamp}} {{actual.stackName}} - {{$root.config.EVENT_TYPE[actual .eventType]}}: {{actual.eventMessage}}</span><br/></span>
+                                                </pre>
+                                            </div>
+                                            <!-- .col-sm-12  -->
+                                        </div>
+                                        <!-- .form-group -->
+
+                                    </form>
                                 </div>
                             </div>
                         </div>
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h5><a href="" data-toggle="collapse" data-target='#panel-collapsetmp-network-{{$root.activeCluster.networkId}}'><i class="fa fa-sitemap fa-fw"></i>{{msg.active_cluster_network_label}} {{activeClusterNetwork.name}}</a></h5>
-                            </div>
-                            <div id="panel-collapsetmp-network-{{$root.activeCluster.networkId}}" class="panel-collapse collapse">
-                                <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'AWS' ">
-                                    <div ng-include="'tags/network/awsnetworklist.tag'" ng-repeat="network in [activeClusterNetwork]"></div>
-                                </div>
-                                <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'AZURE' || $root.activeCluster.cloudPlatform == 'AZURE_RM'">
-                                    <div ng-include="'tags/network/azurenetworklist.tag'" ng-repeat="network in [activeClusterNetwork]"></div>
-                                </div>
-                                <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'GCP' ">
-                                    <div ng-include="'tags/network/gcpnetworklist.tag'" ng-repeat="network in [activeClusterNetwork]"></div>
-                                </div>
-                                <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'OPENSTACK' ">
-                                    <div ng-include="'tags/network/openstacknetworklist.tag'" ng-repeat="network in [activeClusterNetwork]"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h5><a href="" data-toggle="collapse" data-target="#panel-collapse02"><i class="fa fa-th fa-fw"></i>{{msg.active_cluster_blueprint_label}} {{activeClusterBlueprint.name}}</a></h5>
-                            </div>
-                            <div id="panel-collapse02" class="panel-collapse collapse">
-                                <div class="panel-body">
-                                    <div class="row" ng-repeat="blueprint in [activeClusterBlueprint]" ng-include="'tags/blueprint/bplist.tag'"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h5><a href="" data-toggle="collapse" data-target="#panel-collapse001"><i class="fa fa-tag fa-fw"></i>{{msg.active_cluster_credential_label}} {{activeClusterCredential.name}}</a></h5>
-                            </div>
-                            <div id="panel-collapse001" class="panel-collapse collapse">
-                                <div class="panel-body" ng-if="activeClusterCredential.cloudPlatform == 'AWS' ">
-                                    <div ng-include="'tags/credential/awslist.tag'" ng-repeat="credential in [activeClusterCredential]"></div>
-                                </div>
-                                <div class="panel-body" ng-if="activeClusterCredential.cloudPlatform == 'AZURE' ">
-                                    <div ng-include="'tags/credential/azurelist.tag'" ng-repeat="credential in [activeClusterCredential]"></div>
-                                </div>
-                                <div class="panel-body" ng-if="activeClusterCredential.cloudPlatform == 'GCP' ">
-                                    <div ng-include="'tags/credential/gcplist.tag'" ng-repeat="credential in [activeClusterCredential]"></div>
-                                </div>
-                                <div class="panel-body" ng-if="activeClusterCredential.cloudPlatform == 'OPENSTACK' ">
-                                    <div ng-include="'tags/credential/openstacklist.tag'" ng-repeat="credential in [activeClusterCredential]"></div>
-                                </div>
-                                <div class="panel-body" ng-if="activeClusterCredential.cloudPlatform == 'AZURE_RM' ">
-                                    <div ng-include="'tags/credential/azurermlist.tag'" ng-repeat="credential in [activeClusterCredential]"></div>
-                                </div>
-                            </div>
-                        </div>
+
+
                     </section>
                     <section id="periscope-pane" ng-class="{ 'active': periscopeShow }" ng-show="periscopeShow" class="tab-pane fade in">
                         <div ng-include="'tags/periscope/periscope.tag'"></div>
@@ -448,32 +426,32 @@
                 <div class="modal-body">
                     <p>{{msg.cluster_list_upscale_dialog_prefix}} <strong>{{activeCluster.name}}</strong> {{msg.cluster_upscale_dialog_suffix}}</p>
                     <form class="form-horizontal" role="form" name="upscaleCluster1">
-                            <div class="form-group">
-                                <label class="col-sm-3 col-sm-offset-1 control-label" for="hostgroupselected">{{msg.cluster_upscale_form_hostgroup}}</label>
-                                <div class="col-sm-6">
-                                    <select class="form-control" id="hostgroupselected" ng-model="upscaleCluster.hostGroup" ng-options="group.group as group.group for group in $root.activeCluster.instanceGroups | filter:{group: '!cbgateway'}">
-                                    </select>
+                        <div class="form-group">
+                            <label class="col-sm-3 col-sm-offset-1 control-label" for="hostgroupselected">{{msg.cluster_upscale_form_hostgroup}}</label>
+                            <div class="col-sm-6">
+                                <select class="form-control" id="hostgroupselected" ng-model="upscaleCluster.hostGroup" ng-options="group.group as group.group for group in $root.activeCluster.instanceGroups | filter:{group: '!cbgateway'}">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 col-sm-offset-1 control-label" for="hostgroupselectednumber">{{msg.cluster_upscale_form_hostgroup_number}}</label>
+                            <div class="col-sm-6">
+                                <div class="input-group">
+                                    <span class="input-group-addon" id="basic-addon1">+</span>
+                                    <input type="number" class="form-control" id="numberOfInstances" ng-model="upscaleCluster.numberOfInstances" placeholder="1" aria-describedby="basic-addon1">
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label class="col-sm-3 col-sm-offset-1 control-label" for="hostgroupselectednumber">{{msg.cluster_upscale_form_hostgroup_number}}</label>
-                                <div class="col-sm-6">
-                                    <div class="input-group">
-                                      <span class="input-group-addon" id="basic-addon1">+</span>
-                                      <input type="number" class="form-control" id="numberOfInstances" ng-model="upscaleCluster.numberOfInstances" placeholder="1" aria-describedby="basic-addon1">
-                                    </div>
-                                </div>
-                            </div>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <div class="row">
-                      <div class="col-xs-6">
-                          <button type="button" class="btn btn-block btn-default" data-dismiss="modal">{{msg.cluster_list_cancel_command_label}}</button>
-                      </div>
-                      <div class="col-xs-6">
-                          <button type="button" class="btn btn-block btn-success" data-dismiss="modal" id="stackStackBtn" ng-click="startUpScaleCluster()"><i class="fa fa-play fa-fw"></i>{{msg.active_cluster_command_start_upscale_label}}</button>
-                      </div>
+                        <div class="col-xs-6">
+                            <button type="button" class="btn btn-block btn-default" data-dismiss="modal">{{msg.cluster_list_cancel_command_label}}</button>
+                        </div>
+                        <div class="col-xs-6">
+                            <button type="button" class="btn btn-block btn-success" data-dismiss="modal" id="stackStackBtn" ng-click="startUpScaleCluster()"><i class="fa fa-play fa-fw"></i>{{msg.active_cluster_command_start_upscale_label}}</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -486,32 +464,32 @@
                 <div class="modal-body">
                     <p>{{msg.cluster_list_downscale_dialog_prefix}} <strong>{{activeCluster.name}}</strong> {{msg.cluster_upscale_dialog_suffix}}</p>
                     <form class="form-horizontal" role="form" name="downscaleCluster1">
-                            <div class="form-group">
-                                <label class="col-sm-3 col-sm-offset-1 control-label" for="hostgroupselected">{{msg.cluster_upscale_form_hostgroup}}</label>
-                                <div class="col-sm-6">
-                                    <select class="form-control" id="hostgroupselected" ng-model="downscaleCluster.hostGroup" ng-options="group.group as group.group for group in $root.activeCluster.instanceGroups | filter:{group: '!cbgateway'}">
-                                    </select>
+                        <div class="form-group">
+                            <label class="col-sm-3 col-sm-offset-1 control-label" for="hostgroupselected">{{msg.cluster_upscale_form_hostgroup}}</label>
+                            <div class="col-sm-6">
+                                <select class="form-control" id="hostgroupselected" ng-model="downscaleCluster.hostGroup" ng-options="group.group as group.group for group in $root.activeCluster.instanceGroups | filter:{group: '!cbgateway'}">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 col-sm-offset-1 control-label" for="hostgroupselectednumber">{{msg.cluster_upscale_form_hostgroup_number}}</label>
+                            <div class="col-sm-6">
+                                <div class="input-group">
+                                    <span class="input-group-addon" id="basic-addon1">-</span>
+                                    <input type="number" class="form-control" id="numberOfInstances" ng-model="downscaleCluster.numberOfInstances" placeholder="1" aria-describedby="basic-addon1">
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label class="col-sm-3 col-sm-offset-1 control-label" for="hostgroupselectednumber">{{msg.cluster_upscale_form_hostgroup_number}}</label>
-                                <div class="col-sm-6">
-                                    <div class="input-group">
-                                      <span class="input-group-addon" id="basic-addon1">-</span>
-                                      <input type="number" class="form-control" id="numberOfInstances" ng-model="downscaleCluster.numberOfInstances" placeholder="1" aria-describedby="basic-addon1">
-                                    </div>
-                                </div>
-                            </div>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <div class="row">
-                      <div class="col-xs-6">
-                          <button type="button" class="btn btn-block btn-default" data-dismiss="modal">{{msg.cluster_list_cancel_command_label}}</button>
-                      </div>
-                      <div class="col-xs-6">
-                          <button type="button" class="btn btn-block btn-success" data-dismiss="modal" id="stackStackBtn" ng-click="startDownScaleCluster()"><i class="fa fa-play fa-fw"></i>{{msg.active_cluster_command_start_downscale_label}}</button>
-                      </div>
+                        <div class="col-xs-6">
+                            <button type="button" class="btn btn-block btn-default" data-dismiss="modal">{{msg.cluster_list_cancel_command_label}}</button>
+                        </div>
+                        <div class="col-xs-6">
+                            <button type="button" class="btn btn-block btn-success" data-dismiss="modal" id="stackStackBtn" ng-click="startDownScaleCluster()"><i class="fa fa-play fa-fw"></i>{{msg.active_cluster_command_start_downscale_label}}</button>
+                        </div>
                     </div>
                 </div>
             </div>
