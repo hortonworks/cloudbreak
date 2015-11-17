@@ -48,15 +48,16 @@
 </div>
 <div class="form-group">
     <div class="col-sm-11">
-<div class="btn-group btn-group-justified" role="group" style="padding-top: 40px" aria-label="...">
-    <div class="btn-group" role="group">
-        <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureCluster')"><i class="fa fa-angle-double-left"></i> {{msg.cluster_form_ambari_cluster_tag}}</button>
+        <div class="btn-group btn-group-justified" role="group" style="padding-top: 40px" aria-label="...">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureCluster')"><i class="fa fa-angle-double-left"></i> {{msg.cluster_form_ambari_cluster_tag}}</button>
+            </div>
+            <div class="btn-group" role="group" style="opacity: 0;">
+                <button type="button" class="btn btn-sm btn-default"></button>
+            </div>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-sm btn-default" ng-disabled="!cluster.name || !cluster.region || !cluster.securityGroupId || !cluster.networkId" ng-click="showWizardActualElement('configureHostGroups')">{{msg.cluster_form_ambari_blueprint_tag}} <i class="fa fa-angle-double-right"></i></button>
+            </div>
+        </div>
     </div>
-    <div class="btn-group" role="group" style="opacity: 0;">
-        <button type="button" class="btn btn-sm btn-default"></button>
-    </div>
-    <div class="btn-group" role="group">
-        <button type="button" class="btn btn-sm btn-default" ng-disabled="!cluster.name || !cluster.region || !cluster.securityGroupId || !cluster.networkId" ng-click="showWizardActualElement('configureHostGroups')">{{msg.cluster_form_ambari_blueprint_tag}} <i class="fa fa-angle-double-right"></i></button>
-    </div>
-</div>  </div>
 </div>
