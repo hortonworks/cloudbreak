@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudNotificationException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceNotification;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceNotificationType;
@@ -14,8 +15,6 @@ import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-import reactor.rx.Promise;
-import reactor.rx.Promises;
 
 @Component
 public class ResourceNotifier implements PersistenceNotifier {
@@ -25,29 +24,36 @@ public class ResourceNotifier implements PersistenceNotifier {
     private EventBus eventBus;
 
     @Override
-    public Promise<ResourcePersisted> notifyAllocation(CloudResource cloudResource, CloudContext cloudContext) {
-        Promise<ResourcePersisted> promise = Promises.prepare();
-        ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, promise, ResourceNotificationType.CREATE);
-        LOGGER.info("Sending resource allocation notification: {}, context: {}", notification, cloudContext);
-        eventBus.notify("resource-persisted", Event.wrap(notification));
-        return promise;
+    public ResourcePersisted notifyAllocation(CloudResource cloudResource, CloudContext cloudContext) throws CloudNotificationException {
+        ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, ResourceNotificationType.CREATE);
+        return sendNotification(notification, cloudContext);
     }
 
     @Override
-    public Promise<ResourcePersisted> notifyUpdate(CloudResource cloudResource, CloudContext cloudContext) {
-        Promise<ResourcePersisted> promise = Promises.prepare();
-        ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, promise, ResourceNotificationType.UPDATE);
-        LOGGER.info("Sending resource update notification: {}, context: {}", notification, cloudContext);
-        eventBus.notify("resource-persisted", Event.wrap(notification));
-        return promise;
+    public ResourcePersisted notifyUpdate(CloudResource cloudResource, CloudContext cloudContext) throws CloudNotificationException {
+        ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, ResourceNotificationType.UPDATE);
+        return sendNotification(notification, cloudContext);
     }
 
     @Override
-    public Promise<ResourcePersisted> notifyDeletion(CloudResource cloudResource, CloudContext cloudContext) {
-        Promise<ResourcePersisted> promise = Promises.prepare();
-        ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, promise, ResourceNotificationType.DELETE);
-        LOGGER.info("Sending resource deletion notification: {}, context: {}", notification, cloudContext);
-        eventBus.notify("resource-persisted", Event.wrap(notification));
-        return promise;
+    public ResourcePersisted notifyDeletion(CloudResource cloudResource, CloudContext cloudContext) throws CloudNotificationException {
+        ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, ResourceNotificationType.DELETE);
+        return sendNotification(notification, cloudContext);
+    }
+
+    private ResourcePersisted sendNotification(ResourceNotification notification, CloudContext cloudContext) throws CloudNotificationException {
+        LOGGER.info("Sending resource {} notification: {}, context: {}", notification.getType(), notification, cloudContext);
+        synchronized (notification) {
+            try {
+                eventBus.notify("resource-persisted", Event.wrap(notification));
+                notification.wait();
+            } catch (InterruptedException e) {
+                throw new CloudNotificationException(e.getMessage());
+            }
+        }
+        if (notification.isFailed()) {
+            throw new CloudNotificationException(notification.getError());
+        }
+        return notification.getResource();
     }
 }

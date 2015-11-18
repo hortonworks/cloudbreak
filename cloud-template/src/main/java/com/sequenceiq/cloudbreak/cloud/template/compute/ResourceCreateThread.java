@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -28,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
+import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
 
@@ -103,7 +103,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
     private List<CloudResource> createResource(AuthenticatedContext auth, List<CloudResource> cloudResources) throws Exception {
         for (CloudResource cloudResource : cloudResources) {
             if (cloudResource.isPersistent()) {
-                resourceNotifier.notifyAllocation(cloudResource, auth.getCloudContext()).await();
+                resourceNotifier.notifyAllocation(cloudResource, auth.getCloudContext());
             }
         }
         return cloudResources;
@@ -112,7 +112,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
     private List<CloudResource> updateResource(AuthenticatedContext auth, List<CloudResource> cloudResources) throws Exception {
         for (CloudResource cloudResource : cloudResources) {
             if (cloudResource.isPersistent()) {
-                resourceNotifier.notifyUpdate(cloudResource, auth.getCloudContext()).await();
+                resourceNotifier.notifyUpdate(cloudResource, auth.getCloudContext());
             }
         }
         return cloudResources;

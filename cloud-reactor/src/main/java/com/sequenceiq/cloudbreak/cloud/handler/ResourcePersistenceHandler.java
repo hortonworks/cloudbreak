@@ -34,7 +34,7 @@ public class ResourcePersistenceHandler implements Consumer<Event<ResourceNotifi
                 .retry(new RetryTask() {
                     @Override
                     public void run() throws Exception {
-                        ResourceNotification notificationPersisted = null;
+                        ResourceNotification notificationPersisted;
                         switch (notification.getType()) {
                             case CREATE:
                                 notificationPersisted = cloudResourcePersisterService.persist(notification);
@@ -46,9 +46,11 @@ public class ResourcePersistenceHandler implements Consumer<Event<ResourceNotifi
                                 notificationPersisted = cloudResourcePersisterService.delete(notification);
                                 break;
                             default:
+                                awaken(notification);
                                 throw new IllegalArgumentException("Unsupported notification type: " + notification.getType());
                         }
-                        notificationPersisted.getPromise().onNext(new ResourcePersisted(notificationPersisted));
+                        notificationPersisted.setResource(new ResourcePersisted(notificationPersisted));
+                        awaken(notification);
                     }
                 })
                 .checkIfRecoverable(new ExceptionCheckTask() {
@@ -60,8 +62,16 @@ public class ResourcePersistenceHandler implements Consumer<Event<ResourceNotifi
                 .ifNotRecoverable(new ErrorTask() {
                     @Override
                     public void run(Exception e) {
-                        notification.getPromise().onError(e);
+                        LOGGER.error("Resource persistence operation went fail.", e);
+                        notification.setError(e.getMessage() != null ? e.getMessage() : "Unknown reason");
+                        awaken(notification);
                     }
                 }).run();
+    }
+
+    private void awaken(ResourceNotification notification) {
+        synchronized (notification) {
+            notification.notifyAll();
+        }
     }
 }

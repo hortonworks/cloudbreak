@@ -132,8 +132,6 @@ public class ArmSetup implements Setup {
             if (!resourceGroupExist(client, storageGroup)) {
                 client.createResourceGroup(storageGroup, region);
             }
-        } catch (HttpResponseException ex) {
-            throw new CloudConnectorException(ex.getResponse().getData().toString(), ex);
         } catch (Exception ex) {
             throw new CloudConnectorException(ex);
         }
