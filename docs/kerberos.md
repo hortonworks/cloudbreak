@@ -1,12 +1,13 @@
 #Kerberos security
 
-Cloudbreak supports Kerberos security for Ambari internal communication. To activate Kerberos with Cloudbreak you should enable security option and fill the
+Cloudbreak supports Kerberos security for Ambari internal communication. To activate Kerberos with Cloudbreak you should enable security option and
+fill the following fields in the UI or via the Shell during cluster creation. To run a job on the cluster, you can use one of the default Hadoop users, like `ambari-qa`, as usual.
 
  * `kerberos master key`
  * `kerberos admin`
  * `kerberos password`
 
-fields too on web interface or shell during cluster creation. To run a job on the cluster, you can use one of the default Hadoop users, like `ambari-qa`, as usual.
+> This feature is currently `TECHNICAL PREVIEW`.
 
 ### Test
 Once kerberos is enabled you need a `ticket` to execute any job on the cluster. Here's an example to get a ticket:
@@ -56,4 +57,4 @@ hdfs dfs -cat output/*
 
 
 
-**Note** Current implementation of Kerberos security doesn't contain Active Directory support or any other third party user authentication method. If you want to use custom user, you have to create users manually with the same name on all Ambari containers on each node.
+**Note** Current implementation of Kerberos security does not contain Active Directory support or any other third party user authentication method. If you want to use custom user, you have to create users manually with the same name on all Ambari containers on each node.

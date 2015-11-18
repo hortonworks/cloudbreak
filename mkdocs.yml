@@ -35,11 +35,11 @@ pages:
             - 'Provisioning - UI': openstack_cb_ui.md
             - 'Provisioning - CLI': openstack_cb_shell.md
     - Reference:
-        - Blueprints : blueprints.md
         - API : api.md
         - CLI/Shell : shell.md
-        - Periscope : periscope.md
+        - Auto-Scaling : periscope.md
         - Recipes: recipes.md
+        - Blueprints : blueprints.md
         - Kerberos: kerberos.md
         - SPI: spi.md
         - Operations : operations.md

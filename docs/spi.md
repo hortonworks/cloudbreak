@@ -11,6 +11,8 @@ The SPI plugin mechanism has been used to integrate all existing providers to Cl
 
 The SPI interface is event based, scales well and decoupled from Cloudbreak. The core of Cloudbreak is communicating trough [EventBus](http://projectreactor.io/) with providers, but the complexity of Event handling is hidden from the provider implementation.
 
+> Use of the SPI is currently `TECHNICAL PREVIEW`.
+
 ##Resource management
 
 There are two kind of deployment/resource management method is supported by cloud providers:
