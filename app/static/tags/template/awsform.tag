@@ -27,7 +27,7 @@
     <label class="col-sm-3 control-label" for="aws_tinstanceType">{{msg.template_form_instance_type_label}}</label>
 
     <div class="col-sm-9">
-        <select class="form-control" id="aws_tinstanceType" name="aws_tinstanceType" ng-options="instanceType.key as instanceType.value for instanceType in $root.config.AWS.instanceType" ng-model="awsTemp.parameters.instanceType" ng-change="changeAwsInstanceType()" required>
+        <select class="form-control" id="aws_tinstanceType" name="aws_tinstanceType" ng-options="instanceType.value as instanceType.value for instanceType in $root.params.vmTypes.AWS" ng-model="awsTemp.parameters.instanceType" ng-change="changeAwsInstanceType()" required>
         </select>
     </div>
     <!-- .col-sm-9 -->

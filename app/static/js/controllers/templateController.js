@@ -195,8 +195,8 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
 
         $scope.changeAwsInstanceType = function() {
             var instanceType = $scope.awsTemp.parameters.instanceType;
-            $scope.awsInstanceType = $filter('filter')($rootScope.config.AWS.instanceType, {
-                key: instanceType
+            $scope.awsInstanceType = $filter('filter')($rootScope.params.vmTypes.AWS, {
+                value: instanceType
             }, true)[0];
             if ($scope.awsTemp.parameters.volumeType == 'ephemeral') {
                 $scope.awsTemp.parameters.encrypted = false;
@@ -213,7 +213,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 volumeSize: 100,
                 parameters: {
                     sshLocation: "0.0.0.0/0",
-                    instanceType: "M3Large",
+                    instanceType: $rootScope.params.defaultVmTypes.AWS,
                     volumeType: $rootScope.params.defaultDisks.AWS,
                     encrypted: false
                 }
@@ -225,7 +225,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 volumeCount: 1,
                 volumeSize: 100,
                 parameters: {
-                    vmType: "STANDARD_D2",
+                    vmType: $rootScope.params.defaultVmTypes.AZURE_RM,
                     volumeSize: 100
                 }
             }
@@ -244,7 +244,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 volumeCount: 1,
                 volumeSize: 100,
                 parameters: {
-                    gcpInstanceType: "N1_STANDARD_2",
+                    gcpInstanceType: $rootScope.params.defaultVmTypes.GCP,
                     volumeType: $rootScope.params.defaultDisks.GCP
                 }
             }
