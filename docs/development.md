@@ -8,7 +8,7 @@ To build the project
 ```
 # make deps needed only once
 make deps
-
+b
 make install
 ```
 
@@ -27,7 +27,7 @@ cbd update fix-something
 ## Snapshots
 
 We recommend to always use the latest release, but you might want to check new features or bugfixes.
-All successful builds from master are uploaded to the public s3 bucker. You can download it:
+All successful builds from the `master` branch are uploaded to the public S3 bucket. You can download it:
 
 ```
 curl -L public-repo-1.hortonworks.com/HDP/cloudbreak/cbd-snapshot-$(uname).tgz | tar -xz
