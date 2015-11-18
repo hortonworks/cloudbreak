@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -20,10 +21,12 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
+import reactor.bus.selector.Selectors;
 
 @Service
 public class DefaultCloudbreakEventService implements CloudbreakEventService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCloudbreakEventService.class);
+    private static final String CLOUDBREAK_EVENT = "CLOUDBREAK_EVENT";
 
     @Inject
     private StackRepository stackRepository;
@@ -33,6 +36,14 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
 
     @Inject
     private EventBus reactor;
+
+    @Inject
+    private CloudbreakEventHandler cloudbreakEventHandler;
+
+    @PostConstruct
+    public void setup() throws Exception {
+        reactor.on(Selectors.$(CLOUDBREAK_EVENT), cloudbreakEventHandler);
+    }
 
     @Override
     public void fireCloudbreakEvent(Long stackId, String eventType, String eventMessage) {

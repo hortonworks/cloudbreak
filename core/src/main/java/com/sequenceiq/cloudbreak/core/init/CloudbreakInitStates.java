@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.init;
 
+import static com.sequenceiq.cloudbreak.common.type.Status.WAIT_FOR_SYNC;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -19,6 +21,7 @@ import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 
 @Component
 public class CloudbreakInitStates {
@@ -33,6 +36,9 @@ public class CloudbreakInitStates {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
+    @Inject
+    private CloudbreakEventService eventService;
+
     @PostConstruct
     public void resetInProgressStates() {
         resetStackStatus();
@@ -45,6 +51,7 @@ public class CloudbreakInitStates {
             LOGGER.info("Cluster {} status is updated from {} to {} at CB start.", cluster.getId(), cluster.getStatus(), Status.WAIT_FOR_SYNC);
             cluster.setStatus(Status.WAIT_FOR_SYNC);
             clusterRepository.save(cluster);
+            fireEvent(cluster.getStack());
         }
     }
 
@@ -55,6 +62,7 @@ public class CloudbreakInitStates {
             stack.setStatus(Status.WAIT_FOR_SYNC);
             stackRepository.save(stack);
             cleanInstanceMetaData(instanceMetaDataRepository.findAllInStack(stack.getId()));
+            fireEvent(stack);
         }
     }
 
@@ -67,4 +75,8 @@ public class CloudbreakInitStates {
         }
     }
 
+    private void fireEvent(Stack stack) {
+        eventService.fireCloudbreakEvent(stack.getId(), WAIT_FOR_SYNC.name(),
+                "Couldn't retrieve the cluster's status, push sync before continuing with another operation.");
+    }
 }
