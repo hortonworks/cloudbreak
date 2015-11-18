@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.converter;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -23,7 +22,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
@@ -116,18 +114,6 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
         ClusterResponse result = underTest.convert(getSource());
         // THEN
         assertEquals(0L, (long) result.getMinutesUp());
-    }
-
-    @Test
-    public void testConvertWhenBaywatchEnabled() throws IOException {
-        // GIVEN
-        mockAll();
-        given(stackServiceComponentDescs.get(anyString())).willReturn(stackServiceComponentDescriptor);
-        ReflectionTestUtils.setField(underTest, "baywatchEnabled", true);
-        // WHEN
-        ClusterResponse result = underTest.convert(getSource());
-        // THEN
-        assertEquals("10.0.0.1:3080", result.getServiceEndPoints().get("Kibana"));
     }
 
     @Test

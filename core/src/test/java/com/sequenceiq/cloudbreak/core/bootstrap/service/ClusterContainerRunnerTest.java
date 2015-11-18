@@ -82,15 +82,12 @@ public class ClusterContainerRunnerTest {
         ReflectionTestUtils.setField(containerConfigService, "consulWatchPlugnDockerImageName", "sequence/testcont:0.1.1");
         ReflectionTestUtils.setField(containerConfigService, "postgresDockerImageName", "sequence/testcont:0.1.1");
         ReflectionTestUtils.setField(containerConfigService, "kerberosDockerImageName", "sequence/testcont:0.1.1");
-        ReflectionTestUtils.setField(containerConfigService, "baywatchServerDockerImageName", "sequence/testcont:0.1.1");
-        ReflectionTestUtils.setField(containerConfigService, "baywatchClientDockerImageName", "sequence/testcont:0.1.1");
         ReflectionTestUtils.setField(containerConfigService, "logrotateDockerImageName", "sequence/testcont:0.1.1");
     }
 
     @Test
     public void runClusterContainersWhenSecurityEnabled() throws CloudbreakException, CloudbreakOrchestratorFailedException,
             CloudbreakOrchestratorCancelledException {
-        ReflectionTestUtils.setField(underTest, "baywatchEnabled", false);
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
         Cluster cluster = new Cluster();
@@ -111,42 +108,9 @@ public class ClusterContainerRunnerTest {
                 any(ContainerConfig.class), any(LogVolumePath.class), any(KerberosConfiguration.class), any(ExitCriteriaModel.class));
     }
 
-    @Test
-    public void runClusterContainersWhenBaywatchEnabled() throws CloudbreakException, CloudbreakOrchestratorFailedException,
-            CloudbreakOrchestratorCancelledException {
-        ReflectionTestUtils.setField(underTest, "baywatchEnabled", true);
-        Stack stack = TestUtil.stack();
-        stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
-        ProvisioningContext provisioningContext = new ProvisioningContext.Builder().setDefaultParams(1L, CloudPlatform.AZURE).build();
-
-        when(containerOrchestratorResolver.get()).thenReturn(mockContainerOrchestrator);
-        when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
-                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(clusterService.retrieveClusterByStackId(anyLong())).thenReturn(new Cluster());
-
-        underTest.runClusterContainers(provisioningContext);
-
-        verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
-                any(LogVolumePath.class), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(ContainerConfig.class), anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
-                any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startBaywatchServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(LogVolumePath.class), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startRegistrator(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), any(ExitCriteriaModel
-                .class));
-    }
-
     @Test(expected = CloudbreakException.class)
     public void runClusterContainersWhenContainerRunnerFailed()
             throws CloudbreakException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
-        ReflectionTestUtils.setField(underTest, "baywatchEnabled", true);
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
         Cluster cluster = new Cluster();
@@ -166,7 +130,6 @@ public class ClusterContainerRunnerTest {
     @Test(expected = CancellationException.class)
     public void runClusterContainersWhenContainerRunnerCancelled()
             throws CloudbreakException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
-        ReflectionTestUtils.setField(underTest, "baywatchEnabled", true);
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
         ProvisioningContext provisioningContext = new ProvisioningContext.Builder().setDefaultParams(1L, CloudPlatform.AZURE).build();
@@ -183,10 +146,8 @@ public class ClusterContainerRunnerTest {
     }
 
     @Test
-    public void runClusterContainersWhenBaywatchEnabledAndBaywatchServerExternLocationNotNull()
-            throws CloudbreakException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
-        ReflectionTestUtils.setField(underTest, "baywatchEnabled", true);
-        ReflectionTestUtils.setField(underTest, "baywatchServerExternLocation", "test");
+    public void runClusterContainers() throws CloudbreakException, CloudbreakOrchestratorFailedException,
+            CloudbreakOrchestratorCancelledException {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
         ProvisioningContext provisioningContext = new ProvisioningContext.Builder().setDefaultParams(1L, CloudPlatform.AZURE).build();
@@ -203,86 +164,17 @@ public class ClusterContainerRunnerTest {
                 any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
                 any(ContainerConfig.class), anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
-                any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
                 any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
                 any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startRegistrator(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(ExitCriteriaModel.class));
-    }
-
-    @Test
-    public void runClusterContainersWhenBaywatchDisabled() throws CloudbreakException, CloudbreakOrchestratorFailedException,
-            CloudbreakOrchestratorCancelledException {
-        ReflectionTestUtils.setField(underTest, "baywatchEnabled", false);
-        Stack stack = TestUtil.stack();
-        stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
-        ProvisioningContext provisioningContext = new ProvisioningContext.Builder().setDefaultParams(1L, CloudPlatform.AZURE).build();
-
-        when(containerOrchestratorResolver.get()).thenReturn(mockContainerOrchestrator);
-        when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
-                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(clusterService.retrieveClusterByStackId(anyLong())).thenReturn(new Cluster());
-
-        underTest.runClusterContainers(provisioningContext);
-
-        verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
-                any(LogVolumePath.class), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(ContainerConfig.class), anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startBaywatchClients(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
-                any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(LogVolumePath.class), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startRegistrator(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(ExitCriteriaModel.class));
-    }
-
-    @Test
-    public void runNewNodesClusterContainersWhenBaywatchEnabled() throws CloudbreakException, CloudbreakOrchestratorFailedException,
-            CloudbreakOrchestratorCancelledException {
-        ReflectionTestUtils.setField(underTest, "baywatchEnabled", true);
-        Stack stack = TestUtil.stack();
-        stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
-        HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
-        ClusterScalingContext context = new ClusterScalingContext(1L, CloudPlatform.AZURE, hostGroupAdjustmentJson, getPrivateIps(stack),
-                new ArrayList<HostMetadata>(), ScalingType.UPSCALE_ONLY_CLUSTER);
-        when(containerOrchestratorResolver.get()).thenReturn(mockContainerOrchestrator);
-        when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
-                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-
-        underTest.addClusterContainers(context);
-
-        verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startAmbariServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(ContainerConfig.class), anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
-                any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(LogVolumePath.class), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startRegistrator(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
                 any(ExitCriteriaModel.class));
     }
 
     @Test(expected = CloudbreakException.class)
     public void runNewNodesClusterContainersWhenContainerRunnerFailed()
             throws CloudbreakException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
-        ReflectionTestUtils.setField(underTest, "baywatchEnabled", true);
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
@@ -299,7 +191,6 @@ public class ClusterContainerRunnerTest {
     @Test(expected = CancellationException.class)
     public void runNewNodesClusterContainersWhenContainerRunnerCancelled()
             throws CloudbreakException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
-        ReflectionTestUtils.setField(underTest, "baywatchEnabled", true);
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
@@ -314,42 +205,8 @@ public class ClusterContainerRunnerTest {
     }
 
     @Test
-    public void runNewNodesClusterContainersWhenBaywatchEnabledAndBaywatchServerExternLocationNotNull()
-            throws CloudbreakException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
-        ReflectionTestUtils.setField(underTest, "baywatchEnabled", true);
-        ReflectionTestUtils.setField(underTest, "baywatchServerExternLocation", "test");
-        Stack stack = TestUtil.stack();
-        stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
-        HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
-        ClusterScalingContext context = new ClusterScalingContext(1L, CloudPlatform.AZURE, hostGroupAdjustmentJson, getPrivateIps(stack),
-                new ArrayList<HostMetadata>(), ScalingType.UPSCALE_ONLY_CLUSTER);
-        when(containerOrchestratorResolver.get()).thenReturn(mockContainerOrchestrator);
-        when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
-                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-
-        underTest.addClusterContainers(context);
-
-        verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
-                any(LogVolumePath.class), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startAmbariServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(ContainerConfig.class), anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startBaywatchClients(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
-                any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(LogVolumePath.class), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startRegistrator(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(ExitCriteriaModel.class));
-    }
-
-    @Test
-    public void runNewNodesClusterContainersWhenBaywatchDisabled() throws CloudbreakException, CloudbreakOrchestratorFailedException,
+    public void runNewNodesClusterContainers() throws CloudbreakException, CloudbreakOrchestratorFailedException,
             CloudbreakOrchestratorCancelledException {
-        ReflectionTestUtils.setField(underTest, "baywatchEnabled", false);
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
@@ -367,10 +224,6 @@ public class ClusterContainerRunnerTest {
                 any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startAmbariServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
                 any(ContainerConfig.class), anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startBaywatchClients(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
-                any(LogVolumePath.class), anyString(), any(ExitCriteriaModel.class));
-        verify(mockContainerOrchestrator, times(0)).startBaywatchServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
                 any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),

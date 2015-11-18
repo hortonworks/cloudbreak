@@ -77,19 +77,6 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
-    public void startBaywatchServer(ContainerOrchestratorCluster cluster, ContainerConfig config, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
-        return;
-    }
-
-    @Override
-    public void startBaywatchClients(ContainerOrchestratorCluster cluster, ContainerConfig config, String consulDomain, LogVolumePath logVolumePath,
-            String externServerLocation, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
-        return;
-    }
-
-    @Override
     public void startLogrotate(ContainerOrchestratorCluster cluster, ContainerConfig config, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
         return;
