@@ -161,7 +161,7 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
                 }, function(success) {
                     // refresh host metadata
                     if (success.cluster != null) {
-                        $rootScope.activeCluster.cluster.status = success.clusters.status;
+                        $rootScope.activeCluster.cluster.status = success.cluster.status;
                         if (success.cluster.hostGroups != null) {
                             $rootScope.activeCluster.cluster.hostGroups = success.cluster.hostGroups;
                         }
