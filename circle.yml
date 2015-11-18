@@ -27,6 +27,12 @@ deployment:
     branch: release
     commands:
       - make release
+
+  rc:
+    tag: .*-rc.*
+    commands:
+      - make upload-snapshot
+
 general:
   branches:
     ignore:
