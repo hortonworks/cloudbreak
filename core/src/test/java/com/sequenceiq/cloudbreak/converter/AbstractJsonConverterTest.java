@@ -10,8 +10,8 @@ import java.util.List;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.TestException;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public abstract class AbstractJsonConverterTest<S> extends AbstractConverterTest {
 
@@ -40,10 +40,9 @@ public abstract class AbstractJsonConverterTest<S> extends AbstractConverterTest
         try {
             String classPackage = getClass().getPackage().getName().replaceAll("\\.", "/");
             Resource resource = new ClassPathResource(classPackage + "/" + jsonPath);
-            ObjectMapper mapper = new ObjectMapper();
             BufferedReader fileReader = new BufferedReader(
                     new FileReader(resource.getFile()));
-            return mapper.readValue(fileReader, clazz);
+            return JsonUtil.readValue(fileReader, clazz);
         } catch (IOException e) {
             throw new TestException(e);
         }

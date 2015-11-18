@@ -37,7 +37,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptorMapFactory;
@@ -253,6 +252,6 @@ public class AppConfig {
         maxCardinalityReps.put("1+", Integer.MAX_VALUE);
         maxCardinalityReps.put("ALL", Integer.MAX_VALUE);
         String stackServiceComponentsJson = FileReaderUtils.readFileFromClasspath("hdp/hdp-services.json");
-        return new StackServiceComponentDescriptorMapFactory(stackServiceComponentsJson, maxCardinalityReps, new ObjectMapper());
+        return new StackServiceComponentDescriptorMapFactory(stackServiceComponentsJson, maxCardinalityReps);
     }
 }

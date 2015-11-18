@@ -5,25 +5,22 @@ import java.util.Map;
 import org.springframework.beans.factory.FactoryBean;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Maps;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class StackServiceComponentDescriptorMapFactory implements FactoryBean<StackServiceComponentDescriptors> {
     private String stackServiceComponentsJson;
     private Map<String, Integer> maxCardinalityReps;
-    private ObjectMapper objectMapper;
 
-    public StackServiceComponentDescriptorMapFactory(String stackServiceComponentsJson, Map<String, Integer> maxCardinalityReps, ObjectMapper objectMapper) {
+    public StackServiceComponentDescriptorMapFactory(String stackServiceComponentsJson, Map<String, Integer> maxCardinalityReps) {
         this.stackServiceComponentsJson = stackServiceComponentsJson;
         this.maxCardinalityReps = maxCardinalityReps;
-        this.objectMapper = objectMapper;
     }
 
     @Override
     public StackServiceComponentDescriptors getObject() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
         Map<String, StackServiceComponentDescriptor> stackServiceComponentDescriptorMap = Maps.newHashMap();
-        JsonNode rootNode = objectMapper.readTree(stackServiceComponentsJson);
+        JsonNode rootNode = JsonUtil.readTree(stackServiceComponentsJson);
         JsonNode itemsNode = rootNode.get("items");
         for (JsonNode itemNode : itemsNode) {
             JsonNode componentsNode = itemNode.get("components");

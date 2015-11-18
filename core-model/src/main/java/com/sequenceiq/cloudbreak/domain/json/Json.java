@@ -14,7 +14,7 @@ public class Json {
     }
 
     public Json(Object value) throws JsonProcessingException {
-        this.value = JsonUtil.write(value);
+        this.value = JsonUtil.writeValueAsString(value);
     }
 
     public String getValue() {

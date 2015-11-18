@@ -36,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
@@ -85,6 +84,7 @@ import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -479,9 +479,8 @@ public class AmbariClusterConnector {
 
     private String extendBlueprintWithFsConfig(String blueprintText, FileSystem fs, Stack stack) throws IOException {
         FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(FileSystemType.valueOf(fs.getType()));
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(fs.getProperties());
-        FileSystemConfiguration fsConfiguration = (FileSystemConfiguration) mapper.readValue(json, FileSystemType.valueOf(fs.getType()).getClazz());
+        String json = JsonUtil.writeValueAsString(fs.getProperties());
+        FileSystemConfiguration fsConfiguration = (FileSystemConfiguration) JsonUtil.readValue(json, FileSystemType.valueOf(fs.getType()).getClazz());
         decorateFsConfigurationProperties(fsConfiguration, stack);
         Map<String, String> resourceProperties = fsConfigurator.createResources(fsConfiguration);
         List<BlueprintConfigurationEntry> bpConfigEntries = fsConfigurator.getFsProperties(fsConfiguration, resourceProperties);
