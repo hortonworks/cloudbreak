@@ -711,7 +711,8 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                 "START_FAILED": "start failed",
                 "STOP_FAILED": "stop failed",
                 "BILLING_STARTED": "billing started",
-                "BILLING_STOPPED": "billing stopped"
+                "BILLING_STOPPED": "billing stopped",
+                "WAIT_FOR_SYNC": "unknown"
             },
             'EVENT_CLASS': {
                 "REQUESTED": "has-warning",
@@ -731,7 +732,8 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                 "START_FAILED": "has-error",
                 "STOP_FAILED": "has-error",
                 "BILLING_STARTED": "has-success",
-                "BILLING_STOPPED": "has-success"
+                "BILLING_STOPPED": "has-success",
+                "WAIT_FOR_SYNC": "has-error"
             },
             'TIME_ZONES': [{
                 key: 'Etc/GMT+1',
