@@ -29,7 +29,7 @@ deployment:
       - make release
 
   rc:
-    tag: .*-rc.*
+    tag: /.*-rc.*/
     commands:
       - make upload-snapshot
 
