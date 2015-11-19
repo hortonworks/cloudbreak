@@ -23,6 +23,9 @@ else
 	FLAGS="-X main.Version $(VERSION) -X main.GitRevision $(GIT_REV)"
 endif
 
+echo_version:
+	echo VERSION=$(VERSION)
+
 build: bindata
 	mkdir -p build/Linux  && GOOS=linux  go build -ldflags $(FLAGS) -o build/Linux/$(BINARYNAME)
 	mkdir -p build/Darwin && GOOS=darwin go build -ldflags $(FLAGS) -o build/Darwin/$(BINARYNAME)

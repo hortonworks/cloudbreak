@@ -6,9 +6,11 @@ dependencies:
   pre:
     - make circleci
     - make deps
+    - make echo_version
   override:
     - make build
   post:
+    - make echo_version
     - make upload-tagged
     - tar -czvf $CIRCLE_ARTIFACTS/cbd-linux.tgz -C build/Linux cbd
     - tar -czvf $CIRCLE_ARTIFACTS/cbd-darwin.tgz -C build/Darwin cbd
