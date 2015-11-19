@@ -96,10 +96,7 @@ prepare-release: build
 	cp $(ARTIFACTS) build/Darwin/
 	tar -zcf release/$(NAME)_$(VERSION)_Darwin_$(ARCH).tgz -C build/Darwin $(ARTIFACTS) $(BINARYNAME)
 
-release: prepare-release
-
-	gh-release checksums sha256
-	gh-release create sequenceiq/$(NAME) $(VERSION) $(GIT_BRANCH) v$(VERSION)
+upload-release: prepare-release
 	@echo upload artifacts to $(S3_TARGET) ...
 	@docker run \
 		-v $(PWD):/data \
@@ -107,6 +104,10 @@ release: prepare-release
 		-e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) \
 		-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) \
 		anigeo/awscli s3 cp release/ $(S3_TARGET) --recursive --include "$(NAME)_$(VERSION)_*.tgz"
+
+release: upload-release
+	gh-release checksums sha256
+	gh-release create sequenceiq/$(NAME) $(VERSION) $(GIT_BRANCH) v$(VERSION)
 
 release-next-ver: deps
 	./release-next-ver.sh
