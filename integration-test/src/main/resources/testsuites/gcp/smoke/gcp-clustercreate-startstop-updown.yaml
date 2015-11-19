@@ -20,7 +20,7 @@ tests:
     parameters: {
       gcpName: it-gcp-smoke-gateway-ssud,
       gcpInstanceType: N1_STANDARD_4,
-      volumeType: HDD,
+      volumeType: pd-standard,
       volumeCount: 1,
       volumeSize: 30,
       templateAdditions: "cbgateway,1,GATEWAY"
@@ -32,7 +32,7 @@ tests:
     parameters: {
       gcpName: it-gcp-smoke-master-ssud,
       gcpInstanceType: N1_HIGHMEM_8,
-      volumeType: HDD,
+      volumeType: pd-standard,
       volumeCount: 2,
       volumeSize: 100,
       templateAdditions: "master,1"
@@ -44,7 +44,7 @@ tests:
     parameters: {
       gcpName: it-gcp-smoke-slave-ssud,
       gcpInstanceType: N1_HIGHCPU_4,
-      volumeType: SSD,
+      volumeType: pd-ssd,
       volumeCount: 3,
       volumeSize: 500,
       templateAdditions: "slave_1,3"
