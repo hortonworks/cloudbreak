@@ -69,7 +69,7 @@ dependencies {
     compile ("com.sequenceiq:azure-rest-client:${azureRestClientVersion}")                                          { exclude group: 'log4j' }
     compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: '1.10.11')      { exclude group: 'commons-logging' }
     compile group: 'com.jcraft',                    name: 'jsch',                           version: '0.1.52'
-    compile group: 'com.hierynomus',                name: 'sshj',                           version: '0.11.0'
+    compile group: 'com.hierynomus',                name: 'sshj',                           version: '0.15.0-rc.1'
     compile group: 'dnsjava',                       name: 'dnsjava',                        version: '2.1.7'
     compile group: 'com.icegreen',                  name: 'greenmail',                       version: '1.4.1'
 
