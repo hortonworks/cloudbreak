@@ -8,7 +8,7 @@ To build the project
 ```
 # make deps needed only once
 make deps
-b
+
 make install
 ```
 
