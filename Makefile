@@ -31,8 +31,8 @@ create-snapshot-tgz:
 	rm -rf snapshots
 	mkdir -p snapshots
 
-	tar -czf snapshots/cbd-snapshot-Linux.tgz -C build/Linux cbd
-	tar -czf snapshots/cbd-snapshot-Darwin.tgz -C build/Darwin cbd
+	tar -czf snapshots/cloudbreak-deployer_snapshot_Linux_x86_64.tgz -C build/Linux cbd
+	tar -czf snapshots/cloudbreak-deployer_snapshot_Darwin_x86_64.tgz -C build/Darwin cbd
 
 upload-snapshot: create-snapshot-tgz
 	@echo upload snapshot artifacts to $(S3_TARGET) ...

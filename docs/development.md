@@ -30,7 +30,7 @@ We recommend to always use the latest release, but you might want to check new f
 All successful builds from the `master` branch are uploaded to the public S3 bucket. You can download it:
 
 ```
-curl -L public-repo-1.hortonworks.com/HDP/cloudbreak/cbd-snapshot-$(uname).tgz | tar -xz
+curl -L public-repo-1.hortonworks.com/HDP/cloudbreak/cloudbreak-deployer_snapshot_$(uname)_x86_64.tgz | tar -xz
 ```
 
 Instead of overwriting the released version, download it to a **local directory** and useit by refering as `./cbd`
