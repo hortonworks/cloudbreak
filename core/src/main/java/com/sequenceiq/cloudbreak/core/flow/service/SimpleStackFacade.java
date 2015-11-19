@@ -16,6 +16,8 @@ import static com.sequenceiq.cloudbreak.common.type.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.common.type.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_IN_PROGRESS;
 
+import javax.inject.Inject;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -25,13 +27,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.time.DateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.OnFailureAction;
@@ -73,6 +68,10 @@ import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
+import org.apache.commons.lang3.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 @Service
 public class SimpleStackFacade implements StackFacade {
@@ -568,7 +567,7 @@ public class SimpleStackFacade implements StackFacade {
         MDCBuilder.buildMdcContext(stack);
         if (context.isStart()) {
             stackUpdater.updateStackStatus(context.getStackId(), START_FAILED, "Start failed: " + context.getErrorReason());
-            fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_START_FAILED, START_FAILED.name());
+            fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_START_FAILED, START_FAILED.name(), context.getErrorReason());
             if (stack.getCluster() != null) {
                 clusterService.updateClusterStatusByStackId(context.getStackId(), STOPPED);
                 if (stack.getCluster().getEmailNeeded()) {
