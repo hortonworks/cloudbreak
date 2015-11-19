@@ -24,6 +24,13 @@ else
 endif
 
 echo_version:
+	echo GIT_TAG[$(GIT_TAG)]
+ifeq ($(GIT_TAG),)
+	echo EMPTY TAG
+ else
+	echo NOT_EMPTY_TAG
+endif
+
 	echo VERSION=$(VERSION)
 
 build: bindata
