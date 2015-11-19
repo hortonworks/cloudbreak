@@ -2,16 +2,25 @@ NAME=cloudbreak-deployer
 BINARYNAME=cbd
 ARTIFACTS=LICENSE.txt NOTICE.txt VERSION README
 ARCH=$(shell uname -m)
-VERSION=$(shell cat VERSION)
+VERSION_FILE=$(shell cat VERSION)
 GIT_REV=$(shell git rev-parse --short HEAD)
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
+GIT_TAG=$(shell git describe --exact-match --tags 2>/dev/null )
 S3_TARGET?=s3://public-repo-1.hortonworks.com/HDP/cloudbreak/
 #S3_TARGET=s3://public-repo.sequenceiq.com
 
-ifeq ($(GIT_BRANCH), release)
-FLAGS="-X main.Version $(VERSION)"
+# if on a git tag, use that as a version number
+ifeq ($(GIT_TAG),)
+	  VERSION="$(VERSION_FILE)-$(GIT_BRANCH)"
 else
-FLAGS="-X main.Version $(VERSION) -X main.GitRevision $(GIT_BRANCH)-$(GIT_REV)"
+	  VERSION="$(GIT_TAG)"
+endif
+
+# if on release branch dont use git revision
+ifeq ($(GIT_BRANCH), release)
+  FLAGS="-X main.Version $(VERSION)"
+else
+	FLAGS="-X main.Version $(VERSION) -X main.GitRevision $(GIT_REV)"
 endif
 
 build: bindata
