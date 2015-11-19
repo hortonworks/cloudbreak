@@ -4,7 +4,7 @@ machine:
 
 dependencies:
   pre:
-    - git fetch
+      - git fetch --tags
     - make circleci
     - make deps
     - make echo_version
