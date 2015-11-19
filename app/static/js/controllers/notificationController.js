@@ -70,19 +70,30 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
             })[0];
             if (actCluster == undefined) {
                 UluwatuCluster.get(notification.stackId, function(cluster) {
-                    $rootScope.clusters.push(cluster);
-                    $scope.$parent.orderClusters();
+                    actCluster = $filter('filter')($rootScope.clusters, {
+                        id: notification.stackId
+                    })[0];
+                    if (actCluster == undefined) {
+                        $rootScope.clusters.push(cluster);
+                        $scope.$parent.orderClusters();
+                    } else {
+                        updateStatus(actCluster, notification, refresh);
+                    }
                 });
             } else {
-                actCluster.status = notification.stackStatus;
-                actCluster.cluster = actCluster.cluster || {};
-                actCluster.cluster.status = notification.clusterStatus;
-                actCluster.cluster.statusReason = notification.eventMessage;
-                if (refresh) {
-                    refreshMetadata(notification);
-                }
+                updateStatus(actCluster, notification, refresh);
             }
             addNotificationToGlobalEvents(notification);
+        }
+
+        function updateStatus(actCluster, notification, refresh) {
+            actCluster.status = notification.stackStatus;
+            actCluster.cluster = actCluster.cluster || {};
+            actCluster.cluster.status = notification.clusterStatus;
+            actCluster.cluster.statusReason = notification.eventMessage;
+            if (refresh) {
+                refreshMetadata(notification);
+            }
         }
 
         function handleCopyStatus(notification) {
