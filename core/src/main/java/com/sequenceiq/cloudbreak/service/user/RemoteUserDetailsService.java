@@ -14,8 +14,6 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +27,7 @@ import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestOperations;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -42,6 +41,7 @@ import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
 public class RemoteUserDetailsService implements UserDetailsService {
@@ -117,16 +117,15 @@ public class RemoteUserDetailsService implements UserDetailsService {
                 throw new UserDetailsUnavailableException("User details cannot be retrieved.");
         }
 
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            JsonNode root = mapper.readTree(scimResponse);
+            JsonNode root = JsonUtil.readTree(scimResponse);
             List<CbUserRole> roles = new ArrayList<>();
             String account = null;
             JsonNode userNode = root;
             if (UserFilterField.USERNAME.equals(filterField)) {
                 userNode = root.get("resources").get(0);
             }
-            for (Iterator<JsonNode> iterator = userNode.get("groups").getElements(); iterator.hasNext();) {
+            for (Iterator<JsonNode> iterator = userNode.get("groups").iterator(); iterator.hasNext();) {
                 JsonNode node = iterator.next();
                 String group = node.get("display").asText();
                 if (group.startsWith("sequenceiq.account")) {

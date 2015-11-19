@@ -1,21 +1,20 @@
 package com.sequenceiq.it.cloudbreak;
 
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
-import com.sequenceiq.it.IntegrationTestContext;
-import org.apache.commons.codec.binary.Base64;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.testng.annotations.Optional;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class RecipeCreationTest extends AbstractCloudbreakIntegrationTest {
+import org.apache.commons.codec.binary.Base64;
+import org.testng.annotations.Optional;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 
-    private ObjectMapper jsonMapper = new ObjectMapper();
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.it.IntegrationTestContext;
+
+public class RecipeCreationTest extends AbstractCloudbreakIntegrationTest {
 
     @Test
     @Parameters({ "name", "description", "preScript", "postScript" })
@@ -40,7 +39,7 @@ public class RecipeCreationTest extends AbstractCloudbreakIntegrationTest {
 
         // WHEN
         CloudbreakClient client = getClient();
-        String id = client.postRecipe(jsonMapper.writeValueAsString(recipe), false);
+        String id = client.postRecipe(JsonUtil.writeValueAsString(recipe), false);
 
         addRecipeToContext(Long.valueOf(id));
     }

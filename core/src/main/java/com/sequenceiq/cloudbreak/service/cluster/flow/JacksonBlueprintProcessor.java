@@ -9,9 +9,9 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
 public class JacksonBlueprintProcessor implements BlueprintProcessor {
@@ -21,9 +21,8 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
 
     @Override
     public String addConfigEntries(String originalBlueprint, List<BlueprintConfigurationEntry> configurationEntries, boolean override) {
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            ObjectNode root = (ObjectNode) mapper.readTree(originalBlueprint);
+            ObjectNode root = (ObjectNode) JsonUtil.readTree(originalBlueprint);
             JsonNode configurationsNode = root.path(CONFIGURATIONS_NODE);
             if (configurationsNode.isMissingNode()) {
                 configurationsNode = root.putArray(CONFIGURATIONS_NODE);
@@ -44,7 +43,7 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
                     }
                 }
             }
-            return mapper.writeValueAsString(root);
+            return JsonUtil.writeValueAsString(root);
         } catch (IOException e) {
             throw new BlueprintProcessingException("Failed to add config entries to original blueprint.", e);
         }
@@ -52,10 +51,9 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
 
     @Override
     public Set<String> getComponentsInHostGroup(String blueprintText, String hostGroup) {
-        ObjectMapper mapper = new ObjectMapper();
         try {
             Set<String> services = new HashSet<>();
-            ObjectNode root = (ObjectNode) mapper.readTree(blueprintText);
+            ObjectNode root = (ObjectNode) JsonUtil.readTree(blueprintText);
             ArrayNode hostGroupsNode = (ArrayNode) root.path(HOST_GROUPS_NODE);
             Iterator<JsonNode> hostGroups = hostGroupsNode.elements();
             while (hostGroups.hasNext()) {

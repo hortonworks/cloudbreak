@@ -15,9 +15,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestOperations;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.service.cluster.ConfigParam;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
 public class AppMasterFilter implements HostFilter {
@@ -39,8 +39,7 @@ public class AppMasterFilter implements HostFilter {
             String appResponse = restTemplate.exchange(
                     String.format("http://%s", resourceManagerAddress + HostFilterService.RM_WS_PATH + "/apps?state=RUNNING"),
                     HttpMethod.GET, null, String.class).getBody();
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.readTree(appResponse);
+            JsonNode jsonNode = JsonUtil.readTree(appResponse);
             JsonNode apps = jsonNode.get(APPS_NODE);
             if (apps != null && apps.has(APP_NODE)) {
                 JsonNode app = apps.get(APP_NODE);

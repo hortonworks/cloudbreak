@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.controller.doc.ContentType;
 import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.controller.doc.Notes;
@@ -50,6 +49,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -100,13 +100,12 @@ public class ClusterController {
     }
 
     private void validateFilesystemRequest(FileSystemRequest fileSystemRequest) {
-        ObjectMapper mapper = new ObjectMapper();
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
         Validator validator = validatorFactory.getValidator();
         try {
             if (fileSystemRequest != null) {
-                String json = mapper.writeValueAsString(fileSystemRequest.getProperties());
-                Object fsConfig = mapper.readValue(json, fileSystemRequest.getType().getClazz());
+                String json = JsonUtil.writeValueAsString(fileSystemRequest.getProperties());
+                Object fsConfig = JsonUtil.readValue(json, fileSystemRequest.getType().getClazz());
                 Set<ConstraintViolation<Object>> violations = validator.validate(fsConfig);
                 if (!violations.isEmpty()) {
                     throw new ConstraintViolationException(violations);

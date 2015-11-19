@@ -13,12 +13,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.BlueprintRequest;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
 public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConverter<BlueprintRequest, Blueprint> {
@@ -46,9 +46,8 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
         blueprint.setName(json.getName());
         blueprint.setDescription(json.getDescription());
         blueprint.setStatus(ResourceStatus.USER_MANAGED);
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            JsonNode root = mapper.readTree(blueprint.getBlueprintText());
+            JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
             blueprint.setBlueprintName(getBlueprintName(root));
             blueprint.setHostGroupCount(countHostGroups(root));
         } catch (IOException e) {
@@ -65,9 +64,8 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
         blueprint.setBlueprintText(blueprintText);
         blueprint.setPublicInAccount(publicInAccount);
         validateBlueprint(blueprint.getBlueprintText());
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            JsonNode root = mapper.readTree(blueprint.getBlueprintText());
+            JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
             blueprint.setBlueprintName(getBlueprintName(root));
             blueprint.setHostGroupCount(countHostGroups(root));
         } catch (IOException e) {
@@ -107,8 +105,7 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
 
     private void validateBlueprint(String blueprintText) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(blueprintText);
+            JsonNode root = JsonUtil.readTree(blueprintText);
             hasBlueprintInBlueprint(root);
             hasBlueprintNameInBlueprint(root);
             validateHostGroups(root);
