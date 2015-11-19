@@ -1,15 +1,30 @@
-#Kerberos security
+#Kerberos Security
 
-Cloudbreak supports Kerberos security for Ambari internal communication. To activate Kerberos with Cloudbreak you should enable security option and
-fill the following fields in the UI or via the Shell during cluster creation. To run a job on the cluster, you can use one of the default Hadoop users, like `ambari-qa`, as usual.
-
- * `kerberos master key`
- * `kerberos admin`
- * `kerberos password`
+Cloudbreak can enable Kerberos security on the cluster. When enabled, Cloudbreak will install an MIT KDC into the cluster
+and enable Kerberos on the cluster.
 
 > This feature is currently `TECHNICAL PREVIEW`.
 
-### Test
+## Enable Kerberos
+
+To enable Kerberos in a cluster, when creating your cluster via the UI, do the following:
+
+1. When in the **Create cluster** wizard, on the **Setup Network and Security** tab, check the **Enable security** option.
+2. Fill in the following fields:
+
+| Field | Description |
+|---|---|
+| Kerberos master key | The master key to use for the KDC. |
+| Kerberos admin | The KDC admin username to use for the KDC. |
+| Kerberos password | The KDC admin password to use for the KDC. |
+
+> The Cloudbreak Kerberos setup does not contain Active Directory support or any other third party user authentication method. If you
+want to use custom Hadoop user, you have to create users manually with the same name on all Ambari containers on each node.
+
+### Testing Kerberos
+
+To run a job on the cluster, you can use one of the default Hadoop users, like `ambari-qa`, as usual.
+
 Once kerberos is enabled you need a `ticket` to execute any job on the cluster. Here's an example to get a ticket:
 ```
 kinit -V -kt /etc/security/keytabs/smokeuser.headless.keytab ambari-qa-sparktest-rec@NODE.DC1.CONSUL
@@ -25,9 +40,9 @@ hadoop jar $JAR_EXAMPLES teragen 10000000 /user/ambari-qa/terasort-input
 hadoop jar $JAR_JOBCLIENT mrbench -baseDir /user/ambari-qa/smallJobsBenchmark -numRuns 5 -maps 10 -reduces 5 -inputLines 10 -inputType ascending
 ```
 
-### Create/add custom users
+### Create Hadoop Users
 
-To create custom users please follow the steps below.
+To create Hadoop users please follow the steps below.
 
   * Log in via SSH to the Cloudbreak gateway node (IP address is the same as the Ambari UI)
 
@@ -54,7 +69,3 @@ hdfs dfs -mkdir input
 hdfs dfs -put /tmp/wait-for-host-number.sh input
 yarn jar $(find /usr/hdp -name hadoop-mapreduce-examples.jar) wordcount input output
 hdfs dfs -cat output/*
-
-
-
-**Note** Current implementation of Kerberos security does not contain Active Directory support or any other third party user authentication method. If you want to use custom user, you have to create users manually with the same name on all Ambari containers on each node.
