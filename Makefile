@@ -11,9 +11,9 @@ S3_TARGET?=s3://public-repo-1.hortonworks.com/HDP/cloudbreak/
 
 # if on a git tag, use that as a version number
 ifeq ($(GIT_TAG),)
-	  VERSION="$(VERSION_FILE)-$(GIT_BRANCH)"
+	  VERSION=$(VERSION_FILE)-$(GIT_BRANCH)
 else
-	  VERSION="$(GIT_TAG)"
+	  VERSION=$(GIT_TAG)
 endif
 
 # if on release branch dont use git revision
@@ -104,6 +104,20 @@ upload-release: prepare-release
 		-e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) \
 		-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) \
 		anigeo/awscli s3 cp release/ $(S3_TARGET) --recursive --include "$(NAME)_$(VERSION)_*.tgz"
+
+upload-tagged: prepare-release
+ifeq ($(GIT_TAG),)
+	@echo "not a tag, no upload needed"
+else
+	@echo upload artifacts to $(S3_TARGET) ...
+	@docker run \
+		-v $(PWD):/data \
+		-w /data \
+		-e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) \
+		-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) \
+		anigeo/awscli s3 cp release/ $(S3_TARGET) --recursive --include "$(NAME)_$(VERSION)_*.tgz"
+endif
+
 
 release: upload-release
 	gh-release checksums sha256
