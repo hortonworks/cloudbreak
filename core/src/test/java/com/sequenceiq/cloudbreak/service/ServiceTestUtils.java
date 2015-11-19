@@ -5,10 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.sequenceiq.cloudbreak.common.type.AwsInstanceType;
-import com.sequenceiq.cloudbreak.common.type.AzureVmType;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.type.GcpInstanceType;
 import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
@@ -30,6 +27,9 @@ public final class ServiceTestUtils {
     public static final String DUMMY_OWNER = "gipsz@jakab.kom";
     public static final String DUMMY_ACCOUNT = "acmecorp";
     public static final String PUBLIC_KEY = "mypublickey";
+    private static final String C3LARGE_INSTANCE = "c3.large";
+    private static final String N1_STANDARD_1 = "n1-standard-1";
+    private static final String STANDARD_D1 = "Standard_D1";
 
     private ServiceTestUtils() {
     }
@@ -204,7 +204,7 @@ public final class ServiceTestUtils {
                 azureTemplate.setId(1L);
                 azureTemplate.setOwner(owner);
                 azureTemplate.setAccount(account);
-                azureTemplate.setVmType(AzureVmType.STANDARD_D1);
+                azureTemplate.setInstanceType(STANDARD_D1);
                 azureTemplate.setVolumeCount(1);
                 azureTemplate.setVolumeSize(100);
                 azureTemplate.setDescription("azure test template");
@@ -215,7 +215,7 @@ public final class ServiceTestUtils {
                 awsTemplate.setId(1L);
                 awsTemplate.setOwner(owner);
                 awsTemplate.setAccount(account);
-                awsTemplate.setInstanceType(AwsInstanceType.C3Large);
+                awsTemplate.setInstanceType(C3LARGE_INSTANCE);
                 awsTemplate.setVolumeType("gp2");
                 awsTemplate.setSshLocation("0.0.0.0/0");
                 awsTemplate.setVolumeCount(1);
@@ -226,7 +226,7 @@ public final class ServiceTestUtils {
             case GCP:
                 GcpTemplate gcpTemplate = new GcpTemplate();
                 gcpTemplate.setId(1L);
-                gcpTemplate.setGcpInstanceType(GcpInstanceType.N1_STANDARD_1);
+                gcpTemplate.setInstanceType(N1_STANDARD_1);
                 gcpTemplate.setGcpRawDiskType("pd-standard");
                 gcpTemplate.setDescription("gcp test template");
                 gcpTemplate.setOwner(owner);

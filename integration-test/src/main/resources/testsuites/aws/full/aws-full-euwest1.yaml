@@ -13,7 +13,7 @@ tests:
   - name: create gateway template
     parameters: {
       awsTemplateName: it-aws-full-gateway4,
-      awsInstanceType: M3Medium,
+      awsInstanceType: m3.medium,
       awsVolumeType: standard,
       awsVolumeCount: 1,
       awsVolumeSize: 30,
@@ -25,7 +25,7 @@ tests:
   - name: create master template
     parameters: {
       awsTemplateName: it-aws-full-master4,
-      awsInstanceType: C3Large,
+      awsInstanceType: c3.large,
       awsVolumeType: ephemeral,
       awsVolumeCount: 2,
       awsVolumeSize: 16,
@@ -37,7 +37,7 @@ tests:
   - name: create slave template
     parameters: {
       awsTemplateName: it-aws-full-slave4,
-      awsInstanceType: R3Large,
+      awsInstanceType: r3.large,
       awsVolumeType: gp2,
       awsVolumeCount: 3,
       awsVolumeSize: 200,

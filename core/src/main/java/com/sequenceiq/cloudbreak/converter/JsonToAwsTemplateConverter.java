@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.converter;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.type.AwsEncryption;
-import com.sequenceiq.cloudbreak.common.type.AwsInstanceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
@@ -18,7 +17,7 @@ public class JsonToAwsTemplateConverter extends AbstractConversionServiceAwareCo
     public AwsTemplate convert(TemplateRequest source) {
         AwsTemplate awsTemplate = new AwsTemplate();
         awsTemplate.setName(source.getName());
-        awsTemplate.setInstanceType(AwsInstanceType.valueOf(String.valueOf(source.getParameters().get(AwsTemplateParam.INSTANCE_TYPE.getName()))));
+        awsTemplate.setInstanceType(String.valueOf(source.getParameters().get(AwsTemplateParam.INSTANCE_TYPE.getName())));
         String sshLocation = source.getParameters().containsKey(AwsTemplateParam.SSH_LOCATION.getName())
                 ? String.valueOf(source.getParameters().get(AwsTemplateParam.SSH_LOCATION.getName())) : DEFAULT_SSH_LOCATION;
         awsTemplate.setSshLocation(sshLocation);

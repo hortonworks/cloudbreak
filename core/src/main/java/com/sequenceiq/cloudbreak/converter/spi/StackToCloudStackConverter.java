@@ -100,7 +100,7 @@ public class StackToCloudStackConverter {
             Volume volume = new Volume(VolumeUtils.VOLUME_PREFIX + (i + 1), template.getVolumeTypeName(), template.getVolumeSize());
             volumes.add(volume);
         }
-        return new InstanceTemplate(template.getInstanceTypeName(), name, privateId, volumes, status, fields);
+        return new InstanceTemplate(template.getInstanceType(), name, privateId, volumes, status, fields);
     }
 
     private Network buildNetwork(Stack stack) {

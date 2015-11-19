@@ -29,12 +29,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.amazonaws.services.ec2.model.InstanceType;
 import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VolumeCountValidatorTest {
+
+    private static final String C1XLARGE_INSTANCE = "c1.xlarge";
+    private static final String C3LARGE_INSTANCE = "c3.large";
 
     @InjectMocks
     private VolumeCountValidator underTest;
@@ -69,9 +71,8 @@ public class VolumeCountValidatorTest {
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
         templateJson.setCloudPlatform(CloudPlatform.AWS);
-        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
-        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Xlarge.name());
-
+        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "gp2");
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), C1XLARGE_INSTANCE);
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), true);
     }
@@ -95,8 +96,8 @@ public class VolumeCountValidatorTest {
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(3000);
         templateJson.setCloudPlatform(CloudPlatform.AWS);
-        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
-        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Xlarge.name());
+        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "gp2");
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), C1XLARGE_INSTANCE);
 
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
@@ -109,8 +110,8 @@ public class VolumeCountValidatorTest {
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(0);
         templateJson.setCloudPlatform(CloudPlatform.AWS);
-        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
-        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Xlarge.name());
+        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "gp2");
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), C1XLARGE_INSTANCE);
 
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
@@ -123,8 +124,8 @@ public class VolumeCountValidatorTest {
         templateJson.setVolumeCount(30);
         templateJson.setVolumeSize(100);
         templateJson.setCloudPlatform(CloudPlatform.AWS);
-        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
-        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Xlarge.name());
+        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "gp2");
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), C1XLARGE_INSTANCE);
 
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
@@ -137,22 +138,22 @@ public class VolumeCountValidatorTest {
         templateJson.setVolumeCount(0);
         templateJson.setVolumeSize(100);
         templateJson.setCloudPlatform(CloudPlatform.AWS);
-        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
-        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Xlarge.name());
+        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "gp2");
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), C1XLARGE_INSTANCE);
 
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
     }
 
     @Test
-    public void validEphemeralAwsTemplateDisksReturnTrue() {
+    public void validephemeralAwsTemplateDisksReturnTrue() {
         TemplateRequest templateJson = new TemplateRequest();
         Map<String, Object> parameters = new HashMap<>();
         templateJson.setVolumeCount(1);
         templateJson.setVolumeSize(30);
         templateJson.setCloudPlatform(CloudPlatform.AWS);
-        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Ephemeral");
-        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C3Large.name());
+        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "ephemeral");
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), C3LARGE_INSTANCE);
 
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), true);
@@ -165,8 +166,8 @@ public class VolumeCountValidatorTest {
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(3000);
         templateJson.setCloudPlatform(CloudPlatform.AWS);
-        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Ephemeral");
-        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C3Large.name());
+        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "ephemeral");
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), C3LARGE_INSTANCE);
 
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
@@ -179,8 +180,8 @@ public class VolumeCountValidatorTest {
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(0);
         templateJson.setCloudPlatform(CloudPlatform.AWS);
-        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Ephemeral");
-        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C3Large.name());
+        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "ephemeral");
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), C3LARGE_INSTANCE);
 
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
@@ -193,8 +194,8 @@ public class VolumeCountValidatorTest {
         templateJson.setVolumeCount(30);
         templateJson.setVolumeSize(100);
         templateJson.setCloudPlatform(CloudPlatform.AWS);
-        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Ephemeral");
-        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C3Large.name());
+        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "ephemeral");
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), C3LARGE_INSTANCE);
 
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
@@ -207,8 +208,8 @@ public class VolumeCountValidatorTest {
         templateJson.setVolumeCount(0);
         templateJson.setVolumeSize(100);
         templateJson.setCloudPlatform(CloudPlatform.AWS);
-        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Ephemeral");
-        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C3Large.name());
+        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "ephemeral");
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), C3LARGE_INSTANCE);
 
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);

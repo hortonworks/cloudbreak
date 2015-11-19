@@ -5,14 +5,11 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
 import com.sequenceiq.cloudbreak.common.type.AwsEncryption;
-import com.sequenceiq.cloudbreak.common.type.AwsInstanceType;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
 @Entity
 public class AwsTemplate extends Template implements ProvisionEntity {
 
-    @Enumerated(EnumType.STRING)
-    private AwsInstanceType instanceType;
     private String sshLocation;
     private String volumeType;
     private Double spotPrice;
@@ -20,14 +17,6 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     private AwsEncryption encrypted;
 
     public AwsTemplate() {
-    }
-
-    public AwsInstanceType getInstanceType() {
-        return instanceType;
-    }
-
-    public void setInstanceType(AwsInstanceType instanceType) {
-        this.instanceType = instanceType;
     }
 
     public String getSshLocation() {
@@ -41,11 +30,6 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     @Override
     public CloudPlatform cloudPlatform() {
         return CloudPlatform.AWS;
-    }
-
-    @Override
-    public String getInstanceTypeName() {
-        return getInstanceType().getValue();
     }
 
     @Override

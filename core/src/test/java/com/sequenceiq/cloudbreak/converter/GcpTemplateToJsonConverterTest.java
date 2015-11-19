@@ -8,11 +8,11 @@ import org.junit.Test;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.controller.json.TemplateResponse;
 import com.sequenceiq.cloudbreak.controller.validation.GcpTemplateParam;
-import com.sequenceiq.cloudbreak.common.type.GcpInstanceType;
 import com.sequenceiq.cloudbreak.domain.GcpTemplate;
 
 public class GcpTemplateToJsonConverterTest extends AbstractEntityConverterTest<GcpTemplate> {
 
+    private static final String N1_HIGHCPU_16 = "n1-highcpu-16";
     private GcpTemplateToJsonConverter underTest;
 
     @Before
@@ -26,7 +26,7 @@ public class GcpTemplateToJsonConverterTest extends AbstractEntityConverterTest<
         // WHEN
         TemplateResponse result = underTest.convert(getSource());
         // THEN
-        assertEquals(GcpInstanceType.N1_HIGHCPU_16.name(), result.getParameters().get(GcpTemplateParam.INSTANCETYPE.getName()));
+        assertEquals(N1_HIGHCPU_16, result.getParameters().get(GcpTemplateParam.INSTANCETYPE.getName()));
         assertAllFieldsNotNull(result);
     }
 

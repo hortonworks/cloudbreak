@@ -29,17 +29,18 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.amazonaws.services.ec2.model.InstanceType;
 import com.google.common.collect.ImmutableList;
-import com.sequenceiq.cloudbreak.common.type.AzureVmType;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.type.GcpInstanceType;
 import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TemplateParametersValidatorTest {
 
     public static final String HDD = "pd-standard";
+    public static final String M3MEDIUM_INSTANCE = "m3.medium";
+    public static final String GCP_INSTANCE = "n1-standard-1";
+    private static final String STANDARD_A6 = "Standard_A6";
+
     @InjectMocks
     private TemplateParametersValidator underTest;
 
@@ -75,7 +76,7 @@ public class TemplateParametersValidatorTest {
         templateJson.setDescription("description");
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), M3MEDIUM_INSTANCE);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0/0");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
@@ -91,7 +92,7 @@ public class TemplateParametersValidatorTest {
         templateJson.setDescription("description");
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), M3MEDIUM_INSTANCE);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "192.12.12.12/12");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
@@ -107,7 +108,7 @@ public class TemplateParametersValidatorTest {
         templateJson.setDescription("description");
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), M3MEDIUM_INSTANCE);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
@@ -123,7 +124,7 @@ public class TemplateParametersValidatorTest {
         templateJson.setDescription("description");
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), M3MEDIUM_INSTANCE);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0/0");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
@@ -140,7 +141,7 @@ public class TemplateParametersValidatorTest {
         templateJson.setDescription("description");
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), M3MEDIUM_INSTANCE);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0/0");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
@@ -157,7 +158,7 @@ public class TemplateParametersValidatorTest {
         templateJson.setDescription("description");
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), M3MEDIUM_INSTANCE);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0/0");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
@@ -174,7 +175,7 @@ public class TemplateParametersValidatorTest {
         templateJson.setDescription("description");
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), M3MEDIUM_INSTANCE);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "192.0.0.0/256");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
@@ -190,7 +191,7 @@ public class TemplateParametersValidatorTest {
         templateJson.setDescription("description");
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), M3MEDIUM_INSTANCE);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0/0");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
@@ -233,7 +234,7 @@ public class TemplateParametersValidatorTest {
         templateJson.setDescription("description");
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(AzureTemplateParam.VMTYPE.getName(), AzureVmType.A6.name());
+        parameters.put(AzureTemplateParam.VMTYPE.getName(), STANDARD_A6);
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(100);
         templateJson.setParameters(parameters);
@@ -248,7 +249,7 @@ public class TemplateParametersValidatorTest {
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(GcpTemplateParam.CONTAINERCOUNT.getName(), 1);
-        parameters.put(GcpTemplateParam.INSTANCETYPE.getName(), GcpInstanceType.G1_SMALL);
+        parameters.put(GcpTemplateParam.INSTANCETYPE.getName(), GCP_INSTANCE);
         parameters.put(GcpTemplateParam.TYPE.getName(), "invalid");
 
         templateJson.setVolumeCount(6);
@@ -298,7 +299,7 @@ public class TemplateParametersValidatorTest {
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(GcpTemplateParam.CONTAINERCOUNT.getName(), 1);
-        parameters.put(GcpTemplateParam.INSTANCETYPE.getName(), GcpInstanceType.G1_SMALL.name());
+        parameters.put(GcpTemplateParam.INSTANCETYPE.getName(), GCP_INSTANCE);
 
         templateJson.setVolumeCount(6);
         templateJson.setVolumeSize(30);
@@ -313,7 +314,7 @@ public class TemplateParametersValidatorTest {
         templateJson.setDescription("description");
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(GcpTemplateParam.INSTANCETYPE.getName(), GcpInstanceType.G1_SMALL.name());
+        parameters.put(GcpTemplateParam.INSTANCETYPE.getName(), GCP_INSTANCE);
         parameters.put(GcpTemplateParam.TYPE.getName(), HDD);
 
         templateJson.setVolumeCount(6);
@@ -330,7 +331,7 @@ public class TemplateParametersValidatorTest {
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(GcpTemplateParam.CONTAINERCOUNT.getName(), 1);
-        parameters.put(GcpTemplateParam.INSTANCETYPE.getName(), GcpInstanceType.G1_SMALL.name());
+        parameters.put(GcpTemplateParam.INSTANCETYPE.getName(), GCP_INSTANCE);
         parameters.put(GcpTemplateParam.TYPE.getName(), HDD);
 
         templateJson.setVolumeCount(6);

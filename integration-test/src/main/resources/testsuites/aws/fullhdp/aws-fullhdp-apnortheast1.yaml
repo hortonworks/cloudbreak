@@ -14,7 +14,7 @@ tests:
   - name: create gateway template
     parameters: {
       awsTemplateName: it-aws-fullhdp-gateway1,
-      awsInstanceType: M3Medium,
+      awsInstanceType: m3.medium,
       awsVolumeType: standard,
       awsVolumeCount: 1,
       awsVolumeSize: 30,
@@ -26,7 +26,7 @@ tests:
   - name: create master1 template
     parameters: {
       awsTemplateName: it-aws-fullhdp-master1,
-      awsInstanceType: C3Large,
+      awsInstanceType: c3.large,
       awsVolumeType: ephemeral,
       awsVolumeCount: 2,
       awsVolumeSize: 16,
@@ -38,7 +38,7 @@ tests:
   - name: create master2 template
     parameters: {
       awsTemplateName: it-aws-fullhdp-master2,
-      awsInstanceType: M3Large,
+      awsInstanceType: m3.large,
       awsVolumeType: gp2,
       awsVolumeCount: 3,
       awsVolumeSize: 160,
@@ -50,7 +50,7 @@ tests:
   - name: create master3 template
     parameters: {
       awsTemplateName: it-aws-fullhdp-master3,
-      awsInstanceType: C32xlarge,
+      awsInstanceType: c3.2xlarge,
       awsVolumeType: ephemeral,
       awsVolumeCount: 2,
       awsVolumeSize: 80,
@@ -62,7 +62,7 @@ tests:
   - name: create master4 template
     parameters: {
       awsTemplateName: it-aws-fullhdp-master4,
-      awsInstanceType: I2Xlarge,
+      awsInstanceType: i2.xlarge,
       awsVolumeType: standard,
       awsVolumeCount: 4,
       awsVolumeSize: 160,
@@ -74,7 +74,7 @@ tests:
   - name: create slave template
     parameters: {
       awsTemplateName: it-aws-fullhdp-slave1,
-      awsInstanceType: R32xlarge,
+      awsInstanceType: r3.2xlarge,
       awsVolumeType: gp2,
       awsVolumeCount: 3,
       awsVolumeSize: 200,

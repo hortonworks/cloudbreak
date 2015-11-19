@@ -24,7 +24,7 @@ public class AwsTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
 
     @Test
     @Parameters({ "awsTemplateName", "awsInstanceType", "awsVolumeType", "awsVolumeCount", "awsVolumeSize" })
-    public void testAwsTemplateCreation(@Optional("it-aws-template") String awsTemplateName, @Optional("T2Medium") String awsInstanceType,
+    public void testAwsTemplateCreation(@Optional("it-aws-template") String awsTemplateName, @Optional("m3.medium") String awsInstanceType,
             @Optional("standard") String awsVolumeType, @Optional("1") String awsVolumeCount, @Optional("10") String awsVolumeSize) throws Exception {
         // GIVEN
         // WHEN

@@ -13,7 +13,6 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.ec2.model.InstanceType;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
@@ -87,14 +86,14 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private Collection<VmType> virtualMachines() {
         Collection<VmType> vms = Lists.newArrayList();
-        for (InstanceType instanceType : InstanceType.values()) {
-            vms.add(VmType.vmType(instanceType.toString()));
+        for (AwsInstanceType instanceType : AwsInstanceType.values()) {
+            vms.add(VmType.vmTypeWithMeta(instanceType.toString(), instanceType.getMeta()));
         }
         return vms;
     }
 
     private VmType defaultVirtualMachine() {
-        return VmType.vmType(InstanceType.M1Large.toString());
+        return VmType.vmType(AwsInstanceType.M3Large.toString());
     }
 
     private enum AwsDiskType {

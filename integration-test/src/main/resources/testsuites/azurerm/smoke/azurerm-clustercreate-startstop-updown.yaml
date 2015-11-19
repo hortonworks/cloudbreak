@@ -19,7 +19,7 @@ tests:
   - name: create gateway template
     parameters: {
       azureTemplateName: it-azurerm-smoke-gateway-ssud,
-      azureVmType: STANDARD_D3,
+      azureVmType: Standard_D3,
       azureVolumeCount: 1,
       azureVolumeSize: 50,
       templateAdditions: "cbgateway,1,GATEWAY"
@@ -30,7 +30,7 @@ tests:
   - name: create master template
     parameters: {
       azureTemplateName: it-azurerm-smoke-master-ssud,
-      azureVmType: STANDARD_D4,
+      azureVmType: Standard_D4,
       azureVolumeCount: 2,
       azureVolumeSize: 100,
       templateAdditions: "master,1"
@@ -41,7 +41,7 @@ tests:
   - name: create slave template
     parameters: {
       azureTemplateName: it-azurerm-smoke-slave-ssud,
-      azureVmType: STANDARD_D11,
+      azureVmType: Standard_D11,
       azureVolumeCount: 3,
       azureVolumeSize: 200,
       templateAdditions: "slave_1,3"

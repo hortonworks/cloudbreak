@@ -4,8 +4,8 @@
   "parameters":
   {
     "sshLocation":"0.0.0.0/0",
-    "instanceType":"M3Large",
-    "volumeType":"Standard",
+    "instanceType":"m3.large",
+    "volumeType":"standard",
     "encrypted":true,
     "spotPrice":0.1
   },

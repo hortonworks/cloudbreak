@@ -8,10 +8,10 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.controller.json.TemplateResponse;
 import com.sequenceiq.cloudbreak.controller.validation.AzureTemplateParam;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.common.type.AzureVmType;
 
 public class AzureTemplateToJsonConverterTest extends AbstractEntityConverterTest<AzureTemplate> {
 
+    private static final String STANDARD_A5 = "Standard_A5";
     private AzureTemplateToJsonConverter underTest = new AzureTemplateToJsonConverter();
 
     public void setUp() {
@@ -24,7 +24,7 @@ public class AzureTemplateToJsonConverterTest extends AbstractEntityConverterTes
         // WHEN
         TemplateResponse result = underTest.convert(getSource());
         // THEN
-        assertEquals(AzureVmType.A5.toString(), result.getParameters().get(AzureTemplateParam.VMTYPE.getName()));
+        assertEquals(STANDARD_A5, result.getParameters().get(AzureTemplateParam.VMTYPE.getName()));
         assertAllFieldsNotNull(result);
     }
 

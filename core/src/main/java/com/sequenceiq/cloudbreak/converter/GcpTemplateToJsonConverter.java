@@ -24,7 +24,7 @@ public class GcpTemplateToJsonConverter extends AbstractConversionServiceAwareCo
         gcpTemplateJson.setDescription(entity.getDescription());
         gcpTemplateJson.setPublicInAccount(entity.isPublicInAccount());
         Map<String, Object> props = new HashMap<>();
-        putProperty(props, GcpTemplateParam.INSTANCETYPE.getName(), entity.getGcpInstanceType());
+        putProperty(props, GcpTemplateParam.INSTANCETYPE.getName(), entity.getInstanceType());
         putProperty(props, GcpTemplateParam.TYPE.getName(), entity.getGcpRawDiskType());
         gcpTemplateJson.setParameters(props);
         gcpTemplateJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());

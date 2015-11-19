@@ -76,6 +76,8 @@ public abstract class Template {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
+    private String instanceType;
+
     private String owner;
     private String account;
 
@@ -94,8 +96,6 @@ public abstract class Template {
     }
 
     public abstract CloudPlatform cloudPlatform();
-
-    public abstract String getInstanceTypeName();
 
     public abstract String getVolumeTypeName();
 
@@ -177,5 +177,13 @@ public abstract class Template {
 
     public void setStatus(ResourceStatus status) {
         this.status = status;
+    }
+
+    public String getInstanceType() {
+        return instanceType;
+    }
+
+    public void setInstanceType(String instanceType) {
+        this.instanceType = instanceType;
     }
 }
