@@ -41,6 +41,18 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                     value: "us-central1-f",
                     cloud: 'GCP'
                 }, {
+                    key: 'US_EAST1_B',
+                    value: "us-east1-b",
+                    cloud: 'GCP'
+                }, {
+                    key: 'US_EAST1_C',
+                    value: "us-east1-c",
+                    cloud: 'GCP'
+                }, {
+                    key: 'US_EAST1_D',
+                    value: "us-east1-d",
+                    cloud: 'GCP'
+                },{
                     key: 'EUROPE_WEST1_B',
                     value: "europe-west1-b",
                     cloud: 'GCP'
