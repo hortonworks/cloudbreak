@@ -55,20 +55,20 @@ public class ServiceProviderCredentialAdapter implements CredentialHandler<Crede
         eventBus.notify(request.selector(), Event.wrap(request));
         try {
             CredentialVerificationResult res = request.await();
+            String message = "Failed to verify the credential: ";
             LOGGER.info("Result: {}", res);
             if (res.getStatus() != EventStatus.OK) {
-                LOGGER.error("Failed to verify the credential", res.getErrorDetails());
-                throw new OperationException(res.getErrorDetails());
+                LOGGER.error(message, res.getErrorDetails());
+                throw new BadRequestException(message + res.getErrorDetails(), res.getErrorDetails());
             }
             if (CredentialStatus.FAILED.equals(res.getCloudCredentialStatus().getStatus())) {
-                throw new BadRequestException("Failed to verify the credential: " + res.getCloudCredentialStatus().getStatusReason(),
+                throw new BadRequestException(message + res.getCloudCredentialStatus().getStatusReason(),
                         res.getCloudCredentialStatus().getException());
             }
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing credential verification", e);
             throw new OperationException(e);
         }
-
         return credential;
     }
 

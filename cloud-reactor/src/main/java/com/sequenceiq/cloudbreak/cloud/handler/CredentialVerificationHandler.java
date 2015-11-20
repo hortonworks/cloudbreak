@@ -8,10 +8,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationException;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 
 import reactor.bus.Event;
 
@@ -34,8 +36,21 @@ public class CredentialVerificationHandler implements CloudPlatformEventHandler<
         CredentialVerificationRequest request = createCredentialRequestEvent.getData();
         try {
             CloudConnector connector = cloudPlatformConnectors.getDefault(request.getCloudContext().getPlatform());
-            AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
-            CloudCredentialStatus cloudCredentialStatus = connector.credentials().verify(ac);
+            AuthenticatedContext ac = null;
+            CloudCredentialStatus cloudCredentialStatus = null;
+            try {
+                ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
+                cloudCredentialStatus = connector.credentials().verify(ac);
+            } catch (CredentialVerificationException e) {
+                String errorMessage = e.getMessage();
+                LOGGER.error(errorMessage, e);
+                cloudCredentialStatus = new CloudCredentialStatus(request.getCloudCredential(), CredentialStatus.FAILED, e, errorMessage);
+            } catch (Exception e) {
+                String errorMessage = String.format("Could not verify credential [credential: '%s'], detailed message: %s",
+                        request.getCloudContext().getName(), e.getMessage());
+                LOGGER.error(errorMessage, e);
+                cloudCredentialStatus = new CloudCredentialStatus(request.getCloudCredential(), CredentialStatus.FAILED, e, errorMessage);
+            }
             CredentialVerificationResult credentialVerificationResult = new CredentialVerificationResult(request, cloudCredentialStatus);
             request.getResult().onNext(credentialVerificationResult);
             LOGGER.info("Credential verification successfully finished");
