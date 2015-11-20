@@ -58,7 +58,7 @@ migrate-execute-mybatis-migrations() {
     )
     docker-kill-by-name "sidekick-migrate-$service_name"
 
-    if [[ ! "${migrateResult}" ]] || grep -q "MyBatis Migrations SUCCESS" <<< "${migrateResult}"; then
+    if grep -q "MyBatis Migrations SUCCESS" <<< "${migrateResult}"; then
         info "Migration SUCCESS: $service_name $@"
     else
         error "Migration failed: $service_name $@"
