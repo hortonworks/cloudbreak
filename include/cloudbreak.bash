@@ -1,6 +1,6 @@
 
 cloudbreak-config() {
-  : ${BRIDGE_IP:=$(docker run alpine sh -c 'ip ro | grep default | cut -d" " -f 3';docker-kill-last)}
+  : ${BRIDGE_IP:=$(docker run --name sidekick-bridge alpine sh -c 'ip ro | grep default | cut -d" " -f 3';docker-kill-by-name sidekick-bridge)}
   env-import PRIVATE_IP $BRIDGE_IP
   cloudbreak-conf-tags
   cloudbreak-conf-images
@@ -66,7 +66,7 @@ cloudbreak-conf-consul() {
 
     env-import DOCKER_CONSUL_OPTIONS ""
     if ! [[ $DOCKER_CONSUL_OPTIONS =~ .*recursor.* ]]; then
-        DOCKER_CONSUL_OPTIONS="$DOCKER_CONSUL_OPTIONS $(consul-recursors <(docker run --net=host alpine cat /etc/resolv.conf ;docker-kill-last) ${BRIDGE_IP} $(docker-ip))"
+        DOCKER_CONSUL_OPTIONS="$DOCKER_CONSUL_OPTIONS $(consul-recursors <(docker run --name sidekick-recursor --net=host alpine cat /etc/resolv.conf ;docker-kill-by-name sidekick-recursor) ${BRIDGE_IP} $(docker-ip))"
     fi
     debug "DOCKER_CONSUL_OPTIONS=$DOCKER_CONSUL_OPTIONS"
     cloudbreakConfConsulExecuted=1
@@ -221,7 +221,7 @@ _cloudbreak-shell() {
         -v $PWD:/data \
         sequenceiq/cb-shell:$DOCKER_TAG_CLOUDBREAK_SHELL
 
-    docker-kill-last
+    docker-kill-by-name cloudbreak-shell
 }
 
 gen-password() {
@@ -234,8 +234,8 @@ cloudbreak-generate-cert() {
       debug "Cloudbreak certificate and private key already exist, won't generate new ones."
     else
       info "Generating Cloudbreak client certificate and private key in ${CBD_CERT_ROOT_PATH}."
-      docker run -v ${CBD_CERT_ROOT_PATH}:/certs ehazlett/cert-tool:${DOCKER_TAG_CERT_TOOL} -d /certs -o=local &> /dev/null
-      docker-kill-last
+      docker run --name sidekick-certs -v ${CBD_CERT_ROOT_PATH}:/certs ehazlett/cert-tool:${DOCKER_TAG_CERT_TOOL} -d /certs -o=local &> /dev/null
+      docker-kill-by-name sidekick-certs
       owner=$(ls -od ${CBD_CERT_ROOT_PATH} | tr -s ' ' | cut -d ' ' -f 3)
       [[ "$owner" != "$(whoami)" ]] && sudo chown -R $(whoami):$(id -gn) ${CBD_CERT_ROOT_PATH}
       cat "${CBD_CERT_ROOT_PATH}/ca.pem" >> "${CBD_CERT_ROOT_PATH}/client.pem"

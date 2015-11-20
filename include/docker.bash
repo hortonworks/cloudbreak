@@ -133,7 +133,7 @@ docker-check-version() {
     docker-check-server-version
 }
 
-docker-kill-last() {
-    ( docker rm -f $(docker ps -ql) & ) &>/dev/null
+docker-kill-by-name() {
+    ( docker rm -f ${1:? container name required} & ) &>/dev/null
 }
 
