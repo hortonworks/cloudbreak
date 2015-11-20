@@ -14,8 +14,6 @@ import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-import reactor.rx.Promise;
-import reactor.rx.Promises;
 
 @Component
 public class ResourceNotifier implements PersistenceNotifier {
@@ -25,29 +23,26 @@ public class ResourceNotifier implements PersistenceNotifier {
     private EventBus eventBus;
 
     @Override
-    public Promise<ResourcePersisted> notifyAllocation(CloudResource cloudResource, CloudContext cloudContext) {
-        Promise<ResourcePersisted> promise = Promises.prepare();
-        ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, promise, ResourceNotificationType.CREATE);
+    public ResourcePersisted notifyAllocation(CloudResource cloudResource, CloudContext cloudContext) {
+        ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, ResourceNotificationType.CREATE);
         LOGGER.info("Sending resource allocation notification: {}, context: {}", notification, cloudContext);
         eventBus.notify("resource-persisted", Event.wrap(notification));
-        return promise;
+        return notification.getResult();
     }
 
     @Override
-    public Promise<ResourcePersisted> notifyUpdate(CloudResource cloudResource, CloudContext cloudContext) {
-        Promise<ResourcePersisted> promise = Promises.prepare();
-        ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, promise, ResourceNotificationType.UPDATE);
+    public ResourcePersisted notifyUpdate(CloudResource cloudResource, CloudContext cloudContext) {
+        ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, ResourceNotificationType.UPDATE);
         LOGGER.info("Sending resource update notification: {}, context: {}", notification, cloudContext);
         eventBus.notify("resource-persisted", Event.wrap(notification));
-        return promise;
+        return notification.getResult();
     }
 
     @Override
-    public Promise<ResourcePersisted> notifyDeletion(CloudResource cloudResource, CloudContext cloudContext) {
-        Promise<ResourcePersisted> promise = Promises.prepare();
-        ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, promise, ResourceNotificationType.DELETE);
+    public ResourcePersisted notifyDeletion(CloudResource cloudResource, CloudContext cloudContext) {
+        ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, ResourceNotificationType.DELETE);
         LOGGER.info("Sending resource deletion notification: {}, context: {}", notification, cloudContext);
         eventBus.notify("resource-persisted", Event.wrap(notification));
-        return promise;
+        return notification.getResult();
     }
 }

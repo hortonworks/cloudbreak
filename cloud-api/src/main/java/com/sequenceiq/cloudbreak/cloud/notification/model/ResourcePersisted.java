@@ -5,21 +5,25 @@ package com.sequenceiq.cloudbreak.cloud.notification.model;
  */
 public class ResourcePersisted {
 
-    private final ResourceNotification request;
+    private String statusReason;
 
-    public ResourcePersisted(ResourceNotification request) {
-        this.request = request;
+    private Exception exception;
+
+    public ResourcePersisted() {
+
     }
 
-    public ResourceNotification getRequest() {
-        return request;
+    public ResourcePersisted(String statusReason, Exception exception) {
+        this.statusReason = statusReason;
+        this.exception = exception;
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("ResourcePersisted{");
-        sb.append("request=").append(request);
-        sb.append('}');
-        return sb.toString();
+
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public Exception getException() {
+        return exception;
     }
 }

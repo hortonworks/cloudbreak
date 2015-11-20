@@ -80,7 +80,7 @@ public class NetworkResourceService {
                         results.addAll(pollerResult);
                     }
                 }
-                resourceNotifier.notifyDeletion(resource, cloudContext).await();
+                resourceNotifier.notifyDeletion(resource, cloudContext);
             }
         }
         return results;
@@ -113,14 +113,14 @@ public class NetworkResourceService {
 
     protected CloudResource createResource(AuthenticatedContext auth, CloudResource buildableResource) throws Exception {
         if (buildableResource.isPersistent()) {
-            resourceNotifier.notifyAllocation(buildableResource, auth.getCloudContext()).await();
+            resourceNotifier.notifyAllocation(buildableResource, auth.getCloudContext());
         }
         return buildableResource;
     }
 
     protected CloudResource updateResource(AuthenticatedContext auth, CloudResource buildableResource) throws Exception {
         if (buildableResource.isPersistent()) {
-            resourceNotifier.notifyUpdate(buildableResource, auth.getCloudContext()).await();
+            resourceNotifier.notifyUpdate(buildableResource, auth.getCloudContext());
         }
         return buildableResource;
     }

@@ -72,7 +72,7 @@ public class ResourceDeleteThread implements Callable<ResourceRequestResult<List
     }
 
     private void deleteResource() throws InterruptedException {
-        resourceNotifier.notifyDeletion(resource, auth.getCloudContext()).await();
+        resourceNotifier.notifyDeletion(resource, auth.getCloudContext());
     }
 
 }

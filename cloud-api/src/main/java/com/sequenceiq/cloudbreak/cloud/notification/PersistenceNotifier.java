@@ -4,11 +4,9 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 
-import reactor.rx.Promise;
 
 /**
  * When the Cloud provider allocates a resource (e.g starts a VM, or creates a disk) then it notifies the Cloudbreak through this interface.
- * The interface can be used in synch and also in asych way, synhronisation for the returned {@link Promise} with the {@link Promise#await()} method call.
  * <p/>
  * Note: if the Cloud provider fails not send a notificayion then the resource (e.g VM, disk, etc.) will not be managed by Cloudbreak.
  */
@@ -21,7 +19,7 @@ public interface PersistenceNotifier {
      * @param cloudContext  the context containing information to identify which stack (cluster) is affected
      * @return status of persisted resource
      */
-    Promise<ResourcePersisted> notifyAllocation(CloudResource cloudResource, CloudContext cloudContext);
+    ResourcePersisted notifyAllocation(CloudResource cloudResource, CloudContext cloudContext);
 
     /**
      * Inform Cloudbreak about a resource has been updated
@@ -30,7 +28,7 @@ public interface PersistenceNotifier {
      * @param cloudContext  the context containing information to identify which stack (cluster) is affected
      * @return status of update resource
      */
-    Promise<ResourcePersisted> notifyUpdate(CloudResource cloudResource, CloudContext cloudContext);
+    ResourcePersisted notifyUpdate(CloudResource cloudResource, CloudContext cloudContext);
 
     /**
      * Inform Cloudbreak about a resource has been deleted
@@ -39,6 +37,6 @@ public interface PersistenceNotifier {
      * @param cloudContext  the context containing information to identify which stack (cluster) is affected
      * @return status of deleted resource
      */
-    Promise<ResourcePersisted> notifyDeletion(CloudResource cloudResource, CloudContext cloudContext);
+    ResourcePersisted notifyDeletion(CloudResource cloudResource, CloudContext cloudContext);
 
 }

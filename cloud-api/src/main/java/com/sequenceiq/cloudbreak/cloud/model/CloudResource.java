@@ -3,11 +3,10 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.cloudbreak.common.type.CommonStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
-
-import reactor.core.support.Assert;
 
 /**
  * Cloudbreak handles the entities on the Cloud provider side as Generic resources, and this class represent a generic resource.
@@ -108,10 +107,10 @@ public class CloudResource extends DynamicModel {
         }
 
         public CloudResource build() {
-            Assert.notNull(type);
-            Assert.notNull(status);
-            Assert.notNull(name);
-            Assert.notNull(parameters);
+            Preconditions.checkNotNull(type);
+            Preconditions.checkNotNull(status);
+            Preconditions.checkNotNull(name);
+            Preconditions.checkNotNull(parameters);
             return new CloudResource(type, status, name, reference, persistent, parameters);
         }
     }
