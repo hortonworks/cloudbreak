@@ -13,7 +13,7 @@ tests:
       gcpName: it-gcp-template-restest
       templateName: it-gcp-template-restest
       gcpInstanceType: N1_STANDARD_4
-      volumeType: HDD
+      volumeType: pd-standard
       volumeCount: 1
       volumeSize: 30
       templateAdditions: "gcp,1"
@@ -38,7 +38,7 @@ tests:
       awsTemplateName: it-aws-template-restest
       templateName: it-aws-template-restest
       awsInstanceType: M3Medium
-      awsVolumeType: Standard
+      awsVolumeType: standard
       awsVolumeCount: 1
       awsVolumeSize: 30
       templateAdditions: "aws,1"
