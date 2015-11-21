@@ -133,7 +133,7 @@ docker-check-version() {
     docker-check-server-version
 }
 
-docker-kill-by-name() {
+docker-kill-all-sidekicks() {
     ( docker rm -f ${1:? container name required} & ) &>/dev/null
 }
 

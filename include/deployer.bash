@@ -356,5 +356,5 @@ main() {
 	else
 		cmd-ns "" "$@"
 	fi
-
+    docker-kill-all-sidekicks
 }
