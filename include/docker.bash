@@ -134,6 +134,7 @@ docker-check-version() {
 }
 
 docker-kill-all-sidekicks() {
-    ( docker rm -f ${1:? container name required} & ) &>/dev/null
+    debug "kill all exited container labeled as: cbreak.sidekick"
+    ( docker rm -f $(docker ps -qa -f 'label=cbreak.sidekick' -f status=exited ) & ) &>/dev/null
 }
 
