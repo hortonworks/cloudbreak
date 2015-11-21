@@ -4,7 +4,7 @@ docker-check-boot2docker() {
     if [[ "$missing" ]]; then
         echo "[ERROR] boot2docker command not found, please install by:" | red
         echo "  brew install boot2docker" | blue
-        exit 127
+        _exit 127
     fi
 
     : << "UNTIL-BOOT2DOCKER-CLI-366-GET-MERGED"
@@ -14,12 +14,12 @@ docker-check-boot2docker() {
         else
             echo "[ERROR] boot2docker shell env is not set correctly, please run:" | red
             echo ' eval "$(boot2docker shellinit)"' | blue
-            exit 125
+            _exit 125
         fi
     else
         echo "[ERROR] boot2docker is not running, please start by:" | red
         echo "  boot2docker start" | blue
-        exit 126
+        _exit 126
     fi
 UNTIL-BOOT2DOCKER-CLI-366-GET-MERGED
     if [[ "$(boot2docker status)" == "running" ]]; then
@@ -28,12 +28,12 @@ UNTIL-BOOT2DOCKER-CLI-366-GET-MERGED
         else
             echo "[ERROR] boot2docker shell env is not set correctly, please run:" | red
             echo ' eval "$(boot2docker shellinit)"' | blue
-            exit 125
+            _exit 125
         fi
     else
         echo "[ERROR] boot2docker is not running, please start by:" | red
         echo "  boot2docker start" | blue
-        exit 126
+        _exit 126
     fi
 
     debug "TODO: check for version and instruction for update ..."
@@ -48,7 +48,7 @@ UNTIL-BOOT2DOCKER-CLI-366-GET-MERGED
         localDate=$(date -u +%Y-%m-%d\ %H:%M)
         if [[ "$localDate" != "$b2dDate" ]];then
             echo "Couldnt correct date in boot2docker, giving up" |red
-            exit 2
+            _exit 2
         else
              info "boot2docker date settings: OK" | green
         fi
@@ -78,7 +78,7 @@ docker-check-client-version() {
     docker --version &> /dev/null || local missing=1
     if [[ "$missing" ]]; then
         echo "[ERROR] docker command not found, please install docker. https://docs.docker.com/installation/" | red
-        exit 127
+        _exit 127
     fi
     info "docker command: OK"
 
@@ -91,7 +91,7 @@ docker-check-client-version() {
         echo "[ERROR] Please upgrade your docker version to 1.5.0 or latest" | red
         echo "suggested command:" | red
         echo "  sudo curl -Lo $target https://get.docker.com/builds/$(uname -s)/$(uname -m)/docker-latest ; chmod +x $target" | blue
-        exit 1
+        _exit 1
     fi
     info "docker client version: OK"
 }
@@ -101,7 +101,7 @@ docker-check-server-version() {
     if [[ "$noserver" ]]; then
         echo "[ERROR] docker version returned an error" | red
         cat /tmp/cbd.log | yellow
-        exit 127
+        _exit 127
     fi
 
     local numserver
@@ -121,7 +121,7 @@ docker-check-server-version() {
     if [ $numserver -lt 150 ]; then
         echo "[ERROR] Please upgrade your docker version to 1.5.0 or latest" | red
         echo "[WARNING] your local docker seems to be fine, only the server version is outdated" | yellow
-        exit 1
+        _exit 1
     fi
     info "docker server version: OK"
 }

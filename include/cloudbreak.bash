@@ -291,7 +291,7 @@ generate_uaa_config() {
             warn "Please check the expected config changes with:"
             echo "  cbd doctor" | blue
             debug "If you want to ignore the changes, set the CBD_FORCE_START to true in Profile"
-            exit 1
+            _exit 1
         fi
     else
         info "generating uaa.yml"
@@ -389,7 +389,7 @@ util-local-dev() {
 
     if [ "$CB_SCHEMA_SCRIPTS_LOCATION" = "container" ]; then
       warn "CB_SCHEMA_SCRIPTS_LOCATION environment variable must be set and points to the cloudbreak project's schema location"
-      exit 127
+      _exit 127
     fi
 
     debug stopping original cloudbreak container

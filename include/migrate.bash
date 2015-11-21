@@ -110,7 +110,7 @@ migrate() {
     execute-migration
     if grep "MyBatis Migrations FAILURE" "$DB_MIGRATION_LOG" ; then
         error "Migration is failed, please check the log: $DB_MIGRATION_LOG"
-        exit 127
+        _exit 127
     fi
 }
 

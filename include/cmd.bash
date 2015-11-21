@@ -63,7 +63,7 @@ cmd-ns() {
 			#done
 		done
 		echo
-		exit $status
+		_exit $status
 	fi
 }
 

@@ -150,7 +150,7 @@ init-profile() {
                 echo "echo export PUBLIC_IP=1.2.3.4 > $CBD_PROFILE" | blue
             fi
         fi
-        exit 2
+        _exit 2
     fi
 
     doctor
@@ -190,7 +190,7 @@ doctor() {
           info "deployer location: OK"
         else
           error "Please relocate deployer under your home folder. On OSX other locations are not supported."
-          exit 1
+          _exit 1
         fi
     fi
 
@@ -286,6 +286,11 @@ start-and-migrate-cmd() {
     echo "  $ULU_HOST_ADDRESS" | blue
     warn "Credentials are not printed here. You can get them by:"
     echo '  cbd login' | blue
+}
+
+_exit() {
+    docker-kill-all-sidekicks
+    exit $1
 }
 
 main() {

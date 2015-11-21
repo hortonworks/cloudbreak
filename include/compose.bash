@@ -67,7 +67,7 @@ util-cleanup() {
 
     if [ ! -f docker-compose.yml ]; then
       error "docker-compose.yml file does not exists"
-      exit 126
+      _exit 126
     fi
 
     compose-remove-exited-containers
@@ -162,7 +162,7 @@ compose-generate-yaml() {
             warn "Please check the expected config changes with:"
             echo "  cbd doctor" | blue
             debug "If you want to ignore the changes, set the CBD_FORCE_START to true in Profile"
-            exit 1
+            _exit 1
         fi
     else
         info "generating docker-compose.yml"
