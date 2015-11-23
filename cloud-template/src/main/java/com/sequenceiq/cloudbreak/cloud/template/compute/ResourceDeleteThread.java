@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudNotificationException;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -71,8 +72,8 @@ public class ResourceDeleteThread implements Callable<ResourceRequestResult<List
         return new ResourceRequestResult<>(FutureResult.SUCCESS, asList(status));
     }
 
-    private void deleteResource() throws InterruptedException {
-        resourceNotifier.notifyDeletion(resource, auth.getCloudContext()).await();
+    private void deleteResource() throws InterruptedException, CloudNotificationException {
+        resourceNotifier.notifyDeletion(resource, auth.getCloudContext());
     }
 
 }
