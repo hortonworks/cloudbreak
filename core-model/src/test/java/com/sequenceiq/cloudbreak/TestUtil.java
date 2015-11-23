@@ -17,51 +17,48 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
-import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
-import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.common.type.AwsEncryption;
 import com.sequenceiq.cloudbreak.common.type.AwsInstanceType;
+import com.sequenceiq.cloudbreak.common.type.AzureVmType;
+import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.GcpInstanceType;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.type.PluginExecutionType;
+import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.cloudbreak.common.type.Status;
+import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
+import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsNetwork;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.common.type.AwsVolumeType;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureNetwork;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.common.type.AzureVmType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.GcpCredential;
-import com.sequenceiq.cloudbreak.common.type.GcpInstanceType;
 import com.sequenceiq.cloudbreak.domain.GcpNetwork;
-import com.sequenceiq.cloudbreak.common.type.GcpRawDiskType;
 import com.sequenceiq.cloudbreak.domain.GcpTemplate;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
 import com.sequenceiq.cloudbreak.domain.OpenStackNetwork;
 import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
-import com.sequenceiq.cloudbreak.common.type.PluginExecutionType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.domain.Template;
 
 public class TestUtil {
@@ -183,7 +180,7 @@ public class TestUtil {
     public static Stack setEphemeral(Stack stack) {
         if (stack.cloudPlatform().equals(CloudPlatform.AWS)) {
             for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                ((AwsTemplate) instanceGroup.getTemplate()).setVolumeType(AwsVolumeType.Ephemeral);
+                ((AwsTemplate) instanceGroup.getTemplate()).setVolumeType("ephemeral");
             }
         }
         return stack;
@@ -378,7 +375,7 @@ public class TestUtil {
         awsTemplate.setId(id);
         awsTemplate.setVolumeCount(1);
         awsTemplate.setVolumeSize(100);
-        awsTemplate.setVolumeType(AwsVolumeType.Standard);
+        awsTemplate.setVolumeType("standard");
         awsTemplate.setId(1L);
         awsTemplate.setName(DUMMY_NAME);
         awsTemplate.setDescription(DUMMY_DESCRIPTION);
@@ -408,7 +405,7 @@ public class TestUtil {
         gcpTemplate.setId(id);
         gcpTemplate.setVolumeCount(1);
         gcpTemplate.setVolumeSize(100);
-        gcpTemplate.setGcpRawDiskType(GcpRawDiskType.SSD);
+        gcpTemplate.setGcpRawDiskType("pd-ssd");
         gcpTemplate.setDescription(DUMMY_DESCRIPTION);
         gcpTemplate.setPublicInAccount(true);
         gcpTemplate.setStatus(ResourceStatus.DEFAULT);
@@ -540,7 +537,7 @@ public class TestUtil {
         cloudbreakUsage.setInstanceType("xlarge");
         cloudbreakUsage.setOwner("owner");
         cloudbreakUsage.setProvider(CloudPlatform.AZURE.name());
-        cloudbreakUsage.setRegion(CloudRegion.CENTRAL_US.name());
+        cloudbreakUsage.setRegion("Central US");
         cloudbreakUsage.setStackName("usagestack");
         cloudbreakUsage.setStackId(1L);
         return cloudbreakUsage;

@@ -14,7 +14,7 @@ tests:
     parameters: {
       gcpName: it-gcp-full-gateway6,
       gcpInstanceType: N1_STANDARD_4,
-      volumeType: HDD,
+      volumeType: pd-standard,
       volumeCount: 1,
       volumeSize: 30,
       templateAdditions: "cbgateway,1,GATEWAY"
@@ -26,7 +26,7 @@ tests:
     parameters: {
       gcpName: it-gcp-full-master6,
       gcpInstanceType: N1_HIGHMEM_8,
-      volumeType: HDD,
+      volumeType: pd-standard,
       volumeCount: 2,
       volumeSize: 100,
       templateAdditions: "master,1"
@@ -38,7 +38,7 @@ tests:
     parameters: {
       gcpName: it-gcp-full-slave6,
       gcpInstanceType: N1_HIGHCPU_4,
-      volumeType: SSD,
+      volumeType: pd-ssd,
       volumeCount: 3,
       volumeSize: 500,
       templateAdditions: "slave_1,3"
@@ -49,7 +49,8 @@ tests:
   - name: create cluster
     parameters: {
       stackName: it-gcp-stack6,
-      region: EUROPE_WEST1_D,
+      region: europe-west1,
+      availabilityZone: europe-west1-d,
       clusterName: it-gcp-cluster6
     }
     classes:

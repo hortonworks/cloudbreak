@@ -7,6 +7,7 @@
   "eventTimestamp" : "1438090740000",
   "eventType" : "BILLING_STARTED",
   "region" : "us-east-1",
+  "availabilityZone" : "us-east-1b",
   "owner" : "ownerid",
   "stackId" : 150,
   "stackName" : "myStack",

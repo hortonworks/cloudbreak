@@ -41,6 +41,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
@@ -621,4 +623,13 @@ public class Stack implements ProvisionEntity {
     public void setComponents(Set<Component> components) {
         this.components = components;
     }
+
+    public String getMostSpecificZone() {
+        if (StringUtils.isNoneEmpty(availabilityZone)) {
+            return availabilityZone;
+        } else {
+            return region;
+        }
+    }
+
 }

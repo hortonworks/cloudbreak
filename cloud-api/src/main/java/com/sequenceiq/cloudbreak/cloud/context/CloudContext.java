@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.context;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 /**
  * Context object is used to identify messages exchanged between core and Cloud Platfrom. This context object passed along
@@ -12,15 +14,15 @@ public class CloudContext {
 
     private final Long id;
     private final String name;
-    private final String platform;
+    private final Platform platform;
     private final String owner;
-    private final String variant;
+    private final Variant variant;
     private final Location location;
 
     public CloudContext(Long id, String name, String platform, String owner) {
         this.id = id;
         this.name = name;
-        this.platform = platform;
+        this.platform = Platform.platform(platform);
         this.owner = owner;
         this.variant = null;
         this.location = null;
@@ -29,9 +31,9 @@ public class CloudContext {
     public CloudContext(Long id, String name, String platform, String owner, String variant, Location location) {
         this.id = id;
         this.name = name;
-        this.platform = platform;
+        this.platform = Platform.platform(platform);
         this.owner = owner;
-        this.variant = variant;
+        this.variant = Variant.variant(variant);
         this.location = location;
     }
 
@@ -43,11 +45,11 @@ public class CloudContext {
         return name;
     }
 
-    public String getPlatform() {
+    public Platform getPlatform() {
         return platform;
     }
 
-    public String getVariant() {
+    public Variant getVariant() {
         return variant;
     }
 

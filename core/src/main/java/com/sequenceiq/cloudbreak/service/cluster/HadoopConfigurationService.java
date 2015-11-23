@@ -16,11 +16,11 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
 public class HadoopConfigurationService {
@@ -29,12 +29,11 @@ public class HadoopConfigurationService {
     private HostGroupRepository hostGroupRepository;
     private Map<String, ServiceConfig> serviceConfigs = new HashMap<>();
     private Map<String, Map<String, String>> bpConfigs = new HashMap<>();
-    private ObjectMapper objectMapper = new ObjectMapper();
 
     @PostConstruct
     public void init() throws IOException {
         String serviceConfigJson = FileReaderUtils.readFileFromClasspath("hdp/service-config.json");
-        JsonNode services = objectMapper.readTree(serviceConfigJson).get("services");
+        JsonNode services = JsonUtil.readTree(serviceConfigJson).get("services");
         for (JsonNode service : services) {
             String serviceName = service.get("name").asText();
             JsonNode configurations = service.get("configurations");
@@ -55,7 +54,7 @@ public class HadoopConfigurationService {
         }
 
         String bpConfigJson = FileReaderUtils.readFileFromClasspath("hdp/bp-config.json");
-        JsonNode bps = objectMapper.readTree(bpConfigJson).get("sites");
+        JsonNode bps = JsonUtil.readTree(bpConfigJson).get("sites");
         for (JsonNode bp : bps) {
             String siteName = bp.get("name").asText();
             JsonNode configurations = bp.get("configurations");
@@ -71,8 +70,7 @@ public class HadoopConfigurationService {
 
     public Map<String, Map<String, String>> getGlobalConfiguration(Cluster cluster) throws IOException {
         Map<String, Map<String, String>> config = new HashMap<>();
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode blueprintNode = mapper.readTree(cluster.getBlueprint().getBlueprintText());
+        JsonNode blueprintNode = JsonUtil.readTree(cluster.getBlueprint().getBlueprintText());
         JsonNode hostGroups = blueprintNode.path("host_groups");
         for (JsonNode hostGroup : hostGroups) {
             JsonNode components = hostGroup.path("components");

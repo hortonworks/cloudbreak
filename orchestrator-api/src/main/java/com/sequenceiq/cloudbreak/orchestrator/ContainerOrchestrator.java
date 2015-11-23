@@ -46,13 +46,6 @@ public interface ContainerOrchestrator {
             KerberosConfiguration kerberosConfiguration, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 
-    void startBaywatchServer(ContainerOrchestratorCluster cluster, ContainerConfig containerConfig, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException;
-
-    void startBaywatchClients(ContainerOrchestratorCluster cluster, ContainerConfig containerConfig, String consulDomain, LogVolumePath logVolumePath,
-            String externServerLocation, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException;
-
     void startLogrotate(ContainerOrchestratorCluster cluster, ContainerConfig containerConfig, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 

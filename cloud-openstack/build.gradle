@@ -20,7 +20,7 @@ dependencies {
     compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: '3.3.2'
     compile group: 'org.springframework',           name: 'spring-context-support',         version: '4.0.3.RELEASE'
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
-    compile group: 'org.pacesys',                   name: 'openstack4j',                    version: '2.0.3'
+    compile group: 'org.pacesys',                   name: 'openstack4j',                    version: '2.0.6'
     compile group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
     compile group: 'commons-codec',                 name: 'commons-codec',                  version: '1.10'
 
@@ -29,3 +29,4 @@ dependencies {
     testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: '1.1.8.RELEASE'
     testCompile group: 'junit',                     name: 'junit',                          version: '4.12'
 }
+

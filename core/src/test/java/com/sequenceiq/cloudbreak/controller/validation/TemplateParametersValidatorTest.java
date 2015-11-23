@@ -31,16 +31,15 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.google.common.collect.ImmutableList;
-import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 import com.sequenceiq.cloudbreak.common.type.AzureVmType;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.type.GcpDiskType;
 import com.sequenceiq.cloudbreak.common.type.GcpInstanceType;
-import com.sequenceiq.cloudbreak.common.type.GcpRawDiskType;
+import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TemplateParametersValidatorTest {
 
+    public static final String HDD = "pd-standard";
     @InjectMocks
     private TemplateParametersValidator underTest;
 
@@ -58,15 +57,15 @@ public class TemplateParametersValidatorTest {
                         new ParametersRequiredValidator(),
                         new ParametersTypeValidator(),
                         new ParametersRegexValidator()
-                        )
-                );
+                )
+        );
         given(constraintValidatorContext.buildConstraintViolationWithTemplate(anyString())).willReturn(
                 new ConstraintValidatorContextImpl(
                         new ArrayList<String>(),
                         PathImpl.createRootPath(),
                         new DummyConstraintDescriptor()
                 ).buildConstraintViolationWithTemplate("dummytemplate")
-                );
+        );
     }
 
     @Test
@@ -80,7 +79,7 @@ public class TemplateParametersValidatorTest {
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0/0");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
-        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
+        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "gp2");
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), true);
     }
@@ -96,7 +95,7 @@ public class TemplateParametersValidatorTest {
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "192.12.12.12/12");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
-        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
+        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "gp2");
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), true);
     }
@@ -112,7 +111,7 @@ public class TemplateParametersValidatorTest {
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
-        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
+        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "gp2");
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
     }
@@ -128,7 +127,7 @@ public class TemplateParametersValidatorTest {
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0/0");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
-        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
+        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "gp2");
         parameters.put(AwsTemplateParam.SPOT_PRICE.getName(), Integer.valueOf(1));
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), true);
@@ -145,7 +144,7 @@ public class TemplateParametersValidatorTest {
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0/0");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
-        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
+        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "gp2");
         parameters.put(AwsTemplateParam.SPOT_PRICE.getName(), "apple");
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
@@ -162,7 +161,7 @@ public class TemplateParametersValidatorTest {
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0/0");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
-        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
+        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "gp2");
         parameters.put(AwsTemplateParam.SPOT_PRICE.getName(), Double.valueOf(1.2));
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), true);
@@ -179,7 +178,7 @@ public class TemplateParametersValidatorTest {
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "192.0.0.0/256");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
-        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
+        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "gp2");
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
     }
@@ -267,7 +266,7 @@ public class TemplateParametersValidatorTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(GcpTemplateParam.CONTAINERCOUNT.getName(), 1);
         parameters.put(GcpTemplateParam.INSTANCETYPE.getName(), "invalid");
-        parameters.put(GcpTemplateParam.TYPE.getName(), GcpDiskType.PERSISTENT.name());
+        parameters.put(GcpTemplateParam.TYPE.getName(), "PERSISTENT");
 
         templateJson.setVolumeCount(6);
         templateJson.setVolumeSize(30);
@@ -283,7 +282,7 @@ public class TemplateParametersValidatorTest {
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(GcpTemplateParam.CONTAINERCOUNT.getName(), 1);
-        parameters.put(GcpTemplateParam.TYPE.getName(), GcpDiskType.PERSISTENT.name());
+        parameters.put(GcpTemplateParam.TYPE.getName(), "PERSISTENT");
 
         templateJson.setVolumeCount(6);
         templateJson.setVolumeSize(30);
@@ -315,7 +314,7 @@ public class TemplateParametersValidatorTest {
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(GcpTemplateParam.INSTANCETYPE.getName(), GcpInstanceType.G1_SMALL.name());
-        parameters.put(GcpTemplateParam.TYPE.getName(), GcpRawDiskType.HDD.name());
+        parameters.put(GcpTemplateParam.TYPE.getName(), HDD);
 
         templateJson.setVolumeCount(6);
         templateJson.setVolumeSize(30);
@@ -332,7 +331,7 @@ public class TemplateParametersValidatorTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(GcpTemplateParam.CONTAINERCOUNT.getName(), 1);
         parameters.put(GcpTemplateParam.INSTANCETYPE.getName(), GcpInstanceType.G1_SMALL.name());
-        parameters.put(GcpTemplateParam.TYPE.getName(), GcpRawDiskType.HDD.name());
+        parameters.put(GcpTemplateParam.TYPE.getName(), HDD);
 
         templateJson.setVolumeCount(6);
         templateJson.setVolumeSize(30);

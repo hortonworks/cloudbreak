@@ -8,8 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 import com.sequenceiq.cloudbreak.controller.json.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
@@ -27,7 +25,6 @@ public class CloudbreakUsageToJsonConverter extends AbstractConversionServiceAwa
     public CloudbreakUsageJson convert(CloudbreakUsage entity) {
         CloudbreakUsageJson json = new CloudbreakUsageJson();
         String day = DATE_FORMAT.format(entity.getDay());
-        String zone = getZoneNameByProvider(entity.getProvider(), entity.getRegion());
         String cbUser = null;
         try {
             cbUser = userDetailsService.getDetails(entity.getOwner(), UserFilterField.USERID).getUsername();
@@ -38,7 +35,8 @@ public class CloudbreakUsageToJsonConverter extends AbstractConversionServiceAwa
         json.setOwner(entity.getOwner());
         json.setAccount(entity.getAccount());
         json.setProvider(entity.getProvider());
-        json.setRegion(zone);
+        json.setRegion(entity.getRegion());
+        json.setAvailabilityZone(entity.getAvailabilityZone());
         json.setInstanceHours(entity.getInstanceHours());
         json.setDay(day);
         json.setStackId(entity.getStackId());
@@ -50,18 +48,4 @@ public class CloudbreakUsageToJsonConverter extends AbstractConversionServiceAwa
         return json;
     }
 
-    private String getZoneNameByProvider(String cloud, String zoneFromUsage) {
-        String zone = "";
-        if (zoneFromUsage != null && CloudPlatform.AWS.name().equals(cloud)) {
-            CloudRegion transformedZone = CloudRegion.valueOf(zoneFromUsage);
-            zone = transformedZone.name();
-        } else if (zoneFromUsage != null && CloudPlatform.GCP.name().equals(cloud)) {
-            CloudRegion transformedZone = CloudRegion.valueOf(zoneFromUsage);
-            zone = transformedZone.name();
-        } else if (zoneFromUsage != null && CloudPlatform.AZURE.name().equals(cloud)) {
-            CloudRegion transformedZone = CloudRegion.valueOf(zoneFromUsage);
-            zone = transformedZone.name();
-        }
-        return zone;
-    }
 }

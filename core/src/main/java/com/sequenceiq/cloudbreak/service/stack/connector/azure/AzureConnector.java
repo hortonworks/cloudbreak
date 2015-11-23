@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -92,8 +93,8 @@ public class AzureConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public String checkAndGetPlatformVariant(Stack stack) {
-        return getCloudPlatform().name();
+    public Variant checkAndGetPlatformVariant(Stack stack) {
+        return Variant.variant(getCloudPlatform().name());
     }
 
     private <T extends AzureOperation.Builder> T buildAzureOperation(T builder, Stack stack) {

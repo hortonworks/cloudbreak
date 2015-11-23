@@ -15,7 +15,7 @@ tests:
     parameters: {
       gcpName: it-gcp-fullhdp-gateway1,
       gcpInstanceType: N1_STANDARD_4,
-      volumeType: HDD,
+      volumeType: pd-standard,
       volumeCount: 1,
       volumeSize: 30,
       templateAdditions: "cbgateway,1,GATEWAY;gateway,1"
@@ -27,7 +27,7 @@ tests:
     parameters: {
       gcpName: it-gcp-fullhdp-master1,
       gcpInstanceType: N1_HIGHMEM_8,
-      volumeType: HDD,
+      volumeType: pd-standard,
       volumeCount: 2,
       volumeSize: 100,
       templateAdditions: "master_1,1"
@@ -39,7 +39,7 @@ tests:
     parameters: {
       gcpName: it-gcp-fullhdp-master2,
       gcpInstanceType: N1_HIGHMEM_16,
-      volumeType: SSD,
+      volumeType: pd-ssd,
       volumeCount: 3,
       volumeSize: 200,
       templateAdditions: "master_2,1"
@@ -51,7 +51,7 @@ tests:
     parameters: {
       gcpName: it-gcp-fullhdp-master3,
       gcpInstanceType: N1_STANDARD_8,
-      volumeType: SSD,
+      volumeType: pd-ssd,
       volumeCount: 4,
       volumeSize: 50,
       templateAdditions: "master_3,1"
@@ -63,7 +63,7 @@ tests:
     parameters: {
       gcpName: it-gcp-fullhdp-master4,
       gcpInstanceType: N1_HIGHCPU_8,
-      volumeType: HDD,
+      volumeType: pd-standard,
       volumeCount: 1,
       volumeSize: 300,
       templateAdditions: "master_4,1"
@@ -75,7 +75,7 @@ tests:
     parameters: {
       gcpName: it-gcp-fullhdp-slave1,
       gcpInstanceType: N1_HIGHCPU_4,
-      volumeType: SSD,
+      volumeType: pd-ssd,
       volumeCount: 3,
       volumeSize: 500,
       templateAdditions: "slave_1,3"
@@ -86,7 +86,8 @@ tests:
   - name: create cluster
     parameters: {
       stackName: it-gcp-fullhdp-stack1,
-      region: ASIA_EAST1_A,
+      region: asia-east1,
+      availabilityZone: asia-east1-a,
       clusterName: it-gcp-fullhdp-cluster1
     }
     classes:

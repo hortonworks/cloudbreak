@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_AMBARI;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_AMBARI_DB;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_AMBARI_WARMUP;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_BAYWATCH_CLIENT;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_BAYWATCH_SERVER;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_DOCKER_CONSUL_WATCH_PLUGN;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_KERBEROS;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_LOGROTATE;
@@ -53,12 +51,6 @@ public class ContainerConfigService {
 
     @Value("${cb.docker.container.kerberos:" + CB_DOCKER_CONTAINER_KERBEROS + "}")
     private String kerberosDockerImageName;
-
-    @Value("${cb.docker.container.baywatch.server:" + CB_DOCKER_CONTAINER_BAYWATCH_SERVER + "}")
-    private String baywatchServerDockerImageName;
-
-    @Value("${cb.docker.container.baywatch.client:" + CB_DOCKER_CONTAINER_BAYWATCH_CLIENT + "}")
-    private String baywatchClientDockerImageName;
 
     @Value("${cb.docker.container.logrotate:" + CB_DOCKER_CONTAINER_LOGROTATE + "}")
     private String logrotateDockerImageName;
@@ -109,12 +101,6 @@ public class ContainerConfigService {
                     break;
                 case CONSUL_WATCH:
                     config = new GenericConfig.Builder(consulWatchPlugnDockerImageName).build();
-                    break;
-                case BAYWATCH_SERVER:
-                    config = new GenericConfig.Builder(baywatchServerDockerImageName).build();
-                    break;
-                case BAYWATCH_CLIENT:
-                    config = new GenericConfig.Builder(baywatchClientDockerImageName).build();
                     break;
                 case LOGROTATE:
                     config = new GenericConfig.Builder(logrotateDockerImageName).build();

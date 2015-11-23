@@ -17,7 +17,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
@@ -25,10 +25,10 @@ import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.GcpTemplate;
 import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
-import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
 public class SimpleTemplateLoaderService {
@@ -71,8 +71,7 @@ public class SimpleTemplateLoaderService {
                 try {
                     JsonNode jsonNode = jsonHelper.createJsonFromString(
                             FileReaderUtils.readFileFromClasspath(String.format("defaults/templates/%s.tmpl", templateName)));
-                    ObjectMapper mapper = new ObjectMapper();
-                    TemplateRequest templateRequest = mapper.treeToValue(jsonNode, TemplateRequest.class);
+                    TemplateRequest templateRequest = JsonUtil.treeToValue(jsonNode, TemplateRequest.class);
                     Template converted = null;
                     switch (templateRequest.getCloudPlatform()) {
                         case AWS:

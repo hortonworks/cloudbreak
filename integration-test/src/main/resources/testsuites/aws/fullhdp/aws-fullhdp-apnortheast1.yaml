@@ -15,7 +15,7 @@ tests:
     parameters: {
       awsTemplateName: it-aws-fullhdp-gateway1,
       awsInstanceType: M3Medium,
-      awsVolumeType: Standard,
+      awsVolumeType: standard,
       awsVolumeCount: 1,
       awsVolumeSize: 30,
       templateAdditions: "cbgateway,1,GATEWAY;gateway,1"
@@ -27,7 +27,7 @@ tests:
     parameters: {
       awsTemplateName: it-aws-fullhdp-master1,
       awsInstanceType: C3Large,
-      awsVolumeType: Ephemeral,
+      awsVolumeType: ephemeral,
       awsVolumeCount: 2,
       awsVolumeSize: 16,
       templateAdditions: "master_1,1"
@@ -39,7 +39,7 @@ tests:
     parameters: {
       awsTemplateName: it-aws-fullhdp-master2,
       awsInstanceType: M3Large,
-      awsVolumeType: Gp2,
+      awsVolumeType: gp2,
       awsVolumeCount: 3,
       awsVolumeSize: 160,
       templateAdditions: "master_2,1"
@@ -51,7 +51,7 @@ tests:
     parameters: {
       awsTemplateName: it-aws-fullhdp-master3,
       awsInstanceType: C32xlarge,
-      awsVolumeType: Ephemeral,
+      awsVolumeType: ephemeral,
       awsVolumeCount: 2,
       awsVolumeSize: 80,
       templateAdditions: "master_3,1"
@@ -63,7 +63,7 @@ tests:
     parameters: {
       awsTemplateName: it-aws-fullhdp-master4,
       awsInstanceType: I2Xlarge,
-      awsVolumeType: Standard,
+      awsVolumeType: standard,
       awsVolumeCount: 4,
       awsVolumeSize: 160,
       templateAdditions: "master_4,1"
@@ -75,7 +75,7 @@ tests:
     parameters: {
       awsTemplateName: it-aws-fullhdp-slave1,
       awsInstanceType: R32xlarge,
-      awsVolumeType: Gp2,
+      awsVolumeType: gp2,
       awsVolumeCount: 3,
       awsVolumeSize: 200,
       templateAdditions: "slave_1,3"
@@ -86,7 +86,7 @@ tests:
   - name: create cluster
     parameters: {
       stackName: it-aws-fullhdp-stack1,
-      region: AP_NORTHEAST_1,
+      region: ap-northeast-1,
       clusterName: it-aws-fullhdp-cluster1
     }
     classes:

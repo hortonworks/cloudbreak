@@ -12,7 +12,7 @@ tests:
 
   - name: create security group
     parameters:
-      name: restricted-ambari-aws
+      name: it-restricted-ambari-aws
     classes:
       - com.sequenceiq.it.cloudbreak.SecurityGroupCreationTest
 
@@ -20,7 +20,7 @@ tests:
     parameters: {
       awsTemplateName: it-aws-smoke-gateway-ssud,
       awsInstanceType: M3Medium,
-      awsVolumeType: Standard,
+      awsVolumeType: standard,
       awsVolumeCount: 1,
       awsVolumeSize: 30,
       templateAdditions: "cbgateway,1,GATEWAY"
@@ -32,7 +32,7 @@ tests:
     parameters: {
       awsTemplateName: it-aws-smoke-master-ssud,
       awsInstanceType: C3Large,
-      awsVolumeType: Gp2,
+      awsVolumeType: gp2,
       awsVolumeCount: 2,
       awsVolumeSize: 100,
       templateAdditions: "master,1"
@@ -44,7 +44,7 @@ tests:
     parameters: {
       awsTemplateName: it-aws-smoke-slave-ssud,
       awsInstanceType: R3Large,
-      awsVolumeType: Gp2,
+      awsVolumeType: gp2,
       awsVolumeCount: 3,
       awsVolumeSize: 200,
       templateAdditions: "slave_1,3"
@@ -55,7 +55,7 @@ tests:
   - name: create cluster
     parameters: {
       stackName: it-aws-stack-ssud,
-      region: EU_WEST_1,
+      region: eu-west-1,
       clusterName: it-aws-cluster-ssud
     }
     classes:

@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
@@ -33,7 +35,7 @@ public class OpenStackContextBuilder implements ResourceContextBuilder<OpenStack
         OSClient osClient = openStackClient.createOSClient(auth);
         KeystoneCredentialView credentialView = new KeystoneCredentialView(auth);
 
-        OpenStackContext openStackContext = new OpenStackContext(cloudContext.getName(), cloudContext.getLocation().getRegion().value(),
+        OpenStackContext openStackContext = new OpenStackContext(cloudContext.getName(), cloudContext.getLocation(),
                 PARALLEL_RESOURCE_REQUEST, build);
 
         openStackContext.putParameter(OpenStackConstants.TENANT_ID, osClient.identity().tenants().getByName(credentialView.getTenantName()).getId());
@@ -61,12 +63,12 @@ public class OpenStackContextBuilder implements ResourceContextBuilder<OpenStack
     }
 
     @Override
-    public String platform() {
-        return OpenStackConstants.OPENSTACK;
+    public Platform platform() {
+        return OpenStackConstants.OPENSTACK_PLATFORM;
     }
 
     @Override
-    public String variant() {
-        return OpenStackConstants.Variant.NATIVE.name();
+    public Variant variant() {
+        return OpenStackConstants.OpenStackVariant.NATIVE.variant();
     }
 }

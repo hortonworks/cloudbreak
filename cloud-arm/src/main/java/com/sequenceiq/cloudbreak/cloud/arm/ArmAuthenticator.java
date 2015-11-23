@@ -10,6 +10,8 @@ import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 @Service
 public class ArmAuthenticator implements Authenticator {
@@ -20,13 +22,13 @@ public class ArmAuthenticator implements Authenticator {
     private ArmClient armClient;
 
     @Override
-    public String platform() {
-        return ArmConstants.AZURE_RM;
+    public Platform platform() {
+        return ArmConstants.AZURE_RM_PLATFORM;
     }
 
     @Override
-    public String variant() {
-        return ArmConstants.AZURE_RM;
+    public Variant variant() {
+        return ArmConstants.AZURE_RM_VARIANT;
     }
 
     @Override

@@ -47,32 +47,27 @@ public class EnvironmentVariableConfig {
     public static final String CB_DOCKER_CONTAINER_DOCKER_CONSUL_WATCH_PLUGN = "sequenceiq/docker-consul-watch-plugn:1.0";
     public static final String CB_DOCKER_CONTAINER_AMBARI_DB = "postgres:9.4.1";
     public static final String CB_DOCKER_CONTAINER_KERBEROS = "sequenceiq/kerberos:2.1.0-consul";
-    public static final String CB_DOCKER_CONTAINER_BAYWATCH_SERVER = "sequenceiq/baywatch:v0.5.3";
-    public static final String CB_DOCKER_CONTAINER_BAYWATCH_CLIENT = "sequenceiq/baywatch-client:v1.0.0";
     public static final String CB_DOCKER_CONTAINER_LOGROTATE = "sequenceiq/logrotate:v0.5.1";
     public static final String CB_DOCKER_CONTAINER_MUNCHAUSEN = "sequenceiq/munchausen:0.5.5";
 
     public static final String CB_DOCKER_RELOCATE = "true";
 
-    public static final String CB_BAYWATCH_ENABLED = "true";
-    public static final String CB_BAYWATCH_EXTERN_LOCATION = "";
-
     public static final String CB_AZURE_IMAGE_NAME = "cb-centos71-amb212-2015-10-296_2015-October-29_13-7-os-2015-10-29.vhd";
     public static final String CB_AZURE_IMAGE_URI = "https://102589fae040d8westeurope.blob.core.windows.net/images/" + CB_AZURE_IMAGE_NAME;
     public static final String CB_AZURE_RM_IMAGE = new StringBuilder()
-            .append(String.format("EAST_ASIA:https://sequenceiqeastasia.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
-            .append(String.format("EAST_US:https://sequenceiqeastus.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
-            .append(String.format("CENTRAL_US:https://sequenceiqcentralus.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
-            .append(String.format("NORTH_EUROPE:https://sequenceiqnortheurope.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
-            .append(String.format("SOUTH_CENTRAL_US:https://sequenceiqsouthcentralus.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
-            .append(String.format("NORTH_CENTRAL_US:https://sequenceiqnorthcentralus.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
-            .append(String.format("EAST_US_2:https://sequenceiqeastus2.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
-            .append(String.format("JAPAN_EAST:https://sequenceiqjapaneast.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
-            .append(String.format("JAPAN_WEST:https://sequenceiqjapanwest.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
-            .append(String.format("SOUTHEAST_ASIA:https://sequenceiqsoutheastasia.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
-            .append(String.format("WEST_US:https://sequenceiqwestus.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
-            .append(String.format("WEST_EUROPE:https://sequenceiqwesteurope.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
-            .append(String.format("BRAZIL_SOUTH:https://sequenceiqbrazilsouth.blob.core.windows.net/images/%s", CB_AZURE_IMAGE_NAME))
+            .append(String.format("East Asia:https://sequenceiqeastasia.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("East US:https://sequenceiqeastus.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("Central US:https://sequenceiqcentralus.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("North Europe:https://sequenceiqnortheurope.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("South Central US:https://sequenceiqsouthcentralus.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("North Central US:https://sequenceiqnorthcentralus.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("East US 2:https://sequenceiqeastus2.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("Japan East:https://sequenceiqjapaneast.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("Japan West:https://sequenceiqjapanwest.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("Southeast Asia:https://sequenceiqsoutheastasia.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("West US:https://sequenceiqwestus.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("West Europe:https://sequenceiqwesteurope.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
+            .append(String.format("Brazil South:https://sequenceiqbrazilsouth.blob.core.windows.net/images/%s", CB_AZURE_IMAGE_NAME))
             .toString();
     public static final String CB_AWS_AMI_MAP = new StringBuilder()
             .append("ap-northeast-1:ami-4ea78120,")

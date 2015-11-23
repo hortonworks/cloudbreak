@@ -1,9 +1,5 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_BAYWATCH_ENABLED;
-import static com.sequenceiq.cloudbreak.service.network.ExposedService.ELASTIC_SEARCH;
-import static com.sequenceiq.cloudbreak.service.network.ExposedService.KIBANA;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,7 +9,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -39,9 +34,6 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
 
     private static final int SECONDS_PER_MINUTE = 60;
     private static final int MILLIS_PER_SECOND = 1000;
-
-    @Value("${cb.baywatch.enabled:" + CB_BAYWATCH_ENABLED + "}")
-    private Boolean baywatchEnabled;
 
     @Inject
     private BlueprintValidator blueprintValidator;
@@ -107,26 +99,10 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                     collectServicePorts(result, ports, next, componentDescriptor);
                 }
             }
-            if (ambariIp != null) {
-                collectLoggingPorts(ambariIp, result, ports);
-            }
         } catch (Exception ex) {
             return result;
         }
         return result;
-    }
-
-    private void collectLoggingPorts(String ambariIp, Map<String, String> result, List<Port> ports) {
-        if (baywatchEnabled) {
-            Optional<Port> kibana = getPortForService(KIBANA, ports);
-            if (kibana.isPresent()) {
-                result.put(kibana.get().getExposedService().getPortName(), String.format("%s:%s", ambariIp, kibana.get().getPort()));
-            }
-            Optional<Port> elasticSearch = getPortForService(ELASTIC_SEARCH, ports);
-            if (elasticSearch.isPresent()) {
-                result.put(elasticSearch.get().getExposedService().getPortName(), String.format("%s:%s", ambariIp, elasticSearch.get().getPort()));
-            }
-        }
     }
 
     private void collectServicePorts(Map<String, String> result, List<Port> ports, InstanceMetaData next, StackServiceComponentDescriptor componentDescriptor) {

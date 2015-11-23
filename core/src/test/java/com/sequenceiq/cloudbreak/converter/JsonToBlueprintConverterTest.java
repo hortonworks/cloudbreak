@@ -32,25 +32,7 @@ public class JsonToBlueprintConverterTest extends AbstractJsonConverterTest<Blue
         // THEN
         assertAllFieldsNotNull(result);
     }
-/*
-    TODO: test blueprint convert with source url
-    @Test
-    public void testConvertWithSourceUrl() throws IOException {
-        // GIVEN
-        String classPackage = getClass().getPackage().getName().replaceAll("\\.", "/");
-        Resource resource = new ClassPathResource(classPackage + "/" + "stack/ambari-blueprint.json");
-        String url = resource.getURL().toString().replace(":/", ":///");
-        ObjectMapper mapper = new ObjectMapper();
-        BlueprintRequest request = mapper.readValue(
-                "{\"name\":\"multi-node-hdfs-yarn\", \"description\":\"blueprint description\"," +
-                        "\"public\":true, \"url\": \"" + url + "\"}"
-                , BlueprintRequest.class);
-        // WHEN
-        Blueprint result = underTest.convert(request);
-        // THEN
-        assertAllFieldsNotNull(result);
-    }
-*/
+
     @Override
     public Class<BlueprintRequest> getRequestClass() {
         return BlueprintRequest.class;

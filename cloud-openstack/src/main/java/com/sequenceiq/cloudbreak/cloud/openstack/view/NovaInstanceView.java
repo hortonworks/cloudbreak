@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class NovaInstanceView {
 
@@ -56,7 +56,7 @@ public class NovaInstanceView {
 
     public String getMetadata() {
         try {
-            return new ObjectMapper().writeValueAsString(generateMetadata());
+            return JsonUtil.writeValueAsString(generateMetadata());
         } catch (JsonProcessingException e) {
             return generateMetadata().toString();
         }

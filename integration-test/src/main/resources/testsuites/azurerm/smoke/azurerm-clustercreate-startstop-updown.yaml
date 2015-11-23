@@ -12,7 +12,7 @@ tests:
 
   - name: create security group
     parameters:
-      name: restricted-ambari-arm
+      name: it-restricted-ambari-arm
     classes:
       - com.sequenceiq.it.cloudbreak.SecurityGroupCreationTest
 
@@ -52,7 +52,7 @@ tests:
   - name: create cluster
     parameters: {
       stackName: it-azurerm-stack-ssud,
-      region: WEST_EUROPE,
+      region: West Europe,
       clusterName: it-azurerm-cluster-ssud,
       sleepTime: 60000
     }

@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import javax.annotation.Resource;
-import javax.inject.Inject;
+import static com.sequenceiq.cloudbreak.util.JsonUtil.readValue;
+import static com.sequenceiq.cloudbreak.util.JsonUtil.writeValueAsString;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,7 +10,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -27,9 +33,6 @@ import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 @Service
 public class TerminationService {
@@ -101,9 +104,8 @@ public class TerminationService {
     private Map<String, String> deleteFileSystemResources(Long stackId, FileSystem fileSystem) {
         try {
             FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(FileSystemType.valueOf(fileSystem.getType()));
-            ObjectMapper mapper = new ObjectMapper();
-            String json = mapper.writeValueAsString(fileSystem.getProperties());
-            FileSystemConfiguration fsConfiguration = (FileSystemConfiguration) mapper.readValue(json, FileSystemType.valueOf(fileSystem.getType()).getClazz());
+            String json = writeValueAsString(fileSystem.getProperties());
+            FileSystemConfiguration fsConfiguration = (FileSystemConfiguration) readValue(json, FileSystemType.valueOf(fileSystem.getType()).getClazz());
             fsConfiguration.addProperty(FileSystemConfiguration.STORAGE_CONTAINER, "cloudbreak" + stackId);
             return fsConfigurator.deleteResources(fsConfiguration);
         } catch (IOException e) {

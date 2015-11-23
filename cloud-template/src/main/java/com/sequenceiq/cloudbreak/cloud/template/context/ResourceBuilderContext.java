@@ -8,30 +8,31 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
 public class ResourceBuilderContext extends DynamicModel {
 
-    private String region;
+    private Location location;
     private String name;
     private int parallelResourceRequest;
     private Queue<CloudResource> networkResources = new ConcurrentLinkedQueue<>();
     private Map<Long, List<CloudResource>> computeResources = new HashMap<>();
     private boolean build;
 
-    public ResourceBuilderContext(String name, String region, int parallelResourceRequest, boolean build) {
-        this(name, region, parallelResourceRequest);
+    public ResourceBuilderContext(String name, Location location, int parallelResourceRequest, boolean build) {
+        this(name, location, parallelResourceRequest);
         this.build = build;
     }
 
-    public ResourceBuilderContext(String name, String region, int parallelResourceRequest) {
-        this.region = region;
+    public ResourceBuilderContext(String name, Location location, int parallelResourceRequest) {
+        this.location = location;
         this.name = name;
         this.parallelResourceRequest = parallelResourceRequest;
     }
 
-    public String getRegion() {
-        return region;
+    public Location getLocation() {
+        return location;
     }
 
     public boolean isBuild() {

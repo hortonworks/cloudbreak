@@ -3,10 +3,9 @@ package com.sequenceiq.cloudbreak.controller.validation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 import com.sequenceiq.cloudbreak.common.type.AwsInstanceType;
-import com.sequenceiq.cloudbreak.common.type.AwsVolumeType;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 
 public class VolumeCountValidator implements ConstraintValidator<ValidVolume, TemplateRequest> {
 
@@ -46,7 +45,7 @@ public class VolumeCountValidator implements ConstraintValidator<ValidVolume, Te
     }
 
     private boolean isEphemeralVolume(TemplateRequest value) {
-        return AwsVolumeType.Ephemeral.name().equalsIgnoreCase((String) value.getParameters().get(AwsTemplateParam.VOLUME_TYPE.getName()));
+        return "ephemeral".equalsIgnoreCase((String) value.getParameters().get(AwsTemplateParam.VOLUME_TYPE.getName()));
     }
 
     private boolean validateEphemeralParams(ConstraintValidatorContext context, TemplateRequest value) {

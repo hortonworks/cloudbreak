@@ -26,6 +26,9 @@ public class CloudbreakUsageJson implements JsonEntity {
     @ApiModelProperty(StackModelDescription.REGION)
     private String region;
 
+    @ApiModelProperty(StackModelDescription.AVAILABILITY_ZONE)
+    private String availabilityZone;
+
     @ApiModelProperty(UsageModelDescription.INSTANCE_HOURS)
     private Long instanceHours;
 
@@ -138,5 +141,13 @@ public class CloudbreakUsageJson implements JsonEntity {
 
     public void setInstanceGroup(String instanceGroup) {
         this.instanceGroup = instanceGroup;
+    }
+
+    public String getAvailabilityZone() {
+        return availabilityZone;
+    }
+
+    public void setAvailabilityZone(String availabilityZone) {
+        this.availabilityZone = availabilityZone;
     }
 }

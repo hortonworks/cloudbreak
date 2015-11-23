@@ -23,7 +23,7 @@ tests:
     parameters: {
       gcpName: it-gcp-recipe-gateway,
       gcpInstanceType: N1_STANDARD_4,
-      volumeType: HDD,
+      volumeType: pd-standard,
       volumeCount: 1,
       volumeSize: 30,
       templateAdditions: "cbgateway,1,GATEWAY"
@@ -35,7 +35,7 @@ tests:
     parameters: {
       gcpName: it-gcp-recipe-master,
       gcpInstanceType: N1_HIGHMEM_8,
-      volumeType: HDD,
+      volumeType: pd-standard,
       volumeCount: 2,
       volumeSize: 100,
       templateAdditions: "master,1"
@@ -47,7 +47,7 @@ tests:
     parameters: {
       gcpName: it-gcp-recipe-slave,
       gcpInstanceType: N1_HIGHCPU_4,
-      volumeType: SSD,
+      volumeType: pd-ssd,
       volumeCount: 3,
       volumeSize: 500,
       templateAdditions: "slave_1,3"
@@ -58,7 +58,8 @@ tests:
   - name: create cluster
     parameters: {
       stackName: it-gcp-recipe-stack,
-      region: EUROPE_WEST1_B,
+      region: europe-west1,
+      availabilityZone: europe-west1-b,
       clusterName: it-gcp-recipe-cluster,
       runRecipesOnHosts: "master,slave_1"
     }

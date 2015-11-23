@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
-import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 
 import freemarker.template.Configuration;
@@ -73,7 +72,7 @@ public class ArmTemplateBuilder {
             model.put("admin_user_name", cloudCredential.getLoginUserName());
             model.put("stackname", stackName);
             model.put("ssh_key", armCredentialView.getPublicKey());
-            model.put("region", CloudRegion.valueOf(cloudContext.getLocation().getRegion().value()).value());
+            model.put("region", cloudContext.getLocation().getRegion().value());
             model.put("subnet1Prefix", cloudStack.getNetwork().getSubnet().getCidr());
             model.put("addressPrefix", cloudStack.getNetwork().getParameter("subnetCIDR", String.class));
             model.put("groups", new ArmGroupView(cloudStack.getGroups()).getGroups());

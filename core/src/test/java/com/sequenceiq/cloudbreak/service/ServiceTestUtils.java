@@ -5,15 +5,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.common.type.AwsInstanceType;
+import com.sequenceiq.cloudbreak.common.type.AzureVmType;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.GcpInstanceType;
+import com.sequenceiq.cloudbreak.common.type.Status;
+import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.common.type.AwsVolumeType;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.common.type.AzureVmType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -22,10 +23,7 @@ import com.sequenceiq.cloudbreak.domain.GcpTemplate;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.common.type.GcpInstanceType;
-import com.sequenceiq.cloudbreak.common.type.GcpRawDiskType;
 
 public final class ServiceTestUtils {
 
@@ -97,7 +95,7 @@ public final class ServiceTestUtils {
     }
 
     public static Stack createStack(Template template, Credential credential) {
-        return createStack(template, credential,  new HashSet<Resource>());
+        return createStack(template, credential, new HashSet<Resource>());
     }
 
     public static Stack createStack(Template template, Credential credential, Set<Resource> resources) {
@@ -218,7 +216,7 @@ public final class ServiceTestUtils {
                 awsTemplate.setOwner(owner);
                 awsTemplate.setAccount(account);
                 awsTemplate.setInstanceType(AwsInstanceType.C3Large);
-                awsTemplate.setVolumeType(AwsVolumeType.Gp2);
+                awsTemplate.setVolumeType("gp2");
                 awsTemplate.setSshLocation("0.0.0.0/0");
                 awsTemplate.setVolumeCount(1);
                 awsTemplate.setVolumeSize(100);
@@ -229,7 +227,7 @@ public final class ServiceTestUtils {
                 GcpTemplate gcpTemplate = new GcpTemplate();
                 gcpTemplate.setId(1L);
                 gcpTemplate.setGcpInstanceType(GcpInstanceType.N1_STANDARD_1);
-                gcpTemplate.setGcpRawDiskType(GcpRawDiskType.HDD);
+                gcpTemplate.setGcpRawDiskType("pd-standard");
                 gcpTemplate.setDescription("gcp test template");
                 gcpTemplate.setOwner(owner);
                 gcpTemplate.setAccount(account);

@@ -14,7 +14,7 @@ tests:
     parameters: {
       awsTemplateName: it-aws-full-gateway5,
       awsInstanceType: M3Medium,
-      awsVolumeType: Standard,
+      awsVolumeType: standard,
       awsVolumeCount: 1,
       awsVolumeSize: 30,
       templateAdditions: "cbgateway,1,GATEWAY"
@@ -26,7 +26,7 @@ tests:
     parameters: {
       awsTemplateName: it-aws-full-master5,
       awsInstanceType: C3Large,
-      awsVolumeType: Ephemeral,
+      awsVolumeType: ephemeral,
       awsVolumeCount: 2,
       awsVolumeSize: 16,
       templateAdditions: "master,1"
@@ -38,7 +38,7 @@ tests:
     parameters: {
       awsTemplateName: it-aws-full-slave5,
       awsInstanceType: R3Large,
-      awsVolumeType: Gp2,
+      awsVolumeType: gp2,
       awsVolumeCount: 3,
       awsVolumeSize: 200,
       templateAdditions: "slave_1,3"
@@ -49,7 +49,7 @@ tests:
   - name: create cluster
     parameters: {
       stackName: it-aws-stack5,
-      region: SA_EAST_1,
+      region: sa-east-1,
       clusterName: it-aws-cluster5
     }
     classes:

@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Optional;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
@@ -25,6 +26,7 @@ public class AmbariOperationsStatusCheckerTask extends StackBasedStatusCheckerTa
 
     private static final BigDecimal COMPLETED = new BigDecimal(100.0);
     private static final BigDecimal FAILED = new BigDecimal(-1.0);
+    private static final BigDecimal PENDING = new BigDecimal(0);
     private static final int MAX_RETRY = 3;
 
     @Inject
@@ -36,11 +38,11 @@ public class AmbariOperationsStatusCheckerTask extends StackBasedStatusCheckerTa
         boolean allFinished = true;
         for (Entry<String, Integer> request : installRequests.entrySet()) {
             AmbariClient ambariClient = t.getAmbariClient();
-            BigDecimal installProgress = ambariClient.getRequestProgress(request.getValue());
+            BigDecimal installProgress = Optional.fromNullable(ambariClient.getRequestProgress(request.getValue())).or(PENDING);
             LOGGER.info("Ambari operation: '{}', Progress: {}", request.getKey(), installProgress);
             notificationSender.send(getAmbariProgressNotification(installProgress.longValue(), t.getStack()));
-            allFinished = allFinished && installProgress != null && COMPLETED.compareTo(installProgress) == 0;
-            if (installProgress != null && FAILED.compareTo(installProgress) == 0) {
+            allFinished = allFinished && COMPLETED.compareTo(installProgress) == 0;
+            if (FAILED.compareTo(installProgress) == 0) {
                 boolean failed = true;
                 for (int i = 0; i < MAX_RETRY; i++) {
                     if (ambariClient.getRequestProgress(request.getValue()).compareTo(FAILED) != 0) {

@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
@@ -33,9 +34,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.common.type.CloudRegion;
-import com.sequenceiq.cloudbreak.common.type.GcpDiskMode;
-import com.sequenceiq.cloudbreak.common.type.GcpDiskType;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
@@ -43,6 +43,8 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpInstanceResourceBuilder.class);
+    private static final String GCP_DISK_TYPE = "PERSISTENT";
+    private static final String GCP_DISK_MODE = "READ_WRITE";
 
     @Override
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -56,20 +58,23 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             List<CloudResource> buildableResource) throws Exception {
         InstanceTemplate template = group.getInstances().get(0).getTemplate();
         String projectId = context.getProjectId();
-        CloudRegion region = CloudRegion.valueOf(context.getRegion());
+        //CloudRegion region = CloudRegion.valueOf(context.getRegion());
+        Location location = context.getLocation();
+
+
         Compute compute = context.getCompute();
 
         List<CloudResource> computeResources = context.getComputeResources(privateId);
         List<AttachedDisk> listOfDisks = new ArrayList<>();
-        listOfDisks.addAll(getBootDiskList(computeResources, projectId, region));
-        listOfDisks.addAll(getAttachedDisks(computeResources, projectId, region));
+        listOfDisks.addAll(getBootDiskList(computeResources, projectId, location.getAvailabilityZone()));
+        listOfDisks.addAll(getAttachedDisks(computeResources, projectId, location.getAvailabilityZone()));
 
         Instance instance = new Instance();
         instance.setMachineType(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/%s",
-                projectId, region.value(), template.getFlavor()));
+                projectId, location.getAvailabilityZone().value(), template.getFlavor()));
         instance.setName(buildableResource.get(0).getName());
         instance.setCanIpForward(Boolean.TRUE);
-        instance.setNetworkInterfaces(getNetworkInterface(context.getNetworkResources(), region, group, compute, projectId));
+        instance.setNetworkInterfaces(getNetworkInterface(context.getNetworkResources(), location.getRegion(), group, compute, projectId));
         instance.setDisks(listOfDisks);
         Tags tags = new Tags();
         tags.setItems(asList(group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "")));
@@ -89,7 +94,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         metadata.getItems().add(startupScript);
         instance.setMetadata(metadata);
 
-        Compute.Instances.Insert insert = compute.instances().insert(projectId, region.value(), instance);
+        Compute.Instances.Insert insert = compute.instances().insert(projectId, location.getAvailabilityZone().value(), instance);
         insert.setPrettyPrint(Boolean.TRUE);
         try {
             Operation operation = insert.execute();
@@ -107,7 +112,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         String resourceName = resource.getName();
         try {
             Operation operation = context.getCompute().instances()
-                    .delete(context.getProjectId(), CloudRegion.valueOf(context.getRegion()).value(), resourceName).execute();
+                    .delete(context.getProjectId(), context.getLocation().getAvailabilityZone().value(), resourceName).execute();
             return createOperationAwareCloudResource(resource, operation);
         } catch (GoogleJsonResponseException e) {
             exceptionHandler(e, resourceName, resourceType());
@@ -151,36 +156,36 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         return 2;
     }
 
-    private List<AttachedDisk> getBootDiskList(List<CloudResource> resources, String projectId, CloudRegion region) {
+    private List<AttachedDisk> getBootDiskList(List<CloudResource> resources, String projectId, AvailabilityZone zone) {
         List<AttachedDisk> listOfDisks = new ArrayList<>();
         for (CloudResource resource : filterResourcesByType(resources, ResourceType.GCP_DISK)) {
-            listOfDisks.add(createDisk(resource, projectId, region, true));
+            listOfDisks.add(createDisk(resource, projectId, zone, true));
         }
         return listOfDisks;
     }
 
-    private List<AttachedDisk> getAttachedDisks(List<CloudResource> resources, String projectId, CloudRegion region) {
+    private List<AttachedDisk> getAttachedDisks(List<CloudResource> resources, String projectId, AvailabilityZone zone) {
         List<AttachedDisk> listOfDisks = new ArrayList<>();
         for (CloudResource resource : filterResourcesByType(resources, ResourceType.GCP_ATTACHED_DISK)) {
-            listOfDisks.add(createDisk(resource, projectId, region, false));
+            listOfDisks.add(createDisk(resource, projectId, zone, false));
         }
         return listOfDisks;
     }
 
-    private AttachedDisk createDisk(CloudResource resource, String projectId, CloudRegion region, boolean boot) {
+    private AttachedDisk createDisk(CloudResource resource, String projectId, AvailabilityZone zone, boolean boot) {
         AttachedDisk attachedDisk = new AttachedDisk();
         attachedDisk.setBoot(boot);
         attachedDisk.setAutoDelete(true);
-        attachedDisk.setType(GcpDiskType.PERSISTENT.getValue());
-        attachedDisk.setMode(GcpDiskMode.READ_WRITE.getValue());
+        attachedDisk.setType(GCP_DISK_TYPE);
+        attachedDisk.setMode(GCP_DISK_MODE);
         attachedDisk.setDeviceName(resource.getName());
         attachedDisk.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s",
-                projectId, region.value(), resource.getName()));
+                projectId, zone.value(), resource.getName()));
         return attachedDisk;
     }
 
     private List<NetworkInterface> getNetworkInterface(List<CloudResource> resources,
-            CloudRegion region, Group group, Compute compute, String projectId) throws IOException {
+            Region region, Group group, Compute compute, String projectId) throws IOException {
         NetworkInterface networkInterface = new NetworkInterface();
         String networkName = filterResourcesByType(resources, ResourceType.GCP_NETWORK).get(0).getName();
         networkInterface.setName(networkName);
@@ -188,7 +193,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         accessConfig.setName(networkName);
         accessConfig.setType("ONE_TO_ONE_NAT");
         if (InstanceGroupType.GATEWAY == group.getType()) {
-            Compute.Addresses.Get getReservedIp = compute.addresses().get(projectId, region.region(),
+            Compute.Addresses.Get getReservedIp = compute.addresses().get(projectId, region.value(),
                     filterResourcesByType(resources, ResourceType.GCP_RESERVED_IP).get(0).getName());
             accessConfig.setNatIP(getReservedIp.execute().getAddress());
         }
@@ -209,15 +214,15 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private CloudVmInstanceStatus stopStart(GcpContext context, AuthenticatedContext auth, CloudInstance instance, boolean stopRequest) {
         String projectId = GcpStackUtil.getProjectId(auth.getCloudCredential());
-        String region = CloudRegion.valueOf(context.getRegion()).value();
+        String availabilityZone = context.getLocation().getAvailabilityZone().value();
         Compute compute = context.getCompute();
         String instanceId = instance.getInstanceId();
         try {
-            Compute.Instances.Get get = compute.instances().get(projectId, region, instanceId);
+            Compute.Instances.Get get = compute.instances().get(projectId, availabilityZone, instanceId);
             String state = stopRequest ? "RUNNING" : "TERMINATED";
             if (state.equals(get.execute().getStatus())) {
-                Operation operation = stopRequest ? compute.instances().stop(projectId, region, instanceId).setPrettyPrint(true).execute()
-                        : compute.instances().start(projectId, region, instanceId).setPrettyPrint(true).execute();
+                Operation operation = stopRequest ? compute.instances().stop(projectId, availabilityZone, instanceId).setPrettyPrint(true).execute()
+                        : compute.instances().start(projectId, availabilityZone, instanceId).setPrettyPrint(true).execute();
                 CloudInstance operationAwareCloudInstance = createOperationAwareCloudInstance(instance, operation);
                 return checkInstances(context, auth, asList(operationAwareCloudInstance)).get(0);
             } else {
@@ -228,4 +233,5 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             throw new GcpResourceException(String.format("An error occurred while stopping the vm '%s'", instanceId), e);
         }
     }
+
 }

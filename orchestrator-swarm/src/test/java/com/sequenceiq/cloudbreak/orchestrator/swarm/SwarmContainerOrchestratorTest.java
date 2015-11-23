@@ -43,8 +43,6 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariAgentBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariServerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariServerDatabaseBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.BaywatchClientBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.BaywatchServerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.ConsulWatchBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.KerberosServerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.LogrotateBootsrap;
@@ -82,12 +80,6 @@ public class SwarmContainerOrchestratorTest {
 
     @Mock
     private KerberosServerBootstrap kerberosServerBootstrap;
-
-    @Mock
-    private BaywatchClientBootstrap baywatchClientBootstrap;
-
-    @Mock
-    private BaywatchServerBootstrap baywatchServerBootstrap;
 
     @Mock
     private ConsulWatchBootstrap consulWatchBootstrap;
@@ -426,7 +418,7 @@ public class SwarmContainerOrchestratorTest {
 
     @Test
     public void kerberosServerStartInClusterWhenOrchestratorCancelled() throws Exception {
-        when(baywatchServerBootstrap.call()).thenThrow(new CloudbreakOrchestratorCancelledException("cancelled"));
+        when(registratorBootstrap.call()).thenThrow(new CloudbreakOrchestratorCancelledException("cancelled"));
         doReturn(kerberosServerBootstrap).when(underTestSpy).kerberosServerBootstrap(any(KerberosConfiguration.class), any(GatewayConfig.class), anyString(),
                 any(Node.class), any(LogVolumePath.class));
 
@@ -436,7 +428,7 @@ public class SwarmContainerOrchestratorTest {
 
     @Test
     public void kerberosServerStartInClusterWhenOrchestratorFailed() throws Exception {
-        when(baywatchServerBootstrap.call()).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
+        when(registratorBootstrap.call()).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
         doReturn(kerberosServerBootstrap).when(underTestSpy).kerberosServerBootstrap(any(KerberosConfiguration.class), any(GatewayConfig.class), anyString(),
                 any(Node.class), any(LogVolumePath.class));
 
@@ -446,89 +438,12 @@ public class SwarmContainerOrchestratorTest {
 
     @Test
     public void kerberosServerStartInClusterWhenNullPointerOccurredAndOrchestratorFailedComes() throws Exception {
-        when(baywatchServerBootstrap.call()).thenThrow(new NullPointerException("null"));
+        when(registratorBootstrap.call()).thenThrow(new NullPointerException("null"));
         doReturn(kerberosServerBootstrap).when(underTestSpy).kerberosServerBootstrap(any(KerberosConfiguration.class), any(GatewayConfig.class), anyString(),
                 any(Node.class), any(LogVolumePath.class));
 
         underTestSpy.startKerberosServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bserver", "0.0.1"),
                 generateLogVolume(), new KerberosConfiguration("", "", ""), exitCriteriaModel());
     }
-
-    @Test
-    public void baywatchServerStartInClusterWhenEverythingWorksFine() throws Exception {
-        when(baywatchServerBootstrap.call()).thenReturn(true);
-        doReturn(baywatchServerBootstrap).when(underTestSpy).baywatchServerBootstrap(any(GatewayConfig.class), anyString(), any(Node.class));
-
-        underTestSpy.startBaywatchServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bserver", "0.0.1"),
-                exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorCancelledException.class)
-    public void baywatchServerStartInClusterWhenOrchestratorCancelled() throws Exception {
-        when(baywatchServerBootstrap.call()).thenThrow(new CloudbreakOrchestratorCancelledException("cancelled"));
-        doReturn(baywatchServerBootstrap).when(underTestSpy).baywatchServerBootstrap(any(GatewayConfig.class), anyString(), any(Node.class));
-
-        underTestSpy.startBaywatchServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bserver", "0.0.1"),
-                exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
-    public void baywatchServerStartInClusterWhenOrchestratorFailed() throws Exception {
-        when(baywatchServerBootstrap.call()).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
-        doReturn(baywatchServerBootstrap).when(underTestSpy).baywatchServerBootstrap(any(GatewayConfig.class), anyString(), any(Node.class));
-
-        underTestSpy.startBaywatchServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bserver", "0.0.1"),
-                exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
-    public void baywatchServerStartInClusterWhenNullPointerOccurredAndOrchestratorFailedComes() throws Exception {
-        when(baywatchServerBootstrap.call()).thenThrow(new NullPointerException("null"));
-        doReturn(baywatchServerBootstrap).when(underTestSpy).baywatchServerBootstrap(any(GatewayConfig.class), anyString(), any(Node.class));
-
-        underTestSpy.startBaywatchServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bserver", "0.0.1"),
-                exitCriteriaModel());
-    }
-
-    @Test
-    public void baywatchClientStartInClusterWhenEverythingWorksFine() throws Exception {
-        when(baywatchClientBootstrap.call()).thenReturn(true);
-        doReturn(baywatchClientBootstrap).when(underTestSpy).baywatchClientBootstrap(any(GatewayConfig.class), anyString(), anyString(),
-                any(Node.class), anyString(), any(LogVolumePath.class), anyString());
-
-        underTestSpy.startBaywatchClients(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)),
-                new ContainerConfig("bserver", "0.0.1"), "consuldomain", generateLogVolume(), "externallocation", exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
-    public void baywatchClientStartInClusterWhenOrchestratorCancelled() throws Exception {
-        when(baywatchClientBootstrap.call()).thenThrow(new CloudbreakOrchestratorCancelledException("cancelled"));
-        doReturn(baywatchClientBootstrap).when(underTestSpy).baywatchClientBootstrap(any(GatewayConfig.class), anyString(), anyString(),
-                any(Node.class), anyString(), any(LogVolumePath.class), anyString());
-
-        underTestSpy.startBaywatchClients(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)),
-                new ContainerConfig("bserver", "0.0.1"), "consuldomain", generateLogVolume(), "externallocation", exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
-    public void baywatchClientStartInClusterWhenOrchestratorFailed() throws Exception {
-        when(baywatchClientBootstrap.call()).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
-        doReturn(baywatchClientBootstrap).when(underTestSpy).baywatchClientBootstrap(any(GatewayConfig.class), anyString(), anyString(),
-                any(Node.class), anyString(), any(LogVolumePath.class), anyString());
-
-        underTestSpy.startBaywatchClients(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bclient", "0.0.1"),
-                "consuldomain", generateLogVolume(), "externallocation", exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
-    public void baywatchClientStartInClusterWhenNullPointerOccurredAndOrchestratorFailedComes() throws Exception {
-        when(baywatchClientBootstrap.call()).thenThrow(new NullPointerException("null"));
-        doReturn(baywatchClientBootstrap).when(underTestSpy).baywatchClientBootstrap(any(GatewayConfig.class), anyString(), anyString(),
-                any(Node.class), anyString(), any(LogVolumePath.class), anyString());
-
-        underTestSpy.startBaywatchClients(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bclient", "0.0.1"),
-                "consuldomain", generateLogVolume(), "externallocation", exitCriteriaModel());
-    }
-
 
 }

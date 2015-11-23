@@ -28,6 +28,8 @@ public class CloudbreakUsage implements ProvisionEntity {
 
     private String region;
 
+    private String availabilityZone;
+
     private Date day;
 
     private Long instanceHours;
@@ -126,6 +128,14 @@ public class CloudbreakUsage implements ProvisionEntity {
         this.instanceGroup = instanceGroup;
     }
 
+    public String getAvailabilityZone() {
+        return availabilityZone;
+    }
+
+    public void setAvailabilityZone(String availabilityZone) {
+        this.availabilityZone = availabilityZone;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("CloudbreakUsage{");
@@ -135,6 +145,7 @@ public class CloudbreakUsage implements ProvisionEntity {
         sb.append(", day=").append(day);
         sb.append(", provider='").append(provider).append('\'');
         sb.append(", region='").append(region).append('\'');
+        sb.append(", availabilityZone='").append(availabilityZone).append('\'');
         sb.append(", instanceHours='").append(instanceHours).append('\'');
         sb.append(", stackId='").append(stackId).append('\'');
         sb.append(", stackName='").append(stackName).append('\'');
@@ -152,4 +163,5 @@ public class CloudbreakUsage implements ProvisionEntity {
     public void setCosts(Double costs) {
         this.costs = costs;
     }
+
 }

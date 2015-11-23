@@ -48,6 +48,7 @@ public class CloudbreakEvent implements ProvisionEntity {
     private String account;
     private String cloud;
     private String region;
+    private String availabilityZone;
     private String blueprintName;
     private long blueprintId;
     private Long stackId;
@@ -185,6 +186,14 @@ public class CloudbreakEvent implements ProvisionEntity {
 
     public void setClusterStatus(Status clusterStatus) {
         this.clusterStatus = clusterStatus;
+    }
+
+    public String getAvailabilityZone() {
+        return availabilityZone;
+    }
+
+    public void setAvailabilityZone(String availabilityZone) {
+        this.availabilityZone = availabilityZone;
     }
 
     @Override

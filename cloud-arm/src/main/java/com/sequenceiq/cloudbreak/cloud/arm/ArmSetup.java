@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
-import com.sequenceiq.cloudbreak.common.type.CloudRegion;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -71,11 +70,11 @@ public class ArmSetup implements Setup {
         String region = ac.getCloudContext().getLocation().getRegion().value();
         try {
             if (!resourceGroupExist(client, resourceGroupName)) {
-                client.createResourceGroup(resourceGroupName, CloudRegion.valueOf(region).value());
+                client.createResourceGroup(resourceGroupName, region);
             }
             createStorage(ac, client, attachedStorageName, resourceGroupName, region);
             if (!resourceGroupExist(client, imageResourceGroupName)) {
-                client.createResourceGroup(imageResourceGroupName, CloudRegion.valueOf(region).value());
+                client.createResourceGroup(imageResourceGroupName, region);
             }
             createStorage(ac, client, storageName, imageResourceGroupName, region);
             if (!storageContainsImage(client, imageResourceGroupName, storageName, image.getImageName())) {
@@ -131,7 +130,7 @@ public class ArmSetup implements Setup {
         try {
             persistenceNotifier.notifyAllocation(cloudResource, ac.getCloudContext());
             if (!resourceGroupExist(client, storageGroup)) {
-                client.createResourceGroup(storageGroup, CloudRegion.valueOf(region).value());
+                client.createResourceGroup(storageGroup, region);
             }
         } catch (HttpResponseException ex) {
             throw new CloudConnectorException(ex.getResponse().getData().toString(), ex);
@@ -144,7 +143,7 @@ public class ArmSetup implements Setup {
     private void createStorage(AuthenticatedContext authenticatedContext, AzureRMClient client, String osStorageName, String storageGroup, String region)
             throws Exception {
         if (!storageAccountExist(client, osStorageName)) {
-            client.createStorageAccount(storageGroup, osStorageName, CloudRegion.valueOf(region).value(), LOCALLY_REDUNDANT_STORAGE);
+            client.createStorageAccount(storageGroup, osStorageName, region, LOCALLY_REDUNDANT_STORAGE);
             PollTask<Boolean> task = armPollTaskFactory.newStorageStatusCheckerTask(authenticatedContext, armClient,
                     new StorageCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()), storageGroup, osStorageName));
             syncPollingScheduler.schedule(task);

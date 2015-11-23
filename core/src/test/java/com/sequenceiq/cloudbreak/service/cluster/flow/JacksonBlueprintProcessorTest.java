@@ -9,8 +9,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class JacksonBlueprintProcessorTest {
 
@@ -22,7 +22,7 @@ public class JacksonBlueprintProcessorTest {
         List<BlueprintConfigurationEntry> configurationEntries = new ArrayList<>();
         String result = underTest.addConfigEntries(testBlueprint, configurationEntries, true);
 
-        JsonNode configNode = new ObjectMapper().readTree(result).path("configurations");
+        JsonNode configNode = JsonUtil.readTree(result).path("configurations");
         Assert.assertFalse(configNode.isMissingNode());
     }
 
@@ -33,7 +33,7 @@ public class JacksonBlueprintProcessorTest {
         configurationEntries.add(new BlueprintConfigurationEntry("core-site", "fs.AbstractFileSystem.wasb.impl", "org.apache.hadoop.fs.azure.Wasb"));
         String result = underTest.addConfigEntries(testBlueprint, configurationEntries, true);
 
-        JsonNode coreSiteNode = new ObjectMapper().readTree(result).findPath("core-site");
+        JsonNode coreSiteNode = JsonUtil.readTree(result).findPath("core-site");
         Assert.assertFalse(coreSiteNode.isMissingNode());
     }
 
@@ -45,10 +45,10 @@ public class JacksonBlueprintProcessorTest {
         configurationEntries.add(new BlueprintConfigurationEntry("hdfs-site", "dfs.blocksize", "134217728"));
         String result = underTest.addConfigEntries(testBlueprint, configurationEntries, true);
 
-        String configValue1 = new ObjectMapper().readTree(result).findPath("core-site").findPath("fs.AbstractFileSystem.wasb.impl").textValue();
+        String configValue1 = JsonUtil.readTree(result).findPath("core-site").findPath("fs.AbstractFileSystem.wasb.impl").textValue();
         Assert.assertEquals("org.apache.hadoop.fs.azure.Wasb", configValue1);
 
-        String configValue2 = new ObjectMapper().readTree(result).findPath("hdfs-site").findPath("dfs.blocksize").textValue();
+        String configValue2 = JsonUtil.readTree(result).findPath("hdfs-site").findPath("dfs.blocksize").textValue();
         Assert.assertEquals("134217728", configValue2);
     }
 
@@ -60,16 +60,16 @@ public class JacksonBlueprintProcessorTest {
         configurationEntries.add(new BlueprintConfigurationEntry("core-site", "io.serializations", "org.apache.hadoop.io.serializer.WritableSerialization"));
         String result = underTest.addConfigEntries(testBlueprint, configurationEntries, true);
 
-        String configValue1 = new ObjectMapper().readTree(result).findPath("core-site").path("fs.AbstractFileSystem.wasb.impl").textValue();
+        String configValue1 = JsonUtil.readTree(result).findPath("core-site").path("fs.AbstractFileSystem.wasb.impl").textValue();
         Assert.assertEquals("org.apache.hadoop.fs.azure.Wasb", configValue1);
 
-        String configValue2 = new ObjectMapper().readTree(result).findPath("core-site").path("io.serializations").textValue();
+        String configValue2 = JsonUtil.readTree(result).findPath("core-site").path("io.serializations").textValue();
         Assert.assertEquals("org.apache.hadoop.io.serializer.WritableSerialization", configValue2);
 
-        String configValue3 = new ObjectMapper().readTree(result).findPath("core-site").path("fs.trash.interval").textValue();
+        String configValue3 = JsonUtil.readTree(result).findPath("core-site").path("fs.trash.interval").textValue();
         Assert.assertEquals("360", configValue3);
 
-        String configValue4 = new ObjectMapper().readTree(result).findPath("core-site").path("io.file.buffer.size").textValue();
+        String configValue4 = JsonUtil.readTree(result).findPath("core-site").path("io.file.buffer.size").textValue();
         Assert.assertEquals("131072", configValue4);
     }
 
@@ -81,16 +81,16 @@ public class JacksonBlueprintProcessorTest {
         configurationEntries.add(new BlueprintConfigurationEntry("core-site", "io.serializations", "org.apache.hadoop.io.serializer.WritableSerialization"));
         String result = underTest.addConfigEntries(testBlueprint, configurationEntries, true);
 
-        String configValue1 = new ObjectMapper().readTree(result).findPath("core-site").path("properties").path("fs.AbstractFileSystem.wasb.impl").textValue();
+        String configValue1 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("fs.AbstractFileSystem.wasb.impl").textValue();
         Assert.assertEquals("org.apache.hadoop.fs.azure.Wasb", configValue1);
 
-        String configValue2 = new ObjectMapper().readTree(result).findPath("core-site").path("properties").path("io.serializations").textValue();
+        String configValue2 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("io.serializations").textValue();
         Assert.assertEquals("org.apache.hadoop.io.serializer.WritableSerialization", configValue2);
 
-        String configValue3 = new ObjectMapper().readTree(result).findPath("core-site").path("properties").path("fs.trash.interval").textValue();
+        String configValue3 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("fs.trash.interval").textValue();
         Assert.assertEquals("360", configValue3);
 
-        String configValue4 = new ObjectMapper().readTree(result).findPath("core-site").path("properties").path("io.file.buffer.size").textValue();
+        String configValue4 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("io.file.buffer.size").textValue();
         Assert.assertEquals("131072", configValue4);
     }
 
@@ -102,16 +102,16 @@ public class JacksonBlueprintProcessorTest {
         configurationEntries.add(new BlueprintConfigurationEntry("core-site", "io.serializations", "org.apache.hadoop.io.serializer.WritableSerialization"));
         String result = underTest.addConfigEntries(testBlueprint, configurationEntries, true);
 
-        String configValue1 = new ObjectMapper().readTree(result).findPath("core-site").path("properties").path("fs.defaultFS").textValue();
+        String configValue1 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("fs.defaultFS").textValue();
         Assert.assertEquals("wasb://cloudbreak@dduihoab6jt1jl.cloudapp.net", configValue1);
 
-        String configValue2 = new ObjectMapper().readTree(result).findPath("core-site").path("properties").path("io.serializations").textValue();
+        String configValue2 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("io.serializations").textValue();
         Assert.assertEquals("org.apache.hadoop.io.serializer.WritableSerialization", configValue2);
 
-        String configValue3 = new ObjectMapper().readTree(result).findPath("core-site").path("properties").path("fs.trash.interval").textValue();
+        String configValue3 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("fs.trash.interval").textValue();
         Assert.assertEquals("360", configValue3);
 
-        String configValue4 = new ObjectMapper().readTree(result).findPath("core-site").path("properties").path("io.file.buffer.size").textValue();
+        String configValue4 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("io.file.buffer.size").textValue();
         Assert.assertEquals("131072", configValue4);
     }
 
@@ -123,16 +123,16 @@ public class JacksonBlueprintProcessorTest {
         configurationEntries.add(new BlueprintConfigurationEntry("core-site", "io.serializations", "org.apache.hadoop.io.serializer.WritableSerialization"));
         String result = underTest.addConfigEntries(testBlueprint, configurationEntries, false);
 
-        String configValue1 = new ObjectMapper().readTree(result).findPath("core-site").path("properties").path("fs.defaultFS").textValue();
+        String configValue1 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("fs.defaultFS").textValue();
         Assert.assertEquals("hdfs://%HOSTGROUP::host_group_master_1%:8020", configValue1);
 
-        String configValue2 = new ObjectMapper().readTree(result).findPath("core-site").path("properties").path("io.serializations").textValue();
+        String configValue2 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("io.serializations").textValue();
         Assert.assertEquals("org.apache.hadoop.io.serializer.WritableSerialization", configValue2);
 
-        String configValue3 = new ObjectMapper().readTree(result).findPath("core-site").path("properties").path("fs.trash.interval").textValue();
+        String configValue3 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("fs.trash.interval").textValue();
         Assert.assertEquals("360", configValue3);
 
-        String configValue4 = new ObjectMapper().readTree(result).findPath("core-site").path("properties").path("io.file.buffer.size").textValue();
+        String configValue4 = JsonUtil.readTree(result).findPath("core-site").path("properties").path("io.file.buffer.size").textValue();
         Assert.assertEquals("131072", configValue4);
     }
 
@@ -144,10 +144,10 @@ public class JacksonBlueprintProcessorTest {
         configurationEntries.add(new BlueprintConfigurationEntry("core-site", "io.serializations", "org.apache.hadoop.io.serializer.WritableSerialization"));
         String result = underTest.addConfigEntries(testBlueprint, configurationEntries, false);
 
-        String configValue1 = new ObjectMapper().readTree(result).findPath("core-site").path("fs.defaultFS").textValue();
+        String configValue1 = JsonUtil.readTree(result).findPath("core-site").path("fs.defaultFS").textValue();
         Assert.assertEquals("wasb://cloudbreak@dduihoab6jt1jl.cloudapp.net", configValue1);
 
-        String configValue2 = new ObjectMapper().readTree(result).findPath("core-site").path("io.serializations").textValue();
+        String configValue2 = JsonUtil.readTree(result).findPath("core-site").path("io.serializations").textValue();
         Assert.assertEquals("org.apache.hadoop.io.serializer.WritableSerialization", configValue2);
     }
 

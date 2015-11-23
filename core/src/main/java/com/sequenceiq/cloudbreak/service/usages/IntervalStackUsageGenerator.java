@@ -123,6 +123,7 @@ public class IntervalStackUsageGenerator {
         usage.setAccount(event.getAccount());
         usage.setProvider(event.getCloud());
         usage.setRegion(event.getRegion());
+        usage.setAvailabilityZone(event.getAvailabilityZone());
         usage.setInstanceHours(instanceHours);
         usage.setDay(day);
         usage.setStackId(event.getStackId());
