@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
+import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_IN_PROGRESS;
 
 import java.util.Arrays;
@@ -57,6 +58,7 @@ public class SimpleFlowFacade implements FlowFacade {
 
     private enum Msg {
 
+        FLOW_STACK_METADATA_COLLECTED("stack.metadata.collected"),
         FLOW_STACK_PROVISIONED("flow.stack.provisioned"),
         FLOW_STACK_SETUP_START("stack.setup.start"),
         FLOW_STACK_SETUP("stack.setup.time");
@@ -160,6 +162,8 @@ public class SimpleFlowFacade implements FlowFacade {
             metadataSetupService.setupMetadata(provisioningContext.getCloudPlatform(), stack);
             cloudbreakEventService.fireCloudbreakEvent(provisioningContext.getStackId(), BillingStatus.BILLING_STARTED.name(),
                     cloudbreakMessagesService.getMessage(Msg.FLOW_STACK_PROVISIONED.code()));
+            cloudbreakEventService.fireCloudbreakEvent(provisioningContext.getStackId(), AVAILABLE.name(),
+                    cloudbreakMessagesService.getMessage(Msg.FLOW_STACK_METADATA_COLLECTED.code()));
             LOGGER.debug("Metadata setup DONE.");
             return new ProvisioningContext.Builder()
                     .setDefaultParams(provisioningContext.getStackId(), provisioningContext.getCloudPlatform())
