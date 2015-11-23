@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.notification.model;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 
 import reactor.rx.Promise;
+import reactor.rx.Promises;
 
 /**
  * Notification sent to Cloudbreak.
@@ -15,10 +17,10 @@ public class ResourceNotification {
     private final Promise<ResourcePersisted> promise;
     private final ResourceNotificationType type;
 
-    public ResourceNotification(CloudResource cloudResource, CloudContext cloudContext, Promise<ResourcePersisted> promise, ResourceNotificationType type) {
+    public ResourceNotification(CloudResource cloudResource, CloudContext cloudContext, ResourceNotificationType type) {
         this.cloudResource = cloudResource;
         this.cloudContext = cloudContext;
-        this.promise = promise;
+        this.promise = Promises.prepare();
         this.type = type;
     }
 
@@ -28,6 +30,14 @@ public class ResourceNotification {
 
     public Promise<ResourcePersisted> getPromise() {
         return promise;
+    }
+
+    public ResourcePersisted getResult() {
+        try {
+            return promise.await();
+        } catch (InterruptedException e) {
+            throw new CloudConnectorException("ResourceNotification has been interrupted", e);
+        }
     }
 
     public CloudContext getCloudContext() {

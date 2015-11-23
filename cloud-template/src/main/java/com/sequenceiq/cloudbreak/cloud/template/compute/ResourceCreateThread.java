@@ -103,7 +103,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
     private List<CloudResource> createResource(AuthenticatedContext auth, List<CloudResource> cloudResources) throws Exception {
         for (CloudResource cloudResource : cloudResources) {
             if (cloudResource.isPersistent()) {
-                resourceNotifier.notifyAllocation(cloudResource, auth.getCloudContext()).await();
+                resourceNotifier.notifyAllocation(cloudResource, auth.getCloudContext());
             }
         }
         return cloudResources;
@@ -112,7 +112,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
     private List<CloudResource> updateResource(AuthenticatedContext auth, List<CloudResource> cloudResources) throws Exception {
         for (CloudResource cloudResource : cloudResources) {
             if (cloudResource.isPersistent()) {
-                resourceNotifier.notifyUpdate(cloudResource, auth.getCloudContext()).await();
+                resourceNotifier.notifyUpdate(cloudResource, auth.getCloudContext());
             }
         }
         return cloudResources;

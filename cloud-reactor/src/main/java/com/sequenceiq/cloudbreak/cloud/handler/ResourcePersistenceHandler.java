@@ -48,7 +48,7 @@ public class ResourcePersistenceHandler implements Consumer<Event<ResourceNotifi
                             default:
                                 throw new IllegalArgumentException("Unsupported notification type: " + notification.getType());
                         }
-                        notificationPersisted.getPromise().onNext(new ResourcePersisted(notificationPersisted));
+                        notificationPersisted.getPromise().onNext(new ResourcePersisted());
                     }
                 })
                 .checkIfRecoverable(new ExceptionCheckTask() {

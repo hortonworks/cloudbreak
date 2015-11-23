@@ -25,13 +25,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
-
-import reactor.rx.Promise;
 
 @Service
 public class OpenStackResourceConnector implements ResourceConnector {
@@ -64,9 +61,8 @@ public class OpenStackResourceConnector implements ResourceConnector {
 
 
         CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.HEAT_STACK).name(heatStack.getId()).build();
-        Promise<ResourcePersisted> promise = notifier.notifyAllocation(cloudResource, authenticatedContext.getCloudContext());
         try {
-            promise.awaitSuccess();
+            notifier.notifyAllocation(cloudResource, authenticatedContext.getCloudContext());
         } catch (Exception e) {
             //Rollback
             terminate(authenticatedContext, stack, Lists.newArrayList(cloudResource));
