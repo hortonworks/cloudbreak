@@ -2,8 +2,8 @@
 
 var log = log4javascript.getLogger("blueprintController-logger");
 
-angular.module('uluwatuControllers').controller('blueprintController', ['$scope', '$rootScope', '$filter', 'UserBlueprint', 'AccountBlueprint', 'GlobalBlueprint', 'ErrorHandler',
-    function($scope, $rootScope, $filter, UserBlueprint, AccountBlueprint, GlobalBlueprint, ErrorHandler) {
+angular.module('uluwatuControllers').controller('blueprintController', ['$scope', '$rootScope', '$filter', '$base64', 'File', 'UserBlueprint', 'AccountBlueprint', 'GlobalBlueprint', 'ErrorHandler',
+    function($scope, $rootScope, $filter, $base64, File, UserBlueprint, AccountBlueprint, GlobalBlueprint, ErrorHandler) {
         $rootScope.blueprints = AccountBlueprint.query();
         initializeBlueprint();
         $scope.showAlert = false;
@@ -50,9 +50,7 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
             angular.element(document.querySelector('#panel-blueprint-collapse' + blueprint.id)).collapse('hide')
             $scope.blueprint = newBlueprint;
             $scope.blueprint.name = ""
-            $scope.blueprint.ambariBlueprint.toString = function() { // formatting textarea
-                return JSON.stringify(this, null, "    ");
-            }
+            $scope.blueprint.ambariBlueprint.toString = jsonToString;
         }
 
         $scope.deleteBlueprint = function(blueprint) {
@@ -80,7 +78,13 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
         }
 
         function initializeBlueprint() {
+            $scope.blueprintType = 'TEXT';
+            $scope.blueprintFileValid = null;
             $scope.blueprint = {}
+        }
+
+        function jsonToString() { // formatting textarea
+            return JSON.stringify(this, null, "    ");
         }
 
         $scope.unShowErrorMessageAlert = function() {
@@ -92,5 +96,20 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
             $scope.showAlert = true;
             $scope.alertMessage = $scope.statusMessage;
         }
+
+        $scope.generateBlueprintFromFile = function() {
+            $scope.blueprint.ambariBlueprint = "";
+            File.getBase64ContentById("blueprintFile", function(content) {
+                try {
+                    $scope.blueprint.ambariBlueprint = JSON.parse(content ? $base64.decode(content) : "");
+                    $scope.blueprint.ambariBlueprint.toString = jsonToString;
+                    $scope.blueprintFileValid = true;
+                } catch (e) {
+                    $scope.blueprintFileValid = false;
+                }
+                $scope.$apply();
+            });
+            $scope.$apply();
+        };
     }
 ]);
