@@ -612,6 +612,16 @@ angular.module('uluwatuControllers')
                         value: 'ONE_NODE'
                     }]
                 },
+                'BLUEPRINT_TYPE': [{
+                    key: 'TEXT',
+                    value: 'TEXT'
+                }, {
+                    key: 'FILE',
+                    value: 'FILE'
+                }, {
+                    key: 'URL',
+                    value: 'URL'
+                }],
                 'EVENT_TYPE': {
                     "REQUESTED": "requested",
                     "CREATE_IN_PROGRESS": "create in progress",
