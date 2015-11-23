@@ -1,6 +1,6 @@
 
 cloudbreak-config() {
-  : ${BRIDGE_IP:=$(docker run --label cbreak.sidekick alpine sh -c 'ip ro | grep default | cut -d" " -f 3')}
+  : ${BRIDGE_IP:=$(docker run --label cbreak.sidekick=true alpine sh -c 'ip ro | grep default | cut -d" " -f 3')}
   env-import PRIVATE_IP $BRIDGE_IP
   cloudbreak-conf-tags
   cloudbreak-conf-images
@@ -213,7 +213,7 @@ _cloudbreak-shell() {
 
     docker run "$@" \
         --name cloudbreak-shell \
-        --label cbreak.sidekick \
+        --label cbreak.sidekick=true \
         --dns=$PRIVATE_IP \
         -e CLOUDBREAK_ADDRESS=http://cloudbreak.service.consul:8080 \
         -e IDENTITY_ADDRESS=http://identity.service.consul:8089 \
@@ -237,7 +237,7 @@ cloudbreak-generate-cert() {
     else
       info "Generating Cloudbreak client certificate and private key in ${CBD_CERT_ROOT_PATH}."
       docker run \
-          --label cbreak.sidekick \
+          --label cbreak.sidekick=true \
           -v ${CBD_CERT_ROOT_PATH}:/certs \
           ehazlett/cert-tool:${DOCKER_TAG_CERT_TOOL} -d /certs -o=local &> /dev/null
       owner=$(ls -od ${CBD_CERT_ROOT_PATH} | tr -s ' ' | cut -d ' ' -f 3)

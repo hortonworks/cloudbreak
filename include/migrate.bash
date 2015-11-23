@@ -45,11 +45,11 @@ migrate-execute-mybatis-migrations() {
         local scripts_location=$(pwd)/.schema/$service_name
         rm -rf $scripts_location
         mkdir -p $scripts_location
-        docker run --label cbreak.sidekick --entrypoint bash -v $scripts_location:/migrate/scripts $docker_image_name -c "cp /schema/* /migrate/scripts/"
+        docker run --label cbreak.sidekick=true --entrypoint bash -v $scripts_location:/migrate/scripts $docker_image_name -c "cp /schema/* /migrate/scripts/"
     fi
     migrateDebug "Scripts location:  $scripts_location"
     local migrateResult=$(docker run \
-        --label cbreak.sidekick \
+        --label cbreak.sidekick=true \
         --link $container_name:db \
         -v $scripts_location:/migrate/scripts \
         sequenceiq/mybatis-migrations:$DOCKER_TAG_MIGRATION "$@" \
