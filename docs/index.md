@@ -28,7 +28,7 @@ desired HDP clusters as possible. For example, if you plan to launch clusters on
 
 Follow the instructions for [installing the Cloudbreak Deployer](onprem.md). Alternatively, you can consider using one of the [pre-built cloud images that includes Cloudbreak Deployer](#pre-built-images) pre-installed.
 
-> **IMPORTANT:** If you plan to use Cloudbreak on Azure, you **must** use the [Azure Setup](azure.md) instructions to install and configure the Cloudbreak.
+> **IMPORTANT:** If you plan to use Cloudbreak on Azure, you **must** use the [Azure Setup](azure.md) instructions to configure the image.
 
 
 <div id="pre-built-images"></div>
