@@ -274,7 +274,9 @@
                                                 </td>
                                                 <td class="col-md-1" data-title="'action'">
                                                     <span class="label label-danger" style="font-size: 12px;">
-                                                        <a title="{{msg.active_cluster_stack_description_hostgroup_terminate_tooltip}}" href="" class="btn label label-block label-danger fa fa-trash-o fa-fw" role="button" style="font-size: 12px; width: 100px; display: inline-block; !important" data-toggle="modal" data-target="#modal-terminate-instance" ng-mouseover="activeCluster.instanceId=instance.instanceId" ng-disabled="!(instance.instanceStatus === 'FAILED' || instance.state === 'UNHEALTHY' || instance.instanceStatus === 'DECOMMISSIONED')">
+                                                        <a title="{{msg.active_cluster_stack_description_hostgroup_terminate_tooltip}}" href="" class="btn label label-block label-danger fa fa-trash-o fa-fw" role="button" style="font-size: 12px; width: 100px; display: inline-block; !important"
+                                                            data-toggle="modal" data-target="#modal-terminate-instance" ng-mouseover="activeCluster.instanceId=instance.instanceId"
+                                                            ng-disabled="updateStatuses.indexOf(activeCluster.status) != -1 || updateStatuses.indexOf(activeCluster.cluster.status) != -1 || (terminatableStatuses.indexOf(instance.instanceStatus) == -1 && instance.state !== 'UNHEALTHY')">
                                                           {{msg.active_cluster_stack_description_hostgroup_terminate_label}}</a>
                                                     </span>
                                                 </td>
