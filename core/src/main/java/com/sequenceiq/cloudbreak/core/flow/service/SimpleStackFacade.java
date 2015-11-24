@@ -16,8 +16,6 @@ import static com.sequenceiq.cloudbreak.common.type.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.common.type.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_IN_PROGRESS;
 
-import javax.inject.Inject;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -27,6 +25,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.OnFailureAction;
@@ -68,10 +73,6 @@ import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
-import org.apache.commons.lang3.time.DateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 @Service
 public class SimpleStackFacade implements StackFacade {
@@ -405,7 +406,7 @@ public class SimpleStackFacade implements StackFacade {
         Date endDate = new Date();
         long seconds = (endDate.getTime() - startDate.getTime()) / DateUtils.MILLIS_PER_SECOND;
 
-        fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_TIME, AVAILABLE.name(), seconds);
+        fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_TIME, UPDATE_IN_PROGRESS.name(), seconds);
         context = new ProvisioningContext.Builder()
                 .setDefaultParams(provisionResult.getStackId(), provisionResult.getCloudPlatform())
                 .setProvisionSetupProperties(actualContext.getSetupProperties())
