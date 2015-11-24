@@ -85,10 +85,10 @@ docker-check-client-version() {
     local ver=$(docker --version 2> /dev/null)
     local numver=$(docker-getversion $ver)
     
-    if [ $numver -lt 150 ]; then
+    if [ $numver -lt 180 ]; then
         local target=$(which docker 2>/dev/null || true)
         : ${target:=/usr/local/bin/docker}
-        echo "[ERROR] Please upgrade your docker version to 1.5.0 or latest" | red
+        echo "[ERROR] Please upgrade your docker version to 1.8.0 or latest" | red
         echo "suggested command:" | red
         echo "  sudo curl -Lo $target https://get.docker.com/builds/$(uname -s)/$(uname -m)/docker-latest ; chmod +x $target" | blue
         _exit 1
@@ -118,8 +118,8 @@ docker-check-server-version() {
     fi
 
 
-    if [ $numserver -lt 150 ]; then
-        echo "[ERROR] Please upgrade your docker version to 1.5.0 or latest" | red
+    if [ $numserver -lt 180 ]; then
+        echo "[ERROR] Please upgrade your docker version to 1.8.0 or latest" | red
         echo "[WARNING] your local docker seems to be fine, only the server version is outdated" | yellow
         _exit 1
     fi
@@ -127,7 +127,7 @@ docker-check-server-version() {
 }
 
 docker-check-version() {
-    declare desc="Checks if docker is at least 1.5.0"
+    declare desc="Checks if docker is at least 1.8.0"
 
     docker-check-client-version
     docker-check-server-version
