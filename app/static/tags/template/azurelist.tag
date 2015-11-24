@@ -31,7 +31,7 @@
         <label class="col-sm-3 control-label" for="vmType">{{msg.template_azure_list_azure_vm_type}}</label>
 
         <div class="col-sm-9">
-            <p id="vmType" class="form-control-static" ng-repeat="item in $root.config.AZURE.azureVmTypes | filter:{key: template.parameters.vmType}:true">{{item.value}}</p>
+            <p id="vmType" class="form-control-static">{{template.parameters.vmType}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>

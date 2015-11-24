@@ -133,7 +133,7 @@
                                             <tr ng-repeat="group in usage.instanceGroups | orderBy:'name'">
                                                 <td>{{group.name}}</td>
                                                 <td>
-                                                    <p ng-repeat="item in $root.config.GCP.gcpInstanceTypes | filter:{key: group.instanceType}">{{item.value}}</p>
+                                                    <p ng-repeat="item in $root.params.vmTypes.GCP | filter:{value: group.instanceType}">{{item.value}}</p>
                                                 </td>
                                                 <td>{{group.hours}}</td>
                                             </tr>
@@ -171,7 +171,7 @@
                                             <tr ng-repeat="group in usage.instanceGroups | orderBy:'name'">
                                                 <td>{{group.name}}</td>
                                                 <td>
-                                                    <p ng-repeat="item in $root.config.AWS.instanceType | filter:{key: group.instanceType}">{{item.value}}</p>
+                                                    <p ng-repeat="item in $root.params.vmTypes.AWS | filter:{value: group.instanceType}">{{item.value}}</p>
                                                 </td>
                                                 <td>{{group.hours}}</td>
                                             </tr>
@@ -209,7 +209,7 @@
                                             <tr ng-repeat="group in usage.instanceGroups | orderBy:'name'">
                                                 <td>{{group.name}}</td>
                                                 <td>
-                                                    <p ng-repeat="item in $root.config.AZURE.azureVmTypes | filter:{key: group.instanceType}">{{item.value}}</p>
+                                                    <p ng-repeat="item in $root.params.vmTypes.AZURE_RM | filter:{value: group.instanceType}">{{item.value}}</p>
                                                 </td>
                                                 <td>{{group.hours}}</td>
                                             </tr>

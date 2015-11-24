@@ -19,7 +19,7 @@
         <label class="col-sm-3 control-label" for="gcplgcpInstanceType">{{msg.template_form_instance_type_label}}</label>
 
         <div class="col-sm-9">
-            <p id="gcplgcpInstanceType" class="form-control-static" ng-repeat="item in $root.config.GCP.gcpInstanceTypes | filter:{key: template.parameters.gcpInstanceType}">{{item.value}}</p>
+            <p id="gcplgcpInstanceType" class="form-control-static">{{template.parameters.gcpInstanceType}}</p>
         </div>
     </div>
 
