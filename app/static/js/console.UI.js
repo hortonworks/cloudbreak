@@ -47,7 +47,7 @@ function addClusterListPanelJQEventListeners() {
     // Bootstrap carousel as clusters / cluster details / create cluster slider init
     $jq('.carousel').carousel('pause');
     // show cluster details
-    $jq(document).on("click", ".cluster h4 .btn-cluster", function() {
+    $jq(document).on("click", ".cluster h4 #btn-cluster", function() {
         $jq('.carousel').carousel(1);
         $jq('.carousel').on('slid.bs.carousel', function() {
             // unbind event
